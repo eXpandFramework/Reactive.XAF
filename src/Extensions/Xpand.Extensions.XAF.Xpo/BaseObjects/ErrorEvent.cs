@@ -1,4 +1,5 @@
 using System;
+using DevExpress.ExpressApp.DC;
 using DevExpress.Persistent.Base.General;
 using DevExpress.Xpo;
 using Xpand.Extensions.XAF.Attributes;
@@ -11,7 +12,7 @@ namespace Xpand.Extensions.XAF.Xpo.BaseObjects {
 
         string _notificationMessage;
 
-        [Size(SizeAttribute.Unlimited)][DisplayName("Msg")]
+        [Size(SizeAttribute.Unlimited)][XafDisplayName("Msg")]
         public string NotificationMessage{
             get => _notificationMessage;
             set => SetPropertyValue(nameof(NotificationMessage), ref _notificationMessage, value);

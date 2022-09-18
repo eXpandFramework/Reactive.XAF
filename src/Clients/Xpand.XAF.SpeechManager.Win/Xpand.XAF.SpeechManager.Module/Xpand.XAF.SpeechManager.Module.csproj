@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net6.0-windows</TargetFramework>
+    <TargetFramework>net6.0-windows7.0</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
     <Deterministic>false</Deterministic>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
@@ -25,6 +25,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="DevExpress.ExpressApp" Version="22.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp.Notifications" Version="22.1.5" />
     <PackageReference Include="DevExpress.ExpressApp.CodeAnalysis" Version="22.1.5" />
     <PackageReference Include="DevExpress.ExpressApp.Objects" Version="22.1.5" />
     <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="22.1.5" />
@@ -41,17 +42,15 @@
     <Reference Include="Xpand.XAF.Modules.Speech">
       <HintPath>..\..\..\..\bin\net6.0-windows7.0\Xpand.XAF.Modules.Speech.dll</HintPath>
     </Reference>
-    <Reference Include="Xpand.XAF.Modules.ModelMapper">
-      <HintPath>..\..\..\..\bin\Xpand.XAF.Modules.ModelMapper.dll</HintPath>
+    <Reference Include="Xpand.XAF.Modules.Reactive.Logger">
+      <HintPath>..\..\..\..\bin\Xpand.XAF.Modules.Reactive.Logger.dll</HintPath>
     </Reference>
-    <Reference Include="Xpand.XAF.Modules.CloneModelView">
-      <HintPath>..\..\..\..\bin\Xpand.XAF.Modules.CloneModelView.dll</HintPath>
+    <Reference Include="Xpand.Extensions.XAF.Xpo">
+      <HintPath>..\..\..\..\bin\Xpand.Extensions.XAF.Xpo.dll</HintPath>
     </Reference>
-    <Reference Include="Xpand.XAF.Modules.Reactive">
-      <HintPath>..\..\..\..\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>
-    </Reference>
-    <Reference Include="Xpand.XAF.Modules.ModelViewInheritance">
-      <HintPath>..\..\..\..\bin\Xpand.XAF.Modules.ModelViewInheritance.dll</HintPath>
+    <Reference Include="Xpand.XAF.Modules.Reactive.Logger.Hub">
+      <HintPath>..\..\..\..\bin\Xpand.XAF.Modules.Reactive.Logger.Hub.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
     </Reference>
   </ItemGroup>
 </Project>

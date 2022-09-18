@@ -17,7 +17,7 @@ namespace Xpand.Extensions.Reactive.Transform{
 
         public static IObservable<T> WaitUntilInactive<T>(this IObservable<T> source, int seconds, int count = 1)
             => source.WaitUntilInactive(TimeSpan.FromSeconds(seconds), count);
-        public static IObservable<T> WaitUntilInactive<T>(this IObservable<T> source, int seconds,SynchronizationContext context=null, int count = 1)
+        public static IObservable<T> WaitUntilInactive<T>(this IObservable<T> source, int seconds,SynchronizationContext context, int count = 1)
             => source.WaitUntilInactive(TimeSpan.FromSeconds(seconds),context, count);
     }
 }

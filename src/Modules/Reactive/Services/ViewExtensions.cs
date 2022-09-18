@@ -86,7 +86,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .Select(pattern => pattern.Sender).Cast<T>());
 
         public static IObservable<T> WhenSelectionChanged<T>(this T view,int waitUntilInactiveSeconds=0) where T : View 
-            => view.ReturnObservable().WhenNotDefault().SelectionChanged();
+            => view.ReturnObservable().WhenNotDefault().SelectionChanged(waitUntilInactiveSeconds);
 
         public static IObservable<T> SelectionChanged<T>(this IObservable<T> source,int waitUntilInactiveSeconds=0) where T:View 
             => source.SelectMany(item => Observable.FromEventPattern<EventHandler, EventArgs>(

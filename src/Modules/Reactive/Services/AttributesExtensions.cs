@@ -5,6 +5,7 @@ using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
@@ -13,6 +14,7 @@ using DevExpress.Persistent.Base;
 using Fasterflect;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.LinqExtensions;
+using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.Attributes;
 using Xpand.Extensions.XAF.Attributes.Custom;
@@ -103,12 +105,25 @@ namespace Xpand.XAF.Modules.Reactive.Services {
                 .ToUnit();
 
         static IObservable<(ApplicationModulesManager manager, CustomizeTypesInfoEventArgs e)> InvisibleInAllViewsAttribute(this IObservable<(ApplicationModulesManager manager, CustomizeTypesInfoEventArgs e)> source)
-            => source.ConcatIgnored(t => t.e.TypesInfo.Members<InvisibleInAllViewsAttribute>().ToArray().ToObservable()
-                    .SelectMany(t1 => new Attribute[] {
-                        new VisibleInDetailViewAttribute(false), new VisibleInListViewAttribute(false),
-                        new VisibleInLookupListViewAttribute(false)
-                    }.Execute(attribute => t1.info.AddAttribute(attribute))));
+            => source.ConcatIgnored(t => t.e.TypesInfo.Members<InvisibleInAllViewsAttribute>().ToArray().ReturnObservable()
+                .SelectMany(attributes => attributes.AddVisibleViewAttributes()
+                    .Concat(attributes.Distinct(t1 => t1.info).ToArray().AddAppearanceAttributes())));
+
+        private static IEnumerable<Attribute> AddVisibleViewAttributes(this (InvisibleInAllViewsAttribute attribute, IMemberInfo info)[] source) 
+            => source.Where(t => t.attribute.Layer == OperationLayer.Model)
+                .SelectMany(t => new Attribute[] {
+                    new VisibleInDetailViewAttribute(false), new VisibleInListViewAttribute(false),
+                    new VisibleInLookupListViewAttribute(false)
+                }.Execute(attribute => t.info.AddAttribute(attribute)));
         
+        private static IEnumerable<Attribute> AddAppearanceAttributes(this (InvisibleInAllViewsAttribute attribute, IMemberInfo info)[] source) 
+            => source.Where(t => t.attribute.Layer == OperationLayer.Appearance)
+                .SelectMany(t => new Attribute[] {
+                    new AppearanceAttribute($"Hide {t.info}",AppearanceItemType.ViewItem, "1=1") {
+                        TargetItems = t.info.Name,Visibility = ViewItemVisibility.ShowEmptySpace
+                    }
+                }.Execute(attribute => t.info.Owner.AddAttribute(attribute)));
+
         static IObservable<(ApplicationModulesManager manager, CustomizeTypesInfoEventArgs e)> InvisibleInAllListViewsAttribute(this IObservable<(ApplicationModulesManager manager, CustomizeTypesInfoEventArgs e)> source)
             => source.ConcatIgnored(t => t.e.TypesInfo.Members<InvisibleInAllListViewsAttribute>().ToArray().ToObservable()
                     .SelectMany(t1 => new Attribute[] {

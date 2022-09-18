@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.DC;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.Validation;
 using DevExpress.Xpo;
@@ -23,7 +24,7 @@ namespace Xpand.XAF.Modules.Speech.BusinessObjects {
 
         protected abstract bool GetIsValid();
 
-        [Association("SpeechToText-SpeechTexts")][Aggregated][InvisibleInAllViews]
+        [Association("SpeechToText-SpeechTexts")][DevExpress.Xpo.Aggregated][InvisibleInAllViews]
         public XPCollection<SpeechText> Texts => GetCollection<SpeechText>();
 
         [SuppressMessage("ReSharper", "CollectionNeverQueried.Global")]
@@ -31,7 +32,7 @@ namespace Xpand.XAF.Modules.Speech.BusinessObjects {
         [SuppressMessage("ReSharper", "CollectionNeverQueried.Global")][CollectionOperationSet(AllowAdd = false,AllowRemove = false)]
         public BindingList<SpeechTextInfo> SpeechInfo { get; } = new();
         [CollectionOperationSet(AllowAdd = false)]
-        public BindingList<SSMLFile> SSMLFiles => Texts.SelectMany(text => text.SSMLFiles).ToBindingList();
+        public BindingList<SSMLFile> SSMLFiles => Texts.SelectMany(text => text.SSMLFiles).Distinct().ToBindingList();
 
         SSML _ssml;
         [NonPersistent]
@@ -40,9 +41,9 @@ namespace Xpand.XAF.Modules.Speech.BusinessObjects {
             set => SetPropertyValue(nameof(SSML), ref _ssml, value);
         }
 
-        int _rate;
-        [NonPersistent]
-        public int Rate {
+        bool _rate=true;
+        [NonPersistent][InvisibleInAllViews(OperationLayer.Appearance)]
+        public bool Rate {
             get => _rate;
             set => SetPropertyValue(nameof(Rate), ref _rate, value);
         }
@@ -70,7 +71,7 @@ namespace Xpand.XAF.Modules.Speech.BusinessObjects {
             speechVoice => speechVoice.Account.Oid == Account.Oid && TargetLanguages.Contains(speechVoice.Language)).ToList();
         
         
-        [Association("SpeechServiceAccount-SpeechToTexts")]
+        [Association("SpeechServiceAccount-SpeechToTexts")][IgnoreDataLocking]
         public SpeechAccount Account {
             get => _speechAccount;
             set => SetPropertyValue(nameof(SpeechAccount), ref _speechAccount, value);
@@ -86,6 +87,7 @@ namespace Xpand.XAF.Modules.Speech.BusinessObjects {
 
         SpeechLanguage _recognitionLanguage;
         [RuleRequiredField][DataSourceProperty(nameof(Account)+"."+nameof(SpeechAccount.Languages))]
+        [XafDisplayName("Recognition")]
         public SpeechLanguage RecognitionLanguage {
             get => _recognitionLanguage;
             set => SetPropertyValue(nameof(RecognitionLanguage), ref _recognitionLanguage, value);

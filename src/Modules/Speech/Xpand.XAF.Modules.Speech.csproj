@@ -53,14 +53,6 @@
       <HintPath>..\..\..\bin\net6.0-windows7.0\Xpand.XAF.Modules.Windows.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
-    <Reference Include="Xpand.XAF.Modules.Reactive.Logger.Hub">
-      <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.Logger.Hub.dll</HintPath>
-      <SpecificVersion>False</SpecificVersion>
-    </Reference>
-    <Reference Include="Xpand.XAF.Modules.ModelMapper">
-      <HintPath>..\..\..\bin\Xpand.XAF.Modules.ModelMapper.dll</HintPath>
-      <SpecificVersion>False</SpecificVersion>
-    </Reference>
     <Reference Include="Xpand.XAF.Modules.ModelViewInheritance">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.ModelViewInheritance.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>

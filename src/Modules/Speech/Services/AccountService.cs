@@ -16,7 +16,6 @@ using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.Attributes;
 using Xpand.Extensions.XAF.ObjectSpaceExtensions;
-using Xpand.Extensions.XAF.Xpo.BaseObjects;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
 using Xpand.XAF.Modules.Speech.BusinessObjects;
@@ -27,10 +26,10 @@ namespace Xpand.XAF.Modules.Speech.Services {
             => manager.UpdateVoices();
 
         private static IObservable<Unit> UpdateVoices(this ApplicationModulesManager manager) 
-            => manager.UpdateVoicesOnViewRefresh();
+            => manager.UpdateVoicesOnViewRefresh().Merge(manager.UpdateVoicesOnCommit());
 
         private static IObservable<Unit> UpdateVoicesOnViewRefresh(this ApplicationModulesManager manager) 
-            => manager.WhenApplication(application => application.WhenFrameViewChanged().WhenFrame(typeof(SpeechAccount),ViewType.DetailView)
+            => manager.WhenSpeechApplication(application => application.WhenFrameViewChanged().WhenFrame(typeof(SpeechAccount),ViewType.DetailView)
                 .SelectUntilViewClosed(frame => frame.GetController<RefreshController>().RefreshAction.WhenConcatRetriedExecution(_ =>frame.View.CurrentObject.To<SpeechAccount>().UpdateVoices() )).ToUnit());
 
         public static SpeechAccount DefaultAccount(this IObjectSpace space,XafApplication application) 
@@ -38,21 +37,14 @@ namespace Xpand.XAF.Modules.Speech.Services {
 
         public static IObservable<Unit> Speak(this SpeechAccount defaultAccount, IModelSpeech speechModel) 
             => Observable.Using(() => new SpeechSynthesizer(defaultAccount.SpeechConfig()), synthesizer
-                => synthesizer.SpeakSsmlAsync(Clipboard.GetText()).ToObservable().ObserveOnContext()
+                => synthesizer.SpeakTextAsync(Clipboard.GetText()).ToObservable().ObserveOnContext()
                     .DoWhen(_ => !new DirectoryInfo(speechModel.DefaultStorageFolder).Exists,
                         _ => Directory.CreateDirectory(speechModel.DefaultStorageFolder))
                     .SelectMany(result => {
                         var lastSpeak = defaultAccount.ObjectSpace.GetObjectsQuery<TextToSpeech>().Max(speech => speech.Oid) + 1;
                         var path = $"{speechModel.DefaultStorageFolder}\\{lastSpeak}.wav";
                         return File.WriteAllBytesAsync(path, result.AudioData).ToObservable().ObserveOnContext()
-                            .SelectMany(_ => {
-                                var textToSpeech = defaultAccount.ObjectSpace.CreateObject<TextToSpeech>();
-                                textToSpeech.Duration = result.AudioDuration;
-                                textToSpeech.File = textToSpeech.CreateObject<FileLinkObject>();
-                                textToSpeech.File.FileName = Path.GetFileName(path);
-                                textToSpeech.File.FullName = path;
-                                return textToSpeech.Commit();
-                            });
+                            .SelectMany(_ => defaultAccount.ObjectSpace.CreateObject<TextToSpeech>().UpdateSSMLFile( result, path).Commit());
                     }));
 
         public static SpeechConfig SpeechConfig(this SpeechAccount account,SpeechLanguage recognitionLanguage=null,[CallerMemberName]string callerMember="") {
@@ -88,10 +80,11 @@ namespace Xpand.XAF.Modules.Speech.Services {
 
         private static IObservable<VoiceInfo[]> UpdateVoices(this SpeechAccount account) 
             => Observable.Using(() => new SpeechSynthesizer(account.SpeechConfig()),synthesizer => synthesizer.GetVoicesAsync().ToObservable()
-                .ObserveOnContext().SelectMany(result => result.Voices.ToNowObservable()
+                .ObserveOnContext().SelectMany(result => !string.IsNullOrEmpty(result.ErrorDetails)?Observable.Throw<SynthesisVoicesResult>(new SpeechException(result.ErrorDetails)):result.ReturnObservable()))
+                .SelectMany(result => result.Voices.ToNowObservable()
                     .Do(account.EnsureVoice ).BufferUntilCompleted().Do(_ => {
                         account.CommitChanges();
                         account.ObjectSpace.Refresh();
-                    })));
+                    }));
     }
 }

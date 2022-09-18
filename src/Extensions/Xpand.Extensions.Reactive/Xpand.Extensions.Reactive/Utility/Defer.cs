@@ -16,8 +16,13 @@ namespace Xpand.Extensions.Reactive.Utility {
         public static IObservable<T> Defer<T>(this object o, Action execute)
             => Observable.Defer(() => {
                 execute();
-                return Unit.Default.ReturnObservable();
+                return o.ReturnObservable();
             }).To<T>();
+        public static IObservable<T> Defer<T>(this T o, Action<T> execute)
+            => Observable.Defer(() => {
+                execute(o);
+                return o.ReturnObservable();
+            });
         
         public static IObservable<Unit> Defer(this object o, Action execute)
             => Observable.Defer(() => {

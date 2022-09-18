@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net6.0-windows7.0</TargetFramework>
+    <TargetFramework>net6.0-windows</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
     <ApplicationIcon>ExpressApp.ico</ApplicationIcon>
     <Deterministic>false</Deterministic>
@@ -14,7 +14,11 @@
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
     <DebugType>full</DebugType>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    
     <AppendTargetFrameworkToOutputPath>True</AppendTargetFrameworkToOutputPath>
+    <ToolCommandName>Speech</ToolCommandName>
+    <PackageOutputPath>$(MSBuildThisFileDirectory)nupkgs</PackageOutputPath>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <NoWarn>1701;1702;XAF0017</NoWarn>
@@ -51,7 +55,6 @@
     <ProjectReference Include="..\Xpand.XAF.SpeechManager.Module\Xpand.XAF.SpeechManager.Module.csproj" />
   </ItemGroup>
   <ItemGroup>
-    
-    <PackageReference Include="xpand.xaf.Win.all" Version="4.221.5.1" />
+    <PackageReference Include="xpand.xaf.Win.all" Version="4.221.5.2" />
   </ItemGroup>
 </Project>

@@ -9,5 +9,19 @@ namespace Xpand.Extensions.Reactive.Utility {
                     action(source1);
                 }
             });
+        public static IObservable<TSource> DoWhen<TSource>(this IObservable<TSource> source, Func<int,TSource, bool> predicate, Action<TSource> action)
+            => source.Select((source1, i) => {
+                if (predicate(i,source1)) {
+                        action(source1);
+                }
+                return source1;
+            });
+        public static IObservable<TSource> DoWhen<TSource>(this IObservable<TSource> source, Func<int,TSource, bool> predicate, Action<TSource,int> action)
+            => source.Select((source1, i) => {
+                if (predicate(i,source1)) {
+                        action(source1,i);
+                }
+                return source1;
+            });
     }
 }

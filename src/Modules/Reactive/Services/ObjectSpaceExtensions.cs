@@ -13,8 +13,9 @@ using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
 using DevExpress.Xpo;
 using Fasterflect;
-
+using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.LinqExtensions;
+using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Transform.Collections;
 using Xpand.Extensions.Reactive.Utility;
@@ -501,10 +502,25 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 #endif
 
         static readonly ISubject<(IObjectSpace objectSpace,object obj)> ReloadObjectSubject=Subject.Synchronize(new Subject<(IObjectSpace objectSpace,object obj)>());
-        public static void ReloadNotifyObject(this IObjectSpace objectSpace,object obj) {
-            objectSpace.ReloadObject(obj);
-            ReloadObjectSubject.OnNext((objectSpace, obj));
-        }
+
+        private static readonly Type XPInvalidateableObjectType =
+            AppDomain.CurrentDomain.GetAssemblyType("DevExpress.Xpo.IXPInvalidateableObject");
+        public static IObservable<TLink> ReloadNotifyObject<TLink>(this TLink link) where  TLink:IObjectSpaceLink 
+            => link.Defer(() => {
+                    if (link.GetType().Implements(XPInvalidateableObjectType)) {
+                        
+                        if (!(bool)link.GetPropertyValue("IsInvalidated") && !(bool)link.GetPropertyValue("Session").GetPropertyValue("IsObjectsLoading"))
+                            return link.ReloadObject().ReturnObservable();
+                        else
+                            return link.GetPropertyValue("Session").WhenEvent("ObjectLoaded").FirstAsync()
+                                .Do(_ => link.ReloadObject()).To(link);
+                    }
+
+                    throw new NotImplementedException();
+                    link.ReloadObject();
+                    return link.ReturnObservable();
+                })
+                .Do(spaceLink => ReloadObjectSubject.OnNext((spaceLink.ObjectSpace, spaceLink)));
 
         public static IObservable<T> ToObjects<T>(this IObservable<(IObjectSpace objectSpace, T obj)> source)
             => source.Select(t => t.obj);
@@ -541,7 +557,6 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                     : Observable.Empty<Unit>());
 
         
-
 
     }
 }

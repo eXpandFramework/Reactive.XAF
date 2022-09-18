@@ -1,2 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Application Title="Xpand.XAF.SpeechManager" />
+<Application Title="Xpand.XAF.SpeechManager" >
+    <ReactiveModules>
+        <ReactiveLogger>
+            <Notifications>
+                <ReactiveLoggerNotification Id="Errors" Criteria="[RXAction] = ##Enum#Xpand.XAF.Modules.Reactive.Logger.RXAction,OnError#" ObjectType="Xpand.Extensions.XAF.Xpo.BaseObjects.ErrorEvent" ShowXafMessage="True" XafMessageType="Error" MessageDisplayInterval="10000000" IsNewNode="True" />
+            </Notifications>
+        </ReactiveLogger>
+    </ReactiveModules>
+</Application>

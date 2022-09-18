@@ -11,7 +11,7 @@ namespace Xpand.XAF.Modules.Speech.BusinessObjects {
     [NavigationItem("Speech")][DefaultClassOptions][OptimisticLocking(OptimisticLockingBehavior.LockModified)]
     [FileAttachment(nameof(File))][DeferredDeletion(false)][ImageName("XafBarLinkContainerItem")]
     [SuppressMessage("Design", "XAF0023:Do not implement IObjectSpaceLink in the XPO types")]
-    public class TextToSpeech:CustomBaseObject {
+    public class TextToSpeech:CustomBaseObject, IAudioFileLink {
         public TextToSpeech(Session session) : base(session) { }
         FileLinkObject _file;
         [RuleRequiredField]
@@ -35,5 +35,19 @@ namespace Xpand.XAF.Modules.Speech.BusinessObjects {
             get => _duration;
             set => SetPropertyValue(nameof(Duration), ref _duration, value);
         }
+
+        TimeSpan? IAudioFileLink.VoiceDuration {
+            get => null;
+            set { }
+        }
+
+        TimeSpan? _fileDuration;
+
+        public TimeSpan? FileDuration {
+            get => _fileDuration;
+            set => SetPropertyValue(nameof(FileDuration), ref _fileDuration, value);
+        }
+
+        SpeechLanguage IAudioFileLink.Language => throw new NotImplementedException();
     }
 }

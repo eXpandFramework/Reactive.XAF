@@ -18,7 +18,9 @@ namespace Xpand.Extensions.XAF.Attributes.Custom {
         [Description("hh:mm:ss")]
         hh_mm_ss,
         [Description("mm:ss")]
-        mm_ss
+        mm_ss,
+        [Description("mm:ss:fff")]
+        mm_ss_fff
     }
     public class DisplayDateAndTime : Attribute, ICustomAttribute {
         private readonly string _dateString;

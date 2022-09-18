@@ -24,6 +24,6 @@ namespace Xpand.XAF.Modules.Speech.BusinessObjects {
             set => SetPropertyValue(nameof(Language), ref _language, value);
         }
 
-        public List<long> SpeechTexts { get; } = new();
+        public List<SpeechText> SpeechTexts { get; } = new();
     }
 }

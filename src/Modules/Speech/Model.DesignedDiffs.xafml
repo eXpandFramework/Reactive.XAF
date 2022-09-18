@@ -18,48 +18,51 @@
   <ReactiveModules>
     <Windows>
       <Alert FormWidth="650" FormLocation="BottomLeft" />
+      <SystemActions>
+        <SystemAction ActionId="SpeakText" HotKey="Control + Alt + 1" IsNewNode="True" />
+      </SystemActions>
     </Windows>
   </ReactiveModules>
   <SchemaModules>
-    <SchemaModule Name="SystemModule" Version="22.1.4.0" IsNewNode="True" />
-    <SchemaModule Name="SystemWindowsFormsModule" Version="22.1.4.0" IsNewNode="True" />
+    <SchemaModule Name="SystemModule" Version="22.1.5.0" IsNewNode="True" />
+    <SchemaModule Name="SystemWindowsFormsModule" Version="22.1.5.0" IsNewNode="True" />
   </SchemaModules>
   <Views>
     <DetailView Id="FileSpeechToText_DetailView">
       <Layout>
         <LayoutGroup Id="Main">
-          <LayoutGroup Id="SimpleEditors" RelativeSize="10.566762728146013">
-            <LayoutGroup Id="Autoab9c72e5-0555-4cb4-8a1e-4ad7d521aa4b">
-              <LayoutGroup Id="Item2" RelativeSize="33.8417540514776">
-                <LayoutGroup Id="Auto4244820a-3cd7-48ba-a572-3c5f4728dac7" RelativeSize="31.818181818181817">
-                  <LayoutItem Id="Name" RelativeSize="50.70422535211268" />
-                  <LayoutItem Id="Account" RelativeSize="49.29577464788732" />
-                </LayoutGroup>
-                <LayoutGroup Id="Auto6736dd12-f6c6-4caa-a907-b5ab61c4e066" RelativeSize="29.09090909090909">
-                  <LayoutItem Id="File" ViewItem="File" Index="0" RelativeSize="37.74647887323944" IsNewNode="True" />
-                  <LayoutItem Id="Item4" Index="1" RelativeSize="38.028169014084504" />
-                  <LayoutItem Id="SpeechToText" Index="2" RelativeSize="24.225352112676056" />
-                </LayoutGroup>
-                <LayoutGroup Id="Autod4f71c1e-3885-419c-be2f-1347e673780a" RelativeSize="30">
-                  <LayoutItem Id="RecognitionLanguage" RelativeSize="50.70422535211268" />
-                  <LayoutItem Id="Rate" RelativeSize="49.29577464788732" />
-                </LayoutGroup>
-                <LayoutItem Id="Item3" RelativeSize="9.090909090909092" />
+          <LayoutGroup Id="Item3" RelativeSize="10.640608034744842">
+            <LayoutGroup Id="Auto6007a961-8d5f-44b3-8c5a-e5f99c70380e" RelativeSize="36.37226970560304" Direction="Horizontal">
+              <LayoutGroup Id="Auto131a427d-44ec-4d82-bdf8-ddd5ce024e5c" ShowCaption="False" Caption="" Index="0" RelativeSize="49.08616187989556" IsNewNode="True">
+                <LayoutItem Id="Name" ViewItem="Name" SizeConstraintsType="Custom" MinSize="188, 32" MaxSize="188, 0" Index="0" RelativeSize="38.775510204081634" IsNewNode="True" />
+                <LayoutItem Id="RecognitionLanguage" ViewItem="RecognitionLanguage" SizeConstraintsType="Custom" MinSize="188, 30" MaxSize="188, 0" Index="1" RelativeSize="30.612244897959183" IsNewNode="True" />
+                <LayoutItem Id="Rate" ViewItem="Rate" SizeConstraintsType="Custom" MinSize="188, 30" MaxSize="188, 30" Index="2" RelativeSize="30.612244897959183" IsNewNode="True" />
               </LayoutGroup>
-              <LayoutItem Id="SpeechInfo" RelativeSize="41.08674928503336" />
-              <LayoutItem Id="SSMLFiles" RelativeSize="25.071496663489036" />
+              <LayoutGroup Id="Autoce086f4e-c3e1-4a04-989a-04a96f316f78" ShowCaption="False" Caption="" Index="1" RelativeSize="50.91383812010444" IsNewNode="True">
+                <LayoutItem Id="Account" ViewItem="Account" SizeConstraintsType="Custom" MinSize="195, 38" MaxSize="195, 0" Index="0" RelativeSize="38.775510204081634" IsNewNode="True" />
+                <LayoutItem Id="File" ViewItem="File" Index="1" RelativeSize="30.612244897959183" IsNewNode="True" />
+                <LayoutItem Id="Item2" Index="2" RelativeSize="30.612244897959183" IsNewNode="True" />
+              </LayoutGroup>
+              <LayoutItem Id="Name" RelativeSize="34.78260869565217" Removed="True" />
+              <LayoutItem Id="Rate" RelativeSize="30.612244897959183" Removed="True" />
+              <LayoutItem Id="RecognitionLanguage" RelativeSize="30.612244897959183" Removed="True" />
+            </LayoutGroup>
+            <LayoutItem Id="SpeechInfo" RelativeSize="55.08072174738842" Index="1" />
+            <LayoutItem Id="SSMLFiles" RelativeSize="8.547008547008547" Index="2" />
+            <LayoutGroup Id="Auto2f0ca29d-93d9-4890-9061-0d215e84f96f" RelativeSize="14.339981006647673" Removed="True">
+              <LayoutItem Id="Account" RelativeSize="41.30434782608695" Removed="True" />
             </LayoutGroup>
           </LayoutGroup>
-          <TabbedGroup Id="Tabs" RelativeSize="89.43323727185398">
+          <TabbedGroup Id="Tabs" RelativeSize="89.35939196525516">
             <LayoutGroup Id="SpeechTexts">
-              <LayoutGroup Id="Autoad629944-d407-43fa-95da-26b18f14e0e4" RelativeSize="47.69921436588103" />
-              <SplitterItem Id="SplitterItem1" RelativeSize="1.122334455667789" />
-              <LayoutItem Id="SpeechTranslations" RelativeSize="51.178451178451176" />
+              <LayoutGroup Id="Autoad629944-d407-43fa-95da-26b18f14e0e4" RelativeSize="41.50702426564496" />
+              <SplitterItem Id="SplitterItem1" RelativeSize="1.277139208173691" />
+              <LayoutItem Id="SpeechTranslations" RelativeSize="57.215836526181356" />
             </LayoutGroup>
             <LayoutGroup Id="Item1">
               <LayoutGroup Id="Auto1465952f-c065-474c-bfbf-66ce9288c364">
-                <LayoutItem Id="TargetLanguages" RelativeSize="49.17234664070107" />
-                <LayoutItem Id="SpeechVoices" RelativeSize="50.82765335929893" />
+                <LayoutItem Id="TargetLanguages" RelativeSize="48.6905916585839" />
+                <LayoutItem Id="SpeechVoices" RelativeSize="51.3094083414161" />
               </LayoutGroup>
             </LayoutGroup>
           </TabbedGroup>
@@ -85,6 +88,15 @@
         <ColumnInfo Id="ShortName" Index="5" />
       </Columns>
     </ListView>
+    <ListView Id="SpeechText_Base_ListView">
+      <HiddenActions>
+        <ActionLink ActionId="Link" IsNewNode="True" />
+        <ActionLink ActionId="NextObject" IsNewNode="True" />
+        <ActionLink ActionId="PreviousObject" IsNewNode="True" />
+        <ActionLink ActionId="PrintPreview" IsNewNode="True" />
+        <ActionLink ActionId="Unlink" IsNewNode="True" />
+      </HiddenActions>
+    </ListView>
     <DetailView Id="SpeechText_DetailView">
       <Items>
         <PropertyEditor Id="SpeechToText.SSML" PropertyName="SpeechToText.SSML.Text" IsNewNode="True" />
@@ -103,9 +115,9 @@
           <LayoutGroup Id="SimpleEditors" RelativeSize="87.07926167209556" Removed="True">
             <LayoutGroup Id="SpeechText" RelativeSize="100" Removed="True">
               <LayoutGroup Id="SpeechText_col1" RelativeSize="50">
-                <LayoutItem Id="AudioDuration" RelativeSize="36.36363636363637" />
                 <LayoutItem Id="End" RelativeSize="27.272727272727273" />
                 <LayoutItem Id="Start" RelativeSize="36.36363636363637" />
+                <LayoutItem Id="VoiceDuration" RelativeSize="36.36363636363637" />
               </LayoutGroup>
               <LayoutGroup Id="SpeechText_col2" RelativeSize="50">
                 <LayoutItem Id="Duration" RelativeSize="63.63636363636363" />
@@ -115,6 +127,15 @@
           </LayoutGroup>
           <LayoutGroup Id="SizeableEditors" Caption="Text" RelativeSize="73.0727470141151" Removed="True">
             <LayoutItem Id="Text" Removed="True" />
+          </LayoutGroup>
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <DetailView Id="SpeechText_Editor_DetailView" FreezeLayout="True">
+      <Layout IsNewNode="True" Removed="True">
+        <LayoutGroup Id="Main" Index="0" ShowCaption="False" RelativeSize="100" IsNewNode="True">
+          <LayoutGroup Id="SizeableEditors" Index="0" ShowCaption="False" RelativeSize="100" TextAlignMode="AlignWithChildren" Caption="Text" IsNewNode="True">
+            <LayoutItem Id="Text" ViewItem="Text" Index="0" RelativeSize="100" ShowCaption="False" IsNewNode="True" />
           </LayoutGroup>
         </LayoutGroup>
       </Layout>
@@ -143,7 +164,7 @@
           </Summary>
         </ColumnInfo>
         <ColumnInfo Id="End" Index="2" OwnerBand="Columns" />
-        <ColumnInfo Id="AudioDuration" Index="3" Width="69" OwnerBand="Columns" />
+        <ColumnInfo Id="VoiceDuration" Index="3" Width="69" OwnerBand="Columns" />
         <ColumnInfo Id="Language" Index="4" Width="55" OwnerBand="Columns" />
         <ColumnInfo Id="Text" Index="5" SortIndex="-1" SortOrder="None" RowIndex="1" OwnerBand="Columns" />
       </Columns>
@@ -157,62 +178,50 @@
     </ListView>
     <DetailView Id="SpeechToText_DetailView" FreezeLayout="True">
       <Items>
-        <ActionContainerViewItem Id="SpeechToText" ActionContainer="SpeechToText" PaintStyle="Image" Caption="SpeechToText(23)" IsNewNode="True" />
+        <PropertyEditor Id="Rate" Index="-1" />
         <DashboardViewItem Id="SpeechTranslations" ViewId="SpeechTranslation_Banded_ListView" IsNewNode="True" />
       </Items>
       <Layout IsNewNode="True" Removed="True">
         <LayoutGroup Id="Main" Index="0" ShowCaption="False" RelativeSize="100" TextAlignMode="UseParentOptions" Direction="Vertical" Caption="Main" IsNewNode="True">
-          <LayoutGroup Id="SimpleEditors" ShowCaption="False" Direction="Vertical" Index="0" RelativeSize="9.74188176519567" IsNewNode="True">
-            <LayoutGroup Id="Autoab9c72e5-0555-4cb4-8a1e-4ad7d521aa4b" ShowCaption="False" Caption="Autoab9c72e5-0555-4cb4-8a1e-4ad7d521aa4b(6)" Direction="Horizontal" Index="0" RelativeSize="100" TextAlignMode="AlignWithChildren" IsNewNode="True">
-              <LayoutGroup Id="Item2" ShowCaption="False" CaptionLocation="Top" Index="0" RelativeSize="33.8235294117647" Caption=" " GroupStyle="Light" IsNewNode="True">
-                <LayoutGroup Id="Auto4244820a-3cd7-48ba-a572-3c5f4728dac7" ShowCaption="False" Caption="Auto4244820a-3cd7-48ba-a572-3c5f4728dac7(5)" Direction="Horizontal" Index="0" RelativeSize="32.47863247863248" IsNewNode="True">
-                  <LayoutItem Id="Name" ViewItem="Name" Index="0" RelativeSize="50.72463768115942" IsNewNode="True" />
-                  <LayoutItem Id="Account" ViewItem="Account" Index="1" RelativeSize="49.27536231884058" IsNewNode="True" />
-                </LayoutGroup>
-                <LayoutGroup Id="Auto6736dd12-f6c6-4caa-a907-b5ab61c4e066" ShowCaption="False" Caption="Auto6736dd12-f6c6-4caa-a907-b5ab61c4e066(8)" Direction="Horizontal" Index="1" RelativeSize="29.05982905982906" TextAlignMode="AlignWithChildren" IsNewNode="True">
-                  <LayoutItem Id="Item4" Index="0" RelativeSize="75.84541062801932" IsNewNode="True" />
-                  <LayoutItem Id="SpeechToText" TextAlignMode="CustomSize" ViewItem="SpeechToText" Index="1" RelativeSize="24.154589371980677" IsNewNode="True" />
-                </LayoutGroup>
-                <LayoutGroup Id="Autod4f71c1e-3885-419c-be2f-1347e673780a" ShowCaption="False" Caption="Autod4f71c1e-3885-419c-be2f-1347e673780a(11)" Direction="Horizontal" Index="2" RelativeSize="29.914529914529915" IsNewNode="True">
-                  <LayoutItem Id="RecognitionLanguage" ViewItem="RecognitionLanguage" Index="0" RelativeSize="50.72463768115942" IsNewNode="True" />
-                  <LayoutItem Id="Rate" ViewItem="Rate" SizeConstraintsType="Custom" MinSize="175, 24" Index="1" RelativeSize="49.27536231884058" IsNewNode="True" />
-                </LayoutGroup>
-                <LayoutItem Id="Item3" Index="3" RelativeSize="8.547008547008547" IsNewNode="True" />
-              </LayoutGroup>
-              <LayoutItem Id="SpeechInfo" ShowCaption="False" ViewItem="SpeechInfo" Index="1" RelativeSize="41.25816993464052" IsNewNode="True" />
-              <LayoutItem Id="SSMLFiles" ViewItem="SSMLFiles" Index="2" RelativeSize="24.91830065359477" TextAlignMode="CustomSize" IsNewNode="True" />
+          <LayoutGroup Id="Item3" ShowCaption="False" CaptionLocation="Top" Direction="Horizontal" Index="0" RelativeSize="10.06585136406397" TextAlignMode="AlignWithChildren" IsNewNode="True">
+            <LayoutGroup Id="Auto6007a961-8d5f-44b3-8c5a-e5f99c70380e" ShowCaption="False" Caption="Auto6007a961-8d5f-44b3-8c5a-e5f99c70380e(3)" Index="0" RelativeSize="17.83387622149837" IsNewNode="True">
+              <LayoutItem Id="Name" ViewItem="Name" SizeConstraintsType="Custom" MinSize="188, 32" Index="0" RelativeSize="34.57943925233645" MaxSize="188, 0" IsNewNode="True" />
+              <LayoutItem Id="RecognitionLanguage" ViewItem="RecognitionLanguage" SizeConstraintsType="Custom" MinSize="188, 30" Index="1" RelativeSize="32.71028037383178" MaxSize="188, 0" IsNewNode="True" />
+              <LayoutItem Id="Rate" ViewItem="Rate" Index="2" RelativeSize="32.71028037383178" SizeConstraintsType="Custom" MinSize="188, 30" MaxSize="188, 30" IsNewNode="True" />
             </LayoutGroup>
+            <LayoutGroup Id="Auto2f0ca29d-93d9-4890-9061-0d215e84f96f" ShowCaption="False" Caption="Auto2f0ca29d-93d9-4890-9061-0d215e84f96f(6)" Index="1" RelativeSize="18.485342019543975" IsNewNode="True">
+              <LayoutItem Id="Account" ViewItem="Account" SizeConstraintsType="Custom" MinSize="195, 38" Index="0" RelativeSize="100" MaxSize="195, 0" IsNewNode="True" />
+            </LayoutGroup>
+            <LayoutItem Id="SpeechInfo" ViewItem="SpeechInfo" Index="2" RelativeSize="53.09446254071661" TextAlignMode="CustomSize" IsNewNode="True" />
+            <LayoutItem Id="SSMLFiles" TextAlignMode="CustomSize" ViewItem="SSMLFiles" Index="3" RelativeSize="10.586319218241043" IsNewNode="True" />
           </LayoutGroup>
-          <TabbedGroup Id="Tabs" Index="1" RelativeSize="90.25811823480433" IsNewNode="True">
+          <TabbedGroup Id="Tabs" Index="1" RelativeSize="89.93414863593603" IsNewNode="True">
             <LayoutGroup Id="SpeechTexts" ShowCaption="True" Caption="Speech Texts" TextAlignMode="AlignWithChildren" Index="0" RelativeSize="100" IsNewNode="True">
-              <LayoutGroup Id="Autoad629944-d407-43fa-95da-26b18f14e0e4" ShowCaption="False" Caption="Autoad629944-d407-43fa-95da-26b18f14e0e4(11)" TextAlignMode="AlignWithChildren" Index="0" RelativeSize="47.79270633397313" IsNewNode="True">
+              <LayoutGroup Id="Autoad629944-d407-43fa-95da-26b18f14e0e4" ShowCaption="False" Caption="Autoad629944-d407-43fa-95da-26b18f14e0e4(11)" TextAlignMode="AlignWithChildren" Index="0" RelativeSize="41.57549234135667" IsNewNode="True">
                 <LayoutItem Id="SpeechTexts" TextAlignMode="AutoSize" ViewItem="SpeechTexts" SizeConstraintsType="Custom" MinSize="65, 38" Index="0" RelativeSize="100" IsNewNode="True" />
               </LayoutGroup>
-              <SplitterItem Id="SplitterItem1" Index="1" RelativeSize="0.9596928982725528" IsNewNode="True" />
-              <LayoutItem Id="SpeechTranslations" ViewItem="SpeechTranslations" SizeConstraintsType="Custom" MinSize="20, 30" Index="2" RelativeSize="51.24760076775432" IsNewNode="True" />
+              <SplitterItem Id="SplitterItem1" Index="1" RelativeSize="1.0940919037199124" IsNewNode="True" />
+              <LayoutItem Id="SpeechTranslations" ViewItem="SpeechTranslations" SizeConstraintsType="Custom" MinSize="20, 30" Index="2" RelativeSize="57.330415754923415" IsNewNode="True" />
             </LayoutGroup>
             <LayoutGroup Id="Item1" ShowCaption="True" Caption="Translations" CaptionLocation="Top" Index="1" RelativeSize="100" IsNewNode="True">
               <LayoutGroup Id="Auto1465952f-c065-474c-bfbf-66ce9288c364" ShowCaption="False" Caption="Auto1465952f-c065-474c-bfbf-66ce9288c364(14)" TextAlignMode="AlignWithChildren" Direction="Horizontal" Index="0" RelativeSize="100" IsNewNode="True">
-                <LayoutItem Id="TargetLanguages" ViewItem="TargetLanguages" CaptionLocation="Top" Index="0" RelativeSize="49.3322203672788" IsNewNode="True" />
-                <LayoutItem Id="SpeechVoices" ViewItem="SpeechVoices" Index="1" RelativeSize="50.6677796327212" IsNewNode="True" />
+                <LayoutItem Id="TargetLanguages" ViewItem="TargetLanguages" CaptionLocation="Top" Index="0" RelativeSize="48.668885191347755" IsNewNode="True" />
+                <LayoutItem Id="SpeechVoices" ViewItem="SpeechVoices" Index="1" RelativeSize="51.331114808652245" IsNewNode="True" />
               </LayoutGroup>
             </LayoutGroup>
           </TabbedGroup>
         </LayoutGroup>
       </Layout>
     </DetailView>
-    <ListView Id="SpeechToText_ListView">
-      <GridView ViewCaption="test" />
-    </ListView>
     <ListView Id="SpeechToText_SpeechInfo_ListView" HideToolBar="True">
       <Columns>
         <ColumnInfo Id="SpeechType" OwnerBand="@e747572a-d281-4ad7-9a1c-8cd215294b93" />
         <ColumnInfo Id="SelectedLines" Width="60" OwnerBand="@e747572a-d281-4ad7-9a1c-8cd215294b93" />
         <ColumnInfo Id="TotalLines" OwnerBand="@e747572a-d281-4ad7-9a1c-8cd215294b93" />
         <ColumnInfo Id="Duration" OwnerBand="@e747572a-d281-4ad7-9a1c-8cd215294b93" />
-        <ColumnInfo Id="AudioDuration" OwnerBand="@e747572a-d281-4ad7-9a1c-8cd215294b93" />
+        <ColumnInfo Id="VoiceDuration" OwnerBand="@e747572a-d281-4ad7-9a1c-8cd215294b93" />
         <ColumnInfo Id="SSMLDuration" OwnerBand="@e747572a-d281-4ad7-9a1c-8cd215294b93" />
-        <ColumnInfo Id="SSMLAudioDuration" OwnerBand="@e747572a-d281-4ad7-9a1c-8cd215294b93" />
+        <ColumnInfo Id="SSMLVoiceDuration" OwnerBand="@e747572a-d281-4ad7-9a1c-8cd215294b93" />
         <ColumnInfo Id="SpareTime" OwnerBand="@e747572a-d281-4ad7-9a1c-8cd215294b93" />
         <ColumnInfo Id="OverTime" OwnerBand="@e747572a-d281-4ad7-9a1c-8cd215294b93" />
       </Columns>
@@ -225,12 +234,16 @@
         <ColumnInfo Id="Offset" Index="-1" />
         <ColumnInfo Id="Oid" Index="-1" />
         <ColumnInfo Id="SpeechToText" Index="-1" />
-        <ColumnInfo Id="Start" Index="0" OwnerBand="Columns" />
+        <ColumnInfo Id="Start" Index="0" SortOrder="Ascending" SortIndex="0" OwnerBand="Columns" />
         <ColumnInfo Id="Text" Index="0" SortIndex="-1" SortOrder="None" RowIndex="1" OwnerBand="Columns" />
         <ColumnInfo Id="Duration" Index="1" OwnerBand="Columns" />
         <ColumnInfo Id="End" Index="2" OwnerBand="Columns" />
-        <ColumnInfo Id="AudioDuration" Index="3" OwnerBand="Columns" />
-        <ColumnInfo Id="File" Index="4" OwnerBand="Columns" />
+        <ColumnInfo Id="VoiceDuration" Index="3" OwnerBand="Columns" />
+        <ColumnInfo Id="VoiceOverTime" Index="4" OwnerBand="Columns" />
+        <ColumnInfo Id="WaitTime" Index="5" OwnerBand="Columns" />
+        <ColumnInfo Id="File" Index="6" OwnerBand="Columns" />
+        <ColumnInfo Id="FileDuration" Index="7" OwnerBand="Columns" />
+        <ColumnInfo Id="SpareTime" Index="8" OwnerBand="Columns" />
       </Columns>
       <BandsLayout Enable="True" ShowColumnHeaders="True" ShowBands="False">
         <Band Id="Columns" IsNewNode="True" />
@@ -242,17 +255,42 @@
         <ActionLink ActionId="PrintPreview" IsNewNode="True" />
         <ActionLink ActionId="Unlink" IsNewNode="True" />
       </HiddenActions>
+      <MergedDifferences>
+        <MergedDifference Id="BaseListView" View="SpeechText_Base_ListView" IsNewNode="True" />
+      </MergedDifferences>
       <SplitLayout Direction="Horizontal" SplitterPosition="344" ViewsOrder="DetailViewListView" />
+    </ListView>
+    <ListView Id="SpeechToText_SpeechTexts_Editor_ListView" MasterDetailMode="ListViewAndDetailView" FreezeColumnIndices="True" MasterDetailView="SpeechText_Editor_DetailView">
+      <Columns>
+        <ColumnInfo Id="CanConvert" Index="-1" />
+        <ColumnInfo Id="Duration" Index="-1" />
+        <ColumnInfo Id="End" Index="-1" />
+        <ColumnInfo Id="File" Index="-1" />
+        <ColumnInfo Id="Offset" Index="-1" />
+        <ColumnInfo Id="Oid" Index="-1" />
+        <ColumnInfo Id="SpareTime" Index="-1" />
+        <ColumnInfo Id="SpeechToText" Index="-1" />
+        <ColumnInfo Id="Text" Index="-1" SortIndex="-1" SortOrder="None" />
+        <ColumnInfo Id="VoiceDuration" Index="-1" />
+        <ColumnInfo Id="VoiceOverTime" Index="-1" />
+        <ColumnInfo Id="WaitTime" Index="-1" SortIndex="0" SortOrder="Ascending" />
+        <ColumnInfo Id="Start" Index="0" />
+        <ColumnInfo Id="FileDuration" Index="1" />
+      </Columns>
+      <MergedDifferences>
+        <MergedDifference Id="BaseListView" View="SpeechText_Base_ListView" IsNewNode="True" />
+      </MergedDifferences>
+      <SplitLayout SplitterPosition="344" />
     </ListView>
     <ListView Id="SpeechToText_SpeechTexts_ListView" MasterDetailMode="ListViewAndDetailView">
       <Columns>
         <ColumnInfo Id="Offset" Index="-1" />
-        <ColumnInfo Id="Start" Index="0" />
+        <ColumnInfo Id="Start" Index="0" SortIndex="0" SortOrder="Ascending" />
         <ColumnInfo Id="Duration" Index="1" />
         <ColumnInfo Id="End" Index="2" />
-        <ColumnInfo Id="AudioDuration" Index="3" />
+        <ColumnInfo Id="VoiceDuration" Index="3" />
         <ColumnInfo Id="File" Index="4" />
-        <ColumnInfo Id="Text" Index="4" />
+        <ColumnInfo Id="Text" Index="4" SortIndex="1" />
       </Columns>
       <HiddenActions>
         <ActionLink ActionId="Link" IsNewNode="True" />
@@ -261,10 +299,14 @@
         <ActionLink ActionId="PrintPreview" IsNewNode="True" />
         <ActionLink ActionId="Unlink" IsNewNode="True" />
       </HiddenActions>
+      <MergedDifferences>
+        <MergedDifference Id="BaseListView" View="SpeechText_Base_ListView" IsNewNode="True" />
+      </MergedDifferences>
       <SplitLayout ViewsOrder="DetailViewListView" SplitterPosition="344" />
       <Variants Current="Banded">
         <Variant Id="Banded" ViewID="SpeechToText_SpeechTexts_Banded_ListView" Caption="Banded" IsNewNode="True" />
         <Variant Id="Default" ViewID="SpeechToText_SpeechTexts_ListView" Caption="Default" IsNewNode="True" />
+        <Variant Id="Editor" ViewID="SpeechToText_SpeechTexts_Editor_ListView" Caption="Editor" IsNewNode="True" />
       </Variants>
     </ListView>
     <ListView Id="SpeechToText_SpeechVoices_ListView">
@@ -304,17 +346,19 @@
         <ColumnInfo Id="Start" Index="0" SortOrder="Ascending" SortIndex="0" OwnerBand="Columns" />
         <ColumnInfo Id="Duration" Index="1" OwnerBand="Columns" />
         <ColumnInfo Id="End" Index="2" OwnerBand="Columns" />
-        <ColumnInfo Id="AudioDuration" Index="3" OwnerBand="Columns" />
         <ColumnInfo Id="File" Index="3" OwnerBand="Columns" />
-        <ColumnInfo Id="Language" Index="4" OwnerBand="Columns" />
-        <ColumnInfo Id="Text" Index="5" RowIndex="1" OwnerBand="Columns" />
+        <ColumnInfo Id="FileDuration" Index="4" OwnerBand="Columns" />
+        <ColumnInfo Id="VoiceDuration" Index="4" OwnerBand="Columns" />
+        <ColumnInfo Id="VoiceOverTime" Index="4" OwnerBand="Columns" />
+        <ColumnInfo Id="WaitTime" Index="5" OwnerBand="Columns" />
+        <ColumnInfo Id="SpareTime" Index="6" OwnerBand="Columns" />
+        <ColumnInfo Id="CanConvert" Index="7" OwnerBand="Columns" />
+        <ColumnInfo Id="Language" Index="9" OwnerBand="Columns" />
+        <ColumnInfo Id="Text" Index="10" RowIndex="1" OwnerBand="Columns" />
       </Columns>
       <BandsLayout Enable="True" ShowBands="False">
         <Band Id="Columns" IsNewNode="True" />
       </BandsLayout>
-      <AdvBandedGridView>
-        <OptionsCustomization AllowSort="False" />
-      </AdvBandedGridView>
       <HiddenActions>
         <ActionLink ActionId="New" IsNewNode="True" />
         <ActionLink ActionId="NextObject" IsNewNode="True" />
@@ -326,10 +370,14 @@
         <ActionLink ActionId="Save" IsNewNode="True" />
         <ActionLink ActionId="SaveAndClose" IsNewNode="True" />
       </HiddenActions>
+      <MergedDifferences>
+        <MergedDifference Id="BaseListView" View="SpeechText_Base_ListView" IsNewNode="True" />
+      </MergedDifferences>
       <SplitLayout SplitterPosition="344" ViewsOrder="DetailViewListView" />
       <Variants Current="Banded">
         <Variant Id="Banded" ViewID="SpeechTranslation_Banded_ListView" Caption="Banded" IsNewNode="True" />
         <Variant Id="Default" ViewID="SpeechTranslation_ListView" Caption="Default" IsNewNode="True" />
+        <Variant Id="Editor" ViewID="SpeechTranslation_Editor_ListView" Caption="Editor" IsNewNode="True" />
       </Variants>
     </ListView>
     <DetailView Id="SpeechTranslation_DetailView">
@@ -359,6 +407,56 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
+    <DetailView Id="SpeechTranslation_Editor_DetailView">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="SizeableEditors" RelativeSize="100" TextAlignMode="AlignWithChildren" Index="0">
+            <LayoutItem Id="Text" RelativeSize="100" ShowCaption="False" />
+          </LayoutGroup>
+          <TabbedGroup Id="Tabs" RelativeSize="12.920738327904452" Index="1" Removed="True">
+            <LayoutGroup Id="RealTranslations" TextAlignMode="AlignWithChildren" RelativeSize="100">
+              <LayoutItem Id="RealTranslations" TextAlignMode="AutoSize" RelativeSize="100" />
+            </LayoutGroup>
+            <LayoutGroup Id="SSMLFiles" TextAlignMode="AlignWithChildren" RelativeSize="100">
+              <LayoutItem Id="SSMLFiles" TextAlignMode="AutoSize" RelativeSize="100" />
+            </LayoutGroup>
+            <LayoutGroup Id="Translations" TextAlignMode="AlignWithChildren" RelativeSize="100">
+              <LayoutItem Id="Translations" TextAlignMode="AutoSize" RelativeSize="100" />
+            </LayoutGroup>
+          </TabbedGroup>
+          <LayoutGroup Id="SimpleEditors" RelativeSize="4.125950054288817" Removed="True">
+            <LayoutGroup Id="SpeechText" Removed="True" />
+            <LayoutGroup Id="SpeechTranslation" RelativeSize="100" Caption="Language" Removed="True">
+              <LayoutItem Id="Language" RelativeSize="100" Removed="True" />
+            </LayoutGroup>
+          </LayoutGroup>
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <ListView Id="SpeechTranslation_Editor_ListView" FreezeColumnIndices="True" MasterDetailMode="ListViewAndDetailView" MasterDetailView="SpeechTranslation_Editor_DetailView">
+      <Columns>
+        <ColumnInfo Id="CanConvert" Index="-1" />
+        <ColumnInfo Id="Duration" Index="-1" SortIndex="-1" SortOrder="None" />
+        <ColumnInfo Id="End" Index="-1" />
+        <ColumnInfo Id="File" Index="-1" />
+        <ColumnInfo Id="Offset" Index="-1" />
+        <ColumnInfo Id="Oid" Index="-1" />
+        <ColumnInfo Id="SourceText" Index="-1" />
+        <ColumnInfo Id="SpareTime" Index="-1" />
+        <ColumnInfo Id="SpeechToText" Index="-1" />
+        <ColumnInfo Id="Text" Index="-1" SortIndex="-1" SortOrder="None" />
+        <ColumnInfo Id="VoiceDuration" Index="-1" />
+        <ColumnInfo Id="VoiceOverTime" Index="-1" />
+        <ColumnInfo Id="WaitTime" Index="-1" />
+        <ColumnInfo Id="Language" Index="0" />
+        <ColumnInfo Id="Start" Index="1" SortIndex="0" SortOrder="Ascending" />
+        <ColumnInfo Id="FileDuration" Index="2" />
+      </Columns>
+      <MergedDifferences>
+        <MergedDifference Id="BaseListView" View="SpeechText_Base_ListView" IsNewNode="True" />
+      </MergedDifferences>
+      <SplitLayout SplitterPosition="344" />
+    </ListView>
     <ListView Id="SpeechTranslation_ListView" MasterDetailMode="ListViewAndDetailView">
       <Columns>
         <ColumnInfo Id="Offset" Index="-1" />
@@ -366,13 +464,10 @@
         <ColumnInfo Id="Language" Index="0" />
         <ColumnInfo Id="Start" Index="1" SortIndex="0" SortOrder="Ascending" />
         <ColumnInfo Id="Duration" Index="2" />
-        <ColumnInfo Id="AudioDuration" Index="3" />
+        <ColumnInfo Id="VoiceDuration" Index="3" />
         <ColumnInfo Id="File" Index="4" />
         <ColumnInfo Id="Text" Index="5" SortIndex="-1" SortOrder="None" />
       </Columns>
-      <GridView>
-        <OptionsCustomization AllowSort="False" />
-      </GridView>
       <HiddenActions>
         <ActionLink ActionId="New" IsNewNode="True" />
         <ActionLink ActionId="NextObject" IsNewNode="True" />
@@ -384,6 +479,9 @@
         <ActionLink ActionId="Save" IsNewNode="True" />
         <ActionLink ActionId="SaveAndClose" IsNewNode="True" />
       </HiddenActions>
+      <MergedDifferences>
+        <MergedDifference Id="BaseListView" View="SpeechText_Base_ListView" IsNewNode="True" />
+      </MergedDifferences>
       <SplitLayout SplitterPosition="344" ViewsOrder="DetailViewListView" />
     </ListView>
     <DetailView Id="SSML_DetailView" AllowEdit="False">

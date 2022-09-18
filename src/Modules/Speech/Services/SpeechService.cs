@@ -7,15 +7,20 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
+using DevExpress.Data.Extensions;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.Model;
+using Fasterflect;
 using HarmonyLib;
 using Microsoft.CognitiveServices.Speech;
 using Microsoft.CognitiveServices.Speech.Translation;
+using NAudio.Wave;
 using Xpand.Extensions.FileExtensions;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.ObjectExtensions;
+using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.ErrorHandling;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
@@ -24,6 +29,7 @@ using Xpand.Extensions.XAF.ActionExtensions;
 using Xpand.Extensions.XAF.CollectionSourceExtensions;
 using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.ViewExtensions;
+using Xpand.Extensions.XAF.Xpo.BaseObjects;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
@@ -38,6 +44,7 @@ namespace Xpand.XAF.Modules.Speech.Services{
 	    
         internal static IObservable<Unit> ConnectSpeech(this  ApplicationModulesManager manager)
 	        => manager.SpeechSynthesizerCache()
+		        .MergeToUnit(manager.IgnoreNonPersistentMembersDataLocking(assembly => assembly==typeof(SpeechService).Assembly))
 		        .Merge(manager.SelectInExplorer())
         ;
 
@@ -51,6 +58,11 @@ namespace Xpand.XAF.Modules.Speech.Services{
 		        .WhenConcatExecution(e => e.SelectedObjects.Cast<ISelectInExplorer>().WhereNotDefault(text => text.File).ToNowObservable()
 			        .Do(text => new FileInfo(text.File.FullName).SelectInExplorer()))
 		        .ToUnit();
+
+        public static TimeSpan Duration(this FileLinkObject fileLinkObject) {
+	        using var audioFileReader = new AudioFileReader(fileLinkObject.FullName);
+	        return audioFileReader.TotalTime;
+        }
 
         private static readonly ConcurrentDictionary<(string voice,Type speechTextType),SpeechSynthesizer> SpeechSynthesizersCache = new();
         [SuppressMessage("ReSharper", "HeapView.CanAvoidClosure")]
@@ -70,7 +82,8 @@ namespace Xpand.XAF.Modules.Speech.Services{
 	        var modifiedSpeechToText = speechToText.ObjectSpace.WhenModifiedObjects<SpeechToText>().Where(text => text.Account!=null&&text.RecognitionLanguage!=null)
 		        .SelectMany(text => text.SpeechVoices.AddItem(text.Account.Voices.First(voice => voice.Language.Oid==text.RecognitionLanguage.Oid)));
 	        var existingVoices = speechToText.Account == null ? Observable.Empty<SpeechVoice>()
-		        : speechToText.SpeechVoices.AddItem(speechToText.Account.Voices.First(voice => voice.Language.Oid == speechToText.RecognitionLanguage?.Oid)).ToNowObservable();
+		        : speechToText.Account.Voices.Where(voice => voice.Language.Oid == speechToText.RecognitionLanguage?.Oid).ToNowObservable()
+			        .Do(voice => speechToText.SpeechVoices.AddItem(voice));
 	        return existingVoices.Concat(modifiedSpeechToText).Distinct(voice => voice.ShortName);
         }
 
@@ -80,12 +93,44 @@ namespace Xpand.XAF.Modules.Speech.Services{
 	        speechConfig.SpeechSynthesisLanguage = voice.Language.Name;
 	        return speechConfig;
         }
-        
+
+        public static T PreviousSpeechText<T>(this T current) where T:SpeechText{
+	        var speechTexts = current.SpeechToText.Texts.Where(text => text.GetType()==current.GetType()).Cast<T>()
+		        .OrderBy(text => text.Oid).ToArray();
+	        var index = speechTexts.FindIndex(text => text.Oid == current.Oid);
+	        var enumerable = speechTexts.Where((_, i) => i<index).ToArray();
+	        return enumerable.LastOrDefault();
+        }
+        public static T NextSpeechText<T>(this T current) where T:SpeechText{
+	        var speechTexts = current.SpeechToText.Texts.Where(text => text.GetType()==current.GetType()).Cast<T>()
+		        .OrderBy(text => text.Oid).ToArray();
+	        var index = speechTexts.FindIndex(text => text.Oid == current.Oid);
+	        var enumerable = speechTexts.Where((_, i) => i>index).ToArray();
+	        return enumerable.FirstOrDefault();
+        }
+        public static TFile UpdateSSMLFile<TFile>(this TFile file, SpeechSynthesisResult result, string path) where TFile:IAudioFileLink{
+	        file.File ??= file.CreateObject<FileLinkObject>();
+	        file.File.FileName = Path.GetFileName(path);
+	        file.File.FullName = path;
+	        using var audioFileReader = new AudioFileReader(path);
+	        file.FileDuration = audioFileReader.TotalTime;
+	        file.File.SetPropertyValue(nameof(FileLinkObject.Size),(int)audioFileReader.Length) ;
+	        file.FireChanged(nameof(IAudioFileLink.File));
+	        return file;
+        }
         public static IObservable<SpeechRecognitionResult> WhenRecognized(this SpeechRecognizer recognizer) 
 	        => recognizer.WhenEvent<SpeechRecognitionEventArgs>(nameof(SpeechRecognizer.Recognized)).Select(args => args.Result);
 
         public static IObservable<Unit> WhenSessionStopped(this Recognizer recognizer) 
-	        => recognizer.WhenEvent(nameof(Recognizer.SessionStopped)).ToUnit().TraceSpeechManager();
+	        => recognizer.WhenEvent<SessionEventArgs>(nameof(Recognizer.SessionStopped)).TraceSpeechManager(e => e.SessionId).ToUnit();
+        public static IObservable<Unit> WhenSessionStarted(this Recognizer recognizer) 
+	        => recognizer.WhenEvent<SessionEventArgs>(nameof(Recognizer.SessionStarted)).TraceSpeechManager(e => e.SessionId).ToUnit();
+        public static IObservable<TranslationRecognitionCanceledEventArgs> WhenCanceled(this TranslationRecognizer recognizer) 
+	        => recognizer.WhenEvent<TranslationRecognitionCanceledEventArgs>(nameof(TranslationRecognizer.Canceled));
+
+        public static IObservable<Unit> NotifyWhenCanceled(this TranslationRecognizer recognizer) 
+	        => recognizer.WhenCanceled().Select(e => new SpeechException($"Id:{e.SessionId}, reason:{e.Reason}, details:{e.ErrorDetails}"))
+		        .SelectMany(e => Observable.Throw<Unit>(e).TraceSpeechError().CompleteOnError());
         
         public static IObservable<SpeechSynthesisEventArgs> WhenSynthesisCompleted(this SpeechSynthesizer speechSynthesizer) 
 	        => speechSynthesizer.WhenEvent<SpeechSynthesisEventArgs>(nameof(Microsoft.CognitiveServices.Speech.SpeechSynthesizer.SynthesisCompleted))
@@ -108,6 +153,8 @@ namespace Xpand.XAF.Modules.Speech.Services{
 
         public static IObservable<SpeechSynthesisEventArgs> WhenSynthesisCanceled(this SpeechSynthesizer synthesizer) 
 	        => synthesizer.WhenEvent<SpeechSynthesisEventArgs>(nameof(Microsoft.CognitiveServices.Speech.SpeechSynthesizer.SynthesisCanceled)).TraceSpeechManager();
+        public static IObservable<SpeechSynthesisWordBoundaryEventArgs> WhenWordBoundary(this SpeechSynthesizer synthesizer) 
+	        => synthesizer.WhenEvent<SpeechSynthesisWordBoundaryEventArgs>(nameof(Microsoft.CognitiveServices.Speech.SpeechSynthesizer.WordBoundary));
 
         public static IModelSpeech SpeechModel(this IModelApplication applicationModel) 
 	        => applicationModel.ToReactiveModule<IModelReactiveModuleSpeech>().Speech;
@@ -125,8 +172,8 @@ namespace Xpand.XAF.Modules.Speech.Services{
 		public static IObservable<T> WhenSpeechApplication<T>(this ApplicationModulesManager manager, Func<XafApplication, IObservable<T>> selector,[CallerMemberName]string memberName="")
 			=> manager.WhenApplication(application => selector(application).TraceSpeechError(memberName:memberName).CompleteOnError());
         
-		public static IObservable<T> SpeechCompleteOnError<T>(this IObservable<T> source)
-			=> source.TraceSpeechError().CompleteOnError();
+		public static IObservable<T> SpeechCompleteOnError<T>(this IObservable<T> source,[CallerMemberName] string memberName = "")
+			=> source.TraceSpeechError(memberName:memberName).CompleteOnError();
 
 		public static IObservable<T2> SpeechPublish<T,T2>(this IObservable<T> source,Func<IObservable<T>,IObservable<T2>> selector)
 			=> source.Publish(observable => selector(observable).SpeechCompleteOnError());

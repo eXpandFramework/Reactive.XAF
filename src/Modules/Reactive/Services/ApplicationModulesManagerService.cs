@@ -55,6 +55,9 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 			        h => manager.CustomizeTypesInfo += h, h => manager.CustomizeTypesInfo += h, ImmediateScheduler.Instance)
 		        .TransformPattern<CustomizeTypesInfoEventArgs,ApplicationModulesManager>();
 	    
+	    public static IObservable<ITypeInfo> DomainComponents(this IObservable<(ApplicationModulesManager manager, CustomizeTypesInfoEventArgs e)> source) 
+            => source.SelectMany(t => t.e.TypesInfo.PersistentTypes);
+	    
 	    public static IObservable<ModelInterfaceExtenders> WhenExtendingModel(this IObservable<ApplicationModulesManager> source) 
             => source.SelectMany(manager => manager.WhenExtendingModel());
 

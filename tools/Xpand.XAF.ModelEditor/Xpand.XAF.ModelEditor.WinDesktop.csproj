@@ -47,7 +47,6 @@
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="6.0.0" />
   </ItemGroup>
   <ItemGroup>
-    
     <PackageReference Include="DevExpress.ExpressApp" Version="22.1.5" />
     <PackageReference Include="DevExpress.ExpressApp.Win" Version="22.1.5" />
     <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="22.1.5" />

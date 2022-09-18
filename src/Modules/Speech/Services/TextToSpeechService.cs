@@ -23,7 +23,7 @@ namespace Xpand.XAF.Modules.Speech.Services {
         [SuppressMessage("ReSharper", "StringLiteralTypo")]
         private static IObservable<Unit> Speak(this ApplicationModulesManager manager) {
             return manager.RegisterViewSimpleAction(nameof(SpeakText), action => {
-                    action.Shortcut = "ctrlalts";
+                    // action.Shortcut = "ctrlalts";
                     action.ImageName = "Action_Debug_Start";
                 },PredefinedCategory.Tools)
                 .WhenConcatExecution(e => e.Application().UseProviderObjectSpace(space => space.DefaultAccount(e.Application())

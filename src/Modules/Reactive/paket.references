@@ -1,4 +1,5 @@
 DevExpress.ExpressApp
+DevExpress.Persistent.Base
 System.Interactive
 System.Reactive
 Fasterflect.Xpand

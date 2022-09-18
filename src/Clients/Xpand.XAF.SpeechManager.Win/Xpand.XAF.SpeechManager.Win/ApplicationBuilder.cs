@@ -12,10 +12,10 @@ namespace Xpand.XAF.SpeechManager.Win {
             var builder = WinApplication.CreateBuilder();
             builder.UseApplication<SpeechManagerWindowsFormsApplication>();
             builder.Modules
-                .Add<Xpand.XAF.SpeechManager.Module.SpeechManagerModule>()
+                .Add<Module.SpeechManagerModule>()
                 .Add<SpeechManagerWinModule>();
             builder.ObjectSpaceProviders
-                .AddXpo((application, options) => {
+                .AddXpo((_, options) => {
                     options.ConnectionString = connectionString;
                 })
                 .AddNonPersistent();

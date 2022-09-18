@@ -21,7 +21,7 @@ namespace Xpand.XAF.Modules.Speech.BusinessObjects {
         [Association("SpeechText-SSMLFiles")]
         public XPCollection<SpeechText> SpeechTexts => GetCollection<SpeechText>();
         FileLinkObject _file;
-        [RuleRequiredField]
+        
         [FileTypeFilter("Audio files", 1, "*.wav")]
         public FileLinkObject File {
             get => _file;
@@ -36,8 +36,8 @@ namespace Xpand.XAF.Modules.Speech.BusinessObjects {
         }
 
         TimeSpan _duration;
-        [ValueConverter(typeof(TimeSpanSecondsValueConverter))]
-        [DisplayDateAndTime(DisplayDateType.None,DisplayTimeType.mm_ss)]
+        [ValueConverter(typeof(TimeSpanTicksValueConverter))]
+        [DisplayDateAndTime(DisplayDateType.None,DisplayTimeType.mm_ss_fff)]
         public TimeSpan Duration {
             get => _duration;
             set => SetPropertyValue(nameof(Duration), ref _duration, value);

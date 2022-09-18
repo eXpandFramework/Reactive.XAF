@@ -9,11 +9,13 @@ using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
+using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using DevExpress.ExpressApp.SystemModule;
@@ -758,35 +760,34 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                     gridview.SetPropertyValue("FocusedRowHandle", index);
                 }
             });
-        
-        public static IObservable<(Frame source, Frame target, T1 sourceObject, T2 targetObject, int targetIndex)> WhenNestedListViewsSelectionChanged<T1, T2>(this XafApplication application,
-                 Func<T1, T2, bool> objectSelector,Func<IObservable<Frame>, IObservable<Frame>> sourceSelector=null, Func<IObservable<Frame>, IObservable<Frame>> targetSelector=null) 
+
+        public static IObservable<(Frame source, Frame target, T1 sourceObject, T2 targetObject, int targetIndex)> WhenNestedListViewsSelectionChanged<T1, T2>(
+            this XafApplication application, Func<T1, T2, bool> objectSelector, Func<IObservable<Frame>, IObservable<Frame>> sourceSelector = null,
+                Func<IObservable<Frame>, IObservable<Frame>> targetSelector = null,Func<T1, object> sourceOrderSelector=null,Func<T2, object> targetOrderSelector=null) 
             => application.WhenFrameViewChanged().WhenFrame(typeof(T1), ViewType.ListView, Nesting.Nested)
-                .Publish(sourceFrame => {
-                    var observable = sourceSelector?.Invoke(sourceFrame) ?? sourceFrame;
-                    if (observable == null) {
-                        
-                    }
-                    return observable;
-                })
+                .Publish(sourceFrame => sourceSelector?.Invoke(sourceFrame) ?? sourceFrame)
                 .Zip(application.WhenFrameViewChanged().WhenFrame(typeof(T2), ViewType.ListView, Nesting.Nested)
-                    .Publish(targetFrame => {
-                        var observable = targetSelector?.Invoke(targetFrame) ?? targetFrame;
-                        if (observable == null) {
-                            
-                        }
-                        return observable;
-                    }))
+                    .Publish(targetFrame => targetSelector?.Invoke(targetFrame) ?? targetFrame))
                 .Select(t => (source: t.First, target: t.Second)).SelectMany(t => t.source.View.WhenSelectionChanged()
-                    .SelectMany(sourceView => sourceView.SelectedObjects.Cast<T1>().ToNowObservable()
-                        .SelectMany(sourceObject => t.target.View.AsListView().CollectionSource.Objects().Cast<T2>().ToNowObservable()
+                    .SelectMany(sourceView => sourceView.SelectedObjects.Cast<T1>().OrderBy(arg =>sourceOrderSelector?.Invoke(arg) ).ToArray().ToNowObservable()
+                        .SelectMany(sourceObject => t.target.View.AsListView().CollectionSource.Objects().Cast<T2>()
+                            .OrderBy(arg => targetOrderSelector?.Invoke(arg)).ToArray().ToNowObservable()
                             .Select((targetObject, targetIndex) => objectSelector(sourceObject, targetObject)
                                 ? (t.source, t.target, sourceObject, targetObject, targetIndex) : default))))
                 .WhenNotDefault();
-        
+
+        private static object OrderBy<T1>(T1 arg) {
+            throw new NotImplementedException();
+        }
+
         public static IObservable<SimpleActionExecuteEventArgs> WhenListViewProcessSelectedItem<T>(this XafApplication application,Nesting nesting=Nesting.Any,bool handled=true)  
             => application.WhenFrameViewChanged().WhenFrame(typeof(T),ViewType.ListView,nesting)
                 .SelectMany(frame => frame.GetController<ListViewProcessCurrentObjectController>().WhenCustomProcessSelectedItem(handled));
+        
+        public static IObservable<IMemberInfo> IgnoreNonPersistentMembersDataLocking(this ApplicationModulesManager manager,Func<Assembly,bool> filterTypes=null)  
+            => manager.WhenCustomizeTypesInfo().DomainComponents().GroupBy(info => info.Type.Assembly).Where(types => filterTypes?.Invoke(types.Key)??true)
+                .SelectMany(types => types).SelectMany(info => info.Members).Where(info => !info.IsPersistent)
+                .Do(info => info.AddAttribute(new IgnoreDataLockingAttribute()));
 
     }
 

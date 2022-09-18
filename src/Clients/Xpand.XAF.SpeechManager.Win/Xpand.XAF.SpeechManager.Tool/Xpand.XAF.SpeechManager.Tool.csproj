@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net6.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <PackAsTool>true</PackAsTool>
+        <ToolCommandName>Speech</ToolCommandName>
+        <PackageOutputPath>$(MSBuildThisFileDirectory)nupkgs</PackageOutputPath>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+        <Deterministic>False</Deterministic>
+        <PackageVersion>2.0.5</PackageVersion>
+        <Version>2.0.5</Version>
+    </PropertyGroup>
+    <ItemGroup>
+        <Compile Remove="nupkg\**" />
+        <EmbeddedResource Remove="nupkg\**" />
+        <None Remove="nupkg\**" />
+    </ItemGroup>
+</Project>
