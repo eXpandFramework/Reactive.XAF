@@ -12,6 +12,7 @@ using DevExpress.ExpressApp.SystemModule;
 using Microsoft.CognitiveServices.Speech;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.ObjectExtensions;
+using Xpand.Extensions.Reactive.ErrorHandling;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.Attributes;
@@ -44,7 +45,8 @@ namespace Xpand.XAF.Modules.Speech.Services {
                         var lastSpeak = defaultAccount.ObjectSpace.GetObjectsQuery<TextToSpeech>().Max(speech => speech.Oid) + 1;
                         var path = $"{speechModel.DefaultStorageFolder}\\{lastSpeak}.wav";
                         return File.WriteAllBytesAsync(path, result.AudioData).ToObservable().ObserveOnContext()
-                            .SelectMany(_ => defaultAccount.ObjectSpace.CreateObject<TextToSpeech>().UpdateSSMLFile( result, path).Commit());
+                            .SelectMany(_ => defaultAccount.ObjectSpace.CreateObject<TextToSpeech>().UpdateSSMLFile( result, path).Commit()
+                                .RetryWithBackoff(3));
                     }));
 
         public static SpeechConfig SpeechConfig(this SpeechAccount account,SpeechLanguage recognitionLanguage=null,[CallerMemberName]string callerMember="") {

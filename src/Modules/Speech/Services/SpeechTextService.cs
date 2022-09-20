@@ -14,14 +14,17 @@ using Xpand.XAF.Modules.Speech.BusinessObjects;
 
 namespace Xpand.XAF.Modules.Speech.Services {
     public static class SpeechTextService {
-        internal static string GetRateTag(this SpeechText current, int i) {
+        internal static string GetRateTag(this SpeechText current, int startRate) {
             if (current.SpeechToText.Rate&&current.VoiceDuration!=null&&current.VoiceDuration>current.Duration) {
                 var maxTime = current.Duration.Add(current.SpareTime);
+                if (current.Rate > 0) {
+                    return @$"<prosody rate=""+{current.Rate}%"">{{0}}</prosody>";
+                }
                 if (current.VoiceDuration.Value > maxTime) {
-                    var rate = current.VoiceDuration.Value.PercentageDifference(maxTime)+i;
+                    var rate = current.VoiceDuration.Value.PercentageDifference(maxTime)+startRate;
                     return @$"<prosody rate=""+{rate}%"">{{0}}</prosody>";    
                 }
-		        
+
             }
 
             return null;

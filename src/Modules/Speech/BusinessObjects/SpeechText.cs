@@ -9,6 +9,7 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using DevExpress.Xpo;
 using Xpand.Extensions.LinqExtensions;
+using Xpand.Extensions.XAF.Attributes;
 using Xpand.Extensions.XAF.Attributes.Custom;
 using Xpand.Extensions.XAF.Xpo.BaseObjects;
 using Xpand.Extensions.XAF.Xpo.ValueConverters;
@@ -77,6 +78,14 @@ namespace Xpand.XAF.Modules.Speech.BusinessObjects {
             get => _speechToText;
             set => SetPropertyValue(nameof(SpeechToText), ref _speechToText, value);
         }
+
+        decimal _rate;
+
+        [InvisibleInAllViews()]
+        public decimal Rate {
+            get => _rate;
+            set => SetPropertyValue(nameof(Rate), ref _rate, value);
+        }
         
         string _text;
 
@@ -128,7 +137,7 @@ namespace Xpand.XAF.Modules.Speech.BusinessObjects {
         }
 
         public SpeechText Previous => this.PreviousSpeechText();
-        public SpeechText Next => this.PreviousSpeechText();
+        public SpeechText Next => this.NextSpeechText();
 
         TimeSpan _duration;
         [VisibleInListView(true)][ModelDefault("AllowEdit","false")]

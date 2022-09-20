@@ -73,11 +73,11 @@ namespace Xpand.XAF.Modules.Speech.Services {
 				.Where(frame => frame.View.ObjectTypeInfo.Type==typeof(SpeechToText))
 				.SelectUntilViewClosed(frame => {
 					var observeOnContext = frame.View.ObjectSpace
-						.WhenCommittedDetailed1<SpeechText>(ObjectModification.NewOrUpdated, text => text.Text != null, nameof(SpeechText.Text))
-						.Select(t => t)
+						.WhenCommittedDetailed<SpeechText>(ObjectModification.NewOrUpdated, text => text.Text != null, nameof(SpeechText.Text))
+						.WaitUntilInactive(2)
 						.ObserveOnContext();
 					return observeOnContext
-						.SelectMany(text => frame.View.ToDetailView().FrameContainers(typeof(SpeechText))
+						.SelectMany(_ => frame.View.ToDetailView().FrameContainers(typeof(SpeechText))
 							// .Where(speechTextFrame => speechTextFrame.View.ObjectTypeInfo.Type == text.GetType())
 							.SelectMany(speechTextFrame => speechTextFrame
 								.Actions<SingleChoiceAction>(nameof(Synthesize))
@@ -86,25 +86,26 @@ namespace Xpand.XAF.Modules.Speech.Services {
 				}))
 				.ToUnit();
         
-        public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)>
-	        WhenCommittedDetailed1<T>(this IObjectSpace objectSpace, ObjectModification objectModification,Func<T, bool> criteria=null,params string[] modifiedProperties) 
-	        => objectSpace.WhenCommitingDetailed1(true, objectModification,criteria, modifiedProperties);
+        // public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)>
+	       //  WhenCommittedDetailed1<T>(this IObjectSpace objectSpace, ObjectModification objectModification,Func<T, bool> criteria=null,params string[] modifiedProperties) 
+	       //  => objectSpace.WhenCommitingDetailed1(true, objectModification,criteria, modifiedProperties);
 
-        public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)>
-	        WhenCommitingDetailed1<T>(this IObjectSpace objectSpace, bool emitAfterCommit, ObjectModification objectModification,Func<T, bool> criteria,params string[] modifiedProperties) 
-	        => modifiedProperties.Any()?objectSpace.WhenModifiedObjects1(typeof(T),modifiedProperties).Cast<T>().Take(1)
-			        .SelectMany(_ => objectSpace.WhenCommitingDetailed(emitAfterCommit,objectModification, criteria,modifiedProperties)):
-		        objectSpace.WhenCommitingDetailed(objectModification, emitAfterCommit,criteria);
+        // public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)>
+	       //  WhenCommitingDetailed1<T>(this IObjectSpace objectSpace, bool emitAfterCommit, ObjectModification objectModification,Func<T, bool> criteria,params string[] modifiedProperties) 
+	       //  => modifiedProperties.Any()?objectSpace.WhenModifiedObjects1(typeof(T),modifiedProperties).Cast<T>().Take(1)
+			     //    .SelectMany(_ => objectSpace.WhenCommitingDetailed(emitAfterCommit,objectModification, criteria,modifiedProperties)
+				    //     .Select(t => t)):
+		      //   objectSpace.WhenCommitingDetailed(objectModification, emitAfterCommit,criteria);
 
-        public static IObservable<object> WhenModifiedObjects1(this IObjectSpace objectSpace,Type objectType, params string[] properties) 
-	        => Observable.Defer(() => objectSpace.WhenObjectChanged().Where(t => objectType.IsInstanceOfType(t.e.Object) && properties.PropertiesMatch( t))
-			        .Select(_ => _.e.Object).Take(1))
-		        .RepeatWhen(observable => observable.SelectMany(_ => objectSpace.WhenModifyChanged().Where(space => !space.IsModified).Take(1)))
-		        .TakeUntil(objectSpace.WhenDisposed());
+        // public static IObservable<object> WhenModifiedObjects1(this IObjectSpace objectSpace,Type objectType, params string[] properties) 
+	       //  => Observable.Defer(() => objectSpace.WhenObjectChanged().Where(t => objectType.IsInstanceOfType(t.e.Object) && properties.PropertiesMatch( t))
+			     //    .Select(_ => _.e.Object).Take(1))
+		      //   .RepeatWhen(observable => observable.SelectMany(_ => objectSpace.WhenModifyChanged().Where(space => !space.IsModified).Take(1)))
+		      //   .TakeUntil(objectSpace.WhenDisposed());
         
-        private static bool PropertiesMatch(this string[] properties, (IObjectSpace objectSpace, ObjectChangedEventArgs e) t) 
-	        => !properties.Any()||(t.e.MemberInfo != null && properties.Contains(t.e.MemberInfo.Name) ||
-	                               t.e.PropertyName != null && properties.Contains(t.e.PropertyName));
+        // private static bool PropertiesMatch(this string[] properties, (IObjectSpace objectSpace, ObjectChangedEventArgs e) t) 
+	       //  => !properties.Any()||(t.e.MemberInfo != null && properties.Contains(t.e.MemberInfo.Name) ||
+	       //                         t.e.PropertyName != null && properties.Contains(t.e.PropertyName));
 
         
         public static IObservable<T> WaitUntilInactive1<T>(this IObservable<T> source, TimeSpan timeSpan,int count =1) 
@@ -148,7 +149,7 @@ namespace Xpand.XAF.Modules.Speech.Services {
 				        .Do(view => view.AsListView().CollectionSource.Objects<SpeechText>().FirstOrDefault()?.SpeechToText.TranslationSSMLs.Clear())
 				        .SpeechSelectMany(view => {
 					        var rate = frame.ParametrizedAction(nameof(Rate))?.Value??0;
-					        return view.SelectedObjects.Cast<SpeechText>().OrderBy(text => text.Start)
+					        return view.SelectedObjects.Cast<SpeechText>().OrderBy(text => text.Start).ToArray()
 						        .GroupBy(speechText => speechText.Language()).ToNowObservable()
 						        .WhenNotDefault(speechTexts => speechTexts.Key)
 						        .Do(speechTexts => speechTexts.UpdateSSML((speechText, texts) =>application.SSMLText(speechText, texts,rate) ));
@@ -175,33 +176,8 @@ namespace Xpand.XAF.Modules.Speech.Services {
 	        var speechModel = application.Model.SpeechModel();
 	        var speechVoice = speechText.SpeechVoice();
 	        var firstText = speechVoice.SSMLText( speechText.Text,speechModel,speechText.GetRateTag((int)(rate??0)));
-	        
-
-	        // var paragraphEnds = speechTexts.Select((text, index) => (text,index))
-		        // .Where(t => t.text.WaitTime > TimeSpan.FromSeconds(2))
-		        // .ToArray();
-	        // speechTexts.Paragraphs().CombineWithPrevious().Select(t => {
-		       //  var previous = t.previous;
-		       //  if (previous.overTime > TimeSpan.Zero) {
-			      //   var newWaitTime = t.current.waitTime - previous.overTime;
-			      //   if (newWaitTime < TimeSpan.Zero) {
-				     //    return speechVoice.SSMLText(t.current.text, speechModel);
-			      //   }
-			      //   else { }
-	        //
-			      //   return null;
-		       //  }
-	        //
-		       //  if (previous.overTime == TimeSpan.Zero) {
-			      //   return null;
-		       //  }
-		       //  throw new NotImplementedException();
-	        // }).ToArray();
-	        // var timeSpans = speechTexts.Select(text => text.WaitTime()).ToArray();
 	        var voiceText = speechTexts.ToNowObservable().CombineWithPrevious().WhenNotDefault(t => t.previous)
-		        // .Buffer(2)
 		        .ToEnumerable().ToArray()
-		        // .Select(list => )
 		        .Select(t => (ssml:t.current.Breaks(t.previous).Join(""),rate:t.current.GetRateTag((int)(rate ?? 0))))
 		        .Select(t => speechVoice.SSMLText(t.ssml,speechModel, t.rate)).Join("");
 
@@ -209,7 +185,7 @@ namespace Xpand.XAF.Modules.Speech.Services {
         }
 
         private static string SSMLText(this SpeechVoice speechVoice,string ssml, IModelSpeech speechModel, string rate=null) 
-	        => speechModel.SSMLSpeakFormat.StringFormat(
+	        =>ssml==null?null: speechModel.SSMLSpeakFormat.StringFormat(
 		        speechModel.SSMLVoiceFormat.StringFormat(speechVoice?.ShortName, rate.StringFormat($"{ssml}")));
         
         
@@ -218,18 +194,20 @@ namespace Xpand.XAF.Modules.Speech.Services {
 	        var speechText = speechTexts.First();
 	        var array = speechTexts.ToArray();
 	        var text = ssmlText(speechText,array);
-	        var additionalObjectSpace = speechText.ObjectSpace.AdditionalObjectSpace(typeof(SSML));
-	        var ssml = additionalObjectSpace.CreateObject<SSML>();
-	        ssml.Language = speechTexts.Key;
-	        ssml.SpeechTexts.AddRange(array.Select(text1 => text1));
-	        ssml.Text = text;
-	        if (speechText.GetType() == typeof(SpeechTranslation)) {
-		        speechText.SpeechToText.TranslationSSMLs.Add(ssml);
+	        if (!text.IsNullOrEmpty()) {
+		        var additionalObjectSpace = speechText.ObjectSpace.AdditionalObjectSpace(typeof(SSML));
+		        var ssml = additionalObjectSpace.CreateObject<SSML>();
+		        ssml.Language = speechTexts.Key;
+		        ssml.SpeechTexts.AddRange(array.Select(text1 => text1));
+		        ssml.Text = text;
+		        if (speechText.GetType() == typeof(SpeechTranslation)) {
+			        speechText.SpeechToText.TranslationSSMLs.Add(ssml);
+		        }
+		        else {
+			        speechText.SpeechToText.SSML = ssml;
+		        }
+		        ssml.RemoveFromModifiedObjects();
 	        }
-	        else {
-		        speechText.SpeechToText.SSML = ssml;
-	        }
-	        ssml.RemoveFromModifiedObjects();
         }
 
         private static Func<AudioConfig, SpeechToText, SynchronizationContext, SimpleAction, IObservable<Unit>> Recognize() 
@@ -424,33 +402,46 @@ namespace Xpand.XAF.Modules.Speech.Services {
 			        var regex = new Regex(@"<speak\b[^>]*>(.*?)</speak>", RegexOptions.IgnoreCase | RegexOptions.Singleline);
 			        var ssmlText = t.ssml.Text;
 			        var speechTexts = t.ssml.SpeechTexts;
-			        return Observable.Defer(() => regex.SpeakSSML(ssmlText, t.speechSynthesizer, t.model, speechTexts))
+			        return Observable.Defer(() => regex.SpeakSSML(ssmlText, t.speechSynthesizer, t.model, speechTexts,actionBase.Application)
+					        .ShowXafMessage(actionBase.Application))
 				        ;
 
 		        })
 		        .BufferUntilCompleted().ObserveOnContext()
 		        .SelectMany(texts => texts.NewSSMLFile(actionBase.Application.Model.SpeechModel()));
 
-        private static IObservable<SpeechText> SpeakSSML(this Regex regex,string ssml,  SpeechSynthesizer speechSynthesizer, IModelSpeech model,List<SpeechText> speechTexts) 
+        private static IObservable<SpeechText> SpeakSSML(this Regex regex,string ssml,  SpeechSynthesizer speechSynthesizer, IModelSpeech model,List<SpeechText> speechTexts,XafApplication application) 
 	        => regex.Matches(ssml).ToNowObservable()
 		        .SelectManySequential((match,i) => {
 			        var ssmlText = match.Value;
 			        var speechText = speechTexts[i];
 			        return Observable.Defer(() => speechSynthesizer.SpeakSSML(() => ssmlText).ObserveOnContext()
-					        .SelectManySequential(result => speechText.SaveSSMLFile( speechText.WavFileName(model),result).To(result)))
+						        .Select(result => (result,speechText))
+					        .SelectManySequential(t => speechText.SaveSSMLFile( speechText.WavFileName(model),t.result).To(t))
+				        )
 				        .RepeatWhen(observable => observable.ObserveOnContext()
 					        .TakeUntil(_ => speechText.CanConvert).Where(_ => !speechText.CanConvert)
-					        .Do(_ => {
+					        .Select(_ => {
 						        var regexObj = new Regex(@"(<prosody rate=""\+)(?<rate>[^""]*)\b[^>]*>(.*?)(</prosody>)",
 							        RegexOptions.IgnoreCase | RegexOptions.Singleline);
 						        var rate = regexObj.Match(ssmlText).Groups["rate"].Value.Change<decimal>() + 5 * (i + 1);
-						        ssmlText = Regex.Replace(ssmlText, @"(<prosody rate="")\+(?<rate>[^""]*)\b[^>]*>(.*?)(</prosody>)",
-							        $"$1+{rate}%\">$2$3", RegexOptions.IgnoreCase | RegexOptions.Singleline);
-					        }))
-				        .Select(result => (result, speechText)).ObserveOnContext();
+						        if (ssmlText.Contains("<prosody rate=")) {
+							        ssmlText = Regex.Replace(ssmlText, @"(<prosody rate="")\+(?<rate>[^""]*)\b[^>]*>(.*?)(</prosody>)",
+								        $"$1+{rate}%\">$2$3", RegexOptions.IgnoreCase | RegexOptions.Singleline);    
+						        }
+						        else {
+							        ssmlText = speechText.GetRateTag((int)rate).StringFormat(ssmlText);
+						        }
+
+						        speechText.Rate = rate;
+						        return rate;
+					        })
+					        .ShowXafMessage(application));
 		        })
 		        .BufferUntilCompleted().WhenNotEmpty().ObserveOnContext().SelectMany()
-		        .SelectMany(t1 => t1.speechText.SaveSSMLFile(t1.speechText.WavFileName(model), t1.result).To(t1.speechText));
+		        .Select(t => t.speechText)
+		        // .SelectMany(t => t.speechText.SaveSSMLFile(t.speechText.WavFileName(model), t.result).To(t.speechText))
+	        ;
 
         private static IObservable<SpeechSynthesisResult> SpeakSSML(this SpeechSynthesizer speechSynthesizer, Func<string> ssml) 
 	        => speechSynthesizer.Defer(() => speechSynthesizer.WhenSynthesisCompleted().Publish(whenSynthesisCompleted => 
@@ -464,7 +455,7 @@ namespace Xpand.XAF.Modules.Speech.Services {
         
         static IObservable<SSMLFile> NewSSMLFile<TLink>(this IEnumerable<TLink> sourceFiles,IModelSpeech modelSpeech) where TLink:IAudioFileLink 
 	        => modelSpeech.Defer(() => sourceFiles.WhereNotDefault(link => link?.File).Where(link => File.Exists(link.File.FullName))
-		        .ToNowObservable().BufferUntilCompleted(true).WaitUntilInactive(TimeSpan.FromSeconds(2))
+		        .ToNowObservable().BufferUntilCompleted(true).WaitUntilInactive(TimeSpan.FromSeconds(1))
 		        .Select(links => links.Select(link => (link, reader: new AudioFileReader(link.File.FullName))).ToArray())
 		        .SelectMany(readers => Observable.Using(
 			        () => new CompositeDisposable(readers.Select(t => t.reader)), _ => {
