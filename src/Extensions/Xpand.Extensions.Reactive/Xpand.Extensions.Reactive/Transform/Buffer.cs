@@ -24,7 +24,10 @@ namespace Xpand.Extensions.Reactive.Transform {
         }
 
         public static IObservable<IList<T>> BufferUntilInactive<T>(this IObservable<T> source, TimeSpan delay)
-            => source.Publish(obs => obs.Window(() => obs.Throttle(delay)).SelectMany(window => window.ToList()));
+            => source.BufferUntilInactive(delay,window => window.ToList());
+        
+        public static IObservable<IList<T>> BufferUntilInactive<T>(this IObservable<T> source, TimeSpan delay,Func<IObservable<T>,IObservable<IList<T>>> resultSelector)
+            => source.Publish(obs => obs.Window(() => obs.Throttle(delay)).SelectMany(resultSelector));
         
         public static IObservable<TSource[]> BufferUntilCompleted<TSource>(this IObservable<TSource> source,bool skipEmpty=false){
             var allEvents = source.Publish().RefCount();

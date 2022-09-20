@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.Office.Cloud.Google.Calendar</id>
-    <version>4.221.6.0</version>
+    <version>4.221.6.1</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -15,20 +15,20 @@
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Office.Cloud.Google.Calendar, 22.1.5</tags>
     <dependencies>
       <group targetFramework="netstandard2.0">
-        <dependency id="Xpand.Extensions" version="4.221.6.0" />
-        <dependency id="Xpand.Extensions.Office.Cloud" version="4.221.6.0" />
-        <dependency id="Xpand.Extensions.Reactive" version="4.221.6.0" />
-        <dependency id="Xpand.Extensions.XAF" version="4.221.6.0" />
-        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.221.6.0" />
-        <dependency id="Xpand.XAF.Modules.Reactive" version="4.221.6.0" />
-        <dependency id="Xpand.XAF.Modules.Office.Cloud.Google" version="4.221.6.0" />
+        <dependency id="Xpand.Extensions" version="4.221.6.1" />
+        <dependency id="Xpand.Extensions.Office.Cloud" version="4.221.6.1" />
+        <dependency id="Xpand.Extensions.Reactive" version="4.221.6.1" />
+        <dependency id="Xpand.Extensions.XAF" version="4.221.6.1" />
+        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.221.6.1" />
+        <dependency id="Xpand.XAF.Modules.Reactive" version="4.221.6.1" />
+        <dependency id="Xpand.XAF.Modules.Office.Cloud.Google" version="4.221.6.1" />
         <dependency id="DevExpress.Persistent.Base" version="22.1.5" />
         <dependency id="DevExpress.ExpressApp.Xpo" version="22.1.5" />
         <dependency id="Fasterflect.Xpand" version="2.0.7" />
         <dependency id="System.Reactive" version="5.0" />
         <dependency id="Google.Apis.Calendar.v3" version="1.55.0.2410" />
         <dependency id="DevExpress.ExpressApp.CodeAnalysis" version="22.1.5" />
-        <dependency id="Xpand.VersionConverter" version="4.221.6.0" />
+        <dependency id="Xpand.VersionConverter" version="4.221.6.1" />
       </group>
     </dependencies>
   </metadata>

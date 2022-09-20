@@ -7,7 +7,6 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
-using System.Security.Cryptography;
 using DevExpress.Data.Extensions;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
@@ -95,11 +94,10 @@ namespace Xpand.XAF.Modules.Speech.Services{
         }
 
         public static T PreviousSpeechText<T>(this T current) where T:SpeechText{
-	        var speechTexts = current.SpeechToText.Texts.Where(text => text.GetType()==current.GetType()).Cast<T>()
-		        .OrderBy(text => text.Oid).ToArray();
+	        var speechTexts = current.SpeechToText?.Texts.Where(text => text.GetType()==current.GetType()).Cast<T>()
+		        .OrderBy(text => text.Oid).ToArray()??Array.Empty<T>();
 	        var index = speechTexts.FindIndex(text => text.Oid == current.Oid);
-	        var enumerable = speechTexts.Where((_, i) => i<index).ToArray();
-	        return enumerable.LastOrDefault();
+	        return speechTexts.Where((_, i) => i<index).LastOrDefault();
         }
         public static T NextSpeechText<T>(this T current) where T:SpeechText{
 	        var speechTexts = current.SpeechToText.Texts.Where(text => text.GetType()==current.GetType()).Cast<T>()
@@ -114,6 +112,9 @@ namespace Xpand.XAF.Modules.Speech.Services{
 	        file.File.FullName = path;
 	        using var audioFileReader = new AudioFileReader(path);
 	        file.FileDuration = audioFileReader.TotalTime;
+	        if (file is SpeechText speechText&&speechText.SpeechToText.GetType()==typeof(SpeechToText)) {
+		        file.Duration=file.FileDuration.Value;
+	        }
 	        file.File.SetPropertyValue(nameof(FileLinkObject.Size),(int)audioFileReader.Length) ;
 	        file.FireChanged(nameof(IAudioFileLink.File));
 	        return file;

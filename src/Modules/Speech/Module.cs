@@ -5,6 +5,7 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Notifications;
 using DevExpress.ExpressApp.Validation;
 using DevExpress.ExpressApp.ViewVariantsModule;
+using DevExpress.XtraSpellChecker;
 using Xpand.XAF.Modules.CloneModelView;
 using Xpand.XAF.Modules.HideToolBar;
 using Xpand.XAF.Modules.ModelViewInheritance;
@@ -12,6 +13,7 @@ using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Speech.Services;
+using Xpand.XAF.Modules.SpellChecker;
 using Xpand.XAF.Modules.Windows;
 
 namespace Xpand.XAF.Modules.Speech {
@@ -30,6 +32,7 @@ namespace Xpand.XAF.Modules.Speech {
             RequiredModuleTypes.Add(typeof(CloneModelViewModule));
             RequiredModuleTypes.Add(typeof(HideToolBarModule));
             RequiredModuleTypes.Add(typeof(WindowsModule));
+            RequiredModuleTypes.Add(typeof(SpellCheckerModule));
             RequiredModuleTypes.Add(typeof(ViewVariantsModule));
             RequiredModuleTypes.Add(typeof(ModelViewInheritanceModule));
             // RequiredModuleTypes.Add(typeof(OfficeModule));

@@ -22,7 +22,6 @@ namespace Xpand.Extensions.XAF.FrameExtensions{
 
         public static IEnumerable<ActionBase> Actions(this Frame frame,params string[] actionsIds) 
             => frame.Actions<ActionBase>(actionsIds);
-        
         public static (TModule module,Frame frame) Action<TModule>(this Frame frame) where TModule:ModuleBase 
             => (frame.Application.Modules.FindModule<TModule>(),frame);
 

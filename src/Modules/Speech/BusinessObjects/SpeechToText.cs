@@ -9,20 +9,21 @@ using DevExpress.Persistent.Validation;
 using DevExpress.Xpo;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.XAF.Attributes;
+using Xpand.XAF.Modules.SpellChecker;
 using Xpand.XAF.Persistent.BaseImpl;
 
 namespace Xpand.XAF.Modules.Speech.BusinessObjects {
     
     [DeferredDeletion(false)][DefaultProperty(nameof(Name))]
-    [ImageName(("Action_Change_State"))]
+    [ImageName(("Action_Change_State"))][NavigationItem("Speech")]
     [OptimisticLocking(OptimisticLockingBehavior.LockModified)]
-    public abstract class SpeechToText:CustomBaseObject {
-        protected SpeechToText(Session session) : base(session) { }
+    public class SpeechToText:CustomBaseObject {
+        public SpeechToText(Session session) : base(session) { }
 
         [InvisibleInAllViews]
         public bool IsValid => GetIsValid();
 
-        protected abstract bool GetIsValid();
+        protected virtual bool GetIsValid() => false;
 
         [Association("SpeechToText-SpeechTexts")][DevExpress.Xpo.Aggregated][InvisibleInAllViews]
         public XPCollection<SpeechText> Texts => GetCollection<SpeechText>();
@@ -49,7 +50,7 @@ namespace Xpand.XAF.Modules.Speech.BusinessObjects {
         }
         
         
-        [CollectionOperationSet(AllowAdd = false)][ReloadWhenChange()]
+        [CollectionOperationSet(AllowAdd = true)][ReloadWhenChange()]
         public BindingList<SpeechText> SpeechTexts => Texts.ExactType().ToBindingList();
         SpeechAccount _speechAccount;
 
@@ -79,7 +80,7 @@ namespace Xpand.XAF.Modules.Speech.BusinessObjects {
 
         string _name;
 
-        [RuleRequiredField][RuleUniqueValue]
+        [RuleRequiredField][RuleUniqueValue][SpellCheck]
         public string Name {
             get => _name;
             set => SetPropertyValue(nameof(Name), ref _name, value);

@@ -4,13 +4,13 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
-using System.Threading;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.SystemModule;
 using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.ViewExtensions;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
@@ -93,7 +93,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                     handler => item.SelectionChanged += handler,
                     handler => item.SelectionChanged -= handler,ImmediateScheduler.Instance))
                 .Select(pattern => pattern.Sender).Cast<T>()
-                .WaitUntilInactive(waitUntilInactiveSeconds,SynchronizationContext.Current)
+                .WaitUntilInactive(waitUntilInactiveSeconds).ObserveOnContext()
         ;
 
         public static IObservable<T> WhenCurrentObjectChanged<T>(this T controller) where T : View 

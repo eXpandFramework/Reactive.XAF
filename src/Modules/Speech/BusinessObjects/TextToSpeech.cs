@@ -5,6 +5,7 @@ using DevExpress.Persistent.Validation;
 using DevExpress.Xpo;
 using Xpand.Extensions.XAF.Attributes.Custom;
 using Xpand.Extensions.XAF.Xpo.BaseObjects;
+using Xpand.XAF.Modules.SpellChecker;
 using Xpand.XAF.Persistent.BaseImpl;
 
 namespace Xpand.XAF.Modules.Speech.BusinessObjects {

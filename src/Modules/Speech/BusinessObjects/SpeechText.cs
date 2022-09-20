@@ -14,6 +14,7 @@ using Xpand.Extensions.XAF.Xpo.BaseObjects;
 using Xpand.Extensions.XAF.Xpo.ValueConverters;
 using Xpand.XAF.Modules.CloneModelView;
 using Xpand.XAF.Modules.Speech.Services;
+using Xpand.XAF.Modules.SpellChecker;
 using Xpand.XAF.Persistent.BaseImpl;
 
 namespace Xpand.XAF.Modules.Speech.BusinessObjects {
@@ -80,7 +81,7 @@ namespace Xpand.XAF.Modules.Speech.BusinessObjects {
         string _text;
 
         [Size(SizeAttribute.Unlimited)][VisibleInListView(true)]
-        [ModelDefault("AllowEdit","true")]
+        [ModelDefault("AllowEdit","true")][SpellCheck]
         public string Text {
             get => _text;
             set => SetPropertyValue(nameof(Text), ref _text, value);
@@ -117,16 +118,17 @@ namespace Xpand.XAF.Modules.Speech.BusinessObjects {
         [DisplayDateAndTime(DisplayDateType.None,DisplayTimeType.mm_ss_fff)]
         public TimeSpan SpareTime => this.SpareTime();
 
+        
+        TimeSpan _start;
         [VisibleInListView(true)][DisplayDateAndTime(DisplayDateType.None,DisplayTimeType.mm_ss_fff)]
-        public TimeSpan Start => TimeSpan.FromTicks(Offset);
-
-        long _offset;
-        [VisibleInListView(true)]
         [ModelDefault("AllowEdit","false")]
-        public long Offset {
-            get => _offset;
-            set => SetPropertyValue(nameof(Offset), ref _offset, value);
+        public TimeSpan Start {
+            get => _start;
+            set => SetPropertyValue(nameof(Start), ref _start, value);
         }
+
+        public SpeechText Previous => this.PreviousSpeechText();
+        public SpeechText Next => this.PreviousSpeechText();
 
         TimeSpan _duration;
         [VisibleInListView(true)][ModelDefault("AllowEdit","false")]
@@ -137,7 +139,7 @@ namespace Xpand.XAF.Modules.Speech.BusinessObjects {
             set => SetPropertyValue(nameof(Duration), ref _duration, value);
         }
 
-        public bool CanConvert => Duration.Add(SpareTime).Subtract(FileDuration??TimeSpan.Zero)>TimeSpan.Zero;
+        public bool CanConvert => Duration.Add(SpareTime).Subtract(FileDuration??TimeSpan.Zero)>=TimeSpan.Zero;
     }
 
     public interface ISelectInExplorer {

@@ -37,6 +37,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xpand.XAF.SpeechManager.Too
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xpand.XAF.Modules.Windows", "..\..\Modules\Windows\Xpand.XAF.Modules.Windows.csproj", "{F0662FED-D896-467F-B720-775E116C63BE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xpand.XAF.Modules.SpellChecker", "..\..\Modules\SpellChecker\Xpand.XAF.Modules.SpellChecker.csproj", "{1168E463-E6A4-4452-953D-45836100DB7E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -227,6 +229,18 @@ Global
 		{F0662FED-D896-467F-B720-775E116C63BE}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F0662FED-D896-467F-B720-775E116C63BE}.Release|Debug.ActiveCfg = Release|Any CPU
 		{F0662FED-D896-467F-B720-775E116C63BE}.Release|Debug.Build.0 = Release|Any CPU
+		{1168E463-E6A4-4452-953D-45836100DB7E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1168E463-E6A4-4452-953D-45836100DB7E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1168E463-E6A4-4452-953D-45836100DB7E}.Debug|Debug.ActiveCfg = Debug|Any CPU
+		{1168E463-E6A4-4452-953D-45836100DB7E}.Debug|Debug.Build.0 = Debug|Any CPU
+		{1168E463-E6A4-4452-953D-45836100DB7E}.EasyTest|Any CPU.ActiveCfg = Debug|Any CPU
+		{1168E463-E6A4-4452-953D-45836100DB7E}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
+		{1168E463-E6A4-4452-953D-45836100DB7E}.EasyTest|Debug.ActiveCfg = Debug|Any CPU
+		{1168E463-E6A4-4452-953D-45836100DB7E}.EasyTest|Debug.Build.0 = Debug|Any CPU
+		{1168E463-E6A4-4452-953D-45836100DB7E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1168E463-E6A4-4452-953D-45836100DB7E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1168E463-E6A4-4452-953D-45836100DB7E}.Release|Debug.ActiveCfg = Release|Any CPU
+		{1168E463-E6A4-4452-953D-45836100DB7E}.Release|Debug.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -244,6 +258,7 @@ Global
 		{B04B61AC-8AE5-4610-B834-431F0F530D7A} = {8C6E809E-4B11-4103-BA74-C3869FA5D63A}
 		{BCCC5B4E-410F-46A9-ABDF-A676CC52C226} = {8C6E809E-4B11-4103-BA74-C3869FA5D63A}
 		{F0662FED-D896-467F-B720-775E116C63BE} = {8C6E809E-4B11-4103-BA74-C3869FA5D63A}
+		{1168E463-E6A4-4452-953D-45836100DB7E} = {8C6E809E-4B11-4103-BA74-C3869FA5D63A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {AB325AE6-D4D9-4CAF-9F10-1E31052BF6BC}

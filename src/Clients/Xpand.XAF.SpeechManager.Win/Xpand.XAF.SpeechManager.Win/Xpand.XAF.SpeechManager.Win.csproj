@@ -54,6 +54,11 @@
     <ProjectReference Include="..\Xpand.XAF.SpeechManager.Module\Xpand.XAF.SpeechManager.Module.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="xpand.xaf.Win.all" Version="4.221.5.2" />
+    <PackageReference Include="xpand.xaf.Win.all" Version="4.221.6.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Xpand.XAF.Modules.SpellChecker">
+      <HintPath>..\..\..\..\bin\net6.0-windows7.0\Xpand.XAF.Modules.SpellChecker.dll</HintPath>
+    </Reference>
   </ItemGroup>
 </Project>
