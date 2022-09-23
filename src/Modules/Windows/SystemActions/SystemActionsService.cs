@@ -33,27 +33,40 @@ namespace Xpand.XAF.Modules.Windows.SystemActions {
         private static IObservable<Unit> ExecuteViewAgnosticHotKeys(this IObservable<HotKeyManager> source,XafApplication application) 
             => source.ExecuteHotKey(application.WhenFrameCreated(),action => !action.Views.Any()).ToUnit();
 
-        private static IObservable<(ActionBase action, HotKeyManager manager, GlobalHotKey globalHotKey)> ExecuteHotKey(this IObservable<HotKeyManager> source, 
+        private static IObservable<(ActionBase action, HotKeyManager manager, GlobalHotKey globalHotKey, IModelSystemAction modelSystemAction)> ExecuteHotKey(this IObservable<HotKeyManager> source, 
             IObservable<Frame> frameSource, Func<IModelSystemAction, bool> matchModel) 
             => source.CombineLatest(frameSource.SelectMany(frame => frame.Actions()).WhenSystem(),
                     (manager, t) => (manager, t.action, t.modelSystemAction)).Where(t => matchModel(t.modelSystemAction))
-                .Select(t => (t.manager, t.action,shortcut:t.modelSystemAction.ParseShortcut()))
+                .Select(t => (t.manager, t.action,shortcut:t.modelSystemAction.ParseShortcut(),t.modelSystemAction))
                 .AddGlobalHotKey().Execute();
 
-        private static IObservable<(ActionBase action, HotKeyManager manager, GlobalHotKey globalHotKey)> AddGlobalHotKey(
-            this IObservable<(HotKeyManager manager, ActionBase action, (Modifiers modifier, Keys key) shortcut)> source)
+        private static IObservable<(ActionBase action, HotKeyManager manager, GlobalHotKey globalHotKey, IModelSystemAction modelSystemAction)> AddGlobalHotKey(
+            this IObservable<(HotKeyManager manager, ActionBase action, (Modifiers modifier, Keys key) shortcut,IModelSystemAction modelSystemAction)> source)
             => source.Select(t => {
                     var globalHotKey = new GlobalHotKey(t.action.Id, t.shortcut.modifier, t.shortcut.key);
                     if (!t.manager.HotKeyExists(globalHotKey.Name)) {
                         t.manager.AddGlobalHotKey(globalHotKey);   
                     }
-                    return (t.action,t.manager,globalHotKey);
+                    return (t.action,t.manager,globalHotKey,t.modelSystemAction);
                 });
         
-        private static IObservable<(ActionBase action, HotKeyManager manager, GlobalHotKey globalHotKey)> Execute(this IObservable<(ActionBase action, HotKeyManager manager, GlobalHotKey globalHotKey)> source)
+        private static IObservable<(ActionBase action, HotKeyManager manager, GlobalHotKey globalHotKey, IModelSystemAction modelSystemAction)> Execute(this IObservable<(ActionBase action, HotKeyManager manager, GlobalHotKey globalHotKey,IModelSystemAction modelSystemAction)> source)
             => source.MergeIgnored(t => t.manager.WhenEvent<GlobalHotKeyEventArgs>(nameof(HotKeyManager.GlobalHotKeyPressed)).Where(e => e.HotKey.Name==t.globalHotKey.Name)
-                    .Do(_ => t.action.DoTheExecute()));
-        
+                    .Do(_ => t.action.DoTheExecute(t.modelSystemAction)));
+
+        private static void DoTheExecute(this ActionBase action, IModelSystemAction model) {
+            switch (action) {
+                case SimpleAction simpleAction:
+                    simpleAction.DoExecute();
+                    break;
+                case SingleChoiceAction singleChoiceAction:
+                    singleChoiceAction.DoExecute(new ChoiceActionItem(model.ChoiceActionItem));
+                    break;
+            }
+
+            throw new NotImplementedException();
+        }
+
         private static IObservable<HotKeyManager> WhenHotKeyManager(this XafApplication application) 
             => application.WhenFrameCreated(TemplateContext.ApplicationWindow).TemplateChanged()
                 .Select(window => {

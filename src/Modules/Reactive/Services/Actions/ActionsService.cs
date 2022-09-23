@@ -117,8 +117,13 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
                 return retriedExecution.Invoke(e).ObserveOnContext().Finally(() => e.Action.Enabled[nameof(WhenConcatExecution)] = true);
             });
         public static IObservable<T> WhenConcatExecution<T>(this ParametrizedAction simpleAction,Func<ParametrizedActionExecuteEventArgs,IObservable<T>> sourceSelector)
-            => simpleAction.WhenExecuted().Do(_ => simpleAction.Enabled[nameof(WhenConcatExecution)] = false)
-                .SelectMany(e => sourceSelector(e).ObserveOnContext().Finally(() => simpleAction.Enabled[nameof(WhenConcatExecution)] = true));
+            => simpleAction.WhenConcatExecution<T,ParametrizedActionExecuteEventArgs>( sourceSelector);
+        // public static IObservable<T> WhenConcatExecution<T>(this SingleChoiceAction simpleAction,Func<SingleChoiceActionExecuteEventArgs,IObservable<T>> sourceSelector)
+        //     => simpleAction.WhenConcatExecution<T,SingleChoiceActionExecuteEventArgs>( sourceSelector);
+
+        private static IObservable<T> WhenConcatExecution<T,TArgs>(this ActionBase action, Func<TArgs, IObservable<T>> sourceSelector)  where TArgs:ActionBaseEventArgs 
+            => action.WhenExecuted().Do(_ => action.Enabled[nameof(WhenConcatExecution)] = false).Cast<TArgs>()
+                .SelectMany(e => sourceSelector(e).ObserveOnContext().Finally(() => action.Enabled[nameof(WhenConcatExecution)] = true));
 
         public static IObservable<T> WhenExecuted<T>(this SingleChoiceAction simpleAction,Func<SingleChoiceActionExecuteEventArgs, IObservable<T>> retriedExecution) 
             => simpleAction.WhenExecuted().SelectMany(retriedExecution).Retry(() => simpleAction.Application).TakeUntilDeactivated(simpleAction.Controller);
@@ -159,11 +164,16 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
             => source.SelectMany(action => action.WhenExecuted());
         public static IObservable<Unit> WhenConcatExecution(this IObservable<ParametrizedAction> source,Action<ParametrizedActionExecuteEventArgs> retriedExecution) 
             => source.SelectMany(action => action.WhenConcatExecution(retriedExecution));
+        // public static IObservable<Unit> WhenConcatExecution(this IObservable<SingleChoiceAction> source,Action<SingleChoiceActionExecuteEventArgs> retriedExecution) 
+        //     => source.SelectMany(action => action.WhenConcatExecution(retriedExecution));
         
         public static IObservable<Unit> WhenConcatExecution(this IObservable<SimpleAction> source,Action<SimpleActionExecuteEventArgs> retriedExecution) 
             => source.SelectMany(action => action.WhenConcatExecution(retriedExecution));
         
         public static IObservable<T> WhenConcatExecution<T>(this IObservable<ParametrizedAction> source,Func<ParametrizedActionExecuteEventArgs,IObservable<T>> selector) 
+            => source.SelectMany(action => action.WhenConcatExecution(selector));
+        
+        public static IObservable<T> WhenConcatExecution<T>(this IObservable<SingleChoiceAction> source,Func<SingleChoiceActionExecuteEventArgs,IObservable<T>> selector) 
             => source.SelectMany(action => action.WhenConcatExecution(selector));
 
         public static IObservable<T> WhenExecuted<T>(this IObservable<ParametrizedAction> source,Func<ParametrizedActionExecuteEventArgs, IObservable<T>> retriedExecution) 

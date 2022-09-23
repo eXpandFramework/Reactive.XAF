@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
@@ -8,6 +11,7 @@ using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 
 namespace Xpand.Extensions.XAF.ActionExtensions{
+    
     public static partial class ActionExtensions{
         public static BoolList Clone(this BoolList boolList){
             var list = new BoolList();
@@ -18,6 +22,39 @@ namespace Xpand.Extensions.XAF.ActionExtensions{
             return list;
         }
 
+        public static void DoExecute(this SingleChoiceAction actionBase,ChoiceActionItem selectedItem, params object[] objectSelection) {
+            var context = actionBase.SelectionContext;
+            if (objectSelection.Length > 1) {
+                throw new NotImplementedException();
+            }
+
+            actionBase.SelectionContext = new SelectionContext(objectSelection.Single());
+            actionBase.DoExecute(selectedItem);
+            actionBase.SelectionContext=context;
+        }
+
+        [SuppressMessage("ReSharper", "ArrangeTypeMemberModifiers")]
+        [SuppressMessage("ReSharper", "UnusedMember.Local")]
+        sealed class SelectionContext:ISelectionContext {
+            public SelectionContext(object currentObject) {
+                CurrentObject = currentObject;
+                SelectedObjects = new List<object>(){currentObject};
+                OnCurrentObjectChanged();
+                OnSelectionChanged();
+            }
+            public object CurrentObject { get; set; }
+            public IList SelectedObjects { get; set; }
+            public SelectionType SelectionType => SelectionType.MultipleSelection;
+            public string Name => null;
+            public bool IsRoot => false;
+            public event EventHandler CurrentObjectChanged;
+            public event EventHandler SelectionChanged;
+            public event EventHandler SelectionTypeChanged;
+            [SuppressMessage("ReSharper", "ArrangeTypeMemberModifiers")]
+            void OnSelectionTypeChanged() => SelectionTypeChanged?.Invoke(this, EventArgs.Empty);
+            private void OnSelectionChanged() => SelectionChanged?.Invoke(this, EventArgs.Empty);
+            private void OnCurrentObjectChanged() => CurrentObjectChanged?.Invoke(this, EventArgs.Empty);
+        }
         public static bool DoTheExecute(this ActionBase actionBase,bool force=false) {
             BoolList active = null;
             BoolList enable = null;

@@ -11,14 +11,15 @@ using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
+using Xpand.Extensions.XAF.DetailViewExtensions;
 using Xpand.Extensions.XAF.ViewExtensions;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
     public static class ViewExtensions{
-        public static IObservable<CustomizeShowViewParametersEventArgs> WhenNestedListViewProcessCurrentObject(
+        public static IObservable<CustomizeShowViewParametersEventArgs> WhenNestedListViewProcessCustomizeShowViewParameters(
             this DetailView detailView, params Type[] objectTypes) 
-            => detailView.NestedListViews(objectTypes)
-                .SelectMany(editor => editor.Frame.GetController<ListViewProcessCurrentObjectController>()
+            => detailView.FrameContainers(objectTypes).ToNowObservable()
+                .SelectMany(frame => frame.GetController<ListViewProcessCurrentObjectController>()
                     .WhenEvent(nameof(ListViewProcessCurrentObjectController.CustomizeShowViewParameters))
                     .Select(pattern => pattern.EventArgs).Cast<CustomizeShowViewParametersEventArgs>());
 

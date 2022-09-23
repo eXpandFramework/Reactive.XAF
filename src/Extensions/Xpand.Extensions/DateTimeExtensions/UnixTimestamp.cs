@@ -2,6 +2,7 @@
 
 namespace Xpand.Extensions.DateTimeExtensions{
     public static partial class DateTimeExtensions{
+        public static TimeSpan Abs(this TimeSpan timeSpan) =>timeSpan>System.TimeSpan.Zero?timeSpan:System.TimeSpan.Zero ;
         public static DateTime UnixTimestampToDateTimeMilliSecond(this double unixTime) => UnixTimestampToDateTime(unixTime, System.TimeSpan.TicksPerMillisecond);
 
         private static DateTime UnixTimestampToDateTime(double unixTime, long ticks){
