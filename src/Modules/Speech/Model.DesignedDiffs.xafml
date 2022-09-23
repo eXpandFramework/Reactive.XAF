@@ -19,7 +19,7 @@
     <Windows>
       <Alert FormWidth="650" FormLocation="BottomLeft" />
       <SystemActions>
-        <SystemAction ActionId="SpeakText" HotKey="Control + Alt + 1" IsNewNode="True" />
+        <SystemAction ActionId="SpeakText" HotKey="Control + Alt + 1" ChoiceActionItem="Speak" IsNewNode="True" />
       </SystemActions>
     </Windows>
   </ReactiveModules>
@@ -123,15 +123,17 @@
     </DetailView>
     <DetailView Id="SpeechText_Editor_DetailView" FreezeLayout="True">
       <Items>
-        <PropertyEditor Id="Next.Text" PropertyName="Next.Text" Caption="Next" IsNewNode="True" />
+        <PropertyEditor Id="Next.Text" PropertyName="Next.Text" Caption="Next" AllowEdit="False" IsNewNode="True" />
         <PropertyEditor Id="Previous.Text" PropertyName="Previous.Text" Caption="Previous" IsNewNode="True" />
       </Items>
       <Layout IsNewNode="True" Removed="True">
         <LayoutGroup Id="Main" Index="0" ShowCaption="False" RelativeSize="100" IsNewNode="True">
           <LayoutGroup Id="SizeableEditors" Index="0" ShowCaption="False" RelativeSize="100" TextAlignMode="AlignWithChildren" Caption="Text" IsNewNode="True">
-            <LayoutItem Id="Previous.Text" ViewItem="Previous.Text" Index="0" RelativeSize="7.126436781609195" IsNewNode="True" />
-            <LayoutItem Id="Text" ViewItem="Text" Index="1" RelativeSize="85.74712643678161" ShowCaption="False" IsNewNode="True" />
-            <LayoutItem Id="Next.Text" ViewItem="Next.Text" Index="2" RelativeSize="7.126436781609195" IsNewNode="True" />
+            <LayoutItem Id="History" ViewItem="History" Index="0" RelativeSize="80.68880688806888" SizeConstraintsType="Custom" MinSize="63, 94" IsNewNode="True" />
+            <SplitterItem Id="SplitterItem1" Index="1" RelativeSize="1.2300123001230012" IsNewNode="True" />
+            <LayoutItem Id="Text" ViewItem="Text" Index="2" RelativeSize="7.626076260762607" ShowCaption="False" SizeConstraintsType="Custom" MinSize="20, 54" MaxSize="0, 54" IsNewNode="True" />
+            <SplitterItem Id="SplitterItem2" Index="3" RelativeSize="1.2300123001230012" IsNewNode="True" />
+            <LayoutItem Id="Next.Text" ViewItem="Next.Text" Index="4" RelativeSize="9.22509225092251" SizeConstraintsType="Custom" MinSize="63, 62" MaxSize="0, 0" IsNewNode="True" />
           </LayoutGroup>
         </LayoutGroup>
       </Layout>
@@ -149,7 +151,6 @@
     </DetailView>
     <ListView Id="SpeechText_Translations_ListView" FreezeColumnIndices="True" IsFooterVisible="True" AllowEdit="True" PreviewColumnName="">
       <Columns>
-        <ColumnInfo Id="Offset" Index="-1" />
         <ColumnInfo Id="Oid" Index="-1" />
         <ColumnInfo Id="SourceText" Index="-1" />
         <ColumnInfo Id="SpeechToText" Index="-1" />
@@ -224,7 +225,6 @@
     </ListView>
     <ListView Id="SpeechToText_SpeechTexts_Banded_ListView" MasterDetailMode="ListViewAndDetailView" FreezeColumnIndices="True" MasterDetailView="SpeechText_DetailView" DetailViewID="SpeechText_DetailView">
       <Columns>
-        <ColumnInfo Id="Offset" Index="-1" />
         <ColumnInfo Id="Oid" Index="-1" />
         <ColumnInfo Id="SpeechToText" Index="-1" />
         <ColumnInfo Id="Start" Index="0" SortOrder="Ascending" SortIndex="0" OwnerBand="Columns" />
@@ -252,7 +252,6 @@
         <ColumnInfo Id="Duration" Index="-1" />
         <ColumnInfo Id="End" Index="-1" />
         <ColumnInfo Id="File" Index="-1" />
-        <ColumnInfo Id="Offset" Index="-1" />
         <ColumnInfo Id="Oid" Index="-1" />
         <ColumnInfo Id="SpareTime" Index="-1" />
         <ColumnInfo Id="SpeechToText" Index="-1" />
@@ -270,7 +269,6 @@
     </ListView>
     <ListView Id="SpeechToText_SpeechTexts_ListView" MasterDetailMode="ListViewAndDetailView">
       <Columns>
-        <ColumnInfo Id="Offset" Index="-1" />
         <ColumnInfo Id="Start" Index="0" SortIndex="0" SortOrder="Ascending" />
         <ColumnInfo Id="Duration" Index="1" />
         <ColumnInfo Id="End" Index="2" />
@@ -425,7 +423,6 @@
         <ColumnInfo Id="Duration" Index="-1" SortIndex="-1" SortOrder="None" />
         <ColumnInfo Id="End" Index="-1" />
         <ColumnInfo Id="File" Index="-1" />
-        <ColumnInfo Id="Offset" Index="-1" />
         <ColumnInfo Id="Oid" Index="-1" />
         <ColumnInfo Id="SourceText" Index="-1" />
         <ColumnInfo Id="SpareTime" Index="-1" />
@@ -445,7 +442,6 @@
     </ListView>
     <ListView Id="SpeechTranslation_ListView" MasterDetailMode="ListViewAndDetailView">
       <Columns>
-        <ColumnInfo Id="Offset" Index="-1" />
         <ColumnInfo Id="SourceText" Index="-1" />
         <ColumnInfo Id="Language" Index="0" />
         <ColumnInfo Id="Start" Index="1" SortIndex="0" SortOrder="Ascending" />

@@ -2,30 +2,92 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
+using System.Windows.Forms;
+using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.Actions;
 using Microsoft.CognitiveServices.Speech;
 using NAudio.Wave;
+using Xpand.Extensions.DateTimeExtensions;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Numeric;
+using Xpand.Extensions.ObjectExtensions;
+using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
+using Xpand.Extensions.XAF.CollectionSourceExtensions;
+using Xpand.Extensions.XAF.DetailViewExtensions;
+using Xpand.Extensions.XAF.FrameExtensions;
+using Xpand.Extensions.XAF.ObjectSpaceExtensions;
+using Xpand.Extensions.XAF.ViewExtensions;
+using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Speech.BusinessObjects;
+using View = DevExpress.ExpressApp.View;
 
 namespace Xpand.XAF.Modules.Speech.Services {
+    static class SpeechTextInfoService {
+        internal static IObservable<Unit> ConnectSpeechTextInfo(this ApplicationModulesManager manager)
+            => manager.NewSpeechTextInfo().Merge(manager.CopySpeechTextInfoPath());
+
+        private static IObservable<Unit> NewSpeechTextInfo(this ApplicationModulesManager manager) 
+            => manager.WhenSpeechApplication(application => application.WhenFrameViewChanged().WhenFrame(typeof(SpeechToText),ViewType.DetailView)
+                    .SelectUntilViewClosed(frame => frame.View.ToDetailView().NestedFrameContainers(typeof(SpeechText))
+                        .SelectMany(container => container.Frame.View.WhenSelectionChanged().Throttle(TimeSpan.FromSeconds(1)).ObserveOnContext()
+                            .Select(view => view.SelectedObjects.Cast<SpeechText>().ToArray())
+                            .StartWith(container.Frame.View.SelectedObjects.Cast<SpeechText>().ToArray()).WhenNotEmpty()
+                            .Do(speechTexts => frame.View.NewSpeechInfo(container.Frame.View.ObjectTypeInfo.Type,speechTexts)))))
+                .ToUnit();
+        private static IObservable<Unit> CopySpeechTextInfoPath(this ApplicationModulesManager manager) 
+            => manager.WhenSpeechApplication(application => application.WhenFrameViewChanged().WhenFrame(typeof(SpeechToText),ViewType.DetailView))
+                .SelectMany(frame => frame.View.ToDetailView().WhenNestedListViewProcessCustomizeShowViewParameters(typeof(SSMLFile))
+                    .Select(e => {
+                        var ssmlFile = e.ShowViewParameters.CreatedView.CurrentObject.To<SSMLFile>();
+                        Clipboard.SetText(ssmlFile.File.FullName);
+                        e.ShowViewParameters.CreatedView = null;
+                        return ssmlFile;
+                    })
+                    .ShowXafMessage(frame.Application,file => $"File {file.File.FileName} copied in memory."))
+                .ToUnit();
+
+        private static void NewSpeechInfo(this View view,Type speechTextType, params SpeechText[] speechTexts) {
+            var speechToText = view.CurrentObject.To<SpeechToText>();
+            var speechTextInfos = speechToText.SpeechInfo;
+            string type=speechTextType==typeof(SpeechTranslation)?"Translation":"Recognition";
+            speechTextInfos.Remove(speechTextInfos.FirstOrDefault(info => info.SpeechType == type));
+            var speechTextInfo = speechToText.ObjectSpace.AdditionalObjectSpace(typeof(SpeechTextInfo)).CreateObject<SpeechTextInfo>();
+            speechTextInfo.SpeechType = type;
+            speechTextInfo.SelectedLines = speechTexts.Length;
+            speechTextInfo.TotalLines = view.ToDetailView().FrameContainers( speechTextType).First()
+                .View?.ToListView().CollectionSource.Objects().Count()??0;
+            speechTextInfo.Duration = speechTexts.Sum(text => text.Duration.Ticks).TimeSpan();
+            speechTextInfo.VoiceDuration = speechTexts.Sum(text => text.VoiceDuration?.Ticks??0).TimeSpan();
+            var lastSpeechText = speechTexts.LastOrDefault();
+            speechTextInfo.SSMLDuration = lastSpeechText?.Duration.Add(lastSpeechText.Start)??TimeSpan.Zero;
+            speechTextInfo.SSMLVoiceDuration = lastSpeechText?.VoiceDuration?.Add(lastSpeechText.Start)??TimeSpan.Zero;
+            speechTextInfo.OverTime = speechTexts.Sum(text => (text.VoiceDuration?.Subtract(text.Duration).Ticks??0)).TimeSpan();
+            speechTextInfos.Add(speechTextInfo);
+            speechTextInfo.RemoveFromModifiedObjects();
+        }
+
+    }
     public static class SpeechTextService {
-        internal static string GetRateTag(this SpeechText current, int startRate) {
-            if (current.SpeechToText.Rate&&current.VoiceDuration!=null&&current.VoiceDuration>current.Duration) {
-                var maxTime = current.Duration.Add(current.SpareTime);
-                if (current.Rate > 0) {
+
+        internal static string GetRateTag(this SpeechText current, int i) {
+            if (current.FileDuration.HasValue ) {
+                if (!current.CanConvert) {
+                    var maxTime = current.Duration.Add(current.SpareTime);
+                    if (current.FileDuration.Value > maxTime) {
+                        var rate = current.FileDuration.Value.PercentageDifference(maxTime)+i;
+                        return @$"<prosody rate=""+{rate}%"">{{0}}</prosody>";    
+                    }
+                }
+                else if(current.Rate>0) {
                     return @$"<prosody rate=""+{current.Rate}%"">{{0}}</prosody>";
                 }
-                if (current.VoiceDuration.Value > maxTime) {
-                    var rate = current.VoiceDuration.Value.PercentageDifference(maxTime)+startRate;
-                    return @$"<prosody rate=""+{rate}%"">{{0}}</prosody>";    
-                }
-
             }
+            
 
             return null;
         }
@@ -65,7 +127,7 @@ namespace Xpand.XAF.Modules.Speech.Services {
 
         internal static TimeSpan SpareTime(this SpeechText current) {
             var nextSpeechText = current.NextSpeechText();
-            return nextSpeechText == null ? TimeSpan.Zero : nextSpeechText.Start.Subtract(current.End);
+            return nextSpeechText == null ? TimeSpan.Zero : nextSpeechText.Start.Subtract(current.End).Abs();
         }
 
         internal static TimeSpan WaitTime(this SpeechText current) {

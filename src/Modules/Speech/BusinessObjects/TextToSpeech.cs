@@ -1,18 +1,22 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.Validation;
 using DevExpress.Xpo;
 using Xpand.Extensions.XAF.Attributes.Custom;
 using Xpand.Extensions.XAF.Xpo.BaseObjects;
-using Xpand.XAF.Modules.SpellChecker;
+using Xpand.XAF.Modules.CloneModelView;
 using Xpand.XAF.Persistent.BaseImpl;
 
 namespace Xpand.XAF.Modules.Speech.BusinessObjects {
     [NavigationItem("Speech")][DefaultClassOptions][OptimisticLocking(OptimisticLockingBehavior.LockModified)]
     [FileAttachment(nameof(File))][DeferredDeletion(false)][ImageName("XafBarLinkContainerItem")]
     [SuppressMessage("Design", "XAF0023:Do not implement IObjectSpaceLink in the XPO types")]
+    [DefaultProperty(nameof(Text))]
+    [CloneModelView(CloneViewType.DetailView, TypeSpeakDetailView)]
     public class TextToSpeech:CustomBaseObject, IAudioFileLink {
+        public const string TypeSpeakDetailView = nameof(TextToSpeech) + "_TypeSpeak_DetailView";
         public TextToSpeech(Session session) : base(session) { }
         FileLinkObject _file;
         [RuleRequiredField]

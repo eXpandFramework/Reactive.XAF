@@ -9,7 +9,6 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using DevExpress.Xpo;
 using Xpand.Extensions.LinqExtensions;
-using Xpand.Extensions.XAF.Attributes;
 using Xpand.Extensions.XAF.Attributes.Custom;
 using Xpand.Extensions.XAF.Xpo.BaseObjects;
 using Xpand.Extensions.XAF.Xpo.ValueConverters;
@@ -79,18 +78,13 @@ namespace Xpand.XAF.Modules.Speech.BusinessObjects {
             set => SetPropertyValue(nameof(SpeechToText), ref _speechToText, value);
         }
 
-        decimal _rate;
-
-        [InvisibleInAllViews()]
-        public decimal Rate {
-            get => _rate;
-            set => SetPropertyValue(nameof(Rate), ref _rate, value);
-        }
+        
         
         string _text;
 
         [Size(SizeAttribute.Unlimited)][VisibleInListView(true)]
-        [ModelDefault("AllowEdit","true")][SpellCheck]
+        [ModelDefault("AllowEdit","true")][SpellCheck][ImmediatePostData]
+        
         public string Text {
             get => _text;
             set => SetPropertyValue(nameof(Text), ref _text, value);
@@ -127,7 +121,14 @@ namespace Xpand.XAF.Modules.Speech.BusinessObjects {
         [DisplayDateAndTime(DisplayDateType.None,DisplayTimeType.mm_ss_fff)]
         public TimeSpan SpareTime => this.SpareTime();
 
-        
+        [ModelDefault("RowCount","5")]
+        public string History {
+            get {
+                return Previous.FromHierarchy(text => text.Previous,text => text!=null).Reverse()
+                    .Select(text => text.Text.TrimEnd('.')).Join($".{Environment.NewLine}");
+            }
+        }
+
         TimeSpan _start;
         [VisibleInListView(true)][DisplayDateAndTime(DisplayDateType.None,DisplayTimeType.mm_ss_fff)]
         [ModelDefault("AllowEdit","false")]
@@ -148,6 +149,12 @@ namespace Xpand.XAF.Modules.Speech.BusinessObjects {
             set => SetPropertyValue(nameof(Duration), ref _duration, value);
         }
 
+        decimal _rate;
+
+        public decimal Rate {
+            get => _rate;
+            set => SetPropertyValue(nameof(Rate), ref _rate, value);
+        }
         public bool CanConvert => Duration.Add(SpareTime).Subtract(FileDuration??TimeSpan.Zero)>=TimeSpan.Zero;
     }
 

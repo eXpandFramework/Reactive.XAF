@@ -47,6 +47,8 @@ using View = DevExpress.ExpressApp.View;
 
 namespace Xpand.XAF.Modules.Speech.Services {
 	public static class SpeechToTextService {
+		public static ParametrizedAction SpareTime(this (SpeechModule, Frame frame) tuple)
+			=> tuple.frame.ParametrizedAction(nameof(SpareTime));
         public static SimpleAction SpeechToText(this (SpeechModule, Frame frame) tuple) 
             => tuple.frame.Action(nameof(SpeechToText)).To<SimpleAction>();
         
@@ -64,9 +66,9 @@ namespace Xpand.XAF.Modules.Speech.Services {
 		        .Merge(manager.Synthesize()).Merge(manager.SSML())
 		        .Merge(manager.ConfigureSpeechTextView())
 		        .Merge(manager.SynthesizeOnChange())
+		        .Merge(manager.SpareTime())
 		        .Merge(manager.Rate())
-		        .Merge(manager.NewSpeechTextFromUI())
-		        .Merge(manager.SpeechTextInfo());
+		        .Merge(manager.NewSpeechTextFromUI());
 
         private static IObservable<Unit> SynthesizeOnChange(this ApplicationModulesManager manager)
 			=> manager.WhenSpeechApplication(application => application.WhenFrameViewChanged().WhenFrame(typeof(SpeechToText))
@@ -74,15 +76,18 @@ namespace Xpand.XAF.Modules.Speech.Services {
 				.SelectUntilViewClosed(frame => {
 					var observeOnContext = frame.View.ObjectSpace
 						.WhenCommittedDetailed<SpeechText>(ObjectModification.NewOrUpdated, text => text.Text != null, nameof(SpeechText.Text))
-						.WaitUntilInactive(2)
+						.Select(t => t).Where(t => t.details.Any()).ToObjects()
+						// .WaitUntilInactive(2)
 						.ObserveOnContext();
 					return observeOnContext
-						.SelectMany(_ => frame.View.ToDetailView().FrameContainers(typeof(SpeechText))
+						.SelectMany(speechText => frame.View.ToDetailView().FrameContainers(typeof(SpeechText))
 							// .Where(speechTextFrame => speechTextFrame.View.ObjectTypeInfo.Type == text.GetType())
 							.SelectMany(speechTextFrame => speechTextFrame
 								.Actions<SingleChoiceAction>(nameof(Synthesize))
-								.Do(action =>
-									action.DoExecute(action.Items.First(item => (string)item.Data == "SSML")))));
+								.Do(action => {
+									speechText.YieldItem().ToArray().UpdateSSML(frame);
+									action.DoExecute(action.Items.First(item => (string)item.Data == "SSML"),speechText);
+								})));
 				}))
 				.ToUnit();
         
@@ -147,14 +152,16 @@ namespace Xpand.XAF.Modules.Speech.Services {
 	        => manager.WhenSpeechApplication(application => application.WhenFrameViewChanged().WhenFrame(typeof(SpeechText),ViewType.ListView)
 			        .SelectUntilViewClosed(frame => frame.View.WhenSelectionChanged(1)
 				        .Do(view => view.AsListView().CollectionSource.Objects<SpeechText>().FirstOrDefault()?.SpeechToText.TranslationSSMLs.Clear())
-				        .SpeechSelectMany(view => {
-					        var rate = frame.ParametrizedAction(nameof(Rate))?.Value??0;
-					        return view.SelectedObjects.Cast<SpeechText>().OrderBy(text => text.Start).ToArray()
-						        .GroupBy(speechText => speechText.Language()).ToNowObservable()
-						        .WhenNotDefault(speechTexts => speechTexts.Key)
-						        .Do(speechTexts => speechTexts.UpdateSSML((speechText, texts) =>application.SSMLText(speechText, texts,rate) ));
-				        })))
+				        .Do(view => view.SelectedObjects.Cast<SpeechText>().OrderBy(text => text.Start).ToArray()
+					        .UpdateSSML(frame))))
 		        .ToUnit();
+
+        private static void UpdateSSML(this SpeechText[] source,Frame frame) {
+	        var rate = frame.ParametrizedAction(nameof(Rate))?.Value??0;
+	        source.GroupBy(speechText => speechText.Language())
+		        .WhereNotDefault(speechTexts => speechTexts.Key)
+		        .ForEach(speechTexts => speechTexts.UpdateSSML((speechText, texts) => frame.Application.SSMLText(speechText, texts, rate)));
+        }
         private static IObservable<Unit> NewSpeechTextFromUI(this ApplicationModulesManager manager) 
 	        => manager.WhenSpeechApplication(application => application.WhenViewOnFrame(typeof(SpeechText),ViewType.ListView)
 			        .SelectUntilViewClosed(frame => frame.GetController<NewObjectViewController>().WhenEvent<ObjectCreatedEventArgs>(nameof(NewObjectViewController.ObjectCreated))
@@ -166,7 +173,8 @@ namespace Xpand.XAF.Modules.Speech.Services {
 						        speechText.SetMemberValue("_oid", 1+(speechText.SpeechToText.SpeechTexts.Where(text => text.Oid > 0)
 								        .MaxBy(text => text.Start)?.Oid ?? 0));
 						        var previousSpeechText = speechText.PreviousSpeechText();
-						        speechText.Start = previousSpeechText.Start.Add(previousSpeechText.Duration);
+						        speechText.Start = previousSpeechText?.Start.Add(previousSpeechText.Duration)??TimeSpan.Zero;
+						        speechText.Start+=TimeSpan.FromSeconds(1);
 					        }
 					        
 				        })))
@@ -293,6 +301,36 @@ namespace Xpand.XAF.Modules.Speech.Services {
 	        => manager.RegisterViewParametrizedAction(nameof(Rate),typeof(int), action => action.TargetObjectType = typeof(SpeechToTextService))
 		        .WhenConcatExecution(e => e.Action.Frame().AsNestedFrame().ViewItem.View.Refresh())
 		        .ToUnit();
+        private static IObservable<Unit> SpareTime(this ApplicationModulesManager manager)
+	        => manager.RegisterViewParametrizedAction(nameof(SpareTime),typeof(int), action => action.TargetObjectType = typeof(SpeechText))
+		        .WhenConcatExecution(e => {
+			        var speechTexts = e.Action.SelectedObjects<SpeechText>().OrderBy(text => text.Start).ToArray();
+			        var timeSpan = e.Action.AsParametrizedAction().Value.Change<int>();
+			        return speechTexts.ToNowObservable()
+				        .SelectMany(current => {
+					        if (timeSpan == 0) {
+						        current.Start = current.Previous?.End??TimeSpan.Zero;
+						        return Unit.Default.ReturnObservable();
+						        // var currentSpareTime = current.SpareTime;
+						        // return Observable.While(() => current.Next != null, current.Defer(() => {
+						        //  current.Next.Start -= currentSpareTime;
+						        //  current = current.Next;
+						        // }));
+					        }
+
+					        if (timeSpan > 0) {
+						        int i = 0;
+						        return Observable.While(() => current.Next != null&&speechTexts.Contains(current.Next), current.Defer(() => {
+							        current.Next.Start += TimeSpan.FromSeconds(timeSpan);
+							        i++;
+							        current = current.Next;
+						        }));
+					        }
+
+					        return Observable.Empty<Unit>();
+				        });
+		        })
+		        .ToUnit();
         
         private static IObservable<SSMLFile> Join(this IEnumerable<SpeechText> source,IModelSpeech modelSpeech) 
 	        => source.ToArray().ToNowObservable()
@@ -308,36 +346,6 @@ namespace Xpand.XAF.Modules.Speech.Services {
 	        return providers.Select(t => t.speechText).WhereNotDefault().DistinctBy(text => text.Oid).ToArray();
         }
 
-        
-        private static IObservable<Unit> SpeechTextInfo(this ApplicationModulesManager manager)
-	        => manager.WhenSpeechApplication(application => application.WhenFrameViewChanged().WhenFrame(typeof(SpeechToText),ViewType.DetailView)
-			        .SelectUntilViewClosed(frame => frame.View.ToDetailView().NestedFrameContainers(typeof(SpeechText))
-			        .SelectMany(container => container.Frame.View.WhenSelectionChanged().Throttle(TimeSpan.FromSeconds(1)).ObserveOnContext()
-				        .Select(view => view.SelectedObjects.Cast<SpeechText>().ToArray())
-				        .StartWith(container.Frame.View.SelectedObjects.Cast<SpeechText>().ToArray()).WhenNotEmpty()
-				        .Do(speechTexts => frame.View.NewSpeechInfo(container.Frame.View.ObjectTypeInfo.Type,speechTexts)))))
-		        .ToUnit();
-
-        private static void NewSpeechInfo(this View view,Type speechTextType, params SpeechText[] speechTexts) {
-	        var speechToText = view.CurrentObject.To<SpeechToText>();
-	        var speechTextInfos = speechToText.SpeechInfo;
-	        string type=speechTextType==typeof(SpeechTranslation)?"Translation":"Recognition";
-	        speechTextInfos.Remove(speechTextInfos.FirstOrDefault(info => info.SpeechType == type));
-	        var speechTextInfo = speechToText.ObjectSpace.AdditionalObjectSpace(typeof(SpeechTextInfo)).CreateObject<SpeechTextInfo>();
-	        speechTextInfo.SpeechType = type;
-	        speechTextInfo.SelectedLines = speechTexts.Length;
-	        speechTextInfo.TotalLines = view.ToDetailView().FrameContainers( speechTextType).First()
-		        .View?.ToListView().CollectionSource.Objects().Count()??0;
-	        speechTextInfo.Duration = speechTexts.Sum(text => text.Duration.Ticks).TimeSpan();
-	        speechTextInfo.VoiceDuration = speechTexts.Sum(text => text.VoiceDuration?.Ticks??0).TimeSpan();
-	        var lastSpeechText = speechTexts.LastOrDefault();
-	        speechTextInfo.SSMLDuration = lastSpeechText?.Duration.Add(lastSpeechText.Start)??TimeSpan.Zero;
-	        speechTextInfo.SSMLVoiceDuration = lastSpeechText?.VoiceDuration?.Add(lastSpeechText.Start)??TimeSpan.Zero;
-	        speechTextInfo.OverTime = speechTexts.Sum(text => (text.VoiceDuration?.Subtract(text.Duration).Ticks??0)).TimeSpan();
-	        speechTextInfos.Add(speechTextInfo);
-	        speechTextInfo.RemoveFromModifiedObjects();
-        }
-
         private static IObservable<Unit> Synthesize(this ApplicationModulesManager manager) 
             => manager.RegisterViewSingleChoiceAction(nameof(Synthesize), action => {
                     action.TargetObjectType = typeof(SpeechText);
@@ -347,7 +355,7 @@ namespace Xpand.XAF.Modules.Speech.Services {
                     action.PaintStyle=ActionItemPaintStyle.Image;
                     action.DefaultItemMode=DefaultItemMode.LastExecutedItem;
                     action.SetImage(CommonImage.Start);
-                    action.Shortcut = "CtrlP";
+                    action.Shortcut = "CtrlL";
                     action.Items.Add(new ChoiceActionItem("SSML","SSML"));
                     action.Items.Add(new ChoiceActionItem("Text","Text"));
                     action.Items.Add(new ChoiceActionItem("Join","Join"));
@@ -356,16 +364,16 @@ namespace Xpand.XAF.Modules.Speech.Services {
                 .ToUnit()
                 .Merge(manager.WhenSpeechApplication(application => application.WhenFrameViewChanged().WhenFrame(typeof(SpeechToText),ViewType.DetailView)
                     .SelectUntilViewClosed(speechToTextFrame => speechToTextFrame.View.AsDetailView().NestedFrameContainers(typeof(SpeechText))
-                        .SelectMany(editor => editor.Frame.SingleChoiceAction(nameof(Synthesize)).Synthesize())
+                        .SelectMany(editor => {
+	                        var action = editor.Frame.SingleChoiceAction(nameof(Synthesize));
+	                        return action.Synthesize(() => action.SelectedObjects<SpeechText>().ToArray());
+                        })
                         .ToUnit())));
 
-        private static IObservable<Unit> Synthesize(this SingleChoiceAction action) {
-	        SpeechText[] Source() => action.View().SelectedObjects.Cast<SpeechText>().ToArray();
-	        return action.SpeakText(Source).Merge(action.SpeakSSML(Source))
-		        .Merge(action.JoinAudio(Source))
-		        .Merge(action.JoinTextSSMLAudio())
-		        ;
-        }
+        private static IObservable<Unit> Synthesize(this SingleChoiceAction action, Func<SpeechText[]> source) 
+	        => action.SpeakText(source).Merge(action.SpeakSSML(source))
+		        .Merge(action.JoinAudio(source))
+		        .Merge(action.JoinTextSSMLAudio());
 
         private static IObservable<Unit> JoinAudio(this SingleChoiceAction synthesizeAction,Func<SpeechText[]> speechTextSource) 
 	        => synthesizeAction.WhenExecuted().Where(e => (string)e.SelectedChoiceActionItem.Data=="Join")
@@ -390,28 +398,31 @@ namespace Xpand.XAF.Modules.Speech.Services {
         private static SpeechVoice SpeechVoice(this SpeechToText speechToText,SpeechLanguage speechLanguage) 
 	        => speechToText.SpeechVoices.FirstOrDefault(voice => voice.Language.Name == speechLanguage.Name)??speechToText.Account.Voices.First(voice => voice.Language.Name==speechLanguage.Name);
         
-        
-        private static IObservable<SSMLFile> SpeakSSML(this ActionBase actionBase,Func<SpeechText[]> speechTextSource) 
-	        => speechTextSource().SSMLs().ToNowObservable().WhenNotDefault()
+        static readonly Regex SpeakTagRegex = new(@"<speak\b[^>]*>(.*?)</speak>", RegexOptions.IgnoreCase | RegexOptions.Singleline|RegexOptions.Compiled);
+        private static IObservable<SSMLFile> SpeakSSML(this ActionBase actionBase,Func<SpeechText[]> speechTextSourceSelector) {
+	        var speechTextSource = speechTextSourceSelector();
+	        return speechTextSource.SSMLs().ToNowObservable().WhenNotDefault()
 		        .Select(ssml => {
-			        var speechVoice = actionBase.View().SelectedObjects.Cast<SpeechText>().First().SpeechToText.SpeechVoice(ssml.Language);
+			        var speechVoice = speechTextSource.First().SpeechToText.SpeechVoice(ssml.Language);
 			        var speechTextType = actionBase.View().ObjectTypeInfo.Type;
-			        return (ssml, speechSynthesizer: speechVoice.SpeechSynthesizer(speechTextType), model: actionBase.Application.Model.SpeechModel());
+			        return (ssml, speechSynthesizer: speechVoice.SpeechSynthesizer(speechTextType),
+				        model: actionBase.Application.Model.SpeechModel());
 		        })
 		        .SelectManySequential(t => {
-			        var regex = new Regex(@"<speak\b[^>]*>(.*?)</speak>", RegexOptions.IgnoreCase | RegexOptions.Singleline);
 			        var ssmlText = t.ssml.Text;
 			        var speechTexts = t.ssml.SpeechTexts;
-			        return Observable.Defer(() => regex.SpeakSSML(ssmlText, t.speechSynthesizer, t.model, speechTexts,actionBase.Application)
+			        return Observable.Defer(() => SpeakTagRegex
+					        .SpeakSSML(ssmlText, t.speechSynthesizer, t.model, speechTexts, actionBase.Application)
 					        .ShowXafMessage(actionBase.Application))
 				        ;
-
 		        })
 		        .BufferUntilCompleted().ObserveOnContext()
 		        .SelectMany(texts => texts.NewSSMLFile(actionBase.Application.Model.SpeechModel()));
+        }
 
         private static IObservable<SpeechText> SpeakSSML(this Regex regex,string ssml,  SpeechSynthesizer speechSynthesizer, IModelSpeech model,List<SpeechText> speechTexts,XafApplication application) 
 	        => regex.Matches(ssml).ToNowObservable()
+		        .ShowXafMessage(application,match => match.Value)
 		        .SelectManySequential((match,i) => {
 			        var ssmlText = match.Value;
 			        var speechText = speechTexts[i];
@@ -430,7 +441,9 @@ namespace Xpand.XAF.Modules.Speech.Services {
 								        $"$1+{rate}%\">$2$3", RegexOptions.IgnoreCase | RegexOptions.Singleline);    
 						        }
 						        else {
-							        ssmlText = speechText.GetRateTag((int)rate).StringFormat(ssmlText);
+							        ssmlText = Regex.Replace(ssmlText, @"(<voice\b[^>]*>)(.*?)</voice>",
+								        $"$1{speechText.GetRateTag((int)rate).StringFormat("$2")}</voice>",
+								        RegexOptions.IgnoreCase | RegexOptions.Singleline);
 						        }
 
 						        speechText.Rate = rate;
@@ -492,10 +505,10 @@ namespace Xpand.XAF.Modules.Speech.Services {
         }
 
         [SuppressMessage("ReSharper", "HeapView.CanAvoidClosure")]
-        private static IObservable<Unit> SpeakSSML(this SingleChoiceAction sayItAction, Func<SpeechText[]> speechTextSource) 
+        private static IObservable<Unit> SpeakSSML(this SingleChoiceAction sayItAction, Func<SpeechText[]> speechTextSourceSelector) 
 	        => sayItAction.StopSpeak("SSML").MergeToUnit(sayItAction.WhenExecuted().Where(e => (string)e.SelectedChoiceActionItem.Data=="SSML")
 		        .Where(e => e.Action.CommonImage()==CommonImage.Start).Do(e => e.Action.SetImage(CommonImage.Stop))
-		        .SelectMany(e => e.Action.SpeakSSML(speechTextSource)
+		        .SelectMany(e => e.Action.SpeakSSML(speechTextSourceSelector)
 			        .DoOnComplete(() => e.Action.SetImage(CommonImage.Start)))
 		        .ToUnit());
 

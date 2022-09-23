@@ -51,6 +51,7 @@ namespace Xpand.XAF.Modules.Speech {
                 .Merge(moduleManager.ConnectAccount())
                 .Merge(moduleManager.ConnectSpeech())
                 .Merge(moduleManager.ConnectTextToSpeech())
+                .Merge(moduleManager.ConnectSpeechTextInfo())
                 .Subscribe(this);
         }
 

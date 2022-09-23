@@ -100,11 +100,13 @@ namespace Xpand.XAF.Modules.Speech.Services{
 	        return speechTexts.Where((_, i) => i<index).LastOrDefault();
         }
         public static T NextSpeechText<T>(this T current) where T:SpeechText{
+	        if (current.SpeechToText == null) {
+		        return default;
+	        }
 	        var speechTexts = current.SpeechToText.Texts.Where(text => text.GetType()==current.GetType()).Cast<T>()
 		        .OrderBy(text => text.Oid).ToArray();
 	        var index = speechTexts.FindIndex(text => text.Oid == current.Oid);
-	        var enumerable = speechTexts.Where((_, i) => i>index).ToArray();
-	        return enumerable.FirstOrDefault();
+	        return speechTexts.Where((_, i) => i>index).ToArray().FirstOrDefault();
         }
         public static TFile UpdateSSMLFile<TFile>(this TFile file, SpeechSynthesisResult result, string path) where TFile:IAudioFileLink{
 	        file.File ??= file.CreateObject<FileLinkObject>();
@@ -114,6 +116,7 @@ namespace Xpand.XAF.Modules.Speech.Services{
 	        file.FileDuration = audioFileReader.TotalTime;
 	        if (file is SpeechText speechText&&speechText.SpeechToText.GetType()==typeof(SpeechToText)) {
 		        file.Duration=file.FileDuration.Value;
+		        file.VoiceDuration = file.Duration;
 	        }
 	        file.File.SetPropertyValue(nameof(FileLinkObject.Size),(int)audioFileReader.Length) ;
 	        file.FireChanged(nameof(IAudioFileLink.File));

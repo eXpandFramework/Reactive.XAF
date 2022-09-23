@@ -5,6 +5,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
@@ -36,18 +37,31 @@ namespace Xpand.XAF.Modules.Speech.Services {
         public static SpeechAccount DefaultAccount(this IObjectSpace space,XafApplication application) 
             => space.FindObject<SpeechAccount>(CriteriaOperator.Parse(application.Model.SpeechModel().DefaultAccountCriteria));
 
-        public static IObservable<Unit> Speak(this SpeechAccount defaultAccount, IModelSpeech speechModel) 
+        public static IObservable<TResult> Speak<TResult>(this SpeechAccount defaultAccount, IModelSpeech speechModel,Func<SpeechSynthesisResult,string,IObservable<TResult>> afterBytesWritten) 
             => Observable.Using(() => new SpeechSynthesizer(defaultAccount.SpeechConfig()), synthesizer
-                => synthesizer.SpeakTextAsync(Clipboard.GetText()).ToObservable().ObserveOnContext()
+                => SpeakAsync(synthesizer).ToObservable().ObserveOnContext()
                     .DoWhen(_ => !new DirectoryInfo(speechModel.DefaultStorageFolder).Exists,
                         _ => Directory.CreateDirectory(speechModel.DefaultStorageFolder))
                     .SelectMany(result => {
                         var lastSpeak = defaultAccount.ObjectSpace.GetObjectsQuery<TextToSpeech>().Max(speech => speech.Oid) + 1;
                         var path = $"{speechModel.DefaultStorageFolder}\\{lastSpeak}.wav";
                         return File.WriteAllBytesAsync(path, result.AudioData).ToObservable().ObserveOnContext()
-                            .SelectMany(_ => defaultAccount.ObjectSpace.CreateObject<TextToSpeech>().UpdateSSMLFile( result, path).Commit()
-                                .RetryWithBackoff(3));
+                            .SelectMany(_ => {
+                                IObservable<TextToSpeech> observable = defaultAccount.ObjectSpace.CreateObject<TextToSpeech>()
+                                    .UpdateSSMLFile(result, path).Commit();
+                                
+                                return afterBytesWritten(result,path)
+                                    .RetryWithBackoff(3);
+                            });
                     }));
+
+        private static Task<SpeechSynthesisResult> SpeakAsync(this SpeechSynthesizer synthesizer) {
+            var text = Clipboard.GetText();
+            if (text.StartsWith("<speak")) {
+                return synthesizer.SpeakSsmlAsync(text);
+            }
+            return synthesizer.SpeakTextAsync(text);
+        }
 
         public static SpeechConfig SpeechConfig(this SpeechAccount account,SpeechLanguage recognitionLanguage=null,[CallerMemberName]string callerMember="") {
             var speechConfig = Microsoft.CognitiveServices.Speech.SpeechConfig.FromSubscription(account.Subscription, account.Region);
