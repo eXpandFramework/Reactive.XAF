@@ -14,10 +14,12 @@ using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.StringExtensions;
 using Xpand.Extensions.XAF.ActionExtensions;
+using Xpand.Extensions.XAF.Attributes;
 using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
+using Xpand.XAF.Modules.Reactive.Services.Controllers;
 using Xpand.XAF.Modules.Speech.BusinessObjects;
 
 namespace Xpand.XAF.Modules.Speech.Services {
@@ -29,21 +31,38 @@ namespace Xpand.XAF.Modules.Speech.Services {
             => manager.SpeakText()
                 .MergeToUnit(manager.WhenSpeechApplication(application =>application.WhenFrameViewChanged()
                     .WhenFrame(typeof(TextToSpeech),ViewType.DetailView)
-                    .SelectUntilViewClosed(frame => Observable.If(() => frame.View.Id==TextToSpeech.TypeSpeakDetailView,frame.WhenTypeSpeakOnIdle())
-                        .MergeToUnit(Observable.If(() => frame.View.Id!=TextToSpeech.TypeSpeakDetailView,frame.WhenSaveSpeak()))
-                    )))
+                    .SelectUntilViewClosed(frame => {
+                        if (frame.View.Id != TextToSpeech.TypeSpeakDetailView) {
+                            return frame.WhenSaveSpeak().ToUnit();
+                        }
+                        return frame.View.ObjectSpace.WhenCommittedDetailed<TextToSpeech>(
+                                ObjectModification.NewOrUpdated, speech => speech.Text.IsNotNullOrEmpty(),
+                                nameof(TextToSpeech.Text))
+                            .ToObjects().WaitUntilInactive(3).ObserveOnContext()
+                            .SelectMany(speech => frame.Application.Speak(frame.View.ObjectSpace, _ => speech,
+                                () => speech.Text).ObserveOnContext().Do(toSpeech => toSpeech.ObjectSpace.Refresh()).ToUnit());
+
+                    })))
+                .MergeToUnit(manager.SaveTextToSpeech())
         ;
 
+        private static IObservable<SimpleActionExecuteEventArgs> SaveTextToSpeech(this ApplicationModulesManager manager) 
+            => manager.RegisterViewSimpleAction("SaveTextToSpeech",action => {
+                    action.TargetViewId = TextToSpeech.TypeSpeakDetailView;
+                    action.Shortcut = "Control+S";
+                },PredefinedCategory.PopupActions)
+                .WhenExecuted().Do(e => e.View().ObjectSpace.CommitChanges());
+
         private static IObservable<Unit> WhenTypeSpeakOnIdle(this Frame frame)
-            => frame.View.ObjectSpace.WhenModifiedObjects<TextToSpeech>(speech => speech.Text)
-                .WaitUntilInactive(1).ObserveOnContext()
-                .SelectMany(textToSpeech => Observable.If(() => !textToSpeech.Text.IsNullOrEmpty(),
+            => frame.View.ObjectSpace.WhenCommittedDetailed<TextToSpeech>(ObjectModification.NewOrUpdated,text => !text.Text.IsNullOrEmpty(),nameof(TextToSpeech.Text)).ToObjects()
+                .WaitUntilInactive(2).ObserveOnContext().Select (textToSpeech => Observable.If(() => !textToSpeech.Text.IsNullOrEmpty(),
                     frame.Application.Speak(frame.View.ObjectSpace, _ => textToSpeech, () => textToSpeech.Text)
                         .Do(speech => speech.ObjectSpace.Refresh())))
                 .ToUnit();
         
+        
         private static IObservable<SingleChoiceAction> WhenSaveSpeak(this Frame frame) 
-            => frame.View.ObjectSpace.WhenCommitted()
+            => frame.View.ObjectSpace.WhenCommitted().WaitUntilInactive(3).ObserveOnContext()
                 .Select(_ => frame.Application.MainWindow.SingleChoiceAction(nameof(SpeakText)))
                 .Do(action => action.Speak());
 
@@ -59,7 +78,7 @@ namespace Xpand.XAF.Modules.Speech.Services {
                 })
                 .MergeToUnit(manager.WhenSpeechApplication(application => application.WhenFrameCreated(TemplateContext.ApplicationWindow)
                     .SelectMany(frame => frame.SingleChoiceAction(nameof(SpeakText))
-                        .WhenConcatExecution(e => e.Speak().Merge(e.Type())))))
+                        .WhenExecuted(e => e.Speak().Merge(e.Type())))))
                 .ToUnit();
 
         private static IObservable<Unit> Speak(this SingleChoiceActionExecuteEventArgs e) 
@@ -77,12 +96,16 @@ namespace Xpand.XAF.Modules.Speech.Services {
 
         private static IObservable<Unit> Type(this SingleChoiceActionExecuteEventArgs e) 
             => Observable.If(() => (string)e.SelectedChoiceActionItem.Data=="Type",e.Defer(() => {
-                    e.ShowViewParameters.Controllers.Add(e.Application().CreateController<DialogController>());
+                    var dialogController = e.Application().CreateController<DialogController>();
+                    e.ShowViewParameters.Controllers.Add(dialogController);
                 e.ShowViewParameters.CreateAllControllers = true;
                 e.ShowViewParameters.CreatedView = e.Application().NewDetailView(space => space.CreateObject<TextToSpeech>(),
                     (IModelDetailView)e.Application().Model.Views[TextToSpeech.TypeSpeakDetailView]);
                 e.ShowViewParameters.NewWindowTarget=NewWindowTarget.Separate;
                 e.ShowViewParameters.TargetWindow=TargetWindow.NewModalWindow;
+                return dialogController.WhenFrameAssigned().SelectMany(frame => {
+                    return frame.GetController<ModificationsController>().WhenActivated().Select(controller => controller.SaveAction.WhenExecuted().Select(args => args));
+                });
             }))
             .ToUnit();
     }

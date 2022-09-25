@@ -57,6 +57,8 @@ namespace Xpand.XAF.Modules.Speech.BusinessObjects {
         public const string SpeechTextEditorListView = nameof(BusinessObjects.SpeechToText) + "_" +
                                                        nameof(BusinessObjects.SpeechToText.SpeechTexts) + "_Editor_ListView";
         public SpeechText(Session session) : base(session) { }
+        
+        string IAudioFileLink.Storage => SpeechToText.Storage;
 
         [Association("SpeechText-SSMLFiles")]
         public XPCollection<SSMLFile> SSMLFiles => GetCollection<SSMLFile>();

@@ -44,11 +44,18 @@ namespace Xpand.XAF.Modules.ViewItemValue{
                         var memberInfo = item.MemberViewItem.ModelMember.MemberInfo;
                         var defaultObject = view.ViewItemValueObject(memberInfo);
                         if (defaultObject != null){
-                            var typeConverter = TypeDescriptor.GetConverter(memberInfo.MemberTypeInfo.KeyMember.MemberType);
-                            var objectKeyValue = defaultObject.ViewItemValue;
-                            var value = objectKeyValue!=null?view.ObjectSpace.GetObjectByKey(memberInfo.MemberType,
-                                typeConverter.ConvertFromString(objectKeyValue)):null;
-                            memberInfo.SetValue(view.CurrentObject, value);
+                            var memberValue = defaultObject.ViewItemValue;
+                            if (memberInfo.MemberTypeInfo.IsDomainComponent) {
+                                var typeConverter = TypeDescriptor.GetConverter(memberInfo.MemberTypeInfo.KeyMember.MemberType);
+                                var value = memberValue!=null?view.ObjectSpace.GetObjectByKey(memberInfo.MemberType,
+                                    typeConverter.ConvertFromString(memberValue)):null;
+                                memberInfo.SetValue(view.CurrentObject, value);    
+                            }
+                            else {
+                                var typeConverter = TypeDescriptor.GetConverter(memberInfo.MemberType);
+                                memberInfo.SetValue(view.CurrentObject,typeConverter.ConvertFromString(memberValue));
+                            }
+                            
                             return item;
                         }
                         return null;
@@ -68,8 +75,8 @@ namespace Xpand.XAF.Modules.ViewItemValue{
             return Query(view.ObjectSpace);
         }
 
-        private static IObservable<Unit> SaveViewItemValue(this IObservable<SingleChoiceAction> registerAction) => registerAction
-            .WhenExecute()
+        private static IObservable<Unit> SaveViewItemValue(this IObservable<SingleChoiceAction> registerAction) 
+            => registerAction.WhenExecute()
             .Select(e => {
                 var item = ((IModelViewItemValueObjectViewItem) e.SelectedChoiceActionItem.Data);
                 using var objectSpace = e.Action.Application.CreateObjectSpace(typeof(ViewItemValueObject));
@@ -77,13 +84,13 @@ namespace Xpand.XAF.Modules.ViewItemValue{
                 var memberInfo = item.MemberViewItem.ModelMember.MemberInfo;
                 var memberName = memberInfo.Name;
                 var objectViewId = defaultObjectItem.ObjectView.Id;
-                var defaultObject = objectSpace.GetObjectsQuery<ViewItemValueObject>(true)
+                var viewItemValueObject = objectSpace.GetObjectsQuery<ViewItemValueObject>(true)
                                         .FirstOrDefault(o => o.ViewItemId == memberName && o.ObjectView == objectViewId) ??
                                     objectSpace.CreateObject<ViewItemValueObject>();
-                defaultObject.ObjectView = objectViewId;
-                defaultObject.ViewItemId = memberName;
+                viewItemValueObject.ObjectView = objectViewId;
+                viewItemValueObject.ViewItemId = memberName;
                 var value = memberInfo.GetValue(e.SelectedObjects.Cast<object>().First());
-                defaultObject.ViewItemValue=value!=null?$"{objectSpace.GetKeyValue(value)}":null;
+                viewItemValueObject.ViewItemValue=(string)(memberInfo.MemberTypeInfo.IsPersistent? value!=null?$"{objectSpace.GetKeyValue(value)}":null:value);
                 objectSpace.CommitChanges();
 
                 return item;
@@ -118,8 +125,8 @@ namespace Xpand.XAF.Modules.ViewItemValue{
             .WhenActive()
             .TraceDefaultObjectValue(action => action.Id);
 
-        internal static bool IsViewItemValueObjectView(this IModelApplication applicationModel, string viewID) => applicationModel
-            .ModelViewItemValue().Items.Any(item => item.ObjectView.Id==viewID);
+        internal static bool IsViewItemValueObjectView(this IModelApplication applicationModel, string viewID) 
+            => applicationModel.ModelViewItemValue().Items.Any(item => item.ObjectView.Id==viewID);
 
         internal static IObservable<TSource> TraceDefaultObjectValue<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<ITraceEvent> traceAction = null,
             Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.OnNextOrOnError,

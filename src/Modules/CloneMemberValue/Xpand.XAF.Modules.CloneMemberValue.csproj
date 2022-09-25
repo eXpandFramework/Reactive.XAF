@@ -25,15 +25,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Update="Module.cs" />
+    <Compile Include="..\..\Common\AssemblyInfoVersion.cs">
+      <Link>Properties\AssemblyInfoVersion.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Xpand.Extensions">
       <HintPath>..\..\..\bin\Xpand.Extensions.dll</HintPath>
     </Reference>
     <None Include="Readme.md" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="..\..\Common\AssemblyInfoVersion.cs" Link="AssemblyInfoVersion.cs" />
   </ItemGroup>
   <Import Project="..\..\..\.paket\Paket.Restore.targets" />
 </Project>

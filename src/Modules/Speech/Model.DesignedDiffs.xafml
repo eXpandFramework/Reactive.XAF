@@ -16,6 +16,15 @@
   </BOModel>
   <NavigationItems NavigationStyle="Accordion" StartupNavigationItem="FileSpeechToText_ListView" />
   <ReactiveModules>
+    <ViewItemValue>
+      <Items>
+        <ViewItemValueItem ObjectViewId="TextToSpeech_DetailView" IsNewNode="True">
+          <Members IsNewNode="True">
+            <ViewItemValueObjectViewItem MemberViewItemId="Storage" IsNewNode="True" />
+          </Members>
+        </ViewItemValueItem>
+      </Items>
+    </ViewItemValue>
     <Windows>
       <Alert FormWidth="650" FormLocation="BottomLeft" />
       <Exit>
@@ -495,14 +504,17 @@
     <DetailView Id="TextToSpeech_DetailView" FreezeLayout="True">
       <Layout IsNewNode="True" Removed="True">
         <LayoutGroup Id="Main" Index="0" ShowCaption="False" RelativeSize="100" IsNewNode="True">
-          <LayoutGroup Id="SizeableEditors" Index="0" ShowCaption="False" RelativeSize="100" Caption="Text" IsNewNode="True">
-            <LayoutItem Id="Text" ViewItem="Text" ShowCaption="False" Index="0" RelativeSize="92.05673758865248" TextAlignMode="CustomSize" IsNewNode="True" />
-            <LayoutGroup Id="Auto82fe4b0f-8337-4c72-ac28-47385eacc991" ShowCaption="False" Caption="" Direction="Horizontal" Index="1" RelativeSize="7.943262411347518" IsNewNode="True">
-              <LayoutGroup Id="Autoeed3f4af-4fe2-4e9f-a9ff-9a42d6aadc57" ShowCaption="False" Caption="" Index="0" RelativeSize="49.940688018979834" IsNewNode="True">
-                <LayoutItem Id="Duration" ViewItem="Duration" Index="0" RelativeSize="42.857142857142854" IsNewNode="True" />
-                <LayoutItem Id="File" ViewItem="File" Index="1" RelativeSize="57.142857142857146" IsNewNode="True" />
+          <LayoutGroup Id="SizeableEditors" Index="0" ShowCaption="False" RelativeSize="100" Caption="Text" TextAlignMode="AlignWithChildren" IsNewNode="True">
+            <LayoutItem Id="Text" ViewItem="Text" ShowCaption="False" Index="0" RelativeSize="91.20567375886525" TextAlignMode="CustomSize" IsNewNode="True" />
+            <LayoutGroup Id="Auto82fe4b0f-8337-4c72-ac28-47385eacc991" ShowCaption="False" Caption="Auto82fe4b0f-8337-4c72-ac28-47385eacc991(4)" Direction="Horizontal" Index="1" RelativeSize="8.794326241134751" IsNewNode="True">
+              <LayoutGroup Id="Autoeed3f4af-4fe2-4e9f-a9ff-9a42d6aadc57" ShowCaption="False" Caption="Autoeed3f4af-4fe2-4e9f-a9ff-9a42d6aadc57(5)" Index="0" RelativeSize="49.8220640569395" IsNewNode="True">
+                <LayoutItem Id="Duration" ViewItem="Duration" Index="0" RelativeSize="48.38709677419355" IsNewNode="True" />
+                <LayoutItem Id="File" ViewItem="File" Index="1" RelativeSize="51.61290322580645" IsNewNode="True" />
               </LayoutGroup>
-              <LayoutItem Id="FileDuration" ViewItem="FileDuration" Index="1" RelativeSize="50.059311981020166" IsNewNode="True" />
+              <LayoutGroup Id="Autob9488f01-3fc3-4746-990e-185c5151a97b" ShowCaption="False" Caption="" Index="1" RelativeSize="50.1779359430605" IsNewNode="True">
+                <LayoutItem Id="FileDuration" ViewItem="FileDuration" Index="0" RelativeSize="48.38709677419355" IsNewNode="True" />
+                <LayoutItem Id="Storage" ViewItem="Storage" Index="1" RelativeSize="51.61290322580645" IsNewNode="True" />
+              </LayoutGroup>
             </LayoutGroup>
           </LayoutGroup>
         </LayoutGroup>

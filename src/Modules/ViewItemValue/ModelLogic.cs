@@ -48,16 +48,16 @@ namespace Xpand.XAF.Modules.ViewItemValue{
 	[DomainLogic(typeof(IModelViewItemValueItem))]
 	public class ModelViewItemValueItemLogic{
 		
-		public IModelList<IModelObjectView> Get_ObjectViews(IModelViewItemValueItem itemValueItem) =>
-			itemValueItem.Application.Views.OfType<IModelDetailView>().Where(view => view.DomainComponentItems().Any()).Cast<IModelObjectView>()
+		public IModelList<IModelObjectView> Get_ObjectViews(IModelViewItemValueItem itemValueItem) 
+			=> itemValueItem.Application.Views.OfType<IModelDetailView>().Where(view => view.DomainComponentItems().Any()).Cast<IModelObjectView>()
 				.ToCalculatedModelNodeList();
 		
-		public static IModelObjectView Get_ObjectView(IModelViewItemValueItem itemValueItem) => itemValueItem
-			.ObjectViews.FirstOrDefault(viewItem => viewItem.Id==itemValueItem.ObjectViewId);
+		public static IModelObjectView Get_ObjectView(IModelViewItemValueItem itemValueItem) 
+			=> itemValueItem.ObjectViews.FirstOrDefault(viewItem => viewItem.Id==itemValueItem.ObjectViewId);
 
 		
-		public static void Set_ObjectView(IModelViewItemValueItem itemValueItem, IModelObjectView modelObjectView) => 
-			itemValueItem.ObjectViewId = modelObjectView.Id;
+		public static void Set_ObjectView(IModelViewItemValueItem itemValueItem, IModelObjectView modelObjectView) 
+			=> itemValueItem.ObjectViewId = modelObjectView.Id;
 	}
 	
 	public interface IModelViewItemValueObjectViewItems:IModelNode,IModelList<IModelViewItemValueObjectViewItem>{
@@ -74,18 +74,16 @@ namespace Xpand.XAF.Modules.ViewItemValue{
 	}
 	
 	[DomainLogic(typeof(IModelViewItemValueObjectViewItem))]
-	public static class ModelViewItemValueObjectViewIteLogicm{
+	public static class ModelViewItemValueObjectViewIteLogic{
 		
-		public static IModelMemberViewItem Get_MemberViewItem(IModelViewItemValueObjectViewItem item) => item
-			.MemberViewItems.FirstOrDefault(viewItem => viewItem.Id==item.MemberViewItemId);
+		public static IModelMemberViewItem Get_MemberViewItem(IModelViewItemValueObjectViewItem item) 
+			=> item.MemberViewItems.FirstOrDefault(viewItem => viewItem.Id==item.MemberViewItemId);
 
-		
-		public static void Set_MemberViewItem(IModelViewItemValueObjectViewItem item, IModelMemberViewItem memberViewItem) => 
-			item.MemberViewItemId = memberViewItem.Id;
-		
-		
-		public static IModelList<IModelMemberViewItem> Get_MemberViewItems(this IModelViewItemValueObjectViewItem item) =>
-			item == null ? new CalculatedModelNodeList<IModelMemberViewItem>()
-				: item.GetParent<IModelViewItemValueItem>().ObjectView.DomainComponentItems().ToCalculatedModelNodeList();
+		public static void Set_MemberViewItem(IModelViewItemValueObjectViewItem item, IModelMemberViewItem memberViewItem) 
+			=> item.MemberViewItemId = memberViewItem.Id;
+
+		public static IModelList<IModelMemberViewItem> Get_MemberViewItems(this IModelViewItemValueObjectViewItem item) 
+			=> item == null ? new CalculatedModelNodeList<IModelMemberViewItem>()
+				: item.GetParent<IModelViewItemValueItem>().ObjectView.MemberViewItems().ToCalculatedModelNodeList();
 	}
 }

@@ -93,7 +93,13 @@ namespace Xpand.XAF.Modules.Speech.BusinessObjects {
             get => _recognitionLanguage;
             set => SetPropertyValue(nameof(RecognitionLanguage), ref _recognitionLanguage, value);
         }
-        
-        
+
+        string _storage;
+
+        [Size(256)]
+        public string Storage {
+            get => _storage;
+            set => SetPropertyValue(nameof(Storage), ref _storage, value);
+        }
     }
 }

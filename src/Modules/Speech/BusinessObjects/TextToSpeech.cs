@@ -3,7 +3,6 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
-using DevExpress.Persistent.Validation;
 using DevExpress.Xpo;
 using Xpand.Extensions.XAF.Attributes;
 using Xpand.Extensions.XAF.Attributes.Custom;
@@ -22,13 +21,20 @@ namespace Xpand.XAF.Modules.Speech.BusinessObjects {
         public const string TypeSpeakDetailView = nameof(TextToSpeech) + "_TypeSpeak_DetailView";
         public TextToSpeech(Session session) : base(session) { }
         FileLinkObject _file;
-        [RuleRequiredField][ModelDefault("AllowEdit","false")]
+        
+        [ModelDefault("AllowEdit","false")]
         [FileTypeFilter("Audio files", 1, "*.wav")]
         public FileLinkObject File {
             get => _file;
             set => SetPropertyValue(nameof(File), ref _file, value);
         }
 
+        string _storage;
+
+        public string Storage {
+            get => _storage;
+            set => SetPropertyValue(nameof(Storage), ref _storage, value);
+        }
         string _text;
 
         [Size(-1)][SpellCheck][ImmediatePostData]

@@ -61,6 +61,10 @@
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.ModelViewInheritance.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
+    <Reference Include="Xpand.XAF.Modules.ViewItemValue">
+      <HintPath>..\..\..\bin\Xpand.XAF.Modules.ViewItemValue.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Update="Module.cs" />

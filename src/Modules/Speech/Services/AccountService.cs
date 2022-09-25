@@ -42,8 +42,9 @@ namespace Xpand.XAF.Modules.Speech.Services {
                     .DoWhen(_ => !new DirectoryInfo(speechModel.DefaultStorageFolder).Exists,
                         _ => Directory.CreateDirectory(speechModel.DefaultStorageFolder))
                     .SelectMany(result => {
-                        var lastSpeak = defaultAccount.ObjectSpace.GetObjectsQuery<TextToSpeech>().Max(speech => speech.Oid) + 1;
-                        var path = $"{speechModel.DefaultStorageFolder}\\{lastSpeak}.wav";
+                        var path = defaultAccount.ObjectSpace.GetObjectsQuery<TextToSpeech>()
+                            .OrderByDescending(speech => speech.Oid).FirstOrDefault()
+                            .WavFileName(speechModel,oid => (oid + 1).ToString());
                         return File.WriteAllBytesAsync(path, result.AudioData).ToObservable().ObserveOnContext()
                             .SelectMany(_ => afterBytesWritten(result,path)
                                 .RetryWithBackoff(3));

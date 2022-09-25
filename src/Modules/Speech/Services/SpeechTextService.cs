@@ -7,7 +7,6 @@ using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Windows.Forms;
 using DevExpress.ExpressApp;
-using DevExpress.ExpressApp.Actions;
 using Microsoft.CognitiveServices.Speech;
 using NAudio.Wave;
 using Xpand.Extensions.DateTimeExtensions;
@@ -19,7 +18,6 @@ using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.CollectionSourceExtensions;
 using Xpand.Extensions.XAF.DetailViewExtensions;
-using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.ObjectSpaceExtensions;
 using Xpand.Extensions.XAF.ViewExtensions;
 using Xpand.XAF.Modules.Reactive.Services;
@@ -150,8 +148,12 @@ namespace Xpand.XAF.Modules.Speech.Services {
             throw new NotImplementedException();
         }
 
-        public static string WavFileName(this SpeechText speechText,IModelSpeech model) 
-            => $"{model.DefaultStorageFolder}\\{speechText.Oid}.wav";
+        public static string WavFileName(this IAudioFileLink audioFileLink,IModelSpeech model,Func<long,string> fileName=null) {
+            var storage = audioFileLink.Storage;
+            fileName ??= s => s.ToString();
+            storage ??= model.DefaultStorageFolder;
+            return $"{ storage}\\{fileName(audioFileLink.Oid)}.wav";
+        }
 
         public static IObservable<SpeechText> SaveSSMLFile(this SpeechText speechText, string fileName, SpeechSynthesisResult result) 
             => File.WriteAllBytesAsync(fileName, result.AudioData).ToObservable()

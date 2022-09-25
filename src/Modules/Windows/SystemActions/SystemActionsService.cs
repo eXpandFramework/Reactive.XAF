@@ -42,7 +42,12 @@ namespace Xpand.XAF.Modules.Windows.SystemActions {
             => source.SelectMany(hotKeyManager => application.WhenGlobalHotKeyPressed(hotKeyManager.manager).Publish(hotKeyPressed => hotKeyPressed
                         .WithLatestFrom(application.WhenActionActivated(hotKeyManager), (pressed,activated) => (activated, pressed))
                         .Where(t => t.activated.modelSystemAction.Action == t.pressed.action.Action)))
-                .Do(t => t.activated.action.DoTheExecute(t.pressed.action))
+                .DoWhen(t => t.pressed.action.Focus,_ => SetForegroundWindow(((Form)application.MainWindow.Template).Handle))
+                .SelectAndOmit(t => t.activated.action.WhenExecuteCompleted().FirstAsync().Select(a => a)
+                    .MergeToUnit(t.Defer(() => {
+                        t.activated.action.DoTheExecute(t.pressed.action);
+                        return Observable.Empty<Unit>();
+                    })).FirstAsync())
                 .ToUnit();
 
         private static IObservable<(ActionBase action, IModelSystemAction modelSystemAction)> WhenActionActivated(this XafApplication application, (HotKeyManager manager, Frame window) hotKeyManager) 
@@ -91,9 +96,6 @@ namespace Xpand.XAF.Modules.Windows.SystemActions {
         static extern bool SetForegroundWindow(IntPtr hWnd);
         
         private static void DoTheExecute(this ActionBase action, IModelSystemAction model) {
-            if (model.Focus) {
-                SetForegroundWindow(((Form)action.Application.MainWindow.Template).Handle);
-            }
             switch (action) {
                 case SimpleAction simpleAction:
                     simpleAction.DoExecute();

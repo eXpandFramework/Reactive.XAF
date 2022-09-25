@@ -124,7 +124,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
         
         private static IObservable<T> WhenConcatExecution<T,TArgs>(this ActionBase action, Func<TArgs, IObservable<T>> sourceSelector)  where TArgs:ActionBaseEventArgs 
             => action.WhenExecuted().Do(_ => action.Enabled[nameof(WhenConcatExecution)] = false).Cast<TArgs>()
-                .SelectMany(e => sourceSelector(e).ObserveOnContext().Finally(() => action.Enabled[nameof(WhenConcatExecution)] = true));
+                .SelectManySequential(e => sourceSelector(e).ObserveOnContext().Finally(() => action.Enabled[nameof(WhenConcatExecution)] = true));
 
         public static IObservable<T> WhenExecuted<T>(this SingleChoiceAction simpleAction,Func<SingleChoiceActionExecuteEventArgs, IObservable<T>> retriedExecution) 
             => simpleAction.WhenExecuted().SelectMany(retriedExecution).Retry(() => simpleAction.Application).TakeUntilDeactivated(simpleAction.Controller);
