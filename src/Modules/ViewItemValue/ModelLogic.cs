@@ -67,6 +67,7 @@ namespace Xpand.XAF.Modules.ViewItemValue{
 	public interface IModelViewItemValueObjectViewItem:IModelNode{
 		[Browsable(false)]
 		string MemberViewItemId{ get; set; }
+		bool DefaultOnCommit { get; set; }
 		[Required][DataSourceProperty(nameof(MemberViewItems))]
 		IModelMemberViewItem MemberViewItem{ get; set; }
 		[Browsable(false)]

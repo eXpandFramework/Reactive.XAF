@@ -20,7 +20,7 @@
       <Items>
         <ViewItemValueItem ObjectViewId="TextToSpeech_DetailView" IsNewNode="True">
           <Members IsNewNode="True">
-            <ViewItemValueObjectViewItem MemberViewItemId="Storage" IsNewNode="True" />
+            <ViewItemValueObjectViewItem MemberViewItemId="Storage" DefaultOnCommit="True" IsNewNode="True" />
           </Members>
         </ViewItemValueItem>
       </Items>

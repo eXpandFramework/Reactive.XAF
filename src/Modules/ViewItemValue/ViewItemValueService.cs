@@ -9,7 +9,7 @@ using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Templates;
-using Xpand.Extensions.Reactive.Filter;
+using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.Tracing;
@@ -30,39 +30,47 @@ namespace Xpand.XAF.Modules.ViewItemValue{
             var registerAction = manager.RegisterAction();
             return registerAction.Activate().ToUnit()
                 .Merge(registerAction.SaveViewItemValue())
-                .Merge(manager.AssignViewItemValue())
+                .MergeToUnit(manager.WhenViewItemValueItem()
+                    .Publish(source => source.Select(t => t.model.AssignViewItemValue( t.frame.View.ToDetailView()))
+                        .MergeToUnit(source.SaveViewItemValueOnCommit())))
                 .ToUnit();
         }
 
-        private static IObservable<Unit> AssignViewItemValue(this ApplicationModulesManager manager) => manager
-	        .WhenApplication(application => application.WhenDetailViewCreated().ToDetailView()
-                .Where(view => view.Model.Application.IsViewItemValueObjectView(view.Id))
-                .SelectMany(view => view.Model.Application.ModelViewItemValue().Items
-                    .Where(item => item.ObjectView == view.Model)
-                    .SelectMany(item => item.Members)
-                    .Select(item => {
-                        var memberInfo = item.MemberViewItem.ModelMember.MemberInfo;
-                        var defaultObject = view.ViewItemValueObject(memberInfo);
-                        if (defaultObject != null){
-                            var memberValue = defaultObject.ViewItemValue;
-                            if (memberInfo.MemberTypeInfo.IsDomainComponent) {
-                                var typeConverter = TypeDescriptor.GetConverter(memberInfo.MemberTypeInfo.KeyMember.MemberType);
-                                var value = memberValue!=null?view.ObjectSpace.GetObjectByKey(memberInfo.MemberType,
-                                    typeConverter.ConvertFromString(memberValue)):null;
-                                memberInfo.SetValue(view.CurrentObject, value);    
-                            }
-                            else {
-                                var typeConverter = TypeDescriptor.GetConverter(memberInfo.MemberType);
-                                memberInfo.SetValue(view.CurrentObject,typeConverter.ConvertFromString(memberValue));
-                            }
-                            
-                            return item;
-                        }
-                        return null;
-                    }))
-                .WhenNotDefault()
-                .TraceDefaultObjectValue(item => item.Id())
-                .ToUnit());
+        private static IObservable<Unit> SaveViewItemValueOnCommit(this IObservable<(IModelViewItemValueObjectViewItem model, Frame frame)> source) 
+            => source.Where(t => t.model.DefaultOnCommit).SelectMany(t => t.frame.View.ObjectSpace.WhenCommitted()
+                    .Do(_ => t.frame.SingleChoiceAction(nameof(ViewItemValue)).DoExecute(t.model)))
+                .ToUnit();
+
+        private static IObservable<(IModelViewItemValueObjectViewItem model, Frame frame)> WhenViewItemValueItem(this ApplicationModulesManager manager) 
+            => manager.WhenApplication(application => application.WhenFrameViewChanged().WhenFrame(ViewType.DetailView)
+                .Where(frame => frame.View.Model.Application.IsViewItemValueObjectView(frame.View.Id))
+                .SelectMany(frame => frame.View.Model.Application.ModelViewItemValue().Items
+                    .Where(item => item.ObjectView == frame.View.Model)
+                    .SelectMany(item => item.Members.Select(viewItem => (model:viewItem, frame)).ToArray())));
+
+        private static IModelViewItemValueObjectViewItem AssignViewItemValue(this IModelViewItemValueObjectViewItem item, DetailView view) {
+            var memberInfo = item.MemberViewItem.ModelMember.MemberInfo;
+            var defaultObject = view.ViewItemValueObject(memberInfo);
+            if (defaultObject != null) {
+                var memberValue = defaultObject.ViewItemValue;
+                if (memberInfo.MemberTypeInfo.IsDomainComponent) {
+                    var typeConverter = TypeDescriptor.GetConverter(memberInfo.MemberTypeInfo.KeyMember.MemberType);
+                    var value = memberValue != null
+                        ? view.ObjectSpace.GetObjectByKey(memberInfo.MemberType,
+                            typeConverter.ConvertFromString(memberValue))
+                        : null;
+                    memberInfo.SetValue(view.CurrentObject, value);
+                }
+                else {
+                    var typeConverter = TypeDescriptor.GetConverter(memberInfo.MemberType);
+                    memberInfo.SetValue(view.CurrentObject, typeConverter.ConvertFromString(memberValue));
+                }
+
+                return item;
+            }
+
+            return null;
+        }
 
         private static ViewItemValueObject ViewItemValueObject(this DetailView view, IMemberInfo memberInfo){
             ViewItemValueObject Query(IObjectSpace space) 
@@ -79,7 +87,8 @@ namespace Xpand.XAF.Modules.ViewItemValue{
             => registerAction.WhenExecute()
             .Select(e => {
                 var item = ((IModelViewItemValueObjectViewItem) e.SelectedChoiceActionItem.Data);
-                using var objectSpace = e.Action.Application.CreateObjectSpace(typeof(ViewItemValueObject));
+                var application = e.Action.Application;
+                using var objectSpace = application.CreateObjectSpace(typeof(ViewItemValueObject));
                 var defaultObjectItem = item.GetParent<IModelViewItemValueItem>();
                 var memberInfo = item.MemberViewItem.ModelMember.MemberInfo;
                 var memberName = memberInfo.Name;
