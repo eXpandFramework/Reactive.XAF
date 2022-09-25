@@ -1,12 +1,15 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
+using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.Validation;
 using DevExpress.Xpo;
+using Xpand.Extensions.XAF.Attributes;
 using Xpand.Extensions.XAF.Attributes.Custom;
 using Xpand.Extensions.XAF.Xpo.BaseObjects;
 using Xpand.XAF.Modules.CloneModelView;
+using Xpand.XAF.Modules.SpellChecker;
 using Xpand.XAF.Persistent.BaseImpl;
 
 namespace Xpand.XAF.Modules.Speech.BusinessObjects {
@@ -19,7 +22,7 @@ namespace Xpand.XAF.Modules.Speech.BusinessObjects {
         public const string TypeSpeakDetailView = nameof(TextToSpeech) + "_TypeSpeak_DetailView";
         public TextToSpeech(Session session) : base(session) { }
         FileLinkObject _file;
-        [RuleRequiredField]
+        [RuleRequiredField][ModelDefault("AllowEdit","false")]
         [FileTypeFilter("Audio files", 1, "*.wav")]
         public FileLinkObject File {
             get => _file;
@@ -28,14 +31,14 @@ namespace Xpand.XAF.Modules.Speech.BusinessObjects {
 
         string _text;
 
-        [Size(-1)]
+        [Size(-1)][SpellCheck][ImmediatePostData]
         public string Text {
             get => _text;
             set => SetPropertyValue(nameof(Text), ref _text, value);
         }
 
         TimeSpan _duration;
-        [DisplayDateAndTime(DisplayDateType.None,DisplayTimeType.mm_ss)]
+        [DisplayDateAndTime(DisplayDateType.None,DisplayTimeType.mm_ss)][ReadOnlyProperty()]
         public TimeSpan Duration {
             get => _duration;
             set => SetPropertyValue(nameof(Duration), ref _duration, value);
@@ -47,7 +50,7 @@ namespace Xpand.XAF.Modules.Speech.BusinessObjects {
         }
 
         TimeSpan? _fileDuration;
-
+        [ReadOnlyProperty()]
         public TimeSpan? FileDuration {
             get => _fileDuration;
             set => SetPropertyValue(nameof(FileDuration), ref _fileDuration, value);

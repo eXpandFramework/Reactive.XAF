@@ -10,6 +10,7 @@ namespace Xpand.Extensions.Reactive.Transform{
             => source.ToTask().Timeout(timeSpan).Result;
         public static IObservable<T> WaitUntilInactive<T>(this IObservable<T> source, TimeSpan timeSpan,int count =1) 
             => source.BufferUntilInactive(timeSpan).SelectMany(list => list.TakeLast(1).ToArray());
+        
         public static IObservable<T> WaitUntilInactive<T>(this IObservable<T> source, int seconds, int count = 1)
             => source.WaitUntilInactive(TimeSpan.FromSeconds(seconds), count);
         

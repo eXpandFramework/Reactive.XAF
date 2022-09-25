@@ -18,8 +18,14 @@
   <ReactiveModules>
     <Windows>
       <Alert FormWidth="650" FormLocation="BottomLeft" />
+      <Exit>
+        <OnExit HideMainWindow="True" />
+      </Exit>
+      <MultiInstance Disabled="True" />
+      <NotifyIcon Enabled="True" />
       <SystemActions>
-        <SystemAction ActionId="SpeakText" HotKey="Control + Alt + 1" ChoiceActionItem="Speak" IsNewNode="True" />
+        <SystemAction Id="SpeakText" ActionId="SpeakText" HotKey="Control + Alt + 1" ChoiceActionItem="Speak" Action="SpeakText" IsNewNode="True" />
+        <SystemAction Id="TypeSpeak" ActionId="TypeSpeak" HotKey="Control + Alt + 2" ChoiceActionItem="Type" Action="SpeakText" Focus="True" IsNewNode="True" />
       </SystemActions>
     </Windows>
   </ReactiveModules>
@@ -485,6 +491,27 @@
           </LayoutGroup>
         </LayoutGroup>
       </Layout>
+    </DetailView>
+    <DetailView Id="TextToSpeech_DetailView" FreezeLayout="True">
+      <Layout IsNewNode="True" Removed="True">
+        <LayoutGroup Id="Main" Index="0" ShowCaption="False" RelativeSize="100" IsNewNode="True">
+          <LayoutGroup Id="SizeableEditors" Index="0" ShowCaption="False" RelativeSize="100" Caption="Text" IsNewNode="True">
+            <LayoutItem Id="Text" ViewItem="Text" ShowCaption="False" Index="0" RelativeSize="92.05673758865248" TextAlignMode="CustomSize" IsNewNode="True" />
+            <LayoutGroup Id="Auto82fe4b0f-8337-4c72-ac28-47385eacc991" ShowCaption="False" Caption="" Direction="Horizontal" Index="1" RelativeSize="7.943262411347518" IsNewNode="True">
+              <LayoutGroup Id="Autoeed3f4af-4fe2-4e9f-a9ff-9a42d6aadc57" ShowCaption="False" Caption="" Index="0" RelativeSize="49.940688018979834" IsNewNode="True">
+                <LayoutItem Id="Duration" ViewItem="Duration" Index="0" RelativeSize="42.857142857142854" IsNewNode="True" />
+                <LayoutItem Id="File" ViewItem="File" Index="1" RelativeSize="57.142857142857146" IsNewNode="True" />
+              </LayoutGroup>
+              <LayoutItem Id="FileDuration" ViewItem="FileDuration" Index="1" RelativeSize="50.059311981020166" IsNewNode="True" />
+            </LayoutGroup>
+          </LayoutGroup>
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <DetailView Id="TextToSpeech_TypeSpeak_DetailView">
+      <MergedDifferences>
+        <MergedDifference Id="TextToSpeech_DetailView" View="TextToSpeech_DetailView" IsNewNode="True" />
+      </MergedDifferences>
     </DetailView>
   </Views>
 </Application>

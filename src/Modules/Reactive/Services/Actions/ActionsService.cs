@@ -118,9 +118,10 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
             });
         public static IObservable<T> WhenConcatExecution<T>(this ParametrizedAction simpleAction,Func<ParametrizedActionExecuteEventArgs,IObservable<T>> sourceSelector)
             => simpleAction.WhenConcatExecution<T,ParametrizedActionExecuteEventArgs>( sourceSelector);
-        // public static IObservable<T> WhenConcatExecution<T>(this SingleChoiceAction simpleAction,Func<SingleChoiceActionExecuteEventArgs,IObservable<T>> sourceSelector)
-        //     => simpleAction.WhenConcatExecution<T,SingleChoiceActionExecuteEventArgs>( sourceSelector);
-
+        
+        public static IObservable<T> WhenConcatExecution<T>(this SingleChoiceAction simpleAction,Func<SingleChoiceActionExecuteEventArgs,IObservable<T>> sourceSelector)
+            => simpleAction.WhenConcatExecution<T,SingleChoiceActionExecuteEventArgs>( sourceSelector);
+        
         private static IObservable<T> WhenConcatExecution<T,TArgs>(this ActionBase action, Func<TArgs, IObservable<T>> sourceSelector)  where TArgs:ActionBaseEventArgs 
             => action.WhenExecuted().Do(_ => action.Enabled[nameof(WhenConcatExecution)] = false).Cast<TArgs>()
                 .SelectMany(e => sourceSelector(e).ObserveOnContext().Finally(() => action.Enabled[nameof(WhenConcatExecution)] = true));
@@ -353,6 +354,8 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
 
         public static IObservable<TAction> WhenActive<TAction>(this IObservable<TAction> source) where TAction : ActionBase 
             => source.Where(a => a.Active);
+        public static IObservable<TAction> WhenAvailable<TAction>(this IObservable<TAction> source) where TAction : ActionBase 
+            => source.Where(a => a.Available());
 
         public static IObservable<TAction> WhenInActive<TAction>(this IObservable<TAction> source) where TAction : ActionBase 
             => source.Where(a => !a.Active);

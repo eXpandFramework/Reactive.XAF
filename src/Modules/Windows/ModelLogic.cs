@@ -4,13 +4,10 @@ using System.Drawing.Design;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Windows.Forms;
-using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
-using DevExpress.ExpressApp.SystemModule;
 using DevExpress.Persistent.Base;
 using DevExpress.XtraBars.Alerter;
-using Xpand.Extensions.ObjectExtensions;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Windows.SystemActions;
 
@@ -40,7 +37,7 @@ namespace Xpand.XAF.Modules.Windows{
         
     }
 
-    public interface IModelSystemAction:IModelActionLink {
+    public interface IModelSystemAction : IModelNode {
         [Editor(typeof(HotKeyEditor), typeof(UITypeEditor))]
         [Required][ReadOnly(true)]
         string HotKey { get; set; }
@@ -48,12 +45,14 @@ namespace Xpand.XAF.Modules.Windows{
         [ModelBrowsable(typeof(ChoiceActionItemVisibilityCalculator))]
         [DataSourceProperty(nameof(Action)+"."+nameof(IModelAction.ChoiceActionItems))]
         IModelChoiceActionItem ChoiceActionItem { get; set; }
-        
+        [DataSourceProperty("Application.ActionDesign.Actions")][RefreshProperties(RefreshProperties.All)]
+        IModelAction Action { get; set; }
+        bool Focus { get; set; }
     }
-
+    
     public class ChoiceActionItemVisibilityCalculator:IModelIsVisible {
         public bool IsVisible(IModelNode node, string propertyName) 
-            => ((IModelSystemAction)node).Action.ChoiceActionItems.Any();
+            => ((IModelSystemAction)node).Action?.ChoiceActionItems?.Any()??false;
     }
 
     public interface IModelSystemActionViews:IModelNode,IModelList<IModelViewLink> { }

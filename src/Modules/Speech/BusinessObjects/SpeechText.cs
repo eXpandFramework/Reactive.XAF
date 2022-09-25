@@ -9,6 +9,7 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using DevExpress.Xpo;
 using Xpand.Extensions.LinqExtensions;
+using Xpand.Extensions.XAF.Attributes;
 using Xpand.Extensions.XAF.Attributes.Custom;
 using Xpand.Extensions.XAF.Xpo.BaseObjects;
 using Xpand.Extensions.XAF.Xpo.ValueConverters;
@@ -63,10 +64,11 @@ namespace Xpand.XAF.Modules.Speech.BusinessObjects {
         [Association("SpeechText-Translations")][Aggregated]
         public XPCollection<SpeechTranslation> RealTranslations => GetCollection<SpeechTranslation>();
         [CollectionOperationSet(AllowAdd = false)]
-        public BindingList<SpeechTranslation> Translations => SpeechToText.Texts.SelectMany(text => text.RealTranslations).ToBindingList();
+        public BindingList<SpeechTranslation> Translations 
+            => SpeechToText.Texts.SelectMany(text => text.RealTranslations).ToBindingList();
         SpeechToText _speechToText;
         FileLinkObject _file;
-        [FileTypeFilter("Audio files", 1, "*.wav")][ModelDefault("AllowEdit","true")]
+        [FileTypeFilter("Audio files", 1, "*.wav")][ModelDefault("AllowEdit","true")][ReadOnlyProperty()]
         public FileLinkObject File {
             get => _file;
             set => SetPropertyValue(nameof(File), ref _file, value);
@@ -77,14 +79,11 @@ namespace Xpand.XAF.Modules.Speech.BusinessObjects {
             get => _speechToText;
             set => SetPropertyValue(nameof(SpeechToText), ref _speechToText, value);
         }
-
-        
         
         string _text;
 
         [Size(SizeAttribute.Unlimited)][VisibleInListView(true)]
         [ModelDefault("AllowEdit","true")][SpellCheck][ImmediatePostData]
-        
         public string Text {
             get => _text;
             set => SetPropertyValue(nameof(Text), ref _text, value);

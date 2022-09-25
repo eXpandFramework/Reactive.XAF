@@ -113,8 +113,7 @@ namespace Xpand.XAF.Modules.Speech.Services {
 	       //                         t.e.PropertyName != null && properties.Contains(t.e.PropertyName));
 
         
-        public static IObservable<T> WaitUntilInactive1<T>(this IObservable<T> source, TimeSpan timeSpan,int count =1) 
-	        => source.BufferUntilInactive(timeSpan).SelectMany(list => list.TakeLast(1).ToArray());
+        
         private static IObservable<Unit> ConfigureSpeechTextView(this ApplicationModulesManager manager)
 	        => manager.WhenSpeechApplication(application => application.WhenFrameViewChanged().WhenFrame(typeof(SpeechToText), ViewType.DetailView)
 			        .SelectUntilViewClosed(frame => frame.View.ToDetailView().NestedFrameContainers(typeof(SpeechText))

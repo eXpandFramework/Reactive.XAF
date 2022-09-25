@@ -22,15 +22,24 @@ namespace Xpand.Extensions.XAF.ActionExtensions{
             return list;
         }
 
-        public static void DoExecute(this SingleChoiceAction actionBase,ChoiceActionItem selectedItem, params object[] objectSelection) {
-            var context = actionBase.SelectionContext;
+        public static void ExecuteIfAvailable(this SingleChoiceAction actionBase, ChoiceActionItem selectedItem) {
+            if (actionBase.Available()) {
+                actionBase.DoExecute(selectedItem);
+            }
+        }
+
+        public static void DoExecute(this SingleChoiceAction action, object data) 
+            => action.DoExecute(action.Items.FirstOrDefault(item => item.Data==data));
+
+        public static void DoExecute(this SingleChoiceAction action,ChoiceActionItem selectedItem, params object[] objectSelection) {
+            var context = action.SelectionContext;
             if (objectSelection.Length > 1) {
                 throw new NotImplementedException();
             }
 
-            actionBase.SelectionContext = new SelectionContext(objectSelection.Single());
-            actionBase.DoExecute(selectedItem);
-            actionBase.SelectionContext=context;
+            action.SelectionContext = new SelectionContext(objectSelection.Single());
+            action.DoExecute(selectedItem);
+            action.SelectionContext=context;
         }
 
         [SuppressMessage("ReSharper", "ArrangeTypeMemberModifiers")]

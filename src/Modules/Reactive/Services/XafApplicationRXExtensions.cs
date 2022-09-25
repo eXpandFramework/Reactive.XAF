@@ -137,14 +137,13 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => application.WhenFrameCreated().ToController<TController>().SelectMany(_ => action(_).WhenExecuteCompleted());
 
         public static IObservable<Window> WhenWindowCreated(this XafApplication application,bool isMain=false,bool emitIfMainExists=true) {
-            var windowCreated = application.WhenFrameCreated().OfType<Window>();
+            var windowCreated = application.WhenFrameCreated().Select(frame => frame).OfType<Window>();
             return isMain ? emitIfMainExists && application.MainWindow != null ? application.MainWindow.ReturnObservable().ObserveOn(SynchronizationContext.Current)
                     : application.WhenMainWindowAvailable(windowCreated) : windowCreated.TraceRX(window => window.Context);
         }
 
         private static IObservable<Window> WhenMainWindowAvailable(this XafApplication application, IObservable<Window> windowCreated) 
-            => windowCreated.When(TemplateContext.ApplicationWindow)
-                .TemplateChanged()
+            => windowCreated.When(TemplateContext.ApplicationWindow).TemplateChanged()
                 .SelectMany(_ => Observable.Interval(TimeSpan.FromMilliseconds(300))
                     .ObserveOnWindows(SynchronizationContext.Current)
                     .Select(_ => application.MainWindow))

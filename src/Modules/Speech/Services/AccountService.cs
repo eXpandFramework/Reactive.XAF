@@ -6,7 +6,6 @@ using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.SystemModule;
@@ -37,26 +36,21 @@ namespace Xpand.XAF.Modules.Speech.Services {
         public static SpeechAccount DefaultAccount(this IObjectSpace space,XafApplication application) 
             => space.FindObject<SpeechAccount>(CriteriaOperator.Parse(application.Model.SpeechModel().DefaultAccountCriteria));
 
-        public static IObservable<TResult> Speak<TResult>(this SpeechAccount defaultAccount, IModelSpeech speechModel,Func<SpeechSynthesisResult,string,IObservable<TResult>> afterBytesWritten) 
+        public static IObservable<TResult> Speak<TResult>(this SpeechAccount defaultAccount, IModelSpeech speechModel,Func<SpeechSynthesisResult,string,IObservable<TResult>> afterBytesWritten,Func<string> textSelector) 
             => Observable.Using(() => new SpeechSynthesizer(defaultAccount.SpeechConfig()), synthesizer
-                => SpeakAsync(synthesizer).ToObservable().ObserveOnContext()
+                => synthesizer.SpeakAsync(textSelector).ToObservable().ObserveOnContext()
                     .DoWhen(_ => !new DirectoryInfo(speechModel.DefaultStorageFolder).Exists,
                         _ => Directory.CreateDirectory(speechModel.DefaultStorageFolder))
                     .SelectMany(result => {
                         var lastSpeak = defaultAccount.ObjectSpace.GetObjectsQuery<TextToSpeech>().Max(speech => speech.Oid) + 1;
                         var path = $"{speechModel.DefaultStorageFolder}\\{lastSpeak}.wav";
                         return File.WriteAllBytesAsync(path, result.AudioData).ToObservable().ObserveOnContext()
-                            .SelectMany(_ => {
-                                IObservable<TextToSpeech> observable = defaultAccount.ObjectSpace.CreateObject<TextToSpeech>()
-                                    .UpdateSSMLFile(result, path).Commit();
-                                
-                                return afterBytesWritten(result,path)
-                                    .RetryWithBackoff(3);
-                            });
+                            .SelectMany(_ => afterBytesWritten(result,path)
+                                .RetryWithBackoff(3));
                     }));
 
-        private static Task<SpeechSynthesisResult> SpeakAsync(this SpeechSynthesizer synthesizer) {
-            var text = Clipboard.GetText();
+        private static Task<SpeechSynthesisResult> SpeakAsync(this SpeechSynthesizer synthesizer,Func<string> textSelector) {
+            var text = textSelector();
             if (text.StartsWith("<speak")) {
                 return synthesizer.SpeakSsmlAsync(text);
             }

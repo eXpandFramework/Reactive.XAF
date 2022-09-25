@@ -37,7 +37,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
             Func<(WindowController controller, string id), TAction> actionBase) where  TAction:ActionBase 
 	        => applicationModulesManager.RegisterWindowAction(id, tuple => {
 		        var action = actionBase(tuple);
-		        tuple.controller.TargetWindowType=WindowType.Child;
+		        tuple.controller.TargetWindowType=WindowType.Main;
 		        return action;
 	        });
 
@@ -51,7 +51,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
 
         public static IObservable<TAction> RegisterWindowAction<TAction>(this ApplicationModulesManager applicationModulesManager, string id,
             Func<(WindowController controller, string id), TAction> actionBase) where TAction:ActionBase 
-	        => applicationModulesManager.RegisterAction(id, actionBase);
+	        => applicationModulesManager.RegisterAction(id,actionBase);
 
         public static IObservable<PopupWindowShowAction> RegisterViewPopupWindowShowAction(this ApplicationModulesManager manager, string id,
             Type targetObjectType=null,ViewType viewType=ViewType.Any,PredefinedCategory category=PredefinedCategory.View) 
@@ -127,8 +127,10 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
 
 
         public static IObservable<SingleChoiceAction> RegisterWindowSingleChoiceAction(this ApplicationModulesManager manager, string id,
-            PredefinedCategory category=PredefinedCategory.Tools,Action<SingleChoiceAction> configure=null) 
-	        => manager.RegisterWindowAction(id, category.NewAction<SingleChoiceAction,WindowController>(configure));
+            PredefinedCategory category=PredefinedCategory.Tools,Action<SingleChoiceAction> configure=null,WindowType windowType=WindowType.Main) 
+            => windowType == WindowType.Main ? manager.RegisterMainWindowAction(id, category.NewAction<SingleChoiceAction, WindowController>(configure))
+            : windowType == WindowType.Child ? manager.RegisterChildWindowAction(id, category.NewAction<SingleChoiceAction, WindowController>(configure))
+            : manager.RegisterWindowAction(id, category.NewAction<SingleChoiceAction, WindowController>(configure));
 
         private static Action<T> Configure<T>(this Type targetObjectType, ViewType viewType) where T:ActionBase 
 	        => action => {
@@ -159,26 +161,18 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
 		        ControllerCtorState
                     .AddOrUpdate(controllerType, type1 => (id, _ => actionBase(((TController) _.controller, _.id))),(_, tuple) => tuple);
             }
-
-            // var registerAction = _actionsSubject.Select(a => a).OfType<TAction>().FirstAsync(_ => _.Id == id).Replay(1);
-            // registerAction.Connect();
-            // applicationModulesManager.Application().CreateController<TController>()
             var controller = (TController) Controller.Create(controllerType);
             applicationModulesManager.ControllersManager.RegisterController(controller);
             return ((IActionController) controller).WhenCloned
                 .SelectMany(viewController => viewController.Actions).Cast<TAction>()
-                .StartWith(controller.Actions.Cast<TAction>())
-                // .Merge(controller.WhenClone().SelectMany(controller=>c.Actions))
-                ;
+                .StartWith(controller.Actions.Cast<TAction>());
         }
 
         public static IObservable<ActionBase> WhenActionAdded(this ActionList actionList)
             => Observable.FromEventPattern<EventHandler<ActionManipulationEventArgs>, ActionManipulationEventArgs>(
                 h => actionList.ActionAdded += h, h => actionList.ActionAdded -= h, ImmediateScheduler.Instance)
                 .Select(p => p.EventArgs.Action);
-
-        static Subject<ActionBase> _actionsSubject=new();
-
+        
         private static Type NewControllerType<T>(string id) where T:Controller{
             var baseController = GetBaseController<T>();
             var actionControllerName = ActionControllerName(id, baseController);
