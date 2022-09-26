@@ -159,12 +159,7 @@ namespace Xpand.XAF.Modules.Speech.Services {
 		        .WhereNotDefault(speechTexts => speechTexts.Key)
 		        .ForEach(speechTexts => speechTexts.UpdateSSML((speechText, texts) => frame.Application.SSMLText(speechText, texts, rate)));
         }
-        private static void EnsureStorage(this SpeechToText speechToText, XafApplication xafApplication) {
-	        if (speechToText.Storage.IsNullOrEmpty()) {
-		        // speechToText.Storage = xafApplication.Model.SpeechModel().DefaultStorageFolder;
-	        }
-        }
-
+        
         private static IObservable<Unit> NewSpeechTextFromUI(this ApplicationModulesManager manager) 
 	        => manager.WhenSpeechApplication(application => application.WhenViewOnFrame(typeof(SpeechText),ViewType.ListView)
 			        .SelectUntilViewClosed(frame => frame.GetController<NewObjectViewController>().WhenEvent<ObjectCreatedEventArgs>(nameof(NewObjectViewController.ObjectCreated))
@@ -172,7 +167,6 @@ namespace Xpand.XAF.Modules.Speech.Services {
 					        var speechText = ((SpeechText)e.CreatedObject);
 					        if (speechText.IsNewObject) {
 						        speechText.SpeechToText = frame.ParentObject<SpeechToText>();
-						        speechText.SpeechToText.EnsureStorage(application);
 						        speechText.SetMemberValue("_oid", 1+(speechText.SpeechToText.SpeechTexts.Where(text => text.Oid > 0)
 								        .MaxBy(text => text.Start)?.Oid ?? 0));
 						        var previousSpeechText = speechText.PreviousSpeechText();
@@ -186,20 +180,14 @@ namespace Xpand.XAF.Modules.Speech.Services {
         private static string SSMLText(this XafApplication application, SpeechText speechText, SpeechText[] speechTexts, object rate) {
 	        var speechModel = application.Model.SpeechModel();
 	        var speechVoice = speechText.SpeechVoice();
-	        var firstText = speechVoice.SSMLText( speechText.Text,speechModel,speechText.GetRateTag((int)(rate??0)));
+	        var firstText = speechModel.SSMLText( speechText.Text,speechVoice,speechText.GetRateTag((int)(rate??0)));
 	        var voiceText = speechTexts.ToNowObservable().CombineWithPrevious().WhenNotDefault(t => t.previous)
 		        .ToEnumerable().ToArray()
 		        .Select(t => (ssml:t.current.Breaks(t.previous).Join(""),rate:t.current.GetRateTag((int)(rate ?? 0))))
-		        .Select(t => speechVoice.SSMLText(t.ssml,speechModel, t.rate)).Join("");
+		        .Select(t => speechModel.SSMLText(t.ssml,speechVoice, t.rate)).Join("");
 
 	        return $"{firstText}{voiceText}";
         }
-
-        private static string SSMLText(this SpeechVoice speechVoice,string ssml, IModelSpeech speechModel, string rate=null) 
-	        =>ssml==null?null: speechModel.SSMLSpeakFormat.StringFormat(
-		        speechModel.SSMLVoiceFormat.StringFormat(speechVoice?.ShortName, rate.StringFormat($"{ssml}")));
-        
-        
 
         private static void UpdateSSML(this IGrouping<SpeechLanguage, SpeechText> speechTexts, Func<SpeechText, SpeechText[], string> ssmlText) {
 	        var speechText = speechTexts.First();
@@ -230,13 +218,12 @@ namespace Xpand.XAF.Modules.Speech.Services {
 				        .SelectMany(_ => recognizer.StopContinuousRecognitionAsync().ToObservable()))
 			        .FirstAsync().ObserveOn(context).Do(_ => simpleAction.SetImage(CommonImage.ConvertTo))
 			        .MergeToUnit(recognizer.WhenRecognized().ObserveOn(context)
-				        .Do(result => speechToText.NewSpeechText<SpeechText>(result.Text, result.Duration, result.OffsetInTicks,simpleAction.Application))
+				        .Do(result => speechToText.NewSpeechText<SpeechText>(result.Text, result.Duration, result.OffsetInTicks))
 				        .IgnoreElements())));
         
-        private static T NewSpeechText<T>(this SpeechToText speechToText, string text,TimeSpan duration, long offset,XafApplication application,SpeechLanguage speechLanguage=null) where T:SpeechText{
+        private static T NewSpeechText<T>(this SpeechToText speechToText, string text,TimeSpan duration, long offset,SpeechLanguage speechLanguage=null) where T:SpeechText{
 	        var speechText = speechToText.ObjectSpace.CreateObject<T>();
 	        speechText.SpeechToText = speechToText;
-	        speechText.SpeechToText.EnsureStorage(application);
 	        speechToText.SpeechTexts.Add(speechText);
 	        speechText.Text = text;
 	        speechText.Start=TimeSpan.FromTicks(offset);
@@ -249,8 +236,8 @@ namespace Xpand.XAF.Modules.Speech.Services {
 	        return speechText;
         }
         
-        private static SpeechTranslation NewSpeechTranslation(this SpeechToText speechToText, KeyValuePair<string, string> pair, TranslationRecognitionResult result, SpeechText[] speechTexts,XafApplication application) {
-	        var speechTranslation = speechToText.NewSpeechText<SpeechTranslation>(pair.Value, result.Duration, result.OffsetInTicks,application,
+        private static SpeechTranslation NewSpeechTranslation(this SpeechToText speechToText, KeyValuePair<string, string> pair, TranslationRecognitionResult result, SpeechText[] speechTexts) {
+	        var speechTranslation = speechToText.NewSpeechText<SpeechTranslation>(pair.Value, result.Duration, result.OffsetInTicks,
 		        speechToText.TargetLanguages.FirstOrDefault(language => language.Name.Split('-')[0] == pair.Key));
 	        var sourceText = speechTexts.Last(text => text.Text.CalculateSimilarity(result.Text)>0.75);
 	        speechTranslation.SourceText=sourceText;
@@ -292,7 +279,7 @@ namespace Xpand.XAF.Modules.Speech.Services {
         private static Frame NewSpeechTranslation(this SpeechToText speechToText, SimpleAction simpleAction,
 	        KeyValuePair<string, string> pair, TranslationRecognitionEventArgs e, SpeechText[] speechTexts) {
 	        var speechTextFrame = simpleAction.View().ToDetailView().FrameContainers(typeof(SpeechTranslation)).First();
-	        var newSpeechTranslation = speechToText.NewSpeechTranslation(pair, e.Result, speechTexts,simpleAction.Application);
+	        var newSpeechTranslation = speechToText.NewSpeechTranslation(pair, e.Result, speechTexts);
 	        var collectionSource = speechTextFrame.View.ToListView().CollectionSource;
 	        collectionSource.Add(collectionSource.ObjectSpace.GetObject(newSpeechTranslation));
 	        return speechTextFrame;

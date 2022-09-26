@@ -23,23 +23,19 @@ namespace Xpand.XAF.Modules.Windows.SystemActions {
         private static readonly Subject<HotKeyManager> CustomizeHotKeyManagerSubject = new();
         public static IObservable<HotKeyManager> CustomizeHotKeyManager => CustomizeHotKeyManagerSubject.AsObservable();
 
-        internal static IObservable<Unit> SystemActionsConnect(this XafApplication application) {
-            var hotKeyManager = application.WhenHotKeyManager().Publish().RefCount();
-            return hotKeyManager.ExecuteHotKeys(application);
-        }
-        
+        internal static IObservable<Unit> SystemActionsConnect(this XafApplication application) 
+            => application.WhenHotKeyManager().ExecuteHotKeys(application);
+
         private static IObservable<Unit> ExecuteHotKeys(this IObservable<(HotKeyManager manager, Frame window)> source, XafApplication application)
-            => source.SelectMany(hotKeyManager => application.WhenHotKeyPressed(hotKeyManager.manager).Publish(hotKeyPressed => hotKeyPressed
-                        .WithLatestFrom(application.WhenActionActivated(hotKeyManager), (hotkey,activated) => (activated, hotkey))
-                        .Where(t => t.activated.model.Action == t.hotkey.Action)))
-                .DoWhen(t => t.hotkey is IModelSystemAction { Focus: true },_ => SetForegroundWindow(((Form)application.MainWindow.Template).Handle))
-                .Select(t => t)
-                .SelectMany(t => t.activated.action.WhenExecuteCompleted().FirstAsync().Select(a => a)
-                    .MergeToUnit(t.Defer(() => {
-                        t.activated.action.DoTheExecute(t.hotkey);
-                        return Observable.Empty<Unit>();
-                    })).FirstAsync())
-                .ToUnit();
+            => source.SelectMany(hotKeyManager => application.WhenHotKeyPressed(hotKeyManager.manager)
+                .Publish(hotkeyPressed=> application.WhenActionActivated(hotKeyManager)
+                    .SelectMany(activated => hotkeyPressed.Where(model => activated.model==model)
+                        .TakeUntil(activated.action.WhenDeactivated())
+                        .SelectMany(model => activated.WaitTheExecute( model)))));
+
+        private static IObservable<Unit> WaitTheExecute(this (ActionBase action, IModelHotkeyAction model) activated, IModelHotkeyAction model) 
+            => activated.action.WhenExecuteCompleted().FirstAsync()
+                .MergeToUnit(model.Defer(() => activated.action.DoTheExecute(model)).IgnoreElements()).FirstAsync();
 
         private static IObservable<(ActionBase action, IModelHotkeyAction model)> WhenActionActivated(this XafApplication application, (HotKeyManager manager, Frame window) hotKeyManager) 
             => hotKeyManager.window.Actions().Where(a => a.Available()).ToNowObservable()

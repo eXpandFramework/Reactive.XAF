@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Windows.Forms;
@@ -30,7 +31,7 @@ namespace Xpand.XAF.Modules.Speech.Services {
         internal static IObservable<Unit> ConnectTextToSpeech(this  ApplicationModulesManager manager)
             => manager.SpeakText()
                 .MergeToUnit(manager.WhenSpeechApplication(application =>application.SaveSpeak()))
-                .MergeToUnit(manager.SaveTextToSpeech())
+                // .MergeToUnit(manager.SaveTextToSpeech())
                 .MergeToUnit(manager.Break())
         ;
 
@@ -40,15 +41,11 @@ namespace Xpand.XAF.Modules.Speech.Services {
                     : frame.View.ObjectSpace.WhenCommittedDetailed<TextToSpeech>(
                             ObjectModification.NewOrUpdated, speech => speech.Text.IsNotNullOrEmpty(), nameof(TextToSpeech.Text))
                         .ToObjects().WaitUntilInactive(3).ObserveOnContext()
-                        .SelectMany(speech => frame.Application.Speak(frame.View.ObjectSpace, _ => speech,
-                                () => speech.Text).ObserveOnContext().Do(toSpeech => toSpeech.ObjectSpace.Refresh())
+                        .SelectMany(speech => frame.Application.Speak(frame.View.ObjectSpace, _ => speech, account => 
+                                frame.Application.Model.SpeechModel().SSMLText(speech.Text,account.Voices.First(voice => voice.Language.Oid==speech.Language.Oid)))
+                            .ObserveOnContext().Do(toSpeech => toSpeech.ObjectSpace.Refresh())
                             .ToUnit()));
 
-        private static IObservable<SimpleActionExecuteEventArgs> SaveTextToSpeech(this ApplicationModulesManager manager) 
-            => manager.RegisterViewSimpleAction(nameof(SaveTextToSpeech),action => {
-                    action.TargetViewId = TextToSpeech.TypeSpeakDetailView;
-                },PredefinedCategory.ObjectsCreation)
-                .WhenExecuted().Do(e => e.View().ObjectSpace.CommitChanges());
         private static IObservable<ParametrizedActionExecuteEventArgs> Break(this ApplicationModulesManager manager) 
             => manager.RegisterViewParametrizedAction(nameof(Break),typeof(int),action => {
                     action.TargetViewId = TextToSpeech.TypeSpeakDetailView;
@@ -56,7 +53,7 @@ namespace Xpand.XAF.Modules.Speech.Services {
                     action.ToolTip = $"{action.Caption} (CTRL+B)";
                 },PredefinedCategory.PopupActions)
                 .WhenExecuted().Do(e => {
-                    Clipboard.SetText(@$"<nreak time=""{e.Action.AsParametrizedAction().Value}s""/>");
+                    Clipboard.SetText(@$"<break time=""{e.Action.AsParametrizedAction().Value}s""/>");
                     SendKeys.Send("^{v}");
                 });
 
@@ -82,16 +79,17 @@ namespace Xpand.XAF.Modules.Speech.Services {
 
         private static IObservable<Unit> Speak(this SingleChoiceActionExecuteEventArgs e) 
             => Observable.If(() => (string)e.SelectedChoiceActionItem.Data=="Speak",e.Defer(() => e.Application()
-                .UseProviderObjectSpace(space => e.Application().Speak(space,objectSpace => objectSpace.CreateObject<TextToSpeech>(),Clipboard.GetText))))
+                .UseProviderObjectSpace(space => e.Application().Speak(space,objectSpace => objectSpace.CreateObject<TextToSpeech>(),_ => Clipboard.GetText()))))
                 .ToUnit();
 
         private static IObservable<TextToSpeech> Speak(this XafApplication application, IObjectSpace space,
-            Func<IObjectSpace, TextToSpeech> textToSpeechSelector, Func<string> textSelector) 
-            => space.DefaultAccount(application)
-                .Speak( application.Model.SpeechModel(),(result, path) => textToSpeechSelector(space)
-                    .UpdateSSMLFile(result, path).Commit(),textSelector).ObserveOnContext()
+            Func<IObjectSpace, TextToSpeech> textToSpeechSelector, Func<SpeechAccount,string> textSelector) {
+            var speechAccount = space.DefaultSpeechAccount(application.Model.SpeechModel());
+            return speechAccount.Speak(application.Model.SpeechModel(), (_, result, path) => textToSpeechSelector(space)
+                    .UpdateSSMLFile(result, path).Commit(), () => textSelector(speechAccount)).ObserveOnContext()
                 .Do(speech => Clipboard.SetText(speech.File.FullName))
-                .ShowXafMessage(application,speech => $"{speech.File.FileName} saved and path in memory.");
+                .ShowXafMessage(application, speech => $"{speech.File.FileName} saved and path in memory.");
+        }
 
         private static IObservable<Unit> Type(this SingleChoiceActionExecuteEventArgs e) 
             => Observable.If(() => (string)e.SelectedChoiceActionItem.Data=="Type",e.Defer(() => {

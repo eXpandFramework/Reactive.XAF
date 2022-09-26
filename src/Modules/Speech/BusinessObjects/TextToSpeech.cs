@@ -1,13 +1,20 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using DevExpress.ExpressApp.Model;
+using DevExpress.ExpressApp.Utils;
 using DevExpress.Persistent.Base;
+using DevExpress.Persistent.Validation;
 using DevExpress.Xpo;
+using Xpand.Extensions.LinqExtensions;
+using Xpand.Extensions.StringExtensions;
 using Xpand.Extensions.XAF.Attributes;
 using Xpand.Extensions.XAF.Attributes.Custom;
 using Xpand.Extensions.XAF.Xpo.BaseObjects;
 using Xpand.XAF.Modules.CloneModelView;
+using Xpand.XAF.Modules.Speech.Services;
 using Xpand.XAF.Modules.SpellChecker;
 using Xpand.XAF.Modules.ViewItemValue;
 using Xpand.XAF.Persistent.BaseImpl;
@@ -52,6 +59,18 @@ namespace Xpand.XAF.Modules.Speech.BusinessObjects {
             set => SetPropertyValue(nameof(Duration), ref _duration, value);
         }
 
+        [Size(-1)]
+        public string BeforeText {
+            get {
+                var oid = Oid;
+                if (oid == 0) {
+                    oid = Session.Query<TextToSpeech>().Max(speech => speech.Oid)+1;
+                }
+                return Session.Query<TextToSpeech>().Where(speech => speech.Oid<oid&&speech.Text!=null).OrderByDescending(speech => speech.Oid)
+                    .Take(5).Select(speech => speech._text).ToArray().Join($"{Environment.NewLine}{Environment.NewLine}");
+            }
+        }
+
         TimeSpan? IAudioFileLink.VoiceDuration {
             get => null;
             set { }
@@ -64,6 +83,16 @@ namespace Xpand.XAF.Modules.Speech.BusinessObjects {
             set => SetPropertyValue(nameof(FileDuration), ref _fileDuration, value);
         }
 
-        SpeechLanguage IAudioFileLink.Language => throw new NotImplementedException();
+        SpeechLanguage _language;
+
+        [RuleRequiredField][ViewItemValue(DefaultOnCommit = true)]
+        [DataSourceProperty(nameof(Languages))]
+        public SpeechLanguage Language {
+            get => _language;
+            set => SetPropertyValue(nameof(Language), ref _language, value);
+        }
+
+        public List<SpeechLanguage> Languages => ObjectSpace
+            .DefaultSpeechAccount(CaptionHelper.Instance.ApplicationModel.SpeechModel()).Languages;
     }
 }

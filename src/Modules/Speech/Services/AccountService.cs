@@ -33,20 +33,20 @@ namespace Xpand.XAF.Modules.Speech.Services {
             => manager.WhenSpeechApplication(application => application.WhenFrameViewChanged().WhenFrame(typeof(SpeechAccount),ViewType.DetailView)
                 .SelectUntilViewClosed(frame => frame.GetController<RefreshController>().RefreshAction.WhenConcatRetriedExecution(_ =>frame.View.CurrentObject.To<SpeechAccount>().UpdateVoices() )).ToUnit());
 
-        public static SpeechAccount DefaultAccount(this IObjectSpace space,XafApplication application) 
-            => space.FindObject<SpeechAccount>(CriteriaOperator.Parse(application.Model.SpeechModel().DefaultAccountCriteria));
+        public static SpeechAccount DefaultSpeechAccount(this IObjectSpace space,IModelSpeech modelSpeech) 
+            => space.FindObject<SpeechAccount>(CriteriaOperator.Parse(modelSpeech.DefaultAccountCriteria));
 
-        public static IObservable<TResult> Speak<TResult>(this SpeechAccount defaultAccount, IModelSpeech speechModel,Func<SpeechSynthesisResult,string,IObservable<TResult>> afterBytesWritten,Func<string> textSelector) 
-            => Observable.Using(() => new SpeechSynthesizer(defaultAccount.SpeechConfig()), synthesizer
+        public static IObservable<TResult> Speak<TResult>(this SpeechAccount speechAccount, IModelSpeech speechModel,Func<SpeechAccount,SpeechSynthesisResult,string,IObservable<TResult>> afterBytesWritten,Func<string> textSelector) 
+            => Observable.Using(() => new SpeechSynthesizer(speechAccount.SpeechConfig()), synthesizer
                 => synthesizer.SpeakAsync(textSelector).ToObservable().ObserveOnContext()
                     .DoWhen(_ => !new DirectoryInfo(speechModel.DefaultStorageFolder).Exists,
                         _ => Directory.CreateDirectory(speechModel.DefaultStorageFolder))
                     .SelectMany(result => {
-                        var path = defaultAccount.ObjectSpace.GetObjectsQuery<TextToSpeech>()
+                        var path = speechAccount.ObjectSpace.GetObjectsQuery<TextToSpeech>()
                             .OrderByDescending(speech => speech.Oid).FirstOrDefault()
                             .WavFileName(speechModel,oid => (oid + 1).ToString());
                         return File.WriteAllBytesAsync(path, result.AudioData).ToObservable().ObserveOnContext()
-                            .SelectMany(_ => afterBytesWritten(result,path)
+                            .SelectMany(_ => afterBytesWritten(speechAccount, result,path)
                                 .RetryWithBackoff(3));
                     }));
 

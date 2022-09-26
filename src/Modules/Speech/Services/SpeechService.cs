@@ -23,6 +23,7 @@ using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.ErrorHandling;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
+using Xpand.Extensions.StringExtensions;
 using Xpand.Extensions.Tracing;
 using Xpand.Extensions.XAF.ActionExtensions;
 using Xpand.Extensions.XAF.CollectionSourceExtensions;
@@ -108,6 +109,11 @@ namespace Xpand.XAF.Modules.Speech.Services{
 	        var index = speechTexts.FindIndex(text => text.Oid == current.Oid);
 	        return speechTexts.Where((_, i) => i>index).ToArray().FirstOrDefault();
         }
+
+        internal static string SSMLText(this  IModelSpeech speechModel, string ssml,SpeechVoice speechVoice, string rate=null) 
+	        =>ssml==null?null: speechModel.SSMLSpeakFormat.StringFormat(
+		        speechModel.SSMLVoiceFormat.StringFormat(speechVoice.ShortName, rate.StringFormat($"{ssml}")));
+        
         public static TFile UpdateSSMLFile<TFile>(this TFile file, SpeechSynthesisResult result, string path) where TFile:IAudioFileLink{
 	        file.File ??= file.CreateObject<FileLinkObject>();
 	        file.File.FileName = Path.GetFileName(path);
