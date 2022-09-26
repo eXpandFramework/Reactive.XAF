@@ -12,6 +12,23 @@ namespace Xpand.Extensions.LinqExtensions{
                     action(obj);
                 }
             });
+        public static IEnumerable<T> DoWhenFirst<T>(this IEnumerable<T> source, Action<T> action) 
+            => source.Select((arg1, i) => {
+                if (i == 0) {
+                    action(arg1);
+                }
+
+                return arg1;
+            });
+        public static IEnumerable<T> DoWhen<T>(this IEnumerable<T> source, Func<T,int,bool> when,Action<T> action) 
+            => source.Select((arg1, i) => {
+                if (when(arg1,i)) {
+                    action(arg1);
+                }
+
+                return arg1;
+
+            });
         public static IEnumerable<T> ExactType<T>(this IEnumerable<T> source) 
             => source.Where(arg => arg.GetType()==typeof(T));
 

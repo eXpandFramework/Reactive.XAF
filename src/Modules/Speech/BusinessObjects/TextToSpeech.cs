@@ -9,6 +9,7 @@ using Xpand.Extensions.XAF.Attributes.Custom;
 using Xpand.Extensions.XAF.Xpo.BaseObjects;
 using Xpand.XAF.Modules.CloneModelView;
 using Xpand.XAF.Modules.SpellChecker;
+using Xpand.XAF.Modules.ViewItemValue;
 using Xpand.XAF.Persistent.BaseImpl;
 
 namespace Xpand.XAF.Modules.Speech.BusinessObjects {
@@ -31,6 +32,7 @@ namespace Xpand.XAF.Modules.Speech.BusinessObjects {
 
         string _storage;
 
+        [ViewItemValue(DefaultOnCommit = true)]
         public string Storage {
             get => _storage;
             set => SetPropertyValue(nameof(Storage), ref _storage, value);

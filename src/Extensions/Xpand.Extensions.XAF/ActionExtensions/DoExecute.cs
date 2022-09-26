@@ -27,6 +27,16 @@ namespace Xpand.Extensions.XAF.ActionExtensions{
                 actionBase.DoExecute(selectedItem);
             }
         }
+        public static void ExecuteIfAvailable(this SimpleAction actionBase) {
+            if (actionBase.Available()) {
+                actionBase.DoExecute();
+            }
+        }
+        public static void ExecuteIfAvailable(this ParametrizedAction actionBase) {
+            if (actionBase.Available()) {
+                actionBase.DoExecute(actionBase.Value);
+            }
+        }
 
         public static void DoExecute(this SingleChoiceAction action, object data) 
             => action.DoExecute(action.Items.FirstOrDefault(item => item.Data==data));

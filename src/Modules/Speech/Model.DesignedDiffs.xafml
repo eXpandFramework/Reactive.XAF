@@ -16,26 +16,22 @@
   </BOModel>
   <NavigationItems NavigationStyle="Accordion" StartupNavigationItem="FileSpeechToText_ListView" />
   <ReactiveModules>
-    <ViewItemValue>
-      <Items>
-        <ViewItemValueItem ObjectViewId="TextToSpeech_DetailView" IsNewNode="True">
-          <Members IsNewNode="True">
-            <ViewItemValueObjectViewItem MemberViewItemId="Storage" DefaultOnCommit="True" IsNewNode="True" />
-          </Members>
-        </ViewItemValueItem>
-      </Items>
-    </ViewItemValue>
     <Windows>
       <Alert FormWidth="650" FormLocation="BottomLeft" />
       <Exit>
         <OnExit HideMainWindow="True" />
       </Exit>
+      <HotkeyActions>
+        <LocalAction Id="Break" Action="Break" HotKey="Control + B" IsNewNode="True">
+          <Views IsNewNode="True">
+            <ViewLink ViewId="TextToSpeech_TypeSpeak_DetailView" IsNewNode="True" />
+          </Views>
+        </LocalAction>
+        <SystemAction Id="SpeakText" Action="SpeakText" ChoiceActionItem="Speak" HotKey="Control +  Alt + 1" IsNewNode="True" />
+        <SystemAction Id="TypeSpeak" Action="SpeakText" ChoiceActionItem="Type" HotKey="Control +  Alt + 2" Focus="True" IsNewNode="True" />
+      </HotkeyActions>
       <MultiInstance Disabled="True" />
       <NotifyIcon Enabled="True" />
-      <SystemActions>
-        <SystemAction Id="SpeakText" ActionId="SpeakText" HotKey="Control + Alt + 1" ChoiceActionItem="Speak" Action="SpeakText" IsNewNode="True" />
-        <SystemAction Id="TypeSpeak" ActionId="TypeSpeak" HotKey="Control + Alt + 2" ChoiceActionItem="Type" Action="SpeakText" Focus="True" IsNewNode="True" />
-      </SystemActions>
     </Windows>
   </ReactiveModules>
   <SchemaModules>

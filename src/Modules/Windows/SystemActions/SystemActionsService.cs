@@ -8,7 +8,6 @@ using System.Windows.Forms;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using Xpand.Extensions.Reactive.Combine;
-using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.ActionExtensions;
@@ -26,79 +25,58 @@ namespace Xpand.XAF.Modules.Windows.SystemActions {
 
         internal static IObservable<Unit> SystemActionsConnect(this XafApplication application) {
             var hotKeyManager = application.WhenHotKeyManager().Publish().RefCount();
-            return hotKeyManager.ExecuteViewAgnosticHotKeys(application)
-                // .Merge(hotKeyManager.ExecuteViewHotKeys(application))
-                ;
+            return hotKeyManager.ExecuteHotKeys(application);
         }
-
-        private static IObservable<Unit> ExecuteViewHotKeys(this IObservable<HotKeyManager> source,XafApplication application)
-            => source.ExecuteHotKey(application.WhenFrameViewChanged(),action => action.Views.Any())
-                .SelectMany(t => t.action.View().WhenClosed().Do(_ => t.manager.RemoveHotKey(t.globalHotKey.Name)))
-                .ToUnit();
-
-        private static IObservable<Unit> ExecuteViewAgnosticHotKeys(
-            this IObservable<(HotKeyManager manager, Frame window)> source, XafApplication application)
         
-            => source.SelectMany(hotKeyManager => application.WhenGlobalHotKeyPressed(hotKeyManager.manager).Publish(hotKeyPressed => hotKeyPressed
-                        .WithLatestFrom(application.WhenActionActivated(hotKeyManager), (pressed,activated) => (activated, pressed))
-                        .Where(t => t.activated.modelSystemAction.Action == t.pressed.action.Action)))
-                .DoWhen(t => t.pressed.action.Focus,_ => SetForegroundWindow(((Form)application.MainWindow.Template).Handle))
-                .SelectAndOmit(t => t.activated.action.WhenExecuteCompleted().FirstAsync().Select(a => a)
+        private static IObservable<Unit> ExecuteHotKeys(this IObservable<(HotKeyManager manager, Frame window)> source, XafApplication application)
+            => source.SelectMany(hotKeyManager => application.WhenHotKeyPressed(hotKeyManager.manager).Publish(hotKeyPressed => hotKeyPressed
+                        .WithLatestFrom(application.WhenActionActivated(hotKeyManager), (hotkey,activated) => (activated, hotkey))
+                        .Where(t => t.activated.model.Action == t.hotkey.Action)))
+                .DoWhen(t => t.hotkey is IModelSystemAction { Focus: true },_ => SetForegroundWindow(((Form)application.MainWindow.Template).Handle))
+                .Select(t => t)
+                .SelectMany(t => t.activated.action.WhenExecuteCompleted().FirstAsync().Select(a => a)
                     .MergeToUnit(t.Defer(() => {
-                        t.activated.action.DoTheExecute(t.pressed.action);
+                        t.activated.action.DoTheExecute(t.hotkey);
                         return Observable.Empty<Unit>();
                     })).FirstAsync())
                 .ToUnit();
 
-        private static IObservable<(ActionBase action, IModelSystemAction modelSystemAction)> WhenActionActivated(this XafApplication application, (HotKeyManager manager, Frame window) hotKeyManager) 
+        private static IObservable<(ActionBase action, IModelHotkeyAction model)> WhenActionActivated(this XafApplication application, (HotKeyManager manager, Frame window) hotKeyManager) 
             => hotKeyManager.window.Actions().Where(a => a.Available()).ToNowObservable()
                 .Concat(application.WhenWindowCreated().SelectMany(frame => frame.Actions()))
-                .SelectMany(a => a.Controller.WhenActivated().To(a).StartWith(a).WhenAvailable()).WhenSystem()
-                .Select(t => t);
+                .SelectMany(a => a.Controller.WhenActivated().To(a).StartWith(a).WhenAvailable()).WhenHotkey();
 
-        private static IObservable<(GlobalHotKeyEventArgs e, IModelSystemAction action)> WhenGlobalHotKeyPressed(this XafApplication application, HotKeyManager hotKeyManager) 
-            => application.Model.ToReactiveModule<IModelReactiveModuleWindows>().Windows.SystemActions.ToNowObservable()
+        private static IObservable<IModelHotkeyAction> WhenHotKeyPressed(this XafApplication application, HotKeyManager hotKeyManager) 
+            => application.Model.ToReactiveModule<IModelReactiveModuleWindows>().Windows.HotkeyActions.ToNowObservable()
                 .SelectMany(action => {
                     var modifiers = action.ParseShortcut();
-                    var globalHotKey = new GlobalHotKey(action.Id(), modifiers.modifier, modifiers.key);
-                    hotKeyManager.AddGlobalHotKey(globalHotKey);
-                    return hotKeyManager.WhenGlobalHotKeyPressed( globalHotKey).Select(e => (e,action));
+                    if (action is IModelSystemAction) {
+                        var globalHotKey = new GlobalHotKey(action.Id(), modifiers.modifier, modifiers.key);
+                        hotKeyManager.AddGlobalHotKey(globalHotKey);
+                        return hotKeyManager.WhenGlobalHotKeyPressed( globalHotKey).To(action);    
+                    }
+                    var localHotKey = new LocalHotKey(action.Id(), modifiers.modifier, modifiers.key);
+                    hotKeyManager.AddLocalHotKey(localHotKey);
+                    return hotKeyManager.WhenLocalHotKeyPressed( localHotKey).To( action);
                 });
 
         private static IObservable<GlobalHotKeyEventArgs> WhenGlobalHotKeyPressed(this HotKeyManager hotKeyManager, GlobalHotKey globalHotKey) 
             => hotKeyManager.WhenEvent<GlobalHotKeyEventArgs>(nameof(HotKeyManager.GlobalHotKeyPressed)).Where(e => e.HotKey.Name==globalHotKey.Name);
+        private static IObservable<LocalHotKeyEventArgs> WhenLocalHotKeyPressed(this HotKeyManager hotKeyManager, LocalHotKey globalHotKey) 
+            => hotKeyManager.WhenEvent<LocalHotKeyEventArgs>(nameof(HotKeyManager.LocalHotKeyPressed)).Where(e => e.HotKey.Name==globalHotKey.Name);
+        
 
-        private static IObservable<(ActionBase action, HotKeyManager manager, GlobalHotKey globalHotKey, IModelSystemAction modelSystemAction)> ExecuteHotKey(this IObservable<HotKeyManager> source, 
-            IObservable<Frame> frameSource, Func<IModelSystemAction, bool> matchModel) 
-            => source.CombineLatest(frameSource.SelectMany(frame => frame.Actions()).WhenSystem(),
-                    (manager, t) => (manager, t.action, t.modelSystemAction)).Where(t => matchModel(t.modelSystemAction))
-                .Select(t => (t.manager, t.action,shortcut:t.modelSystemAction.ParseShortcut(),t.modelSystemAction))
-                .AddGlobalHotKey().Execute();
-
-        private static IObservable<(ActionBase action, HotKeyManager manager, GlobalHotKey globalHotKey, IModelSystemAction modelSystemAction)> AddGlobalHotKey(
-            this IObservable<(HotKeyManager manager, ActionBase action, (Modifiers modifier, Keys key) shortcut,IModelSystemAction modelSystemAction)> source)
-            => source.Select(t => {
-                var hotKey = t.manager.EnumerateGlobalHotKeys.Cast<GlobalHotKey>().FirstOrDefault(key => key.Name==t.action.Id);
-                if (hotKey==null) {
-                        var globalHotKey = new GlobalHotKey(t.action.Id, t.shortcut.modifier, t.shortcut.key);
-                        t.manager.AddGlobalHotKey(globalHotKey);
-                        return (t.action,t.manager,globalHotKey,t.modelSystemAction);
-                }
-                return (t.action,t.manager,hotKey,t.modelSystemAction);
-            });
-
-        private static IObservable<(ActionBase action, HotKeyManager manager, GlobalHotKey globalHotKey, IModelSystemAction modelSystemAction)> 
-            Execute(this IObservable<(ActionBase action, HotKeyManager manager, GlobalHotKey globalHotKey, IModelSystemAction modelSystemAction)> source)
-            => source.MergeIgnored(t => t.manager.WhenEvent<GlobalHotKeyEventArgs>(nameof(HotKeyManager.GlobalHotKeyPressed)).Where(e => e.HotKey.Name==t.globalHotKey.Name)
-                .ObserveOnContext().Do(_ => t.action.DoTheExecute(t.modelSystemAction)));
 
         [DllImport("user32.dll")]
         static extern bool SetForegroundWindow(IntPtr hWnd);
         
-        private static void DoTheExecute(this ActionBase action, IModelSystemAction model) {
+        private static void DoTheExecute(this ActionBase action, IModelHotkeyAction model) {
             switch (action) {
                 case SimpleAction simpleAction:
-                    simpleAction.DoExecute();
+                    simpleAction.ExecuteIfAvailable();
+                    break;
+                case ParametrizedAction parametrizedAction:
+                    parametrizedAction.ExecuteIfAvailable();
                     break;
                 case SingleChoiceAction singleChoiceAction :
                     singleChoiceAction.ExecuteIfAvailable(singleChoiceAction.Items.First(item => (string)item.Data==model.ChoiceActionItem.Id));
@@ -135,7 +113,7 @@ namespace Xpand.XAF.Modules.Windows.SystemActions {
             return false;
         }
 
-        static (Modifiers modifier, Keys key) ParseShortcut(this IModelSystemAction model) {
+        static (Modifiers modifier, Keys key) ParseShortcut(this IModelHotkeyAction model) {
             var hasAlt = false;
             var hasControl = false;
             var hasShift = false;
@@ -174,10 +152,9 @@ namespace Xpand.XAF.Modules.Windows.SystemActions {
             return  ( modifier, key:(Keys)new KeysConverter().ConvertFrom(result.GetValue(result.Length - 1))! );
         }
 
-        private static IObservable<(ActionBase action, IModelSystemAction modelSystemAction)> WhenSystem(this IObservable<ActionBase> source)
-            => source.SelectMany(action => action.Application.Model.ToReactiveModule<IModelReactiveModuleWindows>().Windows.SystemActions
-                .Where(modelSystemAction => modelSystemAction.Action!=null)
-                    .Where(modelAction => action.Model.Id==modelAction.Action.Id())
+        private static IObservable<(ActionBase action, IModelHotkeyAction model)> WhenHotkey(this IObservable<ActionBase> source)
+            => source.SelectMany(action => action.Application.Model.ToReactiveModule<IModelReactiveModuleWindows>().Windows.HotkeyActions
+                .Where(hotkeyAction => hotkeyAction.Action!=null).Where(modelAction => action.Model.Id==modelAction.Action.Id())
                 .Select(modelSystemAction => (action,modelSystemAction)));
     }
 

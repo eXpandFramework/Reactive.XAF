@@ -44,7 +44,7 @@ Use the cross platform [Xpand.XAF.Modules.ViewItemValue](https://github.com/eXpa
 2. Remember value strategies e.g Last.
 4. Conditional strategies.
 5. Scripting strategies.
-6. Support for any member type.
+6. Support for any member type. # done 25.09.22
 3. Any other need you may have.
 
 [Let me know](https://github.com/sponsors/apobekiaris) if you want me to implement them for you.

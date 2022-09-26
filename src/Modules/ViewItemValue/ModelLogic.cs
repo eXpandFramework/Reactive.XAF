@@ -5,12 +5,18 @@ using System.Linq;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
+using DevExpress.ExpressApp.Model.Core;
 using DevExpress.Persistent.Base;
-
+using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.XAF.ModelExtensions;
+using Xpand.Extensions.XAF.TypesInfoExtensions;
 using Xpand.XAF.Modules.Reactive;
 
 namespace Xpand.XAF.Modules.ViewItemValue{
+	[AttributeUsage(AttributeTargets.Property)]
+	public class ViewItemValueAttribute:Attribute {
+		public bool DefaultOnCommit { get; set; }
+	}
 	public interface IModelReactiveModulesViewItemValue : IModelReactiveModule{
 		IModelViewItemValue ViewItemValue{ get; }
 	}
@@ -31,7 +37,26 @@ namespace Xpand.XAF.Modules.ViewItemValue{
 		IModelViewItemValueItems Items{ get; }
 	}
 
+	[ModelNodesGenerator(typeof(ModelViewItemValueItemsUpdater))]
 	public interface IModelViewItemValueItems : IModelNode, IModelList<IModelViewItemValueItem>{
+	}
+
+	public class ModelViewItemValueItemsUpdater:ModelNodesGeneratorBase {
+		protected override void GenerateNodesCore(ModelNode node) 
+			=> node.Application.BOModel.Select(c => c.TypeInfo).AttributedMembers<ViewItemValueAttribute>()
+				.SelectMany(t => node.Application.Views.OfType<IModelDetailView>()
+					.SelectMany(view => view.PropertyEditorItems().Where(editor => editor.ModelMember.MemberInfo==t.memberInfo)
+						.Select(editor => (editor,t.attribute))))
+				.GroupBy(t => t.editor.GetParent<IModelDetailView>())
+				.ForEach(views => {
+					var item = node.To<IModelViewItemValueItems>().AddNode<IModelViewItemValueItem>();
+					item.ObjectView = views.Key.AsObjectView;
+					views.ForEach(t => {
+						var viewItem = item.Members.AddNode<IModelViewItemValueObjectViewItem>();
+						viewItem.MemberViewItem = viewItem.MemberViewItems.First(memberViewItem => memberViewItem.ModelMember==t.editor.ModelMember);
+						viewItem.DefaultOnCommit = t.attribute.DefaultOnCommit;
+					});
+				});
 	}
 
 	[KeyProperty(nameof(ObjectViewId))]
@@ -59,6 +84,7 @@ namespace Xpand.XAF.Modules.ViewItemValue{
 		public static void Set_ObjectView(IModelViewItemValueItem itemValueItem, IModelObjectView modelObjectView) 
 			=> itemValueItem.ObjectViewId = modelObjectView.Id;
 	}
+	
 	
 	public interface IModelViewItemValueObjectViewItems:IModelNode,IModelList<IModelViewItemValueObjectViewItem>{
 	}

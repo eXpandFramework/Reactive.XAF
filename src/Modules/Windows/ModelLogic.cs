@@ -24,7 +24,7 @@ namespace Xpand.XAF.Modules.Windows{
 	    IModelWindowsExit Exit{ get;  }
         IModelWindowsMainFormBox Form { get; } 
         bool Startup { get; set; }
-        IModelSystemActions SystemActions { get; }
+        IModelHotkeyActions HotkeyActions { get; }
     }
 
     public interface IModelWindowsAlert : IModelNode {
@@ -33,34 +33,43 @@ namespace Xpand.XAF.Modules.Windows{
         int? FormWidth { get; set; }
     }
 
-    public interface IModelSystemActions : IModelNode, IModelList<IModelSystemAction> {
+    public interface IModelHotkeyActions : IModelNode, IModelList<IModelHotkeyAction> {
         
     }
 
-    public interface IModelSystemAction : IModelNode {
+    public interface IModelSystemAction : IModelHotkeyAction {
+        bool Focus { get; set; }    
+    }
+    public interface IModelLocalAction : IModelHotkeyAction {
+        
+    }
+
+    [ModelAbstractClass]
+    public interface IModelHotkeyAction:IModelNode { 
         [Editor(typeof(HotKeyEditor), typeof(UITypeEditor))]
         [Required][ReadOnly(true)]
         string HotKey { get; set; }
-        IModelSystemActionViews Views { get; }
+        IModelHotKeyActionViews Views { get; }
         [ModelBrowsable(typeof(ChoiceActionItemVisibilityCalculator))]
         [DataSourceProperty(nameof(Action)+"."+nameof(IModelAction.ChoiceActionItems))]
         IModelChoiceActionItem ChoiceActionItem { get; set; }
         [DataSourceProperty("Application.ActionDesign.Actions")][RefreshProperties(RefreshProperties.All)]
         IModelAction Action { get; set; }
-        bool Focus { get; set; }
+        
     }
     
     public class ChoiceActionItemVisibilityCalculator:IModelIsVisible {
         public bool IsVisible(IModelNode node, string propertyName) 
-            => ((IModelSystemAction)node).Action?.ChoiceActionItems?.Any()??false;
+            => ((IModelHotkeyAction)node).Action?.ChoiceActionItems?.Any()??false;
     }
 
-    public interface IModelSystemActionViews:IModelNode,IModelList<IModelViewLink> { }
+    public interface IModelHotKeyActionViews:IModelNode,IModelList<IModelViewLink> { }
 
     [KeyProperty(nameof(ViewId))]
     public interface IModelViewLink : IModelNode {
         [Browsable(false)]
         string ViewId { get; set; }
+        [DataSourceProperty("Application.Views")]
         IModelView View { get; set; }
     }
 
@@ -72,7 +81,7 @@ namespace Xpand.XAF.Modules.Windows{
     }
     public class HotKeyVisibility:IModelIsReadOnly {
         
-        public bool IsReadOnly(IModelNode node, string propertyName) => ((IModelSystemAction)node).Action == null;
+        public bool IsReadOnly(IModelNode node, string propertyName) => ((IModelHotkeyAction)node).Action == null;
 
         public bool IsReadOnly(IModelNode node, IModelNode childNode) {
             throw new NotImplementedException();
