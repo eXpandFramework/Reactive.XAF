@@ -23,7 +23,7 @@
         <dependency id="Xpand.XAF.Modules.Blazor" version="4.221.6.1" />
         <dependency id="Xpand.Extensions.Blazor" version="4.221.6.1" />
         <dependency id="DevExpress.ExpressApp.Security" version="22.1.5" />
-        <dependency id="Xpand.Patcher" version="3.0.1" />
+        <dependency id="Xpand.Patcher" version="3.0.5" />
         <dependency id="System.Reactive" version="5.0" />
         <dependency id="DevExpress.Persistent.Base" version="22.1.5" />
         <dependency id="DevExpress.ExpressApp.Xpo" version="22.1.5" />

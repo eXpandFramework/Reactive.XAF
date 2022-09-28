@@ -31,7 +31,7 @@ namespace Xpand.XAF.Modules.Speech.Services {
         internal static IObservable<Unit> ConnectTextToSpeech(this  ApplicationModulesManager manager)
             => manager.SpeakText()
                 .MergeToUnit(manager.WhenSpeechApplication(application =>application.SaveSpeak()))
-                // .MergeToUnit(manager.SaveTextToSpeech())
+                .MergeToUnit(manager.NewTextToSpeech())
                 .MergeToUnit(manager.Break())
         ;
 
@@ -46,16 +46,25 @@ namespace Xpand.XAF.Modules.Speech.Services {
                             .ObserveOnContext().Do(toSpeech => toSpeech.ObjectSpace.Refresh())
                             .ToUnit()));
 
-        private static IObservable<ParametrizedActionExecuteEventArgs> Break(this ApplicationModulesManager manager) 
+        private static IObservable<Unit> Break(this ApplicationModulesManager manager) 
             => manager.RegisterViewParametrizedAction(nameof(Break),typeof(int),action => {
                     action.TargetViewId = TextToSpeech.TypeSpeakDetailView;
                     action.Value = 2;
                     action.ToolTip = $"{action.Caption} (CTRL+B)";
                 },PredefinedCategory.PopupActions)
-                .WhenExecuted().Do(e => {
+                .MergeIgnored(action => action.WhenEvent("ValueChanged").DoWhen(_ => action.Value==null,_ => action.Value=2))
+                .WhenExecuted(e => {
                     Clipboard.SetText(@$"<break time=""{e.Action.AsParametrizedAction().Value}s""/>");
                     SendKeys.Send("^{v}");
-                });
+                }).ToUnit()
+                ;
+        private static IObservable<Unit> NewTextToSpeech(this ApplicationModulesManager manager) 
+            => manager.RegisterViewSimpleAction(nameof(NewTextToSpeech),action => action.TargetViewId = TextToSpeech.TypeSpeakDetailView,PredefinedCategory.Unspecified)
+                .WhenExecuted(e =>  {
+                    // e.View().ObjectSpace.CommitChanges();
+                    e.View().CurrentObject = e.View().ObjectSpace.CreateObject<TextToSpeech>();
+                }).ToUnit()
+                ;
 
         private static IObservable<SingleChoiceAction> WhenSaveSpeak(this Frame frame) 
             => frame.View.ObjectSpace.WhenCommitted().WaitUntilInactive(3).ObserveOnContext()

@@ -65,6 +65,10 @@
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.ViewItemValue.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
+    <Reference Include="Xpand.XAF.Modules.SuppressConfirmation">
+      <HintPath>..\..\..\bin\Xpand.XAF.Modules.SuppressConfirmation.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Update="Module.cs" />

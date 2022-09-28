@@ -27,6 +27,7 @@
             <ViewLink ViewId="TextToSpeech_TypeSpeak_DetailView" IsNewNode="True" />
           </Views>
         </LocalAction>
+        <LocalAction Id="NewTextToSpeech" Action="NewTextToSpeech" HotKey="Control + N" IsNewNode="True" />
         <LocalAction Id="Save" Action="Save" HotKey="Control + S" IsNewNode="True">
           <Views IsNewNode="True">
             <ViewLink ViewId="TextToSpeech_TypeSpeak_DetailView" IsNewNode="True" />
@@ -502,7 +503,7 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
-    <DetailView Id="TextToSpeech_DetailView" FreezeLayout="True">
+    <DetailView Id="TextToSpeech_DetailView" FreezeLayout="True" DefaultFocusedItem="Text">
       <Items>
         <PropertyEditor Id="BeforeText" Caption="Before" />
       </Items>
@@ -528,7 +529,10 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
-    <DetailView Id="TextToSpeech_TypeSpeak_DetailView">
+    <DetailView Id="TextToSpeech_TypeSpeak_DetailView" SupressConfirmation="True">
+      <HiddenActions>
+        <ActionLink ActionId="New" IsNewNode="True" />
+      </HiddenActions>
       <MergedDifferences>
         <MergedDifference Id="TextToSpeech_DetailView" View="TextToSpeech_DetailView" IsNewNode="True" />
       </MergedDifferences>

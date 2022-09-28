@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
+using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
@@ -30,8 +31,9 @@ namespace Xpand.XAF.Modules.Windows.SystemActions {
             => source.SelectMany(hotKeyManager => application.WhenHotKeyPressed(hotKeyManager.manager)
                 .Publish(hotkeyPressed=> application.WhenActionActivated(hotKeyManager)
                     .SelectMany(activated => hotkeyPressed.Where(model => activated.model==model)
-                        .TakeUntil(activated.action.WhenDeactivated())
-                        .SelectMany(model => activated.WaitTheExecute( model)))));
+                        // .TakeUntil(activated.action.WhenDeactivated())
+                        .DoWhen(action => action is IModelSystemAction { Focus: true },_ => SetForegroundWindow(application.MainWindow.Template.To<Form>().Handle))
+                        .SelectAndOmit(model => activated.WaitTheExecute( model)))));
 
         private static IObservable<Unit> WaitTheExecute(this (ActionBase action, IModelHotkeyAction model) activated, IModelHotkeyAction model) 
             => activated.action.WhenExecuteCompleted().FirstAsync()

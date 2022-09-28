@@ -44,9 +44,10 @@ namespace Xpand.XAF.Modules.ViewItemValue{
         private static IObservable<(IModelViewItemValueObjectViewItem model, Frame frame)> WhenViewItemValueItem(this ApplicationModulesManager manager) 
             => manager.WhenApplication(application => application.WhenFrameViewChanged().WhenFrame(ViewType.DetailView)
                 .Where(frame => frame.View.Model.Application.IsViewItemValueObjectView(frame.View.Id))
-                .SelectMany(frame => frame.View.Model.Application.ModelViewItemValue().Items
-                    .Where(item => item.ObjectView == frame.View.Model)
-                    .SelectMany(item => item.Members.Select(viewItem => (model:viewItem, frame)).ToArray())));
+                .SelectUntilViewClosed(frame => frame.View.WhenCurrentObjectChanged().To(frame).StartWith(frame)
+                    .SelectMany(_ => frame.View.Model.Application.ModelViewItemValue().Items
+                        .Where(item => item.ObjectView == frame.View.Model)
+                        .SelectMany(item => item.Members.Select(viewItem => (model:viewItem, frame)).ToArray()))));
 
         private static IModelViewItemValueObjectViewItem AssignViewItemValue(this IModelViewItemValueObjectViewItem item, DetailView view) {
             var memberInfo = item.MemberViewItem.ModelMember.MemberInfo;

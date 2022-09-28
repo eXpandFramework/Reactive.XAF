@@ -32,7 +32,7 @@
         <dependency id="NUnit" version="3.13.2" />
         <dependency id="NUnit3TestAdapter" version="4.0" />
         <dependency id="Fasterflect.Xpand" version="2.0.7" />
-        <dependency id="Xpand.Patcher" version="3.0.1" />
+        <dependency id="Xpand.Patcher" version="3.0.5" />
         <dependency id="Polly" version="7.2.2" />
         <dependency id="Microsoft.CodeAnalysis" version="4.2" />
         <dependency id="DevExpress.ExpressApp.Win" version="22.1.5" />

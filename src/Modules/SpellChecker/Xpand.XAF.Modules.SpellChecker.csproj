@@ -58,8 +58,5 @@
     <None Remove="Dictionaries\EnglishAlphabet.txt" />
     <EmbeddedResource Include="Dictionaries\EnglishAlphabet.txt" />
   </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="DevExpress.Win.SpellChecker" Version="22.1.5" />
-  </ItemGroup>
   <Import Project="..\..\..\.paket\Paket.Restore.targets" />
 </Project>

@@ -14,6 +14,7 @@ using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Speech.Services;
 using Xpand.XAF.Modules.SpellChecker;
+using Xpand.XAF.Modules.SuppressConfirmation;
 using Xpand.XAF.Modules.ViewItemValue;
 using Xpand.XAF.Modules.Windows;
 
@@ -37,6 +38,7 @@ namespace Xpand.XAF.Modules.Speech {
             RequiredModuleTypes.Add(typeof(ViewVariantsModule));
             RequiredModuleTypes.Add(typeof(ModelViewInheritanceModule));
             RequiredModuleTypes.Add(typeof(ViewItemValueModule));
+            RequiredModuleTypes.Add(typeof(SuppressConfirmationModule));
             
         }
 

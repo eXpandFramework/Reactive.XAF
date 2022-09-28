@@ -66,8 +66,9 @@ namespace Xpand.XAF.Modules.Speech.BusinessObjects {
                 if (oid == 0) {
                     oid = Session.Query<TextToSpeech>().Max(speech => speech.Oid)+1;
                 }
+                
                 return Session.Query<TextToSpeech>().Where(speech => speech.Oid<oid&&speech.Text!=null).OrderByDescending(speech => speech.Oid)
-                    .Take(5).Select(speech => speech._text).ToArray().Join($"{Environment.NewLine}{Environment.NewLine}");
+                    .Take(5).Select(speech => speech._text).ToArray().Reverse().Join($"{Environment.NewLine}{Environment.NewLine}");
             }
         }
 

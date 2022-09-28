@@ -19,28 +19,7 @@ using Xpand.XAF.Modules.SpellChecker;
 using Xpand.XAF.Persistent.BaseImpl;
 
 namespace Xpand.XAF.Modules.Speech.BusinessObjects {
-    // public class CustomRichTextHtmlValueStorage : IRichTextValueStorage {
-    //     public object GetValue(RichEditControl control) {
-    //         return control.RtfText;
-    //     }
-    //     public void SetValue(RichEditControl control, object propertyValue) {
-    //         if(propertyValue == null) {
-    //             return;
-    //         }
-    //         using(MemoryStream ms = new MemoryStream(Encoding.UTF8.GetBytes((string)propertyValue))) {
-    //             control.LoadDocument(ms);
-    //         }
-    //     }
-    // }
 
-    // public class CustomWinController : ObjectViewController<DetailView, SpeechText> {
-    //     protected override void OnActivated() {
-    //         base.OnActivated();
-    //         if(View.FindItem("Text") is RichTextPropertyEditor richTextPropertyEditor) {
-    //             richTextPropertyEditor.ValueStorage = new CustomRichTextHtmlValueStorage();
-    //         }
-    //     }
-    // }
     [CloneModelView(CloneViewType.DetailView, nameof(SpeechText)+"_MD_DetailView")]
     [CloneModelView(CloneViewType.ListView,SpeechTextBandedListView)]
     [CloneModelView(CloneViewType.ListView,SpeechTextEditorListView)]

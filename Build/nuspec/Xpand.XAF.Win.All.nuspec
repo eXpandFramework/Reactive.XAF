@@ -83,6 +83,7 @@
         <dependency id="Xpand.XAF.Modules.Office.DocumentStyleManager" version="4.221.6.1" />
         <dependency id="Xpand.XAF.Modules.OneView" version="4.221.6.1" />
         <dependency id="Xpand.XAF.Modules.Speech" version="4.221.6.1" />
+        <dependency id="Xpand.XAF.Modules.SpellChecker" version="4.221.6.1" />
         <dependency id="Xpand.XAF.Modules.Windows" version="4.221.6.1" />
         <dependency id="Xpand.XAF.Modules.BulkObjectUpdate" version="4.221.6.1" />
         <dependency id="Xpand.XAF.Modules.Email" version="4.221.6.1" />

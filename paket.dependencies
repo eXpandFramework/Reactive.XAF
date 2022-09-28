@@ -20,6 +20,7 @@ nuget DevExpress.EasyTest 22.1.5
 nuget DevExpress.ExpressApp.EasyTest.WebAdapter 22.1.5  
 nuget DevExpress.ExpressApp.EasyTest.WinAdapter 22.1.5  
 nuget DevExpress.ExpressApp.Security.Xpo 22.1.5  
+nuget DevExpress.Win.SpellChecker 22.1.5  
 nuget System.CodeDom == 6.0.0
 nuget System.ServiceModel.NetTcp 4.9
 nuget System.ServiceModel.Security 4.9
@@ -63,7 +64,7 @@ nuget System.Reflection.Metadata 5.0.0
 nuget System.Interactive 5.0     
 nuget System.Interactive.Async 5.0
 nuget Unofficial.Microsoft.mshtml 7.0.3300
-nuget Xpand.Patcher 3.0.1
+nuget Xpand.Patcher 3.0.5
 nuget YamlDotNet 11.2.1
 nuget Polly 7.2.2
 nuget Google.Apis.Calendar.v3 1.55.0.2410

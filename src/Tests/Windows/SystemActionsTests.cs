@@ -20,7 +20,7 @@ namespace Xpand.XAF.Modules.Windows.Tests {
         public void RegisterWindowsAction() {
             var observer = SystemActionsService.CustomizeHotKeyManager.Test();
             using var application = WindowsModule().Application;
-            var windowsSystemActions = application.Model.ToReactiveModule<IModelReactiveModuleWindows>().Windows.SystemActions;
+            var windowsSystemActions = application.Model.ToReactiveModule<IModelReactiveModuleWindows>().Windows.HotkeyActions;
             var modelSystemAction = windowsSystemActions.AddNode<IModelSystemAction>();
             modelSystemAction.Action = application.Model.ActionDesign.Actions[nameof(TestWindowsService.WindowsAction)];
             modelSystemAction.HotKey = "LWin + Control + Z";
@@ -39,7 +39,7 @@ namespace Xpand.XAF.Modules.Windows.Tests {
         public void RegisterViewAction() {
             var observer = SystemActionsService.CustomizeHotKeyManager.Test();
             using var application = WindowsModule().Application;
-            var windowsSystemActions = application.Model.ToReactiveModule<IModelReactiveModuleWindows>().Windows.SystemActions;
+            var windowsSystemActions = application.Model.ToReactiveModule<IModelReactiveModuleWindows>().Windows.HotkeyActions;
             var modelSystemAction = windowsSystemActions.AddNode<IModelSystemAction>();
             modelSystemAction.Action = application.Model.ActionDesign.Actions[nameof(TestWindowsService.ViewAction)];
             var modelViewLink = modelSystemAction.Views.AddNode<IModelViewLink>();

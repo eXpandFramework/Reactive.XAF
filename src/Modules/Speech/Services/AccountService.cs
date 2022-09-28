@@ -11,6 +11,7 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.SystemModule;
 using Microsoft.CognitiveServices.Speech;
 using Xpand.Extensions.AppDomainExtensions;
+using Xpand.Extensions.FileExtensions;
 using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.ErrorHandling;
 using Xpand.Extensions.Reactive.Transform;
@@ -45,6 +46,9 @@ namespace Xpand.XAF.Modules.Speech.Services {
                         var path = speechAccount.ObjectSpace.GetObjectsQuery<TextToSpeech>()
                             .OrderByDescending(speech => speech.Oid).FirstOrDefault()
                             .WavFileName(speechModel,oid => (oid + 1).ToString());
+                        if (new FileInfo(path).IsFileLocked()) {
+                            path = $"{Path.GetDirectoryName(path)}{Path.GetFileNameWithoutExtension(path)}_{Path.GetFileNameWithoutExtension(path)}{Path.GetExtension(path)}";
+                        }
                         return File.WriteAllBytesAsync(path, result.AudioData).ToObservable().ObserveOnContext()
                             .SelectMany(_ => afterBytesWritten(speechAccount, result,path)
                                 .RetryWithBackoff(3));
