@@ -94,7 +94,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                     handler => item.SelectionChanged += handler,
                     handler => item.SelectionChanged -= handler,ImmediateScheduler.Instance))
                 .Select(pattern => pattern.Sender).Cast<T>()
-                .WaitUntilInactive(waitUntilInactiveSeconds).ObserveOnContext()
+                .Publish(changed => waitUntilInactiveSeconds > 0 ? changed.ObserveOnContext() : changed)
+                
         ;
 
         public static IObservable<T> WhenCurrentObjectChanged<T>(this T controller) where T : View 
