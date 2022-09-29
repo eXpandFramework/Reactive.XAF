@@ -24,9 +24,10 @@ namespace Xpand.XAF.Modules.ViewItemValue.Tests{
             viewItemValueItem.ObjectView = application.FindModelDetailView(typeof(Order));
 
             var item = viewItemValueItem.Members.AddNode<IModelViewItemValueObjectViewItem>();
-            item.MemberViewItems.Count().ShouldBe(2);
+            item.MemberViewItems.Count().ShouldBe(5);
             item.MemberViewItems.FirstOrDefault(viewItem => viewItem.Id==nameof(Order.Accessory)).ShouldNotBeNull();
             item.MemberViewItems.FirstOrDefault(viewItem => viewItem.Id==nameof(Order.Product)).ShouldNotBeNull();
+            item.MemberViewItems.FirstOrDefault(viewItem => viewItem.Id==nameof(Order.OrderID)).ShouldNotBeNull();
         }
     }
 }

@@ -83,7 +83,7 @@ namespace Xpand.XAF.Modules.ViewItemValue.Tests{
             objectSpace.CommitChanges();
             var order = objectSpace.CreateObject<Order>();
 
-            application.CreateDetailView(objectSpace, order);
+            application.CreateViewWindow().SetView(application.CreateDetailView(objectSpace, order));
 
             order.Product.ShouldNotBeNull();
             order.Product.Oid.ShouldBe(product.Oid);

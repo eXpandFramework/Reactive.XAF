@@ -10,35 +10,35 @@ namespace Xpand.XAF.Modules.Reactive.Tests.ObjectSpace {
         private R _r;
         private TestObserver<R> _testObserver;
 
-        [Test][Order(0)]
-        public void Emit_once_when_many_properties_change() {
-            var objectSpace = Application.CreateObjectSpace();
-            _r = objectSpace.CreateObject<R>();
-
-            _testObserver = objectSpace.WhenModifiedObjects<R>().Test();
-
-            _r.Test = nameof(R.Test);
-            _r.Test1 = nameof(R.Test1);
-            
-            _testObserver.ItemCount.ShouldBe(1);
-            
-            
-        }
+        // [Test][Order(0)]
+        // public void Emit_once_when_many_properties_change() {
+        //     var objectSpace = Application.CreateObjectSpace();
+        //     _r = objectSpace.CreateObject<R>();
+        //
+        //     _testObserver = objectSpace.WhenModifiedObjects<R>().Test();
+        //
+        //     _r.Test = nameof(R.Test);
+        //     _r.Test1 = nameof(R.Test1);
+        //     
+        //     _testObserver.ItemCount.ShouldBe(1);
+        //     
+        //     
+        // }
         
-        [Test][Order(10)]
-        public void Emit_again_for_same_properties_After_commit() {
-            _r.ObjectSpace.CommitChanges();
-
-            _r.Test = null;
-            _r.Test1 = null;
-            
-            _testObserver.ItemCount.ShouldBe(2);
-            
-            
-        }
+        // [Test][Order(10)]
+        // public void Emit_again_for_same_properties_After_commit() {
+        //     _r.ObjectSpace.CommitChanges();
+        //
+        //     _r.Test = null;
+        //     _r.Test1 = null;
+        //     
+        //     _testObserver.ItemCount.ShouldBe(2);
+        //     
+        //     
+        // }
 
         [Test][Order(20)]
-        public void Emit_once_when_selected_properties_change() {
+        public void Emit_all_property_changes() {
             var objectSpace = Application.CreateObjectSpace();
             _r = objectSpace.CreateObject<R>();
 
@@ -47,22 +47,22 @@ namespace Xpand.XAF.Modules.Reactive.Tests.ObjectSpace {
             _r.Test = nameof(R.Test);
             _r.Test1 = nameof(R.Test1);
             
-            _testObserver.ItemCount.ShouldBe(1);
-            
-            
-        }
-        
-        [Test][Order(30)]
-        public void Emit_again_for_same_selected_properties_After_commit() {
-            _r.ObjectSpace.CommitChanges();
-
-            _r.Test = null;
-            _r.Test1 = null;
-            
             _testObserver.ItemCount.ShouldBe(2);
             
             
         }
+        
+        // [Test][Order(30)]
+        // public void Emit_again_for_same_selected_properties_After_commit() {
+        //     _r.ObjectSpace.CommitChanges();
+        //
+        //     _r.Test = null;
+        //     _r.Test1 = null;
+        //     
+        //     _testObserver.ItemCount.ShouldBe(2);
+        //     
+        //     
+        // }
         
         [Test][Order(40)]
         public void Do_not_Emit_for_non_selected_properties() {
