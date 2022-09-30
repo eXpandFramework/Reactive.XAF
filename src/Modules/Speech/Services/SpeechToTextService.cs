@@ -22,6 +22,7 @@ using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
 using Swordfish.NET.Collections.Auxiliary;
 using Xpand.Extensions.LinqExtensions;
+using Xpand.Extensions.Numeric;
 using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.ErrorHandling;
@@ -303,14 +304,12 @@ namespace Xpand.XAF.Modules.Speech.Services {
 						        current.Start = current.Previous?.End??TimeSpan.Zero;
 						        return Unit.Default.ReturnObservable();
 					        }
-					        if (timeSpan > 0) {
-						        return Observable.While(() => current.Next != null&&speechTexts.Contains(current.Next), current.Defer(() => {
+
+					        return Observable.While(() => current.Next != null && speechTexts.Contains(current.Next),
+						        current.Defer(() => {
 							        current.Next.Start += TimeSpan.FromSeconds(timeSpan);
 							        current = current.Next;
 						        }));
-					        }
-
-					        return Observable.Empty<Unit>();
 				        });
 		        })
 		        .ToUnit();
@@ -415,7 +414,7 @@ namespace Xpand.XAF.Modules.Speech.Services {
 				        )
 				        .RepeatWhen(observable => observable.ObserveOnContext()
 					        .TakeUntil(_ => speechText.CanConvert).Where(_ => !speechText.CanConvert)
-					        .Select(_ => {
+					        .Select((_,i) => {
 						        var regexObj = new Regex(@"(<prosody rate=""\+)(?<rate>[^""]*)\b[^>]*>(.*?)(</prosody>)",
 							        RegexOptions.IgnoreCase | RegexOptions.Singleline);
 						        var rate = regexObj.Match(ssmlText).Groups["rate"].Value.Change<decimal>() + 5 * (i + 1);
@@ -430,9 +429,9 @@ namespace Xpand.XAF.Modules.Speech.Services {
 						        }
 
 						        speechText.Rate = rate;
-						        return rate;
+						        return $"Increasing rate {rate.RoundNumber()}%";
 					        })
-					        .ShowXafMessage(application));
+					        .ShowXafMessage(application).Take(1));
 		        })
 		        .BufferUntilCompleted().WhenNotEmpty().ObserveOnContext().SelectMany()
 		        .Select(t => t.speechText)

@@ -72,7 +72,8 @@ namespace Xpand.XAF.Modules.Speech.BusinessObjects {
             speechVoice => speechVoice.Account.Oid == Account.Oid && TargetLanguages.Contains(speechVoice.Language)).ToList();
         
         
-        [Association("SpeechServiceAccount-SpeechToTexts")][IgnoreDataLocking]
+        // [Association("SpeechServiceAccount-SpeechToTexts-CannotDelete")]
+        [IgnoreDataLocking]
         public SpeechAccount Account {
             get => _speechAccount;
             set => SetPropertyValue(nameof(SpeechAccount), ref _speechAccount, value);

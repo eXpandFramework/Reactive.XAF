@@ -13,7 +13,8 @@ using Xpand.XAF.Persistent.BaseImpl;
 namespace Xpand.XAF.Modules.Speech.BusinessObjects {
     [NavigationItem("Speech")][DefaultClassOptions]
     [DefaultProperty(nameof(Name))][DeferredDeletion(false)][ImageName(("BO_User"))]
-    [OptimisticLocking(OptimisticLockingBehavior.LockModified)][SuppressMessage("Design", "XAF0023:Do not implement IObjectSpaceLink in the XPO types")]
+    [OptimisticLocking(OptimisticLockingBehavior.LockModified)]
+    [SuppressMessage("Design", "XAF0023:Do not implement IObjectSpaceLink in the XPO types")]
     public class SpeechAccount:CustomBaseObject {
         public SpeechAccount(Session session) : base(session) { }
 
@@ -24,8 +25,8 @@ namespace Xpand.XAF.Modules.Speech.BusinessObjects {
         [InvisibleInAllViews]
         public List<SpeechLanguage> Languages => Voices.Select(voice => voice.Language).Distinct().ToList();
         
-        [Association("SpeechServiceAccount-SpeechToTexts")][InvisibleInAllViews]
-        public XPCollection<SpeechToText> SpeechToTexts => GetCollection<SpeechToText>();
+        // [Association("SpeechServiceAccount-SpeechToTexts")][InvisibleInAllViews]
+        // public XPCollection<SpeechToText> SpeechToTexts => GetCollection<SpeechToText>();
         string _subscription;
 
         string _name;

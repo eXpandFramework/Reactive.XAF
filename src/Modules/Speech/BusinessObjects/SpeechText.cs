@@ -135,7 +135,7 @@ namespace Xpand.XAF.Modules.Speech.BusinessObjects {
             get => _rate;
             set => SetPropertyValue(nameof(Rate), ref _rate, value);
         }
-        public bool CanConvert => Duration.Add(SpareTime).Subtract(FileDuration??TimeSpan.Zero)>=TimeSpan.Zero;
+        public bool CanConvert =>FileDuration != null && FileDuration.Value != TimeSpan.Zero && Duration.Add(SpareTime).Subtract(FileDuration??TimeSpan.Zero)>=TimeSpan.Zero;
     }
 
     public interface ISelectInExplorer {
