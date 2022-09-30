@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Web.All</id>
-    <version>4.221.7.0</version>
+    <version>4.221.8.0</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -15,108 +15,108 @@
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  Xpand.XAF.Web.All</tags>
     <dependencies>
       <group targetFramework="net6.0-windows7.0">
-        <dependency id="Xpand.XAF.Modules.Office.DocumentStyleManager" version="4.221.7.0" />
+        <dependency id="Xpand.XAF.Modules.Office.DocumentStyleManager" version="4.221.8.0" />
       </group>
       <group targetFramework="netstandard2.0">
-        <dependency id="Xpand.Extensions.Mono.Cecil" version="4.221.7.0" />
-        <dependency id="Xpand.Extensions" version="4.221.7.0" />
-        <dependency id="Xpand.Extensions.Office.Cloud" version="4.221.7.0" />
-        <dependency id="Xpand.Extensions.Reactive" version="4.221.7.0" />
-        <dependency id="Xpand.Extensions.XAF" version="4.221.7.0" />
-        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.AutoCommit" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.CloneMemberValue" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.CloneModelView" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.HideToolBar" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.MasterDetail" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.ModelMapper" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.ModelViewInheritance" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.Office.Cloud.Google.Calendar" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.Office.Cloud.Google" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.Office.Cloud.Google.Tasks" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.PositionInListView" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.ProgressBarViewItem" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.Reactive.Logger.Hub" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.Reactive.Logger" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.Reactive" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.RefreshView" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.SequenceGenerator" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.SuppressConfirmation" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.ViewEditMode" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.ViewItemValue" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.ViewWizard" version="4.221.7.0" />
+        <dependency id="Xpand.Extensions.Mono.Cecil" version="4.221.8.0" />
+        <dependency id="Xpand.Extensions" version="4.221.8.0" />
+        <dependency id="Xpand.Extensions.Office.Cloud" version="4.221.8.0" />
+        <dependency id="Xpand.Extensions.Reactive" version="4.221.8.0" />
+        <dependency id="Xpand.Extensions.XAF" version="4.221.8.0" />
+        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.AutoCommit" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.CloneMemberValue" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.CloneModelView" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.HideToolBar" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.MasterDetail" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.ModelMapper" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.ModelViewInheritance" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.Office.Cloud.Google.Calendar" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.Office.Cloud.Google" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.Office.Cloud.Google.Tasks" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.PositionInListView" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.ProgressBarViewItem" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.Reactive.Logger.Hub" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.Reactive.Logger" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.Reactive" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.RefreshView" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.SequenceGenerator" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.SuppressConfirmation" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.ViewEditMode" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.ViewItemValue" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.ViewWizard" version="4.221.8.0" />
       </group>
       <group targetFramework="net6.0">
-        <dependency id="Xpand.Extensions.Blazor" version="4.221.7.0" />
-        <dependency id="Xpand.Extensions.Office.Cloud.Google.Blazor" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.Blazor" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.BulkObjectUpdate" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.Email" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.JobScheduler.Hangfire" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.JobScheduler.Notification" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.RazorView" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.Reactive.Rest" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.StoreToDisk" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.TenantManager" version="4.221.7.0" />
-        <dependency id="Xpand.Extensions.Mono.Cecil" version="4.221.7.0" />
-        <dependency id="Xpand.Extensions" version="4.221.7.0" />
-        <dependency id="Xpand.Extensions.Office.Cloud" version="4.221.7.0" />
-        <dependency id="Xpand.Extensions.Reactive" version="4.221.7.0" />
-        <dependency id="Xpand.Extensions.XAF" version="4.221.7.0" />
-        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.AutoCommit" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.CloneMemberValue" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.CloneModelView" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.HideToolBar" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.MasterDetail" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.ModelMapper" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.ModelViewInheritance" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.Office.Cloud.Google.Calendar" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.Office.Cloud.Google" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.Office.Cloud.Google.Tasks" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.PositionInListView" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.ProgressBarViewItem" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.Reactive.Logger.Hub" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.Reactive.Logger" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.Reactive" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.RefreshView" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.SequenceGenerator" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.SuppressConfirmation" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.ViewEditMode" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.ViewItemValue" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.ViewWizard" version="4.221.7.0" />
+        <dependency id="Xpand.Extensions.Blazor" version="4.221.8.0" />
+        <dependency id="Xpand.Extensions.Office.Cloud.Google.Blazor" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.Blazor" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.BulkObjectUpdate" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.Email" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.JobScheduler.Hangfire" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.JobScheduler.Notification" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.RazorView" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.Reactive.Rest" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.StoreToDisk" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.TenantManager" version="4.221.8.0" />
+        <dependency id="Xpand.Extensions.Mono.Cecil" version="4.221.8.0" />
+        <dependency id="Xpand.Extensions" version="4.221.8.0" />
+        <dependency id="Xpand.Extensions.Office.Cloud" version="4.221.8.0" />
+        <dependency id="Xpand.Extensions.Reactive" version="4.221.8.0" />
+        <dependency id="Xpand.Extensions.XAF" version="4.221.8.0" />
+        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.AutoCommit" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.CloneMemberValue" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.CloneModelView" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.HideToolBar" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.MasterDetail" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.ModelMapper" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.ModelViewInheritance" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.Office.Cloud.Google.Calendar" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.Office.Cloud.Google" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.Office.Cloud.Google.Tasks" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.PositionInListView" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.ProgressBarViewItem" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.Reactive.Logger.Hub" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.Reactive.Logger" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.Reactive" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.RefreshView" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.SequenceGenerator" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.SuppressConfirmation" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.ViewEditMode" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.ViewItemValue" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.ViewWizard" version="4.221.8.0" />
       </group>
       <group targetFramework="net461">
-        <dependency id="Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.Office.Cloud.Microsoft" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo" version="4.221.7.0" />
-        <dependency id="Xpand.Extensions.Mono.Cecil" version="4.221.7.0" />
-        <dependency id="Xpand.Extensions" version="4.221.7.0" />
-        <dependency id="Xpand.Extensions.Office.Cloud" version="4.221.7.0" />
-        <dependency id="Xpand.Extensions.Reactive" version="4.221.7.0" />
-        <dependency id="Xpand.Extensions.XAF" version="4.221.7.0" />
-        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.AutoCommit" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.CloneMemberValue" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.CloneModelView" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.HideToolBar" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.MasterDetail" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.ModelMapper" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.ModelViewInheritance" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.Office.Cloud.Google.Calendar" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.Office.Cloud.Google" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.Office.Cloud.Google.Tasks" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.PositionInListView" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.ProgressBarViewItem" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.Reactive.Logger.Hub" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.Reactive.Logger" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.Reactive" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.RefreshView" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.SequenceGenerator" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.SuppressConfirmation" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.ViewEditMode" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.ViewItemValue" version="4.221.7.0" />
-        <dependency id="Xpand.XAF.Modules.ViewWizard" version="4.221.7.0" />
+        <dependency id="Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.Office.Cloud.Microsoft" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo" version="4.221.8.0" />
+        <dependency id="Xpand.Extensions.Mono.Cecil" version="4.221.8.0" />
+        <dependency id="Xpand.Extensions" version="4.221.8.0" />
+        <dependency id="Xpand.Extensions.Office.Cloud" version="4.221.8.0" />
+        <dependency id="Xpand.Extensions.Reactive" version="4.221.8.0" />
+        <dependency id="Xpand.Extensions.XAF" version="4.221.8.0" />
+        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.AutoCommit" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.CloneMemberValue" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.CloneModelView" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.HideToolBar" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.MasterDetail" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.ModelMapper" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.ModelViewInheritance" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.Office.Cloud.Google.Calendar" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.Office.Cloud.Google" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.Office.Cloud.Google.Tasks" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.PositionInListView" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.ProgressBarViewItem" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.Reactive.Logger.Hub" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.Reactive.Logger" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.Reactive" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.RefreshView" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.SequenceGenerator" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.SuppressConfirmation" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.ViewEditMode" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.ViewItemValue" version="4.221.8.0" />
+        <dependency id="Xpand.XAF.Modules.ViewWizard" version="4.221.8.0" />
       </group>
     </dependencies>
   </metadata>

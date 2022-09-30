@@ -54,7 +54,7 @@
     <ProjectReference Include="..\Xpand.XAF.SpeechManager.Module\Xpand.XAF.SpeechManager.Module.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="xpand.xaf.Win.all" Version="4.221.6.1" />
+    <PackageReference Include="xpand.xaf.Win.all" Version="4.221.8.0" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Xpand.XAF.Modules.SpellChecker">

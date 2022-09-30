@@ -76,9 +76,12 @@ $filteredProjects| Invoke-Parallel -StepInterval 500 -VariablesToImport @("allPr
 
     $psTarget = "CopySymbols"
     
-    & $addTargets $psTarget
+    
     if (Test-Path "$root\build\Targets\$($_.BaseName).targets") {
         & $addTargets $_.BaseName
+    }
+    else{
+        & $addTargets $psTarget
     }
     # $nuspec.Save($NuspecFilename)
     # "2. $NuspecFilename"
