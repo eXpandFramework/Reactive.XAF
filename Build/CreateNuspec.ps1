@@ -22,7 +22,6 @@ $filteredProjects=Get-ChildItem "$root\src\" -Include "*.csproj" -Recurse | Wher
 $filteredProjects+=Get-ChildItem "$root\src\" -Include "*Xpand.TestsLib*.csproj" -Recurse # |Where-Object{$_.BaseName -notmatch "Blazor"}
 $dxVersionBuild=Get-VersionPart $dxVersion Build
 $filteredProjects| Invoke-Parallel -StepInterval 500 -VariablesToImport @("allProjects", "root", "Release","dxVersionBuild") -Script {
-
 # $filteredProjects|where{$_.BaseName -eq "Xpand.TestsLib.Blazor"}| foreach {
 # $filteredProjects| foreach {
     $addTargets = {
@@ -76,11 +75,11 @@ $filteredProjects| Invoke-Parallel -StepInterval 500 -VariablesToImport @("allPr
     [xml]$nuspec = Get-Content $nuspecFileName
 
     $psTarget = "CopySymbols"
-    if (Test-Path "..\build\Targets\$($_.BaseName).targets") {
-        $psTarget = $_.BaseName
-    }
-    & $addTargets $psTarget
     
+    & $addTargets $psTarget
+    if (Test-Path "$root\build\Targets\$($_.BaseName).targets") {
+        & $addTargets $_.BaseName
+    }
     # $nuspec.Save($NuspecFilename)
     # "2. $NuspecFilename"
     # Format-Xml -Path $nuspecFileName
