@@ -4,6 +4,7 @@ Newtonsoft.Json
 NAudio
 Enums.NET
 DevExpress.ExpressApp
+DevExpress.Utils
 DevExpress.ExpressApp.Validation
 DevExpress.ExpressApp.Notifications
 DevExpress.ExpressApp.ViewVariantsModule

@@ -177,6 +177,9 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
         public static IObservable<Unit> WhenConcatExecution(this IObservable<SimpleAction> source,Action<SimpleActionExecuteEventArgs> retriedExecution) 
             => source.SelectMany(action => action.WhenConcatExecution(retriedExecution));
         
+        public static IObservable<Unit> WhenConcatExecution(this IObservable<SimpleAction> source,Func<SimpleActionExecuteEventArgs,IObservable<Unit>> retriedExecution) 
+            => source.SelectMany(action => action.WhenConcatRetriedExecution(retriedExecution));
+        
         public static IObservable<T> WhenConcatExecution<T>(this IObservable<ParametrizedAction> source,Func<ParametrizedActionExecuteEventArgs,IObservable<T>> selector) 
             => source.SelectMany(action => action.WhenConcatExecution(selector));
         
@@ -355,12 +358,16 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
         public static IObservable<TAction> WhenControllerActivated<TAction>(this IObservable<TAction> source,bool emitWhenActive=false) where TAction : ActionBase 
             => source.SelectMany(a =>a.Controller.WhenActivated(emitWhenActive).To(a) );
         
+        public static IObservable<TAction> WhenControllerActivated<TAction>(this IObservable<TAction> source,Func<TAction,IObservable<Unit>> mergeSelector,bool emitWhenActive=false) where TAction : ActionBase 
+            => source.SelectMany(a =>a.Controller.WhenActivated(emitWhenActive).TakeUntil(a.Controller.WhenDeactivated())
+                .SelectMany(_ => mergeSelector(a)).To(a) );
+        
         public static IObservable<TAction> WhenControllerDeActivated<TAction>(this IObservable<TAction> source,bool emitWhenActive=false) where TAction : ActionBase 
             => source.SelectMany(a =>a.Controller.WhenDeactivated().To(a) );
 
         public static IObservable<TAction> WhenActive<TAction>(this IObservable<TAction> source) where TAction : ActionBase 
             => source.Where(a => a.Active);
-        public static IObservable<TAction> WhenAvailable<TAction>(this IObservable<TAction> source) where TAction : ActionBase 
+        public static IObservable<TAction> WhereAvailable<TAction>(this IObservable<TAction> source) where TAction : ActionBase 
             => source.Where(a => a.Available());
 
         public static IObservable<TAction> WhenInActive<TAction>(this IObservable<TAction> source) where TAction : ActionBase 

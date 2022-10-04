@@ -8,6 +8,8 @@ namespace Xpand.Extensions.XAF.FrameExtensions {
         public static bool Is<T>(this T frame, params Nesting[] nesting) where T : Frame 
             => nesting.Any(item => item == Nesting.Any || frame is NestedFrame && item == Nesting.Nested ||
                                          !(frame is NestedFrame) && item == Nesting.Root);
+        public static bool Is<T>(this T frame, params string[] viewIds) where T : Frame 
+            => viewIds.Contains(frame.View?.Id);
 
         public static bool Is<T>(this T frame, params ViewType[] viewTypes) where T : Frame 
             => viewTypes.Any(item =>item==ViewType.Any|| frame.View is ObjectView objectView && objectView.Is(item));

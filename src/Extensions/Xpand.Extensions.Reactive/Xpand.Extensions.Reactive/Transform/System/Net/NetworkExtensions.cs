@@ -20,6 +20,7 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net {
         
         public static HttpClient HttpClient=new();
 
+        
         static T Sign<T>(this T requestMessage,string key,string secret) where T:HttpRequestMessage{
             if (key != null) {
                 var toSing = requestMessage.RequestUri.PathAndQuery;
@@ -77,7 +78,7 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net {
 
         private static object CreateInstance<T>() => typeof(T) == typeof(string) ? "" : typeof(T).CreateInstance();
 
-        public static IObservable<(T instance, HttpResponseMessage message)> SendRequest<T>(this HttpClient client, HttpRequestMessage httpRequestMessage, 
+        public static IObservable<T> SendRequest<T>(this HttpClient client, HttpRequestMessage httpRequestMessage, 
             T obj = null, Func<string, T[]> deserializeResponse = null) where T : class,new()
             => Observable.FromAsync(() => client.SendAsync(httpRequestMessage,HttpCompletionOption.ResponseHeadersRead))
                 .Do(message => ResponseSubject.OnNext((message, obj)))
@@ -89,38 +90,41 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net {
             string secret = null, Func<string, T[]> deserializeResponse = null) where T : class,new() 
             => HttpClient.Send(httpMethod, requestUrl,obj,key,secret,deserializeResponse);
 
-        private static IObservable<(T,HttpResponseMessage message)> SendRequest<T>(this IObservable<(string json, HttpResponseMessage response)> source,
+        private static IObservable<T> SendRequest<T>(this IObservable<(string json, HttpResponseMessage response)> source,
             object obj, Func<string,T[]> deserializeResponse) {
             deserializeResponse ??= s =>obj is IJsonFactory factory?new[] { (T)factory.FromJson(s) }: obj.GetType().Deserialize<T>(s);
-            return source.SelectMany(t => {
-                if (t.response.IsSuccessStatusCode)
-                    if (t.response.RequestMessage.Method != HttpMethod.Get && t.json == "true") {
-                        ObjectSentSubject.OnNext((t.response, t.json, obj));
-                        return Observable.Empty< (T,HttpResponseMessage)>();
-                    }
-                    else
-                        return deserializeResponse(t.json).ToNowObservable()
-                            .Do(obj1 => ObjectSentSubject.OnNext((t.response, t.json, obj1)))
-                            .Select(arg => (arg,t.response));
-
-                return Observable.Throw< (T,HttpResponseMessage)>(new HttpResponseException(nameof(t.response.StatusCode),t.response));
-            });
+            return source.WhenResponse(obj, s => deserializeResponse(s).ToNowObservable());
+            //     .SelectMany(t => {
+            //     if (t.response.IsSuccessStatusCode)
+            //         if (t.response.RequestMessage.Method != HttpMethod.Get && t.json == "true") {
+            //             ObjectSentSubject.OnNext((t.response, t.json, obj));
+            //             return Observable.Empty< (T,HttpResponseMessage)>();
+            //         }
+            //         else
+            //             return deserializeResponse(t.json).ToNowObservable()
+            //                 .Do(obj1 => ObjectSentSubject.OnNext((t.response, t.json, obj1)))
+            //                 .Select(arg => (arg,t.response));
+            //
+            //     return Observable.Throw< (T,HttpResponseMessage)>(new HttpResponseException(nameof(t.response.StatusCode),t.response));
+            // });
         }
         private static IObservable<T> Send<T>(this IObservable<(string json, HttpResponseMessage response)> source,
             object obj, Func<string,T[]> deserializeResponse) where T:class,new(){
             deserializeResponse ??= s =>obj is IJsonFactory factory?new[] { (T)factory.FromJson(s) }: obj.GetType().Deserialize<T>(s);
-            return source.SelectMany(t => {
-                if (t.response.IsSuccessStatusCode)
-                    if (t.response.RequestMessage.Method != HttpMethod.Get && t.json == "true") {
-                        ObjectSentSubject.OnNext((t.response, t.json, obj));
-                        return Observable.Empty<T>();
-                    }
-                    else
-                        return deserializeResponse(t.json).ToNowObservable()
-                            .Do(obj1 => ObjectSentSubject.OnNext((t.response, t.json, obj1)));
-
-                return Observable.Throw<T>(new HttpResponseException(nameof(t.response.StatusCode),t.response));
-            });
+            return source.WhenResponse(obj, s => deserializeResponse(s).ToNowObservable())
+            //     .SelectMany(t => {
+            //     if (t.response.IsSuccessStatusCode)
+            //         if (t.response.RequestMessage.Method != HttpMethod.Get && t.json == "true") {
+            //             ObjectSentSubject.OnNext((t.response, t.json, obj));
+            //             return Observable.Empty<T>();
+            //         }
+            //         else
+            //             return deserializeResponse(t.json).ToNowObservable()
+            //                 .Do(obj1 => ObjectSentSubject.OnNext((t.response, t.json, obj1)));
+            //
+            //     return Observable.Throw<T>(new HttpResponseException(nameof(t.response.StatusCode),t.response));
+            // })
+                ;
         }
         private static IObservable<T> WhenResponse<T>(this IObservable<(string json, HttpResponseMessage response)> source,
             object obj, Func<string,IObservable<T>> deserializeResponse) {

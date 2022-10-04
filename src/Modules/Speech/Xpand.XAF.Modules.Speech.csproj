@@ -41,6 +41,10 @@
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
+    <Reference Include="Xpand.XAF.Modules.StoreToDisk">
+      <HintPath>..\..\..\bin\net6.0\Xpand.XAF.Modules.StoreToDisk.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
     <Reference Include="Xpand.XAF.Modules.CloneModelView">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.CloneModelView.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>

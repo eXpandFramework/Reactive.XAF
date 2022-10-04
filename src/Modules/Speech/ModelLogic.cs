@@ -13,9 +13,12 @@ namespace Xpand.XAF.Modules.Speech{
     }
 
     public interface IModelSpeech : IModelNode{
-        [CriteriaOptions("TypeInfo")]
+        [CriteriaOptions(nameof(SpeechServiceTypeInfo))]
         [Editor("DevExpress.ExpressApp.Win.Core.ModelEditor.CriteriaModelEditorControl, DevExpress.ExpressApp.Win" + XafAssemblyInfo.VersionSuffix + XafAssemblyInfo.AssemblyNamePostfix, "System.Drawing.Design.UITypeEditor, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
-        string DefaultAccountCriteria { get; set; }
+        string DefaultSpeechServiceCriteria { get; set; }
+        [CriteriaOptions(nameof(SpeechKeywordTypeInfo))]
+        [Editor("DevExpress.ExpressApp.Win.Core.ModelEditor.CriteriaModelEditorControl, DevExpress.ExpressApp.Win" + XafAssemblyInfo.VersionSuffix + XafAssemblyInfo.AssemblyNamePostfix, "System.Drawing.Design.UITypeEditor, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+        string DefaultSpeechKeywordCriteria { get; set; }
         [Required]
         string DefaultStorageFolder { get; set; }
         [Category("SSML")]
@@ -32,12 +35,14 @@ namespace Xpand.XAF.Modules.Speech{
         string SSMLVoiceFormat { get; set; }
         
         [Browsable(false)]
-        ITypeInfo TypeInfo { get; }
+        ITypeInfo SpeechServiceTypeInfo { get; }
+        ITypeInfo SpeechKeywordTypeInfo { get; }
     }
     
     [DomainLogic(typeof(IModelSpeech))]
     public class ModelSpeechLogic{
-        public static ITypeInfo Get_TypeInfo(IModelSpeech link) => link.Application.BOModel.GetClass(typeof(SpeechAccount)).TypeInfo;
+        public static ITypeInfo Get_SpeechServiceTypeInfo(IModelSpeech link) => link.Application.BOModel.GetClass(typeof(SpeechService)).TypeInfo;
+        public static ITypeInfo Get_SpeechKeywordTypeInfo(IModelSpeech link) => link.Application.BOModel.GetClass(typeof(SpeechKeyword)).TypeInfo;
         public static string Get_DefaultStorageFolder(IModelSpeech link) 
             => $"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}\\{link.Application.Title}\\{nameof(SpeechModule)}\\StorageFolder";
     }

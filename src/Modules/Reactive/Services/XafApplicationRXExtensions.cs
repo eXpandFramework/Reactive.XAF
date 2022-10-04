@@ -303,6 +303,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static IObservable<T> WhenFrame<T>(this IObservable<T> source, params Type[] objectTypes) where T:Frame 
             => source.Where(frame => frame.Is(objectTypes));
+        public static IObservable<T> WhenFrame<T>(this IObservable<T> source, params string[] viewIds) where T:Frame 
+            => source.Where(frame => frame.Is(viewIds));
         
         public static IObservable<T> WhenFrame<T>(this IObservable<T> source, params Nesting[] nesting) where T:Frame 
             => source.Where(frame => frame.Is(nesting));

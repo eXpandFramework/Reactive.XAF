@@ -15,8 +15,8 @@ namespace Xpand.XAF.Modules.Speech.BusinessObjects {
     [DefaultProperty(nameof(Name))][DeferredDeletion(false)][ImageName(("BO_User"))]
     [OptimisticLocking(OptimisticLockingBehavior.LockModified)]
     [SuppressMessage("Design", "XAF0023:Do not implement IObjectSpaceLink in the XPO types")]
-    public class SpeechAccount:CustomBaseObject {
-        public SpeechAccount(Session session) : base(session) { }
+    public class SpeechService:CustomBaseObject, IService {
+        public SpeechService(Session session) : base(session) { }
 
         [Association("SpeechAccount-SpeechVoices")][Aggregated][CollectionOperationSet(AllowAdd = false)]
         
@@ -25,9 +25,7 @@ namespace Xpand.XAF.Modules.Speech.BusinessObjects {
         [InvisibleInAllViews]
         public List<SpeechLanguage> Languages => Voices.Select(voice => voice.Language).Distinct().ToList();
         
-        // [Association("SpeechServiceAccount-SpeechToTexts")][InvisibleInAllViews]
-        // public XPCollection<SpeechToText> SpeechToTexts => GetCollection<SpeechToText>();
-        string _subscription;
+        string _key;
 
         string _name;
 
@@ -38,9 +36,9 @@ namespace Xpand.XAF.Modules.Speech.BusinessObjects {
         
         [ModelDefault("IsPassword","True")]
         [RuleRequiredField][VisibleInListView(false)]
-        public string Subscription {
-            get => _subscription;
-            set => SetPropertyValue(nameof(Subscription), ref _subscription, value);
+        public string Key {
+            get => _key;
+            set => SetPropertyValue(nameof(Key), ref _key, value);
         }
 
         string _region;

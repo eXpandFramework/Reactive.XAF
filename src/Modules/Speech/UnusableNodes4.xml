@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Application>
+  <Views Id="Views">
+    <DetailView Id="FileSpeechToText_DetailView">
+      <Layout Id="Layout">
+        <LayoutGroup Id="Main">
+          <LayoutGroup Id="Item3">
+            <LayoutGroup Id="Auto6007a961-8d5f-44b3-8c5a-e5f99c70380e">
+              <LayoutItem Id="Name" Removed="True" />
+              <LayoutItem Id="Account" ViewItem="Account" />
+            </LayoutGroup>
+          </LayoutGroup>
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+  </Views>
+</Application>

@@ -17,6 +17,16 @@ namespace Xpand.Extensions.XAF.ObjectSpaceExtensions {
             }
             var ensureObject = objectSpace.CreateObject<T>();
             initialize?.Invoke(ensureObject);
+            CriteriaOperator.FromLambda(criteriaExpression);
+            return ensureObject;
+        }
+        public static T EnsureObject<T>(this IObjectSpace objectSpace, CriteriaOperator criteria,Action<T> initialize=null,bool inTransaction=false) where T : class {
+            var o = objectSpace.FindObject<T>(criteria);
+            if (o != null) {
+                return o;
+            }
+            var ensureObject = objectSpace.CreateObject<T>();
+            initialize?.Invoke(ensureObject);
             return ensureObject;
         }
 

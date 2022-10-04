@@ -31,28 +31,27 @@ namespace Xpand.XAF.Modules.Speech.Services {
             => manager.UpdateVoicesOnViewRefresh().Merge(manager.UpdateVoicesOnCommit());
 
         private static IObservable<Unit> UpdateVoicesOnViewRefresh(this ApplicationModulesManager manager) 
-            => manager.WhenSpeechApplication(application => application.WhenFrameViewChanged().WhenFrame(typeof(SpeechAccount),ViewType.DetailView)
-                .SelectUntilViewClosed(frame => frame.GetController<RefreshController>().RefreshAction.WhenConcatRetriedExecution(_ =>frame.View.CurrentObject.To<SpeechAccount>().UpdateVoices() )).ToUnit());
+            => manager.WhenSpeechApplication(application => application.WhenFrameViewChanged().WhenFrame(typeof(BusinessObjects.SpeechService),ViewType.DetailView)
+                .SelectUntilViewClosed(frame => frame.GetController<RefreshController>().RefreshAction.WhenConcatRetriedExecution(_ =>frame.View.CurrentObject.To<BusinessObjects.SpeechService>().UpdateVoices() )).ToUnit());
 
-        public static SpeechAccount DefaultSpeechAccount(this IObjectSpace space,IModelSpeech modelSpeech) 
-            => space.FindObject<SpeechAccount>(CriteriaOperator.Parse(modelSpeech.DefaultAccountCriteria));
+        public static BusinessObjects.SpeechService DefaultSpeechAccount(this IObjectSpace space,IModelSpeech modelSpeech) 
+            => space.FindObject<BusinessObjects.SpeechService>(CriteriaOperator.Parse(modelSpeech.DefaultSpeechServiceCriteria));
 
-        public static IObservable<TResult> Speak<TResult>(this SpeechAccount speechAccount, IModelSpeech speechModel,Func<SpeechAccount,SpeechSynthesisResult,string,IObservable<TResult>> afterBytesWritten,Func<string> textSelector) 
-            => Observable.Using(() => new SpeechSynthesizer(speechAccount.SpeechConfig()), synthesizer
+        public static IObservable<TResult> Speak<TResult>(this BusinessObjects.SpeechService speechService, IModelSpeech speechModel,Func<BusinessObjects.SpeechService,SpeechSynthesisResult,string,IObservable<TResult>> afterBytesWritten,Func<string> textSelector) 
+            => Observable.Using(() => new SpeechSynthesizer(speechService.SpeechConfig()), synthesizer
                 => synthesizer.SpeakAsync(textSelector).ToObservable().ObserveOnContext()
                     .DoWhen(_ => !new DirectoryInfo(speechModel.DefaultStorageFolder).Exists,
                         _ => Directory.CreateDirectory(speechModel.DefaultStorageFolder))
                     .SelectMany(result => {
-                        var path = speechAccount.ObjectSpace.GetObjectsQuery<TextToSpeech>()
+                        var path = speechService.ObjectSpace.GetObjectsQuery<TextToSpeech>()
                             .OrderByDescending(speech => speech.Oid).FirstOrDefault()
                             .WavFileName(speechModel,oid => (oid + 1).ToString());
-                        if (new FileInfo(path).IsFileLocked()) {
-                            path = $"{Path.GetDirectoryName(path)}{Path.GetFileNameWithoutExtension(path)}_{Path.GetFileNameWithoutExtension(path)}{Path.GetExtension(path)}";
-                        }
+                        path = new FileInfo(path).EnsurePath().FullName;
                         return File.WriteAllBytesAsync(path, result.AudioData).ToObservable().ObserveOnContext()
-                            .SelectMany(_ => afterBytesWritten(speechAccount, result,path)
+                            .SelectMany(_ => afterBytesWritten(speechService, result,path)
                                 .RetryWithBackoff(3));
                     }));
+
 
         private static Task<SpeechSynthesisResult> SpeakAsync(this SpeechSynthesizer synthesizer,Func<string> textSelector) {
             var text = textSelector();
@@ -62,8 +61,8 @@ namespace Xpand.XAF.Modules.Speech.Services {
             return synthesizer.SpeakTextAsync(text);
         }
 
-        public static SpeechConfig SpeechConfig(this SpeechAccount account,SpeechLanguage recognitionLanguage=null,[CallerMemberName]string callerMember="") {
-            var speechConfig = Microsoft.CognitiveServices.Speech.SpeechConfig.FromSubscription(account.Subscription, account.Region);
+        public static SpeechConfig SpeechConfig(this BusinessObjects.SpeechService service,SpeechLanguage recognitionLanguage=null,[CallerMemberName]string callerMember="") {
+            var speechConfig = Microsoft.CognitiveServices.Speech.SpeechConfig.FromSubscription(service.Key, service.Region);
             speechConfig.SpeechRecognitionLanguage = $"{recognitionLanguage?.Name}";
             speechConfig.EnableAudioLogging();
             var path = $"{AppDomain.CurrentDomain.ApplicationPath()}\\Logs\\{nameof(SpeechConfig)}{callerMember}.log";
@@ -71,35 +70,39 @@ namespace Xpand.XAF.Modules.Speech.Services {
                 Directory.CreateDirectory(Path.GetDirectoryName(path)!);
             }
             speechConfig.SetProperty(PropertyId.Speech_LogFilename, path);
+            speechConfig.SetProperty(PropertyId.SpeechServiceConnection_EndSilenceTimeoutMs, "5000");
+            speechConfig.SetProperty(PropertyId.Conversation_Initial_Silence_Timeout, "5000");
+            
+            speechConfig.SetProperty(PropertyId.SpeechServiceConnection_InitialSilenceTimeoutMs, "0");
             return speechConfig;
         }
 
-        public static SpeechTranslationConfig TranslationConfig(this SpeechAccount account) 
-            => SpeechTranslationConfig.FromSubscription(account.Subscription, account.Region);
+        public static SpeechTranslationConfig TranslationConfig(this BusinessObjects.SpeechService service) 
+            => SpeechTranslationConfig.FromSubscription(service.Key, service.Region);
         
-        private static void EnsureVoice(this SpeechAccount account,VoiceInfo voiceInfo) {
-            var speechVoice = account.ObjectSpace.EnsureObject<SpeechVoice>(voice => voice.Account!=null&& voice.Account.Oid==account.Oid&&voice.Name==voiceInfo.Name,inTransaction:true);
+        private static void EnsureVoice(this BusinessObjects.SpeechService service,VoiceInfo voiceInfo) {
+            var speechVoice = service.ObjectSpace.EnsureObject<SpeechVoice>(voice => voice.Service!=null&& voice.Service.Oid==service.Oid&&voice.Name==voiceInfo.Name,inTransaction:true);
             speechVoice.Gender = voiceInfo.Gender;
-            speechVoice.Language=account.ObjectSpace.EnsureObject<SpeechLanguage>(language => language.Name==voiceInfo.Locale,language => language.Name=voiceInfo.Locale,true);
+            speechVoice.Language=service.ObjectSpace.EnsureObject<SpeechLanguage>(language => language.Name==voiceInfo.Locale,language => language.Name=voiceInfo.Locale,true);
             speechVoice.Name = voiceInfo.LocalName;
             speechVoice.ShortName = voiceInfo.ShortName;
             speechVoice.VoicePath = voiceInfo.VoicePath;
             speechVoice.VoiceType = voiceInfo.VoiceType;
-            speechVoice.Account=account;
+            speechVoice.Service=service;
         }
 
         private static IObservable<Unit> UpdateVoicesOnCommit(this ApplicationModulesManager manager) 
-            => manager.WhenSpeechApplication(application => application.WhenCommitted<SpeechAccount>(ObjectModification.New).ToObjects()
+            => manager.WhenSpeechApplication(application => application.WhenCommitted<BusinessObjects.SpeechService>(ObjectModification.New).ToObjects()
                     .SelectMany(UpdateVoices))
                 .ToUnit();
 
-        private static IObservable<VoiceInfo[]> UpdateVoices(this SpeechAccount account) 
-            => Observable.Using(() => new SpeechSynthesizer(account.SpeechConfig()),synthesizer => synthesizer.GetVoicesAsync().ToObservable()
+        private static IObservable<VoiceInfo[]> UpdateVoices(this BusinessObjects.SpeechService service) 
+            => Observable.Using(() => new SpeechSynthesizer(service.SpeechConfig()),synthesizer => synthesizer.GetVoicesAsync().ToObservable()
                 .ObserveOnContext().SelectMany(result => !string.IsNullOrEmpty(result.ErrorDetails)?Observable.Throw<SynthesisVoicesResult>(new SpeechException(result.ErrorDetails)):result.ReturnObservable()))
                 .SelectMany(result => result.Voices.ToNowObservable()
-                    .Do(account.EnsureVoice ).BufferUntilCompleted().Do(_ => {
-                        account.CommitChanges();
-                        account.ObjectSpace.Refresh();
+                    .Do(service.EnsureVoice ).BufferUntilCompleted().Do(_ => {
+                        service.CommitChanges();
+                        service.ObjectSpace.Refresh();
                     }));
     }
 }

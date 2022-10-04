@@ -92,7 +92,7 @@ namespace Xpand.XAF.Modules.Speech.Services {
                 .ToUnit();
 
         private static IObservable<TextToSpeech> Speak(this XafApplication application, IObjectSpace space,
-            Func<IObjectSpace, TextToSpeech> textToSpeechSelector, Func<SpeechAccount,string> textSelector) {
+            Func<IObjectSpace, TextToSpeech> textToSpeechSelector, Func<BusinessObjects.SpeechService,string> textSelector) {
             var speechAccount = space.DefaultSpeechAccount(application.Model.SpeechModel());
             return speechAccount.Speak(application.Model.SpeechModel(), (_, result, path) => textToSpeechSelector(space)
                     .UpdateSSMLFile(result, path).Commit(), () => textSelector(speechAccount)).ObserveOnContext()

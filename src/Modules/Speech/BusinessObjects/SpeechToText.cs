@@ -23,6 +23,14 @@ namespace Xpand.XAF.Modules.Speech.BusinessObjects {
         [InvisibleInAllViews]
         public bool IsValid => GetIsValid();
 
+        TranslatorService _translator;
+
+        [IgnoreDataLocking]
+        public TranslatorService Translator {
+            get => _translator;
+            set => SetPropertyValue(nameof(Translator), ref _translator, value);
+        }
+
         protected virtual bool GetIsValid() => false;
 
         [Association("SpeechToText-SpeechTexts")][DevExpress.Xpo.Aggregated][InvisibleInAllViews]
@@ -52,7 +60,7 @@ namespace Xpand.XAF.Modules.Speech.BusinessObjects {
         
         [CollectionOperationSet(AllowAdd = true)][ReloadWhenChange()]
         public BindingList<SpeechText> SpeechTexts => Texts.ExactType().ToBindingList();
-        SpeechAccount _speechAccount;
+        SpeechService _speechSpeech;
 
         public override void AfterConstruction() {
             base.AfterConstruction();
@@ -69,14 +77,14 @@ namespace Xpand.XAF.Modules.Speech.BusinessObjects {
         public XPCollection<SpeechVoice> SpeechVoices => GetCollection<SpeechVoice>();
 
         public List<SpeechVoice> AvailableVoices => ObjectSpace.GetObjectsQuery<SpeechVoice>().ToArray().Where(
-            speechVoice => speechVoice.Account.Oid == Account.Oid && TargetLanguages.Contains(speechVoice.Language)).ToList();
+            speechVoice => speechVoice.Service?.Oid == Speech.Oid && TargetLanguages.Contains(speechVoice.Language)).ToList();
         
         
         // [Association("SpeechServiceAccount-SpeechToTexts-CannotDelete")]
         [IgnoreDataLocking]
-        public SpeechAccount Account {
-            get => _speechAccount;
-            set => SetPropertyValue(nameof(SpeechAccount), ref _speechAccount, value);
+        public SpeechService Speech {
+            get => _speechSpeech;
+            set => SetPropertyValue(nameof(Speech), ref _speechSpeech, value);
         }
 
         string _name;
@@ -88,7 +96,7 @@ namespace Xpand.XAF.Modules.Speech.BusinessObjects {
         }
 
         SpeechLanguage _recognitionLanguage;
-        [RuleRequiredField][DataSourceProperty(nameof(Account)+"."+nameof(SpeechAccount.Languages))]
+        [RuleRequiredField][DataSourceProperty(nameof(Speech)+"."+nameof(SpeechService.Languages))]
         [XafDisplayName("Recognition")]
         public SpeechLanguage RecognitionLanguage {
             get => _recognitionLanguage;

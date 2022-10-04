@@ -37,7 +37,7 @@ using Xpand.XAF.Modules.Speech.BusinessObjects;
 
 namespace Xpand.XAF.Modules.Speech.Services{
 	internal static class SpeechService{
-	    
+		internal static string ShortName(this SpeechLanguage language) => language.Name.Split('-')[0];
 	    public static SimpleAction SelectInExplorer(this (SpeechModule, Frame frame) tuple) 
 		    => tuple.frame.Action(nameof(SelectInExplorer)).To<SimpleAction>();
 
@@ -72,23 +72,23 @@ namespace Xpand.XAF.Modules.Speech.Services{
 				.SelectMany(speechToText => speechToText.WhenVoices()
 					.SelectMany(voice => new[]{typeof(SpeechText),typeof(SpeechTranslation)}.ToObservable()
 						.Do(type => SpeechSynthesizersCache.GetOrAdd((voice.ShortName,type), _ => {
-							var speechSynthesizer = new SpeechSynthesizer(voice.SpeechSynthesisConfig(speechToText.Account));
+							var speechSynthesizer = new SpeechSynthesizer(voice.SpeechSynthesisConfig(speechToText.Speech));
 							speechSynthesizer.Properties.SetProperty("Start","false");
 							speechSynthesizer.Properties.SetProperty("Stop","false");
 							return speechSynthesizer;
 						})))).ToUnit());
 
         private static IObservable<SpeechVoice> WhenVoices(this SpeechToText speechToText) {
-	        var modifiedSpeechToText = speechToText.ObjectSpace.WhenModifiedObjects<SpeechToText>().Where(text => text.Account!=null&&text.RecognitionLanguage!=null)
-		        .SelectMany(text => text.SpeechVoices.AddItem(text.Account.Voices.First(voice => voice.Language.Oid==text.RecognitionLanguage.Oid)));
-	        var existingVoices = speechToText.Account == null ? Observable.Empty<SpeechVoice>()
-		        : speechToText.Account.Voices.Where(voice => voice.Language.Oid == speechToText.RecognitionLanguage?.Oid).ToNowObservable()
+	        var modifiedSpeechToText = speechToText.ObjectSpace.WhenModifiedObjects<SpeechToText>().Where(text => text.Speech!=null&&text.RecognitionLanguage!=null)
+		        .SelectMany(text => text.SpeechVoices.AddItem(text.Speech.Voices.FirstOrDefault(voice => voice.Language.Oid==text.RecognitionLanguage.Oid)).WhereNotDefault());
+	        var existingVoices = speechToText.Speech == null ? Observable.Empty<SpeechVoice>()
+		        : speechToText.Speech.Voices.Where(voice => voice.Language.Oid == speechToText.RecognitionLanguage?.Oid).ToNowObservable()
 			        .Do(voice => speechToText.SpeechVoices.AddItem(voice));
 	        return existingVoices.Concat(modifiedSpeechToText).Distinct(voice => voice.ShortName);
         }
 
-        private static SpeechConfig SpeechSynthesisConfig(this SpeechVoice voice,SpeechAccount account) {
-	        var speechConfig = account.SpeechConfig(callerMember:$"{nameof(SpeechSynthesisConfig)}_{voice}");
+        private static SpeechConfig SpeechSynthesisConfig(this SpeechVoice voice,BusinessObjects.SpeechService service) {
+	        var speechConfig = service.SpeechConfig(callerMember:$"{nameof(SpeechSynthesisConfig)}_{voice}");
 	        speechConfig.SpeechSynthesisVoiceName = voice.ShortName;
 	        speechConfig.SpeechSynthesisLanguage = voice.Language.Name;
 	        return speechConfig;
@@ -96,7 +96,7 @@ namespace Xpand.XAF.Modules.Speech.Services{
 
         public static T PreviousSpeechText<T>(this T current) where T:SpeechText{
 	        var speechTexts = current.SpeechToText?.Texts.Where(text => text.GetType()==current.GetType()).Cast<T>()
-		        .OrderBy(text => text.Oid).ToArray()??Array.Empty<T>();
+		        .OrderBy(text => text.Start).ToArray()??Array.Empty<T>();
 	        var index = speechTexts.FindIndex(text => text.Oid == current.Oid);
 	        return speechTexts.Where((_, i) => i<index).LastOrDefault();
         }
@@ -105,7 +105,7 @@ namespace Xpand.XAF.Modules.Speech.Services{
 		        return default;
 	        }
 	        var speechTexts = current.SpeechToText.Texts.Where(text => text.GetType()==current.GetType()).Cast<T>()
-		        .OrderBy(text => text.Oid).ToArray();
+		        .OrderBy(text => text.Start).ToArray();
 	        var index = speechTexts.FindIndex(text => text.Oid == current.Oid);
 	        return speechTexts.Where((_, i) => i>index).ToArray().FirstOrDefault();
         }
@@ -115,16 +115,23 @@ namespace Xpand.XAF.Modules.Speech.Services{
 		        speechModel.SSMLVoiceFormat.StringFormat(speechVoice.ShortName, rate.StringFormat($"{ssml}")));
         
         public static TFile UpdateSSMLFile<TFile>(this TFile file, SpeechSynthesisResult result, string path) where TFile:IAudioFileLink{
+	        var info = new FileInfo(path);
+	        // using (var waveFileReader = new WaveFileReader(info.FullName)) {
+		        // var trimEnd = waveFileReader.TotalTime.Subtract(file.Duration);
+		        // info = info.EnsurePath(true);
+		        // waveFileReader.TrimWavFile(info.FullName,TimeSpan.Zero, trimEnd);
+	        // }
+	        
 	        file.File ??= file.CreateObject<FileLinkObject>();
-	        file.File.FileName = Path.GetFileName(path);
-	        file.File.FullName = path;
-	        using var audioFileReader = new AudioFileReader(path);
-	        file.FileDuration = audioFileReader.TotalTime;
+	        file.File.FileName = Path.GetFileName(info.FullName);
+	        file.File.FullName = info.FullName;
+	        
+	        file.FileDuration = info.Duration();
 	        if (file is SpeechText speechText&&speechText.SpeechToText.GetType()==typeof(SpeechToText)) {
 		        file.Duration=file.FileDuration.Value;
 		        file.VoiceDuration = file.Duration;
 	        }
-	        file.File.SetPropertyValue(nameof(FileLinkObject.Size),(int)audioFileReader.Length) ;
+	        file.File.SetPropertyValue(nameof(FileLinkObject.Size),(int)info.Length) ;
 	        file.FireChanged(nameof(IAudioFileLink.File));
 	        return file;
         }
@@ -168,7 +175,6 @@ namespace Xpand.XAF.Modules.Speech.Services{
 
         public static IModelSpeech SpeechModel(this IModelApplication applicationModel) 
 	        => applicationModel.ToReactiveModule<IModelReactiveModuleSpeech>().Speech;
-
 
         public static IObservable<TranslationRecognitionEventArgs> WhenRecognized(this TranslationRecognizer translationRecognizer) 
 	        => translationRecognizer.WhenEvent<TranslationRecognitionEventArgs>(nameof(TranslationRecognizer.Recognized));

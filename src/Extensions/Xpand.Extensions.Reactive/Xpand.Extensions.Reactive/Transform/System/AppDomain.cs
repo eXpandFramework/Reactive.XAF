@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Net.Http;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reflection;
+using Xpand.Extensions.Reactive.Transform.System.Net;
 
 namespace Xpand.Extensions.Reactive.Transform.System {
     public static class AppDomainExtensions {
@@ -21,5 +23,7 @@ namespace Xpand.Extensions.Reactive.Transform.System {
 
         public static IObservable<AppDomain> ExecuteOnce(this AppDomain appDomain) 
             => AppdomainOneEmission.AsObservable();
+        
+        public static HttpClient HttpClient(this AppDomain domain) => NetworkExtensions.HttpClient;
     }
 }

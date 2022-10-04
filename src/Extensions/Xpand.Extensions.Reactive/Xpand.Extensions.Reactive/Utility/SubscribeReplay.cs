@@ -8,7 +8,7 @@ namespace Xpand.Extensions.Reactive.Utility{
             int bufferSize = 0)
             => source.SubscribeReplay(scheduler, bufferSize);
         public static IObservable<T> SubscribeReplay<T>(this IObservable<T> source, IScheduler scheduler,int bufferSize = 0) 
-            => source.SubscribeOn(scheduler ?? Scheduler.Default).SubscribeReplay(bufferSize);
+            => source.SubscribeOn(scheduler ?? System.Reactive.Concurrency.Scheduler.Default).SubscribeReplay(bufferSize);
 
         public static IObservable<T> SubscribeReplay<T>(this IObservable<T> source, int bufferSize = 0){
             var replay = bufferSize > 0 ? source.Replay(bufferSize) : source.Replay();

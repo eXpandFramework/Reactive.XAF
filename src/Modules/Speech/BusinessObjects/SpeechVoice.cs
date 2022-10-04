@@ -16,12 +16,12 @@ namespace Xpand.XAF.Modules.Speech.BusinessObjects {
 
         [Association("SpeechToText-SpeechVoices")]
         public XPCollection<SpeechToText> SpeechToTexts => GetCollection<SpeechToText>();
-        SpeechAccount _speechAccount;
+        SpeechService _speechService;
 
         [Association("SpeechAccount-SpeechVoices")][RuleRequiredField]
-        public SpeechAccount Account {
-            get => _speechAccount;
-            set => SetPropertyValue(nameof(SpeechAccount), ref _speechAccount, value);
+        public SpeechService Service {
+            get => _speechService;
+            set => SetPropertyValue(nameof(SpeechService), ref _speechService, value);
         }
         
         [RuleRequiredField]

@@ -14,6 +14,7 @@ using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Speech.Services;
 using Xpand.XAF.Modules.SpellChecker;
+using Xpand.XAF.Modules.StoreToDisk;
 using Xpand.XAF.Modules.SuppressConfirmation;
 using Xpand.XAF.Modules.ViewItemValue;
 using Xpand.XAF.Modules.Windows;
@@ -32,6 +33,7 @@ namespace Xpand.XAF.Modules.Speech {
             RequiredModuleTypes.Add(typeof(ReactiveModule));
             RequiredModuleTypes.Add(typeof(ValidationModule));
             RequiredModuleTypes.Add(typeof(CloneModelViewModule));
+            RequiredModuleTypes.Add(typeof(StoreToDiskModule));
             RequiredModuleTypes.Add(typeof(HideToolBarModule));
             RequiredModuleTypes.Add(typeof(WindowsModule));
             RequiredModuleTypes.Add(typeof(SpellCheckerModule));
@@ -45,13 +47,10 @@ namespace Xpand.XAF.Modules.Speech {
         public override void Setup(ApplicationModulesManager moduleManager){
             base.Setup(moduleManager);
             
-            moduleManager.WhenApplication(xafApplication => xafApplication
-                    .WhenObjectSpaceCreated()
-                    .SelectMany(space => space.WhenModifyChanged())
-                .Select(o => o))
-                .Subscribe(this);
+            
             moduleManager.ConnectSpeechToText()
                 .Merge(moduleManager.ConnectAccount())
+                .Merge(moduleManager.ConnectSpeechKeyword())
                 .Merge(moduleManager.ConnectSpeech())
                 .Merge(moduleManager.ConnectTextToSpeech())
                 .Merge(moduleManager.ConnectSpeechTextInfo())
