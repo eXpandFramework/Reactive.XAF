@@ -300,6 +300,9 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IEnumerable<Frame> WhenFrame<T>(this IEnumerable<T> source, Type objectType = null,
             ViewType viewType = ViewType.Any, Nesting nesting = Nesting.Any) where T:Frame
             => source.ToObservable(Scheduler.Immediate).WhenFrame(objectType,viewType,nesting).ToEnumerable();
+        
+        public static IEnumerable<Frame> WhenFrame<T>(this IEnumerable<T> source, params string[] viewIds) where T:Frame 
+            => source.ToObservable(Scheduler.Immediate).Where(arg => viewIds.Contains(arg.View.Id)).ToEnumerable();
 
         public static IObservable<T> WhenFrame<T>(this IObservable<T> source, params Type[] objectTypes) where T:Frame 
             => source.Where(frame => frame.Is(objectTypes));

@@ -65,10 +65,10 @@ namespace Xpand.XAF.Modules.Reactive{
 
         private static void PatchXafApplication(){
             var xafApplicationType = typeof(XafApplication);
+            
             new HarmonyMethod(GetMethodInfo(nameof(CreateModuleManager)))
                 .Finalize(xafApplicationType.Method(nameof(CreateModuleManager)),true);
-            new HarmonyMethod(typeof(XafApplicationRxExtensions), nameof(XafApplicationRxExtensions.Exit))
-                .PreFix(xafApplicationType.Method(nameof(XafApplication.Exit)),true);
+            
 
             if (DesignerOnlyCalculator.IsRunTime) {
                 new HarmonyMethod(GetMethodInfo(nameof(CreateControllers)))
@@ -86,20 +86,26 @@ namespace Xpand.XAF.Modules.Reactive{
                 .ToUnit();
 
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager)
-            => manager.Attributes()
+        => manager.Attributes()
                 .Merge(manager.AddNonSecuredTypes())
                 .Merge(manager.MergedExtraEmbeddedModels())
                 .Merge(manager.ConnectObjectString())
-                .Merge(manager.WhenApplication(application =>application.WhenNonPersistentPropertyCollectionSource()
-                    .Merge(application.PatchAuthentication())
-                    .Merge(application.PatchObjectSpaceProvider())
-                    .Merge(application.NonPersistentChangesEnabledAttribute())
-                    .Merge(application.PopulateAdditionalObjectSpaces())
-                    .Merge(application.ReloadWhenChanged())
-                    .Merge(application.ShowInstanceDetailView())
-                    // .Merge(application.ShowPersistentObjectsInNonPersistentView())
-                .Merge(manager.SetupPropertyEditorParentView())));
+                .Merge(manager.WhenApplication(application =>Connect(application)
+                .Merge(manager.SetupPropertyEditorParentView())
+            )
+        );
 
+        private static IObservable<Unit> Connect(this XafApplication application) {
+            new HarmonyMethod(typeof(XafApplicationRxExtensions), nameof(XafApplicationRxExtensions.Exit))
+                .PreFix(typeof(XafApplication).Method(nameof(XafApplication.Exit)),true);
+            return application.WhenNonPersistentPropertyCollectionSource()
+                .Merge(application.PatchAuthentication())
+                .Merge(application.PatchObjectSpaceProvider())
+                .Merge(application.NonPersistentChangesEnabledAttribute())
+                .Merge(application.PopulateAdditionalObjectSpaces())
+                .Merge(application.ReloadWhenChanged())
+                .Merge(application.ShowInstanceDetailView());
+        }
 
 
         private static IObservable<Unit> ShowInstanceDetailView(this XafApplication application)

@@ -8,15 +8,15 @@ namespace Xpand.Extensions.XAF.XafApplicationExtensions{
     
     public static partial class XafApplicationExtensions{
         public static DetailView NewDetailView(this XafApplication application,object currentObject,IModelDetailView modelDetailView=null,bool isRoot=true){
-            var objectSpace = application.CreateObjectSpace();
+            var objectSpace = application.CreateObjectSpace(currentObject.GetType());
             modelDetailView ??= application.FindModelDetailView(currentObject.GetType());
             var detailView = application.CreateDetailView(objectSpace, modelDetailView,isRoot);
             detailView.CurrentObject = objectSpace.GetObject(currentObject);
             return detailView;
         }
 
-        public static DetailView NewDetailView(this XafApplication application,Func<IObjectSpace,object> currentObjectFactory,IModelDetailView modelDetailView=null,bool isRoot=true){
-            var objectSpace = application.CreateObjectSpace();
+        public static DetailView NewDetailView<T>(this XafApplication application,Func<IObjectSpace,T> currentObjectFactory,IModelDetailView modelDetailView=null,bool isRoot=true){
+            var objectSpace = application.CreateObjectSpace(typeof(T));
             var currentObject = currentObjectFactory(objectSpace);
             modelDetailView ??= application.FindModelDetailView(currentObject.GetType());
             var detailView = application.CreateDetailView(objectSpace, modelDetailView,isRoot);

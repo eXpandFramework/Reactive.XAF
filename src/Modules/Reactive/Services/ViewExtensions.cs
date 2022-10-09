@@ -85,17 +85,14 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                     handler => view.ControlsCreated += handler, handler => view.ControlsCreated -= handler, ImmediateScheduler.Instance)
                 .Select(pattern => pattern.Sender).Cast<T>());
 
-        public static IObservable<T> WhenSelectionChanged<T>(this T view,int waitUntilInactiveSeconds=0) where T : View 
-            => view.WhenEvent(nameof(View.SelectionChanged)).To(view)
+        public static IObservable<T> WhenSelectionChanged<T>(this T view, int waitUntilInactiveSeconds = 0) where T : View
+            => Observable.FromEventPattern<EventHandler, EventArgs>(handler => view.SelectionChanged += handler,
+                    handler => view.SelectionChanged -= handler, ImmediateScheduler.Instance).To(view)
                 .Publish(changed => waitUntilInactiveSeconds > 0 ? changed.WaitUntilInactive(waitUntilInactiveSeconds) : changed);
 
         public static IObservable<T> SelectionChanged<T>(this IObservable<T> source,int waitUntilInactiveSeconds=0) where T:View 
-            => source.SelectMany(item => Observable.FromEventPattern<EventHandler, EventArgs>(
-                    handler => item.SelectionChanged += handler,
-                    handler => item.SelectionChanged -= handler,ImmediateScheduler.Instance))
-                .Select(pattern => pattern.Sender).Cast<T>()
+            => source.SelectMany(item => item.WhenSelectionChanged()).Cast<T>()
                 .Publish(changed => waitUntilInactiveSeconds > 0 ? source.WaitUntilInactive(waitUntilInactiveSeconds) : changed);
-
 
         public static IObservable<T> CurrentObjectChanged<T>(this IObservable<T> source) where T:View 
             => source.SelectMany(item => item.WhenCurrentObjectChanged());

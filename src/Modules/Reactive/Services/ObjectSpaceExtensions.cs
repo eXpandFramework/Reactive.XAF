@@ -488,9 +488,12 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<(IObjectSpace objectSpace,ObjectChangedEventArgs e)> ObjectChanged(this IObservable<IObjectSpace> source) 
             => source.SelectMany(item => item.WhenObjectChanged());
 
-        public static IObservable<(IObjectSpace objectSpace,ObjectChangedEventArgs e)> WhenObjectChanged(this IObjectSpace item) 
+        public static IObservable<(IObjectSpace objectSpace,ObjectChangedEventArgs e)> WhenObjectChanged(this IObjectSpace item,params Type[] objectTypes) 
             => Observable.FromEventPattern<EventHandler<ObjectChangedEventArgs>, ObjectChangedEventArgs>(h => item.ObjectChanged += h, h => item.ObjectChanged -= h,ImmediateScheduler.Instance)
-                .TransformPattern<ObjectChangedEventArgs, IObjectSpace>();
+                .TransformPattern<ObjectChangedEventArgs, IObjectSpace>().Where(t =>!objectTypes.Any() ||objectTypes.Any(type => type.IsInstanceOfType(t.e.Object)));
+        public static IObservable<(IObjectSpace objectSpace,ObjectChangedEventArgs e)> WhenObjectChanged(this IObjectSpace item,Type objectType,params string[] properties) 
+            => Observable.FromEventPattern<EventHandler<ObjectChangedEventArgs>, ObjectChangedEventArgs>(h => item.ObjectChanged += h, h => item.ObjectChanged -= h,ImmediateScheduler.Instance)
+                .TransformPattern<ObjectChangedEventArgs, IObjectSpace>().Where(t =>objectType.IsInstanceOfType(t.e.Object)&&properties.Any(s => t.e.PropertyName==s));
 
         public static IObservable<Unit> Disposed(this IObservable<IObjectSpace> source) 
             => source.SelectMany(objectSpace => objectSpace.WhenDisposed());

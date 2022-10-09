@@ -26,10 +26,5 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\ExpressApp.ico" />
   </ItemGroup>
-  <ItemGroup>
-    <Reference Include="PresentationCore">
-      <HintPath>..\..\..\..\..\Windows\Microsoft.NET\assembly\GAC_32\PresentationCore\v4.0_4.0.0.0__31bf3856ad364e35\PresentationCore.dll</HintPath>
-    </Reference>
-  </ItemGroup>
   <Import Project="..\..\..\.paket\Paket.Restore.targets" />
 </Project>
