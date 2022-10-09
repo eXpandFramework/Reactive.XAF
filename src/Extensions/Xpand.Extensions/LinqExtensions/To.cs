@@ -12,5 +12,6 @@ namespace Xpand.Extensions.LinqExtensions{
 
         public static IEnumerable<T> To<TResult,T>(this IEnumerable<TResult> source) 
             => source.Select(_ => default(T)).WhereNotDefault();
+        
     }
 }

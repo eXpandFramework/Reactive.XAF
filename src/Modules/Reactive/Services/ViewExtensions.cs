@@ -10,7 +10,6 @@ using DevExpress.ExpressApp.SystemModule;
 using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
-using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.DetailViewExtensions;
 using Xpand.Extensions.XAF.ViewExtensions;
 
@@ -68,12 +67,12 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 handler => view.QueryCanClose -= handler,ImmediateScheduler.Instance)).TransformPattern<CancelEventArgs,T>();
 
         public static IObservable<(T view, CancelEventArgs e)> WhenQueryCanChangeCurrentObject<T>(this T view) where T : View 
-            => view.ReturnObservable().QueryCanClose();
+            => Observable.FromEventPattern<EventHandler<CancelEventArgs>, CancelEventArgs>(
+                handler => view.QueryCanChangeCurrentObject += handler,
+                handler => view.QueryCanChangeCurrentObject -= handler,ImmediateScheduler.Instance).TransformPattern<CancelEventArgs,T>();
 
         public static IObservable<(T view, CancelEventArgs e)> QueryCanChangeCurrentObject<T>(this IObservable<T> source) where T:View 
-            => source.Cast<View>().SelectMany(view => Observable.FromEventPattern<EventHandler<CancelEventArgs>, CancelEventArgs>(
-                handler => view.QueryCanChangeCurrentObject += handler,
-                handler => view.QueryCanChangeCurrentObject -= handler,ImmediateScheduler.Instance)).TransformPattern<CancelEventArgs,T>();
+            => source.Cast<T>().SelectMany(view => view.WhenQueryCanChangeCurrentObject());
 
         public static IObservable<T> WhenControlsCreated<T>(this T view) where T : View 
             => Observable.FromEventPattern<EventHandler, EventArgs>(
@@ -87,31 +86,32 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .Select(pattern => pattern.Sender).Cast<T>());
 
         public static IObservable<T> WhenSelectionChanged<T>(this T view,int waitUntilInactiveSeconds=0) where T : View 
-            => view.ReturnObservable().WhenNotDefault().SelectionChanged(waitUntilInactiveSeconds);
+            => view.WhenEvent(nameof(View.SelectionChanged)).To(view)
+                .Publish(changed => waitUntilInactiveSeconds > 0 ? changed.WaitUntilInactive(waitUntilInactiveSeconds) : changed);
 
         public static IObservable<T> SelectionChanged<T>(this IObservable<T> source,int waitUntilInactiveSeconds=0) where T:View 
             => source.SelectMany(item => Observable.FromEventPattern<EventHandler, EventArgs>(
                     handler => item.SelectionChanged += handler,
                     handler => item.SelectionChanged -= handler,ImmediateScheduler.Instance))
                 .Select(pattern => pattern.Sender).Cast<T>()
-                .Publish(changed => waitUntilInactiveSeconds > 0 ? changed.ObserveOnContext() : changed)
-                
-        ;
+                .Publish(changed => waitUntilInactiveSeconds > 0 ? source.WaitUntilInactive(waitUntilInactiveSeconds) : changed);
 
-        public static IObservable<T> WhenCurrentObjectChanged<T>(this T controller) where T : View 
-            => controller.ReturnObservable().WhenNotDefault().CurrentObjectChanged();
 
         public static IObservable<T> CurrentObjectChanged<T>(this IObservable<T> source) where T:View 
-            => source.SelectMany(item => Observable.FromEventPattern<EventHandler, EventArgs>(
+            => source.SelectMany(item => item.WhenCurrentObjectChanged());
+
+        public static IObservable<T> WhenCurrentObjectChanged<T>(this T item) where T:View 
+            => Observable.FromEventPattern<EventHandler, EventArgs>(
                 handler => item.CurrentObjectChanged += handler,
-                handler => item.CurrentObjectChanged -= handler,ImmediateScheduler.Instance)).TransformPattern<T>();
+                handler => item.CurrentObjectChanged -= handler,ImmediateScheduler.Instance)
+                .TransformPattern<T>();
 
         public static IObservable<Unit> WhenDisposingView<TView>(this TView view) where TView:View 
-            => view.ReturnObservable().Disposing();
+            => Observable.FromEventPattern<CancelEventHandler, EventArgs>(handler => view.Disposing += handler,
+                handler => view.Disposing -= handler, ImmediateScheduler.Instance).ToUnit();
 
         public static IObservable<Unit> Disposing<TView>(this IObservable<TView> source) where TView:View 
-            => source.SelectMany(item => Observable.FromEventPattern<CancelEventHandler, EventArgs>(handler => item.Disposing += handler,
-                        handler => item.Disposing -= handler, ImmediateScheduler.Instance)).ToUnit();
+            => source.SelectMany(item => item.WhenDisposingView()).ToUnit();
 
         public static IObservable<ListPropertyEditor> NestedListViews<TView>(this IObservable<TView> views, params Type[] objectTypes) where TView : DetailView 
             => views.WhenControlsCreated().SelectMany(detailView => detailView.NestedListViews(objectTypes));
@@ -134,7 +134,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .ToNowObservable().Merge(lazyListPropertyEditors);
 
             var nestedEditors = listFrameContainers.WhenNotDefault(container => container.Frame).SelectMany(frameContainer => {
-                var detailView = ((ListView)frameContainer.Frame.View).EditView;
+                var detailView =frameContainer.Frame.View is ListView listView? listView.EditView:null;
                 return detailView != null ? detailView.NestedFrameContainers(objectTypes).OfType<TFrameContainer>() : Observable.Never<TFrameContainer>();
             });
             return listFrameContainers.WhenNotDefault(container => container.Frame)

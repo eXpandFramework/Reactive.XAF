@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 using DevExpress.ExpressApp.DC;
 using DevExpress.Persistent.Base.General;
 using DevExpress.Xpo;
@@ -6,6 +7,7 @@ using Xpand.Extensions.XAF.Attributes;
 using Xpand.XAF.Persistent.BaseImpl;
 
 namespace Xpand.Extensions.XAF.Xpo.BaseObjects {
+    [DefaultProperty(nameof(NotificationMessage))]
     public class ErrorEvent:CustomBaseObject,ISupportNotifications{
         public ErrorEvent(Session session) : base(session){
         }

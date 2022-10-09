@@ -5,7 +5,9 @@ using DevExpress.ExpressApp.Xpo;
 using DevExpress.Xpo;
 using DevExpress.Xpo.DB;
 using DevExpress.Xpo.Helpers;
+using DevExpress.Xpo.Providers;
 using Fasterflect;
+using Xpand.Extensions.ObjectExtensions;
 
 namespace Xpand.Extensions.XAF.Xpo.ObjectSpaceExtensions{
     public static partial class ObjectSpaceExtensions{
@@ -29,6 +31,11 @@ namespace Xpand.Extensions.XAF.Xpo.ObjectSpaceExtensions{
                 var dbConnection = connectionProviderSql.Connection;
                 pool.ReleaseReadProvider(connectionProviderSql);
                 return dbConnection;
+            }
+
+            if (connectionProvider is STASafeDataStore) {
+                
+                return connectionProvider.GetFieldValue("DataStore").To<ConnectionProviderSql>().Connection;
             }
             return ((ConnectionProviderSql)connectionProvider).Connection;
         }

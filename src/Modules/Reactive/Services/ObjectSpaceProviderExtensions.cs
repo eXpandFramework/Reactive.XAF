@@ -5,7 +5,9 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reflection;
+using DevExpress.Data.Entity;
 using DevExpress.ExpressApp;
+using DevExpress.Xpo.DB;
 using Fasterflect;
 using HarmonyLib;
 using Xpand.Extensions.Harmony;
@@ -90,6 +92,10 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<IObjectSpace> WhenObjectSpaceCreated<TProvider>(this TProvider provider,bool emitUpdatingObjectSpace=false) where TProvider:IObjectSpaceProvider 
             => ObjectSpaceCreatedSubject.AsObservable().Where(t => emitUpdatingObjectSpace||!t.updating)
                 .Where(t=>t.objectSpaceProvider==(IObjectSpaceProvider)provider).Select(t => t.objectSpace);
+        public static IObservable<IDataStore> WhenDataStoreCreated<TProvider>(this TProvider provider) where TProvider:IObjectSpaceProvider 
+            => provider.GetPropertyValue("DataStoreProvider").When("DevExpress.ExpressApp.Xpo.ConnectionStringDataStoreProvider")
+                .SelectMany(spaceProvider => spaceProvider.WhenEvent("DataStoreCreated").Select(pattern => pattern.EventArgs.GetPropertyValue("DataStore")))
+                .Cast<IDataStore>();
 
     }
 }
