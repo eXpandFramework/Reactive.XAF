@@ -269,9 +269,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
                 criteria, bool showXafMessage, InformationType informationType
                 , int messageDisplayInterval) rule)> source, XafApplication application, TraceEvent traceEvent,Action onOk = null, Action onCancel = null, [CallerMemberName] string memberName = "") 
             => source.Where(t => t.rule.showXafMessage).ShowXafMessage(application, _ => $"{traceEvent.Location}, {traceEvent.Method}, {traceEvent.Value}",
-                    t => t.rule.informationType, t => t.rule.messageDisplayInterval,memberName:memberName,onOk: t => {
-                        var detailView = application.NewDetailView(t.supportNotifications);
-                        application.ShowViewStrategy.ShowViewInPopupWindow(detailView);
-                    });
+                t => t.rule.informationType, SynchronizationContext.Current, t => t.rule.messageDisplayInterval, memberName: memberName,
+                onOk: t => application.ShowViewStrategy.ShowViewInPopupWindow(application.NewDetailView(t.supportNotifications)));
     }
 }
