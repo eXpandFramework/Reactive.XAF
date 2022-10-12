@@ -33,6 +33,6 @@ namespace Xpand.Extensions.XAF.Attributes.Custom {
         }
         string ICustomAttribute.Name => "DisplayFormat;EditMask;EditMaskType";
 
-        string ICustomAttribute.Value => $"{{0: {_timeString}}};{_dateString} {_timeString};DateTime";
+        string ICustomAttribute.Value => $"{{0: {_dateString}{_timeString}}};{_dateString} {_timeString};DateTime";
     }
 }
