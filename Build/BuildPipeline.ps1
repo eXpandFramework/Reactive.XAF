@@ -96,17 +96,13 @@ Invoke-Script {
         Write-HostFormatted "PaketInstall $SourcePath (due to different Version)" -section
         dotnet paket install 
     }
-    # $nugetPackageFolder = "$env:USERPROFILE\.nuget\packages"
-    # if (Test-AzDevops) {
-    #     $nugetPackageFolder = "D:\a\1\.nuget\packages"
-    # }
-    # & powershell.exe "$SourcePath\build\targets\Xpand.XAF.Modules.JobScheduler.Hangfire.ps1" -nugetPackagesFolder $nugetPackageFolder
     
-    # Get-AssemblyPublicKeyToken (Get-ChildItem $nugetPackageFolder "*Hangfire.core.dll" -Recurse | Select-Object -First 1)
 
     & $SourcePath\go.ps1 @bArgs
 
     Move-PaketSource 0 "C:\Program Files (x86)\DevExpress $(Get-VersionPart $DXVersion Minor)\Components\System\Components\Packages"
+
+
     if (Test-AzDevops) {
         # Write-HostFormatted "Partition artifacts" -Section
         # "net461","net472"|ForEach-Object{

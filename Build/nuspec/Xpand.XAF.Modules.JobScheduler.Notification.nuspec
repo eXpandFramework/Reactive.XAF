@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.JobScheduler.Notification</id>
-    <version>4.221.8.1</version>
+    <version>4.221.8.2</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -15,18 +15,18 @@
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, JobScheduler.Notification, 22.1.5</tags>
     <dependencies>
       <group targetFramework="net6.0">
-        <dependency id="Xpand.Extensions.Blazor" version="4.221.8.1" />
-        <dependency id="Xpand.Extensions.Reactive" version="4.221.8.1" />
-        <dependency id="Xpand.Extensions.XAF" version="4.221.8.1" />
-        <dependency id="Xpand.Extensions" version="4.221.8.1" />
-        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.221.8.1" />
-        <dependency id="Xpand.XAF.Modules.Blazor" version="4.221.8.1" />
-        <dependency id="Xpand.XAF.Modules.Reactive" version="4.221.8.1" />
+        <dependency id="Xpand.Extensions.Blazor" version="4.221.8.2" />
+        <dependency id="Xpand.Extensions.Reactive" version="4.221.8.2" />
+        <dependency id="Xpand.Extensions.XAF" version="4.221.8.2" />
+        <dependency id="Xpand.Extensions" version="4.221.8.2" />
+        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.221.8.2" />
+        <dependency id="Xpand.XAF.Modules.Blazor" version="4.221.8.2" />
+        <dependency id="Xpand.XAF.Modules.Reactive" version="4.221.8.2" />
         <dependency id="DevExpress.ExpressApp.ConditionalAppearance" version="22.1.5" />
         <dependency id="Fasterflect.Xpand" version="2.0.7" />
         <dependency id="System.Reactive" version="5.0" />
         <dependency id="Hangfire.AspNetCore" version="1.7.30" />
-        <dependency id="Xpand.Patcher" version="3.0.6" />
+        <dependency id="Xpand.Patcher" version="3.0.8" />
         <dependency id="DevExpress.ExpressApp.CodeAnalysis" version="22.1.5" />
         <dependency id="DevExpress.ExpressApp.Blazor" version="22.1.5" />
         <dependency id="DevExpress.ExpressApp.Validation" version="22.1.5" />
@@ -34,7 +34,7 @@
         <dependency id="DevExpress.ExpressApp.Xpo" version="22.1.5" />
       </group>
       <group targetFramework="netstandard2.0">
-        <dependency id="Xpand.VersionConverter" version="4.221.8.1" />
+        <dependency id="Xpand.VersionConverter" version="4.221.8.2" />
       </group>
     </dependencies>
   </metadata>

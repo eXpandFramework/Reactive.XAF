@@ -17,10 +17,10 @@
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-    <NoWarn>1701;1702;NU1701</NoWarn>
+    <NoWarn>1701;1702;NU1701;cs8002 </NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <NoWarn>1701;1702;NU1701</NoWarn>
+    <NoWarn>1701;1702;NU1701;cs8002</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Model.DesignedDiffs.xafml" />

@@ -4,6 +4,7 @@ using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp.Model;
 using NUnit.Framework;
 using Shouldly;
+using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.TestsLib.Common.Attributes;
 using Xpand.XAF.Modules.Reactive.Services;
@@ -40,11 +41,16 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
 			}
 
 		}
+
+		protected override void ResetXAF() {
+			base.ResetXAF();
+		}
+
 		[Test][XpandTest()]
 		public void WhenGeneratingModelNodes_FromType(){
 			using (var application = NewXafApplication()){
 				application.WhenApplicationModulesManager().WhenGeneratingModelNodes<IModelImageSources>()
-					.Do(imageSources => imageSources.AddNode<IModelFileImageSource>(nameof(WhenGeneratingModelNodes_FromType)))
+					.DoWhen(sources => sources[nameof(WhenGeneratingModelNodes_FromType)]==null, imageSources => imageSources.AddNode<IModelFileImageSource>(nameof(WhenGeneratingModelNodes_FromType)))
 					.Test();
 				
 				DefaultReactiveModule(application);

@@ -39,7 +39,6 @@ nuget MessagePack 1.7.3.7
 nuget Hangfire.Core 1.7.30
 nuget Hangfire.SqlServer 1.7.30
 nuget Hangfire.AspNetCore 1.7.30
-nuget hangfire.memorystorage 1.7.24.2
 nuget System.Runtime.CompilerServices.Unsafe 6.0.0
 nuget System.Collections.Immutable 6.0.0
 nuget Microsoft.Windows.Compatibility 6.0.0

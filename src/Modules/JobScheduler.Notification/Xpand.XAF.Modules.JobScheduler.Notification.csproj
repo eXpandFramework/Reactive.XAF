@@ -18,11 +18,11 @@
     <RootNamespace>Xpand.XAF.Modules.JobScheduler.Hangfire.Notification</RootNamespace>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-    <NoWarn>1701;1702;NU1701</NoWarn>
+    <NoWarn>1701;1702;NU1701;CS8002</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <WarningsAsErrors>;NU1605</WarningsAsErrors>
-    <NoWarn>1701;1702;NU1701</NoWarn>
+    <NoWarn>1701;1702;NU1701;cs8002 </NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Model.DesignedDiffs.xafml" />

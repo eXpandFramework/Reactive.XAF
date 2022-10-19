@@ -2847,9 +2847,6 @@ NUGET
       DevExpress.Win.Navigation (22.1.5) - restriction: || (== net461) (== net472) (== net6.0) (== net6.0-windows7.0) (&& (== netstandard2.0) (>= net452)) (&& (== netstandard2.0) (>= netcoreapp3.0)) (&& (== netstandard2.1) (>= net452)) (&& (== netstandard2.1) (>= netcoreapp3.0))
       DevExpress.Win.Printing (22.1.5) - restriction: || (== net461) (== net472) (== net6.0) (== net6.0-windows7.0) (&& (== netstandard2.0) (>= net452)) (&& (== netstandard2.0) (>= netcoreapp3.0)) (&& (== netstandard2.1) (>= net452)) (&& (== netstandard2.1) (>= netcoreapp3.0))
   remote: https://xpandnugetserver.azurewebsites.net/nuget
-    Hangfire.MemoryStorage (1.7.24.2)
-      Hangfire.Core (>= 1.7.24)
-      NETStandard.Library (>= 1.6) - restriction: || (&& (== net461) (< net45)) (&& (== net472) (< net45)) (== net6.0) (== net6.0-windows7.0) (== netstandard2.0) (== netstandard2.1)
     Xpand.Patcher (3.0.8)
       Mono.Cecil (>= 0.11.4)
       System.ComponentModel.TypeConverter (>= 4.3)

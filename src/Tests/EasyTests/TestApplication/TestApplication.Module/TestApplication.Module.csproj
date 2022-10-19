@@ -69,7 +69,7 @@
     <PackageReference Include="DevExpress.Persistent.BaseImpl.Xpo" Version="22.1.5" />
     <PackageReference Include="DevExpress.Xpo" Version="22.1.5" />
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="6.0" />
-    <PackageReference Include="Xpand.XAF.Core.All" Version="4.221.8.1" />
+    <PackageReference Include="Xpand.XAF.Core.All" Version="4.221.8.2" />
     <!-- <PackageReference Include="Xpand.XAF.Modules.BulkObjectUpdate" Version="4.212.2.1" /> -->
     <PackageReference Include="Google.Apis.People.v1" Version="1.25.0.830" />
     <!-- <PackageReference Include="System.ServiceModel.Security" Version="4.8.1" />

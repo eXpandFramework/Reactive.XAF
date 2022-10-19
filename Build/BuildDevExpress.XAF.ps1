@@ -77,7 +77,9 @@ Task CompileTests -precondition { return ((Get-VersionPart $DXVersion Minor) -ne
             $nugetConfig | Save-Xml $nugetConfigPath
         }
         SyncrhonizePaketVersion
+        
         CompileTestSolution "$Root\src\Tests\Tests.sln"
+        
         
     } -Maximum 3
 

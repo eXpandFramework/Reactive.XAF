@@ -15,13 +15,19 @@
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
     <RootNamespace>Xpand.XAF.Modules.JobScheduler.Hangfire.Notification.Tests</RootNamespace>
   </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <NoWarn>1701;1702;cs8002</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <NoWarn>1701;1702;cs8002</NoWarn>
+  </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="DevExpress.ExpressApp.Blazor.All" Version="22.1.5" />
     <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.7" />
     <PackageReference Include="hangfire.core" Version="1.7.30" />
     <PackageReference Include="hangfire.sqlserver" Version="1.7.30" />
     <PackageReference Include="hangfire.aspnetcore" Version="1.7.30" />
-    <PackageReference Include="hangfire.memorystorage" Version="1.7.24.2" />
+    <PackageReference Include="hangfire.memorystorage" Version="1.7.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="4.1.0" />
   </ItemGroup>

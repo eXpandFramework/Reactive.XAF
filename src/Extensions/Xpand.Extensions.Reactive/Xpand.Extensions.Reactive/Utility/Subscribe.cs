@@ -5,8 +5,8 @@ using System.Reactive.Linq;
 
 namespace Xpand.Extensions.Reactive.Utility{
     public static partial class Utility {
-        public static IObservable<T> OnUnsubscribe<T>(this IObservable<T> source, Action unsubscribe) 
-            => Observable.Create<T>(o => new CompositeDisposable(source.Subscribe(o), Disposable.Create(unsubscribe)));
+        public static IObservable<T> Unsubscribed<T>(this IObservable<T> source, Action unsubscribed) 
+            => Observable.Create<T>(o => new CompositeDisposable(source.Subscribe(o), Disposable.Create(unsubscribed)));
         
         public static IObservable<T> ReplayConnect<T>(this IObservable<T> source, IScheduler scheduler,
             int bufferSize = 0)
