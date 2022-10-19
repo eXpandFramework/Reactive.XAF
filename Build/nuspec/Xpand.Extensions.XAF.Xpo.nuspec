@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.Extensions.XAF.Xpo</id>
-    <version>4.221.8.0</version>
+    <version>4.221.8.1</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -15,13 +15,13 @@
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Xpand.Extensions.XAF.Xpo, 22.1.5</tags>
     <dependencies>
       <group targetFramework="netstandard2.0">
-        <dependency id="Xpand.Extensions" version="4.221.8.0" />
-        <dependency id="Xpand.Extensions.XAF" version="4.221.8.0" />
+        <dependency id="Xpand.Extensions" version="4.221.8.1" />
+        <dependency id="Xpand.Extensions.XAF" version="4.221.8.1" />
         <dependency id="DevExpress.ExpressApp.Xpo" version="22.1.5" />
         <dependency id="DevExpress.Persistent.Base" version="22.1.5" />
         <dependency id="Fasterflect.Xpand" version="2.0.7" />
         <dependency id="Newtonsoft.Json" version="13.0.1" />
-        <dependency id="Xpand.VersionConverter" version="4.221.8.0" />
+        <dependency id="Xpand.VersionConverter" version="4.221.8.1" />
       </group>
     </dependencies>
   </metadata>

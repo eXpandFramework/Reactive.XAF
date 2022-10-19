@@ -88,7 +88,7 @@ namespace Xpand.XAF.Modules.GridListEditor.Tests{
                 focusRow.RowHandle = null;
             }
         
-            var testObserver = application.WhenFrameViewChanged().WhenFrame(ViewType.ListView)
+            var testObserver = application.WhenFrame(ViewType.ListView)
                 .Select(frame => {
                     var gridView = ((DevExpress.ExpressApp.Win.Editors.GridListEditor) frame.View.AsListView().Editor).GridView;
                     if (upArrowMoveToRowHandle) {

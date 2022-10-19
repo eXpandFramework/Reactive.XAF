@@ -55,7 +55,7 @@ namespace Xpand.XAF.Modules.Reactive.Rest {
                     .ToUnit()))));
         
         private static IObservable<Unit> ObjectStringLookup(this XafApplication application) 
-            => application.WhenFrameViewChanged().WhenFrame(typeof(ObjectString),ViewType.ListView,Nesting.Nested)
+            => application.WhenFrame(typeof(ObjectString),ViewType.ListView,Nesting.Nested)
                 .SelectMany(frame => frame.View.AsListView().CollectionSource is NonPersistentPropertyCollectionSource source
                     ? source.MasterObjectType.RestListMembers().Where(t => t.attribute.PropertyName == source.MemberInfo.Name)
                         .SelectMany(_ => frame.GetController<NewObjectViewController>().NewObjectAction.WhenExecute()

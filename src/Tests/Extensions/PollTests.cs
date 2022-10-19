@@ -18,11 +18,11 @@ namespace Xpand.Extensions.Tests {
                 .Select(i => i.Switch(v => v, _ => -1))
                 .Subscribe(observer);
 
-            testScheduler.AdvanceTo(30.Seconds());
+            testScheduler.AdvanceTo(30.Seconds().Ticks);
 
-            observer.Messages.AssertEqual(ReactiveTest.OnNext(10.Seconds(), 10.Seconds()),
-                ReactiveTest.OnNext(20.Seconds(), 20.Seconds()),
-                ReactiveTest.OnNext(30.Seconds(), 30.Seconds())
+            observer.Messages.AssertEqual(ReactiveTest.OnNext(10.Seconds().Ticks, 10.Seconds().Ticks),
+                ReactiveTest.OnNext(20.Seconds().Ticks, 20.Seconds().Ticks),
+                ReactiveTest.OnNext(30.Seconds().Ticks, 30.Seconds().Ticks)
             );
         }
 
@@ -38,10 +38,10 @@ namespace Xpand.Extensions.Tests {
                 .Select(i => i.Switch(v => v, _ => -1))
                 .Subscribe(observer);
 
-            testScheduler.AdvanceTo(30.Seconds());
+            testScheduler.AdvanceTo(30.Seconds().Ticks);
 
-            observer.Messages.AssertEqual(ReactiveTest.OnNext(15.Seconds(), 0L),
-                ReactiveTest.OnNext(30.Seconds(), 0L)
+            observer.Messages.AssertEqual(ReactiveTest.OnNext(15.Seconds().Ticks, 0L),
+                ReactiveTest.OnNext(30.Seconds().Ticks, 0L)
             );
         }
 
@@ -62,11 +62,11 @@ namespace Xpand.Extensions.Tests {
             request.Poll(period, testScheduler)
                 .Subscribe(observer);
 
-            testScheduler.AdvanceTo(30.Seconds());
+            testScheduler.AdvanceTo(30.Seconds().Ticks);
 
-            observer.Messages.AssertEqual(ReactiveTest.OnNext(10.Seconds(), Try<string>.Create("Hello")),
-                ReactiveTest.OnNext(20.Seconds(), Try<string>.Fail(new Exception("boom"))),
-                ReactiveTest.OnNext(30.Seconds(), Try<string>.Create("Back again"))
+            observer.Messages.AssertEqual(ReactiveTest.OnNext(10.Seconds().Ticks, Try<string>.Create("Hello")),
+                ReactiveTest.OnNext(20.Seconds().Ticks, Try<string>.Fail(new Exception("boom"))),
+                ReactiveTest.OnNext(30.Seconds().Ticks, Try<string>.Create("Back again"))
             );
         }
         
@@ -89,12 +89,12 @@ namespace Xpand.Extensions.Tests {
                 .Poll(period, testScheduler)
                 .Subscribe(observer);
 
-            testScheduler.AdvanceTo(40.Seconds());
+            testScheduler.AdvanceTo(40.Seconds().Ticks);
 
-            observer.Messages.AssertEqual(ReactiveTest.OnNext(10.Seconds(), Try<string>.Create("response")),
-                ReactiveTest.OnNext(25.Seconds(),
+            observer.Messages.AssertEqual(ReactiveTest.OnNext(10.Seconds().Ticks, Try<string>.Create("response")),
+                ReactiveTest.OnNext(25.Seconds().Ticks,
                     Try<string>.Fail(new TimeoutException("The operation has timed out."))),
-                ReactiveTest.OnNext(35.Seconds(), Try<string>.Create("response"))
+                ReactiveTest.OnNext(35.Seconds().Ticks, Try<string>.Create("response"))
             );
         }
     }

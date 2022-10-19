@@ -73,7 +73,7 @@ namespace Xpand.XAF.Modules.RazorView{
                 .ToUnit();
 
         private static IObservable<Unit> RenderPreview(this XafApplication application) 
-            => application.WhenFrameViewChanged()
+            => application.WhenFrame()
                 .WhenFrame(typeof(RazorView.BusinessObjects.RazorView)).WhenFrame(ViewType.DetailView)
                 .SelectMany(frame => {
                     var objectTemplate = ((RazorView.BusinessObjects.RazorView)frame.View.CurrentObject);

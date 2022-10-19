@@ -24,7 +24,7 @@ namespace Xpand.XAF.Modules.Speech.Services {
 
         public static IObservable<Unit> ConnectSpeechKeyword(this ApplicationModulesManager manager) {
             return manager.NavigateNextWord().Merge(manager.AddSpeechKeyword())
-                .Merge(manager.WhenSpeechApplication(application => application.WhenFrameViewChanged()
+                .Merge(manager.WhenSpeechApplication(application => application
                     .WhenFrame(SpeechText.SpeechTextKeywordListView)
                     .SelectMany(frame => frame.View.WhenCurrentObjectChanged().Take(1)
                         .Select(view => view.ToListView().HideWhenMasterDetail())

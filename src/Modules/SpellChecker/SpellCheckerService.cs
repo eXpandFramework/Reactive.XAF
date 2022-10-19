@@ -19,7 +19,7 @@ using Xpand.XAF.Modules.Reactive.Services;
 namespace Xpand.XAF.Modules.SpellChecker{
     public static class SpellCheckerService{
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) 
-            => manager.WhenApplication(application => application.WhenFrameViewChanged().WhenFrame(ViewType.DetailView)
+            => manager.WhenApplication(application => application.WhenFrame(ViewType.DetailView)
                 .Where(frame => frame.SpellCheckerModel().Enabled)
                 .SelectUntilViewClosed(frame => frame.View.ToDetailView().GetItems<PropertyEditor>().ToNowObservable()
                 .Where(editor => editor.MemberInfo.FindAttributes<SpellCheckAttribute>().Any())

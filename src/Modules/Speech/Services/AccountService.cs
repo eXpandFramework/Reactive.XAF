@@ -31,7 +31,7 @@ namespace Xpand.XAF.Modules.Speech.Services {
             => manager.UpdateVoicesOnViewRefresh().Merge(manager.UpdateVoicesOnCommit());
 
         private static IObservable<Unit> UpdateVoicesOnViewRefresh(this ApplicationModulesManager manager) 
-            => manager.WhenSpeechApplication(application => application.WhenFrameViewChanged().WhenFrame(typeof(BusinessObjects.SpeechService),ViewType.DetailView)
+            => manager.WhenSpeechApplication(application => application.WhenFrame(typeof(BusinessObjects.SpeechService),ViewType.DetailView)
                 .SelectUntilViewClosed(frame => frame.GetController<RefreshController>().RefreshAction.WhenConcatRetriedExecution(_ =>frame.View.CurrentObject.To<BusinessObjects.SpeechService>().UpdateVoices() )).ToUnit());
 
         public static BusinessObjects.SpeechService DefaultSpeechAccount(this IObjectSpace space,IModelSpeech modelSpeech) 

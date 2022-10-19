@@ -67,7 +67,7 @@ namespace Xpand.XAF.Modules.Speech.Services{
         private static readonly ConcurrentDictionary<(string voice,Type speechTextType),SpeechSynthesizer> SpeechSynthesizersCache = new();
         [SuppressMessage("ReSharper", "HeapView.CanAvoidClosure")]
         private static IObservable<Unit> SpeechSynthesizerCache(this ApplicationModulesManager manager)
-			=> manager.WhenSpeechApplication(application => application.WhenFrameViewChanged().WhenFrame(typeof(SpeechToText),ViewType.DetailView)
+			=> manager.WhenSpeechApplication(application => application.WhenFrame(typeof(SpeechToText),ViewType.DetailView)
 				.Select(frame => frame.View.CurrentObject.To<SpeechToText>())
 				.SelectMany(speechToText => speechToText.WhenVoices()
 					.SelectMany(voice => new[]{typeof(SpeechText),typeof(SpeechTranslation)}.ToObservable()

@@ -36,7 +36,7 @@ namespace Xpand.XAF.Modules.Speech.Services {
         ;
 
         private static IObservable<Unit> SaveSpeak(this XafApplication application) 
-            => application.WhenFrameViewChanged().WhenFrame(typeof(TextToSpeech),ViewType.DetailView)
+            => application.WhenFrame(typeof(TextToSpeech),ViewType.DetailView)
                 .SelectUntilViewClosed(frame => frame.View.Id != TextToSpeech.TypeSpeakDetailView ? frame.WhenSaveSpeak().ToUnit()
                     : frame.View.ObjectSpace.WhenCommittedDetailed<TextToSpeech>(
                             ObjectModification.NewOrUpdated, speech => speech.Text.IsNotNullOrEmpty(), nameof(TextToSpeech.Text))

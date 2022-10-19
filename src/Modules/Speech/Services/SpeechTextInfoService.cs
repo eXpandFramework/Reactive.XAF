@@ -23,7 +23,7 @@ namespace Xpand.XAF.Modules.Speech.Services {
             => manager.NewSpeechTextInfo().Merge(manager.CopySpeechTextInfoPath());
 
         private static IObservable<Unit> NewSpeechTextInfo(this ApplicationModulesManager manager) 
-            => manager.WhenSpeechApplication(application => application.WhenFrameViewChanged().WhenFrame(typeof(SpeechToText),ViewType.DetailView)
+            => manager.WhenSpeechApplication(application => application.WhenFrame(typeof(SpeechToText),ViewType.DetailView)
                     .SelectUntilViewClosed(frame => frame.View.ToDetailView().NestedFrameContainers(typeof(SpeechText))
                         .SelectMany(container => container.Frame.View.WhenSelectionChanged().Throttle(TimeSpan.FromSeconds(1)).ObserveOnContext()
                             .Select(view => view.SelectedObjects.Cast<SpeechText>().ToArray())
@@ -31,7 +31,7 @@ namespace Xpand.XAF.Modules.Speech.Services {
                             .Do(speechTexts => frame.View.NewSpeechInfo(container.Frame.View.ObjectTypeInfo.Type,speechTexts)))))
                 .ToUnit();
         private static IObservable<Unit> CopySpeechTextInfoPath(this ApplicationModulesManager manager) 
-            => manager.WhenSpeechApplication(application => application.WhenFrameViewChanged().WhenFrame(typeof(SpeechToText),ViewType.DetailView))
+            => manager.WhenSpeechApplication(application => application.WhenFrame(typeof(SpeechToText),ViewType.DetailView))
                 .SelectMany(frame => frame.View.ToDetailView().WhenNestedListViewProcessCustomizeShowViewParameters(typeof(SSMLFile))
                     .Select(e => {
                         var ssmlFile = e.ShowViewParameters.CreatedView.CurrentObject.To<SSMLFile>();

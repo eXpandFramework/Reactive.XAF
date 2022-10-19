@@ -9,7 +9,6 @@ using DevExpress.Persistent.Base;
 using DevExpress.Persistent.Validation;
 using DevExpress.Xpo;
 using Xpand.Extensions.LinqExtensions;
-using Xpand.Extensions.StringExtensions;
 using Xpand.Extensions.XAF.Attributes;
 using Xpand.Extensions.XAF.Attributes.Custom;
 using Xpand.Extensions.XAF.Xpo.BaseObjects;
@@ -39,7 +38,7 @@ namespace Xpand.XAF.Modules.Speech.BusinessObjects {
 
         string _storage;
 
-        [ViewItemValue(DefaultOnCommit = true)]
+        [ViewItemValue()]
         public string Storage {
             get => _storage;
             set => SetPropertyValue(nameof(Storage), ref _storage, value);
@@ -86,7 +85,7 @@ namespace Xpand.XAF.Modules.Speech.BusinessObjects {
 
         SpeechLanguage _language;
 
-        [RuleRequiredField][ViewItemValue(DefaultOnCommit = true)]
+        [RuleRequiredField][ViewItemValue()]
         [DataSourceProperty(nameof(Languages))]
         public SpeechLanguage Language {
             get => _language;

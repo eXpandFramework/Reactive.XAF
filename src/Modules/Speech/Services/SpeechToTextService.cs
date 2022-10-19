@@ -71,7 +71,7 @@ namespace Xpand.XAF.Modules.Speech.Services {
 		        .Merge(manager.NewSpeechTextFromUI());
 
         private static IObservable<Unit> SynthesizeOnSave(this ApplicationModulesManager manager)
-			=> manager.WhenSpeechApplication(application => application.WhenFrameViewChanged().WhenFrame(typeof(SpeechToText))
+			=> manager.WhenSpeechApplication(application => application.WhenFrame(typeof(SpeechToText))
 				.Where(frame => frame.View.ObjectTypeInfo.Type==typeof(SpeechToText))
 				.SelectUntilViewClosed(frame => {
 					var observeOnContext = frame.View.ObjectSpace
@@ -115,14 +115,14 @@ namespace Xpand.XAF.Modules.Speech.Services {
         
         
         private static IObservable<Unit> ConfigureSpeechTextView(this ApplicationModulesManager manager)
-	        => manager.WhenSpeechApplication(application => application.WhenFrameViewChanged().WhenFrame(typeof(SpeechToText), ViewType.DetailView)
+	        => manager.WhenSpeechApplication(application => application.WhenFrame(typeof(SpeechToText), ViewType.DetailView)
 			        .SelectUntilViewClosed(frame => frame.View.ToDetailView().NestedFrameContainers(typeof(SpeechText))
 				        .Do(container => ((XPObjectSpace)container.Frame.View.ObjectSpace).PopulateAdditionalObjectSpaces(application)))
 			        .MergeToUnit(application.SynchronizeSpeechTextListViewSelection()))
 		        .MergeToUnit(manager.ConfigureSpeechTranslationView());
         
         private static IObservable<Unit> ConfigureSpeechTranslationView(this ApplicationModulesManager manager)
-	        => manager.WhenSpeechApplication(application => application.WhenFrameViewChanged().WhenFrame(typeof(SpeechToText), ViewType.DetailView)
+	        => manager.WhenSpeechApplication(application => application.WhenFrame(typeof(SpeechToText), ViewType.DetailView)
 			        .SelectUntilViewClosed(frame => frame.View.ToDetailView().NestedFrameContainers(typeof(SpeechTranslation))
 				        .Do(container => container.Frame.View.ToListView().CollectionSource
 					        .SetCriteria<SpeechTranslation>(translation => translation.SpeechToText.Oid== ((SpeechToText)frame.View.CurrentObject).Oid)))
@@ -134,7 +134,7 @@ namespace Xpand.XAF.Modules.Speech.Services {
 					        // t1.e.View = (ListView)application.NewView(application.Model.Views[t1.e.ViewID], nestedObjectSpace);
 				        }))
 		        ))
-		        .MergeToUnit(manager.WhenSpeechApplication(application => application.WhenFrameViewChanged().WhenFrame(typeof(SpeechToText),ViewType.DetailView)
+		        .MergeToUnit(manager.WhenSpeechApplication(application => application.WhenFrame(typeof(SpeechToText),ViewType.DetailView)
 			        .SelectUntilViewClosed(frame => frame.View.ObjectSpace.WhenCommitted<SpeechText>(ObjectModification.Deleted)
 				        .Do(_ => frame.GetController<RefreshController>().RefreshAction.DoExecute()))));
 
@@ -148,7 +148,7 @@ namespace Xpand.XAF.Modules.Speech.Services {
 
 
         private static IObservable<Unit> SSML(this ApplicationModulesManager manager) 
-	        => manager.WhenSpeechApplication(application => application.WhenFrameViewChanged().WhenFrame(typeof(SpeechText),ViewType.ListView)
+	        => manager.WhenSpeechApplication(application => application.WhenFrame(typeof(SpeechText),ViewType.ListView)
 			        .SelectUntilViewClosed(frame => frame.View.WhenSelectionChanged(1)
 				        .Do(view => view.AsListView().CollectionSource.Objects<SpeechText>().FirstOrDefault()?.SpeechToText.TranslationSSMLs.Clear())
 				        .Do(view => {
@@ -355,7 +355,7 @@ namespace Xpand.XAF.Modules.Speech.Services {
                     action.Items.Add(new ChoiceActionItem("JoinTextSSML","JoinTextSSML"));
                 },PredefinedCategory.ObjectsCreation)
                 .ToUnit()
-                .Merge(manager.WhenSpeechApplication(application => application.WhenFrameViewChanged().WhenFrame(typeof(SpeechToText),ViewType.DetailView)
+                .Merge(manager.WhenSpeechApplication(application => application.WhenFrame(typeof(SpeechToText),ViewType.DetailView)
                     .SelectUntilViewClosed(speechToTextFrame => speechToTextFrame.View.AsDetailView().NestedFrameContainers(typeof(SpeechText))
                         .SelectMany(editor => {
 	                        var action = editor.Frame.SingleChoiceAction(nameof(Synthesize));
@@ -544,7 +544,7 @@ namespace Xpand.XAF.Modules.Speech.Services {
         
         private static IObservable<Unit> WhenSpeechToTextAction(this ApplicationModulesManager manager, string actionId,
 	        CommonImage startImage, Func<AudioConfig, SpeechToText, SynchronizationContext, SimpleAction, IObservable<Unit>> operation) 
-	        => manager.WhenSpeechApplication(application => application.WhenFrameViewChanged().WhenFrame(typeof(SpeechToText),ViewType.DetailView)
+	        => manager.WhenSpeechApplication(application => application.WhenFrame(typeof(SpeechToText),ViewType.DetailView)
 		        .SelectUntilViewClosed(frame => frame.SimpleAction(actionId)
 			        .WhenExecuted().Where(e => e.Action.CommonImage()==startImage).Do(e => e.Action.SetImage(CommonImage.Stop))
 			        .Select(e => (speechToText:e.View().CurrentObject.To<SpeechToText>(),action:e.Action.ToSimpleAction(),context:SynchronizationContext.Current))

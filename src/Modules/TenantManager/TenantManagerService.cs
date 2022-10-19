@@ -162,7 +162,7 @@ namespace Xpand.XAF.Modules.TenantManager{
             => objectSpace.GetObjectsCount(model.TenantManager().Organization.TypeInfo.Type, objectSpace.ParseCriteria(model.TenantManager().Registration));
 
         private static IObservable<Frame> WhenStartupFrame(this XafApplication application) 
-            => application.WhenFrameViewChanged()
+            => application
                 .WhenFrame(frame => frame.Application.Model.TenantManager().StartupView?.ModelClass.TypeInfo.Type);
         
         private static IObservable<Unit> HideOrganization(this XafApplication application) 
