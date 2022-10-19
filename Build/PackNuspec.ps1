@@ -1,5 +1,5 @@
 param(
-    $Branch = "master",
+    $Branch = "lab",
     $nugetBin = "$PSScriptRoot\..\bin\Nupkg",
     $sourceDir = "$PSScriptRoot\..",
     $Filter ,
@@ -47,8 +47,8 @@ $packScript = {
     
 }
 $varsToImport = @("assemblyVersions", "SkipReadMe", "nugetPath", "sourceDir", "nugetBin", "SkipReadMe")
-$nuspecs | Invoke-Parallel -VariablesToImport $varsToImport -Script $packScript
-# $nuspecs| ForEach-Object { Invoke-Command $packScript -ArgumentList $_ }
+# $nuspecs | Invoke-Parallel -VariablesToImport $varsToImport -Script $packScript
+$nuspecs| ForEach-Object { Invoke-Command $packScript -ArgumentList $_ }
 function AddReadMe {
     param(
         $Package,

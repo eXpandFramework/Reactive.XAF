@@ -2850,7 +2850,7 @@ NUGET
     Hangfire.MemoryStorage (1.7.24.2)
       Hangfire.Core (>= 1.7.24)
       NETStandard.Library (>= 1.6) - restriction: || (&& (== net461) (< net45)) (&& (== net472) (< net45)) (== net6.0) (== net6.0-windows7.0) (== netstandard2.0) (== netstandard2.1)
-    Xpand.Patcher (3.0.6)
+    Xpand.Patcher (3.0.8)
       Mono.Cecil (>= 0.11.4)
       System.ComponentModel.TypeConverter (>= 4.3)
       System.IO.FileSystem.Primitives (>= 4.3)

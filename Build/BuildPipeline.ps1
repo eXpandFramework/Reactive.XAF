@@ -96,13 +96,13 @@ Invoke-Script {
         Write-HostFormatted "PaketInstall $SourcePath (due to different Version)" -section
         dotnet paket install 
     }
-    $nugetPackageFolder = "$env:USERPROFILE\.nuget\packages"
-    if (Test-AzDevops) {
-        $nugetPackageFolder = "D:\a\1\.nuget\packages"
-    }
-    & powershell.exe "$SourcePath\build\targets\Xpand.XAF.Modules.JobScheduler.Hangfire.ps1" -nugetPackagesFolder $nugetPackageFolder
+    # $nugetPackageFolder = "$env:USERPROFILE\.nuget\packages"
+    # if (Test-AzDevops) {
+    #     $nugetPackageFolder = "D:\a\1\.nuget\packages"
+    # }
+    # & powershell.exe "$SourcePath\build\targets\Xpand.XAF.Modules.JobScheduler.Hangfire.ps1" -nugetPackagesFolder $nugetPackageFolder
     
-    Get-AssemblyPublicKeyToken (Get-ChildItem $nugetPackageFolder "*Hangfire.core.dll" -Recurse | Select-Object -First 1)
+    # Get-AssemblyPublicKeyToken (Get-ChildItem $nugetPackageFolder "*Hangfire.core.dll" -Recurse | Select-Object -First 1)
 
     & $SourcePath\go.ps1 @bArgs
 

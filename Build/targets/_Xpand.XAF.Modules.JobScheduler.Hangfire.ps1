@@ -48,16 +48,28 @@ $netstandard=get-item "$nugetPackagesFolder\netstandard.library\2.0.3\build\nets
     }
 }
 
-if ($TargetPath) {
-    $pdbname = "$((Get-ChildItem $PSScriptRoot *.targets).BaseName).pdb"
-    $targetDir = [System.IO.Path]::GetDirectoryName($TargetPath)
-    $pdbPath = Get-ChildItem $PSScriptRoot\..\lib *.pdb -Recurse
-    if (!(Test-Path "$targetDir\$pdbname")) {
-        $pdbPath | Copy-Item -Destination $targetDir
-    }
-    else {
-        if (!(Compare-Object $pdbPath "$targetDir\$pdbname" -Property Length, LastWriteTime)) {
-            Copy-Item $pdbPath "$targetDir\$pdbname" -Force
+$msSpeechPath="$PSScriptRoot\..\..\..\microsoft.cognitiveservices.speech"
+if (Test-Path $msSpeechPath){
+    Get-ChildItem $msSpeechPath "Microsoft.CognitiveServices.Speech.csharp.dll" -Recurse|Where-Object{
+        $_.Directory.Name -eq "netstandard2.0" 
+    }|ForEach-Object{
+        $corelib="$($_.DirectoryName)\Microsoft.CognitiveServices.Speech.core.dll"
+        if (!(Test-Path $corelib)){
+            Copy-Item $_.FullName $corelib -ErrorAction SilentlyContinue
+            $LASTEXITCODE=0
         }
+    }
+}
+
+$pdbname = "$((Get-ChildItem $PSScriptRoot *.targets).BaseName).pdb"
+$targetDir=[System.IO.Path]::GetDirectoryName($TargetPath)
+$pdbPath=Get-ChildItem $PSScriptRoot\..\lib *.pdb -Recurse
+
+if (!(Test-Path "$targetDir\$pdbname")){
+    $pdbPath|Copy-Item -Destination $targetDir
+}
+else{
+    if (!(Compare-Object $pdbPath "$targetDir\$pdbname" -Property Length, LastWriteTime)){
+        Copy-Item $pdbPath "$targetDir\$pdbname" -Force
     }
 }

@@ -10,6 +10,7 @@ if (Test-Path $msSpeechPath){
         $corelib="$($_.DirectoryName)\Microsoft.CognitiveServices.Speech.core.dll"
         if (!(Test-Path $corelib)){
             Copy-Item $_.FullName $corelib -ErrorAction SilentlyContinue
+            $LASTEXITCODE=0
         }
     }
 }
