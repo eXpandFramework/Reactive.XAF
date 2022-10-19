@@ -77,7 +77,7 @@
     <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.0" />
     <PackageReference Include="Unofficial.Microsoft.mshtml" Version="7.0.3300" />
     <PackageReference Include="Xpand.XAF.Web.All">
-      <Version>4.221.8.2</Version>
+      <Version>4.221.9.0</Version>
     </PackageReference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="mscorlib">
@@ -142,7 +142,7 @@
     <PackageReference Include="DevExpress.ExpressApp.Security.Xpo" Version="22.1.5" />
     <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="22.1.5" />
     <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="22.1.5" />
-    <PackageReference Include="Xpand.XAF.Web.All" Version="4.221.8.2">
+    <PackageReference Include="Xpand.XAF.Web.All" Version="4.221.9.0">
     </PackageReference>
     <PackageReference Include="Google.Apis.People.v1" Version="1.25.0.830" />
     <Reference Include="TestApplication.Module">

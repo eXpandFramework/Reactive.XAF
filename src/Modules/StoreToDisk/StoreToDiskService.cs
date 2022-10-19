@@ -83,7 +83,11 @@ namespace Xpand.XAF.Modules.StoreToDisk{
                         jtoken[memberInfo.Name] = memberInfo.GetValue(instance).ToJToken())
                     .ConcatIgnoredValue(jtoken);
             }).BufferUntilCompleted(true)
-                .Do(jObjects => attribute.SaveFile(filePath,  new JArray(jObjects.Concat(objects.ReplaceExisting(jArray, keyMember))).ToString()))
+                .Do(jObjects => {
+                    var content = jObjects.Concat(objects.ReplaceExisting(jArray, keyMember)).Cast<object>().ToArray();
+                    var s = new JArray(content).ToString();
+                    attribute.SaveFile(filePath, s);
+                })
                 .TraceStoreToDisk();
 
         private static JArray ReplaceExisting(this object[] objects,JArray jArray  ,IMemberInfo keyMember) {
