@@ -26,7 +26,6 @@ using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Conditional;
-using Xpand.Extensions.Reactive.ErrorHandling;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
@@ -226,8 +225,18 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => application.ObjectSpaceProviders.ToNowObservable()
                 .SelectMany(spaceProvider => spaceProvider.WhenObjectSpaceCreated(emitUpdatingObjectSpace));
 
-        public static IObservable<T> ShowXafMessage<T>(this IObservable<T> source, XafApplication application,SynchronizationContext context=null,InformationType informationType=InformationType.Info,int displayInterval=MessageDisplayInterval,InformationPosition position=InformationPosition.Left, [CallerMemberName] string memberName = "")
-            => source.ObserveOnContext(context).Do(obj => application.ShowMessage(obj, informationType, displayInterval, memberName, $"{obj}"));
+        public static IObservable<T> ShowXafMessage<T>(this IObservable<T> source, XafApplication application,
+            SynchronizationContext context , InformationType informationType = InformationType.Info,
+            int displayInterval = MessageDisplayInterval, InformationPosition position = InformationPosition.Left,
+            [CallerMemberName] string memberName = "") {
+            return source.ObserveOnContext(context).Do(obj =>
+                application.ShowMessage(obj, informationType, displayInterval, memberName, $"{obj}"));
+        }
+
+        public static IObservable<T> ShowXafMessage<T>(this IObservable<T> source, XafApplication application,
+            InformationType informationType = InformationType.Info, int displayInterval = MessageDisplayInterval,
+            InformationPosition position = InformationPosition.Left, [CallerMemberName] string memberName = "")
+            => source.Do(obj => application.ShowMessage(obj, informationType, displayInterval, memberName, $"{obj}"));
         public static IObservable<T> ShowXafMessage<T>(this IObservable<T> source, XafApplication application,Func<T,string> messageSelector,SynchronizationContext context=null,InformationType informationType=InformationType.Info,int displayInterval=MessageDisplayInterval,InformationPosition position=InformationPosition.Left, [CallerMemberName] string memberName = "")
             => source.ObserveOnContext(context).Do(obj => application.ShowMessage(obj, informationType, displayInterval, "", messageSelector(obj)));
 
@@ -352,14 +361,28 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 ? frame.Is(viewType) && frame.Is(types) ? frame.ReturnObservable() : Observable.Empty<T>()
                 : frame.WhenViewChanged().Where(t => t.frame.Is(viewType) && t.frame.Is(types)).To(frame);
 
-
-        public static IObservable<Frame> WhenFrameViewChanged(this XafApplication application,bool emitDefaultView=false) 
+        public static IObservable<Frame> WhenFrame(this XafApplication application)
+            => application.WhenFrameViewChanged();
+        public static IObservable<Frame> WhenFrame(this XafApplication application, params ViewType[] viewTypes) 
+            => application.WhenFrame().WhenFrame(viewTypes);
+        public static IObservable<Frame> WhenFrame(this XafApplication application, params string[] viewIds) 
+            => application.WhenFrame().WhenFrame(viewIds);
+        
+        public static IObservable<Frame> WhenFrame(this XafApplication application, Type objectType ,
+            ViewType viewType = ViewType.Any, Nesting nesting = Nesting.Any) 
+            => application.WhenFrame(_ => objectType,_ => viewType,nesting);
+        
+        public static IObservable<Frame> WhenFrame(this XafApplication application, Func<Frame,Type> objectType,
+            Func<Frame,ViewType> viewType = null, Nesting nesting = Nesting.Any) 
+            => application.WhenFrame().WhenFrame(objectType,viewType,nesting);
+        
+        static IObservable<Frame> WhenFrameViewChanged(this XafApplication application) 
             => application.WhenFrameCreated().Merge(application.MainWindow.ReturnObservable().WhenNotDefault())
                 .WhenViewChanged().Select(tuple => tuple.frame)
                 .StartWith(application.MainWindow).WhenNotDefault(frame => frame?.View);
         
         public static IObservable<Frame> WhenFrameViewControls(this XafApplication application) 
-            => application.WhenFrameViewChanged().SelectMany(frame => frame.View.WhenControlsCreated().Select(view => view).To(frame));
+            => application.WhenFrame().SelectMany(frame => frame.View.WhenControlsCreated().Select(view => view).To(frame));
 
         public static IObservable<T> SelectUntilViewClosed<T>(this IObservable<(XafApplication application, DetailViewCreatingEventArgs e)> source, Func<(XafApplication application, DetailViewCreatingEventArgs e), IObservable<T>> selector)  
             => source.SelectMany(t => selector(t).TakeUntil(t.application.WhenViewCreated().Where(view => view.Id==t.e.ViewID).SelectMany(view => view.WhenClosing())));
@@ -468,6 +491,9 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .FromEventPattern<EventHandler<DatabaseVersionMismatchEventArgs>,DatabaseVersionMismatchEventArgs>(h => application.DatabaseVersionMismatch += h,h => application.DatabaseVersionMismatch -= h,ImmediateScheduler.Instance)
                 .TransformPattern<DatabaseVersionMismatchEventArgs,XafApplication>();
 
+
+        public static IObservable<SynchronizationContext> WhenSynchronizationContext(this XafApplication application)
+            => application.WhenLoggedOn().Select(_ => SynchronizationContext.Current);
         
         public static IObservable<(XafApplication application, LogonEventArgs e)> WhenLoggedOn(this IObservable<XafApplication> source) 
             => source.SelectMany(application => application.WhenLoggedOn());
@@ -596,23 +622,27 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<T[]> ToObjectsGroup<T>(this IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)> source) 
             => source.Select(t => t.details.Select(t1 => t1.instance).ToArray());
         
-        [SuppressMessage("ReSharper", "HeapView.PossibleBoxingAllocation")]
+        [Obsolete]
         public static IObservable<T> ReloadViewUpdatedObject<T>(this XafApplication application,IObservable<T> source)
-            => application.WhenFrameViewChanged()
-                .SelectMany(frame => source.Where(arg => frame.View.ObjectTypeInfo.Type.IsInstanceOfType(arg)).SampleResponsive(TimeSpan.FromSeconds(2)).ObserveOnContext()
-                    .Do(_ => frame.View?.ObjectSpace?.Refresh()))
-                .CompleteOnError()
-            ;
+            => source.Publish(obs => application.WhenFrame(typeof(T))
+                .SelectUntilViewClosed(frame => obs.Where(arg => arg.GetType().IsAssignableFrom(frame.View.ObjectTypeInfo.Type)).ObserveOnContext()
+                    .Do(_=> frame.View.Refresh())));
+        public static IObservable<T> ReloadViewUpdatedObject<T>(this IObservable<T> source,XafApplication application) 
+            => source.Publish(obs => application.WhenFrame(typeof(T))
+                .SelectUntilViewClosed(frame => obs
+                    .Where(arg => arg.GetType().IsAssignableFrom(frame.View.ObjectTypeInfo.Type)).ObserveOnContext()
+                    .Do(_=> frame.View.ObjectSpace.Refresh())));
 
         public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)> WhenUpdated<T>(
             this XafApplication application,Func<T,bool> criteria,params string[] modifiedProperties) where T:class
             => application.WhenObjectSpaceCreated()
                 .SelectMany(objectSpace => objectSpace.WhenCommittedDetailed(ObjectModification.Updated,criteria, modifiedProperties).TakeUntil(objectSpace.WhenDisposed()));
         
-        public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)> WhenProviderUpdated<T>(
+        public static IObservable<(IObjectSpace objectSpace, T[] objects)> WhenProviderUpdated<T>(
             this XafApplication application,Func<T,bool> criteria,params string[] modifiedProperties) where T:class
             => application.WhenProviderObjectSpaceCreated()
-                .SelectMany(objectSpace => objectSpace.WhenCommittedDetailed(ObjectModification.Updated,criteria, modifiedProperties).TakeUntil(objectSpace.WhenDisposed()));
+                .SelectMany(objectSpace => objectSpace.WhenCommittedDetailed(ObjectModification.Updated,criteria, modifiedProperties).TakeUntil(objectSpace.WhenDisposed())
+                    .Select(t => (t.objectSpace,t.details.Select(t1 => t1.instance).ToArray())));
         public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)> WhenProviderUpdated<T>(
             this XafApplication application,params string[] modifiedProperties) where T:class
             => application.WhenProviderObjectSpaceCreated()
@@ -684,6 +714,13 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         
         public static IObservable<T> UseObjectSpace<T>(this XafApplication application,Func<IObjectSpace,IObservable<T>> factory,bool useObjectSpaceProvider=false) 
             => Observable.Using(() => application.CreateObjectSpace(useObjectSpaceProvider),factory);
+
+        public static IObservable<T> UseProviderObjectSpace<T>(this XafApplication application,T obj, Func<T, IObservable<T>> factory, Type objectType = null) 
+            => application.UseProviderObjectSpace(space => {
+                obj = space.GetObjectByKey<T>(space.GetKeyValue(obj));
+                return factory(obj);
+            }, objectType);
+
         public static IObservable<T> UseProviderObjectSpace<T>(this XafApplication application,Func<IObjectSpace,IObservable<T>> factory,Type objectType=null) {
             var type =objectType?? typeof(T).RealType();
             if (!application.TypesInfo.PersistentTypes.Select(info => info.Type).Contains(type)) {
@@ -756,21 +793,21 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 this IObservable<(Frame source, Frame target, T1 sourceObject, T2 targetObject, int targetIndex)>  source)
             => source.Do(t => {
                 var editor = t.target.View.AsListView().Editor;
-                var gridview = editor.GetPropertyValue("GridView");
-                if (gridview != null) {
-                    gridview.CallMethod("ClearSelection");
-                    var index = (int)gridview.CallMethod("FindRow", t.targetObject);
-                    gridview.CallMethod("SelectRow", index);
-                    gridview.SetPropertyValue("FocusedRowHandle", index);
+                var gridView = editor.GetPropertyValue("GridView");
+                if (gridView != null) {
+                    gridView.CallMethod("ClearSelection");
+                    var index = (int)gridView.CallMethod("FindRow", t.targetObject);
+                    gridView.CallMethod("SelectRow", index);
+                    gridView.SetPropertyValue("FocusedRowHandle", index);
                 }
             });
 
         public static IObservable<(Frame source, Frame target, T1 sourceObject, T2 targetObject, int targetIndex)> WhenNestedListViewsSelectionChanged<T1, T2>(
             this XafApplication application, Func<T1, T2, bool> objectSelector, Func<IObservable<Frame>, IObservable<Frame>> sourceSelector = null,
                 Func<IObservable<Frame>, IObservable<Frame>> targetSelector = null,Func<T1, object> sourceOrderSelector=null,Func<T2, object> targetOrderSelector=null) 
-            => application.WhenFrameViewChanged().WhenFrame(typeof(T1), ViewType.ListView, Nesting.Nested)
+            => application.WhenFrame().WhenFrame(typeof(T1), ViewType.ListView, Nesting.Nested)
                 .Publish(sourceFrame => sourceSelector?.Invoke(sourceFrame) ?? sourceFrame)
-                .Zip(application.WhenFrameViewChanged().WhenFrame(typeof(T2), ViewType.ListView, Nesting.Nested)
+                .Zip(application.WhenFrame().WhenFrame(typeof(T2), ViewType.ListView, Nesting.Nested)
                     .Publish(targetFrame => targetSelector?.Invoke(targetFrame) ?? targetFrame))
                 .Select(t => (source: t.First, target: t.Second)).SelectMany(t => t.source.View.WhenSelectionChanged()
                     .SelectMany(sourceView => sourceView.SelectedObjects.Cast<T1>().OrderBy(arg =>sourceOrderSelector?.Invoke(arg) ).ToArray().ToNowObservable()
@@ -781,7 +818,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .WhenNotDefault();
         
         public static IObservable<SimpleActionExecuteEventArgs> WhenListViewProcessSelectedItem<T>(this XafApplication application,Nesting nesting=Nesting.Any,bool handled=true)  
-            => application.WhenFrameViewChanged().WhenFrame(typeof(T),ViewType.ListView,nesting)
+            => application.WhenFrame().WhenFrame(typeof(T),ViewType.ListView,nesting)
                 .SelectMany(frame => frame.GetController<ListViewProcessCurrentObjectController>().WhenCustomProcessSelectedItem(handled));
         
         public static IObservable<IMemberInfo> IgnoreNonPersistentMembersDataLocking(this ApplicationModulesManager manager,Func<Assembly,bool> filterTypes=null)  

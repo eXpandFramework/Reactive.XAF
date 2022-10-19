@@ -14,5 +14,7 @@ namespace Xpand.Extensions.Reactive.Transform.System {
             => Unit.Default.ReturnObservable().Delay(timeSpan,context.Scheduler()).Do(execute).ToUnit();
         public static IObservable<long> Timer(this TimeSpan dueTime)
             => Observable.Timer(dueTime);
+        public static IObservable<long> Interval(this TimeSpan dueTime)
+            => Observable.Interval(dueTime);
     }
 }

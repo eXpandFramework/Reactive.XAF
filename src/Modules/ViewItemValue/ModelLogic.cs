@@ -7,16 +7,13 @@ using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using DevExpress.Persistent.Base;
+using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.Extensions.XAF.TypesInfoExtensions;
 using Xpand.XAF.Modules.Reactive;
 
 namespace Xpand.XAF.Modules.ViewItemValue{
-	[AttributeUsage(AttributeTargets.Property)]
-	public class ViewItemValueAttribute:Attribute {
-		public bool DefaultOnCommit { get; set; }
-	}
 	public interface IModelReactiveModulesViewItemValue : IModelReactiveModule{
 		IModelViewItemValue ViewItemValue{ get; }
 	}
@@ -51,10 +48,11 @@ namespace Xpand.XAF.Modules.ViewItemValue{
 				.ForEach(views => {
 					var item = node.To<IModelViewItemValueItems>().AddNode<IModelViewItemValueItem>();
 					item.ObjectView = views.Key.AsObjectView;
-					views.ForEach(t => {
+					views.Where(t => item.Members[t.editor.ModelMember.Id()] == null).ForEach(t => {
 						var viewItem = item.Members.AddNode<IModelViewItemValueObjectViewItem>();
-						viewItem.MemberViewItem = viewItem.MemberViewItems.First(memberViewItem => memberViewItem.ModelMember==t.editor.ModelMember);
-						viewItem.DefaultOnCommit = t.attribute.DefaultOnCommit;
+						viewItem.MemberViewItem = viewItem.MemberViewItems
+							.First(memberViewItem => memberViewItem.ModelMember==t.editor.ModelMember,() => t.editor.ModelMember.ToString());
+						viewItem.SaveViewItemValueStrategy = t.attribute.SaveViewItemValueStrategy;
 					});
 				});
 	}
@@ -93,13 +91,15 @@ namespace Xpand.XAF.Modules.ViewItemValue{
 	public interface IModelViewItemValueObjectViewItem:IModelNode{
 		[Browsable(false)]
 		string MemberViewItemId{ get; set; }
-		bool DefaultOnCommit { get; set; }
+		SaveViewItemValueStrategy SaveViewItemValueStrategy { get; set; }
 		[Required][DataSourceProperty(nameof(MemberViewItems))]
 		IModelMemberViewItem MemberViewItem{ get; set; }
 		[Browsable(false)]
 		IEnumerable<IModelMemberViewItem> MemberViewItems{ get; }
 	}
-	
+
+	public enum SaveViewItemValueStrategy { Default,OnCommit,OnChanged}
+
 	[DomainLogic(typeof(IModelViewItemValueObjectViewItem))]
 	public static class ModelViewItemValueObjectViewIteLogic{
 		
@@ -111,6 +111,6 @@ namespace Xpand.XAF.Modules.ViewItemValue{
 
 		public static IModelList<IModelMemberViewItem> Get_MemberViewItems(this IModelViewItemValueObjectViewItem item) 
 			=> item == null ? new CalculatedModelNodeList<IModelMemberViewItem>()
-				: item.GetParent<IModelViewItemValueItem>().ObjectView.MemberViewItems().ToCalculatedModelNodeList();
+				: item.Application.Views[item.GetParent<IModelViewItemValueItem>().ObjectViewId].MemberViewItems().ToCalculatedModelNodeList();
 	}
 }

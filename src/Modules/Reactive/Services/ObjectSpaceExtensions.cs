@@ -266,9 +266,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         static bool HasAnyValue(this ObjectModification value, params ObjectModification[] values) => values.Any(@enum => value == @enum);
 
         public static IEnumerable<(object instance, ObjectModification modification)> ModifiedObjects(this IObjectSpace objectSpace,ObjectModification objectModification) 
-            => objectSpace.ModifiedObjects( objectModification, objectSpace
-                .GetObjectsToDelete(true).Cast<object>().Concat(objectSpace.GetObjectsToSave(true)
-                    .Cast<object>()).Distinct()).WhereNotDefault();
+            => objectSpace.ModifiedObjects( objectModification, objectSpace.YieldAll()
+                .SelectMany(space => space.GetObjectsToDelete(true).Cast<object>().Concat(space.GetObjectsToSave(true).Cast<object>())).Distinct()).WhereNotDefault();
 
         public static IEnumerable<(T o, ObjectModification modification)> ModifiedObjects<T>(this IObjectSpace objectSpace, ObjectModification objectModification, IEnumerable<T> objects) where T:class 
             => objects.Select(o => {
@@ -403,7 +402,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         }
         public static IObservable<(IObjectSpace objectSpace, IEnumerable<object> objects)> WhenProviderCommitted(
             this XafApplication application,Type objectType, ObjectModification objectModification = ObjectModification.All) {
-            return application.WhenProviderObjectSpaceCreated().WhenCommitted(objectType);
+            return application.WhenProviderObjectSpaceCreated().WhenCommitted(objectType,objectModification);
         }
         public static IObservable<(IObjectSpace objectSpace, IEnumerable<T> objects)> WhenProviderCommitting<T>(
             this XafApplication application, ObjectModification objectModification = ObjectModification.All) where T : class 
@@ -423,9 +422,29 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .Select(t => (t.objectSpace,t.details.Select(t1 => t1.instance))));
 
         public static IObservable<(IObjectSpace objectSpace, IEnumerable<T> objects)> WhenCommitted<T>(
-            this XafApplication application, ObjectModification objectModification = ObjectModification.All)
-            => application.WhenObjectSpaceCreated().WhenCommitted<T>(objectModification);
+            this XafApplication application, ObjectModification objectModification,params T[] objects) 
+            => application.WhenObjectSpaceCreated().WhenCommitted(objectModification, objects);
+        public static IObservable<(IObjectSpace objectSpace, IEnumerable<T> objects)> WhenCommitted<T>(
+            this XafApplication application, params T[] objects) 
+            => application.WhenObjectSpaceCreated().WhenCommitted(ObjectModification.All,objects);
         
+        public static IObservable<(IObjectSpace objectSpace, IEnumerable<T> objects)> WhenProviderCommitted<T>(
+            this XafApplication application, ObjectModification objectModification,params T[] objects) 
+            => application.WhenProviderObjectSpaceCreated().WhenCommitted(objectModification, objects);
+        public static IObservable<(IObjectSpace objectSpace, IEnumerable<T> objects)> WhenProviderCommitted<T>(
+            this XafApplication application, params T[] objects) 
+            => application.WhenProviderObjectSpaceCreated().WhenCommitted(ObjectModification.All,objects);
+
+        private static IObservable<(IObjectSpace objectSpace, IEnumerable<T>)> WhenCommitted<T>(this IObservable<IObjectSpace> whenObjectSpaceCreated,ObjectModification objectModification=ObjectModification.All,params T[] instances) 
+            => whenObjectSpaceCreated.WhenCommitted<T>(objectModification).Select(t => {
+                if (instances.Any()) {
+                    var keys = instances.Select(arg => t.objectSpace.GetKeyValue(arg)).ToArray();
+                    return (t.objectSpace, t.objects.Where(arg => keys.Contains(t.objectSpace.GetKeyValue(arg))));
+                }
+
+                return t;
+            });
+
         public static IObservable<T> Objects<T>(this IObservable<(IObjectSpace, IEnumerable<T> objects)> source)
             => source.SelectMany(t => t.objects);
         
@@ -537,8 +556,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 })
                 .Do(spaceLink => ReloadObjectSubject.OnNext((spaceLink.ObjectSpace, spaceLink)));
 
-        public static IObservable<T> ToObjects<T>(this IObservable<(IObjectSpace objectSpace, T obj)> source)
-            => source.Select(t => t.obj);
+        public static IObservable<T> ToObjects<T>(this IObservable<(IObjectSpace objectSpace, T[] objects)> source)
+            =>source.SelectMany(t => t.objects.Select(arg => arg));
         
         public static IObservable<(IObjectSpace objectSpace, object obj)> WhenObjectReloaded(this IObjectSpace objectSpace,object obj=null) 
             => ReloadObjectSubject.Where(t => t.objectSpace==objectSpace&& (obj == null||obj==t.obj)).AsObservable();
@@ -555,6 +574,15 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static IObservable<IObjectSpace> WhenReloaded(this IObservable<IObjectSpace> source) 
             => source.SelectMany(item => item.WhenReloaded());
+        
+        public static IObservable<T> Reload<T>(this IObservable<T> source,XafApplication application) where T:IObjectSpaceLink 
+            => source.Select(item => item.Reload(application));
+        public static IObservable<T> Reload<T>(this IObservable<IList<T>> source,XafApplication application) where T:IObjectSpaceLink 
+            => source.WhenNotEmpty().SelectMany(items => {
+                var firstItem = items.First().Reload(application);
+                return items.Select(link => firstItem.ObjectSpace.GetObject(link)).StartWith(firstItem);
+            });
+        
 
         internal static IObservable<Unit> ShowPersistentObjectsInNonPersistentView(this XafApplication application)
             => application.WhenObjectViewCreating()

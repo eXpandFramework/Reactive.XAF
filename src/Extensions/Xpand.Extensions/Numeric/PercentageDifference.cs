@@ -8,7 +8,8 @@ namespace Xpand.Extensions.Numeric {
             => ((decimal)d.Ticks).PercentageDifference(d2.Ticks,decimals);
         
         public static decimal Percentage(this decimal d, decimal percentage,int decimals=2) 
-            => (percentage / 100 * d).RoundNumber(decimals);
+            =>100==percentage?d: (percentage / 100 * d).RoundNumber(decimals);
+        
         public static decimal Percentage(this decimal d, int percentage,int decimals=2) 
             => d.Percentage(Convert.ToDecimal(percentage),decimals);
     }

@@ -12,9 +12,9 @@ namespace Xpand.Extensions.XAF.ObjectSpaceExtensions {
             });
         }
 
-        public static bool Fit(this IObjectSpaceLink objectSpaceLink, CriteriaOperator criteria)
+        public static bool Match(this IObjectSpaceLink objectSpaceLink, CriteriaOperator criteria)
             => objectSpaceLink.ObjectSpace.IsObjectFitForCriteria(criteria, objectSpaceLink);
-        public static bool Fit(this IObjectSpaceLink objectSpaceLink, string criteria)
-            => objectSpaceLink.Fit(CriteriaOperator.Parse(criteria));
+        public static bool Match(this IObjectSpaceLink objectSpaceLink, string criteria)
+            => objectSpaceLink.Match(objectSpaceLink.ObjectSpace.ParseCriteria(criteria));
     }
 }

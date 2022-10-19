@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using DevExpress.DataAccess.Excel;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;
@@ -14,6 +16,12 @@ namespace Xpand.Extensions.XAF.ModelExtensions{
             throw new DuplicateNameValidationException($"{node}");
         }
 
+        public static IEnumerable<T> EnsureNodes<T>(this IModelNode node, params string[] ids) where T: class, IModelNode 
+            => ids.Select(id => node.GetNode(id) as T ?? node.AddNode<T>());
+        
+        public static T EnsureNode<T>(this IModelNode node, params string[] ids) where T: class, IModelNode 
+            => node.EnsureNodes<T>().First();
+        
         public static ModelNode AddNode(this IModelNode node, string id = null) => node.AddNode(node.ModelListType(), id);
 
         public static ModelNode AddNode(this IModelNode node, Type type,string id=null) => node.AddNode(XafTypesInfo.Instance.FindTypeInfo(type),id);

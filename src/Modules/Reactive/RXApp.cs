@@ -115,7 +115,7 @@ namespace Xpand.XAF.Modules.Reactive{
         private static IObservable<Unit> ReloadWhenChanged(this XafApplication application)
             => application.WhenSetupComplete().SelectMany(_ => {
                 var membersToReload = application.Model.BOModel.TypeInfos().AttributedMembers<ReloadWhenChangeAttribute>().ToArray();
-                return application.WhenFrameViewChanged()
+                return application.WhenFrame()
                     .WhenFrame(membersToReload.SelectMany(t =>t.attribute.AttributeTypes(t.memberInfo)).Distinct().ToArray())
                     .SelectUntilViewClosed(frame => membersToReload.WhenFrame(frame)
                         .SelectMany(ts => application.WhenProviderCommitted(ts.Key).To(ts).SelectMany()).ObserveOnContext()

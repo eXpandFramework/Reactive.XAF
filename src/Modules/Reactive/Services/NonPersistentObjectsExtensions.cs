@@ -25,7 +25,7 @@ namespace Xpand.XAF.Modules.Reactive.Services {
                 .ToUnit();
             // .Merge(manager.WhenApplication(application => {
             //     var detailViewCreated = application.WhenDetailViewCreated().Where(t => t.e.View.ObjectTypeInfo.Type!=typeof(ObjectString))
-            //             .SelectMany(t => application.WhenFrameViewChanged().WhenFrame(typeof(ObjectString)).WhenFrame(ViewType.DetailView)
+            //             .SelectMany(t => application.WhenFrame().WhenFrame(typeof(ObjectString)).WhenFrame(ViewType.DetailView)
             //                 .SelectMany(frame => ((ObjectString) frame.View.AsDetailView().CurrentObject).Datasource
             //                     .Do(e => {
             //                         e.Instance.Objects

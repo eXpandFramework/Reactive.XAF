@@ -54,8 +54,12 @@ namespace Xpand.XAF.Modules.Reactive.Services.Controllers{
             => controller.WhenActivated(true)
                 .SelectMany(viewController => viewController.View.WhenControlsCreated().To(viewController));
 
-        public static IObservable<T> WhenActivated<T>(this T controller, bool emitWhenActive = false)
-            where T : Controller => controller.ReturnObservable().Activated(emitWhenActive);
+        public static IObservable<T> WhenActivated<T>(this T controller, bool emitWhenActive = false) where T : Controller 
+            => controller.ReturnObservable().Activated(emitWhenActive);
+        
+        public static IObservable<T> WhenActivated<T>(this IObservable<T> source, bool emitWhenActive = false) where T : Controller 
+            => source.SelectMany(controller => controller.WhenActivated());
+        
         
         public static IObservable<T2> SelectManyUntilDeactivated<T,T2>(this IObservable<T> source,Func<T,IObservable<T2>> selector) where T:Controller
             => source.SelectMany(controller => selector(controller).TakeUntilDeactivated(controller));

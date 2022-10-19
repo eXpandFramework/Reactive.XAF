@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
+using Xpand.Extensions.EventArgExtensions;
 
 namespace Xpand.Extensions.Reactive.Transform {
     public static partial class Transform {

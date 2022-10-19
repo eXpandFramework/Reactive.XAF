@@ -37,12 +37,12 @@ namespace Xpand.XAF.Modules.ViewItemValue{
         }
 
         private static IObservable<Unit> SaveViewItemValueOnCommit(this IObservable<(IModelViewItemValueObjectViewItem model, Frame frame)> source) 
-            => source.Where(t => t.model.DefaultOnCommit).SelectMany(t => t.frame.View.ObjectSpace.WhenCommitted()
+            => source.Where(t => t.model.SaveViewItemValueStrategy==SaveViewItemValueStrategy.OnCommit).SelectMany(t => t.frame.View.ObjectSpace.WhenCommitted()
                     .Do(_ => t.frame.SingleChoiceAction(nameof(ViewItemValue)).DoExecute(t.model)))
                 .ToUnit();
 
         private static IObservable<(IModelViewItemValueObjectViewItem model, Frame frame)> WhenViewItemValueItem(this ApplicationModulesManager manager) 
-            => manager.WhenApplication(application => application.WhenFrameViewChanged().WhenFrame(ViewType.DetailView)
+            => manager.WhenApplication(application => application.WhenFrame(ViewType.DetailView)
                 .Where(frame => frame.View.Model.Application.IsViewItemValueObjectView(frame.View.Id))
                 .SelectUntilViewClosed(frame => frame.View.WhenCurrentObjectChanged().To(frame).StartWith(frame)
                     .SelectMany(_ => frame.View.Model.Application.ModelViewItemValue().Items
@@ -57,9 +57,7 @@ namespace Xpand.XAF.Modules.ViewItemValue{
                 if (memberInfo.MemberTypeInfo.IsDomainComponent) {
                     var typeConverter = TypeDescriptor.GetConverter(memberInfo.MemberTypeInfo.KeyMember.MemberType);
                     var value = memberValue != null
-                        ? view.ObjectSpace.GetObjectByKey(memberInfo.MemberType,
-                            typeConverter.ConvertFromString(memberValue))
-                        : null;
+                        ? view.ObjectSpace.GetObjectByKey(memberInfo.MemberType, typeConverter.ConvertFromString(memberValue)) : null;
                     memberInfo.SetValue(view.CurrentObject, value);
                 }
                 else {
@@ -100,7 +98,7 @@ namespace Xpand.XAF.Modules.ViewItemValue{
                 viewItemValueObject.ObjectView = objectViewId;
                 viewItemValueObject.ViewItemId = memberName;
                 var value = memberInfo.GetValue(e.SelectedObjects.Cast<object>().First());
-                viewItemValueObject.ViewItemValue=(string)(memberInfo.MemberTypeInfo.IsPersistent? value!=null?$"{objectSpace.GetKeyValue(value)}":null:value);
+                viewItemValueObject.ViewItemValue=memberInfo.MemberTypeInfo.IsPersistent? value!=null?$"{objectSpace.GetKeyValue(value)}":null:$"{value}";
                 objectSpace.CommitChanges();
 
                 return item;
@@ -136,7 +134,7 @@ namespace Xpand.XAF.Modules.ViewItemValue{
             .TraceDefaultObjectValue(action => action.Id);
 
         internal static bool IsViewItemValueObjectView(this IModelApplication applicationModel, string viewID) 
-            => applicationModel.ModelViewItemValue().Items.Any(item => item.ObjectView.Id==viewID);
+            => applicationModel.ModelViewItemValue().Items.Any(item => item.ObjectViewId==viewID);
 
         internal static IObservable<TSource> TraceDefaultObjectValue<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<ITraceEvent> traceAction = null,
             Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.OnNextOrOnError,
