@@ -1,4 +1,7 @@
 <Project>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <NoWarn>1701;1702;NU1701;CS8002</NoWarn>
+  </PropertyGroup>
  <Target Name="ReplaceNuget" AfterTargets="PostBuildEvent">
    <Exec Command="powershell.exe –NonInteractive –ExecutionPolicy Unrestricted –command &quot;&amp; { &amp;&apos;$(MSBuildThisFileDirectory)\..\Build\ReplaceNuget.ps1&apos; &apos;$(ProjectPath)&apos; &apos;$(TargetPath)&apos; &apos;$(skipNugetReplace)&apos; } &quot; " LogStandardErrorAsError="True" ContinueOnError="False" />
    <!-- <Exec Command="powershell.exe –NonInteractive –ExecutionPolicy Unrestricted –command &quot;&amp; { &amp;&apos;$(MSBuildThisFileDirectory)\..\Build\ReplaceNuget.ps1&apos; &apos;$(ProjectPath)&apos; &apos;$(TargetPath)&apos; &apos;$(skipNugetReplace)&apos; -FixVersion; } &quot; " LogStandardErrorAsError="True" ContinueOnError="False" /> -->

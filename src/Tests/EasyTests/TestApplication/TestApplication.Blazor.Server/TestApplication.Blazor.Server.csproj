@@ -42,8 +42,8 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Google.Apis.People.v1" Version="1.25.0.830" />
-    <PackageReference Include="DevExpress.ExpressApp.Blazor.All" Version="22.1.5" />
-    <PackageReference Include="DevExpress.ExpressApp.Security.Xpo" Version="22.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp.Blazor.All" Version="22.1.6" />
+    <PackageReference Include="DevExpress.ExpressApp.Security.Xpo" Version="22.1.6" />
     <PackageReference Include="Hangfire.MemoryStorage" Version="1.7.0" />
     <PackageReference Include="Hangfire.SqlServer" Version="1.7.30" />
     <PackageReference Include="Hangfire.Core" Version="1.7.30" />
@@ -51,12 +51,12 @@
     <PackageReference Include="RazorLight" Version="2.0.0-rc.3" />
     <PackageReference Include="System.Security.Cryptography.Pkcs" Version="6.0" />
     <PackageReference Include="Xpand.XAF.Core.All">
-      <Version>4.221.9.0</Version>
+      <Version>4.221.9.1</Version>
     </PackageReference>
     <PackageReference Include="Xpand.XAF.Web.All">
-      <Version>4.221.9.0</Version>
+      <Version>4.221.9.1</Version>
     </PackageReference>
-    <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="22.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="22.1.6" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.3" />
     <PackageReference Include="System.Data.OleDb" Version="6.0" />
     <PackageReference Include="System.ServiceModel.Http" Version="4.9" />
@@ -64,7 +64,7 @@
     <PackageReference Include="System.ServiceModel.Security" Version="4.9" />
     <PackageReference Include="System.ServiceProcess.ServiceController" Version="6.0" />
     <PackageReference Include="System.Threading" Version="4.3" />
-    <PackageReference Include="System.Text.Json" Version="6.0" />
+    <PackageReference Include="System.Text.Json" Version="6.0.6" />
     <PackageReference Include="System.Threading.AccessControl" Version="6.0" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="2.2" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0" />

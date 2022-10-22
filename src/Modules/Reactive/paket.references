@@ -4,7 +4,6 @@ System.Interactive
 System.Reactive
 Fasterflect.Xpand
 Xpand.Patcher
-
 Microsoft.CSharp
 Newtonsoft.Json
 Enums.Net

@@ -1,3 +1,5 @@
+using System;
+using System.Linq.Expressions;
 using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
 using DevExpress.Persistent.Base;
@@ -23,6 +25,9 @@ namespace Xpand.Extensions.XAF.CriteriaOperatorExtensions {
             return criteriaOperator?.ToString();
         }
 
+        public static CriteriaOperator ToCriteria<T>(this Expression<Func<T, bool>> expression) 
+            => CriteriaOperator.FromLambda(expression);
+        
         public static CriteriaOperator ToCriteria(this string s) => CriteriaOperator.Parse(s);
     }
 }

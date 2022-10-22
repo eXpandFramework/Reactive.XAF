@@ -22,12 +22,12 @@ namespace Xpand.XAF.Modules.Reactive{
         internal readonly ReplaySubject<ReactiveModuleBase> SetupCompletedSubject=new(1);
         static readonly Subject<ApplicationModulesManager> SettingUpSubject=new();
         static ReactiveModuleBase(){
-            AppDomain.CurrentDomain.AssemblyResolve += CurrentDomainOnAssemblyResolve;
-            new HarmonyMethod(typeof(ReactiveModule).Method(nameof(SetupModulesPatch),Flags.StaticAnyVisibility))
-                .PreFix(typeof(ApplicationModulesManager).Method("SetupModules"),true);
-            if (DesignerOnlyCalculator.IsRunTime) {
-                AppDomain.CurrentDomain.AddModelReference("netstandard", typeof(FontStyle?).Assembly.GetName().Name);
-            }
+            // AppDomain.CurrentDomain.AssemblyResolve += CurrentDomainOnAssemblyResolve;
+            // new HarmonyMethod(typeof(ReactiveModule).Method(nameof(SetupModulesPatch),Flags.StaticAnyVisibility))
+            //     .PreFix(typeof(ApplicationModulesManager).Method("SetupModules"),true);
+            // if (DesignerOnlyCalculator.IsRunTime) {
+            //     AppDomain.CurrentDomain.AddModelReference("netstandard", typeof(FontStyle?).Assembly.GetName().Name);
+            // }
         }
 
         private static Assembly CurrentDomainOnAssemblyResolve(object sender, ResolveEventArgs args){

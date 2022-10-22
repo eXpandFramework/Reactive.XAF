@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
@@ -10,11 +11,14 @@ using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.SystemModule;
 using DevExpress.ExpressApp.Utils;
 using Xpand.Extensions.LinqExtensions;
+using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.ActionExtensions;
+using Xpand.Extensions.XAF.CriteriaOperatorExtensions;
 using Xpand.Extensions.XAF.FrameExtensions;
+using Xpand.Extensions.XAF.ObjectSpaceExtensions;
 using Xpand.Extensions.XAF.ViewExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.Reactive.Extensions;
@@ -22,8 +26,26 @@ using Xpand.XAF.Modules.Reactive.Services.Controllers;
 
 namespace Xpand.XAF.Modules.Reactive.Services.Actions{
     
-    public static partial class ActionsService{
-	    public static void Activate(this ActionBase action,string key,bool value){
+    public static partial class ActionsService {
+
+        public static IObservable<T> SetImage<T,TObject>(this IObservable<T> source, CommonImage startImage,
+            CommonImage replaceImage, Expression<Func<TObject, bool>> lambda) where T : ActionBase
+            => source.MergeIgnored(action => action.SetImage(startImage, replaceImage, lambda));
+        
+        public static IObservable<T> SetImage<T>(this ActionBase action, CommonImage startImage,
+            CommonImage replaceImage, Expression<Func<T, bool>> lambda)  
+            => action.Controller.WhenActivated().Do(_ => action.SetImage( lambda,startImage, replaceImage)).Select(_ => action.View())
+                .SelectMany(view => view.ObjectSpace.WhenModifiedObjects<T>()
+                    .Merge(view.WhenSelectionChanged().SelectMany(_ => view.SelectedObjects.Cast<T>()))
+                    .StartWith(view.SelectedObjects.Cast<T>())
+                    .WaitUntilInactive(TimeSpan.FromMilliseconds(250)).ObserveOnContext()
+                .Do(_ => action.SetImage( lambda,startImage, replaceImage)));
+
+        private static void SetImage<T>(this ActionBase action, Expression<Func<T, bool>> lambda, CommonImage startImage, CommonImage replaceImage) 
+            => action.SetImage(action.View().ObjectSpace.IsObjectFitForCriteria(lambda.ToCriteria(),
+                action.View().SelectedObjects.Cast<object>().ToArray()) ? replaceImage : startImage);
+
+        public static void Activate(this ActionBase action,string key,bool value){
 			action.BeginUpdate();
 			action.Active.BeginUpdate();
 			action.Active[key] = value;
@@ -399,9 +421,10 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
 		        .Where(tuple => !tuple.action.Active.ResultValue)
 		        .Select(t => t.action);
         
-        public static IObservable<TAction> WhenDisabled<TAction>(this TAction simpleAction) where TAction : ActionBase 
+        public static IObservable<TAction> WhenDisabled<TAction>(this TAction simpleAction,params string[] contexts) where TAction : ActionBase 
             => simpleAction.ResultValueChanged(action => action.Enabled)
 		        .Where(tuple => !tuple.action.Enabled.ResultValue)
+                .SelectMany(t =>contexts.Any()? contexts.Where(context => t.action.Enabled.Contains(context)&&!t.action.Enabled[context]).To(t):t.YieldItem())
 		        .Select(t => t.action);
 
         public static IObservable<TAction> WhenChanged<TAction>(this IObservable<TAction> source,ActionChangedType? actionChangedType = null)where TAction : ActionBase 
@@ -456,7 +479,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
 		        .TraceRX();
         
         public static IObservable<T2> WhenUpdating<T2>(this ActionBase action,Func<UpdateActionEventArgs,IObservable<T2>> selector) 
-            => action.Controller.WhenActivated()
+            => action.Controller.WhenActivated(true)
                 .SelectManyUntilDeactivated(controller => controller.Frame.GetController<ActionsCriteriaViewController>()
                     .WhenEvent<UpdateActionEventArgs>(nameof(ActionsCriteriaViewController.ActionUpdating)).Where(e => e.Active&&e.NeedUpdateEnabled)
                     .SelectMany(selector));

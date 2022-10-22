@@ -15,6 +15,7 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using Fasterflect;
 using HarmonyLib;
+using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Transform;
@@ -69,7 +70,7 @@ namespace Xpand.XAF.Modules.Reactive{
             new HarmonyMethod(GetMethodInfo(nameof(CreateModuleManager)))
                 .Finalize(xafApplicationType.Method(nameof(CreateModuleManager)),true);
             
-
+            
             if (DesignerOnlyCalculator.IsRunTime) {
                 new HarmonyMethod(GetMethodInfo(nameof(CreateControllers)))
                     .Finalize(typeof(ControllersManager).Method(nameof(ControllersManager.CreateControllers),new []{typeof(Type),typeof(IModelApplication),typeof(View)}),true);
@@ -96,8 +97,10 @@ namespace Xpand.XAF.Modules.Reactive{
         );
 
         private static IObservable<Unit> Connect(this XafApplication application) {
-            new HarmonyMethod(typeof(XafApplicationRxExtensions), nameof(XafApplicationRxExtensions.Exit))
-                .PreFix(typeof(XafApplication).Method(nameof(XafApplication.Exit)),true);
+            if (!AppDomain.CurrentDomain.UseNetFramework()) {
+                new HarmonyMethod(typeof(XafApplicationRxExtensions), nameof(XafApplicationRxExtensions.Exit))
+                    .PreFix(typeof(XafApplication).Method(nameof(XafApplication.Exit)),true);
+            }
             return application.WhenNonPersistentPropertyCollectionSource()
                 .Merge(application.PatchAuthentication())
                 .Merge(application.PatchObjectSpaceProvider())
@@ -150,7 +153,7 @@ namespace Xpand.XAF.Modules.Reactive{
             => manager.WhereApplication().ToObservable()
                 .SelectMany(application => application.WhenCreateCustomUserModelDifferenceStore()
                     .Do(_ => {
-                        var models = _.application.Modules.SelectMany(m => m.EmbeddedModels().Select(tuple => (id: $"{m.Name},{tuple.id}", tuple.model)))
+                        var models = _.application.Modules.SelectMany(m => m.EmbeddedModels().Select(tuple => tuple with { id = $"{m.Name},{tuple.id}" }))
                             .Where(tuple => {
                                 var pattern = ConfigurationManager.AppSettings["EmbeddedModels"]??@"(\.MDO)|(\.RDO)";
                                 return !Regex.IsMatch(tuple.id, pattern, RegexOptions.Singleline);

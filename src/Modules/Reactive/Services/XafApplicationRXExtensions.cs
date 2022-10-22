@@ -26,6 +26,7 @@ using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Conditional;
+using Xpand.Extensions.Reactive.ErrorHandling;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
@@ -627,6 +628,12 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => source.Publish(obs => application.WhenFrame(typeof(T))
                 .SelectUntilViewClosed(frame => obs.Where(arg => arg.GetType().IsAssignableFrom(frame.View.ObjectTypeInfo.Type)).ObserveOnContext()
                     .Do(_=> frame.View.Refresh())));
+        
+        public static IObservable<T> RetryWhenLocked<T>(this IObservable<T> source,int count=5) 
+            => Observable.Defer(() => source).RetryWithBackoff(count,
+                retryOnError: exception => exception is UserFriendlyException userFriendlyException && (userFriendlyException
+                    .InnerException?.GetType().InheritsFrom("DevExpress.Xpo.DB.Exceptions.LockingException") ?? false)) ;
+        
         public static IObservable<T> ReloadViewUpdatedObject<T>(this IObservable<T> source,XafApplication application) 
             => source.Publish(obs => application.WhenFrame(typeof(T))
                 .SelectUntilViewClosed(frame => obs

@@ -34,8 +34,8 @@
     <PackageReference Include="System.CodeDom" Version="6.0" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="6.0" />
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
-    <PackageReference Include="DevExpress.ExpressApp.Blazor" Version="22.1.5" />
-    <PackageReference Include="DevExpress.ExpressApp.Validation.Blazor" Version="22.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp.Blazor" Version="22.1.6" />
+    <PackageReference Include="DevExpress.ExpressApp.Validation.Blazor" Version="22.1.6" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <Reference Include="Xpand.Extensions.Blazor">
       <HintPath>..\..\..\bin\net6.0\Xpand.Extensions.Blazor.dll</HintPath>

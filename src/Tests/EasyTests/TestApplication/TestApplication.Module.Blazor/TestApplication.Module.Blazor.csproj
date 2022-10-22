@@ -42,9 +42,9 @@
     <EmbeddedResource Include="Model.DesignedDiffs.xafml" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DevExpress.ExpressApp.Blazor.All" Version="22.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp.Blazor.All" Version="22.1.6" />
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="6.0" />
-    <PackageReference Include="Xpand.XAF.Web.All" Version="4.221.9.0" />
+    <PackageReference Include="Xpand.XAF.Web.All" Version="4.221.9.1" />
     <PackageReference Include="System.CodeDom" Version="6.0" />
     <PackageReference Include="Microsoft.CodeAnalysis" Version="4.2" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="6.0" />
