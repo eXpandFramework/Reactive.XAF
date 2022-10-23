@@ -50,7 +50,7 @@
     <PackageReference Include="System.Data.SqlClient" Version="4.8.1" />
     <PackageReference Include="System.ServiceModel.Security" Version="4.8.1" />
     <PackageReference Include="System.ServiceModel.NetTcp" Version="4.8.1" /> -->
-    <PackageReference Include="Xpand.XAF.Win.All" Version="4.221.9.1" />
+    <PackageReference Include="Xpand.XAF.Win.All" Version="4.221.10.0" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="TestApplication.Module">

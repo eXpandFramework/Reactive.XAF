@@ -271,17 +271,17 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |**DevExpress.ExpressApp**|**Any**
  |**DevExpress.Persistent.Base**|**Any**
  |**DevExpress.ExpressApp.CodeAnalysis**|**Any**
-|Xpand.Extensions|4.221.9
- |Xpand.Extensions.Reactive|4.221.9
- |Xpand.Extensions.XAF|4.221.9
+|Xpand.Extensions|4.221.10
+ |Xpand.Extensions.Reactive|4.221.10
+ |Xpand.Extensions.XAF|4.221.10
  |System.Interactive|5.0.0
  |System.Reactive|5.0.0
  |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
- |Xpand.Patcher|3.0.8
+ |Xpand.Patcher|3.0.14
  |Microsoft.CSharp|4.7.0
  |Newtonsoft.Json|13.0.1
  |Enums.Net|4.0.0
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.221.9
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.221.10
 
 ## Issues-Debugging-Troubleshooting
 
