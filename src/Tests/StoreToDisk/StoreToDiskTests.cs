@@ -10,6 +10,7 @@ using Xpand.Extensions.FileExtensions;
 using Xpand.Extensions.JsonExtensions;
 using Xpand.Extensions.Reactive.Transform.System.IO;
 using Xpand.Extensions.StringExtensions;
+using Xpand.Extensions.XAF.ObjectSpaceExtensions;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.StoreToDisk.Tests.BOModel;
 using Xpand.XAF.Modules.StoreToDisk.Tests.Common;
@@ -30,8 +31,7 @@ namespace Xpand.XAF.Modules.StoreToDisk.Tests {
             
             objectSpace.CommitChanges();
             testObserver.AwaitDone(Timeout).ItemCount.ShouldBe(1);
-            var changedObserver = new FileInfo($"{folder}\\{typeof(STD).StoreToDiskFileName()}").WhenChanged().FirstAsync().Test();
-            changedObserver.AwaitDone(Timeout).ItemCount.ShouldBe(1);
+        
             var fileInfo = testObserver.Items.First();
             var token = fileInfo.ReadAllBytes().UnProtect().First().GetString().DeserializeJson();
             var jToken = token.First();
@@ -42,6 +42,7 @@ namespace Xpand.XAF.Modules.StoreToDisk.Tests {
         [Test][Order(1)]
         public void When_Application_ObjectSpace_Updates_Objects() {
             WhenUpdatesObjects(Application.CreateObjectSpace(),nameof(When_Application_ObjectSpace_Updates_Objects));
+            WhenUpdatesObjects(Application.CreateObjectSpace(),"aaa");
         }
         
         [Test][Order(2)]
@@ -56,17 +57,16 @@ namespace Xpand.XAF.Modules.StoreToDisk.Tests {
 
         private void WhenUpdatesObjects(IObjectSpace objectSpace, string secret) {
             var folder = Application.Model.ToReactiveModule<IModelReactiveModulesStoreToDisk>().StoreToDisk.Folder;
-            var std = objectSpace.GetObjectsQuery<STD>()
-                .First(std => std.Name == nameof(When_Application_ObjectSpace_Commits_New_Objects));
+            var std = objectSpace.EnsureObject<STD>(std => std.Name == nameof(When_Application_ObjectSpace_Commits_New_Objects),std1 => std1.Name = nameof(When_Application_ObjectSpace_Commits_New_Objects));
             std.Secret = secret;
             objectSpace.CommitChanges();
 
             var fileInfo = new FileInfo($"{folder}\\{typeof(STD).StoreToDiskFileName()}");
-            var changedObserver = fileInfo.WhenChanged().FirstAsync().Test();
-            changedObserver.AwaitDone(Timeout).ItemCount.ShouldBe(1);
+            // var changedObserver = fileInfo.WhenChanged().FirstAsync().Test();
+            // changedObserver.AwaitDone(Timeout).ItemCount.ShouldBe(1);
             var token = fileInfo.ReadAllBytes().UnProtect().First().GetString().DeserializeJson();
             var jToken = token.First();
-            jToken[nameof(STD.Secret)].ShouldBe(std.Secret);
+            jToken[nameof(STD.Secret)].ShouldBe(secret);
             jToken[nameof(STD.Name)].ShouldBe(std.Name);
         }
     }

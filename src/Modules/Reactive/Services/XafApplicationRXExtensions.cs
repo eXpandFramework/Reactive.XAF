@@ -701,7 +701,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<(IObjectSpace objectSpace, (object instance, ObjectModification modification)[] details)> WhenProviderCommittedDetailed(
             this XafApplication application,Type objectType,ObjectModification objectModification,bool emitUpdatingObjectSpace,Func<object,bool> criteria=null,params string[] modifiedProperties)
             => application.WhenProviderObjectSpaceCreated(emitUpdatingObjectSpace)
-                .SelectMany(objectSpace => objectSpace.WhenCommittedDetailed(objectType, objectModification, criteria, modifiedProperties).TakeUntil(objectSpace.WhenDisposed()));
+                .SelectMany(objectSpace => objectSpace.WhenCommittedDetailed(objectType, objectModification, criteria, modifiedProperties));
         
         public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)> WhenProviderCommittedDetailed<T>(
             this XafApplication application,ObjectModification objectModification,Func<T,bool> criteria=null,params string[] modifiedProperties) where T:class
@@ -722,7 +722,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<T> UseObjectSpace<T>(this XafApplication application,Func<IObjectSpace,IObservable<T>> factory,bool useObjectSpaceProvider=false) 
             => Observable.Using(() => application.CreateObjectSpace(useObjectSpaceProvider),factory);
 
-        public static IObservable<T> UseProviderObjectSpace<T>(this XafApplication application,T obj, Func<T, IObservable<T>> factory, Type objectType = null) 
+        public static IObservable<T2> UseProviderObjectSpace<T,T2>(this XafApplication application,T obj, Func<T, IObservable<T2>> factory, Type objectType = null) 
             => application.UseProviderObjectSpace(space => {
                 obj = space.GetObjectByKey<T>(space.GetKeyValue(obj));
                 return factory(obj);
@@ -833,6 +833,11 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .SelectMany(types => types).SelectMany(info => info.Members).Where(info => !info.IsPersistent)
                 .Do(info => info.AddAttribute(new IgnoreDataLockingAttribute()));
 
+        public static IObservable<Unit> EnsureViewTabCaptions(this XafApplication application,params Type[] objectTypes)
+            => application.WhenFrameCreated().OfType<Window>()
+                .MergeIgnored(window => window.WhenViewRefreshExecuted(_ => window.GetController<WindowTemplateController>().UpdateWindowCaption()))
+                .ToController<WindowTemplateController>().SelectMany(controller => controller.WhenCustomizeWindowCaption()
+                    .DoWhen(_ => objectTypes.Contains(controller.Frame.View?.ObjectTypeInfo.Type),e =>  e.WindowCaption.FirstPart = $"{controller.Frame.View.CurrentObject}")).ToUnit();
     }
 
 

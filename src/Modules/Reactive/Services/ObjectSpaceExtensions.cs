@@ -19,6 +19,7 @@ using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Transform.Collections;
 using Xpand.Extensions.Reactive.Utility;
+using Xpand.Extensions.TypeExtensions;
 using Xpand.Extensions.XAF.Attributes;
 using Xpand.Extensions.XAF.CollectionSourceExtensions;
 using Xpand.Extensions.XAF.ObjectSpaceExtensions;
@@ -205,7 +206,13 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         
         public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)>
             WhenCommittedDetailed<T>(this IObjectSpace objectSpace, ObjectModification objectModification) 
-            => objectSpace.WhenCommitingDetailed<T>(true, objectModification);
+            => objectSpace.ParentObjectSpace().WhenCommitingDetailed<T>(true, objectModification);
+
+        public static IObjectSpace ParentObjectSpace(this IObjectSpace objectSpace) 
+            => !objectSpace.IsNested() ? objectSpace : (IObjectSpace)objectSpace.GetPropertyValue("ParentObjectSpace");
+
+        public static bool IsNested(this IObjectSpace objectSpace) 
+            => objectSpace.GetType().InheritsFrom("DevExpress.ExpressApp.Xpo.XPNestedObjectSpace");
 
         public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)>
             WhenCommittedDetailed<T>(this IObjectSpace objectSpace, ObjectModification objectModification,
@@ -322,6 +329,11 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static Task CommitChangesAsync(this IObjectSpaceLink link)
             => link.ObjectSpace.CommitChangesAsync();
         
+        public static IObservable<T> Commit<T>(this IEnumerable<T> source) where T:IObjectSpaceLink {
+            var links = source as T[] ?? source.ToArray();
+            return links.Finally(() => links.FirstOrDefault()?.CommitChanges()).ToNowObservable();
+        }
+
         public static IObservable<T> Commit<T>(this T link) where T:IObjectSpaceLink
             => link.ObjectSpace.CommitChangesAsync().ToObservable().To(link);
         
@@ -363,10 +375,9 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         
         public static IObservable<(T theObject, IObjectSpace objectSpace)> FindObject<T>(this XafApplication application,Func<IQueryable<T>,IQueryable<T>> query=null) 
-            => Observable.Using(application.CreateObjectSpace, space => space.ExistingObject(query));
+            => Observable.Using(() => application.CreateObjectSpace(typeof(T)), space => space.ExistingObject(query).Select(arg => (arg,space)));
 
 
-        
         public static IObservable<T> WhenObjectCommitted<T>(this IObservable<T> source) where T:IObjectSpaceLink 
             => source.SelectMany(_ => _.ObjectSpace.WhenCommitted().FirstAsync().Select(tuple => _));
 
@@ -451,12 +462,15 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<(IObjectSpace objectSpace, IEnumerable<T> objects)> WhenExistingObjectCommiting<T>(this XafApplication application) where T : class 
             => application.WhenObjectSpaceCreated().SelectMany(objectSpace => objectSpace.WhenCommiting<T>(ObjectModification.Updated));
 
-        public static IObservable<(T theObject, IObjectSpace objectSpace)> ExistingObject<T>(this IObjectSpace objectSpace,Func<IQueryable<T>,IQueryable<T>> query=null){
+        public static T FindObject<T>(this IObjectSpace objectSpace, Expression<Func<T,bool>> expression) 
+            => objectSpace.FindObject<T>(CriteriaOperator.FromLambda(expression));
+
+        public static IObservable<T> ExistingObject<T>(this IObjectSpace objectSpace,Func<IQueryable<T>,IQueryable<T>> query=null){
             var objectsQuery = objectSpace.GetObjectsQuery<T>();
             if (query != null){
                 objectsQuery = objectsQuery.Concat(query(objectsQuery));
             }
-            return objectsQuery.ToObservable().Pair(objectSpace).TraceRX();
+            return objectsQuery.ToObservable().Pair(objectSpace).Select(t => t.source);
         }
 
         

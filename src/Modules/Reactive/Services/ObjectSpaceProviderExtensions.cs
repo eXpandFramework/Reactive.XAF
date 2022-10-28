@@ -24,7 +24,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         private static readonly ISubject<IObjectSpaceProvider> SchemaUpdatedSubject=Subject.Synchronize(new Subject<IObjectSpaceProvider>());
 
         private static readonly ISubject<(IObjectSpace objectSpace, IObjectSpaceProvider objectSpaceProvider,bool updating)>
-            ObjectSpaceCreatedSubject = Subject.Synchronize(new Subject<(IObjectSpace objectSpace, IObjectSpaceProvider objectSpaceProvider,bool updating)>());
+            ObjectSpaceCreatedSubject = new Subject<(IObjectSpace objectSpace, IObjectSpaceProvider objectSpaceProvider,bool updating)>();
 
         private static MethodInfo GetMethodInfo(string methodName) 
             => typeof(ObjectSpaceProviderExtensions).GetMethods(BindingFlags.Static|BindingFlags.NonPublic).First(info => info.Name == methodName);
@@ -39,7 +39,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .ToUnit();
 
         private static void PatchObjectSpaceCreated(this XafApplication application) 
-            => application.PatchProviderObjectSpaceCreated( nameof(IObjectSpaceProvider.CreateObjectSpace),info => !info.Parameters().Any(),nameof(CreateObjectSpace));
+            => application.PatchProviderObjectSpaceCreated( nameof(IObjectSpaceProvider.CreateObjectSpace),info => info.Parameters().Any(),nameof(CreateObjectSpace));
 
         private static void PatchUpdatingObjectSpaceCreated(this XafApplication application) 
             => application.PatchProviderObjectSpaceCreated( nameof(IObjectSpaceProvider.CreateUpdatingObjectSpace),info => {

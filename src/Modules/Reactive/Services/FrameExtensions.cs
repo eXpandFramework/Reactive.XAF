@@ -17,6 +17,7 @@ using Xpand.Extensions.XAF.ActionExtensions;
 using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.Extensions.XAF.ViewExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
+using Xpand.XAF.Modules.Reactive.Services.Actions;
 using Xpand.XAF.Modules.Reactive.Services.Controllers;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
@@ -52,6 +53,10 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                     return true;
                 });
 
+        public static IObservable<TFrame> WhenViewRefreshExecuted<TFrame>(this TFrame source,
+            Action<SimpleActionExecuteEventArgs> retriedExecution) where TFrame : Frame
+            => source.GetController<RefreshController>().RefreshAction.WhenExecuted(retriedExecution).To(source);
+        
         public static IObservable<Unit> WhenInvalid<TFrame>(this TFrame source) where TFrame : Frame 
             => source.WhenViewChangedToNull().ToUnit().Merge(source.WhenDisposingFrame().ToUnit());
 

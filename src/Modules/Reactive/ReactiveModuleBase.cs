@@ -21,17 +21,24 @@ namespace Xpand.XAF.Modules.Reactive{
     public abstract class ReactiveModuleBase:ModuleBase{
         internal readonly ReplaySubject<ReactiveModuleBase> SetupCompletedSubject=new(1);
         static readonly Subject<ApplicationModulesManager> SettingUpSubject=new();
-        static ReactiveModuleBase(){
-            // AppDomain.CurrentDomain.AssemblyResolve += CurrentDomainOnAssemblyResolve;
-            // new HarmonyMethod(typeof(ReactiveModule).Method(nameof(SetupModulesPatch),Flags.StaticAnyVisibility))
-            //     .PreFix(typeof(ApplicationModulesManager).Method("SetupModules"),true);
-            // if (DesignerOnlyCalculator.IsRunTime) {
-            //     AppDomain.CurrentDomain.AddModelReference("netstandard", typeof(FontStyle?).Assembly.GetName().Name);
-            // }
+        static ReactiveModuleBase() {
+            AppDomain.CurrentDomain.AssemblyResolve += CurrentDomainOnAssemblyResolve;
+            Patch();
+        }
+
+        private static void Patch() {
+            new HarmonyMethod(typeof(ReactiveModule).Method(nameof(SetupModulesPatch), Flags.StaticAnyVisibility))
+                .PreFix(typeof(ApplicationModulesManager).Method("SetupModules"), true);
+            if (DesignerOnlyCalculator.IsRunTime) {
+                AppDomain.CurrentDomain.AddModelReference("netstandard", typeof(FontStyle?).Assembly.GetName().Name);
+            }
         }
 
         private static Assembly CurrentDomainOnAssemblyResolve(object sender, ResolveEventArgs args){
             var name = args.Name;
+            if (name.Contains("Mono.Mod")) {
+                throw new NotImplementedException("aaaaaaaaaaaaaaaaaaa");
+            }
             var comma = name.IndexOf(",", StringComparison.Ordinal);
             if (comma > -1){
                 name = args.Name.Substring(0, comma);

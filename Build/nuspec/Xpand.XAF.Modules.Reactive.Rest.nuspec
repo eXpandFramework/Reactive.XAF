@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.Reactive.Rest</id>
-    <version>4.221.10.0</version>
+    <version>4.221.10.1</version>
     <authors>eXpandFramework</authors>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <license type="expression">MIT</license>
@@ -13,21 +13,23 @@
     <copyright>eXpandFramework.com</copyright>
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Reactive.Rest, 22.1.6</tags>
     <dependencies>
+      <group targetFramework="netstandard2.0">
+        <dependency id="Xpand.VersionConverter" version="4.221.10.1" />
+      </group>
       <group targetFramework="net6.0">
-        <dependency id="Xpand.Extensions" version="4.221.10.0" />
-        <dependency id="Xpand.Extensions.Reactive" version="4.221.10.0" />
-        <dependency id="Xpand.Extensions.XAF" version="4.221.10.0" />
-        <dependency id="Xpand.XAF.Modules.Reactive" version="4.221.10.0" />
+        <dependency id="Xpand.Extensions" version="4.221.10.1" />
+        <dependency id="Xpand.Extensions.Reactive" version="4.221.10.1" />
+        <dependency id="Xpand.Extensions.XAF" version="4.221.10.1" />
+        <dependency id="Xpand.XAF.Modules.Reactive" version="4.221.10.1" />
         <dependency id="Fasterflect.Xpand" version="2.0.7" />
         <dependency id="DevExpress.ExpressApp" version="22.1.6" />
-        <dependency id="Xpand.Patcher" version="3.0.14" />
+        <dependency id="Xpand.Patcher" version="3.0.17" />
         <dependency id="Microsoft.CSharp" version="4.7" />
         <dependency id="System.Reactive" version="5.0" />
         <dependency id="Newtonsoft.Json" version="13.0.1" />
         <dependency id="DevExpress.ExpressApp.CodeAnalysis" version="22.1.6" />
-      </group>
-      <group targetFramework="netstandard2.0">
-        <dependency id="Xpand.VersionConverter" version="4.221.10.0" />
+        <dependency id="Xpand.Patcher" version="3.0.17.0" />
+        <dependency id="Xpand.VersionConverter" version="4.221.10.1" />
       </group>
     </dependencies>
   </metadata>

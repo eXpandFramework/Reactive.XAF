@@ -157,7 +157,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
 
         public static IObservable<T> WhenExecuted<T>(this SingleChoiceAction simpleAction,Func<SingleChoiceActionExecuteEventArgs, IObservable<T>> retriedExecution) 
             => simpleAction.WhenExecuted().SelectMany(retriedExecution).Retry(() => simpleAction.Application).TakeUntilDeactivated(simpleAction.Controller);
-        
+
         public static IObservable<T> WhenExecute<T>(this IObservable<SingleChoiceAction> source,Func<SingleChoiceActionExecuteEventArgs, IObservable<T>> retriedExecution) 
             => source.SelectMany(action => action.WhenExecute(retriedExecution).TakeUntilDeactivated(action.Controller));
 

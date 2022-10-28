@@ -64,7 +64,7 @@ nuget System.Reflection.Metadata 5.0.0
 nuget System.Interactive 5.0     
 nuget System.Interactive.Async 5.0
 nuget Unofficial.Microsoft.mshtml 7.0.3300
-nuget Xpand.Patcher 3.0.14
+nuget Xpand.Patcher 3.0.17
 nuget YamlDotNet 11.2.1
 nuget Polly 7.2.2
 nuget TextCopy 6.1.0

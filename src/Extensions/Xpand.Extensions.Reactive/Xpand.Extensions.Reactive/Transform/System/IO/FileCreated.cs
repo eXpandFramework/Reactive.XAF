@@ -16,10 +16,11 @@ namespace Xpand.Extensions.Reactive.Transform.System.IO {
             if (!infoClone.Exists) {
                 directoryInfo = directoryInfo.ParentExists();
                 return Observable.Using(() => new FileSystemWatcher(directoryInfo.FullName) { EnableRaisingEvents = true,IncludeSubdirectories = true}, 
-                    watcher => watcher.WhenEvent<FileSystemEventArgs>(nameof(FileSystemWatcher.Created)).Where(e => new[]{WatcherChangeTypes.Created,WatcherChangeTypes.Renamed}.Contains(e.ChangeType))
-                        .Publish(source =>source.FirstAsync(e => e.FullPath==infoClone.FullName).Select(_ => _).IgnoreElements().Concat(source.Where(e => File.Exists(e.FullPath))
-                                .Where(e =>Path.GetDirectoryName(e.FullPath)==infoClone.FullName&& (pattern==null||Regex.IsMatch(Path.GetFileName(e.FullPath),
-                                                    pattern.WildCardToRegular())) ))) )
+                    watcher => watcher.WhenEvent<FileSystemEventArgs>(nameof(FileSystemWatcher.Created))
+                        .Where(e => new[]{WatcherChangeTypes.Created,WatcherChangeTypes.Renamed}.Contains(e.ChangeType))
+                        .Publish(source =>source.Where(e => File.Exists(e.FullPath))
+                            .Where(e =>Path.GetDirectoryName(e.FullPath)==infoClone.FullName&& (pattern==null||Regex.IsMatch(Path.GetFileName(e.FullPath),
+                                pattern.WildCardToRegular())) )) )
                     .Select(e => new FileInfo(e.FullPath));
             }
             return Observable.Using(() => new FileSystemWatcher(directoryInfo.FullName, pattern??"*"){ EnableRaisingEvents = true }, watcher => watcher

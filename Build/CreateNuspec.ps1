@@ -21,6 +21,11 @@ $filter="test|Maintenance|SpeechManager"
 $filteredProjects=Get-ChildItem "$root\src\" -Include "*.csproj" -Recurse | Where-Object { $_ -notmatch $filter} 
 $filteredProjects+=Get-ChildItem "$root\src\" -Include "*Xpand.TestsLib*.csproj" -Recurse # |Where-Object{$_.BaseName -notmatch "Blazor"}
 $dxVersionBuild=Get-VersionPart $dxVersion Build
+$nuspecs=Get-ChildItem "$root\build\nuspec" *.nuspec
+$xpandPatcher=(Get-XpandPackages Lab All|Where-Object{$_.Id -eq "Xpand.Patcher"}).Version
+
+
+
 $filteredProjects| Invoke-Parallel -StepInterval 500 -VariablesToImport @("allProjects", "root", "Release","dxVersionBuild") -Script {
 # $filteredProjects|where{$_.BaseName -eq "Xpand.TestsLib.Blazor"}| foreach {
 # $filteredProjects| foreach {
@@ -132,8 +137,22 @@ $filteredProjects| Invoke-Parallel -StepInterval 500 -VariablesToImport @("allPr
     Format-Xml -Path $nuspecFileName
 } 
 
+$filteredProjects|ForEach-Object{
+    $project=$_
+    $nFileName=($nuspecs|Where-Object{$_.BaseName -eq $project.BaseName})
+    $n=Get-XmlContent $nFileName
+    Add-NuspecDependency Xpand.Patcher $xpandPatcher $n "net6.0"
+    $n.package.metadata.dependencies.group|Where-Object{$_.targetFramework -eq "netstandard2.0"}|ForEach-Object{
+        $_.dependency|ForEach-Object{
+            Add-NuspecDependency $_.Id $_.Version $n "net6.0"
+        }
+    }
+    
+    $n|Save-Xml $nFileName
+}
+
 & "$root\build\UpdateAllNuspec.ps1" $root $Release $branch $dxVersion
-$nuspecs=Get-ChildItem "$root\build\nuspec" *.nuspec
+
 
 $nuspecs |ForEach-Object{
     $nuspec=Get-XmlContent $_.FullName

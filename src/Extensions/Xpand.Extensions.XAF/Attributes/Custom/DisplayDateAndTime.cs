@@ -19,6 +19,8 @@ namespace Xpand.Extensions.XAF.Attributes.Custom {
         hh_mm_ss,
         [Description("mm:ss")]
         mm_ss,
+        [Description("hh:mm")]
+        hh_mm,
         [Description("mm:ss:fff")]
         mm_ss_fff
     }
