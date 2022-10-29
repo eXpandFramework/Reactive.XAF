@@ -6,6 +6,17 @@ using Xpand.Extensions.ObjectExtensions;
 
 namespace Xpand.Extensions.LinqExtensions{
     public static partial class LinqExtensions {
+        public static TValue GetOrAdd<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, Func<TValue> valueCreator) {
+            if (!dictionary.TryGetValue(key, out var value)) {
+                value = valueCreator();
+                dictionary.Add(key, value);
+            }
+            return value;
+        }
+
+        public static TValue GetOrAdd<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key) where TValue : new() 
+            => dictionary.GetOrAdd(key, () => new());
+
         public static IEnumerable<T> DoWhen<T>(this IEnumerable<T> source, Func<T,bool> when,Action<T> action) 
             => source.Do(obj => {
                 if (when(obj)) {

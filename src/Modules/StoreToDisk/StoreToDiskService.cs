@@ -15,6 +15,7 @@ using Xpand.Extensions.BytesExtensions;
 using Xpand.Extensions.JsonExtensions;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.ObjectExtensions;
+using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Transform.System.IO;
@@ -31,33 +32,57 @@ namespace Xpand.XAF.Modules.StoreToDisk{
     public static class StoreToDiskService{
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) 
             => manager.WhenApplication(application => application.WhenSetupComplete()
-                .SelectMany(_ =>application.StoreToDisk(application.Model.ToReactiveModule<IModelReactiveModulesStoreToDisk>().StoreToDisk.Folder) )
+                .SelectMany(_ =>application.DailyBackup()
+                    .MergeToUnit(application.StoreToDisk(application.Model.ToReactiveModule<IModelReactiveModulesStoreToDisk>().StoreToDisk.Folder)) )
                 .ToUnit());
 
-        private static IObservable<(object[] objects, JArray jArray)> LoadFromDisk(this (object instance,ObjectModification modification)[] objects, XafApplication application,
+        private static IObservable<Unit> DailyBackup(this XafApplication application)
+            => application.WhenLoggedOn()
+                .Select(_ => application.Model.ToReactiveModule<IModelReactiveModulesStoreToDisk>().StoreToDisk)
+                .Where(storeToDisk => storeToDisk.DailyBackup)
+                .SelectMany(disk => {
+                    var jsonFles = Directory.GetFiles(disk.Folder, "*.json");
+                    var directoryName = ($"{disk.Folder}\\{DateTime.Now:yyyy.MM.dd}");
+                    if (jsonFles.Any() && !Directory.Exists(directoryName)) {
+                        Directory.CreateDirectory(directoryName);
+                        return jsonFles.Execute(file => File.Copy(file, $"{directoryName}\\{Path.GetFileName(file)}")).ToNowObservable();
+                    }
+                    return Observable.Empty<string>();
+                })
+                .ToUnit();
+
+        private static IObservable<(object[] objects, JArray jArray)> LoadFromDisk(this (object instance,ObjectModification modification)[] source, XafApplication application,
             IMemberInfo keyMember, IMemberInfo[] memberInfos, ITypeInfo typeInfo, string filePath, StoreToDiskAttribute attribute) 
             => Observable.Defer(() => new FileInfo(filePath).WhenFileReadAsBytes()
                 .Select(bytes => bytes.Length == 0 ? "[]" : attribute.Protection.UnProtect(bytes)).Select(json=>json.DeserializeJson().As<JArray>())
-                .SelectMany(jArray => application.UseProviderObjectSpace(space => objects.Where(details =>details.modification==ObjectModification.New )
-                    .Select(t => t.instance).Select(space.GetObject).ToNowObservable().BufferUntilCompleted()
-                    .SelectMany(objects1 =>objects1.ToNowObservable()
-                        .SelectMany(o1 => jArray.Where(jToken => keyMember.Match(jToken,o1)).Take(1).ToNowObservable()
-                            .SelectMany(jToken => memberInfos.ToNowObservable().WhenDefault(info => info.GetValue(o1))
-                                .Do(info => info.SetValue(o1, ((string)jToken[info.Name]).Change(info.MemberType)))
-                                .Select(_ => o1)))
-                    )
-                    .BufferUntilCompleted()
-                    .Select(_ => {
-                        space.CommitChanges();
-                        return (objects.Select(t => t.instance).ToArray(),jArray);
-                    }),typeInfo.Type)));
+                .SelectMany(jArray => application.UseProviderObjectSpace(space => {
+                    var objects = source.Where(details => details.modification == ObjectModification.New)
+                        .Select(t => t.instance).Select(space.GetObject).ToArray();
+                    return objects.ToNowObservable().BufferUntilCompleted()
+                        .SelectMany(objects1 => objects1.ToNowObservable()
+                            .SelectMany(o1 => jArray.Where(jToken => keyMember.Match(jToken, o1)).Take(1).ToNowObservable()
+                                .SelectMany(jToken => memberInfos.ToNowObservable()
+                                    .WhenDefault(info => info.GetValue(o1))
+                                    .Do(info => info.SetValue(o1, ((string)jToken[info.Name]).Change(info.MemberType)))
+                                    .Select(_ => o1)))
+                        )
+                        .BufferUntilCompleted()
+                        .Select(_ => {
+                            space.CommitChanges();
+                            return (source.Where(t => t.modification!=ObjectModification.New)
+                                .Select(t => space.GetObject(t.instance)).Concat(objects).ToArray(), jArray);
+                        });
+                },typeInfo.Type)));
         
         public static IObservable<Unit> StoreToDisk(this XafApplication application, string directory)
             => application.StoreToDiskData(directory)
                 .SelectMany(data => application.WhenProviderCommittedDetailed(data.typeInfo.Type,ObjectModification.NewOrUpdated,emitUpdatingObjectSpace:true)
                     .SelectMany(committed => committed.details.ToArray()
                         .LoadFromDisk(application, data.keyMember, data.memberInfos, data.typeInfo, data.filePath, data.attribute)
-                        .StoreToDisk(committed,data)))
+                        .StoreToDisk(committed,data)
+                        
+                    )
+                )
                 .ToUnit();
         
         private static IObservable<JObject[]> StoreToDisk(this IObservable<(object[] objects, JArray jArray)> source,

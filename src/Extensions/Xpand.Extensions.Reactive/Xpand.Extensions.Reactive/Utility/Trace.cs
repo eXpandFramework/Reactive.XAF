@@ -81,7 +81,7 @@ namespace Xpand.Extensions.Reactive.Utility{
                     },
                     e => {
                         if (traceStrategy.Is(ObservableTraceStrategy.OnError)) {
-                            Action("OnError", e.GetAllInfo(), traceAction.TraceError(traceSource));
+                            Action("OnError", e, traceAction.TraceError(traceSource));
                         }
                         observer.OnError(e);
                     },

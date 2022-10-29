@@ -329,9 +329,13 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static Task CommitChangesAsync(this IObjectSpaceLink link)
             => link.ObjectSpace.CommitChangesAsync();
         
-        public static IObservable<T> Commit<T>(this IEnumerable<T> source) where T:IObjectSpaceLink {
+        public static IObservable<T> Commit<T>(this IEnumerable<T> source,IObjectSpace objectSpace) where T:IObjectSpaceLink {
             var links = source as T[] ?? source.ToArray();
-            return links.Finally(() => links.FirstOrDefault()?.CommitChanges()).ToNowObservable();
+            return links.Finally(objectSpace.CommitChanges).ToNowObservable();
+        }
+        public static IObservable<T> Commit<T>(this IEnumerable<T> source,IObjectSpaceLink objectSpace) where T:IObjectSpaceLink {
+            var links = source as T[] ?? source.ToArray();
+            return links.Finally(objectSpace.CommitChanges).ToNowObservable();
         }
 
         public static IObservable<T> Commit<T>(this T link) where T:IObjectSpaceLink

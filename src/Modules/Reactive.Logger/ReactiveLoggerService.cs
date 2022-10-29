@@ -121,7 +121,10 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
 	        Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.OnNextOrOnError,
 	        [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) 
             => source.Trace(name, ReactiveLoggerModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
-
+        
+        internal static IObservable<TSource> TraceErrorLogger<TSource>(this IObservable<TSource> source, Func<Exception,string> errorMessageFactory=null,
+	        [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) 
+            => source.Trace(null, ReactiveLoggerModule.TraceSource,null,errorMessageFactory, null,ObservableTraceStrategy.OnError, memberName,sourceFilePath,sourceLineNumber);
 
         public static IEnumerable<(ModuleBase module, TraceSource traceSource)> ToTraceSource(this IEnumerable<ModuleBase> moduleList) 
             => moduleList.SelectMany(m => m.GetType().GetProperties(BindingFlags.Static | BindingFlags.Public)

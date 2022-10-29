@@ -16,6 +16,8 @@ namespace Xpand.XAF.Modules.StoreToDisk{
 	public interface IModelStoreToDisk : IModelNode{
 		[Required]
 		string Folder { get; set; }
+		
+		bool DailyBackup { get; set; }
 	}
 
 	[DomainLogic(typeof(IModelStoreToDisk))]
