@@ -9,5 +9,8 @@ namespace Xpand.Extensions.Reactive.Filter{
 
 	    public static IObservable<TSource> WhenDefault<TSource,TValue>(this IObservable<TSource> source,Func<TSource, TValue> valueSelector) 
 		    =>source.Where(source1 => valueSelector(source1).IsDefaultValue());
+	    
+	    public static IObservable<TSource> WhenDefault<TSource>(this IObservable<TSource> source,Func<TSource, object> valueSelector,Func<TSource,Type> valueType) 
+		    =>source.Where(source1 => valueSelector(source1).IsDefaultValue());
     }
 }

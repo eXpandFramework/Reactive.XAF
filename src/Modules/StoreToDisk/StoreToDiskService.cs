@@ -63,7 +63,12 @@ namespace Xpand.XAF.Modules.StoreToDisk{
                             .SelectMany(o1 => jArray.Where(jToken => keyMember.Match(jToken, o1)).Take(1).ToNowObservable()
                                 .SelectMany(jToken => memberInfos.ToNowObservable()
                                     .WhenDefault(info => info.GetValue(o1))
-                                    .Do(info => info.SetValue(o1, ((string)jToken[info.Name]).Change(info.MemberType)))
+                                    .Do(info => {
+                                        var value = ((JValue)jToken[info.Name])?.Value;
+                                        var change = !info.MemberTypeInfo.IsPersistent ? value.Change(info.MemberType) :
+                                            value == null ? null : space.GetObjectByKey(info.MemberType, value);
+                                        info.SetValue(o1, change);
+                                    })
                                     .Select(_ => o1)))
                         )
                         .BufferUntilCompleted()
@@ -106,8 +111,13 @@ namespace Xpand.XAF.Modules.StoreToDisk{
         private static IObservable<JObject[]> StoreToDisk(this object[] objects ,JArray jArray,IMemberInfo keyMember, IMemberInfo[] memberInfos, string filePath, StoreToDiskAttribute attribute) 
             => objects.ToNowObservable().SelectMany(instance => {
                 var jtoken = jArray.GetToken(keyMember, memberInfos,  instance);
-                return memberInfos.ToNowObservable().Do(memberInfo =>
-                        jtoken[memberInfo.Name] = memberInfo.GetValue(instance).ToJToken())
+                return memberInfos.ToNowObservable().Do(memberInfo => {
+                        var value = memberInfo.GetValue(instance);
+                        if (memberInfo.MemberTypeInfo.IsDomainComponent) {
+                            value = memberInfo.MemberTypeInfo.KeyMember.GetValue(value);
+                        }
+                        jtoken[memberInfo.Name] = value.ToJToken();
+                    })
                     .ConcatIgnoredValue(jtoken);
             }).BufferUntilCompleted(true)
                 .Do(jObjects => {
