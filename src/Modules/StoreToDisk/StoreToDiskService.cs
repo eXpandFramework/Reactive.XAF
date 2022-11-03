@@ -111,13 +111,8 @@ namespace Xpand.XAF.Modules.StoreToDisk{
         private static IObservable<JObject[]> StoreToDisk(this object[] objects ,JArray jArray,IMemberInfo keyMember, IMemberInfo[] memberInfos, string filePath, StoreToDiskAttribute attribute) 
             => objects.ToNowObservable().SelectMany(instance => {
                 var jtoken = jArray.GetToken(keyMember, memberInfos,  instance);
-                return memberInfos.ToNowObservable().Do(memberInfo => {
-                        var value = memberInfo.GetValue(instance);
-                        if (memberInfo.MemberTypeInfo.IsDomainComponent) {
-                            value = memberInfo.MemberTypeInfo.KeyMember.GetValue(value);
-                        }
-                        jtoken[memberInfo.Name] = value.ToJToken();
-                    })
+                return memberInfos.ToNowObservable()
+                    .Do(memberInfo => jtoken[memberInfo.Name] = memberInfo.GetMemberValue(instance).ToJToken())
                     .ConcatIgnoredValue(jtoken);
             }).BufferUntilCompleted(true)
                 .Do(jObjects => {
@@ -137,10 +132,16 @@ namespace Xpand.XAF.Modules.StoreToDisk{
         private static void SaveFile(this StoreToDiskAttribute attribute,string filePath,  string json) 
             => (attribute.Protection != null ? json.Protect(attribute.Protection.Value) : json.Bytes()).Save(filePath);
 
-        private static JObject GetToken(this JArray jArray,IMemberInfo keyMember, IMemberInfo[] memberInfos,  object instance) 
-            => jArray.Cast<JObject>().FirstOrDefault(token => keyMember.Match(token, instance)) ??
-               JObject.FromObject(memberInfos.NameValues(instance)
-                   .AddItem((keyMember.Name, keyMember.GetValue(instance).ToJToken())).ToDictionary());
+        private static JObject GetToken(this JArray jArray,IMemberInfo keyMember, IMemberInfo[] memberInfos,  object instance) {
+            var o = jArray.Cast<JObject>().FirstOrDefault(token => keyMember.Match(token, instance));
+            if (o != null) {
+                return o;
+            }
+
+            var dictionary = memberInfos.Select(info => (info.Name,info.GetMemberValue(instance)))
+                .AddItem((keyMember.Name, keyMember.GetMemberValue(instance))).ToDictionary();
+            return JObject.FromObject(dictionary);
+        }
 
         private static bool Match(this IMemberInfo memberInfo, JToken token, object instance) {
             var value = token[memberInfo.Name]?.ToObject(memberInfo.MemberType);

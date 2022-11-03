@@ -4,6 +4,11 @@ using DevExpress.ExpressApp.DC;
 
 namespace Xpand.Extensions.XAF.TypesInfoExtensions {
     public static partial class TypesInfoExtensions {
+        public static object GetMemberValue(this IMemberInfo memberInfo, object instance) {
+            var value = memberInfo.GetValue(instance);
+            return memberInfo.MemberTypeInfo.IsDomainComponent ? memberInfo.MemberTypeInfo.KeyMember.GetValue(value) : value;
+        }
+        
         public static IEnumerable<(string Name, object value)> NameValues(this IEnumerable<IMemberInfo> source, object instance)
             => source.Values(instance).Select(t => (t.info.Name,t.value));
         

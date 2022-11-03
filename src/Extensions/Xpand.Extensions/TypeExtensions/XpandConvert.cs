@@ -397,7 +397,7 @@ namespace Xpand.Extensions.TypeExtensions {
         }
 
         static bool TryParseDecimal(string value, ref object result) {
-            var tryParse = decimal.TryParse(value, out var @decimal);
+            var tryParse = decimal.TryParse(value,NumberStyles.Float, CultureInfo.InvariantCulture, out var @decimal);
             if (tryParse)
                 result = @decimal;
             return tryParse;

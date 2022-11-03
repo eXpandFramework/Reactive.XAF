@@ -5,6 +5,7 @@ using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using Xpand.Extensions.Numeric;
 using Xpand.Extensions.Reactive.Filter;
 
 namespace Xpand.Extensions.Reactive.Transform {
@@ -25,6 +26,9 @@ namespace Xpand.Extensions.Reactive.Transform {
 
         public static IObservable<IList<T>> BufferUntilInactive<T>(this IObservable<T> source, TimeSpan delay)
             => source.BufferUntilInactive(delay,window => window.ToList());
+        
+        public static IObservable<IList<T>> BufferUntilInactive<T>(this IObservable<T> source, int seconds)
+            => source.BufferUntilInactive(seconds.Seconds(),window => window.ToList());
         
         public static IObservable<IList<T>> BufferUntilInactive<T>(this IObservable<T> source, TimeSpan delay,Func<IObservable<T>,IObservable<IList<T>>> resultSelector)
             => source.Publish(obs => obs.Window(() => obs.Throttle(delay)).SelectMany(resultSelector));
