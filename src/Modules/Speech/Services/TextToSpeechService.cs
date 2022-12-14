@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Threading;
 using System.Windows.Forms;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
@@ -94,10 +95,12 @@ namespace Xpand.XAF.Modules.Speech.Services {
         private static IObservable<TextToSpeech> Speak(this XafApplication application, IObjectSpace space,
             Func<IObjectSpace, TextToSpeech> textToSpeechSelector, Func<BusinessObjects.SpeechService,string> textSelector) {
             var speechAccount = space.DefaultSpeechAccount(application.Model.SpeechModel());
+            var synchronizationContext = SynchronizationContext.Current;
             return speechAccount.Speak(application.Model.SpeechModel(), (_, result, path) => textToSpeechSelector(space)
-                    .UpdateSSMLFile(result, path).Commit(), () => textSelector(speechAccount)).ObserveOnContext()
+                    .UpdateSSMLFile(result, path).Commit(), () => textSelector(speechAccount))
+                .ObserveOnContext(synchronizationContext)
                 .Do(speech => Clipboard.SetText(speech.File.FullName))
-                .ShowXafMessage(application, speech => $"{speech.File.FileName} saved and path in memory.");
+                .ShowXafMessage(application, speech => $"{speech.File.FileName} saved and path in memory.",synchronizationContext);
         }
 
         private static IObservable<Unit> Type(this SingleChoiceActionExecuteEventArgs e) 

@@ -14,7 +14,7 @@
     <AssemblyTitle>Xpand.XAF.Modules.RefreshView</AssemblyTitle>
     <Product>Xpand.XAF.Modules.RefreshView</Product>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <AppendTargetFrameworkToOutputPath>True</AppendTargetFrameworkToOutputPath>
+    <AppendTargetFrameworkToOutputPath>False</AppendTargetFrameworkToOutputPath>
     <DebugType>full</DebugType>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>

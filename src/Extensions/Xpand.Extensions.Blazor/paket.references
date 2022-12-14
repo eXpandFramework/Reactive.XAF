@@ -1,5 +1,5 @@
 Fasterflect.Xpand
-Microsoft.CodeAnalysis.CSharp
 System.Configuration.ConfigurationManager
 System.Reactive
 Newtonsoft.Json
+Microsoft.CodeAnalysis

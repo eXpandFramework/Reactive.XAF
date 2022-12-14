@@ -68,7 +68,7 @@ namespace Xpand.TestsLib.Common{
 
         protected static object[] AgnosticModules() 
             => GetModules("Xpand.XAF.Modules*.dll","Core").Where(o => {
-                var name = ((Type) o).Assembly.GetName().Name;
+                var name = $"{((Type) o).Assembly.GetName().Name}";
                 return !name.EndsWith(".Win") && !name.EndsWith(".Web") && !name.EndsWith(".Tests");
             }).ToArray();
 

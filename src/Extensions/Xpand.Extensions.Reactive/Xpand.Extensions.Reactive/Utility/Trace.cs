@@ -7,7 +7,6 @@ using System.Linq;
 using System.Reactive.Linq;
 using System.Threading;
 using Fasterflect;
-using Xpand.Extensions.ExceptionExtensions;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Tracing;
 
@@ -55,7 +54,6 @@ namespace Xpand.Extensions.Reactive.Utility{
                     if (m == "OnNext"){
                         mName = $"{memberName} =>{GetSourceName<TSource>()}";
                     }
-
                     var fullValue = $"{name}.{Path.GetFileNameWithoutExtension(sourceFilePath)}.{mName}({sourceLineNumber.ToString()}): {m}({value})".TrimStart('.');
                     var traceEventMessage = new TraceEventMessage() {
                         Action = m, RXAction = RXActions[m], Line = sourceLineNumber, DateTime = DateTime.Now,

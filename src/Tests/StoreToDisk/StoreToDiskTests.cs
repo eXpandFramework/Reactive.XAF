@@ -28,7 +28,8 @@ namespace Xpand.XAF.Modules.StoreToDisk.Tests {
             var std = objectSpace.CreateObject<STD>();
             std.Name = nameof(When_Application_ObjectSpace_Commits_New_Objects);
             std.Secret = "secret";
-            
+            std.Dep = objectSpace.CreateObject<STDep>();
+            std.Dep.Name = nameof(STDep);
             objectSpace.CommitChanges();
             testObserver.AwaitDone(Timeout).ItemCount.ShouldBe(1);
         
@@ -37,6 +38,7 @@ namespace Xpand.XAF.Modules.StoreToDisk.Tests {
             var jToken = token.First();
             jToken[nameof(STD.Secret)].ShouldBe(std.Secret);
             jToken[nameof(STD.Name)].ShouldBe(std.Name);
+            jToken[nameof(STD.Dep)].ShouldBe(0);
         }
         
         [Test][Order(1)]

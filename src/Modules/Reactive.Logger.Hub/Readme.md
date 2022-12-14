@@ -64,7 +64,7 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |----|----
 |**DevExpress.ExpressApp**|**Any**
  |**DevExpress.Xpo**|**Any**
- |**DevExpress.ExpressApp.CodeAnalysis**|**Any**
+ |****|**Any**
 |Xpand.Extensions.Reactive|4.221.11
  |Xpand.Extensions.XAF|4.221.11
  |Xpand.Extensions|4.221.11

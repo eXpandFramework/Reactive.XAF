@@ -20,7 +20,6 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using DevExpress.ExpressApp.SystemModule;
 using Fasterflect;
-
 using Xpand.Extensions.EventArgExtensions;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.ObjectExtensions;
@@ -415,7 +414,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                     h => application.DetailViewCreated += h, h => application.DetailViewCreated -= h,ImmediateScheduler.Instance)
                 .TransformPattern<DetailViewCreatedEventArgs,XafApplication>()
                 .TraceRX(_ => _.e.View.Id);
-
+        
         public static IObservable<DashboardView> WhenDashboardViewCreated(this XafApplication application) 
             => Observable.FromEventPattern<EventHandler<DashboardViewCreatedEventArgs>, DashboardViewCreatedEventArgs>(
                     h => application.DashboardViewCreated += h, h => application.DashboardViewCreated -= h,ImmediateScheduler.Instance)
@@ -752,14 +751,14 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => Observable.Using(() => application.CreateObjectSpace(objectType),space => selector(space).ReturnObservable());
 
         public static IObservable<T> WhenObject<T>(this XafApplication application,Expression<Func<T, bool>> criteriaExpression=null,params string[] modifiedProperties)where T:class
-            => application.WhenObject(ObjectModification.All,criteriaExpression,modifiedProperties);
+            => application.WhenObject(ObjectModification.NewOrUpdated,criteriaExpression,modifiedProperties);
 
         public static IObservable<T> WhenProviderObject<T>(this XafApplication application,
             Expression<Func<T, bool>> criteriaExpression = null, params string[] modifiedProperties)where T:class
             => application.WhenProviderObjects(criteriaExpression, modifiedProperties).SelectMany();
         
         public static IObservable<T[]> WhenProviderObjects<T>(this XafApplication application,Expression<Func<T, bool>> criteriaExpression=null,params string[] modifiedProperties)where T:class
-            => application.WhenProviderObjects(ObjectModification.All,criteriaExpression,modifiedProperties);
+            => application.WhenProviderObjects(ObjectModification.NewOrUpdated,criteriaExpression,modifiedProperties);
 
         public static IObservable<T> WhenExistingObject<T>(this XafApplication application, Expression<Func<T, bool>> criteriaExpression = null) 
             => application.UseObjectSpace(space => space.GetObjectsQuery<T>().Where(criteriaExpression ?? (arg => true)).ToNowObservable());
@@ -769,6 +768,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static IObservable<T> WhenProviderObject<T>(this XafApplication application,ObjectModification objectModification ,Expression<Func<T, bool>> criteriaExpression=null,params string[] modifiedProperties)where T:class 
             => application.WhenObject( objectModification, criteriaExpression, modifiedProperties, (criteriaExpression ?? (arg1 => true)).Compile(),application.WhenProviderObjectSpaceCreated());
+        
         public static IObservable<T[]> WhenProviderObjects<T>(this XafApplication application,ObjectModification objectModification ,Expression<Func<T, bool>> criteriaExpression=null,params string[] modifiedProperties)where T:class 
             => application.WhenObjects( objectModification, criteriaExpression, modifiedProperties, (criteriaExpression ?? (arg1 => true)).Compile(),application.WhenProviderObjectSpaceCreated());
 
@@ -837,7 +837,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => application.WhenFrameCreated().OfType<Window>()
                 .MergeIgnored(window => window.WhenViewRefreshExecuted(_ => window.GetController<WindowTemplateController>().UpdateWindowCaption()))
                 .ToController<WindowTemplateController>().SelectMany(controller => controller.WhenCustomizeWindowCaption()
-                    .DoWhen(_ => objectTypes.Contains(controller.Frame.View?.ObjectTypeInfo.Type),e =>  e.WindowCaption.FirstPart = $"{controller.Frame.View.CurrentObject}")).ToUnit();
+                    .DoWhen(_ => objectTypes.Contains(controller.Frame.View?.ObjectTypeInfo?.Type),e =>  e.WindowCaption.FirstPart = $"{controller.Frame.View?.CurrentObject}")).ToUnit();
     }
 
 

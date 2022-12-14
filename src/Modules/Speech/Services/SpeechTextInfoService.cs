@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Threading;
 using System.Windows.Forms;
 using DevExpress.ExpressApp;
 using Xpand.Extensions.DateTimeExtensions;
@@ -39,7 +40,7 @@ namespace Xpand.XAF.Modules.Speech.Services {
                         e.ShowViewParameters.CreatedView = null;
                         return ssmlFile;
                     })
-                    .ShowXafMessage(frame.Application,file => $"File {file.File.FileName} copied in memory."))
+                    .ShowXafMessage(frame.Application,file => $"File {file.File.FileName} copied in memory.",SynchronizationContext.Current))
                 .ToUnit();
 
         private static void NewSpeechInfo(this View view,Type speechTextType, params SpeechText[] speechTexts) {

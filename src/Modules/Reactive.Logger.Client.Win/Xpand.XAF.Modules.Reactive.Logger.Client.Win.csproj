@@ -10,7 +10,7 @@
     <OutputPathSuffix>ReactiveLoggerClient</OutputPathSuffix>
     <OutputPath>..\..\..\bin\ReactiveLoggerClient</OutputPath>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <AppendTargetFrameworkToOutputPath>True</AppendTargetFrameworkToOutputPath>
+    <AppendTargetFrameworkToOutputPath>False</AppendTargetFrameworkToOutputPath>
     <DebugType>full</DebugType>
     <OutputType>WinExe</OutputType>
     <StartupObject>Xpand.XAF.Modules.Reactive.Logger.Client.Win.Program</StartupObject>
@@ -45,10 +45,10 @@
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.GridListEditor.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.OneView">
-      <HintPath>..\..\..\bin\net6.0-windows7.0\Xpand.XAF.Modules.OneView.dll</HintPath>
+      <HintPath>..\..\..\bin\Xpand.XAF.Modules.OneView.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.Windows">
-      <HintPath>..\..\..\bin\net6.0-windows7.0\Xpand.XAF.Modules.Windows.dll</HintPath>
+      <HintPath>..\..\..\bin\Xpand.XAF.Modules.Windows.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.Reactive">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>

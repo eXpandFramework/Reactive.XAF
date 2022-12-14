@@ -15,13 +15,13 @@
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DefineConstants>TRACE;DEBUG;XAF221.2.2XAF221.2.2</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;XAF222.2.2XAF222.2.2</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DefineConstants>TRACE;XAF221.2.2XAF221.2.2</DefineConstants>
+    <DefineConstants>TRACE;XAF222.2.2XAF222.2.2</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'EasyTest|AnyCPU' ">
-    <DefineConstants>TRACE;DEBUG;EASYTEST;XAF221.2.2XAF221.2.2</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;EASYTEST;XAF222.2.2XAF222.2.2</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="LookupCascade\LookupCascade.xafml" />
@@ -37,9 +37,9 @@
     <EmbeddedResource Include="LookupCascade\LookupCascade.xafml" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="22.1.6" />
-    <PackageReference Include="DevExpress.ExpressApp.Web.All" Version="22.1.6" />
-    <PackageReference Include="Xpand.XAF.Web.All" Version="4.221.11.0" />
+    <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="22.2.3" />
+    <PackageReference Include="DevExpress.ExpressApp.Web.All" Version="22.2.3" />
+    <PackageReference Include="Xpand.XAF.Web.All" Version="4.222.0.1" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="TestApplication.Module">

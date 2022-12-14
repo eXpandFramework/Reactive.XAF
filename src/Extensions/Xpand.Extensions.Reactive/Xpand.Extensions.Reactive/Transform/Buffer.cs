@@ -141,6 +141,24 @@ namespace Xpand.Extensions.Reactive.Transform {
             => source.Replay(replayed => Observable.Interval(interval)
                 .SelectMany(_ => replayed.TakeUntil(Observable.Return(Unit.Default, Scheduler.CurrentThread)).ToList())
                 .TakeUntil(replayed.LastOrDefaultAsync()), replayDuration, Scheduler.Immediate);
+        
+        public static IObservable<IList<TSource>> BufferOmitEmpty<TSource>(this IObservable<TSource> observable, TimeSpan maxDelay, int maxBufferCount) 
+            => observable.GroupByUntil(_ => 1, g => Observable.Timer(maxDelay).Merge(g.Skip(maxBufferCount - 1).Take(1).Select(_ => 1L)))
+                .Select(x => x.ToArray())
+                .Switch();
+        
+        /// <summary>
+        /// Splits the elements of a sequence into chunks that are starting with
+        /// elements that satisfy the predicate.
+        /// </summary>
+        public static IObservable<IList<TSource>> BufferByPredicate<TSource>(this IObservable<TSource> source, Predicate<TSource> startNewBufferPredicate) 
+            => source.SelectMany(x => {
+                    var subSequence = Observable.Return((Value: x, HasValue: true));
+                    return startNewBufferPredicate(x) ? subSequence.Prepend((default, false)) : subSequence;
+                })
+                .GroupByUntil(_ => 0, g => g.SkipWhile(e => e.HasValue))
+                .SelectMany(g => g.Where(e => e.HasValue).Select(e => e.Value).ToArray())
+                .Where(w => w.Length > 0);
     }
     
 }

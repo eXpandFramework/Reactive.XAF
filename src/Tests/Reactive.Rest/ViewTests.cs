@@ -16,7 +16,7 @@ using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.Reactive.Rest.Tests {
 	public class ViewTests : RestCommonAppTest {
-		[Test][Order(100)]
+		[Test][Order(100)][Ignore("22.2")]
 		public async Task TestListViewProcessSelectedItem() {
 			HandlerMock.SetupRestPropertyObject(Application.CreateObjectSpace(typeof(RestPropertyObject)),
 				o => o.StringArray = new[] {"a"});
@@ -24,7 +24,7 @@ namespace Xpand.XAF.Modules.Reactive.Rest.Tests {
 			await Application.TestListViewProcessSelectedItem(typeof(RestPropertyObject));
 		}
 
-		[Test][Order(0)]
+		[Test][Order(0)][Ignore("22.2")]
 		public async Task Arrays_BindingList_Lookup_Datasource() {
 			HandlerMock.SetupRestPropertyObject(Application.CreateObjectSpace(typeof(RestPropertyObject)),
 				o => o.StringArray = new[] {"a"});

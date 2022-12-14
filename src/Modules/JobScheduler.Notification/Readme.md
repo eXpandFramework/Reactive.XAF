@@ -89,7 +89,7 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |<!-- -->|<!-- -->
 |----|----
 |**DevExpress.ExpressApp.ConditionalAppearance**|**Any**
- |**DevExpress.ExpressApp.CodeAnalysis**|**Any**
+ |****|**Any**
  |**DevExpress.ExpressApp.Blazor**|**Any**
  |**DevExpress.ExpressApp.Validation**|**Any**
  |**DevExpress.ExpressApp.Validation.Blazor**|**Any**

@@ -12,5 +12,14 @@ namespace Xpand.Extensions.Reactive.ErrorHandling {
                 onError?.Invoke(exception);
                 return Observable.Empty<T>();
             });
+        
+        public static IObservable<T> CompleteOnError<T>(this IObservable<T> source,Type exceptionType,Action<Exception> onError=null) 
+            => source.Catch<T,Exception>(exception => {
+                if (exceptionType.IsInstanceOfType(exception)) {
+                    onError?.Invoke(exception);
+                    return Observable.Empty<T>();    
+                }
+                return Observable.Throw<T>(exception);
+            });
     }
 }

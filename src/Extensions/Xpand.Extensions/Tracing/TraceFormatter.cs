@@ -369,7 +369,7 @@ namespace Xpand.Extensions.Tracing {
                     //I don't want to raise any error here since I have a graceful result at the end.
                 }
 
-                _applicationName = Path.GetFileNameWithoutExtension(entryAssembly?.EscapedCodeBase);
+                _applicationName = Path.GetFileNameWithoutExtension(entryAssembly?.Location);
             }
         }
 

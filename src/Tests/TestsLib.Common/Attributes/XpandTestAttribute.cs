@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -46,6 +47,7 @@ namespace Xpand.TestsLib.Common.Attributes{
                 _apartmentState = apartmentState;
             }
 
+            [SuppressMessage("Interoperability", "CA1416:Validate platform compatibility")]
             public override TestResult Execute(TestExecutionContext context){
                 var count = _tryCount;
                 var version = Version.Parse(XafAssemblyInfo.Version);

@@ -36,7 +36,7 @@ if ($GithubToken){
             Copy-Item -Destination "$PSScriptRoot\..\bin" -Force -Path "$_" 
             Copy-Item -Destination "$PSScriptRoot\..\bin\net6.0" -Force -Path "$_" 
             # Copy-Item -Destination "$PSScriptRoot\..\bin\netcoreapp3.1" -Force -Path "$_" -Verbose
-            Copy-Item -Destination "$PSScriptRoot\..\bin\net461" -Force -Path "$_" 
+            # Copy-Item -Destination "$PSScriptRoot\..\bin\net461" -Force -Path "$_" 
             Copy-Item -Destination "$PSScriptRoot\..\src\Tests\EasyTests\TestApplication" -Force -Path "$_" 
         }
     }
@@ -47,7 +47,7 @@ if ($GithubToken){
         Copy-Item -Destination "$PSScriptRoot\..\bin" -Force -Path ".\$_" 
         Copy-Item -Destination "$PSScriptRoot\..\bin\net6.0" -Force -Path ".\$_" 
         # Copy-Item -Destination "$PSScriptRoot\..\bin\netcoreapp3.1" -Force -Path ".\$_" -Verbose
-        Copy-Item -Destination "$PSScriptRoot\..\bin\net461" -Force -Path ".\$_" 
+        # Copy-Item -Destination "$PSScriptRoot\..\bin\net461" -Force -Path ".\$_" 
         Copy-Item -Destination "$PSScriptRoot\..\src\Tests\EasyTests\TestApplication" -Force -Path ".\$_" 
     }
     Set-Location $env:TEMP\storage\Google
@@ -57,7 +57,7 @@ if ($GithubToken){
             $name="WinAuth.exe"
         }
         Copy-Item -Destination "$PSScriptRoot\..\bin\$name" -Force -Path ".\$_" 
-        Copy-Item -Destination "$PSScriptRoot\..\bin\net461\$name" -Force -Path ".\$_" 
+        # Copy-Item -Destination "$PSScriptRoot\..\bin\net461\$name" -Force -Path ".\$_" 
         Copy-Item -Destination "$PSScriptRoot\..\bin\net6.0\$name" -Force -Path ".\$_" 
         # Copy-Item -Destination "$PSScriptRoot\..\bin\netcoreapp3.1\$name" -Force -Path ".\$_" -Verbose
         Copy-Item -Destination "$PSScriptRoot\..\src\Tests\EasyTests\TestApplication\$name" -Force -Path ".\$_" 

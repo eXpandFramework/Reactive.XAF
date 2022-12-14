@@ -75,7 +75,7 @@ jobs:
       enabled: true
       continueOnError: true
       inputs:
-        searchFolder: '$(System.DefaultWorkingDirectory)\bin\net6.0-windows7.0'
+        searchFolder: '$(System.DefaultWorkingDirectory)\bin'
         testSelector: 'testAssemblies'
         testAssemblyVer2: |
           **\Xpand.XAF.Modules.ModelMapper.Tests.dll
@@ -261,7 +261,7 @@ jobs:
         searchFolder: '$(System.DefaultWorkingDirectory)\bin\'
         testSelector: 'testAssemblies'
         testAssemblyVer2: |
-          # **\net6.0-windows7.0\Xpand.XAF.Modules.Reactive.Logger.Hub.Tests.dll
+          # **\Xpand.XAF.Modules.Reactive.Logger.Hub.Tests.dll
           **\Xpand.XAF.Modules.Reactive.Logger.Tests.dll
           **\Xpand.XAF.Modules.Reactive.Tests.dll
           **\Xpand.XAF.Modules.Reactive.Rest.Tests.dll

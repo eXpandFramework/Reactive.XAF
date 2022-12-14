@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Security;
@@ -9,6 +10,7 @@ using Xpand.Extensions.StringExtensions;
 
 namespace Xpand.Extensions.BytesExtensions {
     public static partial class BytesExtensions {
+        [SuppressMessage("Interoperability", "CA1416:Validate platform compatibility")]
         public static string UnProtect(this DataProtectionScope? scope,byte[] bytes) {
             if (scope!=null) {
                 try { return bytes.UnProtect(scope.Value).First().GetString();}
@@ -17,6 +19,7 @@ namespace Xpand.Extensions.BytesExtensions {
             return bytes.GetString();
         }
 
+        [SuppressMessage("Interoperability", "CA1416:Validate platform compatibility")]
         public static SecureString[] UnProtect(this byte[] bytes,
             DataProtectionScope scope = DataProtectionScope.LocalMachine) {
             var strings = new List<SecureString>();

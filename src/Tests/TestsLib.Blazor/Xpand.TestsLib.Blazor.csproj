@@ -10,11 +10,11 @@
     <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
     <OutputPath>..\..\..\bin</OutputPath>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <AppendTargetFrameworkToOutputPath>True</AppendTargetFrameworkToOutputPath>
+    <AppendTargetFrameworkToOutputPath>False</AppendTargetFrameworkToOutputPath>
     <DebugType>full</DebugType>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\Xpand.key\xpand.snk</AssemblyOriginatorKeyFile>
-    <AppendTargetFrameworkToOutputPath>True</AppendTargetFrameworkToOutputPath>
+    <AppendTargetFrameworkToOutputPath>False</AppendTargetFrameworkToOutputPath>
     <OutputPathSuffix>net</OutputPathSuffix>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <OutputType>Library</OutputType>
@@ -23,13 +23,13 @@
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DefineConstants>TRACE;XAF221</DefineConstants>
+    <DefineConstants>TRACE;XAF222</DefineConstants>
     <NoWarn>1701;1702;CS8002</NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="DevExpress.ExpressApp.EasyTest.BlazorAdapter" Version="22.1.6" />
-    <PackageReference Include="DevExpress.EasyTest" Version="22.1.6" />
-    <PackageReference Include="DevExpress.ExpressApp.Blazor" Version="22.1.6" />
+    <PackageReference Include="DevExpress.ExpressApp.EasyTest.BlazorAdapter" Version="22.2.3" />
+    <PackageReference Include="DevExpress.EasyTest" Version="22.2.3" />
+    <PackageReference Include="DevExpress.ExpressApp.Blazor" Version="22.2.3" />
     <PackageReference Include="Microsoft.AspNetCore" Version="2.2" />
     <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.7" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0" />
@@ -40,7 +40,7 @@
       <SpecificVersion>false</SpecificVersion>
     </Reference>
     <Reference Include="Xpand.Extensions.Blazor">
-      <HintPath>..\..\..\bin\net6.0\Xpand.Extensions.Blazor.dll</HintPath>
+      <HintPath>..\..\..\bin\Xpand.Extensions.Blazor.dll</HintPath>
       <SpecificVersion>false</SpecificVersion>
     </Reference>
     <Reference Include="Xpand.Extensions.Reactive">

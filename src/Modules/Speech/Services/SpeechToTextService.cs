@@ -151,6 +151,7 @@ namespace Xpand.XAF.Modules.Speech.Services {
 	        => manager.WhenSpeechApplication(application => application.WhenFrame(typeof(SpeechText),ViewType.ListView)
 			        .SelectUntilViewClosed(frame => frame.View.WhenSelectionChanged(1)
 				        .Do(view => view.AsListView().CollectionSource.Objects<SpeechText>().FirstOrDefault()?.SpeechToText.TranslationSSMLs.Clear())
+				        .ObserveOnContext()
 				        .Do(view => {
 					        
 					        view.SelectedObjects.Cast<SpeechText>().ToArray()

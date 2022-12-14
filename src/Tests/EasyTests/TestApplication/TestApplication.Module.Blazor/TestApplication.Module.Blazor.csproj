@@ -17,15 +17,15 @@
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DefineConstants>TRACE;DEBUG;XAF221</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;XAF222</DefineConstants>
     <NoWarn>1701;1702;XAF0017</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DefineConstants>TRACE;XAF221</DefineConstants>
+    <DefineConstants>TRACE;XAF222</DefineConstants>
     <NoWarn>1701;1702;XAF0017</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'EasyTest|AnyCPU' ">
-    <DefineConstants>TRACE;DEBUG;EASYTEST;XAF221</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;EASYTEST;XAF222</DefineConstants>
     <NoWarn>1701;1702;XAF0017</NoWarn>
   </PropertyGroup>
   <ItemGroup>
@@ -42,9 +42,9 @@
     <EmbeddedResource Include="Model.DesignedDiffs.xafml" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DevExpress.ExpressApp.Blazor.All" Version="22.1.6" />
+    <PackageReference Include="DevExpress.ExpressApp.Blazor.All" Version="22.2.3" />
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="6.0" />
-    <PackageReference Include="Xpand.XAF.Web.All" Version="4.221.11.0" />
+    <PackageReference Include="Xpand.XAF.Web.All" Version="4.222.0.1" />
     <PackageReference Include="System.CodeDom" Version="6.0" />
     <PackageReference Include="Microsoft.CodeAnalysis" Version="4.2" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="6.0" />

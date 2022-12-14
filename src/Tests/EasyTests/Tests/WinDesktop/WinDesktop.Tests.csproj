@@ -20,9 +20,9 @@
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DefineConstants>TRACE;XAF221</DefineConstants>
-    <NoWarn>1701;1702;XAF0017</NoWarn>
+  <PropertyGroup>
+    <DefineConstants>TRACE;XAF222</DefineConstants>
+    <NoWarn>1701;1702;NU1701;CS8002;CS0618;IL2121;NU1608</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <NoWarn>1701;1702;XAF0017</NoWarn>
@@ -39,9 +39,6 @@
     </Compile>
     <Compile Include="..\..\CommonFiles\GoogleCalendarService.cs" Link="GoogleCalendarService.cs" />
     <Compile Include="..\..\CommonFiles\GoogleService.cs" Link="GoogleService.cs" />
-    <Compile Include="..\..\CommonFiles\MicrosoftCalendarService.cs" Link="MicrosoftCalendarService.cs" />
-    <Compile Include="..\..\CommonFiles\MicrosoftService.cs" Link="MicrosoftService.cs" />
-    <Compile Include="..\..\CommonFiles\MicrosoftTodoService.cs" Link="MicrosoftTodoService.cs" />
     <Compile Include="..\..\CommonFiles\GoogleTasksService.cs" Link="GoogleTasksService.cs" />
     <Compile Include="..\..\CommonFiles\ModelViewInheritanceService.cs" Link="ModelViewInheritanceService.cs" />
     <Compile Include="..\..\CommonFiles\OfficeCloudService.cs" Link="OfficeCloudService.cs" />
@@ -55,29 +52,30 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="6.0" />
     <PackageReference Include="Polly" Version="7.2.2" />
-    <PackageReference Include="DevExpress.ExpressApp.Win.All" Version="22.1.6" />
+    <PackageReference Include="DevExpress.ExpressApp.Win.All" Version="22.2.3" />
     <PackageReference Include="MagicOnion" Version="2.6.3" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.0" />
     <PackageReference Include="Moq" Version="4.16" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="4.2" />
     <PackageReference Include="Shouldly" Version="4.0.3" />
     <PackageReference Include="NUnit" Version="3.13.2" />
     <PackageReference Include="NUnit3TestAdapter" Version="4.0" />
-    <PackageReference Include="Xpand.XAF.Win.All" Version="4.221.11.0" />
+    <PackageReference Include="Xpand.XAF.Win.All" Version="4.222.0.1" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.3" />
     <PackageReference Include="System.Data.OleDb" Version="6.0" />
-    <PackageReference Include="System.ServiceModel.Http" Version="4.9" />
+    <PackageReference Include="System.ServiceModel.Http" Version="4.10" />
     <PackageReference Include="System.Collections.Immutable" Version="6.0" />
-    <PackageReference Include="System.ServiceModel.Duplex" Version="4.9" />
-    <PackageReference Include="System.ServiceModel.NetTcp" Version="4.9" />
-    <PackageReference Include="System.ServiceModel.Security" Version="4.9" />
+    <PackageReference Include="System.ServiceModel.Duplex" Version="4.10" />
+    <PackageReference Include="System.ServiceModel.NetTcp" Version="4.10" />
+    <PackageReference Include="System.ServiceModel.Security" Version="4.10" />
     <PackageReference Include="Microsoft.Reactive.Testing" Version="5.0" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Xpand.TestsLib">
-      <HintPath>..\..\..\..\..\bin\net6.0-windows7.0\Xpand.TestsLib.dll</HintPath>
+      <HintPath>..\..\..\..\..\bin\Xpand.TestsLib.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.TestsLib.EasyTest">
-      <HintPath>..\..\..\..\..\bin\net6.0\Xpand.TestsLib.EasyTest.dll</HintPath>
+      <HintPath>..\..\..\..\..\bin\Xpand.TestsLib.EasyTest.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.TestsLib.Common">
       <HintPath>..\..\..\..\..\bin\Xpand.TestsLib.Common.dll</HintPath>

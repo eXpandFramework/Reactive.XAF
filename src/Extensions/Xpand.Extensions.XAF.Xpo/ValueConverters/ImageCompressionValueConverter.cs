@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -13,6 +14,7 @@ namespace Xpand.Extensions.XAF.Xpo.ValueConverters {
 
         #endregion
 
+        [SuppressMessage("Interoperability", "CA1416:Validate platform compatibility")]
         public override object ConvertToStorageType(object value){
             if (value != null && !(value is Image)){
                 throw new ArgumentException();

@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.MasterDetail</id>
-    <version>4.221.11.0</version>
+    <version>4.222.0.1</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -12,40 +12,29 @@
     <description>The `MasterDetail` module can help you create platform agnostic master detail `XAF` views using only the Model Editor.</description>
     <releaseNotes>https://github.com/eXpandFramework/Reactive.XAF/releases</releaseNotes>
     <copyright>eXpandFramework.com</copyright>
-    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, MasterDetail, 22.1.6</tags>
+    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, MasterDetail, 22.2.3</tags>
     <dependencies>
       <group targetFramework="netstandard2.0">
-        <dependency id="Xpand.Extensions" version="4.221.11.0" />
-        <dependency id="Xpand.Extensions.Reactive" version="4.221.11.0" />
-        <dependency id="Xpand.Extensions.XAF" version="4.221.11.0" />
-        <dependency id="Xpand.XAF.Modules.Reactive" version="4.221.11.0" />
-        <dependency id="Xpand.Patcher" version="3.0.17" />
-        <dependency id="System.Reactive" version="5.0" />
-        <dependency id="DevExpress.ExpressApp" version="22.1.6" />
-        <dependency id="Fasterflect.Xpand" version="2.0.7" />
-        <dependency id="Newtonsoft.Json" version="13.0.1" />
-        <dependency id="DevExpress.ExpressApp.CodeAnalysis" version="22.1.6" />
-        <dependency id="Xpand.VersionConverter" version="4.221.11.0" />
+        <dependency id="Xpand.VersionConverter" version="4.222.0.1" />
       </group>
       <group targetFramework="net6.0">
-        <dependency id="Xpand.Patcher" version="3.0.17.0" />
-        <dependency id="Xpand.Extensions" version="4.221.11.0" />
-        <dependency id="Xpand.Extensions.Reactive" version="4.221.11.0" />
-        <dependency id="Xpand.Extensions.XAF" version="4.221.11.0" />
-        <dependency id="Xpand.XAF.Modules.Reactive" version="4.221.11.0" />
+        <dependency id="Xpand.Extensions" version="4.222.0.1" />
+        <dependency id="Xpand.Extensions.Reactive" version="4.222.0.1" />
+        <dependency id="Xpand.Extensions.XAF" version="4.222.0.1" />
+        <dependency id="Xpand.XAF.Modules.Reactive" version="4.222.0.1" />
         <dependency id="Xpand.Patcher" version="3.0.17" />
         <dependency id="System.Reactive" version="5.0" />
-        <dependency id="DevExpress.ExpressApp" version="22.1.6" />
+        <dependency id="DevExpress.ExpressApp" version="22.2.3" />
         <dependency id="Fasterflect.Xpand" version="2.0.7" />
         <dependency id="Newtonsoft.Json" version="13.0.1" />
-        <dependency id="DevExpress.ExpressApp.CodeAnalysis" version="22.1.6" />
-        <dependency id="Xpand.VersionConverter" version="4.221.11.0" />
+        <dependency id="Xpand.Patcher" version="3.0.17.0" />
+        <dependency id="Xpand.VersionConverter" version="4.222.0.1" />
       </group>
     </dependencies>
   </metadata>
   <files>
-    <file src="Xpand.XAF.Modules.MasterDetail.dll" target="lib\netstandard2.0\Xpand.XAF.Modules.MasterDetail.dll" />
-    <file src="Xpand.XAF.Modules.MasterDetail.pdb" target="lib\netstandard2.0\Xpand.XAF.Modules.MasterDetail.pdb" />
+    <file src="Xpand.XAF.Modules.MasterDetail.dll" target="lib\net6.0\Xpand.XAF.Modules.MasterDetail.dll" />
+    <file src="Xpand.XAF.Modules.MasterDetail.pdb" target="lib\net6.0\Xpand.XAF.Modules.MasterDetail.pdb" />
     <file src="..\build\Targets\CopySymbols.targets" target="build\Xpand.XAF.Modules.MasterDetail.targets" />
     <file src="..\build\Targets\CopySymbols.ps1" target="build\CopySymbols.ps1" />
   </files>

@@ -156,7 +156,7 @@ The module follows the Nuget [Version Basics](https://docs.Google.com/en-us/nuge
 |<!-- -->|<!-- -->
 |----|----
 |**DevExpress.Persistent.Base**|**Any**
- |**DevExpress.ExpressApp.CodeAnalysis**|**Any**
+ |****|**Any**
 |Xpand.Extensions|4.221.11
  |Xpand.Extensions.Office.Cloud|4.221.11
  |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.221.11

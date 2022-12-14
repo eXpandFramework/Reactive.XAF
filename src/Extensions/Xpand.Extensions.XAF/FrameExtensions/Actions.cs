@@ -2,10 +2,14 @@
 using System.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
+using DevExpress.ExpressApp.SystemModule;
 using Xpand.Extensions.ObjectExtensions;
 
 namespace Xpand.Extensions.XAF.FrameExtensions{
     public partial class FrameExtensions {
+        
+        public static void ExecuteRefreshAction(this Frame frame) => frame.GetController<RefreshController>().RefreshAction.DoExecute();
+
         public static T ParentObject<T>(this Frame frame) => frame.As<NestedFrame>().ViewItem.View.CurrentObject.As<T>(); 
         public static NestedFrame AsNestedFrame(this Frame frame) => frame.As<NestedFrame>(); 
         public static NestedFrame ToNestedFrame(this Frame frame) => frame.To<NestedFrame>(); 

@@ -22,7 +22,7 @@
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DefineConstants>TRACE;XAF221</DefineConstants>
+    <DefineConstants>TRACE;XAF222</DefineConstants>
     <NoWarn>1701;1702;CS8002;NU1608;XAF0017</NoWarn>
   </PropertyGroup>
   <ItemGroup>
@@ -49,9 +49,12 @@
     <Compile Include="..\..\CommonFiles\SequenceGeneratorService.cs" Link="SequenceGeneratorService.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DevExpress.ExpressApp.EasyTest.BlazorAdapter" Version="22.1.6" />
-    <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="22.1.6" />
-    <PackageReference Include="DevExpress.ExpressApp.Blazor.All" Version="22.1.6" />
+    <PackageReference Include="System.ServiceModel.Duplex" Version="4.10" />
+    <PackageReference Include="System.ServiceModel.NetTcp" Version="4.10" />
+    <PackageReference Include="System.ServiceModel.Security" Version="4.10" />
+    <PackageReference Include="DevExpress.ExpressApp.EasyTest.BlazorAdapter" Version="22.2.3" />
+    <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="22.2.3" />
+    <PackageReference Include="DevExpress.ExpressApp.Blazor.All" Version="22.2.3" />
     <PackageReference Include="Microsoft.NETCore.Platforms" Version="6.0.4" />
     <PackageReference Include="System.CodeDom" Version="6.0" />
     <PackageReference Include="Microsoft.CodeAnalysis" Version="4.2" />
@@ -63,16 +66,16 @@
     <PackageReference Include="Shouldly" Version="4.0.3" />
     <PackageReference Include="NUnit" Version="3.13.2" />
     <PackageReference Include="NUnit3TestAdapter" Version="4.0" />
-    <PackageReference Include="Xpand.XAF.Web.All" Version="4.221.11.0" />
+    <PackageReference Include="Xpand.XAF.Web.All" Version="4.222.0.1" />
     <PackageReference Include="Selenium.WebDriver" Version="4.1" />
     <PackageReference Include="Microsoft.Reactive.Testing" Version="5.0" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Xpand.TestsLib.Blazor">
-      <HintPath>..\..\..\..\..\bin\net6.0\Xpand.TestsLib.Blazor.dll</HintPath>
+      <HintPath>..\..\..\..\..\bin\Xpand.TestsLib.Blazor.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.TestsLib.EasyTest">
-      <HintPath>..\..\..\..\..\bin\net6.0\Xpand.TestsLib.EasyTest.dll</HintPath>
+      <HintPath>..\..\..\..\..\bin\Xpand.TestsLib.EasyTest.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.TestsLib.Common">
       <HintPath>..\..\..\..\..\bin\Xpand.TestsLib.Common.dll</HintPath>

@@ -32,7 +32,7 @@ Task IndexSources {
         $sha = Get-GitLastSha "https://github.com/eXpandFramework/Reactive.XAF" $branch
         "Xpand.XAF.Modules.*.pdb", "Xpand.Extensions.*.pdb" | ForEach-Object {
             Get-ChildItem "$root\bin" $_ | Update-XSymbols -SourcesRoot "$Root" -TargetRoot "https://raw.githubusercontent.com/eXpandFramework/Reactive.XAF/$sha"
-            Get-ChildItem "$root\bin\net461" $_ | Update-XSymbols -SourcesRoot "$Root" -TargetRoot "https://raw.githubusercontent.com/eXpandFramework/Reactive.XAF/$sha"
+            # Get-ChildItem "$root\bin\net461" $_ | Update-XSymbols -SourcesRoot "$Root" -TargetRoot "https://raw.githubusercontent.com/eXpandFramework/Reactive.XAF/$sha"
         }
         
     }
@@ -136,8 +136,8 @@ function SyncrhonizePaketVersion {
 Task CompileNugetConsumers -precondition { return $compile } {
     Invoke-Script {
         Update-NugetConsumersPackageVersion
-        CompileTestSolution "$Root\src\Tests\\EasyTests\EasyTests.sln"
-        FixNet461DXAssembliesTargetFramework
+        Start-Build "$Root\src\Tests\\EasyTests\EasyTests.sln"
+        # FixNet461DXAssembliesTargetFramework
         if ($dxVersion -eq (Get-XAFLatestMinors | Select-Object -First 1)) {
             Invoke-Script {
                 & $root\build\ZipMe.ps1 -SkipIDEBuild

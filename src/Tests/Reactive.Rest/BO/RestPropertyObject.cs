@@ -32,7 +32,9 @@ namespace Xpand.XAF.Modules.Reactive.Rest.Tests.BO {
 
         protected override void OnObjectSpaceChanged() {
             base.OnObjectSpaceChanged();
-            _objectStrings = new(ObjectSpace) {new ObjectString(nameof(StringArraySource))};
+            if (ObjectSpace != null) {
+                _objectStrings = new(ObjectSpace) {new ObjectString(nameof(StringArraySource))};    
+            }
         }
 
         RestOperationObject _restOperationObject;

@@ -4,7 +4,6 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using DevExpress.ExpressApp.Model;
-using DevExpress.ExpressApp.Utils;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.Validation;
 using DevExpress.Xpo;
@@ -93,6 +92,6 @@ namespace Xpand.XAF.Modules.Speech.BusinessObjects {
         }
 
         public List<SpeechLanguage> Languages => ObjectSpace
-            .DefaultSpeechAccount(CaptionHelper.Instance.ApplicationModel.SpeechModel()).Languages;
+            .DefaultSpeechAccount(null).Languages;
     }
 }

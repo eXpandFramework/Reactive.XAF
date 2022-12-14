@@ -50,7 +50,7 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |<!-- -->|<!-- -->
 |----|----
 |**DevExpress.ExpressApp.Win**|**Any**
- |**DevExpress.ExpressApp.CodeAnalysis**|**Any**
+ |****|**Any**
 |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.221.11
  |Xpand.Extensions|4.221.11
  |Xpand.Extensions.Reactive|4.221.11

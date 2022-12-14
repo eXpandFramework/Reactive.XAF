@@ -28,7 +28,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects {
         }
 
         [Browsable(false)]
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "XAF0002:XPO business class properties should not be overriden", Justification = "<Pending>")]
+		
 		public virtual bool UseChainJob => true;
         [Association("Job-ChainJobs")][Aggregated]
         public XPCollection<ChainJob> ChainJobs => GetCollection<ChainJob>(nameof(ChainJobs));

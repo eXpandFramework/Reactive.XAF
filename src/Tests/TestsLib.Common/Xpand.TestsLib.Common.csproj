@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <FileUpgradeFlags />
     <UpgradeBackupLocation />
@@ -19,7 +19,7 @@
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DefineConstants>TRACE;XAF221</DefineConstants>
+    <DefineConstants>TRACE;XAF222</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="AppDomainExtensions.cs" />

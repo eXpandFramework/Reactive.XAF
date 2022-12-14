@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Reflection;
 using HarmonyLib;
 
@@ -13,13 +12,7 @@ namespace Xpand.Extensions.Harmony {
 		    var methodName = $"{method.DeclaringType?.FullName}{method.Name}";
 		    if (!PatchedMethods.TryGetValue(methodName, out _)) {
 			    PatchedMethods.TryAdd(methodName, method);
-                try {
-                    _harmony.Patch(method, prefix, postFix, transpiler,finalizer);
-                }
-                catch (Exception e) {
-                    Console.WriteLine(e);
-                    
-                }
+			    _harmony.Patch(method, prefix, postFix, transpiler,finalizer);
 		    }
 	    }
     }

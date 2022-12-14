@@ -121,7 +121,7 @@ The module follows the Nuget [Version Basics](https://docs.Google.com/en-us/nuge
 |----|----
 |**DevExpress.ExpressApp.Office**|**Any**
  |**DevExpress.ExpressApp.ConditionalAppearance**|**Any**
- |**DevExpress.ExpressApp.CodeAnalysis**|**Any**
+ |****|**Any**
 |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.221.11
  |Xpand.Extensions|4.221.11
  |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.221.11

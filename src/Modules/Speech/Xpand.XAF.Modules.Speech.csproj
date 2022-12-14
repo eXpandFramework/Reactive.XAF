@@ -13,7 +13,7 @@
     <AssemblyTitle>Xpand.XAF.Modules.Speech</AssemblyTitle>
     <Product>Xpand.XAF.Modules.Speech</Product>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <AppendTargetFrameworkToOutputPath>True</AppendTargetFrameworkToOutputPath>
+    <AppendTargetFrameworkToOutputPath>False</AppendTargetFrameworkToOutputPath>
     <DebugType>full</DebugType>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
@@ -42,7 +42,7 @@
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.StoreToDisk">
-      <HintPath>..\..\..\bin\net6.0\Xpand.XAF.Modules.StoreToDisk.dll</HintPath>
+      <HintPath>..\..\..\bin\Xpand.XAF.Modules.StoreToDisk.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.CloneModelView">
@@ -54,11 +54,11 @@
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.Windows">
-      <HintPath>..\..\..\bin\net6.0-windows7.0\Xpand.XAF.Modules.Windows.dll</HintPath>
+      <HintPath>..\..\..\bin\Xpand.XAF.Modules.Windows.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.SpellChecker">
-      <HintPath>..\..\..\bin\net6.0-windows7.0\Xpand.XAF.Modules.SpellChecker.dll</HintPath>
+      <HintPath>..\..\..\bin\Xpand.XAF.Modules.SpellChecker.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.ModelViewInheritance">

@@ -1,4 +1,5 @@
-﻿using System.Windows.Forms;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Windows.Forms;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.SystemModule;
@@ -15,6 +16,7 @@ namespace Xpand.XAF.Modules.SpellChecker {
 
         static SpellCheckerModule() => TraceSource = new ReactiveTraceSource(nameof(SpellCheckerModule));
 
+        [SuppressMessage("Interoperability", "CA1416:Validate platform compatibility")]
         public SpellCheckerModule() {
             RequiredModuleTypes.Add(typeof(SystemModule));
             RequiredModuleTypes.Add(typeof(SystemWindowsFormsModule));
@@ -39,9 +41,11 @@ namespace Xpand.XAF.Modules.SpellChecker {
     }
     
     public class LargeStringEditTextBoxFinder : MemoEditTextBoxFinder {
+        [SuppressMessage("Interoperability", "CA1416:Validate platform compatibility")]
         public override TextBoxBase GetTextBoxInstance(Control editControl) => editControl is LargeStringEdit edit ? base.GetTextBoxInstance(edit) : null;
     }
     public class StringEditTextBoxFinder : TextEditTextBoxFinder {
+        [SuppressMessage("Interoperability", "CA1416:Validate platform compatibility")]
         public override TextBoxBase GetTextBoxInstance(Control editControl) => editControl is StringEdit edit ? base.GetTextBoxInstance(edit) : null;
     }
 }

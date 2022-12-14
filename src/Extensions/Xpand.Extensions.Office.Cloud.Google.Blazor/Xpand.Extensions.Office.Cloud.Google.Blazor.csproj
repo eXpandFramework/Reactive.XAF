@@ -10,7 +10,7 @@
     <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
     <OutputPath>..\..\..\bin</OutputPath>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <AppendTargetFrameworkToOutputPath>True</AppendTargetFrameworkToOutputPath>
+    <AppendTargetFrameworkToOutputPath>False</AppendTargetFrameworkToOutputPath>
     <DebugType>full</DebugType>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
@@ -18,7 +18,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Xpand.Extensions.Blazor">
-      <HintPath>..\..\..\bin\net6.0\Xpand.Extensions.Blazor.dll</HintPath>
+      <HintPath>..\..\..\bin\Xpand.Extensions.Blazor.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.Office.Cloud.Google">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Office.Cloud.Google.dll</HintPath>

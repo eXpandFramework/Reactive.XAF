@@ -23,7 +23,7 @@ namespace Xpand.XAF.Modules.Blazor.Editors {
         public TagPropertyEditor(Type objectType, IModelMemberViewItem model) : base(objectType, model) {
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "BL0005:Component parameter should not be set outside of its component.", Justification = "<Pending>")]
+        
 		class DxTagBoxToStringAdapter : DxTagBoxAdapter<DataItem<object>, object> {
 			public DxTagBoxToStringAdapter(DxTagBoxModel<DataItem<object>, object> componentModel) : base(componentModel) { }
 			public override object GetValue() {

@@ -3,9 +3,7 @@ System.Reactive
 DevExpress.SpellChecker.Core
 DevExpress.Win.SpellChecker
 DevExpress.Persistent.Base
-DevExpress.ExpressApp.Xpo
 DevExpress.ExpressApp.Win
 Fasterflect.Xpand
 Newtonsoft.Json
 Xpand.Collections
-DevExpress.ExpressApp.CodeAnalysis

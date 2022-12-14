@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Reactive;
@@ -18,6 +19,7 @@ using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.SpellChecker{
     public static class SpellCheckerService{
+        [SuppressMessage("Interoperability", "CA1416:Validate platform compatibility")]
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) 
             => manager.WhenApplication(application => application.WhenFrame(ViewType.DetailView)
                 .Where(frame => frame.SpellCheckerModel().Enabled)
@@ -30,6 +32,7 @@ namespace Xpand.XAF.Modules.SpellChecker{
 
         private static IModelSpellChecker SpellCheckerModel(this Frame frame) => frame.Application.Model.SpellChecker();
         static readonly SpellCheckerISpellDictionary EnglishDictionary = (SpellCheckerISpellDictionary)typeof(DictionaryHelper).Method("CreateEnglishDictionary",Flags.StaticAnyVisibility).Call(null);
+        [SuppressMessage("Interoperability", "CA1416:Validate platform compatibility")]
         static IObservable<DevExpress.XtraSpellChecker.SpellChecker> CreateSpellCheckerComponent(this Control parentContainer) 
             => Observable.Using(() => new DevExpress.XtraSpellChecker.SpellChecker(), spellChecker => {
                 spellChecker.Dictionaries.Add(EnglishDictionary);

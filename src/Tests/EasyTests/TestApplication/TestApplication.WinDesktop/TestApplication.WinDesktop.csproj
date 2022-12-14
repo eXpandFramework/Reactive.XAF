@@ -39,7 +39,8 @@
     <DebugSymbols>true</DebugSymbols>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <OutputPath>..\..\..\..\..\bin\TestWinDesktopApplication</OutputPath>
-    <DefineConstants>TRACE;XAF221</DefineConstants>
+    <DefineConstants>TRACE;XAF222</DefineConstants>
+    <NoWarn>1701;1702;NU1701;CS8002;CS0618;IL2121;NU1608</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>full</DebugType>
@@ -49,11 +50,12 @@
     <DebugSymbols>true</DebugSymbols>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <OutputPath>..\..\..\..\..\bin\TestWinDesktopApplication</OutputPath>
-    <DefineConstants>TRACE;XAF221</DefineConstants>
+    <DefineConstants>TRACE;XAF222</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="_Program.cs" />
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="6.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="4.2" />
     <PackageReference Include="System.Data.OleDb" Version="6.0" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.3" />
   </ItemGroup>
@@ -89,15 +91,15 @@
     <Content Include="ExpressApp.ico" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DevExpress.ExpressApp.Win.All" Version="22.1.6" />
-    <PackageReference Include="DevExpress.ExpressApp.Security.Xpo" Version="22.1.6" />
+    <PackageReference Include="DevExpress.ExpressApp.Win.All" Version="22.2.3" />
+    <PackageReference Include="DevExpress.ExpressApp.Security.Xpo" Version="22.2.3" />
     <PackageReference Include="Google.Apis.People.v1" Version="1.25.0.830" />
-    <PackageReference Include="System.ServiceModel.Http" Version="4.9" />
+    <PackageReference Include="System.ServiceModel.Http" Version="4.10" />
     <PackageReference Include="System.Collections.Immutable" Version="6.0" />
-    <PackageReference Include="System.ServiceModel.NetTcp" Version="4.9" />
-    <PackageReference Include="System.ServiceModel.Security" Version="4.9" />
+    <PackageReference Include="System.ServiceModel.NetTcp" Version="4.10" />
+    <PackageReference Include="System.ServiceModel.Security" Version="4.10" />
     <PackageReference Include="System.ServiceProcess.ServiceController" Version="6.0" />
-    <PackageReference Include="Xpand.XAF.Win.All" Version="4.221.11.0" />
+    <PackageReference Include="Xpand.XAF.Win.All" Version="4.222.0.1" />
     <PackageReference Include="RazorLight" Version="2.0.0-rc.3" />
   </ItemGroup>
   <ItemGroup>

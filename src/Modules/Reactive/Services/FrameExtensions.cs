@@ -138,6 +138,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .DoWhen(e => e.View().ObjectTypeInfo.Type.IsInstanceOfType(e.View().CurrentObject),
                     e => e.ShowViewParameters.CreatedView = e.Application().NewDetailView(space => space.GetObject(e.Action.View().CurrentObject),
                         e.View().CurrentObject.GetType().GetModelClass().DefaultDetailView));
+    
         
     }
 }

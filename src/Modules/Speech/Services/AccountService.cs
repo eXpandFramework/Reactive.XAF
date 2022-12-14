@@ -83,7 +83,7 @@ namespace Xpand.XAF.Modules.Speech.Services {
         private static void EnsureVoice(this BusinessObjects.SpeechService service,VoiceInfo voiceInfo) {
             var speechVoice = service.ObjectSpace.EnsureObject<SpeechVoice>(voice => voice.Service!=null&& voice.Service.Oid==service.Oid&&voice.Name==voiceInfo.Name,inTransaction:true);
             speechVoice.Gender = voiceInfo.Gender;
-            speechVoice.Language=service.ObjectSpace.EnsureObject<SpeechLanguage>(language => language.Name==voiceInfo.Locale,language => language.Name=voiceInfo.Locale,true);
+            speechVoice.Language=service.ObjectSpace.EnsureObject<SpeechLanguage>(language => language.Name==voiceInfo.Locale,language => language.Name=voiceInfo.Locale,inTransaction:true);
             speechVoice.Name = voiceInfo.LocalName;
             speechVoice.ShortName = voiceInfo.ShortName;
             speechVoice.VoicePath = voiceInfo.VoicePath;

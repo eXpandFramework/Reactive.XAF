@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.TestsLib</id>
-    <version>4.221.11.0</version>
+    <version>4.222.0.1</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -12,17 +12,17 @@
     <description>Xpand.TestsLib</description>
     <releaseNotes>https://github.com/eXpandFramework/Reactive.XAF/releases</releaseNotes>
     <copyright>eXpandFramework.com</copyright>
-    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Xpand.TestsLib, 22.1.6</tags>
+    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Xpand.TestsLib, 22.2.3</tags>
     <dependencies>
       <group targetFramework="net6.0">
-        <dependency id="Xpand.Extensions" version="4.221.11.0" />
-        <dependency id="Xpand.Extensions.Reactive" version="4.221.11.0" />
-        <dependency id="Xpand.Extensions.XAF" version="4.221.11.0" />
-        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.221.11.0" />
-        <dependency id="Xpand.TestsLib.Common" version="4.221.11.0" />
-        <dependency id="Xpand.XAF.Modules.Reactive" version="4.221.11.0" />
-        <dependency id="Xpand.XAF.Modules.Reactive.Logger" version="4.221.11.0" />
-        <dependency id="Xpand.XAF.Modules.Reactive.Logger.Hub" version="4.221.11.0" />
+        <dependency id="Xpand.Extensions" version="4.222.0.1" />
+        <dependency id="Xpand.Extensions.Reactive" version="4.222.0.1" />
+        <dependency id="Xpand.Extensions.XAF" version="4.222.0.1" />
+        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.222.0.1" />
+        <dependency id="Xpand.TestsLib.Common" version="4.222.0.1" />
+        <dependency id="Xpand.XAF.Modules.Reactive" version="4.222.0.1" />
+        <dependency id="Xpand.XAF.Modules.Reactive.Logger" version="4.222.0.1" />
+        <dependency id="Xpand.XAF.Modules.Reactive.Logger.Hub" version="4.222.0.1" />
         <dependency id="akarnokd.reactive_extensions" version="0.0.27-alpha" />
         <dependency id="Enums.NET" version="4.0" />
         <dependency id="MagicOnion" version="2.6.3" />
@@ -35,15 +35,15 @@
         <dependency id="Xpand.Patcher" version="3.0.17" />
         <dependency id="Polly" version="7.2.2" />
         <dependency id="Microsoft.CodeAnalysis" version="4.2" />
-        <dependency id="DevExpress.ExpressApp.Win" version="22.1.6" />
+        <dependency id="DevExpress.ExpressApp.Win" version="22.2.3" />
         <dependency id="Microsoft.Reactive.Testing" version="5.0" />
         <dependency id="Xpand.Patcher" version="3.0.17.0" />
       </group>
     </dependencies>
   </metadata>
   <files>
-    <file src="net6.0-windows7.0\Xpand.TestsLib.dll" target="lib\net6.0\Xpand.TestsLib.dll" />
-    <file src="net6.0-windows7.0\Xpand.TestsLib.pdb" target="lib\net6.0\Xpand.TestsLib.pdb" />
+    <file src="Xpand.TestsLib.dll" target="lib\net6.0\Xpand.TestsLib.dll" />
+    <file src="Xpand.TestsLib.pdb" target="lib\net6.0\Xpand.TestsLib.pdb" />
     <file src="..\build\Targets\CopySymbols.targets" target="build\Xpand.TestsLib.targets" />
     <file src="..\build\Targets\CopySymbols.ps1" target="build\CopySymbols.ps1" />
   </files>

@@ -4,7 +4,7 @@
     <OutputPath>..\..\..\bin</OutputPath>
     <TargetFramework>net6.0-windows7.0</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
-    <AppendTargetFrameworkToOutputPath>True</AppendTargetFrameworkToOutputPath>
+    <AppendTargetFrameworkToOutputPath>False</AppendTargetFrameworkToOutputPath>
     <LangVersion>latest</LangVersion>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\Xpand.key\xpand.snk</AssemblyOriginatorKeyFile>
@@ -12,9 +12,11 @@
     <DebugType>full</DebugType>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
-    <CopyLocalLockFileAssemblie>true</CopyLocalLockFileAssemblie>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <NoWarn>1701;1702;NU1701;CS8002;CS0618;MSB3277</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Xpand.Extensions">
@@ -29,9 +31,11 @@
     <Reference Include="Xpand.Extensions.XAF.Xpo">
       <HintPath>..\..\..\bin\Xpand.Extensions.XAF.Xpo.dll</HintPath>
     </Reference>
-    <ProjectReference Include="..\TestsLib\Xpand.TestsLib.csproj" />
     <Reference Include="Xpand.TestsLib.Common">
       <HintPath>..\..\..\bin\Xpand.TestsLib.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.TestsLib">
+      <HintPath>..\..\..\bin\Xpand.TestsLib.dll</HintPath>
     </Reference>
   </ItemGroup>
   <Import Project="..\..\..\.paket\Paket.Restore.targets" />

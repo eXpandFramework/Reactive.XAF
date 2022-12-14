@@ -10,7 +10,7 @@
     <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
     <OutputPath>..\..\..\bin</OutputPath>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <AppendTargetFrameworkToOutputPath>True</AppendTargetFrameworkToOutputPath>
+    <AppendTargetFrameworkToOutputPath>False</AppendTargetFrameworkToOutputPath>
     <AllowPackageReference>True</AllowPackageReference>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <DebugType>full</DebugType>
@@ -35,7 +35,7 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Xpand.Extensions.Blazor">
-      <HintPath>..\..\..\bin\net6.0\Xpand.Extensions.Blazor.dll</HintPath>
+      <HintPath>..\..\..\bin\Xpand.Extensions.Blazor.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.Extensions.Reactive">
       <HintPath>..\..\..\bin\Xpand.Extensions.Reactive.dll</HintPath>
@@ -50,18 +50,18 @@
       <HintPath>..\..\..\bin\Xpand.Extensions.XAF.Xpo.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.Blazor">
-      <HintPath>..\..\..\bin\net6.0\Xpand.XAF.Modules.Blazor.dll</HintPath>
+      <HintPath>..\..\..\bin\Xpand.XAF.Modules.Blazor.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.Blazor">
-      <HintPath>..\..\..\bin\net6.0\Xpand.XAF.Modules.JobScheduler.Hangfire.dll</HintPath>
+      <HintPath>..\..\..\bin\Xpand.XAF.Modules.JobScheduler.Hangfire.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.Reactive">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>
     </Reference>
-    <PackageReference Include="DevExpress.ExpressApp.Blazor" Version="22.1.6" />
-    <PackageReference Include="DevExpress.ExpressApp.Validation" Version="22.1.6" />
-    <PackageReference Include="DevExpress.ExpressApp.Validation.Blazor" Version="22.1.6" />
-    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="22.1.6" />
+    <PackageReference Include="DevExpress.ExpressApp.Blazor" Version="22.2.3" />
+    <PackageReference Include="DevExpress.ExpressApp.Validation" Version="22.2.3" />
+    <PackageReference Include="DevExpress.ExpressApp.Validation.Blazor" Version="22.2.3" />
+    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="22.2.3" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Model.DesignedDiffs.xafml" />

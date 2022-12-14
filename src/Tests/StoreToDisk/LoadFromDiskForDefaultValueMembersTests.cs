@@ -34,7 +34,8 @@ namespace Xpand.XAF.Modules.StoreToDisk.Tests {
 
         private async Task WhenObjectSpaceCommitsNewObjects(string name,IObjectSpace objectSpace,bool protect=true) {
             CreateStorage(name, protect);
-            
+            objectSpace.CreateObject<STDep>();
+            objectSpace.CommitChanges();
             var std = objectSpace.CreateObject<STD>();
             std.Name = name;
             var testObserver = Application.WhenProviderCommitted<STD>().ToObjects().FirstAsync().Test();
@@ -44,6 +45,7 @@ namespace Xpand.XAF.Modules.StoreToDisk.Tests {
             std = testObserver.AwaitDone(Timeout).Items.Single();
             std.Secret.ShouldBe($"{name}secret");
             std.Number.ShouldBe(2);
+            std.Dep.ShouldNotBeNull();
             await Application.UseObjectSpace(space => {
                 std = space.GetObject(std);
                 space.Delete(std);
@@ -57,7 +59,7 @@ namespace Xpand.XAF.Modules.StoreToDisk.Tests {
             if (Directory.Exists(folder)) {
                 Directory.Delete(folder, true);
                 Directory.CreateDirectory(folder);
-                var data = new[] { new { Secret = $"{name}secret", Name = name,Number=2 } }.Serialize();
+                var data = new[] { new { Secret = $"{name}secret", Name = name,Number=2,Dep=0 } }.Serialize();
                 var bytes = data.Bytes();
                 if (protect) {
                     bytes = data.Protect();

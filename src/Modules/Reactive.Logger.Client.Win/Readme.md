@@ -65,7 +65,7 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |**DevExpress.ExpressApp.ConditionalAppearance**|**Any**
  |**DevExpress.ExpressApp.Win**|**Any**
  |**DevExpress.ExpressApp.Xpo**|**Any**
- |**DevExpress.ExpressApp.CodeAnalysis**|**Any**
+ |****|**Any**
 |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.221.11
  |[Xpand.XAF.Modules.GridListEditor](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.GridListEditor)|4.221.11
  |[Xpand.XAF.Modules.OneView](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.OneView)|4.221.11

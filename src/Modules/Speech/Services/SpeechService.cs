@@ -59,6 +59,7 @@ namespace Xpand.XAF.Modules.Speech.Services{
 			        .Do(text => new FileInfo(text.File.FullName).SelectInExplorer()))
 		        .ToUnit();
 
+        [SuppressMessage("Interoperability", "CA1416:Validate platform compatibility")]
         public static TimeSpan Duration(this FileLinkObject fileLinkObject) {
 	        using var audioFileReader = new AudioFileReader(fileLinkObject.FullName);
 	        return audioFileReader.TotalTime;
@@ -116,17 +117,11 @@ namespace Xpand.XAF.Modules.Speech.Services{
         
         public static TFile UpdateSSMLFile<TFile>(this TFile file, SpeechSynthesisResult result, string path) where TFile:IAudioFileLink{
 	        var info = new FileInfo(path);
-	        // using (var waveFileReader = new WaveFileReader(info.FullName)) {
-		        // var trimEnd = waveFileReader.TotalTime.Subtract(file.Duration);
-		        // info = info.EnsurePath(true);
-		        // waveFileReader.TrimWavFile(info.FullName,TimeSpan.Zero, trimEnd);
-	        // }
-	        
+	        var fileFileDuration = info.Duration();
 	        file.File ??= file.CreateObject<FileLinkObject>();
 	        file.File.FileName = Path.GetFileName(info.FullName);
 	        file.File.FullName = info.FullName;
-	        
-	        file.FileDuration = info.Duration();
+	        file.FileDuration = fileFileDuration;
 	        if (file is SpeechText speechText&&speechText.SpeechToText.GetType()==typeof(SpeechToText)) {
 		        file.Duration=file.FileDuration.Value;
 		        file.VoiceDuration = file.Duration;

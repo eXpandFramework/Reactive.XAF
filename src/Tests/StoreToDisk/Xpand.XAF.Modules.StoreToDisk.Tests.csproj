@@ -4,7 +4,7 @@
     <OutputPath>..\..\..\bin</OutputPath>
     <TargetFramework>net6.0-windows7.0</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
-    <AppendTargetFrameworkToOutputPath>True</AppendTargetFrameworkToOutputPath>
+    <AppendTargetFrameworkToOutputPath>False</AppendTargetFrameworkToOutputPath>
     <LangVersion>latest</LangVersion>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\Xpand.key\xpand.snk</AssemblyOriginatorKeyFile>
@@ -31,7 +31,7 @@
       <HintPath>..\..\..\bin\Xpand.Extensions.Reactive.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.TenantManager">
-      <HintPath>..\..\..\bin\net6.0\Xpand.XAF.Modules.StoreToDisk.dll</HintPath>
+      <HintPath>..\..\..\bin\Xpand.XAF.Modules.StoreToDisk.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.Reactive">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>

@@ -10,5 +10,8 @@ namespace Xpand.Extensions.XAF.CollectionSourceExtensions {
             => collectionSourceBase.Criteria[key]=CriteriaOperator.FromLambda(lambda);
         public static void SetCriteria<T>(this CollectionSourceBase collectionSourceBase, Expression<Func<T, bool>> lambda,[CallerMemberName]string callMemberName="") 
             => collectionSourceBase.SetCriteria(callMemberName,lambda);
+        
+        public static void SetFilter<T>(this ProxyCollection collection, Expression<Func<T, bool>> lambda) 
+            => collection.Filter = CriteriaOperator.FromLambda(lambda);
     }
 }

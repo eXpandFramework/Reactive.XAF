@@ -1,4 +1,4 @@
-source C:\Program Files (x86)\DevExpress 22.1\Components\System\Components\Packages
+source C:\Program Files (x86)\DevExpress 22.2\Components\System\Components\Packages
 source https://api.nuget.org/v3/index.json
 source https://xpandnugetserver.azurewebsites.net/nuget
 storage:none
@@ -6,32 +6,33 @@ strategy: min
 lowest_matching: true
 copy_local:true
 specific_version : false
-framework:net461,net48,net6.0,net6.0-windows,netstandard2.0,netstandard2.1
+framework:net6.0,net6.0-windows,netstandard2.0
 
 
-nuget DevExpress.ExpressApp.Office 22.1.6
-nuget DevExpress.ExpressApp.Core.All 22.1.6
-nuget DevExpress.ExpressApp.Win.All 22.1.6
-nuget DevExpress.ExpressApp.CodeAnalysis 22.1.6
-nuget DevExpress.ExpressApp.Web.All 22.1.6
-nuget DevExpress.ExpressApp.Blazor.All 22.1.6
-nuget DevExpress.ExpressApp.Blazor 22.1.6
-nuget DevExpress.ExpressApp.Validation.Blazor 22.1.6
-nuget DevExpress.EasyTest 22.1.6  
-nuget DevExpress.ExpressApp.EasyTest.WebAdapter 22.1.6  
-nuget DevExpress.ExpressApp.EasyTest.WinAdapter 22.1.6  
-nuget DevExpress.ExpressApp.Security.Xpo 22.1.6  
-nuget DevExpress.Win.SpellChecker 22.1.6  
+nuget DevExpress.ExpressApp.Office 22.2.3
+nuget DevExpress.ExpressApp.Core.All 22.2.3
+nuget DevExpress.ExpressApp.Win.All 22.2.3
+nuget DevExpress.ExpressApp.Web.All 22.2.3
+nuget DevExpress.ExpressApp.Blazor.All 22.2.3
+nuget DevExpress.ExpressApp.Blazor 22.2.3
+nuget DevExpress.ExpressApp.Validation.Blazor 22.2.3
+nuget DevExpress.EasyTest 22.2.3  
+nuget DevExpress.ExpressApp.EasyTest.WinAdapter 22.2.3  
+nuget DevExpress.ExpressApp.Security.Xpo 22.2.3  
+nuget DevExpress.Win.SpellChecker 22.2.3  
 nuget System.CodeDom == 6.0.0
-nuget System.ServiceModel.NetTcp 4.9
-nuget System.ServiceModel.Security 4.9
-nuget System.ServiceModel.Http 4.9
-nuget System.ServiceModel.Duplex 4.9
+nuget System.ServiceModel.NetTcp 4.10.0
+nuget System.ServiceModel.Security 4.10.0
+nuget System.ServiceModel.Http 4.10.0
+nuget System.ServiceModel.Duplex 4.10.0
 nuget System.Security.Cryptography.Xml 6.0.0
 nuget System.Security.Cryptography.ProtectedData 6.0.0
 nuget Microsoft.CognitiveServices.Speech 1.23.0
 nuget System.Configuration.ConfigurationManager 6.0.0
 nuget Mono.Cecil 0.11.4
+nuget Microsoft.CodeAnalysis.CSharp 4.2.0
+nuget Microsoft.CodeAnalysis.Common 4.2.0
+nuget Microsoft.CodeAnalysis.CSharp.Workspaces 4.2.0
 nuget NAudio 2.1.0
 nuget MagicOnion 2.6.3
 nuget Grpc 2.23.0
@@ -56,9 +57,6 @@ nuget FasterFlect.Xpand 2.0.7
 nuget akarnokd.reactive_extensions 0.0.27-alpha
 nuget Microsoft.AspNetCore.Razor.Runtime 2.2
 nuget Microsoft.AspNetCore.Hosting 2.2.7
-nuget Microsoft.Owin.Host.SystemWeb 4.2.2
-nuget Microsoft.Owin.Security.Cookies 4.2.2
-nuget Microsoft.Owin.Security.OpenIdConnect 4.2.2
 nuget Microsoft.IdentityModel.Protocols.OpenIdConnect 6.15.0
 nuget System.Reflection.Metadata 5.0.0
 nuget System.Interactive 5.0     
@@ -81,7 +79,7 @@ nuget RazorLight 2.0.0-rc.3
 nuget System.Reactive 5.0.0
 nuget Microsoft.Reactive.Testing 5.0.0
 nuget System.Collections.Concurrent 4.3.0
-nuget System.Memory 4.5.4
+nuget System.Memory 4.5.5
 nuget Microsoft.NETCore.Targets 5.0.0
 nuget Xpand.VersionConverter 2.202.11
 nuget Microsoft.VisualBasic 10.3.0

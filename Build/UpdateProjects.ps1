@@ -49,7 +49,7 @@ Get-ChildItem -Filter *.csproj -Recurse | ForEach-Object {
     if ($fileName -notlike "*EasyTest*.csproj*"){
         try {
             $target = Get-ProjectTargetFramework $projXml -FullName
-            Update-ProjectProperty $projXml AppendTargetFrameworkToOutputPath ($target -notlike "netstandard2.*")
+            # Update-ProjectProperty $projXml AppendTargetFrameworkToOutputPath ($target -notlike "netstandard2.*")
         }
         catch {
             

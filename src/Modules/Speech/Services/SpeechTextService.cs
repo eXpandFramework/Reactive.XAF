@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
@@ -79,6 +80,7 @@ namespace Xpand.XAF.Modules.Speech.Services {
             return previous == null ? TimeSpan.Zero : current.Start.Subtract(previous.End);
         }
         
+        [SuppressMessage("Interoperability", "CA1416:Validate platform compatibility")]
         public static (ISampleProvider provider, SpeechText speechText)[] AudioProviders(this SpeechText speechText) {
             var reader = new AudioFileReader(speechText.File.FullName);
             var nextSpeechText = speechText.NextSpeechText();
@@ -95,10 +97,10 @@ namespace Xpand.XAF.Modules.Speech.Services {
         }
 
         public static string WavFileName(this IAudioFileLink audioFileLink,IModelSpeech model,Func<long,string> fileName=null) {
-            var storage = audioFileLink.Storage;
+            var storage = audioFileLink?.Storage;
             fileName ??= s => s.ToString();
             storage ??= model.DefaultStorageFolder;
-            return $"{ storage}\\{fileName(audioFileLink.Oid)}.wav";
+            return $"{ storage}\\{fileName(audioFileLink?.Oid??0)}.wav";
         }
 
         public static IObservable<SpeechText> SaveSSMLFile(this SpeechText speechText, string fileName, SpeechSynthesisResult result) 
@@ -123,8 +125,8 @@ namespace Xpand.XAF.Modules.Speech.Services {
             return speechConfig;
         }
 
-        public static IObservable<SpeechSynthesisResult> SayIt(this SpeechText speechText) 
-            => Observable.Using(() => new SpeechSynthesizer(speechText.SpeechSynthesisConfig()),synthesizer 
-                => synthesizer.SpeakTextAsync(speechText.Text).ToObservable().Select(result => result));
+        // public static IObservable<SpeechSynthesisResult> SayIt(this SpeechText speechText) 
+        //     => Observable.Using(() => new SpeechSynthesizer(speechText.SpeechSynthesisConfig()),synthesizer 
+        //         => synthesizer.SpeakTextAsync(speechText.Text).ToObservable().Select(result => result));
     }
 }

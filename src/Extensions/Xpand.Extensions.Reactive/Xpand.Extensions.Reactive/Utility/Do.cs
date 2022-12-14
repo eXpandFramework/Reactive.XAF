@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Threading;
@@ -15,6 +14,16 @@ namespace Xpand.Extensions.Reactive.Utility {
 
         public static IObservable<T> DoAfter<T>(this T self,TimeSpan delay,Action execute) 
             => self.ReturnObservable().Delay(delay);
+
+        public static IObservable<T> TryDo<T>(this IObservable<T> source, Action<T> tryDo)
+            => source.Do(obj => {
+                try {
+                    tryDo(obj);
+                }
+                catch {
+                    // ignored
+                }
+            });
         
         public static IObservable<T> DoOnError<T>(this IObservable<T> source, Action<Exception> onError) 
             => source.Do(_ => { }, onError);

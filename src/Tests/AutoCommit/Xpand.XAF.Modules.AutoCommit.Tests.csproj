@@ -4,16 +4,18 @@
     <OutputPath>..\..\..\bin</OutputPath>
     <TargetFramework>net6.0-windows7.0</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
-    <AppendTargetFrameworkToOutputPath>True</AppendTargetFrameworkToOutputPath>
+    <AppendTargetFrameworkToOutputPath>False</AppendTargetFrameworkToOutputPath>
     <LangVersion>latest</LangVersion>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\Xpand.key\xpand.snk</AssemblyOriginatorKeyFile>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
-    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <!--    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>-->
+    <!--    <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>-->
+    <!--    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>-->
+    <!--    <ProduceReferenceAssembly>false</ProduceReferenceAssembly>-->
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\TestsLib\Xpand.TestsLib.csproj" />

@@ -10,7 +10,7 @@
     <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
     <OutputPath>..\..\..\bin</OutputPath>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <AppendTargetFrameworkToOutputPath>True</AppendTargetFrameworkToOutputPath>
+    <AppendTargetFrameworkToOutputPath>False</AppendTargetFrameworkToOutputPath>
     <AllowPackageReference>True</AllowPackageReference>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <DebugType>full</DebugType>
@@ -32,8 +32,11 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="System.ServiceModel.NetTcp" Version="4.10.0" />
+    <PackageReference Include="System.ServiceModel.Http" Version="4.10.0" />
+    <PackageReference Include="System.ServiceModel.Security" Version="4.10.0" />
     <Reference Include="Xpand.Extensions.Blazor">
-      <HintPath>..\..\..\bin\net6.0\Xpand.Extensions.Blazor.dll</HintPath>
+      <HintPath>..\..\..\bin\Xpand.Extensions.Blazor.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.Extensions.Reactive">
       <HintPath>..\..\..\bin\Xpand.Extensions.Reactive.dll</HintPath>
@@ -48,7 +51,7 @@
       <HintPath>..\..\..\bin\Xpand.Extensions.XAF.Xpo.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.Blazor">
-      <HintPath>..\..\..\bin\net6.0\Xpand.XAF.Modules.Blazor.dll</HintPath>
+      <HintPath>..\..\..\bin\Xpand.XAF.Modules.Blazor.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.Reactive">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>
@@ -56,13 +59,13 @@
     <PackageReference Include="System.CodeDom" Version="6.0" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="6.0.0" />
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
-    <PackageReference Include="DevExpress.ExpressApp" Version="22.1.6" />
-    <PackageReference Include="DevExpress.ExpressApp.Blazor" Version="22.1.6" />
-    <PackageReference Include="DevExpress.ExpressApp.ConditionalAppearance" Version="22.1.6" />
-    <PackageReference Include="DevExpress.ExpressApp.Validation" Version="22.1.6" />
-    <PackageReference Include="DevExpress.ExpressApp.Validation.Blazor" Version="22.1.6" />
-    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="22.1.6" />
-    <PackageReference Include="DevExpress.Persistent.Base" Version="22.1.6" />
+    <PackageReference Include="DevExpress.ExpressApp" Version="22.2.3" />
+    <PackageReference Include="DevExpress.ExpressApp.Blazor" Version="22.2.3" />
+    <PackageReference Include="DevExpress.ExpressApp.ConditionalAppearance" Version="22.2.3" />
+    <PackageReference Include="DevExpress.ExpressApp.Validation" Version="22.2.3" />
+    <PackageReference Include="DevExpress.ExpressApp.Validation.Blazor" Version="22.2.3" />
+    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="22.2.3" />
+    <PackageReference Include="DevExpress.Persistent.Base" Version="22.2.3" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Model.DesignedDiffs.xafml" />

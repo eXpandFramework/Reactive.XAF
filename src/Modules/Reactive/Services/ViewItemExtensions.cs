@@ -9,22 +9,21 @@ using Xpand.Extensions.Reactive.Transform;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
     public static class ViewItemExtensions{
-        public static IObservable<(ViewItem viewItem, NestedFrame nestedFrame)> ToNestedFrames(this IObservable<ViewItem> source, params Type[] nestedObjectTypes) 
-            => source.Cast<IFrameContainer>()
-                .Where(container => container.Frame!=null)
-                .Select(container => (viewItem: ((ViewItem) container),nestedFrame: ((NestedFrame) container.Frame)))
+        public static IObservable<(T viewItem, NestedFrame nestedFrame)> ToNestedFrames<T>(this IObservable<T> source, params Type[] nestedObjectTypes) where T:ViewItem 
+            => source.Cast<IFrameContainer>().Where(container => container.Frame!=null)
+                .Select(container => (viewItem: ((T) container),nestedFrame: ((NestedFrame) container.Frame)))
                 .Where(_ =>!nestedObjectTypes.Any()|| nestedObjectTypes.Any(type => type.IsAssignableFrom(_.nestedFrame.View.ObjectTypeInfo.Type)));
 
-        public static IObservable<ViewItem> ControlCreated(this IEnumerable<ViewItem> source) => 
-            source.ToObservable(ImmediateScheduler.Instance).ControlCreated();
+        public static IObservable<T> ControlCreated<T>(this IEnumerable<T> source) where T:ViewItem 
+            => source.ToObservable(ImmediateScheduler.Instance).ControlCreated();
 
-        public static IObservable<ViewItem> WhenControlCreated(this ViewItem source) 
+        public static IObservable<T> WhenControlCreated<T>(this T source) where T:ViewItem 
             => source.ReturnObservable().ControlCreated();
 
-        public static IObservable<ViewItem> ControlCreated(this IObservable<ViewItem> source) 
+        public static IObservable<T> ControlCreated<T>(this IObservable<T> source) where T:ViewItem
             => source.SelectMany(item => Observable
                 .FromEventPattern<EventHandler<EventArgs>, EventArgs>(h => item.ControlCreated += h,
                     h => item.ControlCreated -= h,ImmediateScheduler.Instance)
-                .Select(pattern => item));
+                .Select(_ => item));
     }
 }
