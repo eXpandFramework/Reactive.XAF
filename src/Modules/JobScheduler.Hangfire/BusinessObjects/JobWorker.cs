@@ -15,7 +15,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects {
     [Appearance("State_Failed_Color",AppearanceItemType.ViewItem, nameof(State)+"='"+nameof(WorkerState.Failed)+"'",FontColor = "Red",TargetItems = nameof(State))]
     [Appearance("State_Green_Color",AppearanceItemType.ViewItem, nameof(State)+"='"+nameof(WorkerState.Succeeded)+"'",FontColor = "Green",TargetItems = nameof(State))]
     [Appearance("State_Proccesing_Color",AppearanceItemType.ViewItem, nameof(State)+"='"+nameof(WorkerState.Processing)+"'",FontStyle = FontStyle.Bold,TargetItems = nameof(State))]
-    [ReadOnlyObjectView()]
+    // [ReadOnlyObjectView()]
     public class JobWorker:XPCustomBaseObject {
         public JobWorker(Session session) : base(session) {
         }
@@ -30,7 +30,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects {
         public WorkerState? State => LastState?.State;
 
         [PersistentAlias(nameof(LastState) + "." + nameof(JobState.Created))]
-        [DisplayDateAndTime]
+        [DisplayDateAndTime][Browsable(false)]
         public DateTime Created => (DateTime) EvaluateAlias();
 
         [PersistentAlias(nameof(Executions) + "[" + nameof(JobState.State)+ "='" +nameof(WorkerState.Processing)+ "'].Count")]

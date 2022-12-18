@@ -50,20 +50,7 @@ function UpdateALLNuspec($platform, $allNuspec, $nuspecs,$allModuleNuspecs,$csPr
         }
         
     }
-    # $group=$allNuspec.package.metadata.dependencies.group
-    # $standardGroup=($group|Where-Object{$_.targetFramework -eq "netstandard2.0"})
-    # if (($group|Where-Object{$_.targetFramework -eq "net461"})){
-    #     $standardGroup.dependency|ForEach-Object{
-    #         Add-NuspecDependency $_.Id $_.version $allNuspec "net461"
-            
-    #     }
-    # }
-    # $net6Targetframework=($group.targetFramework|Where-Object{$_ -match "net6.0"})
-    # if ($net6Targetframework){
-    #     $standardGroup.dependency|ForEach-Object{
-    #         Add-NuspecDependency $_.Id $_.version $allNuspec $net6Targetframework
-    #     }
-    # }
+    
 }
 
 $nuspecs = Get-ChildItem "$root\build\nuspec" *.nuspec|Where-Object{$dxVersion -gt "20.2.0" -or $_.BaseName -notmatch "blazor|hangfire|Client.Win"}
@@ -97,7 +84,7 @@ function CloneTarget ($source, $target){
 }
 CloneTarget "netstandard2.0" "net6.0"
 CloneTarget "netstandard2.0" "net6.0-windows7.0"
-CloneTarget "netstandard2.0" "net461"
+
 $allNuspec|Save-Xml $allFileName
 
 Get-Content $allFileName -Raw
@@ -105,11 +92,11 @@ $allFileName = "$root\build\nuspec\Xpand.XAF.Win.All.nuspec"
 Write-HostFormatted "Updating Xpand.XAF.Win.All.nuspec" -Section
 [xml]$allNuspec = Get-Content $allFileName
 UpdateALLNuspec @("Core","Win") $allNuspec  $nuspecs $allModuleNuspecs $csProjects
-Add-NuspecDependency -Id Xpand.XAF.Modules.Windows -Version $allNuspec.package.metadata.version -Nuspec $allNuspec -TargetFramework "net461"
+
 CloneTarget "netstandard2.0" "net6.0"
 # CloneTarget "netstandard2.0" "net6.0-windows7.0"
 CloneTarget "net6.0" "net6.0-windows7.0"
-CloneTarget "netstandard2.0" "net461"
+
 $allNuspec|Save-Xml $allFileName
 Get-Content $allFileName -Raw
 
@@ -130,6 +117,6 @@ $allNuspec.package.metadata.dependencies.group|Where-Object{$_.targetFramework -
 }
 CloneTarget "netstandard2.0" "net6.0"
 # CloneTarget "netstandard2.0" "net6.0-windows7.0"
-CloneTarget "netstandard2.0" "net461"
+
 $allNuspec|Save-Xml $allFileName
 Get-Content $allFileName -Raw

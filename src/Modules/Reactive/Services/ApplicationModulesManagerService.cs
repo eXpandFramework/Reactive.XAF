@@ -11,7 +11,6 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using Fasterflect;
 using Xpand.Extensions.Reactive.Combine;
-using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.TypeExtensions;
 using Xpand.Extensions.XAF.ApplicationModulesManagerExtensions;
@@ -69,15 +68,16 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
 	    public static IObservable<T> WhenGeneratingModelNodes<T>(this XafApplication application,Expression<Func<IModelApplication,T>> selector=null) where T : IEnumerable<IModelNode> 
 		    => application.WhenApplicationModulesManager().SelectMany(manager => manager.WhenGeneratingModelNodes(selector));
-	    
+
 	    public static IObservable<T> WhenGeneratingModelNodes<T>(this ApplicationModulesManager manager,bool emitCached) where T : IEnumerable<IModelNode> 
-		    => ReactiveModule.GeneratingModelNodes.WhenNotDefault()
+		    => manager.Modules.OfType<ReactiveModule>().ToObservable()
+			    .SelectMany(module => module.WhenGeneratorUpdaters())
 			    .SelectMany(updaters => {
 				    if (typeof(T).FullName == "IModelMergedDifferences") {
 					    throw new NotImplementedException("Use the model editor instead and add nodes manually see #946");
 				    }
 				    var updaterType = (Type)typeof(T).GetCustomAttributesData().First(data => data.AttributeType==typeof(ModelNodesGeneratorAttribute)).ConstructorArguments.First().Value;
-				    var updater = typeof(NodesUpdater<>).MakeGenericType(updaterType).CreateInstance();
+				    var updater = typeof(NodesUpdater<>).MakeGenericType(updaterType!).CreateInstance();
 				    updaters.Add((IModelNodesGeneratorUpdater) updater);
 				    var name =emitCached? nameof(NodesUpdater<ModelNodesGeneratorBase>.UpdateCached):nameof(NodesUpdater<ModelNodesGeneratorBase>.Update);
 				    return ((IObservable<ModelNode>) updater.GetPropertyValue(name)).Cast<T>();

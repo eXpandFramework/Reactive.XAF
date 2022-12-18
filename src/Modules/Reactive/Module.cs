@@ -11,9 +11,9 @@ namespace Xpand.XAF.Modules.Reactive {
         
         public static ReactiveTraceSource TraceSource{ get; set; }
         readonly Subject<ModelInterfaceExtenders> _extendingModelSubject=new();
-        static readonly Subject<ModelNodesGeneratorUpdaters> GeneratingModelNodesSubject=new();
+        
         internal IObservable<ModelInterfaceExtenders> ExtendingModel=>_extendingModelSubject;
-        public static Subject<ModelNodesGeneratorUpdaters> GeneratingModelNodes=>GeneratingModelNodesSubject;
+        
 
         static ReactiveModule() => TraceSource=new ReactiveTraceSource(nameof(ReactiveModule));
 
@@ -26,9 +26,13 @@ namespace Xpand.XAF.Modules.Reactive {
             extenders.Add<IModelReactiveModules,IModelReactiveModule>();
         }
 
+        public IObservable<ModelNodesGeneratorUpdaters> WhenGeneratorUpdaters() => _generatorUpdaterSubject;
+
+        private readonly Subject<ModelNodesGeneratorUpdaters> _generatorUpdaterSubject = new();
+
         public override void AddGeneratorUpdaters(ModelNodesGeneratorUpdaters updaters){
 	        base.AddGeneratorUpdaters(updaters);
-            GeneratingModelNodesSubject.OnNext(updaters);
+            _generatorUpdaterSubject.OnNext(updaters);
         }
 
         public override void Setup(ApplicationModulesManager moduleManager){

@@ -14,7 +14,6 @@ using DevExpress.Persistent.Base;
 using Fasterflect;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.LinqExtensions;
-using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.Attributes;
 using Xpand.Extensions.XAF.Attributes.Custom;
@@ -73,7 +72,9 @@ namespace Xpand.XAF.Modules.Reactive.Services {
                 .ToUnit();
 
         static IObservable<Unit> ReadOnlyObjectViewAttribute(this ApplicationModulesManager manager)
-            => manager.WhenGeneratingModelNodes<IModelViews>().SelectMany().OfType<IModelObjectView>()
+            => manager.WhenGeneratingModelNodes<IModelViews>()
+                .Select(views => views)
+                .SelectMany().OfType<IModelObjectView>()
                 .SelectMany(view => view.ModelClass.TypeInfo.FindAttributes<ReadOnlyObjectViewAttribute>()
                     .Where(objectView => objectView is IModelDetailView && objectView.ViewType == ViewType.DetailView ||
                                          objectView is IModelListView && objectView.ViewType == ViewType.ListView ||

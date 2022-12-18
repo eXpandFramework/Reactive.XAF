@@ -92,8 +92,7 @@ namespace Xpand.XAF.Modules.Reactive{
                 .Merge(manager.MergedExtraEmbeddedModels())
                 .Merge(manager.ConnectObjectString())
                 .Merge(manager.WhenApplication(application =>Connect(application)
-                .Merge(manager.SetupPropertyEditorParentView())
-            )
+                .Merge(manager.SetupPropertyEditorParentView()))
         );
 
         private static IObservable<Unit> Connect(this XafApplication application) {
