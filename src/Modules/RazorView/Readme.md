@@ -86,13 +86,12 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |<!-- -->|<!-- -->
 |----|----
 |**DevExpress.ExpressApp.Validation**|**Any**
- |****|**Any**
-|[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.221.11
- |Xpand.Extensions.Reactive|4.221.11
- |Xpand.Extensions|4.221.11
- |Xpand.Extensions.XAF|4.221.11
- |Xpand.Extensions.XAF.Xpo|4.221.11
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.221.11
+|[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.222.1
+ |Xpand.Extensions.Reactive|4.222.1
+ |Xpand.Extensions|4.222.1
+ |Xpand.Extensions.XAF|4.222.1
+ |Xpand.Extensions.XAF.Xpo|4.222.1
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.222.1
  |Xpand.Patcher|3.0.17
  |System.Reactive|5.0.0
  |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
@@ -100,7 +99,7 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |Xpand.Collections|1.0.4
  |RazorLight|2.0.0-rc.3
  |System.Reflection.Metadata|5.0.0
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.221.11
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.222.1
 
 ## Issues-Debugging-Troubleshooting
 

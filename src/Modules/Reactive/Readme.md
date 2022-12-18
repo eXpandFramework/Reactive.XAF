@@ -264,16 +264,16 @@ The module is **not bound** to **DevExpress versioning**, which means you can us
 
 The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/nuget/reference/package-versioning#version-basics).
 ## Dependencies
-`.NetFramework: netstandard2.0`
+`.NetFramework: net6.0`
 
 |<!-- -->|<!-- -->
 |----|----
 |**DevExpress.ExpressApp**|**Any**
  |**DevExpress.Persistent.Base**|**Any**
- |****|**Any**
-|Xpand.Extensions|4.221.11
- |Xpand.Extensions.Reactive|4.221.11
- |Xpand.Extensions.XAF|4.221.11
+|[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.222.1
+ |Xpand.Extensions|4.222.1
+ |Xpand.Extensions.Reactive|4.222.1
+ |Xpand.Extensions.XAF|4.222.1
  |System.Interactive|5.0.0
  |System.Reactive|5.0.0
  |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
@@ -281,18 +281,7 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |Microsoft.CSharp|4.7.0
  |Newtonsoft.Json|13.0.1
  |Enums.Net|4.0.0
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.221.11
- |Xpand.Patcher|3.0.17
- |Xpand.Extensions|4.221.11
- |Xpand.Extensions.Reactive|4.221.11
- |Xpand.Extensions.XAF|4.221.11
- |System.Interactive|5.0.0
- |System.Reactive|5.0.0
- |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
- |Microsoft.CSharp|4.7.0
- |Newtonsoft.Json|13.0.1
- |Enums.Net|4.0.0
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.221.11
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.222.1
 
 ## Issues-Debugging-Troubleshooting
 

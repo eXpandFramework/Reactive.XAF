@@ -88,13 +88,13 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |----|----
 |**DevExpress.ExpressApp.Blazor**|**Any**
  |**DevExpress.ExpressApp.Validation.Blazor**|**Any**
-|[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.221.11
- |Xpand.Extensions.Blazor|4.221.11
- |Xpand.Extensions.Reactive|4.221.11
- |Xpand.Extensions.XAF|4.221.11
- |Xpand.Extensions|4.221.11
- |Xpand.Extensions.XAF.Xpo|4.221.11
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.221.11
+|[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.222.1
+ |Xpand.Extensions.Blazor|4.222.1
+ |Xpand.Extensions.Reactive|4.222.1
+ |Xpand.Extensions.XAF|4.222.1
+ |Xpand.Extensions|4.222.1
+ |Xpand.Extensions.XAF.Xpo|4.222.1
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.222.1
  |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
  |System.Reactive|5.0.0
  |System.Interactive|5.0.0
@@ -103,8 +103,11 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |System.CodeDom|6.0.0
  |System.Configuration.ConfigurationManager|6.0.0
  |Newtonsoft.Json|13.0.1
+ |System.ServiceModel.NetTcp|4.10.0
+ |System.ServiceModel.Http|4.10.0
+ |System.ServiceModel.Security|4.10.0
  |Xpand.Patcher|3.0.17
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.221.11
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.222.1
 
 ## Issues-Debugging-Troubleshooting
 
