@@ -4,16 +4,15 @@ using System.Security.Cryptography;
 
 namespace Xpand.Extensions.LinqExtensions {
     public static partial class LinqExtensions {
-#pragma warning disable SYSLIB0023
-        static readonly RNGCryptoServiceProvider Provider = new();
-#pragma warning restore SYSLIB0023
+        
         public static IList<T> Shuffle<T>(this IList<T> list) {
-            int n = list.Count;
+            using var generator = RandomNumberGenerator.Create();
+            var n = list.Count;
             while (n > 1) {
-                byte[] box = new byte[1];
-                do Provider.GetBytes(box);
+                var box = new byte[1];
+                do generator.GetBytes(box);
                 while (!(box[0] < n * (Byte.MaxValue / n)));
-                int k = (box[0] % n);
+                var k = (box[0] % n);
                 n--;
                 (list[k], list[n]) = (list[n], list[k]);
             }

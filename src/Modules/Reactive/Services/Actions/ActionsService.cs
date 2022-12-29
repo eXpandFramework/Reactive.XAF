@@ -66,6 +66,11 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
                 retriedExecution(args);
                 return Unit.Default.ReturnObservable();
             }));
+        public static IObservable<Unit> WhenExecuted(this IObservable<SingleChoiceAction> source,Action<SingleChoiceActionExecuteEventArgs> retriedExecution) 
+            => source.SelectMany(action => action.WhenExecuted(args => {
+                retriedExecution(args);
+                return Unit.Default.ReturnObservable();
+            }));
         
         public static IObservable<Unit> WhenExecuted(this IObservable<ParametrizedAction> source,Action<ParametrizedActionExecuteEventArgs> retriedExecution) 
             => source.SelectMany(action => action.WhenExecuted(args => {
@@ -102,16 +107,11 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
                 return Observable.Empty<Unit>();
             });
 
-        public static IObservable<Unit> WhenConcatExecution(this SimpleAction action,Action<SimpleActionExecuteEventArgs> retriedExecution) 
-            => action.AsSimpleAction().WhenExecuted(e => {
-                e.Action.Enabled[nameof(WhenConcatExecution)] = false;
-                try{
-                    retriedExecution?.Invoke(e);
-                }
-                finally{
-                    e.Action.Enabled[nameof(WhenConcatExecution)] = true;
-                }
-            });
+        public static IObservable<Unit> WhenConcatExecution(this SimpleAction action,Action<SimpleActionExecuteEventArgs> sourceSelector) 
+            => action.AsSimpleAction().WhenExecuted().SelectMany(e => e.WhenConcatExecution(pe => {
+                sourceSelector(pe);
+                return Observable.Empty<Unit>();
+            }));
 
         public static IObservable<T> WhenConcatRetriedExecution<T>(this SimpleAction simpleAction,Func<SimpleActionExecuteEventArgs, IObservable<T>> retriedExecution)
             => simpleAction.WhenExecuted(e => {
@@ -123,27 +123,21 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
             => source.SelectMany(action => action.WhenConcatExecution(sourceSelector));
         
         public static IObservable<T> WhenConcatExecution<T>(this SimpleAction simpleAction,Func<SimpleActionExecuteEventArgs,IObservable<T>> sourceSelector)
-            => simpleAction.WhenExecuted(e => {
-                    simpleAction.Enabled[nameof(WhenConcatExecution)] = false;
-                    return sourceSelector(e).ObserveOnContext().Finally(() => simpleAction.Enabled[nameof(WhenConcatExecution)] = true);
-                });
-        
-        public static IObservable<Unit> WhenConcatExecution(this ParametrizedAction action,Action<ParametrizedActionExecuteEventArgs> retriedExecution) 
-            => action.AsParametrizedAction().WhenExecuted(e => {
-                e.Action.Enabled[nameof(WhenConcatExecution)] = false;
-                try{
-                    retriedExecution?.Invoke(e);
-                }
-                finally{
-                    e.Action.Enabled[nameof(WhenConcatExecution)] = true;
-                }
-            });
+            => simpleAction.WhenExecuted().SelectMany(e => e.WhenConcatExecution(sourceSelector));
 
-        public static IObservable<T> WhenConcatRetriedExecution<T>(this ParametrizedAction simpleAction,Func<ParametrizedActionExecuteEventArgs, IObservable<T>> retriedExecution)
-            => simpleAction.WhenExecuted(e => {
-                e.Action.Enabled[nameof(WhenConcatExecution)] = false;
-                return retriedExecution.Invoke(e).ObserveOnContext().Finally(() => e.Action.Enabled[nameof(WhenConcatExecution)] = true);
-            });
+        private static IObservable<T> WhenConcatExecution<T,TArgs>(this TArgs e,Func<TArgs, IObservable<T>> sourceSelector) where TArgs:ActionBaseEventArgs{
+            e.Action.Enabled[nameof(WhenConcatExecution)] = false;
+            return sourceSelector(e).ObserveOnContext().Finally(() => e.Action.Enabled[nameof(WhenConcatExecution)] = true);
+        }
+
+        public static IObservable<Unit> WhenConcatExecution(this ParametrizedAction action,Action<ParametrizedActionExecuteEventArgs> sourceSelector) 
+            => action.AsParametrizedAction().WhenExecuted().SelectMany(e => e.WhenConcatExecution(pe => {
+                sourceSelector(pe);
+                return Observable.Empty<Unit>();
+            }));
+
+        public static IObservable<T> WhenConcatRetriedExecution<T>(this ParametrizedAction simpleAction,Func<ParametrizedActionExecuteEventArgs, IObservable<T>> sourceSelector)
+            => simpleAction.WhenExecuted().SelectMany(e => e.WhenConcatExecution(sourceSelector));
         public static IObservable<T> WhenConcatExecution<T>(this ParametrizedAction simpleAction,Func<ParametrizedActionExecuteEventArgs,IObservable<T>> sourceSelector)
             => simpleAction.WhenConcatExecution<T,ParametrizedActionExecuteEventArgs>( sourceSelector);
         
@@ -250,6 +244,13 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
         public static IObservable<IObjectSpace> ToObjectSpace<TAction>(this IObservable<TAction> source) where TAction : ActionBase 
             => source.Select(_ => _.Controller.Frame.View.ObjectSpace);
 
+        public static IObservable<(TAction action, CancelEventArgs e)> WhenCanceled<TAction>(
+            this IObservable<(TAction action, CancelEventArgs e)> source) where TAction : ActionBase
+            => source.Where(t => t.e.Cancel);
+        
+        public static IObservable<(TAction action, CancelEventArgs e)> WhenNotCanceled<TAction>(
+            this IObservable<(TAction action, CancelEventArgs e)> source) where TAction : ActionBase
+            => source.Where(t => !t.e.Cancel);
         public static IObservable<(TAction action, CancelEventArgs e)> WhenExecuting<TAction>(this TAction action) where TAction : ActionBase 
             => Observable.FromEventPattern<CancelEventHandler, CancelEventArgs>(h => action.Executing += h,
 		        h => action.Executing -= h, ImmediateScheduler.Instance).TransformPattern<CancelEventArgs, TAction>();

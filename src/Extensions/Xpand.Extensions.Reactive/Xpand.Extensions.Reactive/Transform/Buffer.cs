@@ -17,7 +17,7 @@ namespace Xpand.Extensions.Reactive.Transform {
                 return source.Timestamp(scheduler).Subscribe(tx => {
                     list.AddLast(tx);
                     while (scheduler.Now.Ticks > buffering.Ticks &&
-                           (list.First.Value.Timestamp < scheduler.Now.Subtract(buffering)))
+                           (list.First!.Value.Timestamp < scheduler.Now.Subtract(buffering)))
                         list.RemoveFirst();
                     o.OnNext(list.Select(tx2 => tx2.Value).ToArray());
                 }, o.OnError, o.OnCompleted);

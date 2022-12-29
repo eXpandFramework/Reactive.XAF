@@ -22,11 +22,12 @@ namespace Xpand.Extensions.XAF.NonPersistentObjects {
         public override string ToString() {
             if(!_isDefaultPropertyAttributeInit) {
                 string defaultPropertyName = string.Empty;
-                XafDefaultPropertyAttribute xafDefaultPropertyAttribute = XafTypesInfo.Instance.FindTypeInfo(GetType()).FindAttribute<XafDefaultPropertyAttribute>();
+                var info = XafTypesInfo.Instance.FindTypeInfo(GetType());
+                var xafDefaultPropertyAttribute = info.FindAttribute<XafDefaultPropertyAttribute>();
                 if(xafDefaultPropertyAttribute != null) {
                     defaultPropertyName = xafDefaultPropertyAttribute.Name;
                 } else {
-                    DefaultPropertyAttribute defaultPropertyAttribute = XafTypesInfo.Instance.FindTypeInfo(GetType()).FindAttribute<DefaultPropertyAttribute>();
+                    var defaultPropertyAttribute = info.FindAttribute<DefaultPropertyAttribute>();
                     if(defaultPropertyAttribute != null) {
                         defaultPropertyName = defaultPropertyAttribute.Name;
                     }
@@ -53,7 +54,9 @@ namespace Xpand.Extensions.XAF.NonPersistentObjects {
 
         protected override void OnObjectSpaceChanged() {
             base.OnObjectSpaceChanged();
-            OnObjectSpaceChanged(EventArgs.Empty);
+            if (ObjectSpace != null) {
+                OnObjectSpaceChanged(EventArgs.Empty);    
+            }
         }
 
         protected virtual void OnObjectSpaceChanged(EventArgs e) => ObjectSpaceChanged?.Invoke(this, e);

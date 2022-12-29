@@ -11,6 +11,8 @@ using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.Reactive.Services.Controllers{
     public static partial class ControllerExtensions {
+        public static IObservable<Frame> WhenFrame(this Controller controller)
+            => controller.WhenFrameAssigned().WhenViewChanged().ToFrame();
         public static IObservable<T> TakeUntilDeactivated<T>(this IObservable<T> source, Controller controller) 
             => source.TakeUntil(controller.WhenDeactivated());
 

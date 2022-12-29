@@ -84,7 +84,10 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 				        h => item.ViewChanging += h, h => item.ViewChanging -= h, ImmediateScheduler.Instance))
 		        .Select(pattern => pattern)
 		        .TransformPattern<ViewChangingEventArgs, TFrame>();
-        
+
+        public static IObservable<TFrame> ToFrame<TFrame>(
+            this IObservable<(TFrame frame, ViewChangedEventArgs args)> source) where TFrame : Frame
+            => source.Select(t => t.frame);
         public static IObservable<(TFrame frame, ViewChangedEventArgs args)> WhenViewChanged<TFrame>(
             this IObservable<TFrame> source) where TFrame : Frame 
             => source.SelectMany(item => Observable.FromEventPattern<EventHandler<ViewChangedEventArgs>, ViewChangedEventArgs>(
@@ -127,6 +130,10 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 handler => item.Disposing += handler,
                 handler => item.Disposing -= handler,ImmediateScheduler.Instance)).ToUnit();
 
+        public static IObservable<T> SelectUntilViewClosed<TFrame, T>(this IObservable<TFrame> source,
+            Func<TFrame, IObservable<T>> selector) where TFrame : View
+            => source.SelectMany(view => selector(view).TakeUntil(view.WhenClosed()));
+        
         public static IObservable<T> SelectUntilViewClosed<T,TFrame>(this IObservable<TFrame> source, Func<TFrame, IObservable<T>> selector) where TFrame:Frame 
             => source.SelectMany(frame => selector(frame).TakeUntilViewClosed(frame));
         

@@ -10,8 +10,5 @@ namespace Xpand.Extensions.XAF.ObjectSpaceExtensions {
             => objectSpace as NonPersistentObjectSpace;
         public static NonPersistentObjectSpace ToNonPersistentObjectSpace(this IObjectSpace objectSpace)
             => objectSpace.To<NonPersistentObjectSpace>();
-        
-        public static IObjectSpace AdditionalObjectSpace(this IObjectSpace objectSpace,Type type)
-            => (IObjectSpace)objectSpace.CallMethod("GetCertainObjectSpace",type);
     }
 }

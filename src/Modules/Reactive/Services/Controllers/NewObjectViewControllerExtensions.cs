@@ -1,14 +1,20 @@
 ﻿using System;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
+using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.SystemModule;
 using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
+using Xpand.Extensions.XAF.TypesInfoExtensions;
 
 namespace Xpand.XAF.Modules.Reactive.Services.Controllers{
     public static partial class ControllerExtensions{
+        public static IObservable<Unit> ReplaceTypes<T>(this NewObjectViewController controller,Func<Frame,IObservable<object>> whenFrame) 
+            => controller.ReplaceTypes(e => controller.Application.WhenFrame(e.ObjectType).Take(1)
+                .SelectMany(whenFrame),typeof(T)).ToUnit();
         public static IObservable<(NewObjectViewController sender, CollectTypesEventArgs e)> WhenCollectCreatableItemTypes(this NewObjectViewController controller) 
             => Observable.FromEventPattern<EventHandler<CollectTypesEventArgs>, CollectTypesEventArgs>(
                     h => controller.CollectCreatableItemTypes += h, h => controller.CollectCreatableItemTypes -= h, ImmediateScheduler.Instance)
@@ -27,28 +33,26 @@ namespace Xpand.XAF.Modules.Reactive.Services.Controllers{
             => Observable.FromEventPattern<EventHandler<CollectTypesEventArgs>, CollectTypesEventArgs>(
                     h => controller.CollectDescendantTypes += h, h => controller.CollectDescendantTypes -= h, ImmediateScheduler.Instance)
                 .TransformPattern<CollectTypesEventArgs, NewObjectViewController>();
-        
-        public static IObservable<CollectTypesEventArgs> ReplaceTypes<T>(this NewObjectViewController controller,Action<T> tObject=null)
-            => controller.ReplaceTypes(e => tObject?.Invoke(e.NewObject.To<T>()),typeof(T));
 
         public static IObservable<CollectTypesEventArgs> ReplaceTypes(this NewObjectViewController controller, params Type[] objectTypes)
             => controller.ReplaceTypes(null, objectTypes);
         
-        public static IObservable<CollectTypesEventArgs> ReplaceTypes(this NewObjectViewController controller,Action<ObjectCreatingEventArgs> modifyObject,params Type[] objectTypes) 
-            => controller.WhenCollectDescendantTypes().Select(t => {
-                t.e.Types.Clear();
-                objectTypes.ForEach(type => t.e.Types.Add(type));
-                return t.e;
-            })
-            .Merge(controller.Defer(controller.UpdateNewObjectAction).IgnoreElements().To<CollectTypesEventArgs>())
-            .Merge(controller.WhenObjectCreating().Where(e => objectTypes.Contains(e.ObjectType))
-                .Do(e => {
-                    e.ObjectSpace = controller.View.ObjectSpace.CreateNestedObjectSpace();
-                    e.NewObject = e.ObjectSpace.CreateObject(e.ObjectType);
-                    modifyObject?.Invoke(e);
+        public static IObservable<CollectTypesEventArgs>  ReplaceTypes(this NewObjectViewController controller,Func<ObjectCreatingEventArgs,IObservable<object>> modifyObject,params Type[] objectTypes)
+            =>controller.WhenCollectDescendantTypes().Select(t => {
+                    t.e.Types.Clear();
+                    objectTypes.ForEach(type => t.e.Types.Add(type));
+                    return t.e;
                 })
-                .IgnoreElements().To<CollectTypesEventArgs>())
-            ;
+                .Merge(controller.Defer(controller.UpdateNewObjectAction).IgnoreElements().To<CollectTypesEventArgs>())
+                .Merge(controller.WhenObjectCreating().Where(e => objectTypes.Contains(e.ObjectType))
+                    .SelectMany(e => {
+                        e.ObjectSpace = e.ObjectType.ToTypeInfo().IsPersistent ? controller.View.ObjectSpace.CreateNestedObjectSpace()
+                            : controller.Application.CreateObjectSpace(e.ObjectType);
+                        e.ObjectSpace.To<CompositeObjectSpace>().PopulateAdditionalObjectSpaces(controller.Application);
+                        e.NewObject = e.ObjectSpace.CreateObject(e.ObjectType);
+                        return modifyObject?.Invoke(e);
+                    })
+                    .IgnoreElements().To<CollectTypesEventArgs>());
         
         public static IObservable<(NewObjectViewController sender, ProcessNewObjectEventArgs e)> WhenAddObjectToCollection(this NewObjectViewController controller) 
             => Observable.FromEventPattern<EventHandler<ProcessNewObjectEventArgs>, ProcessNewObjectEventArgs>(
