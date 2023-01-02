@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Linq.Expressions;
 using DevExpress.Data.Filtering;
@@ -12,6 +13,7 @@ using DevExpress.Xpo.Providers;
 using Fasterflect;
 using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.StringExtensions;
+using Xpand.Extensions.XAF.Xpo.ObjectSpaceExtensions;
 
 namespace Xpand.Extensions.XAF.Xpo.Xpo {
     public static class XpoExtensions {
@@ -39,13 +41,22 @@ namespace Xpand.Extensions.XAF.Xpo.Xpo {
                 return dbConnection;
             }
 
-            if (connectionProvider is STASafeDataStore){
-                return connectionProvider.GetFieldValue("DataStore").To<ConnectionProviderSql>().Connection;
-            }
-
-            return ((ConnectionProviderSql)connectionProvider).Connection;
+            return connectionProvider is not STASafeDataStore ? connectionProvider is ConnectionProviderSql provider ? provider.Connection : null
+                : connectionProvider.GetFieldValue("DataStore").To<ConnectionProviderSql>().Connection;
         }
         
+        public static SqlConnection NewSQLConnection(this XafApplication application,Type objectType=null) {
+            objectType ??= application.TypesInfo.PersistentTypes.First(info => info.IsPersistent).Type;
+            using var objectSpace = application.CreateObjectSpace(objectType);
+            var dbConnection = objectSpace.Connection();
+            if (dbConnection!=null) {
+                var sqlConnection = new SqlConnection(dbConnection.ConnectionString);
+                sqlConnection.Open();
+                return sqlConnection;
+            }
+            return null;
+        }
+
         public static void XpoMigrateDatabase(this XafApplication application, string connectionString=null) {
             var provider = XpoDefault.GetConnectionProvider(connectionString??application.ConnectionString, AutoCreateOption.DatabaseAndSchema);
             var sql = ((IUpdateSchemaSqlFormatter)provider).FormatUpdateSchemaScript(((IDataStoreSchemaMigrationProvider)provider)

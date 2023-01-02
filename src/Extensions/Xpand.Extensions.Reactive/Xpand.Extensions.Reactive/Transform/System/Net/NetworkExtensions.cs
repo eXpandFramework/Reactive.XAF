@@ -6,6 +6,7 @@ using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
 using System.Text;
 using Fasterflect;
+using Newtonsoft.Json.Linq;
 using Xpand.Extensions.BytesExtensions;
 using Xpand.Extensions.JsonExtensions;
 using Xpand.Extensions.Reactive.Utility;
@@ -23,9 +24,9 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net {
         
         static T Sign<T>(this T requestMessage,string key,string secret) where T:HttpRequestMessage{
             if (key != null) {
-                var toSing = requestMessage.RequestUri.PathAndQuery;
+                var toSing = requestMessage.RequestUri!.PathAndQuery;
                 if (requestMessage.Method != HttpMethod.Get) {
-                    toSing = $"{requestMessage.RequestUri.AbsolutePath}?{requestMessage.Content.ReadAsStringAsync().Result}";
+                    toSing = $"{requestMessage.RequestUri.AbsolutePath}?{requestMessage.Content!.ReadAsStringAsync().Result}";
                 }
                 var sign = secret.Bytes().CryptoSign(toSing).Replace("-", "").ToLower();
                 requestMessage.Headers.Add("Signature", sign);
@@ -85,6 +86,16 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net {
                 .SelectMany(response => response.Content.ReadAsStringAsync().ToObservable()
                     .Select(s => new { response, json = s })).Select(e => (e.json, e.response))
                 .SendRequest(obj??typeof(T).CreateInstance(), deserializeResponse);
+        
+        public static IObservable<T> SendRequest<T>(this HttpClient client, HttpMethod httpMethod,string url, 
+            T obj = null, Func<string, T[]> deserializeResponse = null) where T : class,new()
+            => client.SendRequest(new HttpRequestMessage(httpMethod, url),obj,deserializeResponse);
+        
+        public static IObservable<JObject> SendRequest(this HttpClient client, HttpMethod httpMethod,string url) 
+            => client.SendRequest<JObject>(new HttpRequestMessage(httpMethod, url));
+        
+        public static IObservable<JObject> Send(this HttpClient client, string url) 
+            => client.SendRequest<JObject>(new HttpRequestMessage(HttpMethod.Get, url));
 
         public static IObservable<T> Send<T>(this HttpMethod httpMethod, string requestUrl, string key = null,
             string secret = null, Func<string, IObservable<T>> deserializeResponse = null) where T : class,new() 
@@ -109,7 +120,7 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net {
             deserializeResponse ??= s => (obj is IJsonFactory factory ? new[] { (T)factory.FromJson(s) } : obj.GetType().Deserialize<T>(s)).ToNowObservable();
             return source.SelectMany(t => {
                 if (t.response.IsSuccessStatusCode)
-                    if (t.response.RequestMessage.Method != HttpMethod.Get && t.json == "true") {
+                    if (t.response.RequestMessage!.Method != HttpMethod.Get && t.json == "true") {
                         ObjectSentSubject.OnNext((t.response, t.json, obj));
                         return Observable.Empty<T>();
                     }

@@ -4,6 +4,8 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
@@ -28,6 +30,7 @@ using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.ErrorHandling;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.Reactive.Transform.System.Net;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.StringExtensions;
 using Xpand.Extensions.TypeExtensions;
@@ -855,6 +858,14 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .MergeIgnored(window => window.WhenViewRefreshExecuted(_ => window.GetController<WindowTemplateController>().UpdateWindowCaption()))
                 .ToController<WindowTemplateController>().SelectMany(controller => controller.WhenCustomizeWindowCaption()
                     .DoWhen(_ => objectTypes.Contains(controller.Frame.View?.ObjectTypeInfo?.Type),e =>  e.WindowCaption.FirstPart = $"{controller.Frame.View?.CurrentObject}")).ToUnit();
+        
+        public static HttpClient HttpClient(this XafApplication application,AuthenticationHeaderValue authenticationHeaderValue=null) {
+            var httpClient = NetworkExtensions.HttpClient;
+            var type = application.GetType();
+            httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue(type.Name, type.Assembly.GetName().Version!.ToString()));
+            httpClient.DefaultRequestHeaders.Authorization=authenticationHeaderValue;
+            return httpClient;
+        }
     }
 
 

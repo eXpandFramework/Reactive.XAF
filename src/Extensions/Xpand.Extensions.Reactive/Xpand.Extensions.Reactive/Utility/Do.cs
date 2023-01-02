@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Threading;
@@ -9,8 +8,12 @@ namespace Xpand.Extensions.Reactive.Utility {
     public static partial class Utility {
         public static SynchronizationContextScheduler Scheduler(this SynchronizationContext context) => new(context);
         
-        public static IObservable<T> Do<T>(this T self,Action execute) 
-            => self.ReturnObservable().Do(_ => execute());
+        public static IObservable<T> Do<T>(this T self,Action execute) {
+            execute();
+            return self.ReturnObservable();
+        }
+
+        
 
         public static IObservable<T> DoAfter<T>(this T self,TimeSpan delay,Action execute) 
             => self.ReturnObservable().Delay(delay);
@@ -27,7 +30,7 @@ namespace Xpand.Extensions.Reactive.Utility {
         
         public static IObservable<T> DoOnError<T>(this IObservable<T> source, Action<Exception> onError) 
             => source.Do(_ => { }, onError);
-
+        
         public static IObservable<T> DoOnPrevious<T>(this IObservable<T> source, Action<T> onPrevious)
             => source.Select(x => (Item: x, HasValue: true))
                 .Append((default, false))
@@ -81,7 +84,6 @@ namespace Xpand.Extensions.Reactive.Utility {
                         if (previous != null) return Observable.Empty<TSource>();
                         return Observable.Defer(() => {
                             var current = Interlocked.Exchange(ref latest, null);
-                            Debug.Assert(current != null);
                             var unBoxed = current.Item1;
                             return Observable.Start(() => {
                                 action(unBoxed);

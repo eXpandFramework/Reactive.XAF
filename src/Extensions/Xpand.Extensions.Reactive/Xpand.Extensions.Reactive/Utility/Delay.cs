@@ -11,28 +11,30 @@ namespace Xpand.Extensions.Reactive.Utility {
             => Observable.Defer(() => execute);
         public static IObservable<T> Defer<T>(this object o, Func<IObservable<T>> selector)
             => Observable.Defer(selector);
+        
         public static IObservable<T> Defer<T>(this object o, Func<IEnumerable<T>> selector)
             => Observable.Defer(() => selector().ToNowObservable());
 
         public static IObservable<T> Defer<T>(this object o, Action execute)
             => Observable.Defer(() => {
                 execute();
-                return o.ReturnObservable();
-            }).To<T>();
+                return Observable.Empty<T>();
+            });
+        
         public static IObservable<T> Defer<T>(this T o, Action<T> execute)
             => Observable.Defer(() => {
                 execute(o);
-                return o.ReturnObservable();
+                return Observable.Empty<T>();
             });
         
         public static IObservable<Unit> Defer(this object o, Action execute)
             => Observable.Defer(() => {
                 execute();
-                return Unit.Default.ReturnObservable();
+                return Observable.Empty<Unit>();
             });
         
         public static IObservable<Unit> Defer(this object o,TimeSpan timeSpan, Action execute)
-            => Unit.Default.ReturnObservable().Delay(timeSpan).Do(execute).ToUnit();
+            => Unit.Default.ReturnObservable().Delay(timeSpan).Do(execute).IgnoreElements().ToUnit();
         
         
         public static IObservable<T> DelaySubscription<T>(this IObservable<T> source, TimeSpan delay, IScheduler scheduler = null) 
