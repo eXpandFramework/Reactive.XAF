@@ -30,9 +30,7 @@ nuget System.Security.Cryptography.ProtectedData 6.0.0
 nuget Microsoft.CognitiveServices.Speech 1.23.0
 nuget System.Configuration.ConfigurationManager 6.0.0
 nuget Mono.Cecil 0.11.4
-nuget Microsoft.CodeAnalysis.CSharp 4.2.0
-nuget Microsoft.CodeAnalysis.Common 4.2.0
-nuget Microsoft.CodeAnalysis.CSharp.Workspaces 4.2.0
+
 nuget NAudio 2.1.0
 nuget MagicOnion 2.6.3
 nuget Grpc 2.23.0

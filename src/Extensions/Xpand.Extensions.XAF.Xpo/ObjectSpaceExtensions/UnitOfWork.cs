@@ -6,7 +6,6 @@ using DevExpress.ExpressApp.Xpo;
 using DevExpress.Xpo;
 using Fasterflect;
 using Xpand.Extensions.ObjectExtensions;
-using Xpand.Extensions.XAF.Xpo.Xpo;
 
 namespace Xpand.Extensions.XAF.Xpo.ObjectSpaceExtensions{
     public static partial class ObjectSpaceExtensions{

@@ -10,6 +10,7 @@ using DevExpress.ExpressApp.SystemModule;
 using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.DetailViewExtensions;
 using Xpand.Extensions.XAF.ViewExtensions;
 
@@ -143,7 +144,9 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             objectType ??= typeof(object);
             return source.Where(view =>view.Is(viewType,nesting,objectType));
         }
-        
 
+
+        public static IObservable<TSource[]> RefreshObjectSpace<TSource>(this IObservable<TSource> source,View view) 
+            => source.BufferUntilCompleted().ObserveOnContext().Do(_ => view.ObjectSpace.Refresh());
     }
 }

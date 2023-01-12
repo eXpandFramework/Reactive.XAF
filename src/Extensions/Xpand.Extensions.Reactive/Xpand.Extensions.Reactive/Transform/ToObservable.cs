@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
@@ -10,5 +11,8 @@ namespace Xpand.Extensions.Reactive.Transform{
             => source.ToObservable().ObserveOn(context);
         public static IObservable<TSource> ToNowObservable<TSource>(this IEnumerable<TSource> source)
             => source.ToObservable(ImmediateScheduler.Instance);
+        
+        public static IObservable<TSource> Consume<TSource>(this BlockingCollection<TSource> source)
+            => source.GetConsumingEnumerable().ToObservable(Scheduler.Default);
     }
 }

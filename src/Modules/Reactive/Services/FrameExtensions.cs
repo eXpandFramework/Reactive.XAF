@@ -10,6 +10,7 @@ using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.SystemModule;
+using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
@@ -26,6 +27,9 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             this IObservable<TFrame> source, Type moduleType) where TFrame : Frame 
             => source.Where(_ => _.Application.Modules.FindModule(moduleType) != null);
 
+        public static IObservable<TFrame> MergeViewCurrentObjectChanged<TFrame>(this IObservable<TFrame> source) where TFrame : Frame
+            => source.MergeWith(frame => frame.View.WhenCurrentObjectChanged().TakeUntil(frame.View.WhenClosed()).To(frame));
+        
         public static IObservable<TFrame> When<TFrame>(this IObservable<TFrame> source, TemplateContext templateContext)
             where TFrame : Frame 
             => source.Where(window => window.Context == templateContext);
@@ -136,6 +140,9 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         
         public static IObservable<T> SelectUntilViewClosed<T,TFrame>(this IObservable<TFrame> source, Func<TFrame, IObservable<T>> selector) where TFrame:Frame 
             => source.SelectMany(frame => selector(frame).TakeUntilViewClosed(frame));
+        
+        public static IObservable<T> SwitchUntilViewClosed<T,TFrame>(this IObservable<TFrame> source, Func<TFrame, IObservable<T>> selector) where TFrame:Frame 
+            => source.Select(frame => selector(frame).TakeUntilViewClosed(frame)).Switch();
         
         public static IObservable<TFrame> TakeUntilViewClosed<TFrame>(this IObservable<TFrame> source,Frame frame)  
             => source.TakeUntil(frame.View.WhenClosing());

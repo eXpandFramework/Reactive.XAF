@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Blazor;
 using DevExpress.ExpressApp.Blazor.AmbientContext;
@@ -7,13 +6,11 @@ using DevExpress.ExpressApp.Blazor.Services;
 using DevExpress.ExpressApp.Security;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.PermissionPolicy;
-using Fasterflect;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.Blazor;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.TestsLib.Common;
@@ -61,14 +58,7 @@ namespace Xpand.TestsLib.Blazor {
 				blazorApplication.ServiceProvider = provider;
 				return blazorApplication.Configure<TModule>(Platform.Blazor).ToBlazor();
 			});
-			services.AddXafSecurity(options => {
-					options.RoleType = typeof(PermissionPolicyRole);
-					options.UserType = UserType();
-					options.Events.OnSecurityStrategyCreated = securityStrategy =>
-						((SecurityStrategy)securityStrategy).RegisterXPOAdapterProviders();
-					options.SupportNavigationPermissionsForTypes = false;
-				}).AddExternalAuthentication<HttpContextPrincipalProvider>()
-				.AddAuthenticationStandard(options => { options.IsSupportChangePassword = true; });
+			AddSecurity(services);
 
 			services.AddSingleton<IXafApplicationProvider, ApplicationProvider>()
 				.AddScoped<IExceptionHandlerService, MyClass>();
@@ -76,6 +66,16 @@ namespace Xpand.TestsLib.Blazor {
 			//  options.LoginPath = "/LoginPage";
 			// });
 		}
+
+		protected virtual void AddSecurity(IServiceCollection services) 
+			=>services.AddXafSecurity(options => {
+					options.RoleType = typeof(PermissionPolicyRole);
+					options.UserType = UserType();
+					options.Events.OnSecurityStrategyCreated = securityStrategy =>
+						((SecurityStrategy)securityStrategy).RegisterXPOAdapterProviders();
+					options.SupportNavigationPermissionsForTypes = false;
+				}).AddExternalAuthentication<HttpContextPrincipalProvider>()
+				.AddAuthenticationStandard(options => { options.IsSupportChangePassword = true; });
 
 		protected virtual Type UserType() => typeof(PermissionPolicyUser);
 	}

@@ -7,4 +7,5 @@ System.ValueTuple
 Microsoft.CodeAnalysis.CSharp
 Newtonsoft.Json
 Xpand.Patcher
+Xpand.Collections
 System.Security.Cryptography.ProtectedData

@@ -283,6 +283,9 @@ namespace Xpand.TestsLib.Common{
         public static T AddModule<T>(this XafApplication application, string title,
             params Type[] additionalExportedTypes) where T : ModuleBase, new() 
             => (T) application.AddModule(new T(), title, true, additionalExportedTypes);
+        public static T AddModule<T>(this XafApplication application, string title,bool setup,
+            params Type[] additionalExportedTypes) where T : ModuleBase, new() 
+            => (T) application.AddModule(new T(), title, setup, additionalExportedTypes);
 
         public static T AddModule<T>(this XafApplication application, params Type[] additionalExportedTypes) where T : ModuleBase, new() 
             => (T) application.AddModule(new T(), null, true, additionalExportedTypes);

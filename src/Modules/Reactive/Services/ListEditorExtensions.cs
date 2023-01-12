@@ -14,10 +14,10 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         
         public static IObservable<T> UpdateGridView<T>(this ListEditor editor,Func<IObservable<T>> selector) 
             => editor.Defer(() => {
-                editor.GetPropertyValue("GridView").CallMethod("BeginDataUpdate");
+                editor.GetPropertyValue("GridView")?.CallMethod("BeginDataUpdate");
                 return selector();
 
-            }).Finally(() => editor.GetPropertyValue("GridView").CallMethod("EndDataUpdate"));
+            }).Finally(() => editor.GetPropertyValue("GridView")?.CallMethod("EndDataUpdate"));
 
         public static IObservable<(ListEditor sender, EventArgs e)> WhenModelApplied(this ListEditor editor) 
             => Observable.FromEventPattern<EventHandler<EventArgs>, EventArgs>(

@@ -7,6 +7,7 @@ using System.Net.WebSockets;
 using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
 using System.Threading;
 using System.Threading.Tasks;
@@ -92,17 +93,23 @@ namespace Xpand.TestsLib.Common {
                 });
             mock.Setup(socket => socket.State).Returns(WebSocketState.Open);
         }
-        public static IReturnsResult<THandler> SetupSend<THandler>(this Mock<THandler> handlerMock, Action<HttpResponseMessage> configure,IScheduler scheduler=null) where THandler:HttpMessageHandler 
-            => handlerMock.Protected()
-                .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
+
+        public static IReturnsResult<THandler> SetupSend<THandler>(this Mock<THandler> handlerMock,
+            Action<HttpResponseMessage> configure, IScheduler scheduler = null) where THandler : HttpMessageHandler 
+            => handlerMock.Protected().Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
                 .Returns((HttpRequestMessage requestMessage, CancellationToken _)
                     =>  new HttpResponseMessage { StatusCode = HttpStatusCode.OK, RequestMessage = requestMessage }.ReturnObservable()
                         .Do(configure)
                         .Delay(Delay,scheduler??=Scheduler.Default)
                         .ToTask(_, scheduler));
+        public static IObservable<HttpResponseMessage> WhenSend<THandler>(this Mock<THandler> handlerMock,
+            IScheduler scheduler = null) where THandler : HttpMessageHandler {
+            var subject = new Subject<HttpResponseMessage>();
+            handlerMock.SetupSend(message =>subject.OnNext(message) , scheduler);
+            return subject.AsObservable();
+        }
 
-        
-        
+
         public static TimeSpan Delay { get; set; } = TimeSpan.FromMilliseconds(200);
     }
 }

@@ -49,6 +49,9 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 	    public static IObservable<(ApplicationModulesManager manager, CustomizeTypesInfoEventArgs e)> WhenCustomizeTypesInfo(this IObservable<ApplicationModulesManager> source) 
             => source.SelectMany(manager => manager.WhenCustomizeTypesInfo());
 
+	    public static IObservable<ITypesInfo> ToTypesInfo(
+		    this IObservable<(ApplicationModulesManager manager, CustomizeTypesInfoEventArgs e)> source)
+		    => source.Select(t => t.e.TypesInfo);
 	    public static IObservable<(ApplicationModulesManager manager, CustomizeTypesInfoEventArgs e)> WhenCustomizeTypesInfo(this ApplicationModulesManager manager) 
             => Observable.FromEventPattern<EventHandler<CustomizeTypesInfoEventArgs>, CustomizeTypesInfoEventArgs>(
 			        h => manager.CustomizeTypesInfo += h, h => manager.CustomizeTypesInfo += h, ImmediateScheduler.Instance)

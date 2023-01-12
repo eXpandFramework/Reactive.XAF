@@ -24,6 +24,14 @@ namespace Xpand.XAF.Modules.Reactive.Extensions{
             [CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "",
             [CallerLineNumber] int sourceLineNumber = 0)
             => source.Trace(name, ReactiveModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
+        
+        internal static IObservable<TSource> TraceErrorRX<TSource>(this IObservable<TSource> source,
+            Func<TSource, string> messageFactory = null, string name = null, Action<ITraceEvent> traceAction = null,
+            Func<Exception, string> errorMessageFactory = null,
+            ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.OnNextOrOnError,
+            [CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "",
+            [CallerLineNumber] int sourceLineNumber = 0)
+            => source.Trace(name, ReactiveModule.TraceSource,messageFactory,errorMessageFactory, traceAction,ObservableTraceStrategy.OnError, memberName,sourceFilePath,sourceLineNumber);
     }
 
     public class ReactiveTraceSource : TraceSource{

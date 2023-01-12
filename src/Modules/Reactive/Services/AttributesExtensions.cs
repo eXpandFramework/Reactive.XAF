@@ -24,17 +24,18 @@ using Xpand.Extensions.XAF.ViewExtensions;
 namespace Xpand.XAF.Modules.Reactive.Services {
     public static class AttributesExtensions {
         internal static IObservable<Unit> Attributes(this ApplicationModulesManager manager)
-            => manager.ReadOnlyObjectViewAttribute()
+            => manager.XpoAttributes()
                 .Merge(manager.WhenCustomizeTypesInfo()
                     .InvisibleInAllViewsAttribute()
                     .InvisibleInAllListViewsAttribute()
                     .CustomAttributes()
+                    .MapTypeMembersAttributes()
                     .VisibleInAllViewsAttribute()
                     .ToUnit())
                 .Merge(manager.ReadOnlyCollection())
                 .Merge(manager.ReadOnlyProperty())
                 .Merge(manager.LookupPropertyAttribute())
-                .Merge(manager.XpoAttributes())
+                .Merge(manager.ReadOnlyObjectViewAttribute())
         ;
         static IObservable<Unit> ReadOnlyProperty(this ApplicationModulesManager manager)
             => manager.WhenGeneratingModelNodes<IModelBOModelClassMembers>()
@@ -62,15 +63,12 @@ namespace Xpand.XAF.Modules.Reactive.Services {
                 .ToUnit();
 
         static IObservable<Unit> XpoAttributes(this ApplicationModulesManager manager)
-            => manager.WhenCustomizeTypesInfo()
-                .SelectMany(_ => new[]{"SingleObjectAttribute","PropertyConcatAttribute"})
-                .SelectMany(attributeName => {
-                    var lastObjectAttributeType = AppDomain.CurrentDomain.GetAssemblyType($"Xpand.Extensions.XAF.Xpo.{attributeName}");
-                    return lastObjectAttributeType != null ? (IEnumerable<IMemberInfo>) lastObjectAttributeType
-                        .Method("Configure", Flags.StaticAnyVisibility).Call(null) : Enumerable.Empty<IMemberInfo>();
-                } )
+            => manager.WhenCustomizeTypesInfo().Select(t => t.e.TypesInfo)
+                .Do(typesInfo => AppDomain.CurrentDomain.GetAssemblyType("Xpand.Extensions.XAF.Xpo.XpoExtensions")
+                    ?.Method("CustomizeTypesInfo",Flags.StaticAnyVisibility).Call(null,typesInfo))
                 .ToUnit();
 
+        
         static IObservable<Unit> ReadOnlyObjectViewAttribute(this ApplicationModulesManager manager)
             => manager.WhenGeneratingModelNodes<IModelViews>()
                 .Select(views => views)
@@ -132,6 +130,14 @@ namespace Xpand.XAF.Modules.Reactive.Services {
                         new VisibleInLookupListViewAttribute(false)
                     }.Execute(attribute => t1.info.AddAttribute(attribute))));
 
+        static IObservable<(ApplicationModulesManager manager, CustomizeTypesInfoEventArgs e)> MapTypeMembersAttributes(this IObservable<(ApplicationModulesManager manager, CustomizeTypesInfoEventArgs e)> source)
+            => source.ConcatIgnored(t => t.e.TypesInfo.PersistentTypes.ToNowObservable()
+                .SelectMany(info => info.FindAttributes<MapTypeMembersAttribute>()
+                .SelectMany(attribute => attribute.Source.ToTypeInfo().OwnMembers)
+                .WhereDefault(memberInfo => info.FindMember(memberInfo.Name))
+                .Execute(memberInfo => info.CreateMember(memberInfo.Name, memberInfo.MemberType)).IgnoreElements()
+                .ToArray().Finally(() => XafTypesInfo.Instance.RefreshInfo(info))
+                .ToNowObservable()));
         static IObservable<(ApplicationModulesManager manager, CustomizeTypesInfoEventArgs e)> CustomAttributes(this IObservable<(ApplicationModulesManager manager, CustomizeTypesInfoEventArgs e)> source) 
             => source.ConcatIgnored(t => t.e.TypesInfo.PersistentTypes
                 .SelectMany(info => info.Members.SelectMany(memberInfo => memberInfo.FindAttributes<Attribute>()

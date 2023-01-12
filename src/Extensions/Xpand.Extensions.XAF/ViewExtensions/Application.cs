@@ -1,6 +1,5 @@
 ﻿using DevExpress.ExpressApp;
 using Fasterflect;
-using Xpand.Extensions.ObjectExtensions;
 
 namespace Xpand.Extensions.XAF.ViewExtensions{
 	public static partial class ViewExtensions{

@@ -16,11 +16,14 @@ namespace Xpand.XAF.Modules.Windows{
     static class AlertControlService {
         [SuppressMessage("ReSharper", "InconsistentNaming")]
         public static void Show(AlertControl __instance, Form owner, AlertInfo info) {
-            var modelWindows = CaptionHelper.ApplicationModel.ToReactiveModule<IModelReactiveModuleWindows>().Windows;
-            __instance.FormLocation = modelWindows.Alert.FormLocation;
-            if (modelWindows.Alert.FormWidth != null) {
-                __instance.WhenEvent<AlertFormWidthEventArgs>(nameof(AlertControl.GetDesiredAlertFormWidth)).FirstAsync()
-                    .Subscribe(e => e.Width = modelWindows.Alert.FormWidth.Value);
+            var applicationModel = CaptionHelper.ApplicationModel;
+            if (applicationModel!=null) {
+                var modelWindows = applicationModel.ToReactiveModule<IModelReactiveModuleWindows>().Windows;
+                __instance.FormLocation = modelWindows.Alert.FormLocation;
+                if (modelWindows.Alert.FormWidth != null) {
+                    __instance.WhenEvent<AlertFormWidthEventArgs>(nameof(AlertControl.GetDesiredAlertFormWidth)).FirstAsync()
+                        .Subscribe(e => e.Width = modelWindows.Alert.FormWidth.Value);
+                }
             }
             
         }

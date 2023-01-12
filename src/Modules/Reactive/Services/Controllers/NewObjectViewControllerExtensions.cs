@@ -50,7 +50,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Controllers{
                             : controller.Application.CreateObjectSpace(e.ObjectType);
                         e.ObjectSpace.To<CompositeObjectSpace>().PopulateAdditionalObjectSpaces(controller.Application);
                         e.NewObject = e.ObjectSpace.CreateObject(e.ObjectType);
-                        return modifyObject?.Invoke(e);
+                        return modifyObject?.Invoke(e)??Observable.Empty<object>();
                     })
                     .IgnoreElements().To<CollectTypesEventArgs>());
         

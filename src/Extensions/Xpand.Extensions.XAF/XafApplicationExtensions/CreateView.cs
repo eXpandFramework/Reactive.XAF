@@ -2,6 +2,7 @@
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using Fasterflect;
+using Xpand.Extensions.ObjectExtensions;
 
 
 namespace Xpand.Extensions.XAF.XafApplicationExtensions{

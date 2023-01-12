@@ -8,7 +8,7 @@ namespace Xpand.Extensions.Reactive.Utility{
         public static IObservable<T> AsyncFinally<T>(this IObservable<T> source, Func<IObservable<object>> action)
             => source.AsyncFinally(async () => await action().ToTask());
 
-	    public static IObservable<T> AsyncFinally<T>(this IObservable<T> source, Func<System.Threading.Tasks.Task> action) 
+        public static IObservable<T> AsyncFinally<T>(this IObservable<T> source, Func<System.Threading.Tasks.Task> action) 
             => source
                 .Materialize()
                 .SelectMany(async n => {

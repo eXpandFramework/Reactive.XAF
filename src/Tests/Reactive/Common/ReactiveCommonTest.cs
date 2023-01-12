@@ -6,7 +6,7 @@ using Xpand.XAF.Modules.Reactive.Tests.BOModel;
 
 namespace Xpand.XAF.Modules.Reactive.Tests.Common{
     public abstract class ReactiveCommonTest:BaseTest{
-        protected ReactiveModule DefaultReactiveModule(XafApplication application){
+        protected virtual ReactiveModule DefaultReactiveModule(XafApplication application){
             application.AddModule<TestModule>(typeof(R),typeof(NonPersistentObject));
             return application.Modules.FindModule<ReactiveModule>();
         }

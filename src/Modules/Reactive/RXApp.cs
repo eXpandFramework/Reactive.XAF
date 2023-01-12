@@ -91,7 +91,7 @@ namespace Xpand.XAF.Modules.Reactive{
                 .Merge(manager.AddNonSecuredTypes())
                 .Merge(manager.MergedExtraEmbeddedModels())
                 .Merge(manager.ConnectObjectString())
-                .Merge(manager.WhenApplication(application =>Connect(application)
+                .Merge(manager.WhenApplication(application =>application.Connect()
                 .Merge(manager.SetupPropertyEditorParentView()))
         );
 

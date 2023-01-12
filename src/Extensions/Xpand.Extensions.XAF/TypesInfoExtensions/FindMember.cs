@@ -4,6 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using DevExpress.ExpressApp.DC;
 using Xpand.Extensions.ExpressionExtensions;
+using Xpand.Extensions.LinqExtensions;
 
 namespace Xpand.Extensions.XAF.TypesInfoExtensions{
 	public static partial class TypesInfoExtensions {
@@ -31,10 +32,15 @@ namespace Xpand.Extensions.XAF.TypesInfoExtensions{
 		public static IEnumerable<(TAttribute attribute,IMemberInfo memberInfo)> AttributedMembers<TAttribute>(this ITypeInfo info)  
 			=> info.Members.SelectMany(memberInfo => memberInfo.FindAttributes<Attribute>().OfType<TAttribute>().Select(attribute => (attribute, memberInfo)));
 		
-		public static IEnumerable<(TAttribute attribute,ITypeInfo typeInfo)> Attributed<TAttribute>(this ITypeInfo info)  
-			=> info.FindAttributes<Attribute>().OfType<TAttribute>().Select(attribute => (attribute,info));
-		
-        public static IMemberInfo FindMember<T>(this ITypeInfo typeInfo,Expression<Func<T, object>> memberName) 
+		public static IEnumerable<(TAttribute attribute,ITypeInfo typeInfo)> Attributed<TAttribute>(this ITypeInfo info,bool includeBaseTypes=false) {
+			var infos = info.YieldItem();
+			if (includeBaseTypes) {
+				infos = info.FromHierarchy(typeInfo => typeInfo.Base).Prepend(info);
+			}
+			return infos.SelectMany(typeInfo => typeInfo.FindAttributes<Attribute>(includeBaseTypes).OfType<TAttribute>().Select(attribute => (attribute, info)));
+		}
+
+		public static IMemberInfo FindMember<T>(this ITypeInfo typeInfo,Expression<Func<T, object>> memberName) 
             => typeInfo.FindMember(memberName.MemberExpressionName());
 	}
 }

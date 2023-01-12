@@ -3,3 +3,4 @@ System.Configuration.ConfigurationManager
 System.Reactive
 Newtonsoft.Json
 Microsoft.CodeAnalysis
+System.Data.SqlClient

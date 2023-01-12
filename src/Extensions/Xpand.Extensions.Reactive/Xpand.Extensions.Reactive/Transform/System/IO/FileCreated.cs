@@ -59,9 +59,8 @@ namespace Xpand.Extensions.Reactive.Transform.System.IO {
                 if (fileMode==FileMode.OpenOrCreate && !Directory.Exists(fileInfo.DirectoryName)) {
                     Directory.CreateDirectory(fileInfo.DirectoryName!);
                 }
-                using var fileStream = File.Open(fileInfo.FullName, fileMode, fileAccess, fileShare);
-                var selector1 = await selector(fileStream);
-                return selector1.ReturnObservable();
+                await using var fileStream = File.Open(fileInfo.FullName, fileMode, fileAccess, fileShare);
+                return (await selector(fileStream)).ReturnObservable();
             }).RetryWithBackoff(retry);
 
         public static IObservable<DirectoryInfo> WhenDirectory(this DirectoryInfo directory,bool create=true) 
@@ -74,7 +73,6 @@ namespace Xpand.Extensions.Reactive.Transform.System.IO {
                     return Observable.Empty<DirectoryInfo>();
                 }
                 return directory.ReturnObservable();
-
             });
 
         public static IObservable<FileInfo> OpenFile(this FileInfo fileInfo,FileMode fileMode=FileMode.Open,FileAccess fileAccess=FileAccess.Read,FileShare fileShare=FileShare.Read) 

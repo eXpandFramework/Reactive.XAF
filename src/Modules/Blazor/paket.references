@@ -3,3 +3,4 @@ System.Reactive
 System.Interactive
 Microsoft.Bcl.AsyncInterfaces
 Microsoft.CodeAnalysis
+System.Data.SqlClient

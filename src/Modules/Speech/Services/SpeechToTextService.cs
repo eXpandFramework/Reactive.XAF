@@ -16,6 +16,7 @@ using DevExpress.ExpressApp.SystemModule;
 using DevExpress.ExpressApp.Templates;
 using DevExpress.ExpressApp.Xpo;
 using DevExpress.Persistent.Base;
+using DevExpress.Xpo;
 using Microsoft.CognitiveServices.Speech;
 using Microsoft.CognitiveServices.Speech.Audio;
 using NAudio.Wave;
@@ -40,7 +41,6 @@ using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.ObjectSpaceExtensions;
 using Xpand.Extensions.XAF.ViewExtensions;
 using Xpand.Extensions.XAF.Xpo.BaseObjects;
-using Xpand.Extensions.XAF.Xpo.Xpo;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
 using Xpand.XAF.Modules.Speech.BusinessObjects;
@@ -288,7 +288,7 @@ namespace Xpand.XAF.Modules.Speech.Services {
 		        translation.Language=speechLanguage;
 	        }
 	        // speechText.CommitChanges();
-	        speechToText.FireChanged(nameof(BusinessObjects.SpeechToText.SpeechTexts));
+	        ((IXPReceiveOnChangedFromArbitrarySource)speechToText).FireChanged(nameof(BusinessObjects.SpeechToText.SpeechTexts));
 	        return speechText;
         }
         

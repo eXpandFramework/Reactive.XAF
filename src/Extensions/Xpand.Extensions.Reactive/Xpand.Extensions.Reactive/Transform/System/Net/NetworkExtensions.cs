@@ -1,9 +1,13 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
+using System.Runtime.CompilerServices;
 using System.Text;
 using Fasterflect;
 using Newtonsoft.Json.Linq;
@@ -14,12 +18,35 @@ using Xpand.Extensions.StringExtensions;
 
 namespace Xpand.Extensions.Reactive.Transform.System.Net {
     public static class NetworkExtensions {
+        public const HttpStatusCode TooManyRequests = HttpStatusCode.TooManyRequests;
+        public const HttpStatusCode IpBanned = (HttpStatusCode)418;
+        public const HttpStatusCode WafLimit = (HttpStatusCode)403;
+        public const HttpStatusCode InternalError = HttpStatusCode.InternalServerError;
         private static readonly Subject<(HttpResponseMessage message, object instance)> ResponseSubject = new();
         private static readonly Subject<(HttpResponseMessage message, string content,object instance)> ObjectSentSubject = new();
         public static IObservable<(HttpResponseMessage message, string content,object instance)> Object => ObjectSentSubject.AsObservable();
         public static IObservable<(HttpResponseMessage message, object instance)> Responded => ResponseSubject.AsObservable();
         
-        public static HttpClient HttpClient=new();
+        [SuppressMessage("ReSharper", "FieldCanBeMadeReadOnly.Global")] public static HttpClient HttpClient=new();
+
+        public static TimeSpan RetryAfter(this HttpResponseMessage responseMessage){
+            var dateTime = !responseMessage.Headers.Contains("Date") ? DateTime.Now
+                : DateTimeOffset.Parse(responseMessage.Headers.GetValues("Date").First()).LocalDateTime;
+            var retryAfterDelta = responseMessage.Headers.RetryAfter?.Delta;
+            DateTime? delay = null;
+            if (retryAfterDelta.HasValue){
+                delay = dateTime.Add(retryAfterDelta.Value);    
+            }
+
+            var retryAfter = (responseMessage.StatusCode switch{
+                WafLimit =>delay?? dateTime.AddMinutes(5),
+                IpBanned => delay??dateTime.AddMinutes(20),
+                TooManyRequests => delay??dateTime.AddSeconds(61),
+                _ => DateTime.Now.AddSeconds(-1)
+            }).Subtract(DateTime.Now);
+            return retryAfter;
+            
+        }
 
         
         static T Sign<T>(this T requestMessage,string key,string secret) where T:HttpRequestMessage{
@@ -80,12 +107,14 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net {
         private static object CreateInstance<T>() => typeof(T) == typeof(string) ? "" : typeof(T).CreateInstance();
 
         public static IObservable<T> SendRequest<T>(this HttpClient client, HttpRequestMessage httpRequestMessage, 
-            T obj = null, Func<string, T[]> deserializeResponse = null) where T : class,new()
+            T obj = null, Func<string, T[]> deserializeResponse = null, [CallerMemberName] string caller = "") where T : class,new()
             => Observable.FromAsync(() => client.SendAsync(httpRequestMessage,HttpCompletionOption.ResponseHeadersRead))
                 .Do(message => ResponseSubject.OnNext((message, obj)))
                 .SelectMany(response => response.Content.ReadAsStringAsync().ToObservable()
                     .Select(s => new { response, json = s })).Select(e => (e.json, e.response))
                 .SendRequest(obj??typeof(T).CreateInstance(), deserializeResponse);
+        public static IObservable<JObject> SendRequest(this HttpClient client, HttpRequestMessage httpRequestMessage) 
+            => client.SendRequest(httpRequestMessage,default,s => s.DeserializeJson().ToJObject().ToArray());
         
         public static IObservable<T> SendRequest<T>(this HttpClient client, HttpMethod httpMethod,string url, 
             T obj = null, Func<string, T[]> deserializeResponse = null) where T : class,new()
@@ -119,14 +148,14 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net {
             object obj, Func<string,IObservable<T>> deserializeResponse) {
             deserializeResponse ??= s => (obj is IJsonFactory factory ? new[] { (T)factory.FromJson(s) } : obj.GetType().Deserialize<T>(s)).ToNowObservable();
             return source.SelectMany(t => {
-                if (t.response.IsSuccessStatusCode)
+                if (t.response.IsSuccessStatusCode) {
                     if (t.response.RequestMessage!.Method != HttpMethod.Get && t.json == "true") {
                         ObjectSentSubject.OnNext((t.response, t.json, obj));
                         return Observable.Empty<T>();
                     }
-                    else
-                        return deserializeResponse(t.json)
-                            .Do(obj1 => ObjectSentSubject.OnNext((t.response, t.json, obj1)));
+                    return deserializeResponse(t.json)
+                        .Do(obj1 => ObjectSentSubject.OnNext((t.response, t.json, obj1)));
+                }
 
                 return t.response.Content.ReadAsStringAsync().ToObservable()
                     .SelectMany(s => Observable.Throw<T>(new HttpResponseException(s, t.response)));

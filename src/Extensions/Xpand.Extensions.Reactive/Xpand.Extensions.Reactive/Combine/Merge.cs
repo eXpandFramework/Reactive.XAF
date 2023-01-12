@@ -21,6 +21,10 @@ namespace Xpand.Extensions.Reactive.Combine{
                     })
                     .Concat();
             });
+
+        public static IObservable<TSource> MergeWith<TSource>(this IObservable<TSource> source,
+            Func<TSource, IObservable<TSource>> selector, IScheduler scheduler = null)
+            => source.Publish(obs => obs.Merge(obs.SelectMany(selector),scheduler??Scheduler.Default));
         
         public static IObservable<TValue> MergeWith<TSource, TValue>(this IObservable<TSource> source, TValue value, IScheduler scheduler = null) 
             => source.Merge(default(TSource).ReturnObservable(scheduler ?? CurrentThreadScheduler.Instance)).Select(_ => value);
@@ -35,26 +39,16 @@ namespace Xpand.Extensions.Reactive.Combine{
                 if (merge(arg)) {
                     observable = secondSelector(arg).IgnoreElements().To(arg);
                 }
-                return observable.StartWith(arg);
-            });
-        public static IObservable<T> MergeIgnored<T,T2>(this IObservable<T> source,Func<T,bool> merge,Func<T,IObservable<T2>> secondSelector)
-            => source.SelectMany(arg => {
-                merge ??= _ => true;
-                var observable = Observable.Empty<T>();
-                if (merge(arg)) {
-                    observable = secondSelector(arg).IgnoreElements().To(arg);
-                }
-                return observable.StartWith(arg);
+                return observable.Merge(arg.ReturnObservable());
             });
         
+        public static IObservable<T> MergeIgnored<T,T2>(this IObservable<T> source,Func<T,bool> merge,Func<T,IObservable<T2>> secondSelector)
+            => source.MergeIgnored(secondSelector);
+        
         public static IObservable<T> MergeIgnored<T>(this IObservable<T> source,Func<T,bool> merge,Action<T> @do)
-            => source.SelectMany(arg => {
-                merge ??= _ => true;
-                var observable = Observable.Empty<T>();
-                if (merge(arg)) {
-                    @do(arg);
-                }
-                return observable.StartWith(arg);
+            => source.MergeIgnored(arg => Observable.Empty<T>(), arg => {
+                @do(arg);
+                return merge(arg);
             });
 
     }

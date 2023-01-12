@@ -7,7 +7,7 @@ using DevExpress.Persistent.Base;
 using DevExpress.Xpo;
 using Xpand.Extensions.XAF.Attributes;
 using Xpand.Extensions.XAF.Attributes.Custom;
-using Xpand.Extensions.XAF.Xpo;
+using Xpand.Extensions.XAF.Xpo.Attributes;
 using Xpand.Extensions.XAF.Xpo.BaseObjects;
 
 namespace Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects {
@@ -48,6 +48,6 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects {
         }
         [Association("JobWorker-JobStates")][CollectionOperationSet(AllowAdd = false,AllowRemove = false)][Aggregated]
         [ReadOnlyCollection(disableListViewProcess:true)]
-        public XPCollection<JobState> Executions => GetCollection<JobState>(nameof(Executions));
+        public XPCollection<JobState> Executions => GetCollection<JobState>();
     }
 }

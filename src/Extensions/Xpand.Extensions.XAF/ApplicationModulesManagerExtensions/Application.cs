@@ -14,5 +14,8 @@ namespace Xpand.Extensions.XAF.ApplicationModulesManagerExtensions{
 
         public static XafApplication Application(this ApplicationModulesManager manager) 
             => manager.Modules.OfType<SystemModule>().First().Application;
+        
+        public static T Module<T>(this ApplicationModulesManager manager) where T:ModuleBase 
+            => manager.Modules.OfType<T>().FirstOrDefault();
     }
 }

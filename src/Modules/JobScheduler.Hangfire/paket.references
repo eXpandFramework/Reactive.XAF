@@ -4,3 +4,4 @@ Xpand.Patcher
 Hangfire.Core
 Hangfire.AspNetCore
 Microsoft.CodeAnalysis
+System.Data.SqlClient

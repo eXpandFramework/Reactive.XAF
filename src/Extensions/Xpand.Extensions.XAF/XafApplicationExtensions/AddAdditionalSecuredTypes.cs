@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Data.SqlClient;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using DevExpress.ExpressApp;
@@ -10,6 +9,9 @@ using Xpand.Extensions.XAF.Harmony;
 
 namespace Xpand.Extensions.XAF.XafApplicationExtensions{
     public static partial class XafApplicationExtensions{
+        
+        public static T Module<T>(this XafApplication application) where T:ModuleBase => application.Modules.OfType<T>().FirstOrDefault();
+
         public static void AddNonSecuredType(this XafApplication application,params Type[] objectTypes){
             if (application.Security != null && application.Security.GetType().FromHierarchy(type => type.BaseType)
                     .Any(type => type.Name == "SecurityStrategy")){
