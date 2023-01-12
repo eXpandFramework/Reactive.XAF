@@ -98,7 +98,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Services.StyleTemplateSe
 
         private static IObservable<(NestedFrame nestedFrame, TemplateDocument templateDocument)> ApplyOriginalContent(
             this IObservable<NestedFrame> source) 
-            => source.SelectMany(frame => frame.Application.UseObjectSpace(space => {
+            => source.SelectMany(frame => frame.Application.UseObjectSpace(typeof(ApplyTemplateStyle),space => {
                     var view = frame.View.AsListView();
                     var templateDocument = (TemplateDocument) view.CurrentObject;
                     if (templateDocument != null){
@@ -112,7 +112,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Services.StyleTemplateSe
                             templateDocument.ApplyStyleTemplate.Original = (byte[]) value;
                             templateDocument.ApplyStyleTemplate.Changed = (byte[]) value;
                         }
-                        return (frame, templateDocument).ReturnObservable();
+                        return (frame, templateDocument);
                     }
                     return default;
                 }))

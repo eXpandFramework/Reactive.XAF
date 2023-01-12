@@ -42,7 +42,7 @@ namespace Xpand.XAF.Modules.RefreshView.Tests{
             var objectSpace = application.CreateObjectSpace();
             objectSpace.CommitChanges();
 
-            await reloaded.Timeout(Timeout).ToTaskWithoutConfigureAwait();
+            await reloaded.Timeout(Timeout);
             application.CreateViewWindow().SetView(listView);
             
             objectSpace = application.CreateObjectSpace();
