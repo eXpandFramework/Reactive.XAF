@@ -7,10 +7,8 @@ using System.IO;
 using System.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Reflection;
-using System.Threading;
 using System.Threading.Tasks;
 using DevExpress.ExpressApp;
-
 using Microsoft.Reactive.Testing;
 using NUnit.Framework;
 using Xpand.Extensions.AppDomainExtensions;
@@ -31,7 +29,7 @@ namespace Xpand.TestsLib.Common{
         
         protected Platform GetPlatform(string platformName) => (Platform) Enum.Parse(typeof(Platform), platformName);
 
-         protected TimeSpan Timeout = TimeSpan.FromSeconds(Debugger.IsAttached ? 120 : 5);
+        public static TimeSpan Timeout = TimeSpan.FromSeconds(Debugger.IsAttached ? 120 : 5);
 
         protected CommonTest() => AssemblyExtensions.EntryAssembly=GetType().Assembly;
         public static string EasyTestTraceLevel = "Verbose";
@@ -143,7 +141,7 @@ namespace Xpand.TestsLib.Common{
                 LogPaths.ForEach(path => {
                     if (File.Exists(path)) {
                         var tempFileName = Path.GetTempFileName();
-                        File.Copy(path!, tempFileName, true);
+                        File.Copy(path, tempFileName, true);
                         var text = $"{File.ReadAllText(tempFileName)}{Environment.NewLine}";
                         var zipPPath = Path.Combine(TestContext.CurrentContext.TestDirectory,$"{Path.GetFileNameWithoutExtension(path)}.gz");
                         File.WriteAllBytes(zipPPath,text.GZip());

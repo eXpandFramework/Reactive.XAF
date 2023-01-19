@@ -37,15 +37,15 @@ function GetModuleName($_){
     $moduleName
 }
 function UpdateModulesList($rootLocation, $packages,$path) {
-    $moduleList = "|PackageName|[![Custom badge](https://xpandshields.azurewebsites.net/endpoint.svg?label=Downloads&url=https%3A%2F%2Fxpandnugetstats.azurewebsites.net%2Fapi%2Ftotals%2FXAF)](https://www.nuget.org/packages?q=Xpand.XAF)<br>Platform/Target|About`r`n|---|---|---|`r`n"
+    $moduleList = "|PackageName|[![Custom badge](https://shields.io/endpoint.svg?label=Downloads&url=https%3A%2F%2Fxpandnugetstats.azurewebsites.net%2Fapi%2Ftotals%2FXAF)](https://www.nuget.org/packages?q=Xpand.XAF)<br>Platform/Target|About`r`n|---|---|---|`r`n"
     $projects=Get-MSBuildProjects $rootLocation\src\Modules
     $assemblies=(Get-ChildItem $rootLocation\bin -Recurse xpand.*.dll)+(Get-ChildItem $rootLocation\bin -Recurse xpand.*.exe)
     
     $packages | ForEach-Object {
         $name = $_.Replace("Xpand.XAF.Modules.", "")
         $packageUri = "[$name](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/$name)"
-        $version = "![](https://xpandshields.azurewebsites.net/nuget/v/$_.svg?label=&style=flat)"
-        $downloads = "![](https://xpandshields.azurewebsites.net/nuget/dt/$_.svg?label=&style=flat)"
+        $version = "![](https://shields.io/nuget/v/$_.svg?label=&style=flat)"
+        $downloads = "![](https://shields.io/nuget/dt/$_.svg?label=&style=flat)"
         $_
         $targetFramework =$null
         if ($_ -like "*.All"){
@@ -89,7 +89,7 @@ function UpdateModulesList($rootLocation, $packages,$path) {
             }
         }
         
-        $moduleList += "$packageUri|![](https://xpandshields.azurewebsites.net/badge/$platform-$targetFramework-yellowgreen)<br>$version$downloads|$about`r`n"
+        $moduleList += "$packageUri|![](https://shields.io/badge/$platform-$targetFramework-yellowgreen)<br>$version$downloads|$about`r`n"
     }
     
     
@@ -142,9 +142,9 @@ function UpdateBadges($_, $packagespath, $readMePath) {
     $readMe = Get-Content $readMePath -Raw
     $package = $_.BaseName.Replace("Xpand.XAF.Modules.", "")
     $badges = @"
-![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Modules.$package.svg?&style=flat) ![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Modules.$package.svg?&style=flat)
+![](https://shields.io/nuget/v/Xpand.XAF.Modules.$package.svg?&style=flat) ![](https://shields.io/nuget/dt/Xpand.XAF.Modules.$package.svg?&style=flat)
 
-[![GitHub issues](https://xpandshields.azurewebsites.net/github/issues/eXpandFramework/expand/$package.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AReactive.XAF+label%3A$package) [![GitHub close issues](https://xpandshields.azurewebsites.net/github/issues-closed/eXpandFramework/eXpand/$package.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AReactive.XAF+label%3A$package)
+[![GitHub issues](https://shields.io/github/issues/eXpandFramework/expand/$package.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AReactive.XAF+label%3A$package) [![GitHub close issues](https://shields.io/github/issues-closed/eXpandFramework/eXpand/$package.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AReactive.XAF+label%3A$package)
 "@
     $readMe = [Regex]::replace($readMe, '(.*)# About', "$badges`r`n# About", [RegexOptions]::Singleline)
     Set-Content $readMePath $readMe.Trim()

@@ -1,9 +1,9 @@
 ![image](https://user-images.githubusercontent.com/159464/66713086-c8c5a800-edae-11e9-9bc1-73ffc0c215fb.png)
 
-[![image](https://xpandshields.azurewebsites.net/badge/Exclusive%20services%3F-Head%20to%20the%20dashboard-Blue)](https://github.com/sponsors/apobekiaris) ![GitHub stars](https://xpandshields.azurewebsites.net/github/stars/expandframework/devexpress.xaf?label=Star%20the%20project%20if%20you%20think%20it%20deserves%20it&style=social) ![GitHub forks](https://xpandshields.azurewebsites.net/github/forks/expandframework/Devexpress.Xaf?label=Fork%20the%20project%20to%20extend%20and%20contribute&style=social)
+[![image](http://45-126-125-189.cloud-xip.com/badge/Exclusive%20services%3F-Head%20to%20the%20dashboard-Blue)](https://github.com/sponsors/apobekiaris) ![GitHub stars](http://45-126-125-189.cloud-xip.com/github/stars/expandframework/devexpress.xaf?label=Star%20the%20project%20if%20you%20think%20it%20deserves%20it&style=social) ![GitHub forks](http://45-126-125-189.cloud-xip.com/github/forks/expandframework/Devexpress.Xaf?label=Fork%20the%20project%20to%20extend%20and%20contribute&style=social)
 
 
-![Visual Studio Marketplace Downloads](https://xpandshields.azurewebsites.net/visual-studio-marketplace/d/eXpandFramework.XVSIX64?label=Visual%20Studio) ![JetBrains plugins](https://xpandshields.azurewebsites.net/jetbrains/plugin/d/17687-xpand?label=Jetbrains%20Rider)
+![Visual Studio Marketplace Downloads](http://45-126-125-189.cloud-xip.com/visual-studio-marketplace/d/eXpandFramework.XVSIX64?label=Visual%20Studio) ![JetBrains plugins](http://45-126-125-189.cloud-xip.com/jetbrains/plugin/d/17687-xpand?label=Jetbrains%20Rider)
 
 # About
 
@@ -79,7 +79,7 @@ If it fails to detect the DevExpress version used due to either indirect referen
 3. You still have problems then enable logging by either setting the Environmental variable `ModelEditorVerbose` to 1 or the same MSBuild property to true. This will generate an execution.log inside the package directory, provide it to support with as much details as possible over the usage context..
 4. For support, feedback etc. use the main project [issues](https://github.com/eXpandFramework/eXpand/issues/new/choose).
 
-[![GitHub issues by-label](https://xpandshields.azurewebsites.net/github/issues/expandframework/expand/XpandModelEditor)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AXpandModelEditor) [![GitHub close issues](https://xpandshields.azurewebsites.net/github/issues-closed/eXpandFramework/eXpand/XpandModelEditor.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AXpandModelEditor)
+[![GitHub issues by-label](http://45-126-125-189.cloud-xip.com/github/issues/expandframework/expand/XpandModelEditor)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AXpandModelEditor) [![GitHub close issues](http://45-126-125-189.cloud-xip.com/github/issues-closed/eXpandFramework/eXpand/XpandModelEditor.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AXpandModelEditor)
 
 ## Rider installation
 Rider installation is ready to go without any additional steps. The Xpand.XAF.ModelEditor creates an external tool in your Settings/Custom tools.

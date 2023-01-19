@@ -20,6 +20,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.BytesExtensions;
+using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
@@ -92,9 +93,12 @@ namespace Xpand.XAF.ModelEditor.Module.Win {
             }
 
             var versionsGroup = Directory.GetFiles(Path.GetDirectoryName(assemblyPath)!,"DevExpress.ExpressApp*.dll")
+	            .Where(s => s.Contains("CodeAnalysis"))
                 .GroupBy(s => Version.Parse(FileVersionInfo.GetVersionInfo(s).FileVersion!)).ToArray();
-            if (versionsGroup.Length > 1) {
-                throw new UserFriendlyException($"Multiple DevExpress versions found in {assemblyPath}");
+            if (versionsGroup.Length > 1){
+	            var conflicts = versionsGroup.SelectMany(grouping => grouping.Take(1).Select(path => (name: Path.GetFileName(path),
+			            version: Version.Parse(FileVersionInfo.GetVersionInfo(path).FileVersion!)))).JoinCommaSpace();
+	            throw new UserFriendlyException($"Multiple DevExpress versions found in {assemblyPath} (${conflicts})");
             }
             if (!versionsGroup.Any()) {
                 throw new UserFriendlyException($"Cannot find any DevExpress assembly in {assemblyPath}");

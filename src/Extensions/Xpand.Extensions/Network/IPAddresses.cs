@@ -1,5 +1,7 @@
 using System;
 using System.Net;
+using System.Net.Http;
+using Fasterflect;
 
 namespace Xpand.Extensions.Network {
     public static partial class NetworkExtensions {

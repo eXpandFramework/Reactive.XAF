@@ -229,7 +229,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)> WhenCommitingDetailed<T>(
             this IObjectSpace objectSpace, bool emitAfterCommit, ObjectModification objectModification, Func<T, bool> criteria, params string[] modifiedProperties) where T:class 
             => !modifiedProperties.Any() ? objectSpace.WhenCommitingDetailed(objectModification, emitAfterCommit, criteria)
-                : objectSpace.WhenModifiedObjects(typeof(T), modifiedProperties).Cast<T>().Where(criteria)
+                : objectSpace.WhenModifiedObjects(typeof(T), modifiedProperties).Cast<T>().Where(criteria??(_ =>true) )
                     .Buffer(objectSpace.WhenCommitingDetailed(false, objectModification, criteria)).WhenNotEmpty()
                     .SelectMany(modifiedObjects => {
                         var objectSpaceModifiedObjects = objectSpace.ModifiedObjects(objectModification, modifiedObjects).ToArray();
@@ -329,9 +329,9 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static Task CommitChangesAsync(this IObjectSpaceLink link)
             => link.ObjectSpace.CommitChangesAsync();
         
-        public static IObservable<T> Commit<T>(this IEnumerable<T> source,IObjectSpace objectSpace) where T:IObjectSpaceLink {
+        public static IObservable<T> Commit<T>(this IEnumerable<T> source,IObjectSpace objectSpace=null) where T:IObjectSpaceLink {
             var links = source as T[] ?? source.ToArray();
-            return links.Finally(objectSpace.CommitChanges).ToNowObservable();
+            return links.Finally((objectSpace??links.First().ObjectSpace).CommitChanges).ToNowObservable();
         }
         public static IObservable<T> Commit<T>(this IEnumerable<T> source,IObjectSpaceLink objectSpace) where T:IObjectSpaceLink {
             var links = source as T[] ?? source.ToArray();
@@ -340,6 +340,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static IObservable<T> Commit<T>(this T link) where T:IObjectSpaceLink
             => link.ObjectSpace.CommitChangesAsync().ToObservable().To(link);
+        public static IObservable<T> Commit<T>(this IObservable<T> source) where T:IObjectSpaceLink
+            => source.BufferUntilCompleted(true).SelectMany(links => links.First().Commit());
         
         public static T CreateObject<T>(this IObjectSpaceLink link)
             => link.ObjectSpace.CreateObject<T>();

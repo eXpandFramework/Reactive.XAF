@@ -29,7 +29,11 @@ if (!(Test-AzDevops) -and !$SkipIDEBuild){
     $zip="$(Get-Location)\..\Xpand.XAF.ModelEditor.Win.zip"
     Compress-Files -zipfileName $zip -Force 
     $version=[System.Diagnostics.FileVersionInfo]::GetVersionInfo("$(Get-Location)\Xpand.XAF.ModelEditor.Win.exe").FileVersion
-    Move-Item $zip "$([System.IO.Path]::GetDirectoryName($zip))\$([System.IO.Path]::GetFileNameWithoutExtension($zip)).$version.zip" -Force
+    $dir="$([System.IO.Path]::GetDirectoryName($zip))\$([System.IO.Path]::GetFileNameWithoutExtension($zip)).$version.zip"
+    $dir|Set-Clipboard
+    Move-Item $zip $dir -Force
+    $dest=[System.IO.Path]::GetFullPath("$([System.IO.Path]::GetDirectoryName($dir))\..\..\..\..\..\XVSIX64\Resources\$([System.IO.Path]::GetFileName($dir))")
+    Copy-Item $dir $dest -Force 
 
     $proj=Get-Content "$root\tools\Xpand.XAF.ModelEditor\IDE\XVSIX64\XVSIX64.csproj" -Raw
     $regex = [regex] 'Xpand\.XAF\.ModelEditor\.Win\..*\.zip'

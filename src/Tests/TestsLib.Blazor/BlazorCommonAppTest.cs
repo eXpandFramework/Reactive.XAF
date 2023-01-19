@@ -15,6 +15,8 @@ namespace Xpand.TestsLib.Blazor {
 		public override void Cleanup() {
 			base.Cleanup();
 			Application?.Dispose();
+			
+
 			base.Dispose();
 			CleanBlazorEnvironment();
 		}

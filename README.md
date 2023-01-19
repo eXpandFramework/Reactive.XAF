@@ -1,9 +1,9 @@
-[![image](https://xpandshields.azurewebsites.net/badge/Exclusive%20services%3F-Head%20to%20the%20dashboard-Blue)](https://github.com/sponsors/apobekiaris) ![GitHub stars](https://xpandshields.azurewebsites.net/github/stars/expandframework/devexpress.xaf?label=Star%20the%20project%20if%20you%20think%20it%20deserves%20it&style=social) ![GitHub forks](https://xpandshields.azurewebsites.net/github/forks/expandframework/Devexpress.Xaf?label=Fork%20the%20project%20to%20extend%20and%20contribute&style=social)
+[![image](http://45-126-125-189.cloud-xip.com/badge/Exclusive%20services%3F-Head%20to%20the%20dashboard-Blue)](https://github.com/sponsors/apobekiaris) ![GitHub stars](http://45-126-125-189.cloud-xip.com/github/stars/expandframework/devexpress.xaf?label=Star%20the%20project%20if%20you%20think%20it%20deserves%20it&style=social) ![GitHub forks](http://45-126-125-189.cloud-xip.com/github/forks/expandframework/Devexpress.Xaf?label=Fork%20the%20project%20to%20extend%20and%20contribute&style=social)
 
-[![image](https://xpandshields.azurewebsites.net/badge/JOIN-LinkedIn.eXpandFramework.com-blue)](http://linkedin.expandframework.com/) [![image](https://xpandshields.azurewebsites.net/badge/SUBSRCIBE-YouTube.eXpandFramework.com-blue)](http://youtube.expandframework.com/) [![image](https://xpandshields.azurewebsites.net/badge/FOLLOW-twitter/eXpandFramework-blue)](https://twitter.com/expandframework/)
+[![image](http://45-126-125-189.cloud-xip.com/badge/JOIN-LinkedIn.eXpandFramework.com-blue)](http://linkedin.expandframework.com/) [![image](http://45-126-125-189.cloud-xip.com/badge/SUBSRCIBE-YouTube.eXpandFramework.com-blue)](http://youtube.expandframework.com/) [![image](http://45-126-125-189.cloud-xip.com/badge/FOLLOW-twitter/eXpandFramework-blue)](https://twitter.com/expandframework/)
 # About 
 
-| ![image](https://user-images.githubusercontent.com/159464/66713086-c8c5a800-edae-11e9-9bc1-73ffc0c215fb.png) |  [![Custom badge](https://xpandshields.azurewebsites.net/endpoint.svg?label=Nuget.org&url=https%3A%2F%2Fxpandnugetstats.azurewebsites.net%2Fapi%2Ftotals%2FXAF)](https://www.nuget.org/packages?q=Xpand.XAF) 
+| ![image](https://user-images.githubusercontent.com/159464/66713086-c8c5a800-edae-11e9-9bc1-73ffc0c215fb.png) |  [![Custom badge](http://45-126-125-189.cloud-xip.com/endpoint.svg?label=Nuget.org&url=https%3A%2F%2Fxpandnugetstats.azurewebsites.net%2Fapi%2Ftotals%2FXAF)](https://www.nuget.org/packages?q=Xpand.XAF) 
 |----------|--------
 **Stable**|`nuget.exe list Xpand.XAF`
 **Lab**|`nuget.exe list Xpand.XAF -source https://xpandnugetserver.azurewebsites.net/nuget`
@@ -26,11 +26,9 @@ The modules found in this repository are unit tested and EasyTested, consuming t
 
 
 
-|![Custom badge](https://xpandshields.azurewebsites.net/endpoint?style=plastic&url=https%3A%2F%2Fxpandnugetstats.azurewebsites.net%2Fapi%2Ftotals%2FXAFBuild%3Findex%3D1%26branch%3Dmaster%26shield%3Dcoverage)| Release  | Lab|
+|![Custom badge](http://45-126-125-189.cloud-xip.com/endpoint?style=plastic&url=https%3A%2F%2Fxpandnugetstats.azurewebsites.net%2Fapi%2Ftotals%2FXAFBuild%3Findex%3D1%26branch%3Dmaster%26shield%3Dcoverage)| Release  | Lab|
 |---|---|---|
-|![Custom badge](https://xpandshields.azurewebsites.net/endpoint?style=for-the-badge&label=%20&url=https%3A%2F%2Fxpandnugetstats.azurewebsites.net%2Fapi%2Ftotals%2FLatestXAFMinors%3Findex%3D1)|![Custom badge](https://xpandshields.azurewebsites.net/endpoint?style=plastic&url=https%3A%2F%2Fxpandnugetstats.azurewebsites.net%2Fapi%2Ftotals%2FXAFBuild%3Findex%3D1%26branch%3Dmaster%26shield%3Dtests)|![Custom badge](https://xpandshields.azurewebsites.net/endpoint?&style=plastic&url=https%3A%2F%2Fxpandnugetstats.azurewebsites.net%2Fapi%2Ftotals%2FXAFBuild%3Findex%3D1%26branch%3Dlab%26shield%3Dtests)
-|![Custom badge](https://xpandshields.azurewebsites.net/endpoint?label=%20&url=https%3A%2F%2Fxpandnugetstats.azurewebsites.net%2Fapi%2Ftotals%2FLatestXAFMinors%3Findex%3D2)|![Custom badge](https://xpandshields.azurewebsites.net/endpoint?style=plastic&url=https%3A%2F%2Fxpandnugetstats.azurewebsites.net%2Fapi%2Ftotals%2FXAFBuild%3Findex%3D2%26branch%3Dmaster%26shield%3Dtests)|![Custom badge](https://xpandshields.azurewebsites.net/endpoint?style=plastic&url=https%3A%2F%2Fxpandnugetstats.azurewebsites.net%2Fapi%2Ftotals%2FXAFBuild%3Findex%3D2%26branch%3Dlab%26shield%3Dtests)
-|![Custom badge](https://xpandshields.azurewebsites.net/endpoint?label=%20&url=https%3A%2F%2Fxpandnugetstats.azurewebsites.net%2Fapi%2Ftotals%2FLatestXAFMinors%3Findex%3D3)|![Custom badge](https://xpandshields.azurewebsites.net/endpoint?style=plastic&url=https%3A%2F%2Fxpandnugetstats.azurewebsites.net%2Fapi%2Ftotals%2FXAFBuild%3Findex%3D3%26branch%3Dmaster%26shield%3Dtests)|![Custom badge](https://xpandshields.azurewebsites.net/endpoint?style=plastic&url=https%3A%2F%2Fxpandnugetstats.azurewebsites.net%2Fapi%2Ftotals%2FXAFBuild%3Findex%3D3%26branch%3Dlab%26shield%3Dtests)
+|![Custom badge](http://45-126-125-189.cloud-xip.com/endpoint?style=for-the-badge&label=%20&url=https%3A%2F%2Fxpandnugetstats.azurewebsites.net%2Fapi%2Ftotals%2FLatestXAFMinors%3Findex%3D1)|![Custom badge](http://45-126-125-189.cloud-xip.com/endpoint?style=plastic&url=https%3A%2F%2Fxpandnugetstats.azurewebsites.net%2Fapi%2Ftotals%2FXAFBuild%3Findex%3D1%26branch%3Dmaster%26shield%3Dtests)|![Custom badge](http://45-126-125-189.cloud-xip.com/endpoint?&style=plastic&url=https%3A%2F%2Fxpandnugetstats.azurewebsites.net%2Fapi%2Ftotals%2FXAFBuild%3Findex%3D1%26branch%3Dlab%26shield%3Dtests)
 
 ## Versioning
 The modules are **not bound** to **DevExpress versioning**, which means you can use the latest version with your old DevExpress projects [Read more](https://github.com/eXpandFramework/XAF/tree/master/tools/Xpand.VersionConverter).
@@ -41,7 +39,7 @@ The modules follow the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 ### Issues
 Use main project [issues](https://github.com/eXpandFramework/eXpand/issues/new?assignees=apobekiaris&labels=Question%2C+XAF&template=xaf--question.md&title=)
 
-![GitHub issues by-label](https://xpandshields.azurewebsites.net/github/issues/expandframework/expand/Standalone_XAF_Modules.svg) [![GitHub close issues](https://xpandshields.azurewebsites.net/github/issues-closed/eXpandFramework/eXpand/Standalone_XAF_Modules.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AXAF+)
+![GitHub issues by-label](http://45-126-125-189.cloud-xip.com/github/issues/expandframework/expand/Standalone_XAF_Modules.svg) [![GitHub close issues](http://45-126-125-189.cloud-xip.com/github/issues-closed/eXpandFramework/eXpand/Standalone_XAF_Modules.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AXAF+)
 
 ### Efficient Package Management
 

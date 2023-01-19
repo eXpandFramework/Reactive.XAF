@@ -38,6 +38,7 @@ using Xpand.Extensions.XAF.ApplicationModulesManagerExtensions;
 using Xpand.Extensions.XAF.Attributes;
 using Xpand.Extensions.XAF.CollectionSourceExtensions;
 using Xpand.Extensions.XAF.FrameExtensions;
+using Xpand.Extensions.XAF.ObjectSpaceExtensions;
 using Xpand.Extensions.XAF.ObjectSpaceProviderExtensions;
 using Xpand.Extensions.XAF.SecurityExtensions;
 using Xpand.Extensions.XAF.TypesInfoExtensions;
@@ -653,6 +654,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static IObservable<T> ToObjects<T>(this IObservable<(IObjectSpace objectSpace, IEnumerable<T> objects)> source)
             => source.SelectMany(t => t.objects);
+        public static IEnumerable<T> ToObjects<T>(this IEnumerable<(IObjectSpace objectSpace, IEnumerable<T> objects)> source)
+            => source.SelectMany(t => t.objects);
         
         public static IObservable<T> ToObjects<T>(this IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)> source) 
             => source.SelectMany(t => t.details.Select(t1 => t1.instance));
@@ -765,6 +768,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         
         public static IObservable<T> UseObjectSpace<T>(this XafApplication application,Func<IObjectSpace,IObservable<T>> factory,bool useObjectSpaceProvider=false,[CallerMemberName]string caller="") 
             => Observable.Using(() => application.CreateObjectSpace(useObjectSpaceProvider,typeof(T),caller:caller), factory);
+        public static IObservable<T> UseObject<T>(this XafApplication application,T instance,Func<T,IObservable<object>> selector,bool useObjectSpaceProvider=false,[CallerMemberName]string caller="") 
+            => application.UseObjectSpace(space => selector(space.GetObjectFromKey(instance)).To<T>());
 
         public static IObservable<T2> UseProviderObjectSpace<T,T2>(this XafApplication application,T obj, Func<T, IObservable<T2>> factory, 
             [CallerMemberName] string caller = "") 
