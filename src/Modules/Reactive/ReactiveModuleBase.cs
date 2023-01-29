@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reflection;
@@ -20,15 +22,19 @@ using Xpand.XAF.Modules.Reactive.Extensions;
 namespace Xpand.XAF.Modules.Reactive{
     public abstract class ReactiveModuleBase:ModuleBase{
         internal readonly ReplaySubject<ReactiveModuleBase> SetupCompletedSubject=new(1);
-        static readonly Subject<ApplicationModulesManager> SettingUpSubject=new();
+        
         static ReactiveModuleBase() {
             AppDomain.CurrentDomain.AssemblyResolve += CurrentDomainOnAssemblyResolve;
             Patch();
         }
 
+        public static IScheduler Scheduler { get; set; }=System.Reactive.Concurrency.Scheduler.Default;
+        
         private static void Patch() {
             new HarmonyMethod(typeof(ReactiveModule).Method(nameof(SetupModulesPatch), Flags.StaticAnyVisibility))
                 .PreFix(typeof(ApplicationModulesManager).Method("SetupModules"), true);
+            new HarmonyMethod(typeof(ReactiveModule).Method(nameof(LoadCore), Flags.StaticAnyVisibility))
+                .PreFix(typeof(ApplicationModulesManager).Method(nameof(ApplicationModulesManager.LoadCore)), true);
             if (DesignerOnlyCalculator.IsRunTime) {
                 AppDomain.CurrentDomain.AddModelReference("netstandard", typeof(FontStyle?).Assembly.GetName().Name);
             }
@@ -58,37 +64,23 @@ namespace Xpand.XAF.Modules.Reactive{
         static bool SetupModulesPatch(ApplicationModulesManager __instance){
             Tracing.Tracer.LogText("SetupModules");
             return SetupModules(__instance);
-
         }
-        public static Type[] UnloadedModules { get; private set; }
         
-
-        
-        public static IDisposable Unload(params Type[] modules) {
-            UnloadedModules=modules;
-            return SettingUpSubject.Do(_ => {
-                    foreach (var module in _.Modules.Where(m => m.RequiredModuleTypes.Any(modules.Contains))) {
-                        foreach (var type in modules) {
-                            module.RequiredModuleTypes.Remove(type);
-                        }
-                    }
-
-                    foreach (var m in modules) {
-                        var module = _.Modules.FindModule(m);
-                        _.Modules.Remove(module);
-                        module.Dispose();
-                    }
-                })
-                .FirstAsync().Subscribe();
+        [SuppressMessage("ReSharper", "InconsistentNaming")]
+        static void LoadCore(ApplicationModulesManager __instance) {
+            UnloadedModules?.ForEach(type => __instance.Modules.Remove(__instance.Modules.First(m => m.GetType()==type)));
         }
 
+        public static List<Type> UnloadedModules { get; } = new();
         
+        public static void Unload(params Type[] modules) => UnloadedModules.AddRange(modules);
+
+
         public IObservable<ReactiveModuleBase> SetupCompleted => Observable.Defer(() => SetupCompletedSubject.Select(module => module)).TraceRX();
 
 
         [SuppressMessage("ReSharper", "SuspiciousTypeConversion.Global")]
         private static bool SetupModules(ApplicationModulesManager applicationModulesManager){
-            SettingUpSubject.OnNext(applicationModulesManager);
             foreach(var module in applicationModulesManager.Modules) {
                 try {
                     module.Setup(applicationModulesManager);

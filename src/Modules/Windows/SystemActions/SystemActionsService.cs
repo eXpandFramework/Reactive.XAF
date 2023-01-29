@@ -3,7 +3,6 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
@@ -16,7 +15,6 @@ using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
-using Xpand.XAF.Modules.Reactive.Services.Controllers;
 
 namespace Xpand.XAF.Modules.Windows.SystemActions {
     public static class SystemActionsService {
@@ -37,7 +35,7 @@ namespace Xpand.XAF.Modules.Windows.SystemActions {
 
         private static IObservable<Unit> WaitTheExecute(this (ActionBase action, IModelHotkeyAction model) activated, IModelHotkeyAction model) 
             => activated.action.WhenExecuteCompleted().FirstAsync()
-                .MergeToUnit(model.Defer(() => activated.action.DoTheExecute(model)).IgnoreElements()).FirstAsync();
+                .MergeToUnit(model.DeferAction(_ => activated.action.DoTheExecute(model)).IgnoreElements()).FirstAsync();
 
         private static IObservable<(ActionBase action, IModelHotkeyAction model)> WhenActionActivated(this XafApplication application, (HotKeyManager manager, Frame window) hotKeyManager) 
             => hotKeyManager.window.Actions().Where(a => a.Available()).ToNowObservable()
@@ -63,11 +61,6 @@ namespace Xpand.XAF.Modules.Windows.SystemActions {
             => hotKeyManager.WhenEvent<GlobalHotKeyEventArgs>(nameof(HotKeyManager.GlobalHotKeyPressed)).Where(e => e.HotKey.Name==globalHotKey.Name);
         private static IObservable<LocalHotKeyEventArgs> WhenLocalHotKeyPressed(this HotKeyManager hotKeyManager, LocalHotKey globalHotKey) 
             => hotKeyManager.WhenEvent<LocalHotKeyEventArgs>(nameof(HotKeyManager.LocalHotKeyPressed)).Where(e => e.HotKey.Name==globalHotKey.Name);
-        
-
-
-        [DllImport("user32.dll")]
-        static extern bool SetForegroundWindow(IntPtr hWnd);
         
         private static void DoTheExecute(this ActionBase action, IModelHotkeyAction model) {
             switch (action) {

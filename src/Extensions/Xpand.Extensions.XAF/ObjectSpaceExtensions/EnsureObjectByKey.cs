@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
 using DevExpress.Data.Filtering;
@@ -21,7 +24,20 @@ namespace Xpand.Extensions.XAF.ObjectSpaceExtensions {
             update?.Invoke(ensureObject);
             return ensureObject;
         }
-        
+
+        public static T EnsureObject<T>(this IObjectSpace space, Dictionary<string, T> dictionary, string id){
+            var ensureObject = dictionary.GetValueOrDefault(id);
+            ensureObject = ensureObject == null ? space.CreateObject<T>() : space.GetObjectFromKey(ensureObject);
+            if (space.IsNewObject(ensureObject)){
+                dictionary.Add(id, ensureObject);
+            }
+
+            return ensureObject;
+        }
+        [SuppressMessage("ReSharper", "HeapView.CanAvoidClosure")]
+        public static T EnsureObject<T>(this IObjectSpace space, ConcurrentDictionary<string, T> dictionary, string id) 
+            => space.GetObject(dictionary.GetOrAdd(id, _ => space.CreateObject<T>()));
+
         public static T EnsureObject<T>(this IObjectSpace objectSpace, CriteriaOperator criteria,Action<T> initialize=null,bool inTransaction=false) where T : class {
             var o = objectSpace.FindObject<T>(criteria,inTransaction);
             if (o != null) {

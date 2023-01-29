@@ -12,8 +12,9 @@ namespace Xpand.Extensions.Reactive.Transform.System {
                 .Do(execute).ToUnit();
         public static IObservable<Unit> After(this TimeSpan timeSpan, Action execute,SynchronizationContext context)
             => Unit.Default.ReturnObservable().Delay(timeSpan,context.Scheduler()).Do(execute).ToUnit();
-        public static IObservable<long> Timer(this TimeSpan dueTime,Func<TimeSpan,bool> when=null)
-            => Observable.Timer(dueTime).Where(_ => when?.Invoke(dueTime)??true);
+        public static IObservable<long> Timer(this TimeSpan dueTime,IScheduler scheduler=null)
+            => Observable.Timer(dueTime,scheduler??Scheduler.Default);
+        
         public static IObservable<long> Interval(this TimeSpan dueTime)
             => Observable.Interval(dueTime);
     }

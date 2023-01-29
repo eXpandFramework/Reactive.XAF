@@ -22,12 +22,13 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net {
     public static class NetworkExtensions {
         public static readonly HttpStatusCode[] WorthRetryingCodes ={
             HttpStatusCode.TooManyRequests, IpBanned, WafLimit, HttpStatusCode.BadGateway, HttpStatusCode.Forbidden,
-            HttpStatusCode.Unauthorized, HttpStatusCode.RequestTimeout
+            HttpStatusCode.Unauthorized, HttpStatusCode.RequestTimeout,HttpStatusCode.InternalServerError,HttpStatusCode.ServiceUnavailable, 
+            HttpStatusCode.GatewayTimeout, 
         };
         public const HttpStatusCode TooManyRequests = HttpStatusCode.TooManyRequests;
         public const HttpStatusCode IpBanned = (HttpStatusCode)418;
         public const HttpStatusCode WafLimit = (HttpStatusCode)403;
-        public const HttpStatusCode InternalError = HttpStatusCode.InternalServerError;
+        
         private static readonly Subject<(HttpResponseMessage message, object instance)> ResponseSubject = new();
         private static readonly Subject<(HttpResponseMessage message, string content,object instance)> ObjectSentSubject = new();
         public static IObservable<(HttpResponseMessage message, string content,object instance)> Object => ObjectSentSubject.AsObservable();
@@ -37,7 +38,8 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net {
             => WorthRetryingCodes.Contains(message.StatusCode);
 
         public static IObservable<TimeSpan> RetryAfter(this HttpResponseException e,Func<TimeSpan,IObservable<Unit>> selector=null) {
-            IObservable<TimeSpan> Retry(TimeSpan retryAfter1) => retryAfter1.Timer(timeSpan => timeSpan > TimeSpan.Zero).DefaultIfEmpty().To(retryAfter1);
+            IObservable<TimeSpan> Retry(TimeSpan retryAfter1) => Observable.If(() => retryAfter1>TimeSpan.Zero,retryAfter1.Timer())
+                .DefaultIfEmpty().To(retryAfter1);
             return e.HttpResponseMessage.RetryAfter().ReturnObservable()
                 .SelectMany(retryAfter => selector?.Invoke(retryAfter).To<TimeSpan>().SwitchIfEmpty(Retry(retryAfter)) ?? Retry(retryAfter));
         }

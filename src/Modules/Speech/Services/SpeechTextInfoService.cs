@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
-using System.Threading;
 using System.Windows.Forms;
 using DevExpress.ExpressApp;
 using Xpand.Extensions.DateTimeExtensions;
@@ -35,16 +34,16 @@ namespace Xpand.XAF.Modules.Speech.Services {
             => manager.WhenSpeechApplication(application => application.WhenFrame(typeof(SpeechToText),ViewType.DetailView))
                 .SelectMany(frame => frame.View.ToDetailView().WhenNestedListViewProcessCustomizeShowViewParameters(typeof(SSMLFile))
                     .Select(e => {
-                        var ssmlFile = e.ShowViewParameters.CreatedView.CurrentObject.To<SSMLFile>();
+                        var ssmlFile = e.ShowViewParameters.CreatedView.CurrentObject.Cast<SSMLFile>();
                         Clipboard.SetText(ssmlFile.File.FullName);
                         e.ShowViewParameters.CreatedView = null;
                         return ssmlFile;
                     })
-                    .ShowXafMessage(frame.Application,file => $"File {file.File.FileName} copied in memory.",SynchronizationContext.Current))
+                    .ShowXafInfoMessage(file => $"File {file.File.FileName} copied in memory."))
                 .ToUnit();
 
         private static void NewSpeechInfo(this View view,Type speechTextType, params SpeechText[] speechTexts) {
-            var speechToText = view.CurrentObject.To<SpeechToText>();
+            var speechToText = view.CurrentObject.Cast<SpeechToText>();
             var speechTextInfos = speechToText.SpeechInfo;
             string type=speechTextType==typeof(SpeechTranslation)?"Translation":"Recognition";
             speechTextInfos.Remove(speechTextInfos.FirstOrDefault(info => info.SpeechType == type));

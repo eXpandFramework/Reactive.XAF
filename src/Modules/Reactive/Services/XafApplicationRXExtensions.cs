@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
@@ -54,6 +55,7 @@ using View = DevExpress.ExpressApp.View;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
     public static class XafApplicationRxExtensions {
+        
         static readonly ISubject<Func<IObservable<object>>> CommitChangesSubject=Subject.Synchronize(new Subject<Func<IObservable<object>>>());
         static XafApplicationRxExtensions(){
             CommitChangesSubject.ObserveOnDefault()
@@ -161,6 +163,12 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .Select(window => window).Publish().RefCount().FirstAsync()
                 .TraceRX(window => window.Context);
 
+        public static IObservable<TObject> Cache<TObject,TKey>(this XafApplication application,ConcurrentDictionary<TKey,TObject> dictionary,IObserver<ConcurrentDictionary<TKey,TObject>> observer) where TObject:IObjectSpaceLink 
+            => Observable.Start(() => application.WhenExistingObject<TObject>()
+                .Do(value => dictionary.TryAdd((TKey)value.ObjectSpace.GetKeyValue(value),value),() => observer.OnNext(dictionary))
+                .ConcatDefer(() => application.WhenProviderCommitted<TObject>(ObjectModification.New).ToObjects()
+                    .Do(value => dictionary.TryAdd((TKey)value.ObjectSpace.GetKeyValue(value),value)))).Merge();
+        
         public static IObservable<Window> WhenPopupWindowCreated(this XafApplication application) 
             => application.WhenFrameCreated(TemplateContext.PopupWindow).Where(_ => _.Application==application).Cast<Window>();
         
@@ -236,80 +244,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => application.ObjectSpaceProviders.ToNowObservable()
                 .SelectMany(spaceProvider => spaceProvider.WhenObjectSpaceCreated(emitUpdatingObjectSpace));
 
-        public static IObservable<T> ShowXafMessage<T>(this IObservable<T> source, XafApplication application,
-            SynchronizationContext context , InformationType informationType = InformationType.Info,
-            int displayInterval = MessageDisplayInterval, InformationPosition position = InformationPosition.Left,
-            [CallerMemberName] string memberName = "") {
-            return source.ObserveOnContext(context).Do(obj =>
-                application.ShowMessage(obj, informationType, displayInterval, memberName, $"{obj}"));
-        }
-
-        public static IObservable<T> ShowXafMessage<T>(this IObservable<T> source, XafApplication application,
-            InformationType informationType = InformationType.Info, int displayInterval = MessageDisplayInterval,
-            InformationPosition position = InformationPosition.Left, [CallerMemberName] string memberName = "")
-            => source.Do(obj => application.ShowMessage(obj, informationType, displayInterval, memberName, $"{obj}"));
-        public static IObservable<T> ShowXafMessage<T>(this IObservable<T> source, XafApplication application,Func<T,string> messageSelector,SynchronizationContext context=null,InformationType informationType=InformationType.Info,int displayInterval=MessageDisplayInterval,InformationPosition position=InformationPosition.Left, [CallerMemberName] string memberName = "")
-            => source.ObserveOnContext(context??SynchronizationContext.Current).Do(obj => application.ShowMessage(obj, informationType, displayInterval, "", messageSelector(obj)));
-
-        public static IObservable<T> ShowXafMessage<T>(this IObservable<T> source, XafApplication application,
-            Func<T,int, string> messageSelector,SynchronizationContext context=null, InformationType informationType = InformationType.Info, int displayInterval = MessageDisplayInterval, InformationPosition position = InformationPosition.Left,
-            [CallerMemberName] string memberName = "")
-            => source.ObserveOnContext(context??SynchronizationContext.Current).Select((arg1, i) => {
-                application.ShowMessage(arg1,informationType, displayInterval, "", messageSelector(arg1, i));
-                return arg1;
-            });
-
-        public static IObservable<T> ShowXafMessage<T>(this IObservable<T> source, XafApplication application, Func<T, string> messageSelector, Func<T, InformationType> infoSelector,SynchronizationContext context=null,
-            Func<T,int> displayInterval=null, InformationPosition position = InformationPosition.Left,Action<T> onOk = null, Action<T> onCancel = null,[CallerMemberName] string memberName = "")
-            => source.ObserveOnContext(context??SynchronizationContext.Current)
-                .Do(obj => application.ShowMessage(obj,infoSelector(obj), displayInterval?.Invoke(obj)??MessageDisplayInterval, memberName, messageSelector?.Invoke(obj)??memberName,onOk:onOk,onCancel:onCancel));
         
-        public static IObservable<T> ShowXafSuccessMessage<T>(this IObservable<T> source, XafApplication application, Func<T, string> messageSelector, SynchronizationContext context=null,
-            Func<T,int> displayInterval=null, InformationPosition position = InformationPosition.Left,Action<T> onOk = null, Action<T> onCancel = null,[CallerMemberName] string memberName = "")
-            => source.ShowXafMessage(application,messageSelector,_ => InformationType.Success,context,displayInterval,position,onOk,onCancel,memberName);
-
-        public static IObservable<T> ShowXafInfoMessage<T,T2>(this IObservable<T> source, XafApplication application,
-            Func<T, IObservable<T2>> showSignal, Func<T2, string> messageSelector, [CallerMemberName] string caller = "") 
-            => source.MergeIgnored(arg => application.WhenSynchronizationContext()
-                .SelectMany(context => showSignal(arg).ShowXafInfoMessage(application, messageSelector,context,memberName:caller)));
-        
-        public static IObservable<XafApplication> ShowXafInfoMessage<T>(this XafApplication application,Func<IObservable<T>> showSignal,Func<T, string> messageSelector,[CallerMemberName]string caller="") 
-            => application.ReturnObservable().To<T>().ShowXafInfoMessage(application, _ => showSignal(),messageSelector,caller ).To(application);
-        
-        public static IObservable<T> ShowXafInfoMessage<T>(this IObservable<T> source, XafApplication application, Func<T, string> messageSelector, SynchronizationContext context,
-            Func<T,int> displayInterval=null, InformationPosition position = InformationPosition.Left,Action<T> onOk = null, Action<T> onCancel = null,[CallerMemberName] string memberName = "")
-            => source.ShowXafMessage(application,messageSelector,_ => InformationType.Info,context,displayInterval,position,onOk,onCancel,memberName);
-        
-        public static IObservable<T> ShowXafWarningMessage<T>(this IObservable<T> source, XafApplication application, Func<T, string> messageSelector, SynchronizationContext context=null,
-            Func<T,int> displayInterval=null, InformationPosition position = InformationPosition.Left,Action<T> onOk = null, Action<T> onCancel = null,[CallerMemberName] string memberName = "")
-            => source.ShowXafMessage(application,messageSelector,_ => InformationType.Warning,context,displayInterval,position,onOk,onCancel,memberName);
-        
-        public static IObservable<T> ShowXafErrorMessage<T>(this IObservable<T> source, XafApplication application, Func<T, string> messageSelector, SynchronizationContext context=null,
-            Func<T,int> displayInterval=null, InformationPosition position = InformationPosition.Left,Action<T> onOk = null, Action<T> onCancel = null,[CallerMemberName] string memberName = "")
-            => source.ShowXafMessage(application,messageSelector,_ => InformationType.Error,context,displayInterval,position,onOk,onCancel,memberName);
-
-        public const int MessageDisplayInterval = 5000;
-
-        public static IObservable<XafApplication> ShowXafMessage(this IObservable<XafApplication> source,SynchronizationContext context=null,
-            InformationType informationType = InformationType.Info, int displayInterval = MessageDisplayInterval,
-            InformationPosition position = InformationPosition.Left, [CallerMemberName] string memberName = "")
-            => source.ObserveOnContext(context??SynchronizationContext.Current).Do(application => application.ShowMessage(default(object),informationType, displayInterval, memberName, null));
-
-        public static IObservable<Frame> ShowXafMessage(this IObservable<Frame> source,SynchronizationContext context=null,
-            InformationType informationType = InformationType.Info, int displayInterval = MessageDisplayInterval,
-            InformationPosition position = InformationPosition.Left, [CallerMemberName] string memberName = "")
-            => source.ObserveOnContext(context??SynchronizationContext.Current).Do(frame => frame.Application.ShowMessage(frame,informationType, displayInterval, memberName,  $"{frame}"));
-
-        private static void ShowMessage<T>(this XafApplication application,T obj, InformationType informationType, int displayInterval, string memberName, string message,
-            WinMessageType winMessageType = WinMessageType.Alert, Action<T> onOk = null, Action<T> onCancel = null) {
-            if (message != null) {
-                application.ShowViewStrategy?.ShowMessage(new MessageOptions() {
-                    Duration = displayInterval, Message = $"{memberName}{Environment.NewLine}{message}",
-                    Type = informationType, Win = { Type = winMessageType },OkDelegate = () => onOk?.Invoke(obj),CancelDelegate = () => onCancel?.Invoke(obj)
-                });   
-            }
-        }
-
         public static IObservable<IObjectSpace> WhenObjectSpaceCreated(this XafApplication application,bool includeNonPersistent=true,bool includeNested=false) 
             => Observable.FromEventPattern<EventHandler<ObjectSpaceCreatedEventArgs>,ObjectSpaceCreatedEventArgs>(h => application.ObjectSpaceCreated += h,h => application.ObjectSpaceCreated -= h,ImmediateScheduler.Instance)
                 .TransformPattern<ObjectSpaceCreatedEventArgs,XafApplication>()
@@ -534,7 +469,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
 
         public static IObservable<SynchronizationContext> WhenSynchronizationContext(this XafApplication application) 
-            => application.WhenLoggedOn().Select(_ => SynchronizationContext.Current);
+            => application.WhenWindowCreated(true).Select(_ => SynchronizationContext.Current);
 
         public static IObservable<(XafApplication application, LogonEventArgs e)> WhenLoggedOn(this IObservable<XafApplication> source) 
             => source.SelectMany(application => application.WhenLoggedOn());
@@ -768,8 +703,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         
         public static IObservable<T> UseObjectSpace<T>(this XafApplication application,Func<IObjectSpace,IObservable<T>> factory,bool useObjectSpaceProvider=false,[CallerMemberName]string caller="") 
             => Observable.Using(() => application.CreateObjectSpace(useObjectSpaceProvider,typeof(T),caller:caller), factory);
-        public static IObservable<T> UseObject<T>(this XafApplication application,T instance,Func<T,IObservable<object>> selector,bool useObjectSpaceProvider=false,[CallerMemberName]string caller="") 
-            => application.UseObjectSpace(space => selector(space.GetObjectFromKey(instance)).To<T>());
+        public static IObservable<TResult> UseObject<TSource,TResult>(this XafApplication application,TSource instance,Func<TSource,IObservable<TResult>> selector,bool useObjectSpaceProvider=false,[CallerMemberName]string caller="") 
+            => application.UseObjectSpace(space => selector(space.GetObjectFromKey(instance)));
 
         public static IObservable<T2> UseProviderObjectSpace<T,T2>(this XafApplication application,T obj, Func<T, IObservable<T2>> factory, 
             [CallerMemberName] string caller = "") 
@@ -902,16 +837,16 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         }
 
         public static IObservable<T[]> CommitChangesSequential<T>(this XafApplication application,Type objectType, Func<IObjectSpace,IObservable<T>> commit,int retry =3,[CallerMemberName]string caller="") 
-            => Observable.Create<T[]>(observer => application.Defer(() => CommitChangesSubject.OnNext(() => application.UseProviderObjectSpace(space => 
-                            commit(space).BufferUntilCompleted()
+            => Observable.Create<T[]>(observer => application.DeferAction(_ => CommitChangesSubject.OnNext(() => application
+                    .UseProviderObjectSpace(space => commit(space).BufferUntilCompleted().Timeout(TimeSpan.FromSeconds(10))
                             .Do(arg => {
                                 space.CommitChanges();
                                 observer.OnNext(arg);
                                 observer.OnCompleted();
-                            })
-                            , objectType, caller)
+                            }), objectType, caller)
                     .RetryWithBackoff(retry)
-                    .DoOnError(observer.OnError).CompleteOnError()
+                    .DoOnError(observer.OnError)
+                    // .CompleteOnError()
                     .Select(_ => default(object))))
                     
                 .Subscribe());

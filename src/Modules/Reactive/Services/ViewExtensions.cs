@@ -122,7 +122,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         
         public static IObservable<IFrameContainer> NestedFrameContainers<TView>(this TView view, params Type[] objectTypes ) where TView : DetailView  
             => view.GetItems<IFrameContainer>().Where(editor =>editor.Frame?.View == null).ToNowObservable()
-                .SelectMany(frameContainer =>frameContainer.To<ViewItem>().Control==null? frameContainer.To<ViewItem>().WhenControlCreated().To(frameContainer):frameContainer.ReturnObservable())
+                .SelectMany(frameContainer =>frameContainer.Cast<ViewItem>().Control==null? frameContainer.Cast<ViewItem>().WhenControlCreated().To(frameContainer):frameContainer.ReturnObservable())
                 .NestedFrameContainers(view, objectTypes);
         public static IObservable<DashboardViewItem> NestedDashboards<TView>(this TView view, params Type[] objectTypes ) where TView : DetailView 
             => view.NestedViewItems<TView,DashboardViewItem>( objectTypes);

@@ -27,7 +27,7 @@ using Xpand.XAF.Modules.Speech.BusinessObjects;
 namespace Xpand.XAF.Modules.Speech.Services {
     public static class TextToSpeechService {
         public static SingleChoiceAction SpeakText(this (SpeechModule, Frame frame) tuple) 
-            => tuple.frame.Action(nameof(SpeakText)).To<SingleChoiceAction>();
+            => tuple.frame.Action(nameof(SpeakText)).Cast<SingleChoiceAction>();
 
         internal static IObservable<Unit> ConnectTextToSpeech(this  ApplicationModulesManager manager)
             => manager.SpeakText()
@@ -95,12 +95,12 @@ namespace Xpand.XAF.Modules.Speech.Services {
         private static IObservable<TextToSpeech> Speak(this XafApplication application, IObjectSpace space,
             Func<IObjectSpace, TextToSpeech> textToSpeechSelector, Func<BusinessObjects.SpeechService,string> textSelector) {
             var speechAccount = space.DefaultSpeechAccount(application.Model.SpeechModel());
-            var synchronizationContext = SynchronizationContext.Current;
+            
             return speechAccount.Speak(application.Model.SpeechModel(), (_, result, path) => textToSpeechSelector(space)
                     .UpdateSSMLFile(result, path).Commit(), () => textSelector(speechAccount))
-                .ObserveOnContext(synchronizationContext)
+                .ObserveOnContext(SynchronizationContext.Current)
                 .Do(speech => Clipboard.SetText(speech.File.FullName))
-                .ShowXafMessage(application, speech => $"{speech.File.FileName} saved and path in memory.",synchronizationContext);
+                .ShowXafMessage(speech => $"{speech.File.FileName} saved and path in memory.");
         }
 
         private static IObservable<Unit> Type(this SingleChoiceActionExecuteEventArgs e) 

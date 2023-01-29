@@ -106,6 +106,7 @@ namespace Xpand.XAF.Modules.Reactive{
                 .Merge(application.NonPersistentChangesEnabledAttribute())
                 .Merge(application.PopulateAdditionalObjectSpaces())
                 .Merge(application.ReloadWhenChanged())
+                .Merge(application.ShowMessages())
                 .Merge(application.ShowInstanceDetailView());
         }
 
@@ -113,7 +114,7 @@ namespace Xpand.XAF.Modules.Reactive{
         private static IObservable<Unit> ShowInstanceDetailView(this XafApplication application)
             => application.WhenSetupComplete().SelectMany(_ => application.WhenViewOnFrame().ShowInstanceDetailView(application.TypesInfo
                     .PersistentTypes.Attributed<ShowInstanceDetailViewAttribute>().Types().Select(info => info.Type).ToArray())).ToUnit();
-            
+        
         private static IObservable<Unit> ReloadWhenChanged(this XafApplication application)
             => application.WhenSetupComplete().SelectMany(_ => {
                 var membersToReload = application.Model.BOModel.TypeInfos().AttributedMembers<ReloadWhenChangeAttribute>().ToArray();

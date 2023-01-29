@@ -33,10 +33,9 @@ namespace Xpand.Extensions.Reactive.Transform {
         public static IObservable<IList<T>> BufferUntilInactive<T>(this IObservable<T> source, TimeSpan delay,Func<IObservable<T>,IObservable<IList<T>>> resultSelector)
             => source.Publish(obs => obs.Window(() => obs.Throttle(delay)).SelectMany(resultSelector));
         
-        public static IObservable<TSource[]> BufferUntilCompleted<TSource>(this IObservable<TSource> source,bool skipEmpty=false){
-            var allEvents = source.Publish().RefCount();
-            return allEvents.Buffer(allEvents.LastOrDefaultAsync().WhenNotDefault()).Select(list => list.ToArray()).Where(sources => !skipEmpty||sources.Any());
-        }
+        public static IObservable<TSource[]> BufferUntilCompleted<TSource>(this IObservable<TSource> source,bool skipEmpty=false) 
+            => source.Publish(allEvents => allEvents.Buffer(allEvents.LastOrDefaultAsync().WhenNotDefault()).Take(1).Select(list => list.ToArray())
+                    .Where(sources => !skipEmpty || sources.Any()));
 
         /// <summary>
         /// Returns a connectable observable, that once connected, will start buffering data until the observer subscribes, at which time it will send all buffered data to the observer and then start sending new data.
@@ -159,6 +158,11 @@ namespace Xpand.Extensions.Reactive.Transform {
                 .GroupByUntil(_ => 0, g => g.SkipWhile(e => e.HasValue))
                 .SelectMany(g => g.Where(e => e.HasValue).Select(e => e.Value).ToArray())
                 .Where(w => w.Length > 0);
+
+        public static IObservable<T> BufferWhen<T>(this IObservable<T> source, IObservable<object> signal,Func<IObservable<T>,IObservable<T>> selector=null) 
+            => source.Publish(obs => obs.Buffer(signal).Take(1)
+                .SelectMany(list => list.ToNowObservable().Concat(selector?.Invoke(obs)??obs)));
     }
+    
     
 }

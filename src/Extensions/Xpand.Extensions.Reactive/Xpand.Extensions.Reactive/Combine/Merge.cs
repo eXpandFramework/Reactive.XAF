@@ -33,20 +33,20 @@ namespace Xpand.Extensions.Reactive.Combine{
             => source.ToUnit().Merge(value.ToUnit());
         
         public static IObservable<T> MergeIgnored<T,T2>(this IObservable<T> source,Func<T,IObservable<T2>> secondSelector,Func<T,bool> merge=null)
-            => source.SelectMany(arg => {
+            => source.Publish(obs => obs.SelectMany(arg => {
                 merge ??= _ => true;
                 var observable = Observable.Empty<T>();
                 if (merge(arg)) {
                     observable = secondSelector(arg).IgnoreElements().To(arg);
                 }
                 return observable.Merge(arg.ReturnObservable());
-            });
+            }));
         
         public static IObservable<T> MergeIgnored<T,T2>(this IObservable<T> source,Func<T,bool> merge,Func<T,IObservable<T2>> secondSelector)
             => source.MergeIgnored(secondSelector);
         
         public static IObservable<T> MergeIgnored<T>(this IObservable<T> source,Func<T,bool> merge,Action<T> @do)
-            => source.MergeIgnored(arg => Observable.Empty<T>(), arg => {
+            => source.MergeIgnored(_ => Observable.Empty<T>(), arg => {
                 @do(arg);
                 return merge(arg);
             });

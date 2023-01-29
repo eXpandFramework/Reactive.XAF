@@ -9,7 +9,7 @@ namespace Xpand.Extensions.XAF.ViewExtensions {
             var container = listView.LayoutManager.Container;
             var fixedPanel = container.GetPropertyValue("FixedPanel");
             fixedPanel.SetPropertyValue("Visible",false);
-            var width = fixedPanel.GetPropertyValue("MinimumSize").To<Size>().Width;
+            var width = fixedPanel.GetPropertyValue("MinimumSize").Cast<Size>().Width;
             fixedPanel.SetPropertyValue("Width",width);
             return listView;
         }

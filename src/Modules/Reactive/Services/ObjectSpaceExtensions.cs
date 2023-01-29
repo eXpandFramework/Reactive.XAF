@@ -8,6 +8,7 @@ using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
@@ -213,12 +214,12 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static bool IsNested(this IObjectSpace objectSpace) 
             => objectSpace.GetType().InheritsFrom("DevExpress.ExpressApp.Xpo.XPNestedObjectSpace");
-
         public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)>
             WhenCommittedDetailed<T>(this IObjectSpace objectSpace, ObjectModification objectModification,
                 Func<T, bool> criteria = null, params string[] modifiedProperties) where T : class 
-            => objectSpace.WhenCommitingDetailed(true, objectModification,criteria, modifiedProperties);
-
+            => objectSpace.Defer(() => objectSpace.WhenCommitingDetailed(true, objectModification,criteria, modifiedProperties).Take(1)).Repeat()
+                .TakeUntil(objectSpace.WhenDisposed());
+        
         public static IObservable<(IObjectSpace objectSpace, (object instance, ObjectModification modification)[] details)>
             WhenCommittedDetailed(this IObjectSpace objectSpace, Type objectType, ObjectModification objectModification,
                 Func<object, bool> criteria = null, params string[] modifiedProperties) 
@@ -323,7 +324,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                     .Where(tuple => filter == null || filter(tuple))
                     .SelectMany(tuple => tuple.objectSpace.ModifiedObjects.OfType<T>()));
 
-        public static void CommitChanges(this IObjectSpaceLink link)
+        public static void CommitChanges(this IObjectSpaceLink link, [CallerMemberName] string caller = "")
             => link.ObjectSpace.CommitChanges();
         
         public static Task CommitChangesAsync(this IObjectSpaceLink link)
@@ -335,7 +336,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         }
         public static IObservable<T> Commit<T>(this IEnumerable<T> source,IObjectSpaceLink objectSpace) where T:IObjectSpaceLink {
             var links = source as T[] ?? source.ToArray();
-            return links.Finally(objectSpace.CommitChanges).ToNowObservable();
+            return links.Finally(() => objectSpace.CommitChanges()).ToNowObservable();
         }
 
         public static IObservable<T> Commit<T>(this T link) where T:IObjectSpaceLink
@@ -373,7 +374,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 nos.Refresh();  
             }  
             else {  
-                objectSpace.ReloadObject(value);  
+                return (T)objectSpace.ReloadObject(value);  
             }
 
             return objectSpace.GetObject(value);

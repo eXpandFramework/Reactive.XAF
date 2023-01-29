@@ -87,7 +87,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
         [ModelBrowsable(typeof(ShowXafMessageVisibility))][Category("XafMessage")]
         InformationType XafMessageType { get; set; }
         [ModelBrowsable(typeof(ShowXafMessageVisibility))]
-        [DefaultValue(XafApplicationRxExtensions.MessageDisplayInterval)]
+        [DefaultValue(ShowMessageExtensions.MessageDisplayInterval)]
         [Category("XafMessage")]
         int MessageDisplayInterval { get; set; }
     }

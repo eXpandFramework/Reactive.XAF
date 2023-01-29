@@ -37,10 +37,13 @@ namespace Xpand.Extensions.Reactive.Utility{
 
         private static readonly Dictionary<string, RXAction> RXActions = Enum.GetValues(typeof(RXAction)).Cast<RXAction>()
             .ToDictionary(action => action.ToString(), action => action);
-        
-        public static IObservable<TSource> Trace<TSource>(this IObservable<TSource> source, string name = null, TraceSource traceSource = null,
-            Func<TSource, string> messageFactory = null, Func<Exception, string> errorMessageFactory = null, Action<ITraceEvent> traceAction = null,
-            ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.OnNextOrOnError, string memberName = "", string sourceFilePath = "", int sourceLineNumber = 0)
+
+        public static IObservable<TSource> Trace<TSource>(this IObservable<TSource> source, string name = null,
+            TraceSource traceSource = null,
+            Func<TSource, string> messageFactory = null, Func<Exception, string> errorMessageFactory = null,
+            Action<ITraceEvent> traceAction = null,
+            ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.OnNextOrOnError, string memberName = "",
+            string sourceFilePath = "", int sourceLineNumber = 0)
             => Observable.Create<TSource>(observer => { 
                 void Action(string m, object v, Action<ITraceEvent> ta){
                     if (traceSource?.Switch.Level == SourceLevels.Off){
@@ -74,6 +77,7 @@ namespace Xpand.Extensions.Reactive.Utility{
                     v => {
                         if (traceStrategy.Is(ObservableTraceStrategy.OnNext)){
                             Action("OnNext", v, traceAction.Push(traceSource));
+                            
                         }
                         observer.OnNext(v);
                     },

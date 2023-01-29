@@ -14,6 +14,7 @@ using System.Threading;
 using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
+using DevExpress.ExpressApp.Notifications;
 using DevExpress.Persistent.Base.General;
 using DevExpress.Utils;
 using Fasterflect;
@@ -64,7 +65,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
                     .SelectMany(frame => events.Throttle(TimeSpan.FromSeconds(1))
 				        .TakeUntil(frame.WhenDisposingFrame())
 				        .DistinctUntilChanged(traceEvent => traceEvent.Key())
-                        .ObserveOn(SynchronizationContext.Current)
+                        .ObserveOn(SynchronizationContext.Current!)
 				        .SelectMany(e => {
 					        if (e.Method != nameof(RefreshViewDataSource)){
 						        frame?.View?.RefreshDataSource();
@@ -228,7 +229,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
             IList<ITraceEvent> traceEventMessages, CriteriaOperator criteria){
             var lastEvent = objectSpace.GetObjectsQuery<TraceEvent>().OrderByDescending(_ => _.Timestamp).FirstOrDefault();
             foreach (var traceEventMessage in traceEventMessages.Where(e => objectSpace.IsObjectFitForCriteria(criteria,e))){
-	            if (lastEvent != null && traceEventMessage.Key() == lastEvent.Key()){
+                if (lastEvent != null && traceEventMessage.Key() == lastEvent.Key()){
                     lastEvent.Called++;
                     continue;
                 }
@@ -244,14 +245,12 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
         private static IObservable<Unit> Notifications(this XafApplication xafApplication) 
             => xafApplication.WhenSetupComplete().SelectMany(_ => {
                 var moduleType = AppDomain.CurrentDomain.GetAssemblyType("DevExpress.ExpressApp.Notifications.NotificationsModule");
-                var service = xafApplication.Modules.FindModule(moduleType)?.GetPropertyValue("NotificationsService");
+                var service = (NotificationsService)xafApplication.Modules.FindModule(moduleType)?.GetPropertyValue("NotificationsService");
                 return service != null ? xafApplication.WhenModelChanged().FirstAsync()
                         .SelectMany(application => {
-                            var synchronizationContext = SynchronizationContext.Current;
                             var notifications = application.ToReactiveModule<IModelReactiveModuleLogger>().ReactiveLogger.Notifications;
                             var rules = notifications.Select(notification => (notification.ObjectType.TypeInfo.Type, notification.Criteria,notification.ShowXafMessage,notification.XafMessageType,notification.MessageDisplayInterval)).ToArray();
-                            return SavedTraceEvent.Cast<TraceEvent>()
-                                .SelectMany(traceEvent => rules.Where(t => traceEvent.ObjectSpace.IsObjectFitForCriteria(CriteriaOperator.Parse(t.Criteria), traceEvent))
+                            return SavedTraceEvent.Cast<TraceEvent>().SelectMany(traceEvent => rules.Where(t => traceEvent.Match(t.Criteria))
                                     .Select(rule => {
                                         var supportNotifications = (ISupportNotifications)traceEvent.ObjectSpace.CreateObject(rule.Type);
                                         supportNotifications.AlarmTime = DateTime.Now;
@@ -260,19 +259,19 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
                                         traceEvent.ObjectSpace.CommitChanges();
                                         return (supportNotifications,rule);
                                     })
-                                    .ToNowObservable().ObserveOnContext(synchronizationContext)
-                                    .Do(_ => service.CallMethod("Refresh"))
-                                    .ShowXafMessage(xafApplication, traceEvent,synchronizationContext));
+                                    .ToNowObservable()
+                                    .ShowXafMessage(xafApplication, traceEvent))
+                                    .Do(_ => service.Refresh());
                         }).ToUnit()
                     : Observable.Empty<Unit>();
             });
 
-        public static IObservable<(ISupportNotifications supportNotifications, (Type objectType, string criteria, bool
+        public static IObservable<(T supportNotifications, (Type objectType, string criteria, bool
                 showXafMessage, InformationType informationType, int messageDisplayInterval))> 
-            ShowXafMessage(this IObservable<(ISupportNotifications supportNotifications, (Type objectType, string criteria, bool showXafMessage, InformationType informationType
-                , int messageDisplayInterval) rule)> source, XafApplication application, TraceEvent traceEvent,SynchronizationContext context,Action onOk = null, Action onCancel = null, [CallerMemberName] string memberName = "") 
-            => source.Where(t => t.rule.showXafMessage).ShowXafMessage(application, _ => $"{traceEvent.Location}, {traceEvent.Method}, {traceEvent.Value}",
-                t => t.rule.informationType, context, t => t.rule.messageDisplayInterval, memberName: memberName,
+            ShowXafMessage<T>(this IObservable<(T supportNotifications, (Type objectType, string criteria, bool showXafMessage, InformationType informationType
+                , int messageDisplayInterval) rule)> source, XafApplication application, TraceEvent traceEvent,Action onOk = null, Action onCancel = null, [CallerMemberName] string memberName = "") 
+            => source.Where(t => t.rule.showXafMessage).ShowXafMessage(_ => $"{traceEvent.Location}, {traceEvent.Method}, {traceEvent.Value}",
+                t => t.rule.informationType, t => t.rule.messageDisplayInterval, memberName: memberName,
                 onOk: t => application.ShowViewStrategy.ShowViewInPopupWindow(application.NewDetailView(t.supportNotifications)));
     }
 }

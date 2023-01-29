@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Reactive;
@@ -26,7 +25,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
         static readonly TraceEventReceiver Receiver = new();
         private static Server _server;
 
-
+        
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) 
 	        => manager.WhenApplication(application => {
 		        if (!(application is ILoggerHubClientApplication)){
@@ -38,16 +37,20 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
 				        .Select(pattern => pattern).IgnoreElements().ToUnit().Subscribe();
 		        }
 		        var startServer = application.StartServer().Publish().RefCount();
-		        var client = Observable.Start(application.ConnectClient).Merge().Publish().RefCount();
+		        
 		        application.CleanUpHubResources( startServer);
 
                 var saveServerTraceMessages = application.SaveServerTraceMessages().Publish().RefCount();
 		        return startServer.ToUnit()
-			        .Merge(client.ToUnit())
+			        .Merge(application.ConnectClient().ToUnit())
 			        .Merge(saveServerTraceMessages.ToUnit())
 			        .Merge(application.WhenViewOnFrame(typeof(TraceEvent))
-				        .SelectMany(frame => saveServerTraceMessages.LoadTracesToListView(frame)));
+				        .SelectMany(frame => saveServerTraceMessages.LoadTracesToListView(frame))
+			        )
+			        ;
 	        });
+
+        
 
         public static void CleanUpHubResources(this XafApplication application, IObservable<Server> startServer) 
             => application.WhenDisposed().Zip(startServer, (_, server) => server.ShutDownServer())
@@ -59,7 +62,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
 	        => server.ShutdownAsync().ToObservable().TakeUntil(Observable.Timer(TimeSpan.FromSeconds(5)));
 
         private static IObservable<Unit> LoadTracesToListView(this IObservable<TraceEvent[]> source,Frame frame) 
-	        => source.ObserveOn(SynchronizationContext.Current)
+	        => source.ObserveOn(SynchronizationContext.Current!)
 		        .Select(events => {
 			        if (events.Any()){
 				        ((ListView)frame?.View)?.RefreshDataSource();
@@ -90,13 +93,14 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
 
         private static IObservable<ITraceEventHub> ConnectClient(this XafApplication application) 
 	        => !(application is ILoggerHubClientApplication)? Observable.Empty<ITraceEventHub>()
-		        : application.WhenCompatibilityChecked().FirstAsync()
-			        .SelectMany(_ => application.DetectServer().Select(point => point)
-				        .ConnectClient())
+		        : application.WhenCompatibilityChecked()
+			        .SelectMany(_ => application.DetectServer().ConnectClient())
 			        ;
 
         public static IObservable<IPEndPoint> DetectServer(this XafApplication application)
-	        => application.ClientPortsList().ToNowObservable().ObserveOnDefault().Listening().Take(1)
+	        => application.ClientPortsList().Select(point => point)
+		        .Listening().Take(1).Select(point => point)
+		        .ShowXafInfoMessage(point => point.ToString())
 		        .TraceRXLoggerHub(point => $"{point.Address}, {point.Port}");
 
         public static IObservable<ITraceEventHub> ConnectClient(this IObservable<IPEndPoint> source) 
@@ -109,12 +113,11 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
 		        .TraceRXLoggerHub()
 		        .Retry();
 
-        public static IEnumerable<IPEndPoint> ClientPortsList(this XafApplication application) 
+        public static IObservable<IPEndPoint> ClientPortsList(this XafApplication application) 
 	        => application.ModelLoggerPorts().SelectMany(ports => ports.LoggerPorts).OfType<IModelLoggerClientRange>()
-		        .TraceRXLoggerHub(range => $"{range.Host}, {range.StartPort}, {range.EndPort}")
+		        // .TraceRXLoggerHub(range => $"{range.Host}, {range.StartPort}, {range.EndPort}")
 		        .SelectMany(range => Enumerable.Range(range.StartPort, range.EndPort-range.StartPort)
-			        .Select(port => IpEndPoint(range.Host, port))).Merge()
-		        .ToEnumerable();
+			        .Select(port => IpEndPoint(range.Host, port))).Merge();
 
         private static IObservable<IPEndPoint> IpEndPoint(string host, int port) 
 	        => Regex.IsMatch(host, @"\A\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b\z") ? new IPEndPoint(IPAddress.Parse(host), port).ReturnObservable()

@@ -28,7 +28,5 @@
     <SchemaModule Name="SystemModule" Version="19.1.5.0" IsNewNode="True" />
     <SchemaModule Name="SystemWindowsFormsModule" Version="19.1.5.0" IsNewNode="True" />
   </SchemaModules>
-  <Views>
-    <ListView Id="TraceEvent_ListView" Criteria="[RXAction] In (##Enum#Xpand.XAF.Modules.Reactive.Logger.RXAction,OnNext#, ##Enum#Xpand.XAF.Modules.Reactive.Logger.RXAction,OnError#)" />
-  </Views>
+  
 </Application>

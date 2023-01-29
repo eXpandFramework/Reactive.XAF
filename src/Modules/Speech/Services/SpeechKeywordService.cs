@@ -6,7 +6,6 @@ using System.Windows.Forms;
 using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
-using DevExpress.XtraEditors;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
@@ -73,7 +72,7 @@ namespace Xpand.XAF.Modules.Speech.Services {
                         speechKeyword.Text += $";{text}";
                         speechKeyword.Text = speechKeyword.Text.TrimStart(';');
                         return speechKeyword.Commit().To(speechKeyword).ObserveOnContext()
-                            .ShowXafMessage(e.Application(),keyword => $"{text} added to {keyword} {keyword.Text.Split(';').Length}");
+                            .ShowXafMessage(keyword => $"{text} added to {keyword} {keyword.Text.Split(';').Length}");
                     }
                     return Observable.Empty<SpeechKeyword>();
 

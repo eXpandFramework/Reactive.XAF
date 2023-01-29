@@ -9,6 +9,6 @@ namespace Xpand.Extensions.XAF.ObjectSpaceExtensions {
         public static NonPersistentObjectSpace AsNonPersistentObjectSpace(this IObjectSpace objectSpace)
             => objectSpace as NonPersistentObjectSpace;
         public static NonPersistentObjectSpace ToNonPersistentObjectSpace(this IObjectSpace objectSpace)
-            => objectSpace.To<NonPersistentObjectSpace>();
+            => objectSpace.Cast<NonPersistentObjectSpace>();
     }
 }

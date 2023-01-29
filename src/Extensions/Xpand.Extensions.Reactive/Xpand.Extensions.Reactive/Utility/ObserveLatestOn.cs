@@ -11,6 +11,9 @@ namespace Xpand.Extensions.Reactive.Utility{
             => source.ObserveLatestOn(new SynchronizationContextScheduler(context));
         public static IObservable<TSource> ObserveLatestOnContext<TSource>(this IObservable<TSource> source)
             => source.ObserveLatestOn(SynchronizationContext.Current);
+        
+        public static IObservable<TSource> ObserveLatest<TSource>(this IObservable<TSource> source)
+            => source.ObserveLatestOn(System.Reactive.Concurrency.Scheduler.CurrentThread);
         public static IObservable<TSource> ObserveLatestOn<TSource>(this IObservable<TSource> source, IScheduler scheduler) 
             => Observable.Create<TSource>(observer => {
                 Notification<TSource> pendingNotification = null;

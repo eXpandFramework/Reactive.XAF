@@ -221,7 +221,7 @@ namespace Xpand.Extensions.XAF.Xpo {
             }
 
             return connectionProvider is not STASafeDataStore ? connectionProvider is ConnectionProviderSql provider ? provider.Connection : null
-                : connectionProvider.GetFieldValue("DataStore").To<ConnectionProviderSql>().Connection;
+                : connectionProvider.GetFieldValue("DataStore").Cast<ConnectionProviderSql>().Connection;
         }
         
         public static SqlConnection NewSQLConnection(this XafApplication application,Type objectType=null) {

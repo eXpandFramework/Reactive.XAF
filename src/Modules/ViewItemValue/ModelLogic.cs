@@ -46,7 +46,7 @@ namespace Xpand.XAF.Modules.ViewItemValue{
 						.Select(editor => (editor,t.attribute))))
 				.GroupBy(t => t.editor.GetParent<IModelDetailView>())
 				.ForEach(views => {
-					var item = node.To<IModelViewItemValueItems>().AddNode<IModelViewItemValueItem>();
+					var item = node.Cast<IModelViewItemValueItems>().AddNode<IModelViewItemValueItem>();
 					item.ObjectView = views.Key.AsObjectView;
 					views.Where(t => item.Members[t.editor.ModelMember.Id()] == null).ForEach(t => {
 						var viewItem = item.Members.AddNode<IModelViewItemValueObjectViewItem>();

@@ -8,27 +8,20 @@ using System.Threading.Tasks;
 using MagicOnion.Server.Hubs;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
+using Xpand.Extensions.Tracing;
 
 namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
     
     public class TraceEventHub : StreamingHubBase<ITraceEventHub, ITraceEventHubReceiver>,ITraceEventHub{
         static readonly ISubject<TraceEventMessage> TraceSubject=new Subject<TraceEventMessage>();
-
         public static IObservable<TraceEventMessage> Trace => TraceSubject;
-
         static readonly ISubject<Unit> ConnectingSubject=Subject.Synchronize(new Subject<Unit>());
         static readonly ISubject<Unit> DisconnectingSubject=Subject.Synchronize(new Subject<Unit>());
         private IGroup _group;
-        // private static IConnectableObservable<IList<ITraceEvent>> _listenerEvents;
-
-
         public static IObservable<Unit> Connecting => ConnectingSubject;
 
         public  Task ConnectAsync(){
             ConnectingSubject.OnNext(Unit.Default);
-            
-            // return _listenerEvents.SelectMany(list => list)
-            //     .Concat(Observable.Defer(() => ReactiveLoggerService.ListenerEvents))
             return ReactiveLoggerService.ListenerEvents
                 .TakeUntil(DisconnectingSubject)
                 .Select(e => {

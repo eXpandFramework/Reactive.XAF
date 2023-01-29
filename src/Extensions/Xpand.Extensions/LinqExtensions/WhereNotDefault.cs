@@ -6,7 +6,12 @@ using Xpand.Extensions.ObjectExtensions;
 
 namespace Xpand.Extensions.LinqExtensions{
     public static partial class LinqExtensions{
-        public static IEnumerable<T> WhereNotDefault<T,T2>(this IEnumerable<T> source, Func<T,T2> predicate) => source.Where(arg => !predicate(arg).IsDefaultValue());
+        public static IEnumerable<T> WhereNotDefault<T,T2>(this IEnumerable<T> source, Func<T,T2> predicate) 
+            => source.Where(arg => !predicate(arg).IsDefaultValue());
+
+        public static IEnumerable<string> WhereNotDefaultOrEmpty(this IEnumerable<string> source) 
+            => source.WhereNotDefault().Where(s => s != String.Empty);
+
         public static IEnumerable<TSource> WhereNotDefault<TSource>(this IEnumerable<TSource> source) {
             var type = typeof(TSource);
             if (type.IsClass || type.IsInterface){

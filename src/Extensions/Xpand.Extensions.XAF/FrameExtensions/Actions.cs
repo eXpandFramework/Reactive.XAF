@@ -12,7 +12,7 @@ namespace Xpand.Extensions.XAF.FrameExtensions{
 
         public static T ParentObject<T>(this Frame frame) => frame.As<NestedFrame>().ViewItem.View.CurrentObject.As<T>(); 
         public static NestedFrame AsNestedFrame(this Frame frame) => frame.As<NestedFrame>(); 
-        public static NestedFrame ToNestedFrame(this Frame frame) => frame.To<NestedFrame>(); 
+        public static NestedFrame ToNestedFrame(this Frame frame) => frame.Cast<NestedFrame>(); 
         public static ActionBase Action(this Frame frame, string id) 
             => frame.Actions(id).FirstOrDefault();
         public static SimpleAction SimpleAction(this Frame frame, string id) 

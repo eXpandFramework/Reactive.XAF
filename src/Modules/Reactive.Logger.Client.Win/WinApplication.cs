@@ -30,8 +30,8 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Client.Win {
             InitializeComponent();
             InitializeDefaults();
             
-            Modules.AddRange(new ModuleBase[]{ new ReactiveLoggerHubModule(), new OneViewModule(),
-                new GridListEditorModule(),new WindowsModule(),new ReactiveLoggerClientModule() 
+            Modules.AddRange(new ModuleBase[]{ new OneViewModule(),new ReactiveLoggerModule(),
+                new ReactiveLoggerHubModule(), new GridListEditorModule(),new WindowsModule(),new ReactiveLoggerClientModule() 
             });
         }
         protected override void CreateDefaultObjectSpaceProvider(CreateCustomObjectSpaceProviderEventArgs args) {

@@ -50,13 +50,13 @@ namespace Xpand.XAF.Modules.Speech.Services {
 		public static ParametrizedAction SpareTime(this (SpeechModule, Frame frame) tuple)
 			=> tuple.frame.ParametrizedAction(nameof(SpareTime));
         public static SimpleAction SpeechToText(this (SpeechModule, Frame frame) tuple) 
-            => tuple.frame.Action(nameof(SpeechToText)).To<SimpleAction>();
+            => tuple.frame.Action(nameof(SpeechToText)).Cast<SimpleAction>();
         
         public static ParametrizedAction Rate(this (SpeechModule, Frame frame) tuple) 
-            => tuple.frame.Action(nameof(Rate)).To<ParametrizedAction>();
+            => tuple.frame.Action(nameof(Rate)).Cast<ParametrizedAction>();
 
         public static SingleChoiceAction Synthesize(this (SpeechModule, Frame frame) tuple) 
-            => tuple.frame.Action(nameof(Synthesize)).To<SingleChoiceAction>();
+            => tuple.frame.Action(nameof(Synthesize)).Cast<SingleChoiceAction>();
         
         public static IObservable<Unit> ConnectSpeechToText(this ApplicationModulesManager manager) 
 	        => manager.SpeechToTextAction(nameof(SpeechToText), CommonImage.ConvertTo, Recognize())
@@ -317,7 +317,7 @@ namespace Xpand.XAF.Modules.Speech.Services {
 					        }
 
 					        return Observable.While(() => current.Next != null && speechTexts.Contains(current.Next),
-						        current.Defer(() => {
+						        current.DeferAction(_ => {
 							        current.Next.Start += TimeSpan.FromSeconds(timeSpan);
 							        current = current.Next;
 						        }));
@@ -373,7 +373,7 @@ namespace Xpand.XAF.Modules.Speech.Services {
 	        => synthesizeAction.WhenExecuted().Where(e => (string)e.SelectedChoiceActionItem.Data=="Join")
 		        .SelectMany(e => speechTextSource().Join(e.Application().Model.SpeechModel())
 			        .Select(file => file.File.FullName).Do(Clipboard.SetText)
-			        .ShowXafMessage(synthesizeAction.Application,file => $"{Path.GetFileName(file)} copied to memory.")).ToUnit();
+			        .ShowXafMessage(file => $"{Path.GetFileName(file)} copied to memory.")).ToUnit();
 
         private static IObservable<Unit> JoinTextSSMLAudio(this SingleChoiceAction synthesizeAction) 
 	        => synthesizeAction.WhenExecuted().Where(e => (string)e.SelectedChoiceActionItem.Data=="JoinTextSSML")
@@ -408,17 +408,17 @@ namespace Xpand.XAF.Modules.Speech.Services {
 			        var ssmlText = t.ssml.Text;
 			        var speechTexts = t.ssml.SpeechTexts;
 			        return Observable.Defer(() => SpeakTagRegex
-					        .SpeakSSML(ssmlText, t.speechSynthesizer, t.model, speechTexts, actionBase.Application)
-					        .ShowXafMessage(actionBase.Application))
+					        .SpeakSSML(ssmlText, t.speechSynthesizer, t.model, speechTexts)
+					        .ShowXafMessage())
 				        ;
 		        })
 		        .BufferUntilCompleted().ObserveOnContext()
 		        .SelectMany(texts => texts.NewSSMLFile(actionBase.Application.Model.SpeechModel()));
         }
 
-        private static IObservable<SpeechText> SpeakSSML(this Regex regex,string ssml,  SpeechSynthesizer speechSynthesizer, IModelSpeech model,List<SpeechText> speechTexts,XafApplication application) 
+        private static IObservable<SpeechText> SpeakSSML(this Regex regex,string ssml,  SpeechSynthesizer speechSynthesizer, IModelSpeech model,List<SpeechText> speechTexts) 
 	        => regex.Matches(ssml).ToNowObservable()
-		        .ShowXafMessage(application,match => match.Value)
+		        .ShowXafMessage(match => match.Value)
 		        .SelectManySequential((match,i) => {
 			        var ssmlText = match.Value;
 			        var speechText = speechTexts[i];
@@ -443,7 +443,7 @@ namespace Xpand.XAF.Modules.Speech.Services {
 						        speechText.Rate = rate;
 						        return $"Increasing rate {rate.RoundNumber()}%";
 					        })
-					        .ShowXafMessage(application))
+					        .ShowXafMessage())
 				        ;
 		        })
 		        .BufferUntilCompleted().WhenNotEmpty().ObserveOnContext().SelectMany()
@@ -467,7 +467,7 @@ namespace Xpand.XAF.Modules.Speech.Services {
 		        .Select(links => links.Select(link => (link, reader: new AudioFileReader(link.File.FullName))).ToArray())
 		        .SelectMany(readers => Observable.Using(
 			        () => new CompositeDisposable(readers.Select(t => t.reader)), _ => {
-				        var firstSpeechText = readers.First().link.To<SpeechText>();
+				        var firstSpeechText = readers.First().link.Cast<SpeechText>();
 				        var filename = $"{modelSpeech.DefaultStorageFolder}\\{firstSpeechText.File.Oid}_{readers.Last().link.File.Oid}.wav";
 				        WaveFileWriter.CreateWaveFile16(filename, new ConcatenatingSampleProvider(readers.Select(t => t.reader)));
 				        
@@ -548,7 +548,7 @@ namespace Xpand.XAF.Modules.Speech.Services {
 	        => manager.WhenSpeechApplication(application => application.WhenFrame(typeof(SpeechToText),ViewType.DetailView)
 		        .SelectUntilViewClosed(frame => frame.SimpleAction(actionId)
 			        .WhenExecuted().Where(e => e.Action.CommonImage()==startImage).Do(e => e.Action.SetImage(CommonImage.Stop))
-			        .Select(e => (speechToText:e.View().CurrentObject.To<SpeechToText>(),action:e.Action.ToSimpleAction(),context:SynchronizationContext.Current))
+			        .Select(e => (speechToText:e.View().CurrentObject.Cast<SpeechToText>(),action:e.Action.ToSimpleAction(),context:SynchronizationContext.Current))
 			        .SelectMany(t => Observable.Using(() => t.speechToText.AudioConfig(),audioConfig => operation(audioConfig, t.speechToText, t.context,t.action)))));
 
         private static IObservable<Unit> SaveTextAudioFile(this SingleChoiceAction sayItAction, SpeechVoice speechVoice, SpeechText speechText, SpeechSynthesisResult result) {
