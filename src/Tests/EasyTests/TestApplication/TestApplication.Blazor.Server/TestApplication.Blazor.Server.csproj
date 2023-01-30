@@ -42,8 +42,8 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Google.Apis.People.v1" Version="1.25.0.830" />
-    <PackageReference Include="DevExpress.ExpressApp.Blazor.All" Version="22.2.3" />
-    <PackageReference Include="DevExpress.ExpressApp.Security.Xpo" Version="22.2.3" />
+    <PackageReference Include="DevExpress.ExpressApp.Blazor.All" Version="22.2.4" />
+    <PackageReference Include="DevExpress.ExpressApp.Security.Xpo" Version="22.2.4" />
     <PackageReference Include="Hangfire.MemoryStorage" Version="1.7.0" />
     <PackageReference Include="Hangfire.SqlServer" Version="1.7.30" />
     <PackageReference Include="Hangfire.Core" Version="1.7.30" />
@@ -56,7 +56,7 @@
     <PackageReference Include="Xpand.XAF.Web.All">
       <Version>4.222.1.4</Version>
     </PackageReference>
-    <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="22.2.3" />
+    <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="22.2.4" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.3" />
     <PackageReference Include="System.Data.OleDb" Version="6.0" />
     <PackageReference Include="System.ServiceModel.Http" Version="4.10" />

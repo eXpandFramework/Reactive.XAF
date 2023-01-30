@@ -44,8 +44,7 @@ namespace Xpand.XAF.Modules.Reactive.Rest {
 
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) 
             => manager.ConfigureRestOperationTypes()
-                .RestOperationAction()
-                .RestPropertyTypes()
+                .RestOperationAction().RestPropertyTypes()
                 .ToUnit()
                 .Merge(manager.WhenApplication(application => application.WhenNonPersistentObjectSpace()
                     .Merge(application.HandleObjectSpaceGetNonPersistentObject()

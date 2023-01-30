@@ -37,8 +37,8 @@
     <EmbeddedResource Include="LookupCascade\LookupCascade.xafml" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="22.2.3" />
-    <PackageReference Include="DevExpress.ExpressApp.Web.All" Version="22.2.3" />
+    <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="22.2.4" />
+    <PackageReference Include="DevExpress.ExpressApp.Web.All" Version="22.2.4" />
     <PackageReference Include="Xpand.XAF.Web.All" Version="4.222.1.4" />
   </ItemGroup>
   <ItemGroup>

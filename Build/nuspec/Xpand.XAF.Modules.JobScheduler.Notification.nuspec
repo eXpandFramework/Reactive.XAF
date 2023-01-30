@@ -12,7 +12,7 @@
     <description>The `JobScheduler.Notification` emits Object creation events and offers a Blazor UI for fine tuning them.</description>
     <releaseNotes>https://github.com/eXpandFramework/Reactive.XAF/releases</releaseNotes>
     <copyright>eXpandFramework.com</copyright>
-    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, JobScheduler.Notification, 22.2.3</tags>
+    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, JobScheduler.Notification, 22.2.4</tags>
     <dependencies>
       <group targetFramework="netstandard2.0">
         <dependency id="Xpand.VersionConverter" version="4.222.1.4" />
@@ -25,15 +25,15 @@
         <dependency id="Xpand.Extensions.XAF.Xpo" version="4.222.1.4" />
         <dependency id="Xpand.XAF.Modules.Blazor" version="4.222.1.4" />
         <dependency id="Xpand.XAF.Modules.Reactive" version="4.222.1.4" />
-        <dependency id="DevExpress.ExpressApp.ConditionalAppearance" version="22.2.3" />
+        <dependency id="DevExpress.ExpressApp.ConditionalAppearance" version="22.2.4" />
         <dependency id="Fasterflect.Xpand" version="2.0.7" />
         <dependency id="System.Reactive" version="5.0" />
         <dependency id="Hangfire.AspNetCore" version="1.7.30" />
         <dependency id="Xpand.Patcher" version="3.0.17" />
-        <dependency id="DevExpress.ExpressApp.Blazor" version="22.2.3" />
-        <dependency id="DevExpress.ExpressApp.Validation" version="22.2.3" />
-        <dependency id="DevExpress.ExpressApp.Validation.Blazor" version="22.2.3" />
-        <dependency id="DevExpress.ExpressApp.Xpo" version="22.2.3" />
+        <dependency id="DevExpress.ExpressApp.Blazor" version="22.2.4" />
+        <dependency id="DevExpress.ExpressApp.Validation" version="22.2.4" />
+        <dependency id="DevExpress.ExpressApp.Validation.Blazor" version="22.2.4" />
+        <dependency id="DevExpress.ExpressApp.Xpo" version="22.2.4" />
         <dependency id="Xpand.Patcher" version="3.0.17.0" />
         <dependency id="Xpand.VersionConverter" version="4.222.1.4" />
       </group>

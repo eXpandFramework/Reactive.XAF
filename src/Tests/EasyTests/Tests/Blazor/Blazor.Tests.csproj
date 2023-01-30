@@ -52,9 +52,9 @@
     <PackageReference Include="System.ServiceModel.Duplex" Version="4.10" />
     <PackageReference Include="System.ServiceModel.NetTcp" Version="4.10" />
     <PackageReference Include="System.ServiceModel.Security" Version="4.10" />
-    <PackageReference Include="DevExpress.ExpressApp.EasyTest.BlazorAdapter" Version="22.2.3" />
-    <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="22.2.3" />
-    <PackageReference Include="DevExpress.ExpressApp.Blazor.All" Version="22.2.3" />
+    <PackageReference Include="DevExpress.ExpressApp.EasyTest.BlazorAdapter" Version="22.2.4" />
+    <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="22.2.4" />
+    <PackageReference Include="DevExpress.ExpressApp.Blazor.All" Version="22.2.4" />
     <PackageReference Include="Microsoft.NETCore.Platforms" Version="6.0.4" />
     <PackageReference Include="System.CodeDom" Version="6.0" />
     <PackageReference Include="Microsoft.CodeAnalysis" Version="4.2" />

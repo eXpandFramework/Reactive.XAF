@@ -58,10 +58,10 @@
     <Reference Include="Xpand.XAF.Modules.Reactive">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>
     </Reference>
-    <PackageReference Include="DevExpress.ExpressApp.Blazor" Version="22.2.3" />
-    <PackageReference Include="DevExpress.ExpressApp.Validation" Version="22.2.3" />
-    <PackageReference Include="DevExpress.ExpressApp.Validation.Blazor" Version="22.2.3" />
-    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="22.2.3" />
+    <PackageReference Include="DevExpress.ExpressApp.Blazor" Version="22.2.4" />
+    <PackageReference Include="DevExpress.ExpressApp.Validation" Version="22.2.4" />
+    <PackageReference Include="DevExpress.ExpressApp.Validation.Blazor" Version="22.2.4" />
+    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="22.2.4" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Model.DesignedDiffs.xafml" />

@@ -46,7 +46,7 @@ namespace Xpand.XAF.Modules.Reactive.Rest.Tests.Common {
                         objects.Where(link =>link.ObjectSpace==null|| !link.ObjectSpace.IsDeletedObject(link)).ToArray());
                 }
                 else if (new[]{$"Create{typeof(T).Name}",$"Update{typeof(T).Name}",$"Delete{typeof(T).Name}","enable","disable","Act"}.Any(s => requestUrl.Contains(s))) {
-                    message.Content = new StringContent(true.Serialize());
+                    message.Content = new StringContent("[]");
                 }
                 else {
                     throw new NotImplementedException();

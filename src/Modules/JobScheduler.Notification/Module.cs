@@ -1,5 +1,4 @@
-﻿using System.Reactive.Concurrency;
-using DevExpress.ExpressApp;
+﻿using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 
 using Xpand.XAF.Modules.Reactive;
@@ -9,9 +8,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Notification {
     public sealed class JobSchedulerNotificationModule : ReactiveModuleBase {
 
         static JobSchedulerNotificationModule() => TraceSource=new ReactiveTraceSource(nameof(JobSchedulerNotificationModule));
-        public static IScheduler Scheduler { get; set; }
 
-        
         public static ReactiveTraceSource TraceSource{ get; set; }
         public JobSchedulerNotificationModule() {
             RequiredModuleTypes.Add(typeof(JobSchedulerModule));

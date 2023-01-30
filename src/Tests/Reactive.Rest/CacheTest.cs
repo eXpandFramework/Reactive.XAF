@@ -1,8 +1,10 @@
+using System;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Moq;
 using NUnit.Framework;
+using Xpand.Extensions.Reactive.Transform;
 using Xpand.TestsLib.Common;
 using Xpand.XAF.Modules.Reactive.Rest.Tests.BO;
 using Xpand.XAF.Modules.Reactive.Rest.Tests.Common;
@@ -32,7 +34,7 @@ namespace Xpand.XAF.Modules.Reactive.Rest.Tests {
 
         [Test]
         public async Task Do_not_Cache_Post_Requests() {
-            var objectSpace = Application.CreateObjectSpace(typeof(RestOperationObject));
+            using var objectSpace = Application.CreateObjectSpace(typeof(RestOperationObject));
             var restOperationObject = objectSpace.CreateObject<RestOperationObject>();
             var objects = new[] {restOperationObject};
             HandlerMock.SetupRestOperationObject(objects);
@@ -41,7 +43,7 @@ namespace Xpand.XAF.Modules.Reactive.Rest.Tests {
             objectSpace.CommitChanges();
             restObject.Name = "2";
             objectSpace.CommitChanges();
-            await RestService.Object.FirstAsync().Timeout(Timeout);
+            await RestService.Object.FirstAsync().ToTaskWithoutConfigureAwait();
 
             HandlerMock.VerifySend(Times.Exactly(2),message => $"{message.RequestUri}".Contains($"Update{nameof(RestOperationObject)}") );
         }

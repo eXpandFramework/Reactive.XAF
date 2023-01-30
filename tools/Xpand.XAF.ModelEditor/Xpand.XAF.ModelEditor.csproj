@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ApplicationIcon>ExpressApp.ico</ApplicationIcon>
@@ -39,11 +39,11 @@
     <None Remove="Xpand.XAF.ModelEditor.WinDesktop.csproj.paket.references" />
     <None Remove="Xpand.XAF.ModelEditor.WinDesktop.paket.references" />
     <EmbeddedResource Include="ExpressApp.ico" />
-    <PackageReference Include="DevExpress.ExpressApp" Version="22.2.3" />
-    <PackageReference Include="DevExpress.ExpressApp.Win" Version="22.2.3" />
-    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="22.2.3" />
-    <PackageReference Include="DevExpress.Persistent.Base" Version="22.2.3" />
-    <PackageReference Include="DevExpress.Persistent.BaseImpl.Xpo" Version="22.2.3" />
+    <PackageReference Include="DevExpress.ExpressApp" Version="22.2.4" />
+    <PackageReference Include="DevExpress.ExpressApp.Win" Version="22.2.4" />
+    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="22.2.4" />
+    <PackageReference Include="DevExpress.Persistent.Base" Version="22.2.4" />
+    <PackageReference Include="DevExpress.Persistent.BaseImpl.Xpo" Version="22.2.4" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="build\**" />

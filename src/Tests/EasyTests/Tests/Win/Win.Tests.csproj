@@ -41,11 +41,11 @@
     <Compile Include="..\..\CommonFiles\Windows\DocumentStyleManagerService.cs" Link="DocumentStyleManagerService.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DevExpress.EasyTest" Version="22.2.3" />
-    <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="22.2.3" />
-    <PackageReference Include="DevExpress.ExpressApp.EasyTest.WinAdapter" Version="22.2.3" />
-    <PackageReference Include="DevExpress.ExpressApp.ScriptRecorder" Version="22.2.3" />
-    <PackageReference Include="DevExpress.ExpressApp.Win.All" Version="22.2.3" />
+    <PackageReference Include="DevExpress.EasyTest" Version="22.2.4" />
+    <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="22.2.4" />
+    <PackageReference Include="DevExpress.ExpressApp.EasyTest.WinAdapter" Version="22.2.4" />
+    <PackageReference Include="DevExpress.ExpressApp.ScriptRecorder" Version="22.2.4" />
+    <PackageReference Include="DevExpress.ExpressApp.Win.All" Version="22.2.4" />
     <PackageReference Include="MagicOnion" Version="2.6.3" />
     <PackageReference Include="Moq" Version="4.16" />
     <PackageReference Include="Polly" Version="7.2.2" />

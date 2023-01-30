@@ -12,7 +12,7 @@
     <description>Xpand.TestsLib</description>
     <releaseNotes>https://github.com/eXpandFramework/Reactive.XAF/releases</releaseNotes>
     <copyright>eXpandFramework.com</copyright>
-    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Xpand.TestsLib, 22.2.3</tags>
+    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Xpand.TestsLib, 22.2.4</tags>
     <dependencies>
       <group targetFramework="net6.0">
         <dependency id="Xpand.Extensions" version="4.222.1.4" />
@@ -35,7 +35,7 @@
         <dependency id="Xpand.Patcher" version="3.0.17" />
         <dependency id="Polly" version="7.2.2" />
         <dependency id="Microsoft.CodeAnalysis" version="4.2" />
-        <dependency id="DevExpress.ExpressApp.Win" version="22.2.3" />
+        <dependency id="DevExpress.ExpressApp.Win" version="22.2.4" />
         <dependency id="Microsoft.Reactive.Testing" version="5.0" />
         <dependency id="Xpand.Patcher" version="3.0.17.0" />
       </group>

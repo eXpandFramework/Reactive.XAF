@@ -192,7 +192,7 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net {
         private static IObservable<T> WhenResponse<T>(this IObservable<(string json, HttpResponseMessage response)> source,
             object obj, Func<(string json,HttpResponseMessage message),IObservable<T>> deserializeResponse) 
             => source.SelectMany(t => t.response.IsSuccessStatusCode ? deserializeResponse.DeserializeResponse(obj)((t.json, t.response))
-                    .Do(obj1 => ObjectSentSubject.OnNext((t.response, t.json, obj1))) : t.response.Content.ReadAsStringAsync().ToObservable()
+                    .DoOnComplete(() => ObjectSentSubject.OnNext((t.response, t.json, obj))) : t.response.Content.ReadAsStringAsync().ToObservable()
                     .SelectMany(s => Observable.Throw<T>(new HttpResponseException(s, t.response))));
 
         private static Func<(string json, HttpResponseMessage message), IObservable<T>> DeserializeResponse<T>(this Func<(string json, HttpResponseMessage message), IObservable<T>> deserializeResponse,object obj) 

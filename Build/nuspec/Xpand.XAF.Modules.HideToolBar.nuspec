@@ -12,7 +12,7 @@
     <description>The `HideToolBar` package uses the the `IModelListView.HideToolBar` attribute to hide the toolbar.</description>
     <releaseNotes>https://github.com/eXpandFramework/Reactive.XAF/releases</releaseNotes>
     <copyright>eXpandFramework.com</copyright>
-    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, HideToolBar, 22.2.3</tags>
+    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, HideToolBar, 22.2.4</tags>
     <dependencies>
       <group targetFramework="netstandard2.0">
         <dependency id="Xpand.VersionConverter" version="4.222.1.4" />
@@ -23,7 +23,7 @@
         <dependency id="Xpand.Extensions" version="4.222.1.4" />
         <dependency id="Xpand.XAF.Modules.Reactive" version="4.222.1.4" />
         <dependency id="Fasterflect.Xpand" version="2.0.7" />
-        <dependency id="DevExpress.ExpressApp" version="22.2.3" />
+        <dependency id="DevExpress.ExpressApp" version="22.2.4" />
         <dependency id="Xpand.Patcher" version="3.0.17" />
         <dependency id="Microsoft.CSharp" version="4.7" />
         <dependency id="System.Reactive" version="5.0" />

@@ -12,7 +12,7 @@
     <description>Xpand.TestsLib.Blazor</description>
     <releaseNotes>https://github.com/eXpandFramework/Reactive.XAF/releases</releaseNotes>
     <copyright>eXpandFramework.com</copyright>
-    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Xpand.TestsLib.Blazor, 22.2.3</tags>
+    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Xpand.TestsLib.Blazor, 22.2.4</tags>
     <dependencies>
       <group targetFramework="net6.0">
         <dependency id="Xpand.Extensions" version="4.222.1.4" />
@@ -29,12 +29,12 @@
         <dependency id="Moq" version="4.16" />
         <dependency id="Newtonsoft.Json" version="13.0.1" />
         <dependency id="Nunit" version="3.13.2" />
-        <dependency id="DevExpress.ExpressApp.Security.Xpo" version="22.2.3" />
-        <dependency id="DevExpress.Persistent.BaseImpl.Xpo" version="22.2.3" />
+        <dependency id="DevExpress.ExpressApp.Security.Xpo" version="22.2.4" />
+        <dependency id="DevExpress.Persistent.BaseImpl.Xpo" version="22.2.4" />
         <dependency id="Microsoft.Reactive.Testing" version="5.0" />
-        <dependency id="DevExpress.ExpressApp.EasyTest.BlazorAdapter" version="22.2.3" />
-        <dependency id="DevExpress.EasyTest" version="22.2.3" />
-        <dependency id="DevExpress.ExpressApp.Blazor" version="22.2.3" />
+        <dependency id="DevExpress.ExpressApp.EasyTest.BlazorAdapter" version="22.2.4" />
+        <dependency id="DevExpress.EasyTest" version="22.2.4" />
+        <dependency id="DevExpress.ExpressApp.Blazor" version="22.2.4" />
         <dependency id="Microsoft.AspNetCore" version="2.2" />
         <dependency id="Microsoft.AspNetCore.Hosting" version="2.2.7" />
         <dependency id="Microsoft.Extensions.Hosting" version="6.0" />
