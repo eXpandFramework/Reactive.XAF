@@ -1,6 +1,6 @@
-![](https://shields.io/nuget/v/Xpand.XAF.Modules.ProgressBarViewItem.svg?&style=flat) ![](https://shields.io/nuget/dt/Xpand.XAF.Modules.ProgressBarViewItem.svg?&style=flat)
+![](http://45-126-125-189.cloud-xip.com/nuget/v/Xpand.XAF.Modules.ProgressBarViewItem.svg?&style=flat) ![](http://45-126-125-189.cloud-xip.com/nuget/dt/Xpand.XAF.Modules.ProgressBarViewItem.svg?&style=flat)
 
-[![GitHub issues](https://shields.io/github/issues/eXpandFramework/expand/ProgressBarViewItem.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AReactive.XAF+label%3AProgressBarViewItem) [![GitHub close issues](https://shields.io/github/issues-closed/eXpandFramework/eXpand/ProgressBarViewItem.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AReactive.XAF+label%3AProgressBarViewItem)
+[![GitHub issues](http://45-126-125-189.cloud-xip.com/github/issues/eXpandFramework/expand/ProgressBarViewItem.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AReactive.XAF+label%3AProgressBarViewItem) [![GitHub close issues](http://45-126-125-189.cloud-xip.com/github/issues-closed/eXpandFramework/eXpand/ProgressBarViewItem.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AReactive.XAF+label%3AProgressBarViewItem)
 # About 
 
 The `ProgressBarViewItem` package integrates a UI progress for long running tasks. 

@@ -1,6 +1,6 @@
-![](https://shields.io/nuget/v/Xpand.XAF.Modules.Reactive.Logger.Client.Win.svg?&style=flat) ![](https://shields.io/nuget/dt/Xpand.XAF.Modules.Reactive.Logger.Client.Win.svg?&style=flat)
+![](http://45-126-125-189.cloud-xip.com/nuget/v/Xpand.XAF.Modules.Reactive.Logger.Client.Win.svg?&style=flat) ![](http://45-126-125-189.cloud-xip.com/nuget/dt/Xpand.XAF.Modules.Reactive.Logger.Client.Win.svg?&style=flat)
 
-[![GitHub issues](https://shields.io/github/issues/eXpandFramework/expand/Reactive.Logger.Client.Win.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AReactive.XAF+label%3AReactive.Logger.Client.Win) [![GitHub close issues](https://shields.io/github/issues-closed/eXpandFramework/eXpand/Reactive.Logger.Client.Win.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AReactive.XAF+label%3AReactive.Logger.Client.Win)
+[![GitHub issues](http://45-126-125-189.cloud-xip.com/github/issues/eXpandFramework/expand/Reactive.Logger.Client.Win.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AReactive.XAF+label%3AReactive.Logger.Client.Win) [![GitHub close issues](http://45-126-125-189.cloud-xip.com/github/issues-closed/eXpandFramework/eXpand/Reactive.Logger.Client.Win.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AReactive.XAF+label%3AReactive.Logger.Client.Win)
 # About 
 
 The `Reactive.Logger.Client.Win` is an executable able connect to any XAF app that uses the `Reactive.Logger.Hub`.

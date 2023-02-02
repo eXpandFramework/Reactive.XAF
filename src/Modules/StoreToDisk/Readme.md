@@ -1,6 +1,6 @@
-![](https://shields.io/nuget/v/Xpand.XAF.Modules.StoreToDisk.svg?&style=flat) ![](https://shields.io/nuget/dt/Xpand.XAF.Modules.StoreToDisk.svg?&style=flat)
+![](http://45-126-125-189.cloud-xip.com/nuget/v/Xpand.XAF.Modules.StoreToDisk.svg?&style=flat) ![](http://45-126-125-189.cloud-xip.com/nuget/dt/Xpand.XAF.Modules.StoreToDisk.svg?&style=flat)
 
-[![GitHub issues](https://shields.io/github/issues/eXpandFramework/expand/StoreToDisk.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AReactive.XAF+label%3AStoreToDisk) [![GitHub close issues](https://shields.io/github/issues-closed/eXpandFramework/eXpand/StoreToDisk.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AReactive.XAF+label%3AStoreToDisk)
+[![GitHub issues](http://45-126-125-189.cloud-xip.com/github/issues/eXpandFramework/expand/StoreToDisk.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AReactive.XAF+label%3AStoreToDisk) [![GitHub close issues](http://45-126-125-189.cloud-xip.com/github/issues-closed/eXpandFramework/eXpand/StoreToDisk.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AReactive.XAF+label%3AStoreToDisk)
 # About 
 
 The `StoreToDisk` package provides partial and secured serialization for your Business Object
