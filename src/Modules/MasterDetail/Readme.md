@@ -1,6 +1,6 @@
-![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Modules.MasterDetail.svg?&style=flat) ![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Modules.MasterDetail.svg?&style=flat)
+![](https://shields.io/nuget/v/Xpand.XAF.Modules.MasterDetail.svg?&style=flat) ![](https://shields.io/nuget/dt/Xpand.XAF.Modules.MasterDetail.svg?&style=flat)
 
-[![GitHub issues](https://xpandshields.azurewebsites.net/github/issues/eXpandFramework/expand/MasterDetail.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AReactive.XAF+label%3AMasterDetail) [![GitHub close issues](https://xpandshields.azurewebsites.net/github/issues-closed/eXpandFramework/eXpand/MasterDetail.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AReactive.XAF+label%3AMasterDetail)
+[![GitHub issues](https://shields.io/github/issues/eXpandFramework/expand/MasterDetail.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AReactive.XAF+label%3AMasterDetail) [![GitHub close issues](https://shields.io/github/issues-closed/eXpandFramework/eXpand/MasterDetail.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AReactive.XAF+label%3AMasterDetail)
 # About 
 
 The `MasterDetail` module can help you create platform agnostic master detail `XAF` views using only the Model Editor. 
@@ -57,16 +57,16 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |<!-- -->|<!-- -->
 |----|----
 |**DevExpress.ExpressApp**|**Any**
-|[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.222.1
- |Xpand.Extensions|4.222.1
- |Xpand.Extensions.Reactive|4.222.1
- |Xpand.Extensions.XAF|4.222.1
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.222.1
+|[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.222.2
+ |Xpand.Extensions|4.222.2
+ |Xpand.Extensions.Reactive|4.222.2
+ |Xpand.Extensions.XAF|4.222.2
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.222.2
  |Xpand.Patcher|3.0.17
  |System.Reactive|5.0.0
  |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
  |Newtonsoft.Json|13.0.1
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.222.1
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.222.2
 
 ## Issues-Debugging-Troubleshooting
 

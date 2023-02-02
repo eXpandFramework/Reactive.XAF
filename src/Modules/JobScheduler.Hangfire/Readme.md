@@ -1,6 +1,6 @@
-![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Modules.JobScheduler.Hangfire.svg?&style=flat) ![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Modules.JobScheduler.Hangfire.svg?&style=flat)
+![](https://shields.io/nuget/v/Xpand.XAF.Modules.JobScheduler.Hangfire.svg?&style=flat) ![](https://shields.io/nuget/dt/Xpand.XAF.Modules.JobScheduler.Hangfire.svg?&style=flat)
 
-[![GitHub issues](https://xpandshields.azurewebsites.net/github/issues/eXpandFramework/expand/JobScheduler.Hangfire.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AReactive.XAF+label%3AJobScheduler.Hangfire) [![GitHub close issues](https://xpandshields.azurewebsites.net/github/issues-closed/eXpandFramework/eXpand/JobScheduler.Hangfire.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AReactive.XAF+label%3AJobScheduler.Hangfire)
+[![GitHub issues](https://shields.io/github/issues/eXpandFramework/expand/JobScheduler.Hangfire.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AReactive.XAF+label%3AJobScheduler.Hangfire) [![GitHub close issues](https://shields.io/github/issues-closed/eXpandFramework/eXpand/JobScheduler.Hangfire.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AReactive.XAF+label%3AJobScheduler.Hangfire)
 # About 
 
 The `JobScheduler.Hangfire` package integrates Hangfire for fire & forget job schedules.
@@ -59,6 +59,7 @@ Follow the next steps:
     public class Import {
         public IServiceProvider Provider { get; }
         public Import() { }
+        [ActivatorUtilitiesConstructor]
         public Import(IServiceProvider provider) {
             Provider = provider;
         }
@@ -213,26 +214,27 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |**DevExpress.ExpressApp.Validation.Blazor**|**Any**
  |**DevExpress.ExpressApp.Xpo**|**Any**
  |**DevExpress.Persistent.Base**|**Any**
-|[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.222.1
- |Xpand.Extensions.Blazor|4.222.1
- |Xpand.Extensions.Reactive|4.222.1
- |Xpand.Extensions.XAF|4.222.1
- |Xpand.Extensions|4.222.1
- |Xpand.Extensions.XAF.Xpo|4.222.1
- |[Xpand.XAF.Modules.Blazor](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Blazor)|4.222.1
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.222.1
+|[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.222.2
+ |Xpand.Extensions.Blazor|4.222.2
+ |Xpand.Extensions.Reactive|4.222.2
+ |Xpand.Extensions.XAF|4.222.2
+ |Xpand.Extensions|4.222.2
+ |Xpand.Extensions.XAF.Xpo|4.222.2
+ |[Xpand.XAF.Modules.Blazor](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Blazor)|4.222.2
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.222.2
  |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
  |System.Reactive|5.0.0
  |Xpand.Patcher|3.0.17
  |Hangfire.Core|1.7.30
  |Hangfire.AspNetCore|1.7.30
  |Microsoft.CodeAnalysis|4.2.0
+ |System.Data.SqlClient|4.8.3
  |System.ServiceModel.NetTcp|4.10.0
  |System.ServiceModel.Http|4.10.0
  |System.ServiceModel.Security|4.10.0
  |System.CodeDom|6.0.0
  |System.Configuration.ConfigurationManager|6.0.0
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.222.1
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.222.2
 
 ## Issues-Debugging-Troubleshooting
 
