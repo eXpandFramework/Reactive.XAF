@@ -93,7 +93,7 @@ namespace Xpand.XAF.ModelEditor.Module.Win {
             }
 
             var versionsGroup = Directory.GetFiles(Path.GetDirectoryName(assemblyPath)!,"DevExpress.ExpressApp*.dll")
-	            .Where(s => s.Contains("CodeAnalysis"))
+	            .Where(s => Path.GetFileName(s).StartsWith("DevExpress.ExpressApp"))
                 .GroupBy(s => Version.Parse(FileVersionInfo.GetVersionInfo(s).FileVersion!)).ToArray();
             if (versionsGroup.Length > 1){
 	            var conflicts = versionsGroup.SelectMany(grouping => grouping.Take(1).Select(path => (name: Path.GetFileName(path),
@@ -101,7 +101,7 @@ namespace Xpand.XAF.ModelEditor.Module.Win {
 	            throw new UserFriendlyException($"Multiple DevExpress versions found in {assemblyPath} (${conflicts})");
             }
             if (!versionsGroup.Any()) {
-                throw new UserFriendlyException($"Cannot find any DevExpress assembly in {assemblyPath}");
+                throw new UserFriendlyException($"Cannot find any DevExpress assembly in {Path.GetDirectoryName(assemblyPath)}");
             }
 
             var dxVersion = versionsGroup.First().Key;
