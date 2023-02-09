@@ -48,7 +48,7 @@ namespace Xpand.XAF.Modules.Reactive.Services {
         
         static IObservable<Unit> ReadOnlyCollection(this ApplicationModulesManager manager)
             => manager.WhenApplication(application => application.WhenFrame().WhenFrame(ViewType.DetailView)
-                .SelectMany(frame => frame.View.AsDetailView().GetItems<ListPropertyEditor>()
+                .SelectMany(frame => frame.View.AsDetailView().NestedListViews()
                     .SelectMany(editor => editor.MemberInfo.FindAttributes<ReadOnlyCollectionAttribute>()
                         .Select(attribute => (attribute, editor))
                         .Do(t => {

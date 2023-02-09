@@ -28,7 +28,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
         
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) 
 	        => manager.WhenApplication(application => {
-		        if (!(application is ILoggerHubClientApplication)){
+		        if (application is not ILoggerHubClientApplication){
 			        TraceEventHub.Init();
 		        }
 		        else {

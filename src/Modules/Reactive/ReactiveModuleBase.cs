@@ -42,9 +42,6 @@ namespace Xpand.XAF.Modules.Reactive{
 
         private static Assembly CurrentDomainOnAssemblyResolve(object sender, ResolveEventArgs args){
             var name = args.Name;
-            if (name.Contains("Mono.Mod")) {
-                throw new NotImplementedException("aaaaaaaaaaaaaaaaaaa");
-            }
             var comma = name.IndexOf(",", StringComparison.Ordinal);
             if (comma > -1){
                 name = args.Name.Substring(0, comma);

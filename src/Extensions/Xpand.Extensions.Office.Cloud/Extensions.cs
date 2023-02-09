@@ -144,8 +144,8 @@ namespace Xpand.Extensions.Office.Cloud{
         }
 
         public static IObservable<bool> NeedsAuthentication<TAuthentication>(this XafApplication application,Func<IObservable<bool>> authorize) where TAuthentication:CloudOfficeBaseObject 
-            => application.UseObjectSpace(space => (space.GetObjectByKey<TAuthentication>( application.CurrentUserId()) == null).ReturnObservable())
-                .SelectMany(b => !b ? authorize() : true.ReturnObservable());
+            => application.UseObjectSpace(typeof(TAuthentication),space => (space.GetObjectByKey<TAuthentication>( application.CurrentUserId())).ReturnObservable())
+                .SelectMany(b => b!=null ? authorize() : true.ReturnObservable());
 
         private static IObservable<Unit> ConfigureStyle(this IObservable<SimpleAction> source) 
             => source.WhenCustomizeControl()

@@ -89,6 +89,7 @@ namespace TestApplication.Module {
             AdditionalExportedTypes.Add(typeof(Order));
 
             RequiredModuleTypes.Add(typeof(AutoCommitModule));
+            RequiredModuleTypes.Add(typeof(AutoCommitModule));
             RequiredModuleTypes.Add(typeof(CloneMemberValueModule));
             RequiredModuleTypes.Add(typeof(HideToolBarModule));
             RequiredModuleTypes.Add(typeof(MasterDetailModule));

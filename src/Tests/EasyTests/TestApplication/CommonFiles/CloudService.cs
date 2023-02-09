@@ -86,9 +86,10 @@ namespace TestApplication{
                         ((IModelListView) views[ViewType.ListView.ViewId(type,serviceName)]).DetailView = ((IModelDetailView) views[ViewType.DetailView.ViewId(type,serviceName)]);    
                     }
                     var modelOAuth = oauthFactory(views.Application.ToReactiveModule<IModelReactiveModuleOffice>().Office);
-                    return Observable.Using(() => File.OpenRead($"{AppDomain.CurrentDomain.ApplicationPath()}\\..\\{parentFolder}{serviceName}{platform}AppCredentials.json"),
+                    var path = $"{AppDomain.CurrentDomain.ApplicationPath()}\\..\\{parentFolder}{serviceName}{platform}AppCredentials.json";
+                    return Observable.If(() => File.Exists(path),Observable.Using(() => File.OpenRead(path),
                             stream => new StreamReader(stream).ReadToEnd().ReturnObservable()).Select(s => (creds:s,modelOAuth))
-                        .Finally(() => modelOAuth.Prompt=OAuthPrompt.Login);
+                        .Finally(() => modelOAuth.Prompt=OAuthPrompt.Login));
                 });
 
         private static string ViewId(this ViewType viewType,Type objectType,string serviceName) 

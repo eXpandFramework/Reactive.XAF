@@ -9,6 +9,7 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
+using DevExpress.ExpressApp.Model.Core;
 using Fasterflect;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Auth.OAuth2.Flows;
@@ -66,7 +67,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google{
                 => application.GoogleNeedsAuthentication(), application
                 => application.AuthorizeGoogle((_, flow) => flow.AuthorizeApp(application)).ToUnit())
                 .Merge(manager.ExchangeCodeForToken())
-                .Merge(manager.CheckBlazor("Xpand.Extensions.Office.Cloud.Google.Blazor.GoogleCodeStateStartup", "Xpand.Extensions.Office.Cloud.Google.Blazor"))
+                .Merge(Observable.If(() => DesignerOnlyCalculator.IsRunTime,manager.Defer(() => manager.CheckBlazor("Xpand.Extensions.Office.Cloud.Google.Blazor.GoogleCodeStateStartup", "Xpand.Extensions.Office.Cloud.Google.Blazor"))))
                 ;
 
         internal static IObservable<TSource> TraceGoogleModule<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<ITraceEvent> traceAction = null,

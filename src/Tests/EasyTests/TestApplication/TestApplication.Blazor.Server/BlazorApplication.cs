@@ -17,7 +17,7 @@ namespace TestApplication.Blazor.Server {
 
     public class ServerBlazorApplication : BlazorApplication {
         public ServerBlazorApplication(){
-            Modules.Add(new TestBlazorModule());
+            // Modules.Add(new TestBlazorModule());
             this.AlwaysUpdateOnDatabaseVersionMismatch().Subscribe();
             CheckCompatibilityType = CheckCompatibilityType.DatabaseSchema;
             DatabaseUpdateMode = DatabaseUpdateMode.UpdateDatabaseAlways;
@@ -32,11 +32,11 @@ namespace TestApplication.Blazor.Server {
             // ConnectionString = ServiceProvider.GetRequiredService<IConfiguration>().GetConnectionString("ConnectionString");
         }
 
-        protected override void CreateDefaultObjectSpaceProvider(CreateCustomObjectSpaceProviderEventArgs args) {
-            var dataStoreProvider = GetDataStoreProvider(args.ConnectionString, args.Connection);
-            args.ObjectSpaceProviders.Add(new SecuredObjectSpaceProvider((ISelectDataSecurityProvider)Security,dataStoreProvider,true));
-            args.ObjectSpaceProviders.Add(new NonPersistentObjectSpaceProvider(TypesInfo, null));
-        }
+        // protected override void CreateDefaultObjectSpaceProvider(CreateCustomObjectSpaceProviderEventArgs args) {
+        //     var dataStoreProvider = GetDataStoreProvider(args.ConnectionString, args.Connection);
+        //     args.ObjectSpaceProviders.Add(new SecuredObjectSpaceProvider((ISelectDataSecurityProvider)Security,dataStoreProvider,true));
+        //     args.ObjectSpaceProviders.Add(new NonPersistentObjectSpaceProvider(TypesInfo, null));
+        // }
 
         private IXpoDataStoreProvider GetDataStoreProvider(string connectionString, System.Data.IDbConnection connection) {
             var accessor = ServiceProvider.GetRequiredService<XpoDataStoreProviderAccessor>();

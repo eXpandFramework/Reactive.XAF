@@ -24,7 +24,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
         public static ReactiveTraceSource TraceSource{ get; set; }
         public JobSchedulerModule() {
             RequiredModuleTypes.Add(typeof(BlazorModule));
-            RequiredModuleTypes.Add(typeof(SystemBlazorModule));
+            // RequiredModuleTypes.Add(typeof(SystemBlazorModule));
             RequiredModuleTypes.Add(typeof(ValidationModule));
             RequiredModuleTypes.Add(typeof(ValidationBlazorModule));
             RequiredModuleTypes.Add(typeof(ConditionalAppearanceModule));

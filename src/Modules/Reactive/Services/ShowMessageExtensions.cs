@@ -8,15 +8,16 @@ using DevExpress.ExpressApp;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
+using Xpand.Extensions.XAF.XafApplicationExtensions;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
     public static class ShowMessageExtensions {
         private static readonly ISubject<MessageOptions> MessageSubject = Subject.Synchronize(new Subject<MessageOptions>());
 
         internal static IObservable<Unit> ShowMessages(this XafApplication application)
-            => MessageSubject.BufferWhen(application.WhenSynchronizationContext(),source => source.ObserveLatestOnContext())
-                .Do(options => application.ShowViewStrategy.ShowMessage(options))
-                .ToUnit();
+            => Observable.If(() => application.GetPlatform()==Platform.Win,MessageSubject.BufferWhen(application.WhenSynchronizationContext().Select(context => context),source => source.ObserveLatestOnContext())
+	            .Do(options => application.ShowViewStrategy.ShowMessage(options))
+	            .ToUnit());
         
         public static IObservable<T> ShowXafMessage<T>(this IObservable<T> source, InformationType informationType = InformationType.Info, int displayInterval = MessageDisplayInterval,
             InformationPosition position = InformationPosition.Left, [CallerMemberName] string memberName = "")

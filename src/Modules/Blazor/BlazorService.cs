@@ -14,12 +14,10 @@ using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.Extensions.DependencyInjection;
 using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Transform;
-using Xpand.Extensions.XAF.ApplicationModulesManagerExtensions;
-using Xpand.Extensions.XAF.XafApplicationExtensions;
+using Xpand.Extensions.Reactive.Utility;
 using Xpand.XAF.Modules.Blazor.Editors;
 using Xpand.XAF.Modules.Blazor.Services;
 using Xpand.XAF.Modules.Reactive.Services;
-using AssemblyExtensions = Xpand.Extensions.AssemblyExtensions.AssemblyExtensions;
 using NestedFrameTemplate = Xpand.XAF.Modules.Blazor.Templates.NestedFrameTemplate;
 
 namespace Xpand.XAF.Modules.Blazor {
@@ -27,28 +25,11 @@ namespace Xpand.XAF.Modules.Blazor {
         internal static  IObservable<Unit> Connect(this ApplicationModulesManager manager) 
             => manager.DefaultLookupPropertyEditor()
                 .Merge(manager.MarkupContentPropertyEditor())
-                .Merge(manager.CheckBlazor1(typeof(BlazorStartup).FullName, typeof(BlazorModule).Namespace))
+                .Merge(Observable.If(() => DesignerOnlyCalculator.IsRunTime,manager.Defer(() => manager.CheckBlazor(typeof(BlazorStartup).FullName, typeof(BlazorModule).Namespace))))
                 .Merge(manager.WhenApplication(application => application.UseCustomNestedFrameTemplate()
-                    .Merge(application.ApplyDxDataGridModel())).ToUnit());
-        
-        
-        public static IObservable<Unit> CheckBlazor1(this ApplicationModulesManager manager, string hostingStartupType, string requiredPackage) 
-	        => manager.WhereApplication().ToObservable().Where(_ => DesignerOnlyCalculator.IsRunTime)
-		        .SelectMany(application => new[] {(hostingStartupType, requiredPackage), ("Xpand.Extensions.Blazor.HostingStartup", "Xpand.Extensions.Blazor")
-		        }.ToObservable().SelectMany(t => application.CheckBlazor1(t.Item1, t.Item2)));
+                    .Merge(application.ApplyDxDataGridModel())).ToUnit())
+            ;
 
-
-        public static IObservable<Unit> CheckBlazor1(this XafApplication xafApplication, string hostingStartupType, string requiredPackage) {
-	        if (xafApplication.GetPlatform() == Platform.Blazor) {
-		        var startup = AssemblyExtensions.EntryAssembly.Attributes()
-			        .Where(attribute => attribute.IsInstanceOf("Microsoft.AspNetCore.Hosting.HostingStartupAttribute"))
-			        .Where(attribute => ((Type) attribute.GetPropertyValue("HostingStartupType")).FullName == hostingStartupType);
-		        if (!startup.Any()) {
-			        throw new InvalidOperationException($"Install the {requiredPackage} package in the front end project and add: [assembly: HostingStartup(typeof({hostingStartupType}))]");
-		        }
-	        }
-	        return Observable.Empty<Unit>();
-        }
         private static IObservable<Unit> UseCustomNestedFrameTemplate(this XafApplication application) 
             => application.WhenCreateCustomTemplate().Where(t => t.e.Context==TemplateContext.NestedFrame)
                 .Do(t => t.e.Template=new NestedFrameTemplate()).ToUnit();
