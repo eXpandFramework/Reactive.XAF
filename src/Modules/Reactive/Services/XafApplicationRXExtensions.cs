@@ -60,7 +60,6 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         static XafApplicationRxExtensions(){
             CommitChangesSubject.ObserveOnDefault()
                 .SelectManySequential(func => func().CompleteOnError())
-                
                 .Subscribe();
         }
 
@@ -469,7 +468,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
 
         public static IObservable<SynchronizationContext> WhenSynchronizationContext(this XafApplication application) 
-            => application.WhenWindowCreated(true).Select(_ => SynchronizationContext.Current);
+            => application.WhenWindowCreated(true).Select(_ => SynchronizationContext.Current).WhenNotDefault();
 
         public static IObservable<(XafApplication application, LogonEventArgs e)> WhenLoggedOn(this IObservable<XafApplication> source) 
             => source.SelectMany(application => application.WhenLoggedOn());
@@ -570,9 +569,12 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => manager.CheckBlazor(hostingStartupType.FullName, requiredPackage.Namespace);
 
         public static IObservable<Unit> CheckBlazor(this ApplicationModulesManager manager, string hostingStartupType, string requiredPackage) 
-            => manager.WhereApplication().ToObservable().Where(_ => DesignerOnlyCalculator.IsRunTime)
+            => Observable.If(() => DesignerOnlyCalculator.IsRunTime,manager.Defer(() => manager.CheckBlazorCore( hostingStartupType, requiredPackage)));
+
+        private static IObservable<Unit> CheckBlazorCore(this ApplicationModulesManager manager, string hostingStartupType, string requiredPackage) 
+            => manager.WhereApplication().ToObservable()
                 .SelectMany(application => new[] {(hostingStartupType, requiredPackage), ("Xpand.Extensions.Blazor.HostingStartup", "Xpand.Extensions.Blazor")
-            }.ToObservable().SelectMany(t => application.CheckBlazor(t.Item1, t.Item2)));
+                }.ToObservable().SelectMany(t => application.CheckBlazor(t.Item1, t.Item2)));
 
 
         public static IObservable<Unit> CheckBlazor(this XafApplication xafApplication, string hostingStartupType, string requiredPackage) {
@@ -836,20 +838,23 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             return httpClient;
         }
 
-        public static IObservable<T[]> CommitChangesSequential<T>(this XafApplication application,Type objectType, Func<IObjectSpace,IObservable<T>> commit,int retry =3,[CallerMemberName]string caller="") 
-            => Observable.Create<T[]>(observer => application.DeferAction(_ => CommitChangesSubject.OnNext(() => application
-                    .UseProviderObjectSpace(space => commit(space).BufferUntilCompleted().Timeout(TimeSpan.FromSeconds(10))
-                            .Do(arg => {
-                                space.CommitChanges();
-                                observer.OnNext(arg);
-                                observer.OnCompleted();
-                            }), objectType, caller)
-                    .RetryWithBackoff(retry)
-                    .DoOnError(observer.OnError)
-                    // .CompleteOnError()
-                    .Select(_ => default(object))))
-                    
-                .Subscribe());
+        public static IObservable<T[]> CommitChangesSequential<T>(this XafApplication application, Type objectType,
+            Func<IObjectSpace, IObservable<T>> commit, int retry = 3, [CallerMemberName] string caller = "") 
+            => Observable.Create<T[]>(observer => application.DeferAction(_ =>
+                CommitChangesSubject.OnNext(() => application.CommitChangesSequential( objectType, commit, retry, caller, observer))).Subscribe());
+
+        private static IObservable<object> CommitChangesSequential<T>(this XafApplication application, Type objectType,
+            Func<IObjectSpace, IObservable<T>> commit, int retry, string caller, IObserver<T[]> observer) 
+            => application.UseProviderObjectSpace(space => commit(space).BufferUntilCompleted()
+                    .Timeout(TimeSpan.FromMinutes(2)).Catch<T[],TimeoutException>(_ => Observable.Throw<T[]>(new TimeoutException(caller)))
+                    .Do(arg => {
+                        space.CommitChanges();
+                        observer.OnNext(arg);
+                        observer.OnCompleted();
+                    }), objectType, caller)
+                .RetryWithBackoff(retry)
+                .DoOnError(observer.OnError)
+                .Select(_ => default(object));
 
         public static IObservable<T[]> CommitChangesSequential<T>(this XafApplication application,Func<IObjectSpace,IObservable<T>> commit,int retry =3,[CallerMemberName]string caller="") 
             => application.CommitChangesSequential(typeof(T),commit,retry,caller);

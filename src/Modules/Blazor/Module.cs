@@ -18,7 +18,7 @@ namespace Xpand.XAF.Modules.Blazor {
         public static ReactiveTraceSource TraceSource{ get; set; }
         public BlazorModule() {
             RequiredModuleTypes.Add(typeof(ReactiveModule));
-            RequiredModuleTypes.Add(typeof(SystemBlazorModule));
+            // RequiredModuleTypes.Add(typeof(SystemBlazorModule));
         }
 
         public override void ExtendModelInterfaces(ModelInterfaceExtenders extenders){

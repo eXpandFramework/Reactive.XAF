@@ -34,8 +34,7 @@ namespace Xpand.Extensions.Reactive.Transform {
             => source.Publish(obs => obs.Window(() => obs.Throttle(delay)).SelectMany(resultSelector));
         
         public static IObservable<TSource[]> BufferUntilCompleted<TSource>(this IObservable<TSource> source,bool skipEmpty=false) 
-            => source.Publish(allEvents => allEvents.Buffer(allEvents.LastOrDefaultAsync().WhenNotDefault()).Take(1).Select(list => list.ToArray())
-                    .Where(sources => !skipEmpty || sources.Any()));
+            => source.Buffer(Observable.Never<Unit>()).Where(sources => !skipEmpty || sources.Any()).Select(list => list.ToArray());
 
         /// <summary>
         /// Returns a connectable observable, that once connected, will start buffering data until the observer subscribes, at which time it will send all buffered data to the observer and then start sending new data.

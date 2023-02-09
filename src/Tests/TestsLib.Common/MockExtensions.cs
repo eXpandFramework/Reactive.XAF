@@ -109,7 +109,9 @@ namespace Xpand.TestsLib.Common {
                 .Returns((HttpRequestMessage requestMessage, CancellationToken _)
                     =>  new HttpResponseMessage { StatusCode = HttpStatusCode.OK, RequestMessage = requestMessage }.ReturnObservable()
                         .Do(message => message.Content=new StringContent("[]"))
-                        .Do(message => configure?.Invoke(message)).Delay(Delay,scheduler??=Scheduler.Default).ToTask(_, scheduler));
+                        .Do(message => configure?.Invoke(message))
+                        .Delay(Delay,scheduler??=Scheduler.Default)
+                        .ToTask(_, scheduler??=Scheduler.Default));
 
         public static IObservable<HttpResponseMessage> WhenMockedResponse(this XafApplication application,
             Action<HttpClient> configure = null, IScheduler scheduler = null) 

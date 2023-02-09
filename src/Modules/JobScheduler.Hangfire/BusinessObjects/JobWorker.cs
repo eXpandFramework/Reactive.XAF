@@ -47,7 +47,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects {
             set => SetPropertyValue(nameof(Job), ref _job, value);
         }
         [Association("JobWorker-JobStates")][CollectionOperationSet(AllowAdd = false,AllowRemove = false)][Aggregated]
-        [ReadOnlyCollection(disableListViewProcess:true)]
+        // [ReadOnlyCollection(disableListViewProcess:true)]
         public XPCollection<JobState> Executions => GetCollection<JobState>();
     }
 }

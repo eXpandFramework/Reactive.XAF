@@ -12,6 +12,7 @@ using DevExpress.DataAccess.Native.ObjectBinding;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.Blazor;
+using DevExpress.ExpressApp.Model.Core;
 using DevExpress.ExpressApp.Utils;
 using Fasterflect;
 using Hangfire;
@@ -24,7 +25,6 @@ using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.JSInterop;
 using Newtonsoft.Json;
-using Xpand.Extensions.Blazor;
 using Xpand.Extensions.EventArgExtensions;
 using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Filter;
@@ -36,6 +36,7 @@ using Xpand.Extensions.XAF.Attributes;
 using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.ObjectSpaceExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
+using Xpand.XAF.Modules.Blazor;
 using Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects;
 using Xpand.XAF.Modules.JobScheduler.Hangfire.Hangfire;
 using Xpand.XAF.Modules.Reactive;
@@ -76,8 +77,8 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
         private static IObservable<bool> WhenNeedTrigger(this IObservable<StateHistoryDto> source) 
             => source.Select(dto => dto.Data.ContainsKey("Result") && dto.Data["Result"] == "true").WhenNotDefault();
 
-        internal static IObservable<Unit> Connect(this ApplicationModulesManager manager)
-            => manager.CheckBlazor(typeof(HangfireStartup).FullName, typeof(JobSchedulerModule).Namespace)
+        internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) 
+            => Observable.If(() => DesignerOnlyCalculator.IsRunTime,manager.Defer(() => manager.CheckBlazor(typeof(HangfireStartup).FullName, typeof(JobSchedulerModule).Namespace)))
                 .Merge(manager.WhenApplication(application => application.ScheduleJobs().Merge(application.DeleteJobs()))
                     .Merge(manager.TriggerJobsFromAction())
                     .Merge(manager.PauseJobsFromAction())
@@ -93,7 +94,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
                 })
                 .WhenExecuted()
                 .SelectMany(args => {
-                    var serviceProvider = args.Action.Application.ToBlazor().ServiceProvider;
+                    var serviceProvider = Extensions.Blazor.Extensions.ToBlazor(args.Action.Application).ServiceProvider;
                     var uri = $"{new Uri($"{serviceProvider.GetService<IHttpContextAccessor>()?.HttpContext?.Request.GetDisplayUrl()}").GetLeftPart(UriPartial.Authority)}/hangfire/jobs/details/";
                     var jsRuntime = serviceProvider.GetService<IJSRuntime>();
                     return args.SelectedObjects.Cast<JobWorker>().ToObservable(ImmediateScheduler.Instance).SelectMany(

@@ -14,7 +14,6 @@ using Fasterflect;
 using Newtonsoft.Json.Linq;
 using Xpand.Extensions.BytesExtensions;
 using Xpand.Extensions.JsonExtensions;
-using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.StringExtensions;
 
@@ -41,10 +40,11 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net {
             IObservable<TimeSpan> Retry(TimeSpan retryAfter1) => Observable.If(() => retryAfter1>TimeSpan.Zero,retryAfter1.Timer())
                 .DefaultIfEmpty().To(retryAfter1);
             return e.HttpResponseMessage.RetryAfter().ReturnObservable()
-                .SelectMany(retryAfter => selector?.Invoke(retryAfter).To<TimeSpan>().SwitchIfEmpty(Retry(retryAfter)) ?? Retry(retryAfter));
+                .SelectMany(retryAfter => selector?.Invoke(retryAfter).To<TimeSpan>() ?? Retry(retryAfter));
         }
 
-        public static HttpClient HttpClient=new();
+        public static HttpClient HttpClient { get; set; }=new();
+        
         public static TimeSpan RetryAfter(this HttpResponseMessage responseMessage){
             var dateTime = !responseMessage.Headers.Contains("Date") ? DateTime.Now
                 : DateTimeOffset.Parse(responseMessage.Headers.GetValues("Date").First()).LocalDateTime;
