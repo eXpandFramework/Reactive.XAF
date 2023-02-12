@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Linq.Expressions;
 using DevExpress.ExpressApp;
 using Fasterflect;
 using HarmonyLib;
@@ -10,6 +11,11 @@ using Xpand.Extensions.XAF.Harmony;
 namespace Xpand.Extensions.XAF.XafApplicationExtensions{
     public static partial class XafApplicationExtensions{
         
+        public static int Count<T>(this XafApplication application, Expression<Func<T,bool>> expression=null) where T:class {
+            using var objectSpace = application.CreateObjectSpace();
+            return objectSpace.GetObjectsQuery<T>().Count(expression ?? (arg => true));
+        }
+
         public static T Module<T>(this XafApplication application) where T:ModuleBase => application.Modules.OfType<T>().FirstOrDefault();
 
         public static void AddNonSecuredType(this XafApplication application,params Type[] objectTypes){

@@ -9,6 +9,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Reactive;
 using System.Reactive.Concurrency;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
@@ -162,12 +163,29 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .Select(window => window).Publish().RefCount().FirstAsync()
                 .TraceRX(window => window.Context);
 
-        public static IObservable<TObject> Cache<TObject,TKey>(this XafApplication application,ConcurrentDictionary<TKey,TObject> dictionary,IObserver<ConcurrentDictionary<TKey,TObject>> observer) where TObject:IObjectSpaceLink 
-            => Observable.Start(() => application.WhenExistingObject<TObject>()
-                .Do(value => dictionary.TryAdd((TKey)value.ObjectSpace.GetKeyValue(value),value),() => observer.OnNext(dictionary))
-                .ConcatDefer(() => application.WhenProviderCommitted<TObject>(ObjectModification.New).ToObjects()
-                    .Do(value => dictionary.TryAdd((TKey)value.ObjectSpace.GetKeyValue(value),value)))).Merge();
+        public static IObservable<TObject[]> Cache<TObject,TKey>(this XafApplication application,
+            ConcurrentDictionary<TKey, TObject> cache=null,Expression<Func<TObject, bool>> criteriaExpression = null,
+            Func<TObject[], IObservable<TObject[]>> afterExisting = null,params string[] modifiedProperties) where TObject : class, IObjectSpaceLink 
+            => application.Cache( criteriaExpression, afterExisting, modifiedProperties, cache??new ConcurrentDictionary<TKey, TObject>());
         
+        public static IObservable<TObject[]> Cache<TObject>(this XafApplication application,
+            ConcurrentDictionary<object, TObject> cache=null,Expression<Func<TObject, bool>> criteriaExpression = null,
+            Func<TObject[], IObservable<TObject[]>> afterExisting = null,params string[] modifiedProperties) where TObject : class, IObjectSpaceLink 
+            => application.Cache( criteriaExpression, afterExisting, modifiedProperties, cache??new ConcurrentDictionary<object, TObject>());
+
+        private static IObservable<TObject[]> Cache<TObject, TKey>(this XafApplication application,
+            Expression<Func<TObject, bool>> criteriaExpression, Func<TObject[], IObservable<TObject[]>> afterExisting,
+            string[] modifiedProperties, ConcurrentDictionary<TKey, TObject> objectSpaceLinks)
+            where TObject : class, IObjectSpaceLink 
+            => application.WhenProviderObjects(ObjectModification.All,criteriaExpression, modifiedProperties)
+                .Select(objects => objects.ToNowObservable()
+                    .If(link => !link.ObjectSpace.IsDeletedObject(link),
+                        link => objectSpaceLinks.AddOrUpdate((TKey)link.ObjectSpace.GetKeyValue(link), link, (_, _) => link).ReturnObservable(),
+                        link => objectSpaceLinks.TryRemove((TKey)link.ObjectSpace.GetKeyValue(link), out _).ReturnObservable().WhenNotDefault().To(link))
+                    .BufferUntilCompleted()).SelectMany()
+                .DoWhen((i, _) => i == 0, _ => afterExisting?.Invoke(_)).Select(links => links)
+                .Select(links => links);
+
         public static IObservable<Window> WhenPopupWindowCreated(this XafApplication application) 
             => application.WhenFrameCreated(TemplateContext.PopupWindow).Where(_ => _.Application==application).Cast<Window>();
         
@@ -685,7 +703,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)> WhenProviderCommittedDetailed<T>(
             this XafApplication application,ObjectModification objectModification,Func<T,bool> criteria=null,params string[] modifiedProperties) where T:class
             => application.WhenProviderObjectSpaceCreated()
-                .SelectMany(objectSpace => objectSpace.WhenCommittedDetailed(objectModification, criteria, modifiedProperties).TakeUntil(objectSpace.WhenDisposed()));
+                .SelectMany(objectSpace => objectSpace.WhenCommittedDetailed(objectModification, criteria, modifiedProperties));
         
         public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)> WhenProviderCommittedDetailed<T>(
             this XafApplication application,ObjectModification objectModification,bool emitUpdatingObjectSpace,Func<T,bool> criteria=null,params string[] modifiedProperties) where T:class
@@ -840,8 +858,10 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static IObservable<T[]> CommitChangesSequential<T>(this XafApplication application, Type objectType,
             Func<IObjectSpace, IObservable<T>> commit, int retry = 3, [CallerMemberName] string caller = "") 
-            => Observable.Create<T[]>(observer => application.DeferAction(_ =>
-                CommitChangesSubject.OnNext(() => application.CommitChangesSequential( objectType, commit, retry, caller, observer))).Subscribe());
+            => Observable.Create<T[]>(observer => {
+                CommitChangesSubject.OnNext(() => application.CommitChangesSequential(objectType, commit, retry, caller, observer));
+                return Disposable.Empty;
+            });
 
         private static IObservable<object> CommitChangesSequential<T>(this XafApplication application, Type objectType,
             Func<IObjectSpace, IObservable<T>> commit, int retry, string caller, IObserver<T[]> observer) 

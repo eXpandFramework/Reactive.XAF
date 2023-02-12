@@ -218,7 +218,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             WhenCommittedDetailed<T>(this IObjectSpace objectSpace, ObjectModification objectModification,
                 Func<T, bool> criteria = null, params string[] modifiedProperties) where T : class 
             => objectSpace.Defer(() => objectSpace.WhenCommitingDetailed(true, objectModification,criteria, modifiedProperties).Take(1)).Repeat()
-                .TakeUntil(objectSpace.WhenDisposed());
+                ;
         
         public static IObservable<(IObjectSpace objectSpace, (object instance, ObjectModification modification)[] details)>
             WhenCommittedDetailed(this IObjectSpace objectSpace, Type objectType, ObjectModification objectModification,
