@@ -49,7 +49,7 @@ namespace Xpand.Extensions.XAF.Xpo {
         private static void CreateXpAttributeValueAttributes(){
             new[]{ nameof(SingleObjectAttribute), nameof(PropertyConcatAttribute) }.ToArray().ForEach(attributeName => {
                 var lastObjectAttributeType =
-                    AppDomain.CurrentDomain.GetAssemblyType($"Xpand.Extensions.XAF.Xpo.{attributeName}");
+                    AppDomain.CurrentDomain.GetAssemblyType($"Xpand.Extensions.XAF.Xpo.Attributes.{attributeName}");
                 lastObjectAttributeType?.Method("Configure", Flags.StaticAnyVisibility).Call(null);
             });
         }

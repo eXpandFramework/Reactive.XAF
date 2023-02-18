@@ -59,6 +59,9 @@ namespace Xpand.Extensions.Reactive.Utility {
 
         public static IObservable<T> DoOnComplete<T>(this IObservable<T> source, Action onComplete)
             => source.Do(_ => { }, onComplete);
+
+        public static IObservable<TSource> DoOnFirst<TSource>(this IObservable<TSource> source, Action<TSource> action)
+            => source.DoWhen((i, _) => i == 0, action);
         
         public static IObservable<TSource> DoWhen<TSource>(this IObservable<TSource> source, Func<TSource, bool> predicate, Action<TSource> action)
             => source.Do(source1 => {

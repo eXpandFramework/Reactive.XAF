@@ -58,7 +58,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             return data;
         }
 
-        public static IObservable<T> WhenObjects<T>(this NonPersistentObjectSpace objectSpace) => objectSpace.WhenObjects(typeof(T)).Cast<T>();
+        public static IObservable<T> WhenObjects<T>(this NonPersistentObjectSpace objectSpace,
+            [CallerMemberName] string caller = "") => objectSpace.WhenObjects(typeof(T)).Cast<T>();
         public static IObservable<object> WhenObjects(this NonPersistentObjectSpace objectSpace,Type objectType=null) 
             => ObjectsSubject.Where(t => t.objectSpace==objectSpace)
                 .Select(t => t.instance).Where(o =>objectType==null|| objectType.IsInstanceOfType(o));

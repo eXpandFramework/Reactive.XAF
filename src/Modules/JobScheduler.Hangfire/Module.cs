@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using DevExpress.ExpressApp;
-using DevExpress.ExpressApp.Blazor.SystemModule;
 using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;

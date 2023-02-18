@@ -36,7 +36,6 @@ using Xpand.Extensions.XAF.Attributes;
 using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.ObjectSpaceExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
-using Xpand.XAF.Modules.Blazor;
 using Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects;
 using Xpand.XAF.Modules.JobScheduler.Hangfire.Hangfire;
 using Xpand.XAF.Modules.Reactive;
