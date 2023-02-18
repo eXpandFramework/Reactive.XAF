@@ -93,7 +93,10 @@ namespace Xpand.XAF.ModelEditor.Module.Win {
             }
 
             var versionsGroup = Directory.GetFiles(Path.GetDirectoryName(assemblyPath)!,"DevExpress.ExpressApp*.dll")
-	            .Where(s => Path.GetFileName(s).StartsWith("DevExpress.ExpressApp"))
+	            .Where(s => {
+		            var fileName = Path.GetFileName(s);
+		            return fileName.StartsWith("DevExpress.ExpressApp")&&!fileName.Contains("CodeAnalysis");
+	            })
                 .GroupBy(s => Version.Parse(FileVersionInfo.GetVersionInfo(s).FileVersion!)).ToArray();
             if (versionsGroup.Length > 1){
 	            var conflicts = versionsGroup.SelectMany(grouping => grouping.Take(1).Select(path => (name: Path.GetFileName(path),
@@ -174,11 +177,9 @@ namespace Xpand.XAF.ModelEditor.Module.Win {
         static IObservable<Unit> StartMEProcess(this IObservable<string> source, XafModel xafModel) 
             => source.SelectMany(mePath => {
 	            var assemblyDir = Path.GetDirectoryName(xafModel.Project.AssemblyPath);
-	            var destFileName = $"{assemblyDir}\\{Path.GetFileName(mePath)}";
+	            var destFileName = mePath;
                 KillProcess(destFileName);
-                return Directory.GetFiles(Path.GetDirectoryName(mePath)!,"*.*").Where(s => !File.Exists($"{assemblyDir}\\{Path.GetFileName(s)}"))
-	                .Do(s => File.Copy(s,$"{assemblyDir}\\{Path.GetFileName(s)}",true)).ToArray()
-	                .ToObservable().ToUnit().Concat(xafModel.StartME(xafModel.Project.Path, destFileName));
+                return xafModel.StartME(xafModel.Project.Path, destFileName);
             }).ToUnit();
 
         private static IObservable<Unit> StartME(this XafModel xafModel, string fullPath, string destFileName) {

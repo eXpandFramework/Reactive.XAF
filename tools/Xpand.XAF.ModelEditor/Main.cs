@@ -2,7 +2,6 @@ using System;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Threading;
 using System.Windows.Forms;
 using DevExpress.ExpressApp.Model.Core;
@@ -34,12 +33,13 @@ namespace Xpand.XAF.ModelEditor {
         }
 
         [STAThread]
-        public static void Main(string[] args) {
+        public static void Main(string[] args){
             
             var iconName = typeof(MainClass).Assembly.GetManifestResourceNames().First(s => s.EndsWith("ExpressApp.ico"));
             var manifestResourceStream = typeof(MainClass).Assembly.GetManifestResourceStream(iconName);
             var icon = new Icon(manifestResourceStream ?? throw new InvalidOperationException() );
             Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
+            
             Application.ThreadException += OnException;
             SplashScreen splashScreen = null;
             try {
@@ -61,16 +61,17 @@ namespace Xpand.XAF.ModelEditor {
                 var modelControllerBuilder = new ModelControllerBuilder();
                 var settingsStorageOnRegistry = new SettingsStorageOnRegistry(@"Software\Developer Express\eXpressApp Framework\Model Editor");
                 var modelEditorViewController = modelControllerBuilder.GetController(pathInfo);
-                Tracing.Tracer.LogText("modelEditorViewController");
+
                 WinSimpleActionBinding.Register();
                 WinSingleChoiceActionBinding.Register();
                 WinParametrizedActionBinding.Register();
                 PopupWindowShowActionBinding.Register();
                 _modelEditorForm = new ModelEditorForm(modelEditorViewController, settingsStorageOnRegistry);
-                _modelEditorForm.Shown += (sender, eventArgs) => splashScreen?.Stop();
-                _modelEditorForm.Disposed += (sender, eventArgs) => ((IModelEditorSettings)sender)?.ModelEditorSaveSettings();
+                _modelEditorForm.Shown += (_, _) => splashScreen?.Stop();
+                _modelEditorForm.Disposed += (sender, _) => ((IModelEditorSettings)sender)?.ModelEditorSaveSettings();
                 _modelEditorForm.SetCaption($"{Path.GetFileNameWithoutExtension(pathInfo.AssemblyPath)}/{Path.GetFileName(pathInfo.LocalPath)}");
                 _modelEditorForm.Icon=icon;
+                
                 Application.Run(_modelEditorForm);
             } catch (Exception exception) {
                 HandleException(exception);
@@ -80,7 +81,6 @@ namespace Xpand.XAF.ModelEditor {
             }
 
         }
-
 
     }
 }

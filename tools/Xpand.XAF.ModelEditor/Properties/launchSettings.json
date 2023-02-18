@@ -2,7 +2,7 @@
   "profiles": {
     "Xpand.XAF.ModelEditor": {
       "commandName": "Project",
-      "commandLineArgs": " True \"C:\\Work\\eXpandFramework\\Issues\\NET5\\NET5.Win\\bin\\Debug\\\\net5.0-windows\\NET5.Win.dll\" \"C:\\Work\\eXpandFramework\\Issues\\NET5\\NET5.Win\\Model.xafml\" \"C:\\Work\\eXpandFramework\\Issues\\NET5\\NET5.Win\\NET5.Win.csproj\""
+      "commandLineArgs": "True \"C:\\Work\\Issues\\DXApplication26\\DXApplication26.Blazor.Server\\bin\\Debug\\\\net6.0\\DXApplication26.Blazor.Server.dll\" \"C:\\Work\\Issues\\DXApplication26\\DXApplication26.Blazor.Server\\Model.xafml\" \"C:\\Work\\Issues\\DXApplication26\\DXApplication26.Blazor.Server\\DXApplication26.Blazor.Server.csproj\""
     }
   }
 }
