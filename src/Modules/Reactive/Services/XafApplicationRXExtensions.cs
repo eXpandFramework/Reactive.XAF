@@ -174,15 +174,18 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => application.Cache( criteriaExpression, modifiedProperties, cache??new ConcurrentDictionary<object, TObject>());
 
         private static IObservable<TObject[]> Cache<TObject, TKey>(this XafApplication application,
-            Expression<Func<TObject, bool>> criteriaExpression, string[] modifiedProperties, ConcurrentDictionary<TKey, TObject> objectSpaceLinks,
-            [CallerMemberName] string caller = "")
-            where TObject : class, IObjectSpaceLink 
-            => application.WhenProviderObjects(ObjectModification.All,criteriaExpression, caller,modifiedProperties)
+            Expression<Func<TObject, bool>> criteriaExpression, string[] modifiedProperties, ConcurrentDictionary<TKey, TObject> objectSpaceLinks) where TObject : class, IObjectSpaceLink 
+            => application.WhenProviderCommittedDetailed(ObjectModification.All, criteriaExpression?.Compile(), modifiedProperties)
+                .Select(t => t.details.Select(t1 => t1.instance).ToArray().Select(o => o))
+                .Merge(application.WhenExistingObject(criteriaExpression).BufferUntilCompleted())
                 .Select(objects => objects.ToNowObservable()
                     .If(link => !link.ObjectSpace.IsDeletedObject(link),
-                        link => objectSpaceLinks.AddOrUpdate((TKey)link.ObjectSpace.GetKeyValue(link), link, (_, _) => link).ReturnObservable(),
-                        link => objectSpaceLinks.TryRemove((TKey)link.ObjectSpace.GetKeyValue(link), out _).ReturnObservable().WhenNotDefault().To(link))
-                    .BufferUntilCompleted()).SelectMany();
+                        link => objectSpaceLinks
+                            .AddOrUpdate((TKey)link.ObjectSpace.GetKeyValue(link), link, (_, _) => link)
+                            .ReturnObservable(),
+                        link => objectSpaceLinks.TryRemove((TKey)link.ObjectSpace.GetKeyValue(link), out _)
+                            .ReturnObservable().WhenNotDefault().To(link))
+                    .BufferUntilCompleted()).SelectMany().Select(links => links);
 
         public static IObservable<Window> WhenPopupWindowCreated(this XafApplication application) 
             => application.WhenFrameCreated(TemplateContext.PopupWindow).Where(_ => _.Application==application).Cast<Window>();
@@ -861,32 +864,6 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             return httpClient;
         }
 
-        // public static IObservable<T[]> CommitChangesSequential<T>(this XafApplication application, Type objectType,
-        //     Func<IObjectSpace, IObservable<T>> commit, int retry = 3, [CallerMemberName] string caller = "") 
-        //     => Observable.Create<T[]>(observer => {
-        //         CommitChangesSubject.OnNext(() => application.CommitChangesSequential(objectType, commit, retry, caller, observer));
-        //         return Disposable.Empty;
-        //     });
-        //
-        // private static IObservable<object> CommitChangesSequential<T>(this XafApplication application, Type objectType,
-        //     Func<IObjectSpace, IObservable<T>> commit, int retry, string caller, IObserver<T[]> observer) 
-        //     => application.UseProviderObjectSpace(space => commit(space).BufferUntilCompleted()
-        //             .Timeout(TimeSpan.FromMinutes(2)).Catch<T[],TimeoutException>(_ => Observable.Throw<T[]>(new TimeoutException(caller)))
-        //             .Do(arg => {
-        //                 space.CommitChanges();
-        //                 observer.OnNext(arg);
-        //                 observer.OnCompleted();
-        //             }), objectType, caller)
-        //         .RetryWithBackoff(retry)
-        //         .DoOnError(observer.OnError)
-        //         .Select(_ => default(object));
-        //
-        // public static IObservable<T[]> CommitChangesSequential<T>(this XafApplication application,Func<IObjectSpace,IObservable<T>> commit,int retry =3,[CallerMemberName]string caller="") 
-        //     => application.CommitChangesSequential(typeof(T),commit,retry,caller);
-        //
-        //
-        
-        
         public static IObservable<T[]> CommitChangesSequential<T>(this XafApplication application,Func<IObjectSpace,IObservable<T>> commit,int retry =3,[CallerMemberName]string caller="") 
             => application.CommitChangesSequential(typeof(T),commit,retry,caller);
 

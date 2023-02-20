@@ -261,7 +261,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
                                     })
                                     .ToNowObservable()
                                     .ShowXafMessage(xafApplication, traceEvent))
-                                    .Do(_ => service.Refresh());
+                                    .DoSafe(_ => service.Refresh());
                         }).ToUnit()
                     : Observable.Empty<Unit>();
             });
