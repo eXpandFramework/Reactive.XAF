@@ -40,5 +40,7 @@ namespace Xpand.XAF.Modules.Reactive {
             moduleManager.Connect()
                 .Subscribe(this);
         }
+
+        public static bool PopulateAdditionalObjectSpaces { get; set; } = true;
     }
 }

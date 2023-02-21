@@ -808,10 +808,10 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         }
 
         internal static IObservable<Unit> PopulateAdditionalObjectSpaces(this XafApplication application) 
-            => application.WhenObjectSpaceCreated().OfType<NonPersistentObjectSpace>()
+            => Observable.If(() => ReactiveModule.PopulateAdditionalObjectSpaces,application.WhenObjectSpaceCreated().OfType<NonPersistentObjectSpace>()
                 .Merge(application.ObjectSpaceProviders.ToNowObservable().SelectMany(provider => provider.WhenObjectSpaceCreated().OfType<CompositeObjectSpace>()))
                 .Do(space => space.PopulateAdditionalObjectSpaces(application))
-                .ToUnit();
+                .ToUnit());
 
         public static IObservable<(Frame source, Frame target, T1 sourceObject, T2 targetObject, int targetIndex)> SynchronizeGridListEditor<T1, T2>(
                 this IObservable<(Frame source, Frame target, T1 sourceObject, T2 targetObject, int targetIndex)>  source)
