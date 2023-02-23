@@ -1,18 +1,16 @@
 ﻿using System;
-using System.Text;
 using Newtonsoft.Json;
 
 namespace Xpand.Extensions.JsonExtensions {
     public static partial class JsonExtensions {
         public static T[] DeserializeSingleOrList<T>(this JsonReader jsonReader) {
             if (jsonReader.Read()) {
+                var jsonSerializer = new JsonSerializer();
                 switch (jsonReader.TokenType) {
                     case JsonToken.StartArray:
-                        return new JsonSerializer().Deserialize<T[]>(jsonReader);
-
+                        return jsonSerializer.Deserialize<T[]>(jsonReader);
                     case JsonToken.StartObject:
-                        var instance = new JsonSerializer().Deserialize<T>(jsonReader);
-                        return new [] { instance };
+                        return new [] { jsonSerializer.Deserialize<T>(jsonReader) };
                 }
             }
 

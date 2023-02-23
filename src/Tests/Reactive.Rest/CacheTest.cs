@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
@@ -46,6 +45,7 @@ namespace Xpand.XAF.Modules.Reactive.Rest.Tests {
             await RestService.Object.FirstAsync().ToTaskWithoutConfigureAwait();
 
             HandlerMock.VerifySend(Times.Exactly(2),message => $"{message.RequestUri}".Contains($"Update{nameof(RestOperationObject)}") );
+
         }
 
     }

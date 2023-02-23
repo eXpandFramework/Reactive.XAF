@@ -165,7 +165,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static IObservable<TObject[]> Cache<TObject,TKey>(this XafApplication application,
             ConcurrentDictionary<TKey, TObject> cache=null,Expression<Func<TObject, bool>> criteriaExpression = null,
-            params string[] modifiedProperties) where TObject : class, IObjectSpaceLink 
+            Func<TObject,TKey> keyValue=null, params string[] modifiedProperties) where TObject : class, IObjectSpaceLink 
             => application.Cache( criteriaExpression, modifiedProperties, cache??new ConcurrentDictionary<TKey, TObject>());
         
         public static IObservable<TObject[]> Cache<TObject>(this XafApplication application,
@@ -174,18 +174,24 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => application.Cache( criteriaExpression, modifiedProperties, cache??new ConcurrentDictionary<object, TObject>());
 
         private static IObservable<TObject[]> Cache<TObject, TKey>(this XafApplication application,
-            Expression<Func<TObject, bool>> criteriaExpression, string[] modifiedProperties, ConcurrentDictionary<TKey, TObject> objectSpaceLinks) where TObject : class, IObjectSpaceLink 
+            Expression<Func<TObject, bool>> criteriaExpression, string[] modifiedProperties, ConcurrentDictionary<TKey, TObject> objectSpaceLinks,Func<TObject,TKey> keyValue=null) where TObject : class, IObjectSpaceLink 
             => application.WhenProviderCommittedDetailed(ObjectModification.All, criteriaExpression?.Compile(), modifiedProperties)
-                .Select(t => t.details.Select(t1 => t1.instance).ToArray().Select(o => o))
-                .Merge(application.WhenExistingObject(criteriaExpression).BufferUntilCompleted())
-                .Select(objects => objects.ToNowObservable()
-                    .If(link => !link.ObjectSpace.IsDeletedObject(link),
-                        link => objectSpaceLinks
-                            .AddOrUpdate((TKey)link.ObjectSpace.GetKeyValue(link), link, (_, _) => link)
-                            .ReturnObservable(),
+                .Select(t => t.details.Select(t1 => t1.instance).ToArray())
+                .Merge(application.WhenExistingObject(criteriaExpression)
+                    .Do(o => objectSpaceLinks.TryAdd(o.GetKeyValue(keyValue), o))
+                    .BufferUntilCompleted().Finally(() => {})
+                    .Do(links => links.FirstOrDefault()?.ObjectSpace.Dispose()))
+                .Select(links => (disposed:links.Where(o => o.ObjectSpace.IsDisposed).ToArray(),notDisposed:links.Where(o => !o.ObjectSpace.IsDisposed).ToArray()))
+                .Select(t => t.notDisposed.ToNowObservable().If(link => !link.ObjectSpace.IsDeletedObject(link), link => objectSpaceLinks
+                            .AddOrUpdate(link.GetKeyValue(keyValue), link, (_, _) => link).ReturnObservable(),
                         link => objectSpaceLinks.TryRemove((TKey)link.ObjectSpace.GetKeyValue(link), out _)
                             .ReturnObservable().WhenNotDefault().To(link))
+                    // .DoOnComplete(() => t.notDisposed.FirstOrDefault()?.ObjectSpace.Dispose())
+                    .Merge(t.disposed.ToNowObservable())
                     .BufferUntilCompleted()).SelectMany().Select(links => links);
+
+        private static TKey GetKeyValue<TObject, TKey>(this TObject link, Func<TObject,TKey> keyValue) where TObject : class, IObjectSpaceLink 
+            => keyValue == null ? (TKey)link.ObjectSpace.GetKeyValue(link) : keyValue(link);
 
         public static IObservable<Window> WhenPopupWindowCreated(this XafApplication application) 
             => application.WhenFrameCreated(TemplateContext.PopupWindow).Where(_ => _.Application==application).Cast<Window>();
@@ -884,7 +890,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                         observer.OnNext(arg);
                         // observer.OnCompleted();
                     }), objectType, caller)
-                .RetryWithBackoff(retry)
+                .RetryWithBackoff(retry,retryOnError:exception => true)
                 .DoOnError(observer.OnError)
                 .Select(_ => default(object));
         

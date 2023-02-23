@@ -43,10 +43,10 @@ namespace Xpand.XAF.Modules.BulkObjectUpdate{
 			        .ToNowObservable()
 			        .Finally(() => {
                         t.detailView.View.ObjectSpace.SetIsModified(false);
-				        if (t.listView.Application.GetPlatform() != Platform.Win) {
+				        if (t.listView.Application.GetPlatform() != Platform.Win||t.listView.View.IsRoot) {
 					        t.listView.View.ObjectSpace.CommitChanges();
 				        }
-			        }))).ToUnit();
+                    }))).ToUnit();
 
         private static IEnumerable<PropertyEditor> PropertyEditors(this (Frame listView, Frame detailView) t) 
 	        => t.detailView.View.AsDetailView().GetItems<PropertyEditor>()

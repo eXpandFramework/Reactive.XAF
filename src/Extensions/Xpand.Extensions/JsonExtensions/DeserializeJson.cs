@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Xpand.Extensions.LinqExtensions;
@@ -21,6 +23,15 @@ namespace Xpand.Extensions.JsonExtensions {
         public static T[] Deserialize<T>(this Type type, string json) => type.Deserialize(json).Cast<T>().ToArray();
         public static T[] DeserializeJson<T>(this string json) {
             using var stringReader = new StringReader(json);
+            using var reader = new JsonTextReader(stringReader);
+            return reader.DeserializeSingleOrList<T>();
+        }
+
+        public static async Task<T[]> DeserializeJson<T>(this HttpResponseMessage message) 
+            => (await message.Content.ReadAsStreamAsync()).DeserializeJson<T>();
+
+        public static T[] DeserializeJson<T>(this Stream stream) {
+            using var stringReader = new StreamReader(stream);
             using var reader = new JsonTextReader(stringReader);
             return reader.DeserializeSingleOrList<T>();
         }

@@ -40,20 +40,22 @@ namespace Xpand.Extensions.XAF.Xpo.ObjectSpaceExtensions{
         public FastUnitOfWork() {
         }
 
-        public FastUnitOfWork(XPDictionary dictionary)
-            : base(dictionary) {
-            TrackPropertiesModifications = true;
-        }
+        public FastUnitOfWork(XPDictionary dictionary) : base(dictionary) 
+            => TrackPropertiesModifications = true;
 
-        public FastUnitOfWork(IDataLayer layer, params IDisposable[] disposeOnDisconnect)
-            : base(layer, disposeOnDisconnect){
-            TrackPropertiesModifications = true;
+        public FastUnitOfWork(IDataLayer layer)
+            : this(layer,Array.Empty<IDisposable>()){
         }
+        public FastUnitOfWork(IDataLayer layer, IDisposable[] disposeOnDisconnect) : base(layer, disposeOnDisconnect) 
+            => TrackPropertiesModifications = true;
 
+        public FastUnitOfWork(IObjectLayer layer)
+            : this(layer, Array.Empty<IDisposable>()) {
+        }
+        
         public FastUnitOfWork(IObjectLayer layer, params IDisposable[] disposeOnDisconnect)
-            : base(layer, disposeOnDisconnect) {
+            : base(layer, disposeOnDisconnect) =>
             TrackPropertiesModifications = true;
-        }
 
         protected override MemberInfoCollection GetPropertiesListForUpdateInsert(object theObject, bool isUpdate, bool addDelayedReference){
             var defaultMembers = base.GetPropertiesListForUpdateInsert(theObject, isUpdate, addDelayedReference);

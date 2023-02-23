@@ -55,5 +55,8 @@
       <HintPath>..\..\..\bin\Xpand.Extensions.Blazor.dll</HintPath>
     </Reference>
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="JetBrains.dotMemoryUnit" Version="3.2.20220510" />
+  </ItemGroup>
   <Import Project="..\..\..\.paket\Paket.Restore.targets" />
 </Project>

@@ -138,9 +138,9 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static IObservable<object> WhenModifiedObjects(this IObjectSpace objectSpace, Type objectType,
             params string[] properties)
-            => Observable.Defer(() => objectSpace.WhenObjectChanged()
+            => objectSpace.WhenObjectChanged()
                 .Where(t => objectType.IsInstanceOfType(t.e.Object) && properties.PropertiesMatch(t))
-                .Select(_ => _.e.Object));
+                .Select(_ => _.e.Object);
                 // .RepeatWhen(observable => observable.SelectMany(_ => objectSpace.WhenModifyChanged().Where(space => !space.IsModified).Take(1)))
                 // .TakeUntil(objectSpace.WhenDisposed());
 
@@ -215,11 +215,11 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static bool IsNested(this IObjectSpace objectSpace) 
             => objectSpace.GetType().InheritsFrom("DevExpress.ExpressApp.Xpo.XPNestedObjectSpace");
+
         public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)>
             WhenCommittedDetailed<T>(this IObjectSpace objectSpace, ObjectModification objectModification,
-                Func<T, bool> criteria = null, params string[] modifiedProperties) where T : class 
-            => objectSpace.Defer(() => objectSpace.WhenCommitingDetailed(true, objectModification,criteria, modifiedProperties).Take(1)).Repeat()
-                ;
+                Func<T, bool> criteria = null, params string[] modifiedProperties) where T : class
+            => objectSpace.WhenCommitingDetailed(true, objectModification, criteria, modifiedProperties);
         
         public static IObservable<(IObjectSpace objectSpace, (object instance, ObjectModification modification)[] details)>
             WhenCommittedDetailed(this IObjectSpace objectSpace, Type objectType, ObjectModification objectModification,
@@ -487,6 +487,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static IObservable<(NonPersistentObjectSpace objectSpace,ObjectsGettingEventArgs e)> WhenObjectsGetting(this NonPersistentObjectSpace item) 
             => Observable.FromEventPattern<EventHandler<ObjectsGettingEventArgs>, ObjectsGettingEventArgs>(h => item.ObjectsGetting += h, h => item.ObjectsGetting -= h,ImmediateScheduler.Instance)
+                .TakeUntil(item.WhenDisposed())
                 .TransformPattern<ObjectsGettingEventArgs, NonPersistentObjectSpace>();
         
         
@@ -495,6 +496,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static IObservable<(NonPersistentObjectSpace objectSpace,ObjectGettingEventArgs e)> WhenObjectGetting(this NonPersistentObjectSpace item) 
             => Observable.FromEventPattern<EventHandler<ObjectGettingEventArgs>, ObjectGettingEventArgs>(h => item.ObjectGetting += h, h => item.ObjectGetting -= h,ImmediateScheduler.Instance)
+                .TakeUntil(item.WhenDisposed())
                 .TransformPattern<ObjectGettingEventArgs, NonPersistentObjectSpace>();
         
         public static IObservable<(IObjectSpace objectSpace,CancelEventArgs e)> Commiting(this IObservable<IObjectSpace> source) 
@@ -502,6 +504,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         
         public static IObservable<(IObjectSpace objectSpace,HandledEventArgs e)> WhenCustomCommitChanges(this IObjectSpace source) 
             => Observable.FromEventPattern<EventHandler<HandledEventArgs>, HandledEventArgs>(h => source.CustomCommitChanges += h, h => source.CustomCommitChanges -= h,ImmediateScheduler.Instance)
+                .TakeUntil(source.WhenDisposed())
                 .TransformPattern<HandledEventArgs, IObjectSpace>()
                 .TraceRX();
 
@@ -510,10 +513,12 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         
         public static IObservable<IObjectSpace> WhenCommitted(this IObjectSpace objectSpace) 
             => Observable.FromEventPattern<EventHandler, EventArgs>(h => objectSpace.Committed += h, h => objectSpace.Committed -= h,ImmediateScheduler.Instance)
+                .TakeUntil(objectSpace.WhenDisposed())
                 .TransformPattern<IObjectSpace>();
 
         public static IObservable<(IObjectSpace objectSpace, CancelEventArgs e)> WhenCommiting(this IObjectSpace item) 
             => Observable.FromEventPattern<EventHandler<CancelEventArgs>, CancelEventArgs>(h => item.Committing += h, h => item.Committing -= h,ImmediateScheduler.Instance)
+                .TakeUntil(item.WhenDisposed())
                 .TransformPattern<CancelEventArgs, IObjectSpace>()
                 .TraceRX();
 
@@ -523,6 +528,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static IObservable<(IObjectSpace objectSpace,ObjectsManipulatingEventArgs e)> WhenObjectDeleted(this IObjectSpace item) 
             => Observable.FromEventPattern<EventHandler<ObjectsManipulatingEventArgs>, ObjectsManipulatingEventArgs>(h => item.ObjectDeleted += h, h => item.ObjectDeleted -= h,ImmediateScheduler.Instance)
+                .TakeUntil(item.WhenDisposed())
                 .TransformPattern<ObjectsManipulatingEventArgs, IObjectSpace>();
 
         
@@ -531,9 +537,12 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static IObservable<(IObjectSpace objectSpace,ObjectChangedEventArgs e)> WhenObjectChanged(this IObjectSpace item,params Type[] objectTypes) 
             => Observable.FromEventPattern<EventHandler<ObjectChangedEventArgs>, ObjectChangedEventArgs>(h => item.ObjectChanged += h, h => item.ObjectChanged -= h,ImmediateScheduler.Instance)
+                .TakeUntil(item.WhenDisposed())
                 .TransformPattern<ObjectChangedEventArgs, IObjectSpace>().Where(t =>!objectTypes.Any() ||objectTypes.Any(type => type.IsInstanceOfType(t.e.Object)));
+        
         public static IObservable<(IObjectSpace objectSpace,ObjectChangedEventArgs e)> WhenObjectChanged(this IObjectSpace item,Type objectType,params string[] properties) 
             => Observable.FromEventPattern<EventHandler<ObjectChangedEventArgs>, ObjectChangedEventArgs>(h => item.ObjectChanged += h, h => item.ObjectChanged -= h,ImmediateScheduler.Instance)
+                .TakeUntil(item.WhenDisposed())
                 .TransformPattern<ObjectChangedEventArgs, IObjectSpace>().Where(t =>objectType.IsInstanceOfType(t.e.Object)&&properties.Any(s => t.e.PropertyName==s));
 
         public static IObservable<Unit> Disposed(this IObservable<IObjectSpace> source) 
@@ -555,6 +564,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         
         public static IObservable<(IObjectSpace objectSpace, ObjectSpaceModificationEventArgs e)> WhenModifiedChanging(this IObjectSpace objectSpace) 
             => Observable.FromEventPattern<EventHandler<ObjectSpaceModificationEventArgs>, ObjectSpaceModificationEventArgs>(h => ((BaseObjectSpace) objectSpace).ModifiedChanging += h, h => ((BaseObjectSpace) objectSpace).ModifiedChanging -= h,ImmediateScheduler.Instance)
+                .TakeUntil(objectSpace.WhenDisposed())
                 .TransformPattern<ObjectSpaceModificationEventArgs,IObjectSpace>();
 
         public static IObservable<(IObjectSpace objectSpace, ObjectSpaceModificationEventArgs e)> WhenModifiedChanging(this IObservable<IObjectSpace> source) 
@@ -589,9 +599,11 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static IObservable<IObjectSpace> WhenRefreshing(this IObjectSpace objectSpace)
             => Observable.FromEventPattern<EventHandler<CancelEventArgs>, CancelEventArgs>(h => objectSpace.Refreshing += h, h => objectSpace.Refreshing -= h,ImmediateScheduler.Instance)
+                .TakeUntil(objectSpace.WhenDisposed())
                 .Select(pattern => (IObjectSpace) pattern.Sender);
         public static IObservable<IObjectSpace> WhenReloaded(this IObjectSpace objectSpace) 
             => Observable.FromEventPattern<EventHandler, EventArgs>(h => objectSpace.Reloaded += h, h => objectSpace.Reloaded -= h,ImmediateScheduler.Instance)
+                .TakeUntil(objectSpace.WhenDisposed())
                 .Select(pattern => (IObjectSpace) pattern.Sender);
 
         public static IObservable<IObjectSpace> WhenReloaded(this IObservable<IObjectSpace> source) 
