@@ -1,10 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using Fasterflect;
 using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.StringExtensions;
@@ -62,50 +65,39 @@ namespace Xpand.Extensions.TypeExtensions {
             return false;
         }
         
-        public static T Change<T>(this object value) {
-            return Change<T>(value, DefaultCultureInfo);
-        }
+        public static T Change<T>(this object value) 
+            => value.Change<T>( DefaultCultureInfo);
 
-        public static T Change<T>(this object value, CultureInfo culture) {
-            return Change<T>(value, culture, DefaultConversion);
-        }
+        public static T Change<T>(this object value, CultureInfo culture) 
+            =>
+            value.Change<T>( culture, DefaultConversion);
 
-        public static T Change<T>(this object value, Conversion options) {
-            return Change<T>(value, DefaultCultureInfo, options);
-        }
+        public static T Change<T>(this object value, Conversion options) 
+            => value.Change<T>( DefaultCultureInfo, options);
 
-        public static T Change<T>(this object value, CultureInfo culture, Conversion options) {
-            return (T)Change(value, typeof(T), culture, options);
-        }
+        public static T Change<T>(this object value, CultureInfo culture, Conversion options) 
+            => (T)value.Change( typeof(T), culture, options);
 
-        public static bool CanChange(this object value, Type destinationType) {
-            return TryToChange(value, destinationType, out _);
-        }
+        public static bool CanChange(this object value, Type destinationType) 
+            => value.TryToChange( destinationType, out _);
 
-        public static bool CanChange(this object value, Type destinationType, CultureInfo culture) {
-            return TryToChange(value, destinationType, out _, culture);
-        }
+        public static bool CanChange(this object value, Type destinationType, CultureInfo culture) 
+            => value.TryToChange( destinationType, out _, culture);
 
-        public static bool CanChange(this object value, Type destinationType, Conversion options) {
-            return TryToChange(value, destinationType, out _, options);
-        }
+        public static bool CanChange(this object value, Type destinationType, Conversion options) 
+            => value.TryToChange( destinationType, out _, options);
 
-        public static bool CanChange(this object value, Type destinationType, CultureInfo culture, Conversion options) {
-            return TryToChange(value, destinationType, out _, options, culture);
-        }
-        
-        public static bool TryToChange(this object value, Type destinationType, out object result) {
-            return TryToChange(value, destinationType, out result, DefaultCultureInfo);
-        }
+        public static bool CanChange(this object value, Type destinationType, CultureInfo culture, Conversion options) 
+            => value.TryToChange( destinationType, out _, options, culture);
 
-        public static bool TryToChange(this object value, Type destinationType, out object result, CultureInfo culture) {
-            return TryToChange(value, destinationType, out result, 
-                DefaultConversion, culture);
-        }
+        public static bool TryToChange(this object value, Type destinationType, out object result) 
+            => value.TryToChange( destinationType, out result, DefaultCultureInfo);
 
-        public static bool TryToChange(this object value, Type destinationType, out object result, Conversion options) {
-            return TryToChange(value, destinationType, out result, options, DefaultCultureInfo);
-        }
+        public static bool TryToChange(this object value, Type destinationType, out object result, CultureInfo culture) 
+            => value.TryToChange( destinationType, out result, DefaultConversion, culture);
+
+        public static bool TryToChange(this object value, Type destinationType, out object result, Conversion options)
+            => value.TryToChange( destinationType, out result, options, DefaultCultureInfo);
 
         public static bool TryToChange(this object value, Type destinationType, out object result, Conversion options , CultureInfo culture) {
             if (destinationType == typeof(object)) {
@@ -124,10 +116,10 @@ namespace Xpand.Extensions.TypeExtensions {
             }
 
             if (destinationType == typeof(string)) {
-                result = value.ToString();
+                result = $"{value}";
                 return true;
             }
-            Type coreDestinationType = destinationType.IsGenericType ? destinationType.UnderlyingSystemType : destinationType;
+            Type coreDestinationType = destinationType.IsGenericType ? destinationType.GenericTypeArguments.First() : destinationType;
             object tmpResult = null;
             if (TryChangeCore(value, coreDestinationType, ref tmpResult, culture, options)) {
                 result = tmpResult;
@@ -146,12 +138,20 @@ namespace Xpand.Extensions.TypeExtensions {
                    Conversion.TreatNullAsDefault;
         }
 
+        [SuppressMessage("ReSharper", "NonConstantEqualityExpressionHasConstantResult")]
         private static bool TryChangeCore(object value, Type destinationType, ref object result, CultureInfo culture, Conversion options) {
             if (value.GetType() == destinationType) {
                 result = value;
                 return true;
             }
-            
+            if (value is JsonValue jsonValue) {
+                var valueKind = jsonValue.GetValue<JsonElement>().ValueKind;
+                if (valueKind == JsonValueKind.String&&destinationType!=typeof(string)) {
+                    return jsonValue.Deserialize<string>().TryToChange(destinationType,out result,options,culture);    
+                }
+                result = jsonValue.Deserialize(destinationType);
+                return true;
+            }
             if (TryChangeByTryParse(value.ToString(), destinationType, ref result)) {
                 return true;
             }
@@ -191,14 +191,11 @@ namespace Xpand.Extensions.TypeExtensions {
             return false;
         }
 
-        static bool TryChangeNullString(object value, Type destinationType, ref object result) {
-            var asString = value.ToString();
-            return IsNullString(asString) && TryToChange(null, destinationType, out result, Conversion.TreatNullAsDefault);
-        }
+        static bool TryChangeNullString(object value, Type destinationType, ref object result) 
+            => IsNullString($"{value}") && TryToChange(null, destinationType, out result, Conversion.TreatNullAsDefault);
 
-        static bool IsNullString(string asString) {
-            return asString != String.Empty && string.CompareOrdinal("(NULL)", asString) == 0;
-        }
+        static bool IsNullString(string asString) 
+            => asString != String.Empty && string.CompareOrdinal("(NULL)", asString) == 0;
 
         private static bool TryChangeGuessedValues(object value, Type destinationType, ref object result) {
             if (value is char c && destinationType == typeof(bool)) {
@@ -222,7 +219,7 @@ namespace Xpand.Extensions.TypeExtensions {
             }
 
             if ((destinationType == typeof (Rectangle)) &&!string.IsNullOrEmpty(value + "")){
-                var rectParts = value.ToString().Split(';');
+                var rectParts =$"{value}".Split(';');
                 if (rectParts.Length == 2){
                     var canChange = rectParts[0].TryToChange(typeof (Point), out var point);
                     if (canChange){
@@ -236,7 +233,7 @@ namespace Xpand.Extensions.TypeExtensions {
             }
 
             if ((destinationType == typeof(Size) || destinationType == typeof(Point)) && !string.IsNullOrEmpty(value + "")) {
-                var strings = value.ToString().Split('x');
+                var strings = $"{value}".Split('x');
                 if (strings.Length == 2 && (strings[0].CanChange(typeof (int)) && strings[1].CanChange(typeof (int)))){
                     result = destinationType.CreateInstance(int.Parse(strings[0]), int.Parse(strings[1]));
                     return true;
@@ -431,15 +428,9 @@ namespace Xpand.Extensions.TypeExtensions {
             return tryParse;
         }
 
-        private static bool TryChangeExplicit(object value, Type destinationType, string operatorMethodName, ref object result) {
-            if (TryChangeExplicit(value, value.GetType(), destinationType, operatorMethodName, ref result)) {
-                return true;
-            }
-            if (TryChangeExplicit(value, destinationType, destinationType, operatorMethodName, ref result)) {
-                return true;
-            }
-            return false;
-        }
+        private static bool TryChangeExplicit(object value, Type destinationType, string operatorMethodName, ref object result) 
+            => TryChangeExplicit(value, value.GetType(), destinationType, operatorMethodName, ref result) ||
+               TryChangeExplicit(value, destinationType, destinationType, operatorMethodName, ref result);
 
         private static bool TryChangeExplicit(object value, Type invokerType, Type destinationType, string explicitMethodName, ref object result) {
             var methods = invokerType.GetMethods(BindingFlags.Public | BindingFlags.Static);
@@ -478,17 +469,14 @@ namespace Xpand.Extensions.TypeExtensions {
             return enumTryParse;
         }
 
-        public static object Change(this object value, Type destinationType) {
-            return Change(value, destinationType, DefaultCultureInfo);
-        }
+        public static object Change(this object value, Type destinationType) 
+            => value.Change( destinationType, DefaultCultureInfo);
 
-        public static object Change(this object value, Type destinationType, CultureInfo culture) {
-            return Change(value, destinationType, culture, DefaultConversion);
-        }
+        public static object Change(this object value, Type destinationType, CultureInfo culture) 
+            => value.Change( destinationType, culture, DefaultConversion);
 
-        public static object Change(this object value, Type destinationType, Conversion options) {
-            return Change(value, destinationType, DefaultCultureInfo, options);
-        }
+        public static object Change(this object value, Type destinationType, Conversion options) 
+            => value.Change( destinationType, DefaultCultureInfo, options);
 
         public static object Change(this object value, Type destinationType, CultureInfo culture, Conversion options) {
             if (TryToChange(value, destinationType, out var result, options, culture)) {
@@ -497,19 +485,10 @@ namespace Xpand.Extensions.TypeExtensions {
             throw new TypeCannotChanged(value, destinationType);
         }
     }
-    /// <summary>
-    /// The exception that is thrown when a conversion is invalid.
-    /// </summary>
+    
     public class TypeCannotChanged : InvalidOperationException {
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TypeCannotChanged">TypeCannotChanged</see> class.
-        /// </summary>
-        /// <param name="valueToConvert"></param>
-        /// <param name="destinationType"></param>
         public TypeCannotChanged(object valueToConvert, Type destinationType)
-            : base(
-                $"'{valueToConvert}' ({valueToConvert?.GetType()}) is not convertible to '{destinationType}'.") {
+            : base($"'{valueToConvert}' ({valueToConvert?.GetType()}) is not convertible to '{destinationType}'.") {
         }
     }
 

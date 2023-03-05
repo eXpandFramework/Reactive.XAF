@@ -4,9 +4,8 @@ DevExpress.ExpressApp
 DevExpress.Xpo
 System.Reactive
 Fasterflect.Xpand
-
 YamlDotNet
 Xpand.Patcher
 Xpand.Collections
 System.CodeDom
-Newtonsoft.Json
+System.Text.Json

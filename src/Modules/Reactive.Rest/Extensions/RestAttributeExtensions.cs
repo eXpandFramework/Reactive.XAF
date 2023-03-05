@@ -13,8 +13,8 @@ namespace Xpand.XAF.Modules.Reactive.Rest.Extensions {
                 ? operationAttribute.Operation == Operation.Get ? System.Net.Http.HttpMethod.Get
                     : operationAttribute.Operation == Operation.Create || operationAttribute.Operation == Operation.Delete
                         ? System.Net.Http.HttpMethod.Post : operationAttribute.Operation == Operation.Update
-                            ? new HttpMethod("PATCH") : new HttpMethod(attribute.HttpMethod)
-                : new HttpMethod(attribute.HttpMethod);
+                            ? new HttpMethod("PATCH") : new HttpMethod(attribute.HttpMethod!)
+                : new HttpMethod(attribute.HttpMethod!);
 
         internal static string RequestUrl(this IRestAttribute operationAttribute,object instance) {
             var regexObj = new Regex("(.*){([^}]*)}(.*)", RegexOptions.IgnoreCase | RegexOptions.Singleline);
@@ -29,11 +29,12 @@ namespace Xpand.XAF.Modules.Reactive.Rest.Extensions {
             return operationAttribute.RequestUrl.TrimEnd('/');
         }
 
-        internal static IObservable<object> Send(this IRestAttribute attribute,  object instance,ICredentialBearer user,string requestUrl=null,Func<string,object[]> deserializeResponse=null) {
+        internal static IObservable<object> Send(this IRestAttribute attribute,  object instance,ICredentialBearer user,string requestUrl=null,Func<HttpResponseMessage, IObservable<object>> deserializeResponse=null) {
             requestUrl ??= attribute.RequestUrl(instance);
             var url = $"{user.BaseAddress}{requestUrl}";
             var pollInterval = attribute.PollInterval>0?TimeSpan.FromSeconds(attribute.PollInterval) :(TimeSpan?) null ;
             return attribute.HttpMethod().Send(url, instance, user.Key, user.Secret,deserializeResponse,pollInterval)
+                .Select(o => o)
                 .HandleAttributeErrors(url,instance,attribute.HandleErrors);
         }
 

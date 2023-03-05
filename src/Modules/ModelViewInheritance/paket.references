@@ -4,4 +4,4 @@ Fasterflect.Xpand
 Xpand.Collections
 Xpand.Patcher
 System.Reactive
-Newtonsoft.Json
+System.Text.Json

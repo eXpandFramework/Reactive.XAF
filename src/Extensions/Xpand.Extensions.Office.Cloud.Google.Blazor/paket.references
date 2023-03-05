@@ -2,3 +2,4 @@ Fasterflect.Xpand
 Microsoft.CodeAnalysis.CSharp
 Google.Apis.Auth
 System.Configuration.ConfigurationManager
+System.Text.Json

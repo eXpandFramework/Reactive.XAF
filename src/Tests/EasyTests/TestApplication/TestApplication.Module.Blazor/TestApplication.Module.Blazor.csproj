@@ -43,8 +43,8 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="DevExpress.ExpressApp.Blazor.All" Version="22.2.4" />
-    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="6.0" />
-    <PackageReference Include="Xpand.XAF.Web.All" Version="4.222.3.0" />
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="7.0" />
+    <PackageReference Include="Xpand.XAF.Web.All" Version="4.222.3.1" />
     <PackageReference Include="System.CodeDom" Version="6.0" />
     <PackageReference Include="Microsoft.CodeAnalysis" Version="4.2" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="6.0" />

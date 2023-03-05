@@ -47,14 +47,14 @@
     <PackageReference Include="Hangfire.MemoryStorage" Version="1.7.0" />
     <PackageReference Include="Hangfire.SqlServer" Version="1.7.30" />
     <PackageReference Include="Hangfire.Core" Version="1.7.30" />
-    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="6.0" />
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="7.0" />
     <PackageReference Include="RazorLight" Version="2.0.0-rc.3" />
     <PackageReference Include="System.Security.Cryptography.Pkcs" Version="6.0" />
     <PackageReference Include="Xpand.XAF.Core.All">
-      <Version>4.222.3.0</Version>
+      <Version>4.222.3.1</Version>
     </PackageReference>
     <PackageReference Include="Xpand.XAF.Web.All">
-      <Version>4.222.3.0</Version>
+      <Version>4.222.3.1</Version>
     </PackageReference>
     <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="22.2.4" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.3" />
@@ -64,7 +64,7 @@
     <PackageReference Include="System.ServiceModel.Security" Version="4.10" />
     <PackageReference Include="System.ServiceProcess.ServiceController" Version="6.0" />
     <PackageReference Include="System.Threading" Version="4.3" />
-    <PackageReference Include="System.Text.Json" Version="6.0.6" />
+    <PackageReference Include="System.Text.Json" Version="7.0.2" />
     <PackageReference Include="System.Threading.AccessControl" Version="6.0" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="2.2" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0" />

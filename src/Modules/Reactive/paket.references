@@ -5,5 +5,5 @@ System.Reactive
 Fasterflect.Xpand
 Xpand.Patcher
 Microsoft.CSharp
-Newtonsoft.Json
+System.Text.Json
 Enums.Net

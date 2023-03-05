@@ -1,8 +1,8 @@
 using System.ComponentModel;
 using System.Net.Http;
+using System.Text.Json.Serialization;
 using DevExpress.ExpressApp.DC;
 using DevExpress.Persistent.Base;
-using Newtonsoft.Json;
 using Xpand.Extensions.XAF.NonPersistentObjects;
 using Xpand.XAF.Modules.Reactive.Services;
 

@@ -2,6 +2,7 @@
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using akarnokd.reactive_extensions;
+using DevExpress.Data.Filtering;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.Reactive.Filter;
@@ -61,6 +62,23 @@ namespace Xpand.XAF.Modules.Reactive.Tests {
             
             
             cache[o.Oid].Test.ShouldBe(nameof(Contains_Updated_Items));
+        }
+        [Test][Order(2)]
+        public void Not_Contains_Updated_Items() {
+            using var application = DefaultReactiveModule().Application;
+            using var objectSpace = application.CreateObjectSpace();
+            var o = objectSpace.CreateObject<R>();
+            o.CommitChanges();
+            var cache = new ConcurrentDictionary<long,R>();
+            using var testObserver = application.Cache(cache,CriteriaOperator.FromLambda<R>(r => r.Test==null)).Test();
+
+            var space = application.CreateObjectSpace();
+            o = space.GetObject(o);
+            o.Test = nameof(Contains_Updated_Items);
+            o.CommitChanges();
+            
+            
+            cache.ContainsKey(o.Oid).ShouldBeFalse();
         }
 
         [Test][Order(3)]

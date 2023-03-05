@@ -36,7 +36,6 @@
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="DevExpress.ExpressApp.Blazor" Version="22.2.4" />
     <PackageReference Include="DevExpress.ExpressApp.Validation.Blazor" Version="22.2.4" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="System.ServiceModel.NetTcp" Version="4.10" />
     <PackageReference Include="System.ServiceModel.Http" Version="4.10" />
     <PackageReference Include="System.ServiceModel.Security" Version="4.10" />

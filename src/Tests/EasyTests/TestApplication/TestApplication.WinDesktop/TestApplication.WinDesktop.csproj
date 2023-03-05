@@ -54,7 +54,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="_Program.cs" />
-    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="6.0" />
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="7.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="4.2" />
     <PackageReference Include="System.Data.OleDb" Version="6.0" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.3" />
@@ -99,7 +99,7 @@
     <PackageReference Include="System.ServiceModel.NetTcp" Version="4.10" />
     <PackageReference Include="System.ServiceModel.Security" Version="4.10" />
     <PackageReference Include="System.ServiceProcess.ServiceController" Version="6.0" />
-    <PackageReference Include="Xpand.XAF.Win.All" Version="4.222.3.0" />
+    <PackageReference Include="Xpand.XAF.Win.All" Version="4.222.3.1" />
     <PackageReference Include="RazorLight" Version="2.0.0-rc.3" />
   </ItemGroup>
   <ItemGroup>

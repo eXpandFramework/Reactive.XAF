@@ -59,7 +59,7 @@ namespace Xpand.XAF.Modules.Speech.BusinessObjects {
         
         
         [CollectionOperationSet(AllowAdd = true)][ReloadWhenChange()]
-        public BindingList<SpeechText> SpeechTexts => Texts.ExactType().ToBindingList();
+        public BindingList<SpeechText> SpeechTexts => Texts.ExactType<SpeechText>().ToBindingList();
         SpeechService _speechSpeech;
 
         public override void AfterConstruction() {

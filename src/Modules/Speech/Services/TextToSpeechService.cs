@@ -40,7 +40,7 @@ namespace Xpand.XAF.Modules.Speech.Services {
             => application.WhenFrame(typeof(TextToSpeech),ViewType.DetailView)
                 .SelectUntilViewClosed(frame => frame.View.Id != TextToSpeech.TypeSpeakDetailView ? frame.WhenSaveSpeak().ToUnit()
                     : frame.View.ObjectSpace.WhenCommittedDetailed<TextToSpeech>(
-                            ObjectModification.NewOrUpdated, speech => speech.Text.IsNotNullOrEmpty(), nameof(TextToSpeech.Text))
+                            ObjectModification.NewOrUpdated,new []{nameof(TextToSpeech.Text)}, speech => speech.Text.IsNotNullOrEmpty())
                         .ToObjects().WaitUntilInactive(3).ObserveOnContext()
                         .SelectMany(speech => frame.Application.Speak(frame.View.ObjectSpace, _ => speech, account => 
                                 frame.Application.Model.SpeechModel().SSMLText(speech.Text,account.Voices.First(voice => voice.Language.Oid==speech.Language.Oid)))

@@ -3,9 +3,11 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Net.Http;
 using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Editors;
@@ -172,8 +174,7 @@ namespace Xpand.XAF.Modules.Reactive.Rest.Extensions {
                             var realType = t.info.MemberType.RealType();
                             return t.attribute.Send(realType.CreateInstance(), bearer, t.attribute.RequestUrl(o),
                                         realType.DeserializeResponse(t2.sender.ObjectSpace))
-                                    .Do(o1 => {},() => {})
-                                    
+
                                     .BufferUntilCompleted()
 
                                     .Do(objects => t2.sender.AddObjects(objects, true))
@@ -181,8 +182,7 @@ namespace Xpand.XAF.Modules.Reactive.Rest.Extensions {
                         });
                 }));
 
-        private static Func<string, object[]> DeserializeResponse(this Type realType, IObjectSpace objectSpace) 
-            => s => realType != typeof(ObjectString) ? realType.Deserialize<object>(s) : typeof(string).Deserialize<string>(s)
-                .ToObjectString(objectSpace).Cast<object>().ToArray();
+        private static Func<HttpResponseMessage, IObservable<object>> DeserializeResponse(this Type realType, IObjectSpace objectSpace) 
+            => responseMessage => responseMessage.DeserializeJson<object>().ToObservable();
     }
 }

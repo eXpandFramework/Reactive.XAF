@@ -36,7 +36,11 @@ namespace Xpand.Extensions.XAF.ObjectSpaceExtensions {
         }
         [SuppressMessage("ReSharper", "HeapView.CanAvoidClosure")]
         public static T EnsureObject<T>(this IObjectSpace space, ConcurrentDictionary<string, T> dictionary, string id) {
-            var add = dictionary.GetOrAdd(id, _ => space.CreateObject<T>());
+            var add = dictionary.GetOrAdd(id, _ => {
+                var o = space.CreateObject<T>();
+                typeof(T).ToTypeInfo().KeyMember.SetValue(o,id);
+                return o;
+            });
             return space.IsNewObject(add)?add: space.GetObject(add);
         }
 

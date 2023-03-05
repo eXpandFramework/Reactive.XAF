@@ -24,6 +24,7 @@ using Xpand.Extensions.TypeExtensions;
 using Xpand.Extensions.XAF.Attributes;
 using Xpand.Extensions.XAF.CollectionSourceExtensions;
 using Xpand.Extensions.XAF.ObjectSpaceExtensions;
+using Xpand.Extensions.XAF.TypesInfoExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.Reactive.Extensions;
 
@@ -136,12 +137,16 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<T> WhenModifiedObjects<T>(this IObjectSpace objectSpace, params string[] properties) 
             => objectSpace.WhenModifiedObjects(typeof(T),properties).Cast<T>();
 
-        public static IObservable<object> WhenModifiedObjects(this IObjectSpace objectSpace, Type objectType,
-            params string[] properties)
-            => objectSpace.WhenObjectChanged()
+        public static IObservable<object> WhenModifiedObjects(this IObjectSpace objectSpace, Type objectType, params string[] properties) {
+            var notExisting = properties.WhereDefault(name => objectType.ToTypeInfo().FindMember(name)).ToArray();
+            if (notExisting.Any()) {
+                return Observable.Throw<object>(new InvalidOperationException($"{objectType.FullName} member ({notExisting.JoinComma()}) not found"));
+            }
+            return objectSpace.WhenObjectChanged()
                 .Where(t => objectType.IsInstanceOfType(t.e.Object) && properties.PropertiesMatch(t))
                 .Select(_ => _.e.Object);
-                // .RepeatWhen(observable => observable.SelectMany(_ => objectSpace.WhenModifyChanged().Where(space => !space.IsModified).Take(1)))
+        }
+        // .RepeatWhen(observable => observable.SelectMany(_ => objectSpace.WhenModifyChanged().Where(space => !space.IsModified).Take(1)))
                 // .TakeUntil(objectSpace.WhenDisposed());
 
         private static bool PropertiesMatch(this string[] properties, (IObjectSpace objectSpace, ObjectChangedEventArgs e) t) 
@@ -217,8 +222,11 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => objectSpace.GetType().InheritsFrom("DevExpress.ExpressApp.Xpo.XPNestedObjectSpace");
 
         public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)>
-            WhenCommittedDetailed<T>(this IObjectSpace objectSpace, ObjectModification objectModification,
-                Func<T, bool> criteria = null, params string[] modifiedProperties) where T : class
+            WhenCommittedDetailed<T>(this IObjectSpace objectSpace, ObjectModification objectModification, Func<T, bool> criteria ) where T : class
+            => objectSpace.WhenCommitingDetailed(true, objectModification, criteria, Array.Empty<string>());
+        public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)>
+            WhenCommittedDetailed<T>(this IObjectSpace objectSpace, ObjectModification objectModification,string[] modifiedProperties,
+                Func<T, bool> criteria = null) where T : class
             => objectSpace.WhenCommitingDetailed(true, objectModification, criteria, modifiedProperties);
         
         public static IObservable<(IObjectSpace objectSpace, (object instance, ObjectModification modification)[] details)>
@@ -433,7 +441,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static IObservable<(IObjectSpace objectSpace, IEnumerable<T> objects)> WhenCommitted<T>(
             this IObjectSpace objectSpace, ObjectModification objectModification = ObjectModification.All) 
-            => objectSpace.WhenCommitingDetailed<T>(objectModification, true).Select(t => (t.objectSpace,t.details.Select(t1 => t1.instance)));
+            => objectSpace.WhenCommitingDetailed<T>(objectModification, true)
+                .Select(t => (t.objectSpace,t.details.Select(t1 => t1.instance)));
 
         public static IObservable<(IObjectSpace objectSpace, IEnumerable<object> objects)> WhenCommitted(
             this IObservable<IObjectSpace> source,Type objectType, ObjectModification objectModification = ObjectModification.All) 

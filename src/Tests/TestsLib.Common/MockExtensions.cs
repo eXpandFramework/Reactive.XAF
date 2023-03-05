@@ -103,6 +103,7 @@ namespace Xpand.TestsLib.Common {
                 message.Content = new StringContent("[]");
                 configure?.Invoke(message);
             }, scheduler);
+        
         public static IReturnsResult<THandler> SetupSend<THandler>(this Mock<THandler> handlerMock,
             Action<HttpResponseMessage> configure=null, IScheduler scheduler = null) where THandler : HttpMessageHandler 
             => handlerMock.Protected().Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())

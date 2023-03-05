@@ -6,15 +6,16 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;
 using HarmonyLib;
-using Newtonsoft.Json.Linq;
 using Swordfish.NET.Collections.Auxiliary;
 using Xpand.Extensions.BytesExtensions;
 using Xpand.Extensions.JsonExtensions;
 using Xpand.Extensions.LinqExtensions;
-using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
@@ -22,7 +23,6 @@ using Xpand.Extensions.Reactive.Transform.System.IO;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.StringExtensions;
 using Xpand.Extensions.Tracing;
-using Xpand.Extensions.TypeExtensions;
 using Xpand.Extensions.XAF.Attributes;
 using Xpand.Extensions.XAF.TypesInfoExtensions;
 using Xpand.XAF.Modules.Reactive;
@@ -51,22 +51,22 @@ namespace Xpand.XAF.Modules.StoreToDisk{
                 })
                 .ToUnit();
 
-        private static IObservable<(object[] objects, JArray jArray)> LoadFromDisk(this (object instance,ObjectModification modification)[] source, XafApplication application,
+        private static IObservable<(object[] objects, JsonArray JsonArray)> LoadFromDisk(this (object instance,ObjectModification modification)[] source, XafApplication application,
             IMemberInfo keyMember, IMemberInfo[] memberInfos, ITypeInfo typeInfo, string filePath, StoreToDiskAttribute attribute) 
             => Observable.Defer(() => new FileInfo(filePath).WhenFileReadAsBytes()
-                .Select(bytes => bytes.Length == 0 ? "[]" : attribute.Protection.UnProtect(bytes)).Select(json=>json.DeserializeJson().As<JArray>())
-                .SelectMany(jArray => application.UseProviderObjectSpace(space => source
+                .Select(bytes => bytes.Length == 0 ? new JsonArray() : attribute.Protection.UnProtect(bytes).DeserializeJson().ToJsonArray())
+                .SelectMany(jsonArray => application.UseProviderObjectSpace(space => source
                     .LoadFromDisk( keyMember, memberInfos, source.Where(details => details.modification == ObjectModification.New)
-                        .Select(t => t.instance).Select(space.GetObject).ToArray(), jArray, space),typeInfo.Type)));
+                        .Select(t => t.instance).Select(space.GetObject).ToArray(), jsonArray, space),typeInfo.Type)));
 
-        private static IObservable<(object[], JArray jArray)> LoadFromDisk(this (object instance, ObjectModification modification)[] source, IMemberInfo keyMember, IMemberInfo[] memberInfos, object[] objects, JArray jArray, IObjectSpace space) 
+        private static IObservable<(object[], JsonArray JsonArray)> LoadFromDisk(this (object instance, ObjectModification modification)[] source, IMemberInfo keyMember, IMemberInfo[] memberInfos, object[] objects, JsonArray jsonArray, IObjectSpace space) 
             => objects.ToNowObservable().BufferUntilCompleted()
                 .SelectMany(objects1 => objects1.ToNowObservable()
-                    .SelectMany(o1 => jArray.Where(jToken => keyMember.Match(jToken, o1)).Take(1).ToNowObservable()
+                    .SelectMany(o1 => jsonArray.Cast<JsonObject>().Where(jToken => keyMember.Match(jToken, o1)).Take(1).ToNowObservable()
                         .SelectMany(jToken => memberInfos.ToNowObservable().WhenDefault(info => info.GetValue(o1))
                             .Do(info => {
-                                var value = ((JValue)jToken[info.Name])?.Value;
-                                var change = !info.MemberTypeInfo.IsPersistent ? value.Change(info.MemberType) :
+                                var value = ((JsonValue)jToken[info.Name])?.Deserialize(!info.MemberTypeInfo.IsPersistent?info.MemberType:info.MemberTypeInfo.KeyMember.MemberType);
+                                var change = !info.MemberTypeInfo.IsPersistent ? value :
                                     value == null ? null : space.GetObjectByKey(info.MemberType, value);
                                 info.SetValue(o1, change);
                             })
@@ -76,7 +76,7 @@ namespace Xpand.XAF.Modules.StoreToDisk{
                 .Select(_ => {
                     space.CommitChanges();
                     return (source.Where(t => t.modification!=ObjectModification.New)
-                        .Select(t => space.GetObject(t.instance)).Concat(objects).ToArray(), jArray);
+                        .Select(t => space.GetObject(t.instance)).Concat(objects).ToArray(), JsonArray: jsonArray);
                 });
 
         public static IObservable<Unit> StoreToDisk(this XafApplication application, string directory)
@@ -90,11 +90,11 @@ namespace Xpand.XAF.Modules.StoreToDisk{
                 )
                 .ToUnit();
         
-        private static IObservable<JObject[]> StoreToDisk(this IObservable<(object[] objects, JArray jArray)> source,
+        private static IObservable<JsonObject[]> StoreToDisk(this IObservable<(object[] objects, JsonArray JsonArray)> source,
                 (IObjectSpace objectSpace, (object instance, ObjectModification modification)[] details) committed,
                 (IMemberInfo keyMember, IMemberInfo[] memberInfos, ITypeInfo typeInfo, string filePath, StoreToDiskAttribute attribute) data)
             => source.SelectMany(loadFromDisk => data.ObjectsToStore(committed,  loadFromDisk.objects,loadFromDisk.objects.Select(o => data.keyMember.GetValue(o)).ToHashSet())
-                .StoreToDisk(loadFromDisk.jArray,data.keyMember, data.memberInfos, data.filePath, data.attribute));
+                .StoreToDisk(loadFromDisk.JsonArray, data.keyMember, data.memberInfos, data.filePath, data.attribute));
 
         private static object[] ObjectsToStore(this (IMemberInfo keyMember, IMemberInfo[] memberInfos, ITypeInfo typeInfo, string filePath, StoreToDiskAttribute attribute) data,
             (IObjectSpace objectSpace, (object instance, ObjectModification modification)[] details) committed, object [] loadedObjects, HashSet<object> loadedKeys) 
@@ -108,39 +108,38 @@ namespace Xpand.XAF.Modules.StoreToDisk{
                 .SelectMany(t => new DirectoryInfo(directory).WhenDirectory().Select(_ => t.typeInfo.EnsureFile(directory))
                     .Select(filePath => ( t.keyMember, t.memberInfos, t.typeInfo, filePath,t.attribute)));
         
-        private static IObservable<JObject[]> StoreToDisk(this object[] objects ,JArray jArray,IMemberInfo keyMember, IMemberInfo[] memberInfos, string filePath, StoreToDiskAttribute attribute) 
+        private static IObservable<JsonObject[]> StoreToDisk(this object[] objects, JsonArray jsonArray,
+            IMemberInfo keyMember, IMemberInfo[] memberInfos, string filePath, StoreToDiskAttribute attribute) 
             => objects.ToNowObservable().SelectMany(instance => {
-                var jtoken = jArray.GetToken(keyMember, memberInfos,  instance);
+                var jtoken = memberInfos.GetObject(keyMember,   instance);
                 return memberInfos.ToNowObservable()
-                    .Do(memberInfo => jtoken[memberInfo.Name] = memberInfo.GetMemberValue(instance).ToJToken())
+                    .Do(memberInfo => jtoken[memberInfo.Name] = memberInfo.GetMemberValue(instance).ToJsonNode())
                     .ConcatIgnoredValue(jtoken);
             }).BufferUntilCompleted(true)
-                .Do(jObjects => attribute.SaveFile(filePath, new JArray(jObjects.Concat(objects.ReplaceExisting(jArray, keyMember)).Cast<object>().ToArray()).ToString()))
+                .Do(jsonObjects => new JsonArray(jsonObjects.Concat(objects.ReplaceExisting(jsonArray, keyMember)
+                            .Select(node => node.Deserialize<JsonObject>())).Cast<JsonNode>().ToArray())
+                    .SaveFile(attribute.Protection, filePath))
                 .TraceStoreToDisk();
 
-        private static JArray ReplaceExisting(this object[] objects,JArray jArray  ,IMemberInfo keyMember) {
-            objects.ForEach(o => jArray.Where(token => keyMember.Match(token, o)).Take(1).ToArray()
-                    .ForEach(token => jArray.Remove(token)));
-            return jArray;
+        private static JsonArray ReplaceExisting(this object[] objects,JsonArray jsonArray  ,IMemberInfo keyMember) {
+            objects.ForEach(o => jsonArray.Cast<JsonObject>().Where(token => keyMember.Match(token, o)).Take(1).ToArray()
+                .ForEach(token => jsonArray.Remove(token)));
+            return jsonArray;
         }
 
         [SuppressMessage("Interoperability", "CA1416:Validate platform compatibility")]
-        private static void SaveFile(this StoreToDiskAttribute attribute,string filePath,  string json) 
-            => (attribute.Protection != null ? json.Protect(attribute.Protection.Value) : json.Bytes()).Save(filePath);
-
-        private static JObject GetToken(this JArray jArray,IMemberInfo keyMember, IMemberInfo[] memberInfos,  object instance) {
-            var o = jArray.Cast<JObject>().FirstOrDefault(token => keyMember.Match(token, instance));
-            if (o != null) {
-                return o;
-            }
-
-            var dictionary = memberInfos.Select(info => (info.Name,info.GetMemberValue(instance)))
-                .AddItem((keyMember.Name, keyMember.GetMemberValue(instance))).ToDictionary();
-            return JObject.FromObject(dictionary);
+        private static void SaveFile(this JsonArray json,DataProtectionScope? scope,string filePath) {
+            var bytes = json.Utf8Bytes(new JsonSerializerOptions(){WriteIndented = true});
+            (scope != null ? bytes.Protect(scope.Value) : bytes).Save(filePath);
         }
 
-        private static bool Match(this IMemberInfo memberInfo, JToken token, object instance) {
-            var value = token[memberInfo.Name]?.ToObject(memberInfo.MemberType);
+        private static JsonObject GetObject(this IMemberInfo[] memberInfos,IMemberInfo keyMember,   object instance) 
+            => memberInfos.Select(info => (info.Name,info.GetMemberValue(instance)))
+                .AddItem((keyMember.Name, keyMember.GetMemberValue(instance))).ToDictionary()
+                .SerializeToNode()!.AsObject();
+
+        private static bool Match(this IMemberInfo memberInfo, JsonObject token, object instance) {
+            var value = token[memberInfo.Name]?.Deserialize(memberInfo.MemberType);
             var keyValue = memberInfo.GetValue(instance);
             return value == null ? keyValue == null : value!.Equals(keyValue);
         }

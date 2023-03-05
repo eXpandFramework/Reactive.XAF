@@ -75,7 +75,7 @@ namespace Xpand.XAF.Modules.Speech.Services {
 				.Where(frame => frame.View.ObjectTypeInfo.Type==typeof(SpeechToText))
 				.SelectUntilViewClosed(frame => {
 					var observeOnContext = frame.View.ObjectSpace
-						.WhenCommittedDetailed<SpeechText>(ObjectModification.NewOrUpdated, text => text.Text != null, nameof(SpeechText.Text))
+						.WhenCommittedDetailed<SpeechText>(ObjectModification.NewOrUpdated,new[]{nameof(SpeechText.Text)}, text => text.Text != null)
 						.Select(t => t).Where(t => t.details.Any()).ToObjects()
 						// .WaitUntilInactive(2)
 						.ObserveOnContext();

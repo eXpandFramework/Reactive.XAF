@@ -3,7 +3,6 @@ System.Reactive
 DevExpress.Persistent.Base
 DevExpress.ExpressApp.Xpo
 Fasterflect.Xpand
-Newtonsoft.Json
+System.Text.Json
 Xpand.Collections
-
 System.Security.Cryptography.ProtectedData

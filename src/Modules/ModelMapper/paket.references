@@ -6,4 +6,4 @@ System.Reactive
 Fasterflect.Xpand
 Xpand.Collections
 System.Interactive
-Newtonsoft.Json
+System.Text.Json

@@ -176,8 +176,8 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManag
 	        ModelSetup(application);
 	        var tuple = application.SetDocumentStyleManagerDetailView(Document);
 	        var action = tuple.window.Action<DocumentStyleManagerModule>().ImportStyles();
-	        action.WhenExecuted().FirstAsync().Do(_ => _.ShowViewParameters.TargetWindow = TargetWindow.NewWindow).Test();
-	        var listViewFrame = application.WhenViewOnFrame(typeof(DocumentStyle),ViewType.ListView,Nesting.Root).Test();
+	        using var _=action.WhenExecuted().FirstAsync().Do(_ => _.ShowViewParameters.TargetWindow = TargetWindow.NewWindow).Test();
+	        using var listViewFrame = application.WhenViewOnFrame(typeof(DocumentStyle),ViewType.ListView,Nesting.Root).Test();
 	        action.DoExecute();
 
 	        var filterImportStyles = listViewFrame.Items.First().Action<DocumentStyleManagerModule>().FilterImportStyles();

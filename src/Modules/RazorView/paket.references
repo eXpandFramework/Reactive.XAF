@@ -2,9 +2,7 @@ Xpand.Patcher
 System.Reactive
 DevExpress.ExpressApp.Validation
 Fasterflect.Xpand
-
-Newtonsoft.Json
+System.Text.Json
 Xpand.Collections
 RazorLight
-
 System.Reflection.Metadata

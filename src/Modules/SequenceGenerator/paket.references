@@ -2,5 +2,4 @@ DevExpress.ExpressApp.Validation
 DevExpress.ExpressApp.Xpo
 Fasterflect.Xpand
 System.Reactive
-
-Newtonsoft.Json
+System.Text.Json
