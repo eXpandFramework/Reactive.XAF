@@ -5,8 +5,6 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
@@ -16,6 +14,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.DC;
@@ -31,7 +30,6 @@ using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.ErrorHandling;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
-using Xpand.Extensions.Reactive.Transform.System.Net;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.StringExtensions;
 using Xpand.Extensions.TypeExtensions;
@@ -164,31 +162,44 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .TraceRX(window => window.Context);
 
         public static IObservable<TObject[]> Cache<TObject,TKey>(this XafApplication application,
-            ConcurrentDictionary<TKey, TObject> cache=null,Expression<Func<TObject, bool>> criteriaExpression = null,
-            Func<TObject,TKey> keyValue=null, params string[] modifiedProperties) where TObject : class, IObjectSpaceLink 
+            ConcurrentDictionary<TKey, TObject> cache=null,CriteriaOperator criteriaExpression = null, params string[] modifiedProperties) where TObject : class, IObjectSpaceLink 
             => application.Cache( criteriaExpression, modifiedProperties, cache??new ConcurrentDictionary<TKey, TObject>());
         
         public static IObservable<TObject[]> Cache<TObject>(this XafApplication application,
-            ConcurrentDictionary<object, TObject> cache=null,Expression<Func<TObject, bool>> criteriaExpression = null,
+            ConcurrentDictionary<object, TObject> cache=null,CriteriaOperator criteriaExpression = null,
             params string[] modifiedProperties) where TObject : class, IObjectSpaceLink 
             => application.Cache( criteriaExpression, modifiedProperties, cache??new ConcurrentDictionary<object, TObject>());
 
         private static IObservable<TObject[]> Cache<TObject, TKey>(this XafApplication application,
-            Expression<Func<TObject, bool>> criteriaExpression, string[] modifiedProperties, ConcurrentDictionary<TKey, TObject> objectSpaceLinks,Func<TObject,TKey> keyValue=null) where TObject : class, IObjectSpaceLink 
-            => application.WhenProviderCommittedDetailed(ObjectModification.All, criteriaExpression?.Compile(), modifiedProperties)
+            CriteriaOperator criteriaExpression, string[] modifiedProperties, ConcurrentDictionary<TKey, TObject> objectSpaceLinks,Func<TObject,TKey> keyValue=null) where TObject : class, IObjectSpaceLink 
+            => application.WhenProviderCommittedDetailed<TObject>(ObjectModification.All,modifiedProperties:modifiedProperties)
                 .Select(t => t.details.Select(t1 => t1.instance).ToArray())
-                .Merge(application.WhenExistingObject(criteriaExpression)
-                    .Do(o => objectSpaceLinks.TryAdd(o.GetKeyValue(keyValue), o))
-                    .BufferUntilCompleted().Finally(() => {})
+                .Merge(application.WhenExistingObject<TObject>(criteriaExpression)
+                    .Do(o => {
+                        var value = o.GetKeyValue(keyValue);
+                        o.CallMethod("Invalidate", true);
+                        objectSpaceLinks.TryAdd(value, o);
+                    })
+                    .DoOnLast(o => o.ObjectSpace.Dispose())
+                    .BufferUntilCompleted()
                     .Do(links => links.FirstOrDefault()?.ObjectSpace.Dispose()))
                 .Select(links => (disposed:links.Where(o => o.ObjectSpace.IsDisposed).ToArray(),notDisposed:links.Where(o => !o.ObjectSpace.IsDisposed).ToArray()))
-                .Select(t => t.notDisposed.ToNowObservable().If(link => !link.ObjectSpace.IsDeletedObject(link), link => objectSpaceLinks
-                            .AddOrUpdate(link.GetKeyValue(keyValue), link, (_, _) => link).ReturnObservable(),
-                        link => objectSpaceLinks.TryRemove((TKey)link.ObjectSpace.GetKeyValue(link), out _)
-                            .ReturnObservable().WhenNotDefault().To(link))
-                    // .DoOnComplete(() => t.notDisposed.FirstOrDefault()?.ObjectSpace.Dispose())
+                .Select(t => t.notDisposed.ToNowObservable()
+                    .If(link => !link.ObjectSpace.IsDeletedObject(link), 
+                        link => application.UseObject(link, spaceLink => {
+                            var match = spaceLink.Match(criteriaExpression);
+                            var value = spaceLink.GetKeyValue(keyValue);
+                            spaceLink.CallMethod("Invalidate", true);
+                            spaceLink.ObjectSpace.Dispose();
+                            if (match)
+                                return objectSpaceLinks.AddOrUpdate(value, spaceLink, (_, _) => spaceLink).ReturnObservable();
+                            objectSpaceLinks.TryRemove((TKey)link.ObjectSpace.GetKeyValue(link), out _);
+                            return Observable.Empty<TObject>();
+
+                        }), 
+                        link => objectSpaceLinks.TryRemove((TKey)link.ObjectSpace.GetKeyValue(link), out _).ReturnObservable().WhenNotDefault().To(link))
                     .Merge(t.disposed.ToNowObservable())
-                    .BufferUntilCompleted()).SelectMany().Select(links => links);
+                    .BufferUntilCompleted()).SelectMany();
 
         private static TKey GetKeyValue<TObject, TKey>(this TObject link, Func<TObject,TKey> keyValue) where TObject : class, IObjectSpaceLink 
             => keyValue == null ? (TKey)link.ObjectSpace.GetKeyValue(link) : keyValue(link);
@@ -647,22 +658,22 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)> WhenUpdated<T>(
             this XafApplication application,Func<T,bool> criteria,params string[] modifiedProperties) where T:class
             => application.WhenObjectSpaceCreated()
-                .SelectMany(objectSpace => objectSpace.WhenCommittedDetailed(ObjectModification.Updated,criteria, modifiedProperties).TakeUntil(objectSpace.WhenDisposed()));
+                .SelectMany(objectSpace => objectSpace.WhenCommittedDetailed(ObjectModification.Updated,modifiedProperties,criteria).TakeUntil(objectSpace.WhenDisposed()));
         
         public static IObservable<(IObjectSpace objectSpace, T[] objects)> WhenProviderUpdated<T>(
             this XafApplication application,Func<T,bool> criteria,params string[] modifiedProperties) where T:class
             => application.WhenProviderObjectSpaceCreated()
-                .SelectMany(objectSpace => objectSpace.WhenCommittedDetailed(ObjectModification.Updated,criteria, modifiedProperties).TakeUntil(objectSpace.WhenDisposed())
+                .SelectMany(objectSpace => objectSpace.WhenCommittedDetailed(ObjectModification.Updated,modifiedProperties,criteria).TakeUntil(objectSpace.WhenDisposed())
                     .Select(t => (t.objectSpace,t.details.Select(t1 => t1.instance).ToArray())));
         public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)> WhenProviderUpdated<T>(
             this XafApplication application,params string[] modifiedProperties) where T:class
             => application.WhenProviderObjectSpaceCreated()
-                .SelectMany(objectSpace => objectSpace.WhenCommittedDetailed<T>(ObjectModification.Updated,_ => true,modifiedProperties).TakeUntil(objectSpace.WhenDisposed()));
+                .SelectMany(objectSpace => objectSpace.WhenCommittedDetailed<T>(ObjectModification.Updated,modifiedProperties,_ => true).TakeUntil(objectSpace.WhenDisposed()));
         
         public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)> WhenCommittedDetailed<T>(
             this XafApplication application,ObjectModification objectModification,Func<T,bool> criteria,params string[] modifiedProperties) where T:class
             => application.WhenObjectSpaceCreated()
-                .SelectMany(objectSpace => objectSpace.WhenCommittedDetailed(objectModification, criteria, modifiedProperties).TakeUntil(objectSpace.WhenDisposed()));
+                .SelectMany(objectSpace => objectSpace.WhenCommittedDetailed(objectModification,modifiedProperties, criteria).TakeUntil(objectSpace.WhenDisposed()));
         
         public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)> WhenCommittingDetailed<T>(this IObservable<IObjectSpace> source,
             ObjectModification objectModification,Func<T,bool> criteria,params string[] modifiedProperties) where T:class
@@ -710,12 +721,12 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)> WhenProviderCommittedDetailed<T>(
             this XafApplication application,ObjectModification objectModification,Func<T,bool> criteria=null,params string[] modifiedProperties) where T:class
             => application.WhenProviderObjectSpaceCreated()
-                .SelectMany(objectSpace => objectSpace.WhenCommittedDetailed(objectModification, criteria, modifiedProperties));
+                .SelectMany(objectSpace => objectSpace.WhenCommittedDetailed(objectModification,modifiedProperties, criteria));
         
         public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)> WhenProviderCommittedDetailed<T>(
             this XafApplication application,ObjectModification objectModification,bool emitUpdatingObjectSpace,Func<T,bool> criteria=null,params string[] modifiedProperties) where T:class
             => application.WhenProviderObjectSpaceCreated(emitUpdatingObjectSpace)
-                .SelectMany(objectSpace => objectSpace.WhenCommittedDetailed(objectModification, criteria, modifiedProperties).TakeUntil(objectSpace.WhenDisposed()));
+                .SelectMany(objectSpace => objectSpace.WhenCommittedDetailed(objectModification,modifiedProperties, criteria).TakeUntil(objectSpace.WhenDisposed()));
         
         
         public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)> WhenProviderNewOrUpdatedCommittedDetailed<T>(
@@ -732,7 +743,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => Observable.Using(() => application.CreateObjectSpace(useObjectSpaceProvider, typeof(T), caller: caller), factory);
 
         public static IObservable<TResult> UseObject<TSource,TResult>(this XafApplication application,TSource instance,Func<TSource,IObservable<TResult>> selector,bool useObjectSpaceProvider=false,[CallerMemberName]string caller="") 
-            => application.UseObjectSpace(space => selector(space.GetObjectFromKey(instance)));
+            => application.UseObjectSpace(space => selector(space.GetObjectFromKey(instance)),useObjectSpaceProvider);
 
         public static IObservable<T2> UseProviderObjectSpace<T,T2>(this XafApplication application,T obj, Func<T, IObservable<T2>> factory, 
             [CallerMemberName] string caller = "") 
@@ -766,32 +777,61 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<T> UseObjectSpace<T>(this XafApplication application,Type objectType,Func<IObjectSpace,T> selector) 
             => Observable.Using(() => application.CreateObjectSpace(objectType),space => selector(space).ReturnObservable());
 
-        public static IObservable<T> WhenObject<T>(this XafApplication application,Expression<Func<T, bool>> criteriaExpression=null,
-            [CallerMemberName] string caller = "",params string[] modifiedProperties)where T:class
-            => application.WhenObject(ObjectModification.NewOrUpdated,criteriaExpression,caller,modifiedProperties);
-
-        public static IObservable<T> WhenProviderObject<T>(this XafApplication application,
-            Expression<Func<T, bool>> criteriaExpression = null, [CallerMemberName] string caller = "", params string[] modifiedProperties)where T:class
-            => application.WhenProviderObjects(criteriaExpression, caller,modifiedProperties).SelectMany();
+        public static IObservable<T> WhenObject<T>(this XafApplication application,string[] modifiedProperties,Expression<Func<T, bool>> criteriaExpression=null,
+            [CallerMemberName] string caller = "")where T:class
+            => application.WhenObject(ObjectModification.NewOrUpdated,modifiedProperties,criteriaExpression,caller);
         
+        public static IObservable<T> WhenObject<T>(this XafApplication application,Expression<Func<T, bool>> criteriaExpression=null,
+            [CallerMemberName] string caller = "")where T:class
+            => application.WhenObject(Array.Empty<string>(),criteriaExpression,caller);
+
+        public static IObservable<T> WhenProviderObject<T>(this XafApplication application,string[] modifiedProperties,
+            Expression<Func<T, bool>> criteriaExpression = null, [CallerMemberName] string caller = "")where T:class
+            => application.WhenProviderObjects(modifiedProperties,criteriaExpression, caller).SelectMany();
+        
+        public static IObservable<T> WhenProviderObject<T>(this XafApplication application,
+            Expression<Func<T, bool>> criteriaExpression = null, [CallerMemberName] string caller = "")where T:class
+            => application.WhenProviderObject(Array.Empty<string>(),criteriaExpression,caller);
+        
+        public static IObservable<T[]> WhenProviderObjects<T>(this XafApplication application,string[] modifiedProperties,Expression<Func<T, bool>> criteriaExpression=null,
+            [CallerMemberName] string caller = "")where T:class
+            => application.WhenProviderObjects(ObjectModification.NewOrUpdated,modifiedProperties,criteriaExpression,caller);
         public static IObservable<T[]> WhenProviderObjects<T>(this XafApplication application,Expression<Func<T, bool>> criteriaExpression=null,
-            [CallerMemberName] string caller = "",params string[] modifiedProperties)where T:class
-            => application.WhenProviderObjects(ObjectModification.NewOrUpdated,criteriaExpression,caller,modifiedProperties);
+            [CallerMemberName] string caller = "")where T:class
+            => application.WhenProviderObjects(Array.Empty<string>(),criteriaExpression,caller );
 
         public static IObservable<T> WhenExistingObject<T>(this XafApplication application, Expression<Func<T, bool>> criteriaExpression = null,
             [CallerMemberName] string caller = "") 
             => application.UseObjectSpace(space => space.GetObjectsQuery<T>().Where(criteriaExpression ?? (arg => true)).ToNowObservable(),caller:caller);
+        
+        public static IObservable<T> WhenExistingObject<T>(this XafApplication application, string criteriaExpression =null,
+            [CallerMemberName] string caller = "") 
+            => application.WhenExistingObject<T>(CriteriaOperator.Parse(criteriaExpression),caller);
+        public static IObservable<T> WhenExistingObject<T>(this XafApplication application, CriteriaOperator criteriaExpression =null,
+            [CallerMemberName] string caller = "") 
+            => application.UseObjectSpace(space => space.GetObjects<T>(criteriaExpression).ToNowObservable(),caller:caller);
 
-        public static IObservable<T> WhenObject<T>(this XafApplication application,ObjectModification objectModification ,Expression<Func<T, bool>> criteriaExpression=null,
-            [CallerMemberName] string caller = "",params string[] modifiedProperties)where T:class 
+        public static IObservable<T> WhenObject<T>(this XafApplication application,ObjectModification objectModification,string[] modifiedProperties ,Expression<Func<T, bool>> criteriaExpression=null,
+            [CallerMemberName] string caller = "")where T:class 
             => application.WhenObject( objectModification, criteriaExpression, modifiedProperties, (criteriaExpression ?? (arg1 => true)).Compile(),application.WhenObjectSpaceCreated(),caller);
+        public static IObservable<T> WhenObject<T>(this XafApplication application,ObjectModification objectModification ,Expression<Func<T, bool>> criteriaExpression=null,
+            [CallerMemberName] string caller = "")where T:class 
+            => application.WhenObject( objectModification,Array.Empty<string>(), criteriaExpression, caller);
 
-        public static IObservable<T> WhenProviderObject<T>(this XafApplication application,ObjectModification objectModification ,Expression<Func<T, bool>> criteriaExpression=null,
-            [CallerMemberName] string caller = "",params string[] modifiedProperties)where T:class 
+        public static IObservable<T> WhenProviderObject<T>(this XafApplication application,ObjectModification objectModification,string[] modifiedProperties ,Expression<Func<T, bool>> criteriaExpression=null,
+            [CallerMemberName] string caller = "")where T:class 
             => application.WhenObject( objectModification, criteriaExpression, modifiedProperties, (criteriaExpression ?? (arg1 => true)).Compile(),application.WhenProviderObjectSpaceCreated(),caller);
         
+        public static IObservable<T> WhenProviderObject<T>(this XafApplication application,ObjectModification objectModification ,Expression<Func<T, bool>> criteriaExpression=null,
+            [CallerMemberName] string caller = "")where T:class 
+            => application.WhenProviderObject(objectModification,Array.Empty<string>(),criteriaExpression,caller);
+        
         public static IObservable<T[]> WhenProviderObjects<T>(this XafApplication application,ObjectModification objectModification ,Expression<Func<T, bool>> criteriaExpression=null,
-            [CallerMemberName] string caller = "",params string[] modifiedProperties)where T:class 
+            [CallerMemberName] string caller = "")where T:class 
+            => application.WhenObjects( objectModification, criteriaExpression, Array.Empty<string>(), (criteriaExpression ?? (arg1 => true)).Compile(),application.WhenProviderObjectSpaceCreated(),caller);
+        
+        public static IObservable<T[]> WhenProviderObjects<T>(this XafApplication application,ObjectModification objectModification,string[] modifiedProperties ,Expression<Func<T, bool>> criteriaExpression=null,
+            [CallerMemberName] string caller = "")where T:class 
             => application.WhenObjects( objectModification, criteriaExpression, modifiedProperties, (criteriaExpression ?? (arg1 => true)).Compile(),application.WhenProviderObjectSpaceCreated(),caller);
 
         private static IObservable<T> WhenObject<T>(this XafApplication application, ObjectModification objectModification,
@@ -802,16 +842,18 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             Expression<Func<T, bool>> criteriaExpression, string[] modifiedProperties, Func<T, bool> criteria,IObservable<IObjectSpace> spaceSource,
             [CallerMemberName] string caller = "")where T:class 
             => application.UseObjectSpace(space => space.GetObjectsQuery<T>().Where(criteriaExpression ?? (arg => true)).ToArray().ReturnObservable(),caller:caller)
-                .Merge(spaceSource.SelectMany(space => space.WhenCommittedDetailed(objectModification, criteria,modifiedProperties)
+                .Merge(spaceSource.SelectMany(space => space.WhenCommittedDetailed(objectModification,modifiedProperties, criteria)
                     .Select(t => t.details.Select(t1 => t1.instance).ToArray()))).WhenNotEmpty();
 
-        public static IObservable<T> WhenObject<T>(this XafApplication application,ObjectModification objectModification,bool existing ,Expression<Func<T, bool>> criteriaExpression=null,params string[] modifiedProperties) where T:class{
+        public static IObservable<T> WhenObject<T>(this XafApplication application,ObjectModification objectModification,bool existing,string[] modifiedProperties ,Expression<Func<T, bool>> criteriaExpression=null) where T:class{
             var criteria = (criteriaExpression ?? (arg1 => true)).Compile();
-            var whenCommitted = application.WhenObjectSpaceCreated().SelectMany(space => space.WhenCommittedDetailed(objectModification, criteria,modifiedProperties)
+            var whenCommitted = application.WhenObjectSpaceCreated().SelectMany(space => space.WhenCommittedDetailed(objectModification,modifiedProperties, criteria)
                 .SelectMany(t => t.details.Select(t1 => t1.instance)));
             var whenExist = application.UseObjectSpace(space => space.GetObjectsQuery<T>().Where(criteriaExpression ?? (arg => true)).ToNowObservable());
             return Observable.If(() => existing,whenCommitted.Merge(whenExist),whenCommitted);
         }
+        public static IObservable<T> WhenObject<T>(this XafApplication application,ObjectModification objectModification,bool existing ,Expression<Func<T, bool>> criteriaExpression=null) where T:class 
+            => application.WhenObject(objectModification, existing, Array.Empty<string>(), criteriaExpression);
 
         internal static IObservable<Unit> PopulateAdditionalObjectSpaces(this XafApplication application) 
             => Observable.If(() => ReactiveModule.PopulateAdditionalObjectSpaces,application.WhenObjectSpaceCreated().OfType<NonPersistentObjectSpace>()
@@ -862,14 +904,6 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .ToController<WindowTemplateController>().SelectMany(controller => controller.WhenCustomizeWindowCaption()
                     .DoWhen(_ => objectTypes.Contains(controller.Frame.View?.ObjectTypeInfo?.Type),e =>  e.WindowCaption.FirstPart = $"{controller.Frame.View?.CurrentObject}")).ToUnit();
         
-        public static HttpClient HttpClient(this XafApplication application,AuthenticationHeaderValue authenticationHeaderValue=null) {
-            var httpClient = NetworkExtensions.HttpClient;
-            var type = application.GetType();
-            httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue(type.Name, type.Assembly.GetName().Version!.ToString()));
-            httpClient.DefaultRequestHeaders.Authorization=authenticationHeaderValue;
-            return httpClient;
-        }
-
         public static IObservable<T[]> CommitChangesSequential<T>(this XafApplication application,Func<IObjectSpace,IObservable<T>> commit,int retry =3,[CallerMemberName]string caller="") 
             => application.CommitChangesSequential(typeof(T),commit,retry,caller);
 
@@ -890,7 +924,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                         observer.OnNext(arg);
                         // observer.OnCompleted();
                     }), objectType, caller)
-                .RetryWithBackoff(retry,retryOnError:exception => true)
+                .RetryWithBackoff(retry)
                 .DoOnError(observer.OnError)
                 .Select(_ => default(object));
         

@@ -40,8 +40,14 @@ namespace Xpand.Extensions.LinqExtensions{
                 return arg1;
 
             });
-        public static IEnumerable<T> ExactType<T>(this IEnumerable<T> source) 
-            => source.Where(arg => arg.GetType()==typeof(T));
+        public static IEnumerable<T> ExactType<T>(this IEnumerable<object> source) 
+            => source.OfType<T>().Where(arg => arg.GetType()==typeof(T));
+        
+        public static IEnumerable<object> ExactType(this IEnumerable<object> source,Type objectType) 
+            => source.Where(arg => arg.GetType()==objectType);
+        
+        public static IEnumerable<T> ExactType<T>(this IEnumerable<T> source,Type objectType) 
+            => source.Where(arg => arg.GetType()==objectType);
 
         public static T[] AddRange<T>(this IEnumerable<T> source,IEnumerable<T> enumerable,bool ignoreDuplicates=false) 
             => source is IList<T> list

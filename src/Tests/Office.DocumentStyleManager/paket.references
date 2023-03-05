@@ -10,5 +10,5 @@ Fasterflect.Xpand
 akarnokd.reactive_extensions
 Moq
 Xpand.Collections
-Newtonsoft.Json
+System.Text.Json
 Microsoft.Reactive.Testing

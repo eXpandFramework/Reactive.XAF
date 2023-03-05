@@ -1,6 +1,6 @@
 Fasterflect.Xpand
 System.Configuration.ConfigurationManager
 System.Reactive
-Newtonsoft.Json
+System.Text.Json
 Microsoft.CodeAnalysis
 System.Data.SqlClient

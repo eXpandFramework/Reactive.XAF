@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using System.Text;
 using NUnit.Framework;
 using Shouldly;
@@ -25,7 +24,7 @@ namespace Xpand.Extensions.Tests{
             var path = $"{AppDomain.CurrentDomain.ApplicationPath()}\\{DateTime.Now.Ticks}.txt";
             File.WriteAllBytes(path,convertToBytes);
             
-            var secureString = File.ReadAllBytes(path).UnProtect().First();
+            var secureString = File.ReadAllBytes(path).UnProtect();
             
             secureString.GetString().ShouldBe(s);
         }

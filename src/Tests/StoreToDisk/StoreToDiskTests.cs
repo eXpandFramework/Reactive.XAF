@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Text.Json;
 using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp;
 using NUnit.Framework;
@@ -9,7 +10,7 @@ using Xpand.Extensions.BytesExtensions;
 using Xpand.Extensions.FileExtensions;
 using Xpand.Extensions.JsonExtensions;
 using Xpand.Extensions.Reactive.Transform.System.IO;
-using Xpand.Extensions.StringExtensions;
+using Xpand.Extensions.TypeExtensions;
 using Xpand.Extensions.XAF.ObjectSpaceExtensions;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.StoreToDisk.Tests.BOModel;
@@ -19,6 +20,7 @@ namespace Xpand.XAF.Modules.StoreToDisk.Tests {
     public class StoreToDiskTests:CommonAppTest {
         [Test][Order(0)]
         public void When_Application_ObjectSpace_Commits_New_Objects() {
+            
             var folder = Application.Model.ToReactiveModule<IModelReactiveModulesStoreToDisk>().StoreToDisk.Folder;
             if (Directory.Exists(folder)) {
                 Directory.Delete(folder, true);
@@ -34,11 +36,12 @@ namespace Xpand.XAF.Modules.StoreToDisk.Tests {
             testObserver.AwaitDone(Timeout).ItemCount.ShouldBe(1);
         
             var fileInfo = testObserver.Items.First();
-            var token = fileInfo.ReadAllBytes().UnProtect().First().GetString().DeserializeJson();
-            var jToken = token.First();
-            jToken[nameof(STD.Secret)].ShouldBe(std.Secret);
-            jToken[nameof(STD.Name)].ShouldBe(std.Name);
-            jToken[nameof(STD.Dep)].ShouldBe(0);
+            var byteArray = fileInfo.ReadAllBytes().UnProtect();
+            var deserializeJson = byteArray.DeserializeJson();
+            var jToken = deserializeJson.AsObject();
+            $"{jToken[nameof(STD.Secret)]}".ShouldBe(std.Secret);
+            $"{jToken[nameof(STD.Name)]}".ShouldBe(std.Name);
+            jToken[nameof(STD.Dep)].Change<int>().ShouldBe(0);
         }
         
         [Test][Order(1)]
@@ -64,12 +67,9 @@ namespace Xpand.XAF.Modules.StoreToDisk.Tests {
             objectSpace.CommitChanges();
 
             var fileInfo = new FileInfo($"{folder}\\{typeof(STD).StoreToDiskFileName()}");
-            // var changedObserver = fileInfo.WhenChanged().FirstAsync().Test();
-            // changedObserver.AwaitDone(Timeout).ItemCount.ShouldBe(1);
-            var token = fileInfo.ReadAllBytes().UnProtect().First().GetString().DeserializeJson();
-            var jToken = token.First();
-            jToken[nameof(STD.Secret)].ShouldBe(secret);
-            jToken[nameof(STD.Name)].ShouldBe(std.Name);
+            var jToken = fileInfo.ReadAllBytes().UnProtect().DeserializeJson().AsObject();
+            jToken[nameof(STD.Secret)].Deserialize<string>().ShouldBe(secret);
+            jToken[nameof(STD.Name)].Deserialize<string>().ShouldBe(std.Name);
         }
     }
 }

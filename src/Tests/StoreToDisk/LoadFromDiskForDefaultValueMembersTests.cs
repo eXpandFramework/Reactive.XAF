@@ -38,7 +38,7 @@ namespace Xpand.XAF.Modules.StoreToDisk.Tests {
             objectSpace.CommitChanges();
             var std = objectSpace.CreateObject<STD>();
             std.Name = name;
-            var testObserver = Application.WhenProviderCommitted<STD>().ToObjects().FirstAsync().Test();
+            using var testObserver = Application.WhenProviderCommitted<STD>().ToObjects().FirstAsync().Test();
 
             objectSpace.CommitChanges();
 

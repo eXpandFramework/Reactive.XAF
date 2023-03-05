@@ -1,7 +1,6 @@
 Fasterflect.Xpand
 DevExpress.ExpressApp
 Xpand.Patcher
-
 Microsoft.CSharp
 System.Reactive
-Newtonsoft.Json
+System.Text.Json

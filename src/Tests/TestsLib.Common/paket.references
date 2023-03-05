@@ -2,7 +2,7 @@ akarnokd.reactive_extensions
 Enums.NET
 MagicOnion
 Moq
-Newtonsoft.Json
+System.Text.Json
 Shouldly
 Fasterflect.Xpand
 Xpand.Patcher

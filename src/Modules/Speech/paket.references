@@ -1,6 +1,6 @@
 System.Reactive
 Fasterflect.Xpand
-Newtonsoft.Json
+System.Text.Json
 NAudio
 Enums.NET
 DevExpress.ExpressApp

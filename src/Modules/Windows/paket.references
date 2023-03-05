@@ -1,7 +1,7 @@
 DevExpress.ExpressApp.Win
 System.Reactive
 Fasterflect.Xpand
-Newtonsoft.Json
+System.Text.Json
 
 Enums.NET
 Microsoft.VisualBasic

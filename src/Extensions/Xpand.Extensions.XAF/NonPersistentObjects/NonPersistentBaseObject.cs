@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using System.Text.Json.Serialization;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;
 
@@ -17,7 +18,7 @@ namespace Xpand.Extensions.XAF.NonPersistentObjects {
         [SuppressMessage("ReSharper", "OptionalParameterHierarchyMismatch")]
         protected override void OnPropertyChanged([CallerMemberName] string memberName = "") => base.OnPropertyChanged(memberName);
 
-        [Browsable(false)][Newtonsoft.Json.JsonIgnore]
+        [Browsable(false)][JsonIgnore]
         public new IObjectSpace ObjectSpace => base.ObjectSpace; 
         public override string ToString() {
             if(!_isDefaultPropertyAttributeInit) {

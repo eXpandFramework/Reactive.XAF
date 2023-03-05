@@ -37,7 +37,7 @@ namespace Xpand.XAF.Modules.Reactive.Rest {
             set => Xpand.Extensions.Reactive.Transform.System.Net.NetworkExtensions.HttpClient = value;
         }
 
-        public static IObservable<(HttpResponseMessage message, string content, object instance)> Object => Xpand.Extensions.Reactive.Transform.System.Net.NetworkExtensions.Object;
+        public static IObservable<(HttpResponseMessage message, object instance)> Object => Xpand.Extensions.Reactive.Transform.System.Net.NetworkExtensions.Object;
         public static IObservable<(HttpResponseMessage message, string content, T instance)> When<T>(
             this IObservable<(HttpResponseMessage message, string content, object instance)> source) 
             => source.Where(t => t.instance is T).Select(t => (t.message, t.content, ((T) t.instance)));

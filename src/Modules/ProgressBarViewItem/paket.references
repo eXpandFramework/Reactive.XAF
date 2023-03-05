@@ -1,6 +1,5 @@
 System.Reactive
 DevExpress.ExpressApp
 Fasterflect.Xpand
-
 System.CodeDom
-Newtonsoft.Json
+System.Text.Json

@@ -7,7 +7,7 @@ using System.Reactive.Linq;
 using System.Xml;
 using DevExpress.EasyTest.Framework;
 using Fasterflect;
-using Newtonsoft.Json;
+using Xpand.Extensions.JsonExtensions;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.ErrorHandling;
@@ -30,7 +30,7 @@ namespace Xpand.TestsLib.EasyTest{
                 extraParameterValue = $"({extraParameterValue})";
             }
             var firstLine = $"{(!command.ExpectException ? "*" : "!")}{typeof(T).Name.Replace("Command","")} {parameterList?.MainParameter?.Value} {extraParameterValue}";
-            var parameters =parameterList==null?new string[0]: parameterList.Select(parameter => $" {parameter.Name} = {parameter.Value}");
+            var parameters =parameterList==null?Array.Empty<string>(): parameterList.Select(parameter => $" {parameter.Name} = {parameter.Value}");
             var lines = new []{firstLine}.Concat(parameters).ToArray();
             var param = new CommandCreationParam(new ScriptStringList(lines), 0);
             t.ParseCommand(param);
@@ -128,7 +128,7 @@ namespace Xpand.TestsLib.EasyTest{
 
         public static void ConfigSettings(this TestApplication application,string connectionString){
             File.WriteAllText(application.EasyTestSettingsFile(),
-                JsonConvert.SerializeObject(new{ConnectionString = connectionString}));
+                new{ConnectionString = connectionString}.Serialize());
         }
 
         public static TestApplication RunWinApplication(this IApplicationAdapter adapter, string fileName, int port = 4100){

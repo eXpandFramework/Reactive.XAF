@@ -2,5 +2,5 @@ DevExpress.Persistent.Base
 Fasterflect.Xpand
 Xpand.Patcher
 Xpand.Collections
-Newtonsoft.Json
+System.Text.Json
 Enums.Net

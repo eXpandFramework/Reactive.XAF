@@ -5,5 +5,5 @@ DevExpress.Win.SpellChecker
 DevExpress.Persistent.Base
 DevExpress.ExpressApp.Win
 Fasterflect.Xpand
-Newtonsoft.Json
+System.Text.Json
 Xpand.Collections

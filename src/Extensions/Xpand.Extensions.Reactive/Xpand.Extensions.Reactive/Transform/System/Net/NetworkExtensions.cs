@@ -9,8 +9,8 @@ using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Text.Json.Nodes;
 using Fasterflect;
-using Newtonsoft.Json.Linq;
 using Xpand.Extensions.BytesExtensions;
 using Xpand.Extensions.JsonExtensions;
 using Xpand.Extensions.Reactive.Utility;
@@ -111,21 +111,12 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net {
         private static IObservable<HttpResponseMessage> Request<T>(this HttpClient client, HttpRequestMessage httpRequestMessage, Action<HttpResponseMessage> onResponse=null, T obj=default) where T : class,new() 
             => Observable.FromAsync(() => client.SendAsync(httpRequestMessage,HttpCompletionOption.ResponseHeadersRead))
                 .Do(message => onResponse?.Invoke(message))
-                .Do(message => ResponseSubject.OnNext((message, obj)))
-                ;
+                .Do(message => ResponseSubject.OnNext((message, obj)));
 
-        public static IObservable<JObject> SendRequest(this HttpClient client, HttpRequestMessage httpRequestMessage,Func<HttpResponseMessage, IObservable<JObject>> deserialize=null) 
-            => client.SendRequest(httpRequestMessage,default,message => deserialize?.Invoke(message) ?? message.DeserializeJson<JObject>().ToObservable().SelectMany());
-
-        public static IObservable<JObject[]> ToObjects(this IObservable<(HttpResponseMessage message, JObject[] objects)> source)
-            => source.Select(t => t.objects);
-        
-        public static IObservable<JObject> ToObject(this IObservable<(HttpResponseMessage message, JObject[] objects)> source)
-            => source.SelectMany(t => t.objects);
-        
-        public static IObservable<(HttpResponseMessage message,JObject[] objects)> WhenResponse(this HttpClient client, HttpRequestMessage httpRequestMessage) 
+        public static IObservable<(HttpResponseMessage message,JsonObject[] objects)> WhenResponse(this HttpClient client, HttpRequestMessage httpRequestMessage) 
             => client.Request<ResponseResult>(httpRequestMessage).WhenResponse(null, httpResponseMessage => new ResponseResult(httpResponseMessage).ReturnObservable())
-                .SelectMany(result => result.Message.Content.ReadAsStreamAsync().ToObservable().Select(stream => stream.DeserializeJson<JObject>())
+                .SelectMany(result => Observable.FromAsync(() => result.Message.Content.ReadAsByteArrayAsync()).ObserveOnDefault()
+                    .Select(bytes => bytes.DeserializeJson().ToJsonObjects().ToArray())
                     .Select(objects => (result.Message,objects)));
 
         record ResponseResult {
@@ -144,12 +135,6 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net {
             T obj = null, Func<HttpResponseMessage, IObservable<T>> deserializeResponse = null) where T : class,new()
             => client.SendRequest(new HttpRequestMessage(httpMethod, url),obj,deserializeResponse);
         
-        public static IObservable<JObject> SendRequest(this HttpClient client, HttpMethod httpMethod,string url) 
-            => client.SendRequest<JObject>(new HttpRequestMessage(httpMethod, url));
-        
-        public static IObservable<JObject> Send(this HttpClient client, string url) 
-            => client.SendRequest<JObject>(new HttpRequestMessage(HttpMethod.Get, url));
-
         public static IObservable<T> Send<T>(this HttpMethod httpMethod, string requestUrl, string key = null,
             string secret = null, Func<HttpResponseMessage, IObservable<T>> deserializeResponse = null) where T : class,new() 
             => HttpClient.Send(httpMethod, requestUrl,null,key,secret,deserializeResponse);
@@ -160,12 +145,13 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net {
 
         private static IObservable<T> SendRequest<T>(this IObservable<HttpResponseMessage> source,
             object obj, Func<HttpResponseMessage, IObservable<T>> deserializeResponse) {
-            deserializeResponse ??= responseMessage =>responseMessage.DeserializeJson<T>().ToObservable().SelectMany();
+            deserializeResponse ??= responseMessage =>responseMessage.DeserializeJson<T>().ToObservable();
             return source.WhenResponse(obj, httpResponseMessage => deserializeResponse(httpResponseMessage));
         }
         private static IObservable<T> Send<T>(this IObservable<HttpResponseMessage> source,
             object obj, Func<HttpResponseMessage, IObservable<T>> deserializeResponse) where T:class,new(){
-            deserializeResponse ??= responseMessage => responseMessage.DeserializeJson<T>().ToObservable().SelectMany();
+            deserializeResponse ??= responseMessage => responseMessage.DeserializeJson<T>()
+                .ToObservable().Select(arg => arg);
             return source.WhenResponse(obj, httpResponseMessage => deserializeResponse(httpResponseMessage));
         }
         private static IObservable<T> WhenResponse<T>(this IObservable<HttpResponseMessage> source,
@@ -175,7 +161,7 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net {
                     .SelectMany(s => Observable.Throw<T>(new HttpResponseException(s, responseMessage))));
 
         private static Func<HttpResponseMessage, IObservable<T>> DeserializeResponse<T>(this Func<HttpResponseMessage, IObservable<T>> deserializeResponse) 
-            => deserializeResponse ?? (message =>  message.DeserializeJson<T>().ToObservable().SelectMany());
+            => deserializeResponse ?? (message =>  message.DeserializeJson<T>().ToObservable());
 
         public static T SetContent<T>(this T message,  string content, string key = null, string secret = null,bool formDataContent=false) where T:HttpRequestMessage {
             if (message.Method != HttpMethod.Get&&!string.IsNullOrEmpty(content) )

@@ -3,5 +3,4 @@ DevExpress.ExpressApp.Notifications
 System.Reactive
 Fasterflect.Xpand
 Xpand.Patcher
-
-Newtonsoft.Json
+System.Text.Json

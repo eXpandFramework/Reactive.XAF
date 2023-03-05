@@ -1,5 +1,4 @@
 DevExpress.ExpressApp
 System.Reactive
 Fasterflect.Xpand
-
-Newtonsoft.Json
+System.Text.Json

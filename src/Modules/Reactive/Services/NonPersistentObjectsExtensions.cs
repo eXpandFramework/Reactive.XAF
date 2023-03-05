@@ -36,6 +36,7 @@ namespace Xpand.XAF.Modules.Reactive.Services {
             // }));
         }
 
+        
         public static BindingList<ObjectString> ToObjectString(this IEnumerable<object> source, IObjectSpace objectSpace)
             => source.Select(o1 => {
                 var isModified =objectSpace.IsDisposed || objectSpace.ModifiedObjects.Contains(o1);
