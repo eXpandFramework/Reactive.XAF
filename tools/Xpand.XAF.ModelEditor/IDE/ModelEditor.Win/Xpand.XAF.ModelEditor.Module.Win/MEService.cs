@@ -176,10 +176,8 @@ namespace Xpand.XAF.ModelEditor.Module.Win {
 
         static IObservable<Unit> StartMEProcess(this IObservable<string> source, XafModel xafModel) 
             => source.SelectMany(mePath => {
-	            var assemblyDir = Path.GetDirectoryName(xafModel.Project.AssemblyPath);
-	            var destFileName = mePath;
-                KillProcess(destFileName);
-                return xafModel.StartME(xafModel.Project.Path, destFileName);
+                KillProcess(mePath);
+                return xafModel.StartME(xafModel.Project.Path, mePath);
             }).ToUnit();
 
         private static IObservable<Unit> StartME(this XafModel xafModel, string fullPath, string destFileName) {
