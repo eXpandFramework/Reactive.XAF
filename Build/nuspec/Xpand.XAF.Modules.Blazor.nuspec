@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.Blazor</id>
-    <version>4.222.3.0</version>
+    <version>4.222.4.0</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -15,31 +15,31 @@
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Blazor, 22.2.4</tags>
     <dependencies>
       <group targetFramework="netstandard2.0">
-        <dependency id="Xpand.VersionConverter" version="4.222.3.0" />
+        <dependency id="Xpand.VersionConverter" version="4.222.4.0" />
       </group>
       <group targetFramework="net6.0">
-        <dependency id="Xpand.Extensions.Blazor" version="4.222.3.0" />
-        <dependency id="Xpand.Extensions.Reactive" version="4.222.3.0" />
-        <dependency id="Xpand.Extensions.XAF" version="4.222.3.0" />
-        <dependency id="Xpand.Extensions" version="4.222.3.0" />
-        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.222.3.0" />
-        <dependency id="Xpand.XAF.Modules.Reactive" version="4.222.3.0" />
+        <dependency id="Xpand.Extensions.Blazor" version="4.222.4.0" />
+        <dependency id="Xpand.Extensions.Reactive" version="4.222.4.0" />
+        <dependency id="Xpand.Extensions.XAF" version="4.222.4.0" />
+        <dependency id="Xpand.Extensions" version="4.222.4.0" />
+        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.222.4.0" />
+        <dependency id="Xpand.XAF.Modules.Reactive" version="4.222.4.0" />
         <dependency id="Fasterflect.Xpand" version="2.0.7" />
         <dependency id="System.Reactive" version="5.0" />
         <dependency id="System.Interactive" version="5.0" />
-        <dependency id="Microsoft.Bcl.AsyncInterfaces" version="6.0" />
+        <dependency id="Microsoft.Bcl.AsyncInterfaces" version="7.0" />
         <dependency id="Microsoft.CodeAnalysis" version="4.2" />
         <dependency id="System.Data.SqlClient" version="4.8.3" />
+        <dependency id="System.Text.Json" version="7.0.2" />
         <dependency id="System.CodeDom" version="6.0" />
         <dependency id="System.Configuration.ConfigurationManager" version="6.0" />
         <dependency id="DevExpress.ExpressApp.Blazor" version="22.2.4" />
         <dependency id="DevExpress.ExpressApp.Validation.Blazor" version="22.2.4" />
-        <dependency id="Newtonsoft.Json" version="13.0.1" />
         <dependency id="System.ServiceModel.NetTcp" version="4.10" />
         <dependency id="System.ServiceModel.Http" version="4.10" />
         <dependency id="System.ServiceModel.Security" version="4.10" />
         <dependency id="Xpand.Patcher" version="3.0.17.0" />
-        <dependency id="Xpand.VersionConverter" version="4.222.3.0" />
+        <dependency id="Xpand.VersionConverter" version="4.222.4.0" />
       </group>
     </dependencies>
   </metadata>
