@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
@@ -160,50 +159,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .WhenNotDefault()
                 .Select(window => window).Publish().RefCount().FirstAsync()
                 .TraceRX(window => window.Context);
-
-        public static IObservable<TObject[]> Cache<TObject,TKey>(this XafApplication application,
-            ConcurrentDictionary<TKey, TObject> cache=null,CriteriaOperator criteriaExpression = null, params string[] modifiedProperties) where TObject : class, IObjectSpaceLink 
-            => application.Cache( criteriaExpression, modifiedProperties, cache??new ConcurrentDictionary<TKey, TObject>());
         
-        public static IObservable<TObject[]> Cache<TObject>(this XafApplication application,
-            ConcurrentDictionary<object, TObject> cache=null,CriteriaOperator criteriaExpression = null,
-            params string[] modifiedProperties) where TObject : class, IObjectSpaceLink 
-            => application.Cache( criteriaExpression, modifiedProperties, cache??new ConcurrentDictionary<object, TObject>());
-
-        private static IObservable<TObject[]> Cache<TObject, TKey>(this XafApplication application,
-            CriteriaOperator criteriaExpression, string[] modifiedProperties, ConcurrentDictionary<TKey, TObject> objectSpaceLinks,Func<TObject,TKey> keyValue=null) where TObject : class, IObjectSpaceLink 
-            => application.WhenProviderCommittedDetailed<TObject>(ObjectModification.All,modifiedProperties:modifiedProperties)
-                .Select(t => t.details.Select(t1 => t1.instance).ToArray())
-                .Merge(application.WhenExistingObject<TObject>(criteriaExpression)
-                    .Do(o => {
-                        var value = o.GetKeyValue(keyValue);
-                        o.CallMethod("Invalidate", true);
-                        objectSpaceLinks.TryAdd(value, o);
-                    })
-                    .DoOnLast(o => o.ObjectSpace.Dispose())
-                    .BufferUntilCompleted()
-                    .Do(links => links.FirstOrDefault()?.ObjectSpace.Dispose()))
-                .Select(links => (disposed:links.Where(o => o.ObjectSpace.IsDisposed).ToArray(),notDisposed:links.Where(o => !o.ObjectSpace.IsDisposed).ToArray()))
-                .Select(t => t.notDisposed.ToNowObservable()
-                    .If(link => !link.ObjectSpace.IsDeletedObject(link), 
-                        link => application.UseObject(link, spaceLink => {
-                            var match = spaceLink.Match(criteriaExpression);
-                            var value = spaceLink.GetKeyValue(keyValue);
-                            spaceLink.CallMethod("Invalidate", true);
-                            spaceLink.ObjectSpace.Dispose();
-                            if (match)
-                                return objectSpaceLinks.AddOrUpdate(value, spaceLink, (_, _) => spaceLink).ReturnObservable();
-                            objectSpaceLinks.TryRemove((TKey)link.ObjectSpace.GetKeyValue(link), out _);
-                            return Observable.Empty<TObject>();
-
-                        }), 
-                        link => objectSpaceLinks.TryRemove((TKey)link.ObjectSpace.GetKeyValue(link), out _).ReturnObservable().WhenNotDefault().To(link))
-                    .Merge(t.disposed.ToNowObservable())
-                    .BufferUntilCompleted()).SelectMany();
-
-        private static TKey GetKeyValue<TObject, TKey>(this TObject link, Func<TObject,TKey> keyValue) where TObject : class, IObjectSpaceLink 
-            => keyValue == null ? (TKey)link.ObjectSpace.GetKeyValue(link) : keyValue(link);
-
         public static IObservable<Window> WhenPopupWindowCreated(this XafApplication application) 
             => application.WhenFrameCreated(TemplateContext.PopupWindow).Where(_ => _.Application==application).Cast<Window>();
         
@@ -814,6 +770,11 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<T> WhenObject<T>(this XafApplication application,ObjectModification objectModification,string[] modifiedProperties ,Expression<Func<T, bool>> criteriaExpression=null,
             [CallerMemberName] string caller = "")where T:class 
             => application.WhenObject( objectModification, criteriaExpression, modifiedProperties, (criteriaExpression ?? (arg1 => true)).Compile(),application.WhenObjectSpaceCreated(),caller);
+        
+        public static IObservable<T[]> WhenObjects<T>(this XafApplication application,ObjectModification objectModification,string[] modifiedProperties ,Expression<Func<T, bool>> criteriaExpression=null,
+            [CallerMemberName] string caller = "")where T:class 
+            => application.WhenObjects(objectModification, criteriaExpression, modifiedProperties, (criteriaExpression ?? (arg1 => true)).Compile(), application.WhenObjectSpaceCreated(),caller);
+
         public static IObservable<T> WhenObject<T>(this XafApplication application,ObjectModification objectModification ,Expression<Func<T, bool>> criteriaExpression=null,
             [CallerMemberName] string caller = "")where T:class 
             => application.WhenObject( objectModification,Array.Empty<string>(), criteriaExpression, caller);

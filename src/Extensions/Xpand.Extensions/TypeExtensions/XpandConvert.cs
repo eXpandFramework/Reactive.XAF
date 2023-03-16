@@ -69,8 +69,7 @@ namespace Xpand.Extensions.TypeExtensions {
             => value.Change<T>( DefaultCultureInfo);
 
         public static T Change<T>(this object value, CultureInfo culture) 
-            =>
-            value.Change<T>( culture, DefaultConversion);
+            => value.Change<T>( culture, DefaultConversion);
 
         public static T Change<T>(this object value, Conversion options) 
             => value.Change<T>( DefaultCultureInfo, options);

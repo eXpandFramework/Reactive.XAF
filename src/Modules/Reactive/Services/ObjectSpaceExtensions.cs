@@ -241,6 +241,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => !modifiedProperties.Any() ? objectSpace.WhenCommitingDetailed(objectModification, emitAfterCommit, criteria)
                 : objectSpace.WhenModifiedObjects(typeof(T), modifiedProperties).Cast<T>().Where(criteria??(_ =>true) )
                     .Buffer(objectSpace.WhenCommitingDetailed(false, objectModification, criteria)).WhenNotEmpty()
+                    .TakeUntil(objectSpace.WhenDisposed())
                     .SelectMany(modifiedObjects => {
                         var objectSpaceModifiedObjects = objectSpace.ModifiedObjects(objectModification, modifiedObjects).ToArray();
                         if (emitAfterCommit) {

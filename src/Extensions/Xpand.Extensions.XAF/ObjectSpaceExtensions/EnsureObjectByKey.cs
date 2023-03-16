@@ -27,11 +27,15 @@ namespace Xpand.Extensions.XAF.ObjectSpaceExtensions {
 
         public static T EnsureObject<T>(this IObjectSpace space, Dictionary<string, T> dictionary, string id){
             var ensureObject = dictionary.GetValueOrDefault(id);
-            ensureObject = ensureObject == null ? space.CreateObject<T>() : space.GetObjectFromKey(ensureObject);
-            if (space.IsNewObject(ensureObject)){
+            if (ensureObject == null) {
+                ensureObject = space.CreateObject<T>();
                 dictionary.Add(id, ensureObject);
             }
-
+            else {
+                if (!space.IsNewObject(ensureObject)){
+                    ensureObject = space.GetObjectFromKey(ensureObject);
+                }
+            }
             return ensureObject;
         }
         [SuppressMessage("ReSharper", "HeapView.CanAvoidClosure")]
