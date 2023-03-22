@@ -2,7 +2,8 @@
   "profiles": {
     "Xpand.XAF.ModelEditor": {
       "commandName": "Project",
-      "commandLineArgs": "True \"C:\\Work\\Issues\\DXApplication26\\DXApplication26.Blazor.Server\\bin\\Debug\\\\net6.0\\DXApplication26.Blazor.Server.dll\" \"C:\\Work\\Issues\\DXApplication26\\DXApplication26.Blazor.Server\\Model.xafml\" \"C:\\Work\\Issues\\DXApplication26\\DXApplication26.Blazor.Server\\DXApplication26.Blazor.Server.csproj\""
+      "commandLineArgs": "False \"C:\\Work\\issues\\986\\Test\\Test\\Test.Module\\bin\\Debug\\net6.0\\Test.Module.dll\" \"C:\\Work\\issues\\986\\Test\\Test\\Test.Module\\Model.DesignedDiffs.xafml\" \"C:\\Work\\issues\\986\\Test\\Test\\Test.Module\\Test.Module.csproj\"",
+      "workingDirectory": "C:\\Work\\issues\\986\\Test\\Test\\Test.Module\\bin\\Debug\\net6.0\\"
     }
   }
 }
