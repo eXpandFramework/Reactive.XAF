@@ -17,6 +17,12 @@
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
   </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <NoWarn>1701;1702;NU1701;CS8002;CS0618;IL2121;CA1416</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <NoWarn>1701;1702;NU1701;CS8002;CS0618;IL2121;CA1416</NoWarn>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Xpand.Extensions">
       <HintPath>..\..\..\..\bin\Xpand.Extensions.dll</HintPath>
@@ -24,6 +30,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\..\..\Common\AssemblyInfoVersion.cs" Link="Properties\AssemblyInfoVersion.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="6.0.0" />
   </ItemGroup>
   <Import Project="..\..\..\..\.paket\Paket.Restore.targets" />
 </Project>

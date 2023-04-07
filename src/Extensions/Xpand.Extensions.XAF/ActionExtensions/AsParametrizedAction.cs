@@ -1,4 +1,5 @@
-﻿using DevExpress.ExpressApp.Actions;
+﻿using System;
+using DevExpress.ExpressApp.Actions;
 
 namespace Xpand.Extensions.XAF.ActionExtensions{
     public static partial class ActionExtensions{

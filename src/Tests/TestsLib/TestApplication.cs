@@ -30,6 +30,10 @@ namespace Xpand.TestsLib{
             TraceClientBroadcast = this.ClientBroadcast();
         }
 
+        // protected override string GetModulesVersionInfoFilePath() {
+        //     return null;
+        // }
+
         public bool TransmitMessage => _transmitMessage;
 
         public IObservable<Unit> TraceClientBroadcast{ get; set; }

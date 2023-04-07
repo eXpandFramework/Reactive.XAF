@@ -24,13 +24,13 @@
     <EmbeddedResource Include="Model.DesignedDiffs.xafml" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DevExpress.ExpressApp" Version="22.2.4" />
-    <PackageReference Include="DevExpress.ExpressApp.Notifications" Version="22.2.4" />
-    <PackageReference Include="DevExpress.ExpressApp.CodeAnalysis" Version="22.2.4" />
-    <PackageReference Include="DevExpress.ExpressApp.Objects" Version="22.2.4" />
-    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="22.2.4" />
-    <PackageReference Include="DevExpress.Persistent.Base" Version="22.2.4" />
-    <PackageReference Include="DevExpress.Persistent.BaseImpl.Xpo" Version="22.2.4" />
+    <PackageReference Include="DevExpress.ExpressApp" Version="22.2.5" />
+    <PackageReference Include="DevExpress.ExpressApp.Notifications" Version="22.2.5" />
+    <PackageReference Include="DevExpress.ExpressApp.CodeAnalysis" Version="22.2.5" />
+    <PackageReference Include="DevExpress.ExpressApp.Objects" Version="22.2.5" />
+    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="22.2.5" />
+    <PackageReference Include="DevExpress.Persistent.Base" Version="22.2.5" />
+    <PackageReference Include="DevExpress.Persistent.BaseImpl.Xpo" Version="22.2.5" />
     <PackageReference Include="System.Drawing.Common" Version="6.0.0" />
     <PackageReference Include="System.Reactive" Version="5.0.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.2.0" />

@@ -1,12 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using Fasterflect;
+using Xpand.Extensions.AssemblyExtensions;
+using Xpand.Extensions.StreamExtensions;
 
 namespace Xpand.Extensions.TypeExtensions {
-    public static class EnumExtensions {
+    public static partial class EnumExtensions {
         public static bool IsPowerOfTwo(this int value) => (value & (value - 1)) == 0;
 
         public static IEnumerable<T> ToUniqueFlagEnumValues<T>(this IEnumerable<T> flagsEnumValues) where T : struct {

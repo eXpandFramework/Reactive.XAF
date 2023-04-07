@@ -649,3 +649,4 @@ GitUserEmail.json
 /tools/Xpand.Rider.ModelEditor/
 **/Xpand.XAF.ModelEditor.bat
 /src/Tests/Clipboard_data.txt
+/MyBlazorApp/

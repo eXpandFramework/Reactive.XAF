@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Specialized;
-using System.Text;
+using Cysharp.Text;
 
 namespace Xpand.Extensions.LinqExtensions {
     public static partial class LinqExtensions {
         public static string ToQueryString(this NameValueCollection nvc) {
             if (nvc == null) return string.Empty;
-            var sb = new StringBuilder();
+            using var sb = ZString.CreateUtf8StringBuilder();
             foreach (string key in nvc.Keys) {
                 if (string.IsNullOrWhiteSpace(key)) continue;
                 var values = nvc.GetValues(key);

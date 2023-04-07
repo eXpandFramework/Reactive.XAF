@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using Cysharp.Text;
+using Xpand.Extensions.StringExtensions;
 
 namespace Xpand.Extensions.Tracing {
     /// <summary>
@@ -184,7 +185,7 @@ namespace Xpand.Extensions.Tracing {
                 formatter = (ICustomFormatter)provider.GetFormat(typeof(ICustomFormatter));
             }
 
-            StringBuilder builder = new StringBuilder();
+            using var builder = ZString.CreateUtf8StringBuilder();
             while (index < length) {
                 var ch = chArray[index];
                 index++;
@@ -358,7 +359,7 @@ namespace Xpand.Extensions.Tracing {
                         index++;
                     }
 
-                    builder.Append(chArray, literalStart, index - literalStart);
+                    builder.Append(chArray.ToString().EnsureEmpty(), literalStart, index - literalStart);
                 }
             }
 

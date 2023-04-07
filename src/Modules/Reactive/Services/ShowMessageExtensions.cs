@@ -15,7 +15,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         private static readonly ISubject<MessageOptions> MessageSubject = Subject.Synchronize(new Subject<MessageOptions>());
 
         internal static IObservable<Unit> ShowMessages(this XafApplication application)
-            => Observable.If(() => application.GetPlatform()==Platform.Win,MessageSubject.BufferWhen(application.WhenSynchronizationContext().Select(context => context),source => source.ObserveLatestOnContext())
+            => Observable.If(() => application.GetPlatform()==Platform.Win,MessageSubject.BufferWhen(
+                    application.WhenSynchronizationContext().Select(context => context),source => source.ObserveLatestOnContext())
 	            .Do(options => application.ShowViewStrategy.ShowMessage(options))
 	            .ToUnit());
         

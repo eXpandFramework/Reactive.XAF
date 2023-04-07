@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Specialized;
 using System.Web;
+using Xpand.Extensions.LinqExtensions;
 
 namespace Xpand.Extensions.UriExtensions {
     public static partial class UriExtensions {

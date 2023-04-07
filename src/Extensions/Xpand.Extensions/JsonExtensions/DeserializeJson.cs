@@ -51,7 +51,13 @@ namespace Xpand.Extensions.JsonExtensions {
             => JsonSerializer.SerializeToNode(value,options);
 
         public static JsonNode DeserializeJson(this string source, JsonSerializerOptions options = null) 
-            => source.Bytes().DeserializeJson();
+            => source.Bytes().DeserializeJson(options);
+
+        public static bool IsJsonStartValid(this string source) {
+            if (source.Length <= 0) return false;
+            var substring = source.Substring(0,1);
+            return new[]{"{","["}.Any(s => s==substring);
+        }
 
         public static JsonNode DeserializeJson(this byte[] bytes,JsonSerializerOptions options=null) {
             var utf8Reader = new Utf8JsonReader(bytes);

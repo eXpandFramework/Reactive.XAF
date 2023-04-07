@@ -124,14 +124,12 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net {
 
         record ResponseResult {
             public HttpResponseMessage Message{ get; }
-            
+             
 
-            public ResponseResult(HttpResponseMessage message) {
-                Message = message;
-            }
+            public ResponseResult(HttpResponseMessage message) 
+                => Message = message;
 
             public ResponseResult() {
-                
             }
         }
         public static IObservable<T> SendRequest<T>(this HttpClient client, HttpMethod httpMethod,string url, 

@@ -460,7 +460,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
 
         public static IObservable<SynchronizationContext> WhenSynchronizationContext(this XafApplication application) 
-            => application.WhenWindowCreated(true).Select(_ => SynchronizationContext.Current).WhenNotDefault();
+            => application.WhenWindowCreated(true)
+                .Select(_ => SynchronizationContext.Current).WhenNotDefault();
 
         public static IObservable<(XafApplication application, LogonEventArgs e)> WhenLoggedOn(this IObservable<XafApplication> source) 
             => source.SelectMany(application => application.WhenLoggedOn());

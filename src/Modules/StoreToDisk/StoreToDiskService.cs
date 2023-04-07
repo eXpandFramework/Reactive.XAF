@@ -32,20 +32,20 @@ namespace Xpand.XAF.Modules.StoreToDisk{
     public static class StoreToDiskService{
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) 
             => manager.WhenApplication(application => application.WhenSetupComplete()
-                .SelectMany(_ =>application.DailyBackup()
-                    .MergeToUnit(application.StoreToDisk(application.Model.ToReactiveModule<IModelReactiveModulesStoreToDisk>().StoreToDisk.Folder)) )
+                .SelectMany(_ =>application.StoreToDisk(application.Model.ToReactiveModule<IModelReactiveModulesStoreToDisk>().StoreToDisk.Folder)
+                    .MergeToUnit(application.DailyBackup()) )
                 .ToUnit());
 
         private static IObservable<Unit> DailyBackup(this XafApplication application)
             => application.WhenLoggedOn()
                 .Select(_ => application.Model.ToReactiveModule<IModelReactiveModulesStoreToDisk>().StoreToDisk)
-                .Where(storeToDisk => storeToDisk.DailyBackup)
+                .Where(storeToDisk => storeToDisk.DailyBackup).ObserveOnDefault()
                 .SelectMany(disk => {
                     var jsonFles = Directory.GetFiles(disk.Folder, "*.json");
-                    var directoryName = ($"{disk.Folder}\\{DateTime.Now:yyyy.MM.dd}");
+                    var directoryName = $"{disk.Folder}\\{DateTime.Now:yyyy.MM.dd}";
                     if (jsonFles.Any() && !Directory.Exists(directoryName)) {
                         Directory.CreateDirectory(directoryName);
-                        return jsonFles.Execute(file => File.Copy(file, $"{directoryName}\\{Path.GetFileName(file)}")).ToNowObservable();
+                        return jsonFles.Execute(file => File.Copy(file, Path.Combine(directoryName,Path.GetFileName(file)))).ToNowObservable();
                     }
                     return Observable.Empty<string>();
                 })
@@ -84,10 +84,7 @@ namespace Xpand.XAF.Modules.StoreToDisk{
                 .SelectMany(data => application.WhenProviderCommittedDetailed(data.typeInfo.Type,ObjectModification.NewOrUpdated,emitUpdatingObjectSpace:true)
                     .SelectMany(committed => committed.details.ToArray()
                         .LoadFromDisk(application, data.keyMember, data.memberInfos, data.typeInfo, data.filePath, data.attribute)
-                        .StoreToDisk(committed,data)
-                        
-                    )
-                )
+                        .StoreToDisk(committed,data)))
                 .ToUnit();
         
         private static IObservable<JsonObject[]> StoreToDisk(this IObservable<(object[] objects, JsonArray JsonArray)> source,

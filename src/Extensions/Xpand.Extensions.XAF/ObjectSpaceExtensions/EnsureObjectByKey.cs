@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Data;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
@@ -29,11 +30,17 @@ namespace Xpand.Extensions.XAF.ObjectSpaceExtensions {
             var ensureObject = dictionary.GetValueOrDefault(id);
             if (ensureObject == null) {
                 ensureObject = space.CreateObject<T>();
+                if (ensureObject == null) {
+                    throw new NoNullAllowedException(typeof(T).FullName);
+                }
                 dictionary.Add(id, ensureObject);
             }
             else {
                 if (!space.IsNewObject(ensureObject)){
                     ensureObject = space.GetObjectFromKey(ensureObject);
+                    if (ensureObject == null) {
+                        throw new NoNullAllowedException(typeof(T).Name);
+                    }
                 }
             }
             return ensureObject;

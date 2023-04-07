@@ -19,6 +19,7 @@ using Xpand.XAF.Modules.Reactive.Tests.Common;
 
 namespace Xpand.XAF.Modules.Reactive.Tests {
     public class ActionServiceTests : ReactiveCommonTest {
+
         [TestCase(ViewType.ListView, false)]
         [XpandTest(IgnoredXAFMinorVersions = "20.1")]
         [Apartment(ApartmentState.STA)]

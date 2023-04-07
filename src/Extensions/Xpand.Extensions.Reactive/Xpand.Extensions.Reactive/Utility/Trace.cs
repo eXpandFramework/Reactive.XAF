@@ -6,9 +6,11 @@ using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading;
+using EnumsNET;
 using Fasterflect;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Tracing;
+using Xpand.Extensions.TypeExtensions;
 
 namespace Xpand.Extensions.Reactive.Utility{
     public enum ObservableTraceStrategy{
@@ -35,69 +37,97 @@ namespace Xpand.Extensions.Reactive.Utility{
         public static bool AddTraceSerialization<T>(Func<T,string> function) => Serialization.TryAdd(typeof(T), o => function((T) o));
 
 
-        private static readonly Dictionary<string, RXAction> RXActions = Enum.GetValues(typeof(RXAction)).Cast<RXAction>()
-            .ToDictionary(action => action.ToString(), action => action);
-
-        public static IObservable<TSource> Trace<TSource>(this IObservable<TSource> source, string name = null,
-            TraceSource traceSource = null,
-            Func<TSource, string> messageFactory = null, Func<Exception, string> errorMessageFactory = null,
-            Action<ITraceEvent> traceAction = null,
-            ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.OnNextOrOnError, string memberName = "",
-            string sourceFilePath = "", int sourceLineNumber = 0)
-            => Observable.Create<TSource>(observer => { 
-                void Action(string m, object v, Action<ITraceEvent> ta){
-                    if (traceSource?.Switch.Level == SourceLevels.Off){
-                        return;
-                    }
-                    string value = null;
-                    if (v!=null){
-                        value = $@"{CalculateValue(v, o => messageFactory.GetMessageValue( errorMessageFactory, o))}";
-                    }
-                    var mName = memberName;
-                    if (m == "OnNext"){
-                        mName = $"{memberName} =>{GetSourceName<TSource>()}";
-                    }
-                    var fullValue = $"{name}.{Path.GetFileNameWithoutExtension(sourceFilePath)}.{mName}({sourceLineNumber.ToString()}): {m}({value})".TrimStart('.');
-                    var traceEventMessage = new TraceEventMessage() {
-                        Action = m, RXAction = RXActions[m], Line = sourceLineNumber, DateTime = DateTime.Now,
-                        Method = mName, Location = Path.GetFileNameWithoutExtension(sourceFilePath), Source = traceSource?.Name,
-                        Value = fullValue,SourceFilePath=sourceFilePath, Message = value??fullValue,
-                        Timestamp =DateTime.Now.Ticks,Thread = Thread.CurrentThread.ManagedThreadId,TraceEventType =TraceEventType.Information 
-                    };
-                    if (traceEventMessage.RXAction == RXAction.OnNext) {
-                        traceEventMessage.ResultType = traceEventMessage.Method.Substring(traceEventMessage.Method.IndexOf(">", StringComparison.Ordinal) + 1);
-                        traceEventMessage.Method = traceEventMessage.Method.Substring(0, traceEventMessage.Method.IndexOf(" ", StringComparison.Ordinal));
-                    }
-                    ta(traceEventMessage);
-                }
+        private static readonly Dictionary<string, RXAction> RXActions = Enums.GetValues<RXAction>()
+            .ToDictionary(action => action.AsString(),action => action);
+        public static IObservable<TSource> Trace<TSource>(this IObservable<TSource> source, string name = null, TraceSource traceSource = null,
+            Func<TSource, string> messageFactory = null, Func<Exception, string> errorMessageFactory = null, Action<ITraceEvent> traceAction = null,
+            ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.OnNextOrOnError, string memberName = "", string sourceFilePath = "", int sourceLineNumber = 0) 
+            => Observable.Create<TSource>(observer => {
                 if (traceStrategy.Is(ObservableTraceStrategy.All))
-                    Action("Subscribe", "", traceAction.Push(traceSource));
-                
+                    traceSource.Action("Subscribe", "", traceAction.Push(traceSource), messageFactory,
+                        errorMessageFactory, memberName, name, sourceFilePath, sourceLineNumber);
                 var disposable = source.Subscribe(
-                    v => {
-                        if (traceStrategy.Is(ObservableTraceStrategy.OnNext)){
-                            Action("OnNext", v, traceAction.Push(traceSource));
-                            
-                        }
-                        observer.OnNext(v);
-                    },
-                    e => {
-                        if (traceStrategy.Is(ObservableTraceStrategy.OnError)) {
-                            Action("OnError", e, traceAction.TraceError(traceSource));
-                        }
-                        observer.OnError(e);
-                    },
-                    () => {
-                        if (traceStrategy.Is(ObservableTraceStrategy.All))
-                            Action("OnCompleted", "", traceAction.Push(traceSource));
-                        observer.OnCompleted();
-                    });
-                return () => {
-                    if (traceStrategy.Is(ObservableTraceStrategy.All))
-                        Action("Dispose", "", traceAction.Push(traceSource));
-                    disposable.Dispose();
-                };
-        });
+                    v => traceSource.OnNext(traceAction, traceStrategy, v, observer, messageFactory,
+                        errorMessageFactory, memberName, name, sourceFilePath, sourceLineNumber),
+                    e => traceSource.OnError(name, messageFactory, errorMessageFactory, traceAction, traceStrategy,
+                        memberName, sourceFilePath, sourceLineNumber, e, observer),
+                    () => traceSource.OnCompleted(name, messageFactory, errorMessageFactory, traceAction, traceStrategy,
+                        memberName, sourceFilePath, sourceLineNumber, observer));
+                return () => traceSource.Dispose(name, messageFactory, errorMessageFactory, traceAction, traceStrategy,
+                    memberName, sourceFilePath, sourceLineNumber, disposable);
+            });
+
+        private static void Dispose<TSource>(this TraceSource traceSource,string name,  Func<TSource, string> messageFactory,
+            Func<Exception, string> errorMessageFactory, Action<ITraceEvent> traceAction, ObservableTraceStrategy traceStrategy, string memberName,
+            string sourceFilePath, int sourceLineNumber, IDisposable disposable){
+            if (traceStrategy.Is(ObservableTraceStrategy.All))
+                traceSource.Action("Dispose", "", traceAction.Push(traceSource), messageFactory, errorMessageFactory,
+                    memberName, name, sourceFilePath, sourceLineNumber);
+            disposable.Dispose();
+        }
+
+        private static void OnCompleted<TSource>(this TraceSource traceSource,string name,  Func<TSource, string> messageFactory,
+            Func<Exception, string> errorMessageFactory, Action<ITraceEvent> traceAction, ObservableTraceStrategy traceStrategy, string memberName,
+            string sourceFilePath, int sourceLineNumber, IObserver<TSource> observer){
+            if (traceStrategy.Is(ObservableTraceStrategy.All))
+                traceSource.Action("OnCompleted", "", traceAction.Push(traceSource), messageFactory, errorMessageFactory,
+                    memberName, name, sourceFilePath, sourceLineNumber);
+            observer.OnCompleted();
+        }
+
+        private static void OnError<TSource>(this TraceSource traceSource,string name,  Func<TSource, string> messageFactory,
+            Func<Exception, string> errorMessageFactory, Action<ITraceEvent> traceAction, ObservableTraceStrategy traceStrategy, string memberName,
+            string sourceFilePath, int sourceLineNumber, Exception e, IObserver<TSource> observer){
+            if (traceStrategy.Is(ObservableTraceStrategy.OnError)){
+                traceSource.Action("OnError", e, traceAction.TraceError(traceSource), messageFactory, errorMessageFactory,
+                    memberName, name, sourceFilePath, sourceLineNumber);
+            }
+
+            observer.OnError(e);
+        }
+
+        private static void OnNext<TSource>(this TraceSource traceSource, Action<ITraceEvent> traceAction,
+            ObservableTraceStrategy traceStrategy, TSource v, IObserver<TSource> observer,
+            Func<TSource, string> messageFactory, Func<Exception, string> errorMessageFactory, string memberName,
+            string name, string sourceFilePath, int sourceLineNumber){
+            if (traceStrategy.Is(ObservableTraceStrategy.OnNext)){
+                traceSource.Action("OnNext", v, traceAction.Push(traceSource),messageFactory,errorMessageFactory,memberName,name,sourceFilePath,sourceLineNumber);
+            }
+            observer.OnNext(v);
+        }
+
+        private static void Action<TSource>(this TraceSource traceSource, string m, object v, Action<ITraceEvent> ta,
+            Func<TSource, string> messageFactory = null, Func<Exception, string> errorMessageFactory = null,
+            string memberName = "", string name="",string sourceFilePath = "", int sourceLineNumber = 0) {
+            if (traceSource?.Switch.Level == SourceLevels.Off){
+                return;
+            }
+            string value = null;
+            if (v!=null){
+                value = CalculateValue(v, o => messageFactory.GetMessageValue( errorMessageFactory, o)).Change<string>();
+            }
+            var mName = memberName;
+            if (m == "OnNext"){
+                mName = new[]{memberName," =>",GetSourceName<TSource>()}.JoinConcat();
+            }
+
+            var fullValue = AllValues(name, sourceFilePath, sourceLineNumber, mName, m, value).JoinConcat();
+            var traceEventMessage = new TraceEventMessage() {
+                Action = m, RXAction = RXActions[m], Line = sourceLineNumber, DateTime = DateTime.Now,
+                Method = mName, Location = Path.GetFileNameWithoutExtension(sourceFilePath), Source = traceSource?.Name,
+                Value = fullValue,SourceFilePath=sourceFilePath, Message = value??fullValue,
+                Timestamp =DateTime.Now.Ticks,Thread = Thread.CurrentThread.ManagedThreadId,TraceEventType =TraceEventType.Information 
+            };
+            if (traceEventMessage.RXAction == RXAction.OnNext) {
+                traceEventMessage.ResultType = traceEventMessage.Method.Substring(traceEventMessage.Method.IndexOf(">", StringComparison.Ordinal) + 1);
+                traceEventMessage.Method = traceEventMessage.Method.Substring(0, traceEventMessage.Method.IndexOf(" ", StringComparison.Ordinal));
+            }
+            ta(traceEventMessage);
+        }
+
+        private static string[] AllValues(string name, string sourceFilePath, int sourceLineNumber, string mName, string m, string value) 
+            => string.IsNullOrEmpty(name) ? new[] { Path.GetFileNameWithoutExtension(sourceFilePath), ".", mName, "(", sourceLineNumber.ToString(), "): ", m, "(", value, ")" }
+                : new[] { name, ".", Path.GetFileNameWithoutExtension(sourceFilePath), ".", mName, "(", sourceLineNumber.ToString(), "): ", m, "(", value, ")" };
 
         public static bool Is(this ObservableTraceStrategy source,ObservableTraceStrategy target) 
             => source == ObservableTraceStrategy.All || source switch {
@@ -147,12 +177,8 @@ namespace Xpand.Extensions.Reactive.Utility{
 		        if (traceSource != null){
 			        traceSource.Push(s);
 		        }
-		        else{
-                    throw new NotImplementedException();
-			        // System.Diagnostics.Trace.TraceInformation(s);
-		        }
-
-	        });
+		        else{ throw new NotImplementedException(); }
+            });
     }
     [DebuggerDisplay("{" + nameof(ApplicationTitle) + "}-{" + nameof(Location) + "}-{" + nameof(RXAction) + ("}-{" + nameof(Method) + "}{"+nameof(Value)+"}"))]
     public class TraceEventMessage:ITraceEvent{
