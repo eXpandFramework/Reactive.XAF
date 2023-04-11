@@ -880,11 +880,10 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         private static IObservable<object> CommitChangesSequential<T>(this XafApplication application, Type objectType,
             Func<IObjectSpace, IObservable<T>> commit, int retry, string caller, IObserver<T[]> observer) 
             => application.UseProviderObjectSpace(space => commit(space).BufferUntilCompleted()
-                    .Timeout(TimeSpan.FromMinutes(2)).Catch<T[],TimeoutException>(_ => Observable.Throw<T[]>(new TimeoutException(caller)))
+                    .Timeout(TimeSpan.FromMinutes(10)).Catch<T[],TimeoutException>(_ => Observable.Throw<T[]>(new TimeoutException(caller)))
                     .Do(arg => {
                         space.CommitChanges();
                         observer.OnNext(arg);
-                        // observer.OnCompleted();
                     }), objectType, caller)
                 .RetryWithBackoff(retry)
                 .DoOnError(observer.OnError)

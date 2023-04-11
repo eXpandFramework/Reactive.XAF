@@ -26,6 +26,7 @@
         <dependency id="System.Interactive" version="5.0" />
         <dependency id="System.Linq.Async" version="5.0" />
         <dependency id="Enums.Net" version="4.0" />
+        <dependency id="System.Diagnostics.PerformanceCounter" version="6.0.0" />
         <dependency id="Xpand.Patcher" version="3.0.17.0" />
       </group>
     </dependencies>

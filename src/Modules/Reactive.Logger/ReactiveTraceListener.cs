@@ -8,7 +8,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger {
     
     public class ReactiveTraceListener : RollingFileTraceListener,IPush {
         private readonly string _applicationTitle;
-         public static bool DisableFileWriter=true;
+         public static readonly bool DisableFileWriter=true;
          readonly ISubject<ITraceEvent> _eventTraceSubject = Subject.Synchronize(new Subject<ITraceEvent>());
          private bool _isDisposed;
 

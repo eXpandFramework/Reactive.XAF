@@ -24,9 +24,7 @@ namespace Xpand.Extensions.LinqExtensions{
 		public static string JoinString(this string source,string separator,params string[] values) 
 			=> string.Join(separator,values.Prepend(source));
 		
-		public static string JoinWithBuilder(this IEnumerable<string> values, string separator) {
-			var joinWithBuilder = separator.IsNullOrEmpty() ? ZString.Concat(values) : ZString.Join(separator, values);
-			return joinWithBuilder;
-		}
+		public static string JoinWithBuilder(this IEnumerable<string> values, string separator) 
+			=> separator.IsNullOrEmpty() ? ZString.Concat(values) : ZString.Join(separator, values);
 	}
 }

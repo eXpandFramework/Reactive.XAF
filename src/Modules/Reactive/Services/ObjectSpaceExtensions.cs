@@ -350,7 +350,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         }
 
         public static IObservable<T> Commit<T>(this T link) where T:IObjectSpaceLink
-            => link.ObjectSpace.CommitChangesAsync().ToObservable().To(link);
+            => Observable.If(() => link!=null,link.Defer(() => link.ObjectSpace.CommitChangesAsync().ToObservable().To(link)));
+        
         public static IObservable<T> Commit<T>(this IObservable<T> source) where T:IObjectSpaceLink
             => source.BufferUntilCompleted(true).SelectMany(links => links.First().Commit());
         

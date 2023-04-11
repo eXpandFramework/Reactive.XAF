@@ -119,7 +119,10 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net {
         public static IObservable<(HttpResponseMessage message,JsonObject[] objects)> WhenResponse(this HttpClient client, HttpRequestMessage httpRequestMessage) 
             => client.Request<ResponseResult>(httpRequestMessage).WhenResponse(null, httpResponseMessage => new ResponseResult(httpResponseMessage).ReturnObservable())
                 .SelectMany(result => Observable.FromAsync(() => result.Message.Content.ReadAsByteArrayAsync()).ObserveOnDefault()
-                    .Select(bytes => bytes.DeserializeJson().ToJsonObjects().ToArray())
+                    .Select(bytes => {
+                        var deserializeJson = bytes.DeserializeJson();
+                        return deserializeJson.ToJsonObjects().ToArray();
+                    })
                     .Select(objects => (result.Message,objects)));
 
         record ResponseResult {

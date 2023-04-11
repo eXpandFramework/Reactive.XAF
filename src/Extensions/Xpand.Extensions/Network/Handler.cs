@@ -8,7 +8,7 @@ namespace Xpand.Extensions.Network {
     public static partial class NetworkExtensions {
         public static string GetFullUrl(this HttpRequest httpRequest) {
             var path = new[]{httpRequest.Scheme,"//",httpRequest.Host.ToUriComponent(),httpRequest.PathBase.ToUriComponent(),httpRequest.Path.ToUriComponent()};
-            return !httpRequest.QueryString.HasValue ? path.JoinConcat() : path.AddItem("?").AddItem(httpRequest.QueryString.Value).JoinConcat();
+            return !httpRequest.QueryString.HasValue ? path.JoinConcat() : path.AddItem(httpRequest.QueryString.Value).JoinConcat();
         }
 
 

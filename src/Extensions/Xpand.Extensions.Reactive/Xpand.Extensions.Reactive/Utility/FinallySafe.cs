@@ -39,5 +39,16 @@ namespace Xpand.Extensions.Reactive.Utility {
                 });
                 return new CompositeDisposable(subscription, finallyOnce);
             });
+
+
+        public static IObservable<T> DoFinallySafe<T>(this IObservable<T> source, Action finallyAction) 
+            => source.FinallySafe(() => {
+                try {
+                    finallyAction();
+                }
+                catch (Exception) {
+                    // ignored
+                }
+            });
     }
 }
