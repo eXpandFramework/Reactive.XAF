@@ -27,9 +27,7 @@ using Task = System.Threading.Tasks.Task;
 namespace Xpand.XAF.Modules.Reactive.Logger.Hub.Tests{
     [NonParallelizable]
     public class ReactiveLoggerHubTests : BaseTest{
-        static ReactiveLoggerHubTests() {
-            ReactiveTraceListener.DisableFileWriter = true;
-        }
+        
         [Test]
         [XpandTest]
         [Apartment(ApartmentState.STA)][Order(0)]
