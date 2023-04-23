@@ -9,3 +9,4 @@ DevExpress.ExpressApp.Win.All
 Microsoft.CodeAnalysis
 Microsoft.NET.Test.Sdk
 Microsoft.Reactive.Testing
+System.Threading.Tasks.Dataflow

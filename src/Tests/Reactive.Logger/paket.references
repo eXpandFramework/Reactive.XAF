@@ -10,3 +10,4 @@ Microsoft.NET.Test.Sdk
 DevExpress.ExpressApp.Win
 Enums.NET
 Microsoft.Reactive.Testing
+System.Threading.Tasks.Dataflow

@@ -7,3 +7,4 @@ DevExpress.ExpressApp.Win
 Fasterflect.Xpand
 System.Text.Json
 Xpand.Collections
+System.Threading.Tasks.Dataflow

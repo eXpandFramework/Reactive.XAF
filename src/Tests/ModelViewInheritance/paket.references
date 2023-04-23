@@ -11,3 +11,4 @@ Microsoft.NET.Test.Sdk
 Xpand.Patcher
 DevExpress.ExpressApp.Win
 Microsoft.Reactive.Testing
+System.Threading.Tasks.Dataflow

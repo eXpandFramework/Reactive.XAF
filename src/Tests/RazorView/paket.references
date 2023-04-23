@@ -14,3 +14,4 @@ Enums.Net
 RazorLight
 DevExpress.ExpressApp.Blazor.All
 Microsoft.Reactive.Testing
+System.Threading.Tasks.Dataflow

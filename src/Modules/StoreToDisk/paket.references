@@ -6,3 +6,4 @@ Fasterflect.Xpand
 System.Text.Json
 Xpand.Collections
 System.Security.Cryptography.ProtectedData
+System.Threading.Tasks.Dataflow

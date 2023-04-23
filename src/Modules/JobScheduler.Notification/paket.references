@@ -4,3 +4,4 @@ Fasterflect.Xpand
 System.Reactive
 Hangfire.AspNetCore
 Xpand.Patcher
+System.Threading.Tasks.Dataflow

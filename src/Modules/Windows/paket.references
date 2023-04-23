@@ -6,3 +6,4 @@ System.Text.Json
 Enums.NET
 Microsoft.VisualBasic
 Xpand.Patcher
+System.Threading.Tasks.Dataflow

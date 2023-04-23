@@ -32,6 +32,9 @@ namespace Xpand.XAF.Modules.Reactive.Services{
     public static class ObjectSpaceExtensions {
         private static readonly Subject<(IObjectSpace objectSpace,object instance)> ObjectsSubject = new();
 
+        public static IObservable<(IObjectSpace objectSpace, CancelEventArgs e)> WhenRollingBack(this IObjectSpace objectSpace) 
+            => objectSpace.WhenEvent<CancelEventArgs>(nameof(IObjectSpace.RollingBack)).InversePair(objectSpace);
+        
         public static IObservable<TObject> WhenNewObjectCreated<TObjectSpace, TObject>(
             this IObservable<TObjectSpace> source) where TObjectSpace : class,IObjectSpace where TObject : IObjectSpaceLink 
             => source.SelectMany(objectSpace => objectSpace.WhenNewObjectCreated<TObject>());

@@ -46,7 +46,6 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
             source.Trace(name, SequenceGeneratorModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
 
         static SequenceGeneratorService() => ExceptionsSubject.Do(exception => Tracing.Tracer.LogError(exception)).Subscribe();
-
         
         public static IObservable<Exception> Exceptions => ExceptionsSubject.AsObservable();
 
@@ -106,18 +105,15 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
                 if (memberInfo == null){
                     throw new MemberNotFoundException(type, sequenceMember);
                 }
-
                 if (memberInfo.MemberType != typeof(long)){
                     throw new InvalidCastException($"{sequenceMember} Type must be long");
                 }
             }
-
             if (customSequenceType != null){
                 var customStorage = unitOfWork.GetSequenceStorage(customSequenceType,sequenceStorageType:storageType);
                 if (customStorage == null){
                     throw new InvalidOperationException($"{customSequenceType.FullName} is not found ");
                 }
-
                 ValidateSequenceMember(customSequenceType);
             }
             ValidateSequenceMember(sequenceType);
@@ -163,7 +159,9 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
             return manager.WhenApplication(application => application.WhenCompatibilityChecked().FirstAsync().Select(xafApplication => xafApplication.ObjectSpaceProvider)
                 .Where(provider => !provider.IsMiddleTier())
                 .SelectMany(provider => provider.SequenceGeneratorDatalayer()
-                    .SelectMany(dataLayer => application.WhenObjectSpaceCreated().GenerateSequences(dataLayer,sequenceStorageType)
+                    .SelectMany(dataLayer => application.WhenObjectSpaceCreated()
+                        .Select(space => space)
+                        .GenerateSequences(dataLayer,sequenceStorageType)
                         .Merge(application.Security.AddAnonymousType(sequenceStorageType).ToObservable()))
                     .Merge(application.ConfigureDetailViewSequenceStorage()).ToUnit()));
         }
@@ -201,7 +199,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
 
         private static IObservable<IObjectSpace> WhenSupported(this IObservable<IObjectSpace> source) 
             => source.Where(space => {
-                if (space.UnitOfWork().DataLayer is BaseDataLayer dataLayer) {
+                if (space.UnitOfWork()?.DataLayer is BaseDataLayer dataLayer) {
                     var dataStore = dataLayer.ConnectionProvider;
                     if (dataStore is DataStorePool dataStorePool) {
                         dataStore = dataStorePool.AcquireReadProvider();
@@ -237,7 +235,6 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
                         .Finally(() => {
 	                        unitOfWorks.TryRemove(objectSpace, out explicitUnitOfWork);
                             explicitUnitOfWork.Close();
-                            
                         });
                 }
                 return Observable.Empty<(ObjectManipulationEventArgs e, ExplicitUnitOfWork explicitUnitOfWork)>();

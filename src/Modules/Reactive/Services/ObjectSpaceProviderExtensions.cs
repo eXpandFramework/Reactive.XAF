@@ -7,6 +7,7 @@ using System.Reactive.Subjects;
 using System.Reflection;
 using DevExpress.Data.Entity;
 using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.Security;
 using DevExpress.Xpo.DB;
 using Fasterflect;
 using HarmonyLib;
@@ -34,12 +35,16 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .Do(_ => {
                     application.PatchSchemaUpdated();
                     application.PatchObjectSpaceCreated();
+                    application.PatchNonSecuredObjectSpaceCreated();
+                    application.PatchUpdatingObjectSpaceCreated();
                     application.PatchUpdatingObjectSpaceCreated();
                 })
                 .ToUnit();
 
         private static void PatchObjectSpaceCreated(this XafApplication application) 
             => application.PatchProviderObjectSpaceCreated( nameof(IObjectSpaceProvider.CreateObjectSpace),info => info.Parameters().Any(),nameof(CreateObjectSpace));
+        private static void PatchNonSecuredObjectSpaceCreated(this XafApplication application) 
+            => application.PatchProviderObjectSpaceCreated( nameof(INonsecuredObjectSpaceProvider.CreateNonsecuredObjectSpace),_ => true,nameof(CreateObjectSpace));
 
         private static void PatchUpdatingObjectSpaceCreated(this XafApplication application) 
             => application.PatchProviderObjectSpaceCreated( nameof(IObjectSpaceProvider.CreateUpdatingObjectSpace),info => {

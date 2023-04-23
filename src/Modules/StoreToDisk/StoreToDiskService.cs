@@ -54,7 +54,7 @@ namespace Xpand.XAF.Modules.StoreToDisk{
         private static IObservable<(object[] objects, JsonArray JsonArray)> LoadFromDisk(this (object instance,ObjectModification modification)[] source, XafApplication application,
             IMemberInfo keyMember, IMemberInfo[] memberInfos, ITypeInfo typeInfo, string filePath, StoreToDiskAttribute attribute) 
             => Observable.Defer(() => new FileInfo(filePath).WhenFileReadAsBytes()
-                .Select(bytes => bytes.Length == 0 ? new JsonArray() : attribute.Protection.UnProtect(bytes).DeserializeJson().ToJsonArray())
+                .Select(bytes => bytes.Length == 0 ? new JsonArray() : attribute.Protection.UnProtect(bytes).DeserializeJsonNode().ToJsonArray())
                 .SelectMany(jsonArray => application.UseProviderObjectSpace(space => source
                     .LoadFromDisk( keyMember, memberInfos, source.Where(details => details.modification == ObjectModification.New)
                         .Select(t => t.instance).Select(space.GetObject).ToArray(), jsonArray, space),typeInfo.Type)));

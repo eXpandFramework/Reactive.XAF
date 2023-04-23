@@ -13,3 +13,4 @@ Polly
 Microsoft.AspNetCore.Http.Features
 DevExpress.ExpressApp.Win
 Microsoft.Reactive.Testing
+System.Threading.Tasks.Dataflow

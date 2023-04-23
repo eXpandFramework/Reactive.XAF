@@ -41,7 +41,7 @@ namespace Xpand.XAF.Modules.StoreToDisk.Tests {
         
             var fileInfo = testObserver.Items.First();
             var byteArray = fileInfo.ReadAllBytes().UnProtect();
-            var deserializeJson = byteArray.DeserializeJson().AsArray();
+            var deserializeJson = byteArray.DeserializeJsonNode().AsArray();
             deserializeJson.Count.ShouldBe(2);
             var jToken = deserializeJson.First();
             jToken[nameof(STD.Secret)].Change<string>().ShouldBe("secret");
@@ -76,7 +76,7 @@ namespace Xpand.XAF.Modules.StoreToDisk.Tests {
             objectSpace.CommitChanges();
 
             var fileInfo = new FileInfo($"{folder}\\{typeof(STD).StoreToDiskFileName()}");
-            var jsonArray = fileInfo.ReadAllBytes().UnProtect().DeserializeJson().AsArray();
+            var jsonArray = fileInfo.ReadAllBytes().UnProtect().DeserializeJsonNode().AsArray();
             jsonArray.Count.ShouldBe(2);
             var jToken = jsonArray.First();
             jToken[nameof(STD.Secret)].Deserialize<string>().ShouldBe(secret);

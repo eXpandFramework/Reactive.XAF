@@ -11,3 +11,4 @@ DevExpress.Persistent.BaseImpl.Xpo
 akarnokd.reactive_extensions
 Fasterflect.Xpand
 Microsoft.Reactive.Testing
+System.Threading.Tasks.Dataflow

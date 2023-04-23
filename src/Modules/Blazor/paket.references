@@ -5,3 +5,4 @@ Microsoft.Bcl.AsyncInterfaces
 Microsoft.CodeAnalysis
 System.Data.SqlClient
 System.Text.Json
+System.Threading.Tasks.Dataflow

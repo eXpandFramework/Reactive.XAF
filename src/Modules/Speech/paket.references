@@ -13,3 +13,4 @@ DevExpress.ExpressApp.Xpo
 Xpand.Patcher
 Xpand.Collections
 Microsoft.CognitiveServices.Speech
+System.Threading.Tasks.Dataflow

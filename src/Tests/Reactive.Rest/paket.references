@@ -12,3 +12,4 @@ Microsoft.NET.Test.SDK
 Polly
 DevExpress.ExpressApp.Blazor.All
 Microsoft.Reactive.Testing
+System.Threading.Tasks.Dataflow

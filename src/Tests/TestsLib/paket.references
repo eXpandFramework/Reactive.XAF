@@ -12,3 +12,4 @@ Polly
 Microsoft.CodeAnalysis
 DevExpress.ExpressApp.Win
 Microsoft.Reactive.Testing
+System.Threading.Tasks.Dataflow

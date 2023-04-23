@@ -5,3 +5,4 @@ Hangfire.Core
 Hangfire.AspNetCore
 Microsoft.CodeAnalysis
 System.Data.SqlClient
+System.Threading.Tasks.Dataflow

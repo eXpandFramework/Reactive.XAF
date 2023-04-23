@@ -10,6 +10,7 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.SystemModule;
 using DevExpress.ExpressApp.Utils;
+using Fasterflect;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Filter;
@@ -484,6 +485,23 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
                 .SelectManyUntilDeactivated(controller => controller.Frame.GetController<ActionsCriteriaViewController>()
                     .WhenEvent<UpdateActionEventArgs>(nameof(ActionsCriteriaViewController.ActionUpdating)).Where(e => e.Active&&e.NeedUpdateEnabled)
                     .SelectMany(selector));
+
+        public static IObservable<DialogController> CreateDialogController(this ActionBaseEventArgs e,ObjectView objectView,bool refreshViewAfterObjectSpaceCommit=true,bool closeOnCancel=true){
+            var application = e.Application();
+            var parameters = e.ShowViewParameters;
+            parameters.TargetWindow = TargetWindow.NewModalWindow;
+            parameters.CreateAllControllers = true;
+            var dialogController = application.CreateController<DialogController>();
+            dialogController.CanCloseWindow = false;
+            dialogController.CancelAction.ActionMeaning = ActionMeaning.Accept;
+            parameters.Controllers.Add(dialogController);
+            parameters.CreatedView=objectView;
+            return dialogController.WhenFrame()
+                .DoWhen(_ => refreshViewAfterObjectSpaceCommit,frame => frame.GetController<ModificationsController>().SetPropertyValue("RefreshViewAfterObjectSpaceCommit",false))
+                .IgnoreElements().To<DialogController>().StartWith(dialogController)
+                .SelectMany(controller => controller.CancelAction.WhenExecuted(_ => e.ShowViewParameters.CreatedView.Close())
+                    .IgnoreElements().To<DialogController>().StartWith(dialogController));
+        }
 
     }
 }

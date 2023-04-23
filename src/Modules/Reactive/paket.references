@@ -7,3 +7,4 @@ Xpand.Patcher
 Microsoft.CSharp
 System.Text.Json
 Enums.Net
+System.Threading.Tasks.Dataflow

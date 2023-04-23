@@ -67,6 +67,8 @@ namespace Xpand.Extensions.TypeExtensions {
         
         public static T Change<T>(this object value) 
             => value.Change<T>( DefaultCultureInfo);
+        
+        public delegate bool TryParseDelegate<T>(ReadOnlySpan<char> span, out T result);
 
         public static T Change<T>(this object value, CultureInfo culture) 
             => value.Change<T>( culture, DefaultConversion);

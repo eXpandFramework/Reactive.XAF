@@ -2,10 +2,12 @@ akarnokd.reactive_extensions
 Fasterflect.Xpand
 System.CodeDom
 System.Reflection.Emit
-
+System.Threading.Tasks
 System.Collections.Immutable
 System.Text.Json
 System.Interactive.Async
 System.Interactive
 System.Linq.Async
 Enums.Net
+System.Threading.Tasks.Dataflow
+System.Diagnostics.PerformanceCounter

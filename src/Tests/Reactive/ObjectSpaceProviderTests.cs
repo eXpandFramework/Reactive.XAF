@@ -6,9 +6,11 @@ using DevExpress.ExpressApp.Xpo;
 using Moq;
 using NUnit.Framework;
 using Shouldly;
+using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.TestsLib.Common;
 using Xpand.TestsLib.Common.Attributes;
 using Xpand.XAF.Modules.Reactive.Services;
+using Xpand.XAF.Modules.Reactive.Tests.BOModel;
 using Xpand.XAF.Modules.Reactive.Tests.Common;
 
 namespace Xpand.XAF.Modules.Reactive.Tests{
@@ -42,11 +44,12 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
             using var testObserver = application.ObjectSpaceProvider.WhenObjectSpaceCreated().Test();
             
             application.ObjectSpaceProvider.CreateObjectSpace();
-
+            application.CreateNonSecuredObjectSpace(typeof(R));
+            
             testObserver.ItemCount.ShouldBe(1);
         }
         [Test]
-        [XpandTest()][Order(-10)][Ignore("fail when run all")]
+        [XpandTest()][Order(-10)]
         public void When_Secured_ObjectSpaceCreated(){
             using var application = NewXafApplication();
             application.SetupSecurity();
@@ -55,6 +58,19 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
             using var testObserver = securedObjectSpaceProvider.WhenObjectSpaceCreated().Test();
 
             securedObjectSpaceProvider.CreateObjectSpace();
+
+            testObserver.ItemCount.ShouldBe(1);
+        }
+        [Test]
+        [XpandTest()][Order(-10)]
+        public void When_NonSecured_ObjectSpaceCreated(){
+            using var application = NewXafApplication();
+            application.SetupSecurity();
+            DefaultReactiveModule(application);
+            var securedObjectSpaceProvider = new SecuredObjectSpaceProvider((ISelectDataSecurityProvider)application.Security, new ConnectionStringDataStoreProvider("XpoProvider=InMemoryDataStoreProvider"));
+            using var testObserver = securedObjectSpaceProvider.WhenObjectSpaceCreated().Test();
+
+            securedObjectSpaceProvider.CreateNonsecuredObjectSpace();
 
             testObserver.ItemCount.ShouldBe(1);
         }

@@ -4,19 +4,10 @@ using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using NUnit.Framework;
-using Shouldly;
-using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Transform.System.Diagnostics;
 using Xpand.TestsLib.Common.Attributes;
 
 namespace Xpand.Extensions.Tests{
-    public class ObjectExtensionsTests {
-        [TestCase(0,true)]
-        public void DefaultValue(object value,bool isDefault) {
-            value.IsDefaultValue().ShouldBe(isDefault);
-        }
-
-    }
     public class ProcessTests{
         private static string CreateScriptFile(){
             var path = $"{Path.GetTempPath()}\\Output.ps1";

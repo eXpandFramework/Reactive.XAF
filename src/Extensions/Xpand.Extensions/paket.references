@@ -12,3 +12,4 @@ System.Security.Cryptography.ProtectedData
 Microsoft.AspNetCore.Http.Abstractions
 ZString
 System.Diagnostics.PerformanceCounter
+System.Threading.Tasks.Dataflow

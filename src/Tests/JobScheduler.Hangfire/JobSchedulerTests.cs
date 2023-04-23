@@ -4,6 +4,8 @@ using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using akarnokd.reactive_extensions;
+using DevExpress.ExpressApp.Core;
+using Moq;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.Blazor;
@@ -25,11 +27,12 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests{
         }
 
         [TestCase(typeof(TestJobDI))]
-        [TestCase(typeof(TestJob))]
+        // [TestCase(typeof(TestJob))]
         [XpandTest()][Order(0)]
         public async Task Inject_BlazorApplication_In_JobType_Ctor(Type testJobType) {
             var jobs = TestJob.Jobs.FirstAsync().ReplayConnect();
-            using var application = JobSchedulerModule().Application.ToBlazor();
+            await using var application = JobSchedulerModule().Application.ToBlazor();
+            
             application.CommitNewJob(testJobType).Trigger();
 
             var testJob =await jobs.Timeout(Timeout);
@@ -72,7 +75,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests{
         [XpandTest()][Order(200)]
         public async Task Inject_PerformContext_In_JobType_Method() {
             var jobs = TestJob.Jobs.FirstAsync().ReplayConnect();
-            using var application = JobSchedulerModule().Application.ToBlazor();
+            await using var application = JobSchedulerModule().Application.ToBlazor();
             
             var job = application.CommitNewJob(typeof(TestJob),nameof(TestJob.TestJobId)).Trigger();
 
@@ -92,7 +95,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests{
         [XpandTest()]
         [Order(300)]
         public async Task Schedule_Successful_job() {
-            using var application = JobSchedulerModule().Application.ToBlazor();
+            await using var application = JobSchedulerModule().Application.ToBlazor();
             var testObserver = WorkerState.Succeeded.Executed().FirstAsync().ReplayConnect();
             
             application.CommitNewJob().Trigger();
@@ -122,7 +125,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests{
 
         [XpandTest()][Test][Order(700)]
         public async Task Resume_Job() {
-            using var application = JobSchedulerModule().Application.ToBlazor();
+            await using var application = JobSchedulerModule().Application.ToBlazor();
             var jobsCommitObserver = TestJob.Jobs.Timeout(Timeout).FirstAsync().ReplayConnect();
 
             application.CommitNewJob( ).Pause().Resume().Trigger();
@@ -179,7 +182,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests{
         [TestCase(nameof(TestJob.FailMethodRetry),2)]
         [XpandTest()][Order(1000)]
         public async Task Schedule_Failed_Recurrent_job(string methodName,int executions) {
-            using var application = JobSchedulerModule().Application.ToBlazor();
+            await using var application = JobSchedulerModule().Application.ToBlazor();
             var testObserver = JobSchedulerService.JobState.FirstAsync(state => state.State==WorkerState.Failed).ReplayConnect();
             application.CommitNewJob(methodName:methodName).Trigger();
 

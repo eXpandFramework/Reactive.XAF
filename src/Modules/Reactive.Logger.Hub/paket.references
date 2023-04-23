@@ -9,3 +9,4 @@ Xpand.Patcher
 Xpand.Collections
 System.CodeDom
 System.Text.Json
+System.Threading.Tasks.Dataflow

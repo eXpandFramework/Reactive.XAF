@@ -2,3 +2,4 @@ Fasterflect.Xpand
 System.Reactive
 DevExpress.Persistent.Base
 System.Text.Json
+System.Threading.Tasks.Dataflow

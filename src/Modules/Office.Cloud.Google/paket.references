@@ -3,3 +3,4 @@ Fasterflect.Xpand
 System.Reactive
 DevExpress.Persistent.Base
 Google.Apis.Auth
+System.Threading.Tasks.Dataflow

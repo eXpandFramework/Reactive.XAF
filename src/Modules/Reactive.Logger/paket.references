@@ -4,3 +4,4 @@ System.Reactive
 Fasterflect.Xpand
 Xpand.Patcher
 System.Text.Json
+System.Threading.Tasks.Dataflow

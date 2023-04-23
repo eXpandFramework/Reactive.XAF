@@ -27,7 +27,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests {
         [TestCase("JS_DetailView",typeof(SimpleAction))]
         [XpandTest()]
 		public async Task Execute_Action(string viewId,Type actionType) {
-			using var application = NewBlazorApplication().ToBlazor();
+			await using var application = NewBlazorApplication().ToBlazor();
 			var actionId = "test";
 			var whenApplicationModulesManager = application.WhenApplicationModulesManager();
 			whenApplicationModulesManager.SelectMany(manager => manager.RegisterViewAction(actionId,

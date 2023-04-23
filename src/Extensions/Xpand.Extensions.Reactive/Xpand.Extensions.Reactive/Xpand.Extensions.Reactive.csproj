@@ -31,8 +31,5 @@
   <ItemGroup>
     <Compile Include="..\..\..\Common\AssemblyInfoVersion.cs" Link="Properties\AssemblyInfoVersion.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="6.0.0" />
-  </ItemGroup>
   <Import Project="..\..\..\..\.paket\Paket.Restore.targets" />
 </Project>

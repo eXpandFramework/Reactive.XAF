@@ -7,3 +7,4 @@ Fasterflect.Xpand
 Xpand.Collections
 System.Interactive
 System.Text.Json
+System.Threading.Tasks.Dataflow

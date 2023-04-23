@@ -5,6 +5,7 @@ using System.Reactive.Subjects;
 using System.Threading.Tasks;
 using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.Security;
 using DevExpress.Persistent.BaseImpl.PermissionPolicy;
 using NUnit.Framework;
 using Shouldly;
@@ -13,11 +14,39 @@ using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.TestsLib.Common;
 using Xpand.TestsLib.Common.Attributes;
 using Xpand.XAF.Modules.Reactive.Services;
+using Xpand.XAF.Modules.Reactive.Tests.BOModel;
 using Xpand.XAF.Modules.Reactive.Tests.Common;
 
 
 namespace Xpand.XAF.Modules.Reactive.Tests{
-    [NonParallelizable]
+    
+    public class ObjectSpaceCreatedTests : ReactiveCommonTest {
+        [XpandTest]
+        [TestCase(nameof(Platform.Win))]
+        public void WhenObjectSpaceCreated(string platformName){
+            var platform = GetPlatform(platformName);
+            using var application = DefaultReactiveModule(platform).Application;
+            using var exiTest = application.WhenObjectSpaceCreated().Test();
+            
+            application.CreateObjectSpace();
+
+            exiTest.Items.Count.ShouldBe(1);
+        }
+        [XpandTest]
+        [TestCase(nameof(Platform.Win))]
+        public void WhenNonSecuredObjectSpaceCreated(string platformName){
+            var application = NewXafApplication();
+            application.SetupSecurity();
+            DefaultReactiveModule(application);
+            using var exiTest = application.WhenObjectSpaceCreated().Test();
+
+            ((INonsecuredObjectSpaceProvider)application.ObjectSpaceProvider).CreateNonsecuredObjectSpace();
+
+            exiTest.Items.Count.ShouldBe(1);
+        }
+
+    }
+
     public class XafApplicationTests : ReactiveCommonTest{
         [XpandTest]
         [TestCase(nameof(Platform.Win))]

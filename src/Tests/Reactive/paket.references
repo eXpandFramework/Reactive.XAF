@@ -13,3 +13,4 @@ DevExpress.Persistent.BaseImpl.Xpo
 DevExpress.ExpressApp.Security.Xpo
 DevExpress.ExpressApp.Win.All
 Microsoft.Reactive.Testing
+System.Threading.Tasks.Dataflow
