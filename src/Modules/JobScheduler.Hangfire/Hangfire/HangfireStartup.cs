@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Linq;
 using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp.Security;
@@ -37,20 +36,17 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Hangfire {
     public class DashboardAuthorization : IDashboardAuthorizationFilter {
         public bool Authorize(DashboardContext context) {
             var httpContext = context.GetHttpContext();
-            var userIdentity = httpContext.User.Identity;
-            Debug.Assert(userIdentity != null, nameof(userIdentity) + " != null");
-            return userIdentity.IsAuthenticated && httpContext.RequestServices.RunWithStorageAsync(application => {
+            return httpContext.User.Identity!.IsAuthenticated && httpContext.RequestServices.RunWithStorageAsync(application => {
                 var security = application.Security;
                 if (!security.IsSecurityStrategyComplex()) return true.ReturnObservable();
-                if (security.IsActionPermissionGranted(nameof(JobSchedulerService.JobDashboard)) ||
-                    security.IsAdminPermissionGranted()) return true.ReturnObservable();
+                if (security.IsActionPermissionGranted(nameof(JobSchedulerService.JobDashboard))) return true.ReturnObservable();
                 using var objectSpace = application.CreateObjectSpace(security?.UserType);
                 var user = (ISecurityUserWithRoles)objectSpace.FindObject(security?.UserType,
-                    CriteriaOperator.Parse($"{nameof(ISecurityUser.UserName)}=?", userIdentity.Name));
-                return user.Roles.Cast<IPermissionPolicyRole>().Any(role => role.IsAdministrative)
-                    .ReturnObservable();
+                    CriteriaOperator.Parse($"{nameof(ISecurityUser.UserName)}=?", httpContext.User.Identity.Name));
+                var any = user.Roles.Cast<IPermissionPolicyRole>().Any(role => role.IsAdministrative);
+                return any.ReturnObservable();
 
-            }).Wait(TimeSpan.FromSeconds(10));
+            }).Result;
         }
     }
 

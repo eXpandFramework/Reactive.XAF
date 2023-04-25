@@ -21,6 +21,7 @@ using DevExpress.Xpo.DB;
 using DevExpress.Xpo.Helpers;
 using Fasterflect;
 using Xpand.Extensions.LinqExtensions;
+using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.Tracing;
@@ -156,14 +157,15 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager,Type sequenceStorageType=null){
             sequenceStorageType ??= typeof(SequenceStorage);
             Guard.TypeArgumentIs(typeof(ISequenceStorage),sequenceStorageType,nameof(sequenceStorageType));
-            return manager.WhenApplication(application => application.WhenCompatibilityChecked().FirstAsync().Select(xafApplication => xafApplication.ObjectSpaceProvider)
+            return manager.WhenApplication(application => application.WhenCompatibilityChecked().FirstAsync()
+                .Select(xafApplication => xafApplication.ObjectSpaceProvider)
                 .Where(provider => !provider.IsMiddleTier())
                 .SelectMany(provider => provider.SequenceGeneratorDatalayer()
                     .SelectMany(dataLayer => application.WhenProviderObjectSpaceCreated(true).Where(space => space is not NonPersistentObjectSpace)
                         .Select(space => space)
-                        .GenerateSequences(dataLayer,sequenceStorageType)
-                        .Merge(application.Security.AddAnonymousType(sequenceStorageType).ToObservable()))
-                    .Merge(application.ConfigureDetailViewSequenceStorage()).ToUnit()));
+                        .GenerateSequences(dataLayer,sequenceStorageType))
+                    .Merge(application.ConfigureDetailViewSequenceStorage()).ToUnit())
+                .MergeToUnit(application.Security.AddAnonymousType(sequenceStorageType).ToObservable()));
         }
 
         private static IObservable<object> ConfigureDetailViewSequenceStorage(this XafApplication application) 

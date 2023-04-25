@@ -14,6 +14,7 @@ namespace Xpand.Extensions.XAF.SecurityExtensions {
             this ISecurityStrategyBase securityStrategy, params Type[] types) {
             foreach (var strategyBase in securityStrategy.WhenSecurityStrategy()) {
                 var anonymousAllowedTypes = strategyBase.GetPropertyValue("AnonymousAllowedTypes");
+                strategyBase.SetPropertyValue("AllowAnonymousAccess", true);
                 foreach (var type in types) {
                     anonymousAllowedTypes.CallMethod("Add", type);
                 }

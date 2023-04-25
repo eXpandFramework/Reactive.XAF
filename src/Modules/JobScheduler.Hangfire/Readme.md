@@ -18,7 +18,27 @@ This `Blazor only` module is valuable when you want to schedule background proce
 ### Job Scheduling
 
 Follow the next steps:
-1. Configure the Hangfire [default storage](https://docs.hangfire.io/en/latest/configuration/using-sql-server.html). Additionally consult Hangfire docs to configure/implement any other Hangfire related scenario, there are no restrictions.
+1. Configure the Hangfire [default storage](https://docs.hangfire.io/en/latest/configuration/using-sql-server.html). Additionally consult Hangfire docs to configure/implement any other Hangfire related scenario.
+   >**Note:** The package will guide you with exceptions to add the next attributes if they not exist.
+
+   ```
+    [assembly: HostingStartup(typeof(Xpand.Extensions.Blazor.HostingStartup))]
+    [assembly: HostingStartup(typeof(Xpand.XAF.Modules.JobScheduler.Hangfire.Hangfire.HangfireStartup))]
+    [assembly: HostingStartup(typeof(Xpand.XAF.Modules.Blazor.BlazorStartup))]
+   ```
+
+   > They are responsible to initial Hangfire with defaults, They call the `AddHangfire`, `AddHangfireServer` methods. If you want to configure Hangfire further you can use the `GlobalConfiguration`:
+
+   ```
+   GlobalConfiguration.Configuration.UseSqlServerStorage(
+            Configuration.GetConnectionString("ConnectionString"), new SqlServerStorageOptions {
+                CommandBatchMaxTimeout = TimeSpan.FromMinutes(5),
+                SlidingInvisibilityTimeout = TimeSpan.FromMinutes(5),
+                QueuePollInterval = TimeSpan.Zero,
+                UseRecommendedIsolationLevel = true,
+                DisableGlobalLocks = true
+            });
+   ```
 2. Add a model assembly `job source` pointing to the assembly containing your Job types.<br><br>
     ![image](https://user-images.githubusercontent.com/159464/103508193-4b7dcb80-4e69-11eb-82be-7fa109720368.png)
 3. Mark any type with a default constructor with the `Xpand.XAF.Modules.JobScheduler.Hangfire.JobProviderAttribute`. 
@@ -116,7 +136,7 @@ Follow the next steps:
    ```
 8. A Job discussing some of those cases.
    ```csharp
-       [JobProvider]
+    [JobProvider]
     public class Job
     {
         public IServiceProvider ServiceProvider { get; }

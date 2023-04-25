@@ -156,7 +156,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
 
         private static IObservable<Unit> TriggerJobsFromAction(this ApplicationModulesManager manager)
             => manager.RegisterViewSimpleAction(nameof(TriggerJob), Configure)
-                .WhenExecute().SelectMany(args => args.SelectedObjects.Cast<Job>()).Do(job => job.Trigger()).ToUnit();
+                .WhenExecute().SelectMany(args => args.SelectedObjects.Cast<Job>().Do(job => job.Trigger(args.Action.Application.ServiceProvider))).ToUnit();
         
         private static IObservable<Unit> PauseJobsFromAction(this ApplicationModulesManager manager)
             => manager.RegisterViewSimpleAction(nameof(PauseJob), Configure)
@@ -178,13 +178,23 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
             action.Caption = action.Caption.Replace("Job", "").Trim();
         }
 
+        public static T Trigger<T>(this T job, IServiceProvider serviceProvider) where T : Job {
+            serviceProvider.GetService<IRecurringJobManager>().Trigger(job.Id);
+            return job;
+        }
+        
         public static T Trigger<T>(this T job) where T:Job {
             RecurringJob.Trigger(job.Id);
             return job;
         }
         
+        [Obsolete]
         public static void AddOrUpdateHangfire(this Job job) 
             => RecurringJob.AddOrUpdate(job.Id, job.Expression(), () => job.CronExpression?.Expression??Cron.Never());
+        
+        public static void AddOrUpdateHangfire(this Job job,IServiceProvider serviceProvider) 
+            => serviceProvider.GetService<IRecurringJobManager>()
+                .AddOrUpdate(job.Id, job.Expression(), () => job.CronExpression?.Expression??Cron.Never());
 
         static IObservable<Unit> ScheduleJobs(this XafApplication application) 
             => application.WhenCommitted<Job>(ObjectModification.NewOrUpdated).Objects()
@@ -192,7 +202,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
                     var args = new GenericEventArgs<IObservable<Job>>(scheduledJob.ReturnObservable());
                     CustomJobScheduleSubject.OnNext(args);
                     if (!args.Handled) {
-                        scheduledJob.AddOrUpdateHangfire();
+                        scheduledJob.AddOrUpdateHangfire(application.ServiceProvider);
                     }
                     return args.Instance;
                 })
@@ -201,7 +211,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
 
         private static IObservable<Unit> DeleteJobs(this XafApplication application) 
             => application.DeletedObjects<Job>()
-                .SelectMany(t => t.objects.Do(job => RecurringJob.RemoveIfExists(job.Id)))
+                .SelectMany(t => t.objects.Do(job => application.ServiceProvider.GetService<IRecurringJobManager>().RemoveIfExists(job.Id)))
                 .TraceJobSchedulerModule().ToUnit();
         
 
@@ -213,7 +223,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
             => job.JobType.Type.Method(job.JobMethod.Name.Replace(" ", "")).JobExpression();
 
         public static Expression<Action> JobExpression(this MethodInfo method) 
-            => method.DeclaringType.CallExpression(method, method.Parameters().Count == 1 &&
+            => method.ReflectedType.CallExpression(method, method.Parameters().Count == 1 &&
                                                            method.Parameters().Any(info => info.ParameterType == typeof(PerformContext))
                 ? new Expression[] { System.Linq.Expressions.Expression.Constant(null, typeof(PerformContext)) } : Array.Empty<Expression>());
 
