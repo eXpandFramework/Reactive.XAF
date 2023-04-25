@@ -20,7 +20,7 @@ using DevExpress.Xpo;
 using DevExpress.Xpo.DB;
 using DevExpress.Xpo.Helpers;
 using Fasterflect;
-
+using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.Tracing;
@@ -159,7 +159,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
             return manager.WhenApplication(application => application.WhenCompatibilityChecked().FirstAsync().Select(xafApplication => xafApplication.ObjectSpaceProvider)
                 .Where(provider => !provider.IsMiddleTier())
                 .SelectMany(provider => provider.SequenceGeneratorDatalayer()
-                    .SelectMany(dataLayer => application.WhenObjectSpaceCreated()
+                    .SelectMany(dataLayer => application.WhenProviderObjectSpaceCreated(true).Where(space => space is not NonPersistentObjectSpace)
                         .Select(space => space)
                         .GenerateSequences(dataLayer,sequenceStorageType)
                         .Merge(application.Security.AddAnonymousType(sequenceStorageType).ToObservable()))
@@ -175,8 +175,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
                 .Select(_ => new object()).IgnoreElements();
 
         private static IObservable<object> Configure(this XafApplication application, ObjectView view, (IObjectSpace objectSpace, CancelEventArgs e) t) 
-            => view.ObjectSpace.ModifiedObjects.Cast<SequenceStorage>().Where(storage => !storage.ObjectSpace.IsObjectToDelete(storage))
-                .ToObservable(ImmediateScheduler.Instance)
+            => view.ObjectSpace.ModifiedObjects.Cast<SequenceStorage>().Where(storage => !storage.ObjectSpace.IsObjectToDelete(storage)).ToNowObservable()
                 .SelectMany(storage => storage.Configure().HandleErrors(application, t.e)).ToUnit()
                 .To(new object());
 
@@ -199,46 +198,48 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
 
         private static IObservable<IObjectSpace> WhenSupported(this IObservable<IObjectSpace> source) 
             => source.Where(space => {
-                if (space.UnitOfWork()?.DataLayer is BaseDataLayer dataLayer) {
-                    var dataStore = dataLayer.ConnectionProvider;
-                    if (dataStore is DataStorePool dataStorePool) {
-                        dataStore = dataStorePool.AcquireReadProvider();
-                        bool supported = SupportedDataStoreTypes.Any(type => type.IsInstanceOfType(dataStore));
-                        dataStorePool.ReleaseReadProvider(dataStore);
-                        return supported;
-                    }
-                    return true;
-                }
-                return false;
+                if (space.UnitOfWork()?.DataLayer is not BaseDataLayer dataLayer) return false;
+                var dataStore = dataLayer.ConnectionProvider;
+                if (dataStore is not DataStorePool dataStorePool) return true;
+                dataStore = dataStorePool.AcquireReadProvider();
+                var supported = SupportedDataStoreTypes.Any(type => type.IsInstanceOfType(dataStore));
+                dataStorePool.ReleaseReadProvider(dataStore);
+                return supported;
             });
 
         public static IList<Type> SupportedDataStoreTypes { get; } = new List<Type>(){typeof(MSSqlConnectionProvider), typeof(BaseOracleConnectionProvider), typeof(MySqlConnectionProvider)};
 
         private static IObservable<object> GenerateSequences(this IObservable<IObjectSpace> source, IDataLayer dataLayer,Type sequenceStorageType=null) 
-            => source.WhenSupported().SelectMany(space => Observable.Defer(() => space.GetObjectForSave(dataLayer).SelectMany(e => e.GenerateSequences(sequenceStorageType))
-                        .TakeUntil(space.WhenCommitted()))
+            => source.TraceSequenceGeneratorModule(space => $"{space.GetType().Name} {space.GetHashCode()}").WhenSupported().SelectMany(space => Observable.Defer(() => space.GetObjectForSave(dataLayer).SelectMany(e => e.GenerateSequences(sequenceStorageType))
+                        .TakeUntil(space.WhenCommitted().Select(objectSpace => objectSpace)))
                     .RepeatWhen(observable => observable.Where(_ => !space.IsDisposed))
                 )
 	            .Do(SequenceSubject)
                 .TraceSequenceGeneratorModule();
 
         static IObservable<(ObjectManipulationEventArgs e, ExplicitUnitOfWork explicitUnitOfWork)> GetObjectForSave(this IObjectSpace objectSpace, IDataLayer dataLayer ){
-	        var unitOfWorks = new ConcurrentDictionary<IObjectSpace,ExplicitUnitOfWork>();
-            return objectSpace.WhenCommiting().SelectMany(_ => {
-                if (!unitOfWorks.TryGetValue(objectSpace, out var explicitUnitOfWork)) {
-                    explicitUnitOfWork=new ExplicitUnitOfWork(dataLayer);
-                    unitOfWorks.TryAdd(objectSpace, explicitUnitOfWork);
-                    return objectSpace.UnitOfWork().WhenObjectSaving().Distinct(e => e.Object)
-                        .Where(e => e.Session.IsNewObject(e.Object))
-                        .Select(e => (e,explicitUnitOfWork))
-                        .TakeUntil(objectSpace.WhenCommitted().ToUnit().Merge(objectSpace.WhenRollingBack().ToUnit()))
-                        .Finally(() => {
-	                        unitOfWorks.TryRemove(objectSpace, out explicitUnitOfWork);
-                            explicitUnitOfWork.Close();
-                        });
-                }
-                return Observable.Empty<(ObjectManipulationEventArgs e, ExplicitUnitOfWork explicitUnitOfWork)>();
-            });
+            var unitOfWorks = new ConcurrentDictionary<IObjectSpace, ExplicitUnitOfWork>();
+            return objectSpace.WhenCommiting()
+                .TraceSequenceGeneratorModule(t => $"{t.objectSpace.GetType().Name} {t.objectSpace.GetHashCode()}")
+                .SelectMany(_ => {
+                    if (!unitOfWorks.TryGetValue(objectSpace, out var explicitUnitOfWork)) {
+                        explicitUnitOfWork = new ExplicitUnitOfWork(dataLayer);
+                        unitOfWorks.TryAdd(objectSpace, explicitUnitOfWork);
+                        return objectSpace.UnitOfWork().WhenObjectSaving().Distinct(e => e.Object)
+                            .Where(e => e.Session.IsNewObject(e.Object))
+                            .Select(e => (e, explicitUnitOfWork))
+                            .TakeUntil(objectSpace.WhenCommitted().ToUnit()
+                                .Merge(objectSpace.WhenRollingBack().ToUnit()))
+                            .Finally(() => {
+                                unitOfWorks.TryRemove(objectSpace, out explicitUnitOfWork);
+                                explicitUnitOfWork.Close();
+                            });
+                    }
+
+                    return Observable.Empty<(ObjectManipulationEventArgs e, ExplicitUnitOfWork explicitUnitOfWork)>();
+                })
+                .Merge(objectSpace.WhenDisposed()
+                    .Do(_ => unitOfWorks.Clear()).IgnoreElements().To<(ObjectManipulationEventArgs e, ExplicitUnitOfWork explicitUnitOfWork)>());
         }
 
         private static IObservable<object> GenerateSequences(this (ObjectManipulationEventArgs e,ExplicitUnitOfWork explicitUnitOfWork) t, Type sequenceStorageType) 
@@ -291,7 +292,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
 
         private static IObservable<Exception> RetryException(this IObservable<Exception> source) 
             => source.OfType<Exception>().Where(exception => exception.HResult == ParallelTransactionExceptionHResult)
-                .TraceSequenceGeneratorModule(exception => $"{exception.GetType().Name}, {exception.Message}");
+                .TraceSequenceGeneratorModule(exception => new[]{exception.GetType().Name,exception.Message}.JoinCommaSpace());
 
         private static IObservable<T> DisposeOnException<T>(this IObservable<T> source,ExplicitUnitOfWork explicitUnitOfWork) 
             => source.Catch<T, Exception>(exception => {

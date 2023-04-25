@@ -38,5 +38,6 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net{
             => endPoint.Address.Ping(endPoint.Port).To(endPoint);
 
         public static bool Listening(this IPEndPoint endPoint) => IPGlobalProperties.GetIPGlobalProperties().GetActiveTcpListeners().Contains(endPoint);
+        public static bool IsFree(this IPEndPoint endPoint) => !endPoint.Listening();
     }
 }

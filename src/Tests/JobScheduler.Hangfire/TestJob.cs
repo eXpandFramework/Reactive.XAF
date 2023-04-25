@@ -2,11 +2,17 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
+using DevExpress.ExpressApp.Security;
 using Hangfire;
 using Hangfire.Server;
 using Microsoft.Extensions.DependencyInjection;
+using Xpand.Extensions.Blazor;
+using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Transform;
+using Xpand.XAF.Modules.JobScheduler.Hangfire.Tests.BO;
+using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests {
     [JobProvider]
@@ -17,6 +23,33 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests {
         }
 
         public TestJobDI() { }
+        
+        [JobProvider]
+        public async Task<bool> CreateObject(PerformContext context) 
+            => await Provider.RunWithStorageAsync(application => application.UseObjectSpace(space => Observable.Range(0, 10)
+                .Select(_ => space.CreateObject<JS>()).Commit()))
+                .ToObservable().To(true);
+
+        [JobProvider]
+        public async Task<bool> CreateObjectAnonymous(PerformContext context) 
+            => await Provider.RunWithStorageAsync(application => {
+                    application.Security.Cast<SecurityStrategyComplex>().AnonymousAllowedTypes.Add(typeof(JS));
+                    return application.UseObjectSpace(space => Observable.Range(0, 10)
+                        .Select(_ => space.CreateObject<JS>()).Commit());
+                })
+                .ToObservable().To(true);
+        
+        [JobProvider]
+        public async Task<bool> CreateObjectNonSecured(PerformContext context) 
+            => await Provider.RunWithStorageAsync(application => application.UseNonSecuredObjectSpace(space => Observable.Range(0, 10)
+                    .Select(_ => space.CreateObject<JS>()).Commit()))
+                .ToObservable().To(true);
+        [JobProvider]
+        public async Task<bool> CreateObjectNonAuthenticated(PerformContext context) 
+            => await Provider.RunWithStorageAsync(application => application.UseNonSecuredObjectSpace(space => Observable.Range(0, 10)
+                    .Select(_ => space.CreateObject<JS>()).Commit()))
+                .ToObservable().To(true);
+
     }
 
     [JobProvider]

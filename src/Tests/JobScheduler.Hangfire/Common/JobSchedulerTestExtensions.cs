@@ -42,7 +42,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests.Common {
             job.JobType = new ObjectType(testJobType);
             job.JobMethod = new ObjectString(methodName);
             job.CronExpression = job.ObjectSpace.GetObjectsQuery<CronExpression>()
-                .First(expression => expression.Name == nameof(Cron.Minutely));
+                .FirstOrDefault(expression => expression.Name == nameof(Cron.Minutely));
             job.Id = ScheduledJobId;
             modify?.Invoke(job);
             objectSpace.CommitChanges();
@@ -52,9 +52,9 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests.Common {
         public static string ScheduledJobId => $"{TestContext.CurrentContext.Test.MethodName}{TestContext.CurrentContext.Test.ID}";
 
         public static IObservable<Job> ScheduleImmediate(this
-            IObservable<GenericEventArgs<IObservable<Job>>> source, Expression<Action> expression)
+            IObservable<GenericEventArgs<IObservable<Job>>> source, Expression<Action> expression,IServiceProvider serviceProvider)
             => source.Handle().SelectMany(args => args.Instance.SelectMany(job => {
-                job.AddOrUpdateHangfire();
+                job.AddOrUpdateHangfire(serviceProvider);
                 if (job.CronExpression.Name != nameof(Cron.Never)) {
                     return Observable.Start(job.Trigger).To(job);
                 }

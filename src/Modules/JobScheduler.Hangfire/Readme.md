@@ -52,8 +52,9 @@ Follow the next steps:
     job.Pause();
     Job.Resume();
    ```
-   Note that the methods are scheduled in the background therefore the `HttpContext` is not available.
-5. Use DI to inject object instances in the constructor for e.g. to inject an `IServiceProvider` and later use it to get a BlazorApplication use the next snippet. Note that depending on your needs a NonSecuredObjectSpace should be created if your did not explicitly authenticate. 
+   > **Note:** The methods run asynchronously in the background, which is why the HttpContext is not accessible.
+5. Use DI to inject object instances in the constructor for e.g. to inject an `IServiceProvider` and later use it to get a BlazorApplication use the next snippet.</br> 
+   > **Note:** If you have not explicitly authenticated, you should create a NonSecuredObjectSpace based on your requirements. 
    ```c#
     [JobProvider]
     public class Import {
@@ -66,15 +67,19 @@ Follow the next steps:
 
         [JobProvider("Customize-Name")]
         public async Task DailyOrders() {
-            await ServiceProvider.RunWithStorageAsync(application => Observable.Using(() => application.CreateNonSecuredObjectSpace(true,true), objectSpace 
-                => Observable.Range(0, 10).Do(i => {
-                        var order = objectSpace.CreateObject<Order>();
-                        order.OrderID = i;
-                    }).Finally(objectSpace.CommitChanges)));
+            //You can also use application.UseNonSecuredObjectSpace if you do not want to authenticate or
+            //application.UseObjectSpace(space=>) if you do not have authentication enabled.
+            await Provider.RunWithStorageAsync(application => application.UseObjectSpace("Admin",objectSpace =>
+                Observable.Range(0, 10).Select(i => {
+                    var order = objectSpace.CreateObject<Order>();
+                    order.OrderID = i;
+                    return order;
+                }).Commit()))
+                .ToObservable().To(true)
         }
     }
    ```
-   Note that the BlazorApplication is not authenticated and the default constructor must exist.
+   
 6. Use a Job descendant to pass job specific parameters.
    ```c#
     public class CustomJob:Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects.Job {
@@ -91,15 +96,15 @@ Follow the next steps:
     [JobProvider] 
     public async Task ImportOrders(PerformContext context) {
         var jobId = context.JobId();
-        await ServiceProvider.RunWithStorageAsync(application => Observable.Using(() => application.CreateNonSecuredObjectSpace(true,true),
-            objectSpace => { var ordersCount=objectSpace.GetObjectsQuery<CustomJob>()
-                        .First(job1 => job1.Id == jobId).OrdersCount
-                    for (int i = 0; i < ordersCount; i++) {
-                        var order = objectSpace.CreateObject<Order>();
-                        order.OrderID = i;
-                    }
-                    objectSpace.CommitChanges();
-                }));
+        await Provider.RunWithStorageAsync(application => application.UseNonSecuredObjectSpace(objectSpace =>
+                objectSpace.GetObjectsQuery<CustomJob>().Where(job => job.Id == jobId)
+                    .Take(1).ToNowObservable().SelectMany(job => Observable.Range(0, job.OrdersCount)
+                        .Select(i => {
+                            var order = objectSpace.CreateObject<Order>();
+                            order.OrderID = i;
+                            return order;
+                        }).Commit()
+                    )))
     }
 
    ```
@@ -109,7 +114,61 @@ Follow the next steps:
         var job = state.JobWorker.Job;
     });
    ```
+8. A Job discussing some of those cases.
+   ```csharp
+       [JobProvider]
+    public class Job
+    {
+        public IServiceProvider ServiceProvider { get; }
+        public Job() { }
+        [ActivatorUtilitiesConstructor]
+        public Job(IServiceProvider provider) => ServiceProvider = provider;
 
+        [JobProvider]
+        public async Task<bool> ImportOrdersAuthenticated() 
+            => await ServiceProvider.RunWithStorageAsync(application 
+                => application.UseObjectSpace("Admin", space => CreateOrders(space).FinallySafe(space.CommitChanges)))
+                .ToObservable().To(true);
+
+        private static IObservable<Order> CreateOrders(IObjectSpace space) 
+            => Observable.Range(0, 10).Select(_ => space.CreateObject<Order>());
+
+        [JobProvider]
+        public async Task<bool> ImportOrdersAuthenticatedSequential() 
+            => await ServiceProvider.RunWithStorageAsync(application =>
+                    application.CommitChangesSequential(CreateOrders,
+                        (factory, _) => application.UseObjectSpace("Admin",factory).SelectMany()))
+                .ToObservable().To(true);
+
+        [JobProvider]
+        public async Task<bool> ImportOrdersFailed() 
+            => await ServiceProvider.RunWithStorageAsync(application 
+                    => application.UseObjectSpace(space => CreateOrders(space)
+                        .FinallySafe(space.CommitChanges)))
+                .ToObservable().To(true);
+
+        [JobProvider]
+        public async Task<bool> ImportOrdersNonSecured()
+            => await ServiceProvider.RunWithStorageAsync(application 
+                => application.UseNonSecuredObjectSpace(space => CreateOrders(space)
+                        .FinallySafe(space.CommitChanges))
+                .To(true));
+        
+        [JobProvider]
+        public async Task<bool> ImportOrdersNonSecuredSequential()
+            => await ServiceProvider.RunWithStorageAsync(application => application.CommitChangesSequential(CreateOrders,(factory, _) 
+                    => application.UseNonSecuredObjectSpace(factory).SelectMany())
+                .To(true));
+
+
+
+        public void Failed()
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+   ```
 In the screencast you can see `how to declare, schedule, pause, resume and get more details` for a Job. Consult the previous code snippets as the video record uses outdated api.
 
 <twitter tags="#Hangfire #Blazor">

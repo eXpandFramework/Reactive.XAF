@@ -40,7 +40,10 @@ namespace Xpand.TestsLib.Blazor {
 		protected BlazorApplication NewBlazorApplication(Type startupType) {
 			var defaultBuilder = Host.CreateDefaultBuilder();
 			WebHost = defaultBuilder
-				.ConfigureWebHostDefaults(webBuilder => webBuilder.UseStartup(startupType))
+				.ConfigureWebHostDefaults(webBuilder => {
+					webBuilder.UseStartup(startupType);
+					webBuilder.ConfigureKestrel(options => options.ListenAnyIP(0));
+				})
 				.Build();
 			WebHost.Start();
 			var containerInitializer = WebHost.Services.GetRequiredService<IValueManagerStorageContainerInitializer>();

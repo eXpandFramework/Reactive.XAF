@@ -171,8 +171,8 @@ jobs:
           **\Xpand.XAF.Modules.CloneMemberValue.Tests.dll
           **\Xpand.XAF.Modules.CloneModelView.Tests.dll
           **\Xpand.XAF.Modules.HideToolBar.Tests.dll
-          # **\Xpand.XAF.Modules.JobScheduler.Hangfire.Tests.dll
-          # **\Xpand.XAF.Modules.JobScheduler.Notification.Hangfire.Tests.dll
+          **\Xpand.XAF.Modules.JobScheduler.Hangfire.Tests.dll
+          **\Xpand.XAF.Modules.JobScheduler.Notification.Hangfire.Tests.dll
           **\Xpand.XAF.Modules.MasterDetail.Tests.dll
           **\Xpand.XAF.Modules.ModelViewInheritance.Tests.dll
           **\Xpand.XAF.Modules.OneView.Tests.dll

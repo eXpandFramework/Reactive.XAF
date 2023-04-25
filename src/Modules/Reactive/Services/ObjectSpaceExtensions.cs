@@ -499,77 +499,66 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<(NonPersistentObjectSpace objectSpace,ObjectsGettingEventArgs e)> ObjectsGetting(this IObservable<NonPersistentObjectSpace> source) 
             => source.SelectMany(item => item.WhenObjectsGetting());
 
-        public static IObservable<(NonPersistentObjectSpace objectSpace,ObjectsGettingEventArgs e)> WhenObjectsGetting(this NonPersistentObjectSpace item) 
-            => Observable.FromEventPattern<EventHandler<ObjectsGettingEventArgs>, ObjectsGettingEventArgs>(h => item.ObjectsGetting += h, h => item.ObjectsGetting -= h,ImmediateScheduler.Instance)
-                .TakeUntil(item.WhenDisposed())
-                .TransformPattern<ObjectsGettingEventArgs, NonPersistentObjectSpace>();
-        
-        
+        public static IObservable<(NonPersistentObjectSpace objectSpace,ObjectsGettingEventArgs e)> WhenObjectsGetting(this NonPersistentObjectSpace objectSpace) 
+            => objectSpace.WhenEvent<ObjectsGettingEventArgs>(nameof(NonPersistentObjectSpace.ObjectsGetting))
+                .InversePair(objectSpace).TakeUntil(objectSpace.WhenDisposed());
+
         public static IObservable<(NonPersistentObjectSpace objectSpace,ObjectGettingEventArgs e)> ObjectGetting(this IObservable<NonPersistentObjectSpace> source) 
             => source.SelectMany(item => item.WhenObjectGetting());
 
-        public static IObservable<(NonPersistentObjectSpace objectSpace,ObjectGettingEventArgs e)> WhenObjectGetting(this NonPersistentObjectSpace item) 
-            => Observable.FromEventPattern<EventHandler<ObjectGettingEventArgs>, ObjectGettingEventArgs>(h => item.ObjectGetting += h, h => item.ObjectGetting -= h,ImmediateScheduler.Instance)
-                .TakeUntil(item.WhenDisposed())
-                .TransformPattern<ObjectGettingEventArgs, NonPersistentObjectSpace>();
+        public static IObservable<(NonPersistentObjectSpace objectSpace,ObjectGettingEventArgs e)> WhenObjectGetting(this NonPersistentObjectSpace objectSpace) 
+            => objectSpace.WhenEvent<ObjectGettingEventArgs>(nameof(NonPersistentObjectSpace.ObjectGetting))
+                .InversePair(objectSpace).TakeUntil(objectSpace.WhenDisposed());
         
         public static IObservable<(IObjectSpace objectSpace,CancelEventArgs e)> Commiting(this IObservable<IObjectSpace> source) 
             => source.SelectMany(space => space.WhenCommiting());
         
-        public static IObservable<(IObjectSpace objectSpace,HandledEventArgs e)> WhenCustomCommitChanges(this IObjectSpace source) 
-            => Observable.FromEventPattern<EventHandler<HandledEventArgs>, HandledEventArgs>(h => source.CustomCommitChanges += h, h => source.CustomCommitChanges -= h,ImmediateScheduler.Instance)
-                .TakeUntil(source.WhenDisposed())
-                .TransformPattern<HandledEventArgs, IObjectSpace>()
+        public static IObservable<(IObjectSpace objectSpace,HandledEventArgs e)> WhenCustomCommitChanges(this IObjectSpace objectSpace) 
+            => objectSpace.WhenEvent<HandledEventArgs>(nameof(IObjectSpace.CustomCommitChanges)).InversePair(objectSpace)
+                .TakeUntil(objectSpace.WhenDisposed())
                 .TraceRX();
 
         public static IObservable<IObjectSpace> Committed(this IObservable<IObjectSpace> source) 
             => source.SelectMany(objectSpace => objectSpace.WhenCommitted());
         
         public static IObservable<IObjectSpace> WhenCommitted(this IObjectSpace objectSpace) 
-            => Observable.FromEventPattern<EventHandler, EventArgs>(h => objectSpace.Committed += h, h => objectSpace.Committed -= h,ImmediateScheduler.Instance)
-                .TakeUntil(objectSpace.WhenDisposed())
-                .TransformPattern<IObjectSpace>();
+            => objectSpace.WhenEvent(nameof(IObjectSpace.Committed)).To(objectSpace)
+                .TakeUntil(objectSpace.WhenDisposed());
 
         public static IObservable<(IObjectSpace objectSpace, CancelEventArgs e)> WhenCommiting(this IObjectSpace item) 
-            => Observable.FromEventPattern<EventHandler<CancelEventArgs>, CancelEventArgs>(h => item.Committing += h, h => item.Committing -= h,ImmediateScheduler.Instance)
+            => item.WhenEvent<CancelEventArgs>(nameof(IObjectSpace.Committing)).InversePair(item)
                 .TakeUntil(item.WhenDisposed())
-                .TransformPattern<CancelEventArgs, IObjectSpace>()
-                .TraceRX();
+                .TraceRX(t => t.value.GetType().Name.JoinString(" ",t.value.GetHashCode().ToString()));
 
         
         public static IObservable<(IObjectSpace objectSpace,ObjectsManipulatingEventArgs e)> ObjectDeleted(this IObservable<IObjectSpace> source) 
             => source.SelectMany(item => item.WhenObjectDeleted());
 
-        public static IObservable<(IObjectSpace objectSpace,ObjectsManipulatingEventArgs e)> WhenObjectDeleted(this IObjectSpace item) 
-            => Observable.FromEventPattern<EventHandler<ObjectsManipulatingEventArgs>, ObjectsManipulatingEventArgs>(h => item.ObjectDeleted += h, h => item.ObjectDeleted -= h,ImmediateScheduler.Instance)
-                .TakeUntil(item.WhenDisposed())
-                .TransformPattern<ObjectsManipulatingEventArgs, IObjectSpace>();
+        public static IObservable<(IObjectSpace objectSpace,ObjectsManipulatingEventArgs e)> WhenObjectDeleted(this IObjectSpace objectSpace) 
+            => objectSpace.WhenEvent<ObjectsManipulatingEventArgs>(nameof(IObjectSpace.ObjectDeleted)).InversePair(objectSpace)
+                .TakeUntil(objectSpace.WhenDisposed());
 
         
         public static IObservable<(IObjectSpace objectSpace,ObjectChangedEventArgs e)> ObjectChanged(this IObservable<IObjectSpace> source) 
             => source.SelectMany(item => item.WhenObjectChanged());
 
-        public static IObservable<(IObjectSpace objectSpace,ObjectChangedEventArgs e)> WhenObjectChanged(this IObjectSpace item,params Type[] objectTypes) 
-            => Observable.FromEventPattern<EventHandler<ObjectChangedEventArgs>, ObjectChangedEventArgs>(h => item.ObjectChanged += h, h => item.ObjectChanged -= h,ImmediateScheduler.Instance)
-                .TakeUntil(item.WhenDisposed())
-                .TransformPattern<ObjectChangedEventArgs, IObjectSpace>().Where(t =>!objectTypes.Any() ||objectTypes.Any(type => type.IsInstanceOfType(t.e.Object)));
+        public static IObservable<(IObjectSpace objectSpace,ObjectChangedEventArgs e)> WhenObjectChanged(this IObjectSpace objectSpace,params Type[] objectTypes) 
+            => objectSpace.WhenEvent<ObjectChangedEventArgs>(nameof(IObjectSpace.ObjectChanged)).InversePair(objectSpace)
+                .Where(t =>!objectTypes.Any() ||objectTypes.Any(type => type.IsInstanceOfType(t.source.Object)));
         
-        public static IObservable<(IObjectSpace objectSpace,ObjectChangedEventArgs e)> WhenObjectChanged(this IObjectSpace item,Type objectType,params string[] properties) 
-            => Observable.FromEventPattern<EventHandler<ObjectChangedEventArgs>, ObjectChangedEventArgs>(h => item.ObjectChanged += h, h => item.ObjectChanged -= h,ImmediateScheduler.Instance)
-                .TakeUntil(item.WhenDisposed())
-                .TransformPattern<ObjectChangedEventArgs, IObjectSpace>().Where(t =>objectType.IsInstanceOfType(t.e.Object)&&properties.Any(s => t.e.PropertyName==s));
+        public static IObservable<(IObjectSpace objectSpace,ObjectChangedEventArgs e)> WhenObjectChanged(this IObjectSpace objectSpace,Type objectType,params string[] properties) 
+            => objectSpace.WhenEvent<ObjectChangedEventArgs>(nameof(IObjectSpace.ObjectChanged)).InversePair(objectSpace)
+                .TakeUntil(objectSpace.WhenDisposed())
+                .Where(t =>objectType.IsInstanceOfType(t.source.Object)&&properties.Any(s => t.source.PropertyName==s));
 
         public static IObservable<Unit> Disposed(this IObservable<IObjectSpace> source) 
             => source.SelectMany(objectSpace => objectSpace.WhenDisposed());
 
         public static IObservable<Unit> WhenDisposed(this IObjectSpace objectSpace)
-            => Observable.FromEventPattern<EventHandler,EventArgs>(h => objectSpace.Disposed += h, h => objectSpace.Disposed -= h,ImmediateScheduler.Instance)
-                .ToUnit();
+            => objectSpace.WhenEvent(nameof(IObjectSpace.Disposed)).ToUnit();
 
-        
         public static IObservable<IObjectSpace> WhenModifyChanged(this IObjectSpace objectSpace) 
-            => Observable.FromEventPattern<EventHandler, EventArgs>(h => objectSpace.ModifiedChanged += h, h => objectSpace.ModifiedChanged -= h,Scheduler.Immediate)
-                .Select(pattern => (IObjectSpace) pattern.Sender);
+            => objectSpace.WhenEvent(nameof(IObjectSpace.Disposed)).To(objectSpace);
 
         public static IObservable<IObjectSpace> WhenModifyChanged(this IObservable<IObjectSpace> source) 
             => source.SelectMany(item => item.WhenModifyChanged());

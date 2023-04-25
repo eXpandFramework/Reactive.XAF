@@ -63,7 +63,7 @@ namespace Xpand.XAF.Modules.Reactive.Services {
                 .ToUnit();
 
         static IObservable<Unit> XpoAttributes(this ApplicationModulesManager manager)
-            => manager.WhenCustomizeTypesInfo().Select(t => t.e.TypesInfo)
+            => manager.WhenCustomizeTypesInfo().Take(1).Select(t => t.e.TypesInfo)
                 .Do(typesInfo => AppDomain.CurrentDomain.GetAssemblyType("Xpand.Extensions.XAF.Xpo.XpoExtensions")
                     ?.Method("CustomizeTypesInfo",Flags.StaticAnyVisibility).Call(null,typesInfo))
                 .ToUnit();

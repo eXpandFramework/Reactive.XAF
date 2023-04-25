@@ -31,6 +31,7 @@
         <dependency id="System.Text.Json" version="7.0.2" />
         <dependency id="Enums.Net" version="4.0" />
         <dependency id="System.Threading.Tasks.Dataflow" version="7.0" />
+        <dependency id="DevExpress.ExpressApp.Security.Xpo" version="22.2.5" />
         <dependency id="Serialize.Linq" version="2.0.0" />
         <dependency id="Xpand.Patcher" version="3.0.17.0" />
         <dependency id="Xpand.VersionConverter" version="4.222.6.1" />

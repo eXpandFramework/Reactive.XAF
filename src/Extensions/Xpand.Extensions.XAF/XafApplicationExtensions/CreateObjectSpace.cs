@@ -16,7 +16,7 @@ namespace Xpand.Extensions.XAF.XafApplicationExtensions {
 
         public static IObjectSpace CreateNonSecuredObjectSpace(this XafApplication application,Type objectType)
             => application.CreateObjectSpace(true ,objectType,true);
-        
+
         public static IObjectSpace CreateObjectSpace(this XafApplication application, bool useObjectSpaceProvider,Type type=null,bool nonSecuredObjectSpace=false,
             [CallerMemberName] string caller = "") {
             if (type != null) {
@@ -27,7 +27,6 @@ namespace Xpand.Extensions.XAF.XafApplicationExtensions {
                     throw new InvalidOperationException($"{caller} {type?.FullName} is not a persistent object");
                 }
             }
-            
             if (!useObjectSpaceProvider)
                 return application.CreateObjectSpace(type ?? typeof(object));
             var applicationObjectSpaceProvider = application.ObjectSpaceProviders(type ?? typeof(object)).First();

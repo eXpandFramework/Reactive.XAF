@@ -66,11 +66,13 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
             );
 
 
-        protected IObservable<Unit> TestObjects<T>(XafApplication application,bool parallel, int count = 100, int objectSpaceCount = 1, Action beforeSave = null){
+        protected IObservable<Unit> TestObjects<T>(XafApplication application,bool parallel, int count = 100, int objectSpaceCount = 1, Action beforeSave = null,bool nonSecured=false){
             if (parallel){
                 return Observable.Range(1, count).SelectMany(_ => Observable.Defer(() => Observable.Start(() => {
                     for (int j = 0; j < objectSpaceCount; j++) {
-                        using var objectSpace = application.CreateObjectSpace();
+                        using var objectSpace = nonSecured
+                            ? application.CreateNonSecuredObjectSpace(typeof(T))
+                            : application.CreateObjectSpace(typeof(T)); 
                         objectSpace.CreateObject<T>();
                         beforeSave?.Invoke();
                         objectSpace.CommitChanges();
@@ -79,7 +81,9 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
             }
             return Observable.Start(() => {
                     for (int i = 0; i < objectSpaceCount; i++) {
-                        using var objectSpace = application.CreateObjectSpace();
+                        using var objectSpace = nonSecured
+                            ? application.CreateNonSecuredObjectSpace(typeof(T))
+                            : application.CreateObjectSpace(typeof(T));
                         for (int j = 0; j < count; j++){
                             objectSpace.CreateObject<T>();
                             beforeSave?.Invoke();
@@ -89,8 +93,8 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
             });
         }
 
-        protected IObservable<Unit> TestObjects(XafApplication application,bool parallel,int count = 100,int objectSpaceCount=1,Action beforeSave=null){
-            return TestObjects<TestObject>(application,parallel, count, objectSpaceCount, beforeSave);
+        protected IObservable<Unit> TestObjects(XafApplication application,bool parallel,int count = 100,int objectSpaceCount=1,Action beforeSave=null,bool nonSecured=false){
+            return TestObjects<TestObject>(application,parallel, count, objectSpaceCount, beforeSave,nonSecured);
         }
     }
 }

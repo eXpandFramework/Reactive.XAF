@@ -31,7 +31,8 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects {
 		
 		public virtual bool UseChainJob => true;
         [Association("Job-ChainJobs")][Aggregated]
-        public XPCollection<ChainJob> ChainJobs => GetCollection<ChainJob>(nameof(ChainJobs));
+        
+        public XPCollection<ChainJob> ChainJobs => GetCollection<ChainJob>();
         
         ObjectType _jobType;
         
@@ -89,7 +90,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects {
         }
 
         [Association("Job-Jobs")][CollectionOperationSet(AllowAdd = false,AllowRemove = false)]
-        public XPCollection<JobWorker> Workers => GetCollection<JobWorker>(nameof(Workers));
+        public XPCollection<JobWorker> Workers => GetCollection<JobWorker>();
 
         string _id;
         [RuleUniqueValue][RuleRequiredField][VisibleInListView(true)]

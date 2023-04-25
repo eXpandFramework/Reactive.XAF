@@ -12,6 +12,8 @@ namespace Xpand.Extensions.LinqExtensions{
 
 		public static string JoinString(this object source, params object[] objects) 
 			=> objects.Prepend(source).Join(null);
+		public static string JoinString(this object source, params string[] objects) 
+			=> objects.Prepend(source).Join(null);
 
 		public static string Join(this IEnumerable source, string separator) 
 			=> source is IEnumerable<string> strings ? strings.Join(separator)

@@ -14,7 +14,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Xpand.Extensions.Blazor;
 using Xpand.Extensions.Harmony;
 using Xpand.Extensions.Reactive.Transform;
-using Xpand.Extensions.XAF.AppDomainExtensions;
 using Xpand.Extensions.XAF.SecurityExtensions;
 using StartupExtensions = DevExpress.ExpressApp.Blazor.Services.StartupExtensions;
 
@@ -27,17 +26,8 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Hangfire {
         public static void UseXaf(IApplicationBuilder builder) => Dashboard?.Invoke(builder);
 
         public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next) 
-            => app => {
-                Server?.Invoke(app);
-                next(app);
-            };
-
-
-        public static readonly Action<IApplicationBuilder> Server = builder 
-#pragma warning disable CS0618
-            => builder.UseHangfireServer();
-#pragma warning restore CS0618
-
+            => next;
+        
         public static readonly Action<IApplicationBuilder> Dashboard = builder 
             => builder.UseHangfireDashboard(options:new DashboardOptions {
                 Authorization = new[] {new DashboardAuthorization()}

@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using System.Reactive.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using akarnokd.reactive_extensions;
 using Hangfire;
 using NUnit.Framework;
@@ -18,9 +19,9 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests {
         [TestCase(false,0,nameof(ChainJob.TestVoidChainJob))]
         [Apartment(ApartmentState.STA)]
         [XpandTest()][Order(400)]
-        public void ChainedJob(bool result,int chainExecCount,string methodName) {
+        public async Task ChainedJob(bool result,int chainExecCount,string methodName) {
             ChainJob.Result = result;
-            using var application = JobSchedulerModule().Application.ToBlazor();
+            await using var application = JobSchedulerModule().Application.ToBlazor();
             using var parentJobObserver = WorkerState.Succeeded.Executed().Test();
 
             application.CommitNewJob(typeof(ChainJob), methodName, job => {
@@ -31,7 +32,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests {
                         .First(expression => expression.Name == nameof(Cron.Never));
                 }));
                 job.ChainJobs.Add(chainJob);
-            }).Trigger();
+            }).Trigger(application.ServiceProvider);
 
             var chainJobObserver = WorkerState.Succeeded.Executed(job => !job.ChainJobs.Any()).FirstAsync().Test();
             var jobState = parentJobObserver.AwaitDone(Timeout).Items.First();
@@ -42,6 +43,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests {
             jobState=objectSpace.GetObjectByKey<JobState>(jobState.Oid);
             var jobWorker = jobState.JobWorker;
             jobWorker.State.ShouldBe(WorkerState.Succeeded);
+            await WebHost.StopAsync();
         }
 
     }

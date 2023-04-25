@@ -127,7 +127,11 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
                 var jobState = objectSpace.CreateObject<JobState>();
                 jobState.Created = DateTime.Now;
                 jobState.State=(WorkerState) Enum.Parse(typeof(WorkerState),context.NewState.Name);
+                
                 jobState.Reason = context.NewState.Reason;
+                if (context.NewState is FailedState failedState) {
+                    jobState.Reason = failedState.Exception.Message;
+                }
                 worker.Executions.Add(jobState);
                 objectSpace.CommitChanges();
                 JobStateSubject.OnNext(jobState);
@@ -178,9 +182,9 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
             RecurringJob.Trigger(job.Id);
             return job;
         }
-
+        
         public static void AddOrUpdateHangfire(this Job job) 
-            => RecurringJob.AddOrUpdate(job.Id, job.CallExpression(), () => job.CronExpression.Expression);
+            => RecurringJob.AddOrUpdate(job.Id, job.Expression(), () => job.CronExpression?.Expression??Cron.Never());
 
         static IObservable<Unit> ScheduleJobs(this XafApplication application) 
             => application.WhenCommitted<Job>(ObjectModification.NewOrUpdated).Objects()
@@ -205,12 +209,14 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
         
         public static IObservable<JobState> JobState => JobStateSubject.AsObservable();
 
-        internal static Expression<Action> CallExpression(this Job job) {
-            var method = job.JobType.Type.Method(job.JobMethod.Name.Replace(" ", ""));
-            var arguments = method.Parameters().Count == 1 && method.Parameters().Any(info => info.ParameterType == typeof(PerformContext))
-                ? new Expression[] {Expression.Constant(null, typeof(PerformContext))} : Array.Empty<Expression>();
-            return job.JobType.Type.CallExpression(method,arguments);
-        }
+        public static Expression<Action> Expression(this Job job) 
+            => job.JobType.Type.Method(job.JobMethod.Name.Replace(" ", "")).JobExpression();
+
+        public static Expression<Action> JobExpression(this MethodInfo method) 
+            => method.DeclaringType.CallExpression(method, method.Parameters().Count == 1 &&
+                                                           method.Parameters().Any(info => info.ParameterType == typeof(PerformContext))
+                ? new Expression[] { System.Linq.Expressions.Expression.Constant(null, typeof(PerformContext)) } : Array.Empty<Expression>());
+
         internal static IObservable<TSource> TraceJobSchedulerModule<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<ITraceEvent> traceAction = null,
             Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.OnNextOrOnError,
             [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) 

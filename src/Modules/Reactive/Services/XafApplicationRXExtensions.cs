@@ -45,6 +45,7 @@ using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
 using Xpand.XAF.Modules.Reactive.Services.Controllers;
+using Xpand.XAF.Modules.Reactive.Services.Security;
 using AssemblyExtensions = Xpand.Extensions.AssemblyExtensions.AssemblyExtensions;
 using ListView = DevExpress.ExpressApp.ListView;
 using SecurityExtensions = Xpand.XAF.Modules.Reactive.Services.Security.SecurityExtensions;
@@ -226,11 +227,13 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => application.ObjectSpaceProviders.ToNowObservable()
                 .SelectMany(spaceProvider => spaceProvider.WhenObjectSpaceCreated(emitUpdatingObjectSpace));
 
+        public static IObjectSpace CreateAuthenticatedObjectSpace(this XafApplication application, string userName)  
+            => application.ServiceProvider.CreateAuthenticatedObjectSpace(application.Security.UserType,userName);
         
         public static IObservable<IObjectSpace> WhenObjectSpaceCreated(this XafApplication application,bool includeNonPersistent=true,bool includeNested=false) 
             => application.WhenEvent<ObjectSpaceCreatedEventArgs>(nameof(XafApplication.ObjectSpaceCreated)).InversePair(application)
-                .Where(t => includeNonPersistent || t.source.ObjectSpace is not NonPersistentObjectSpace)
-                .Where(t => includeNested||t.source.ObjectSpace is not INestedObjectSpace)
+                .Where(t => (includeNonPersistent || t.source.ObjectSpace is not NonPersistentObjectSpace)&&
+                            (includeNested || t.source.ObjectSpace is not INestedObjectSpace))
                 .Select(t => t.source.ObjectSpace);
 
         
@@ -644,6 +647,12 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         
         public static IObservable<T> UseObjectSpace<T>(this XafApplication application,Func<IObjectSpace,IObservable<T>> factory,bool useObjectSpaceProvider=false,[CallerMemberName]string caller="") 
             => Observable.Using(() => application.CreateObjectSpace(useObjectSpaceProvider, typeof(T), caller: caller), factory);
+        
+        public static IObservable<T> UseObjectSpace<T>(this XafApplication application,string username,Func<IObjectSpace,IObservable<T>> factory,[CallerMemberName]string caller="") 
+            => Observable.Using(() => application.CreateAuthenticatedObjectSpace(username), factory);
+        
+        public static IObservable<T> UseNonSecuredObjectSpace<T>(this XafApplication application,Func<IObjectSpace,IObservable<T>> factory,bool useObjectSpaceProvider=false,[CallerMemberName]string caller="") 
+            => Observable.Using(() => application.CreateNonSecuredObjectSpace(typeof(T)), factory);
 
         public static IObservable<TResult> UseObject<TSource,TResult>(this XafApplication application,TSource instance,Func<TSource,IObservable<TResult>> selector,bool useObjectSpaceProvider=false,[CallerMemberName]string caller="") 
             => application.UseObjectSpace(space => selector(space.GetObjectFromKey(instance)),useObjectSpaceProvider);
@@ -670,6 +679,11 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 action(space);
                 return Observable.Return(Unit.Default);
             });
+        public static IObservable<Unit> UseObjectSpace(this XafApplication application,string user,Action<IObjectSpace> action,bool useObjectSpaceProvider=false) 
+            => Observable.Using(() => application.CreateAuthenticatedObjectSpace(user),space => {
+                action(space);
+                return Observable.Return(Unit.Default);
+            });
         
         public static IObservable<Unit> UseObjectSpace(this XafApplication application,Type objectType,Action<IObjectSpace> action) 
             => Observable.Using(() => application.CreateObjectSpace(objectType),space => {
@@ -679,6 +693,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         
         public static IObservable<T> UseObjectSpace<T>(this XafApplication application,Type objectType,Func<IObjectSpace,T> selector) 
             => Observable.Using(() => application.CreateObjectSpace(objectType),space => selector(space).ReturnObservable());
+        
 
         public static IObservable<T> WhenObject<T>(this XafApplication application,string[] modifiedProperties,Expression<Func<T, bool>> criteriaExpression=null,
             [CallerMemberName] string caller = "")where T:class
@@ -811,33 +826,39 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .MergeIgnored(window => window.WhenViewRefreshExecuted(_ => window.GetController<WindowTemplateController>().UpdateWindowCaption()))
                 .ToController<WindowTemplateController>().SelectMany(controller => controller.WhenCustomizeWindowCaption()
                     .DoWhen(_ => objectTypes.Contains(controller.Frame.View?.ObjectTypeInfo?.Type),e =>  e.WindowCaption.FirstPart = $"{controller.Frame.View?.CurrentObject}")).ToUnit();
-        
-        public static IObservable<T[]> CommitChangesSequential<T>(this XafApplication application,Func<IObjectSpace,IObservable<T>> commit,int retry =3,[CallerMemberName]string caller="") 
-            => application.CommitChangesSequential(typeof(T),commit,retry,caller);
+
+        public static IObservable<T[]> CommitChangesSequential<T>(this XafApplication application,
+            Func<IObjectSpace, IObservable<T>> commit, Func<Func<IObjectSpace, IObservable<T[]>>, Type, IObservable<T>> objectSpaceSource = null, int retry = 3,
+            [CallerMemberName] string caller = "") 
+            => application.CommitChangesSequential(typeof(T),commit,objectSpaceSource,retry,caller);
 
         public static IObservable<T[]> CommitChangesSequential<T>(this XafApplication application, Type objectType,
-            Func<IObjectSpace, IObservable<T>> commit, int retry = 3, [CallerMemberName] string caller = "") 
+            Func<IObjectSpace, IObservable<T>> commit, Func<Func<IObjectSpace, IObservable<T[]>>, Type, IObservable<T>> objectSpaceSource = null, int retry = 3,
+            [CallerMemberName] string caller = "") 
             => Observable.Using(() => new BehaviorSubject<T[]>(null), subject => {
-                CommitChangesSubject.OnNext(() => application.CommitChangesSequential(objectType, commit, retry, caller, subject));
-                return subject.DoNotComplete().WhenNotDefault().Take(1).Select(arg => arg)
-                    .DoOnComplete(() => {});
+                CommitChangesSubject.OnNext(() => subject.CommitChangesSequential(application.ObjectSpaceSource( objectSpaceSource, caller), objectType, commit, retry, caller));
+                return subject.DoNotComplete().WhenNotDefault().Take(1).Select(arg => arg).DoOnComplete(() => {});
             });
 
-        private static IObservable<object> CommitChangesSequential<T>(this XafApplication application, Type objectType,
-            Func<IObjectSpace, IObservable<T>> commit, int retry, string caller, IObserver<T[]> observer) 
-            => application.UseProviderObjectSpace(space => commit(space).BufferUntilCompleted()
-                    .Timeout(TimeSpan.FromMinutes(10)).Catch<T[],TimeoutException>(_ => Observable.Throw<T[]>(new TimeoutException(caller)))
-                    .Do(arg => {
-                        space.CommitChanges();
-                        observer.OnNext(arg);
-                    }), objectType, caller)
-                .RetryWithBackoff(retry)
-                .DoOnError(observer.OnError)
-                .Select(_ => default(object));
-        
-        
-        
+        private static Func<Func<IObjectSpace, IObservable<T[]>>, Type, IObservable<T>> ObjectSpaceSource<T>(this XafApplication application,
+            Func<Func<IObjectSpace, IObservable<T[]>>, Type, IObservable<T>> objectSpaceSource, string caller)
+            => (factory, type) => objectSpaceSource?.Invoke(factory, type) ?? application.UseProviderObjectSpace(factory, type, caller).SelectMany( );
 
+        private static IObservable<object> CommitChangesSequential<T>(this IObserver<T[]> observer,
+            Func<Func<IObjectSpace, IObservable<T[]>>, Type, IObservable<T>> objectSpaceSource, Type objectType,
+            Func<IObjectSpace, IObservable<T>> commit, int retry, string caller) 
+            => objectSpaceSource(space => space.Commit(commit, caller, observer), objectType)
+                .RetryWithBackoff(retry).DoOnError(observer.OnError).Select(_ => default(object));
+
+
+        private static IObservable<T[]> Commit<T>(this IObjectSpace objectSpace,Func<IObjectSpace, IObservable<T>> commit, string caller, IObserver<T[]> observer) 
+            => commit(objectSpace).BufferUntilCompleted()
+                .Timeout(TimeSpan.FromMinutes(10))
+                .Catch<T[], TimeoutException>(_ => Observable.Throw<T[]>(new TimeoutException(caller)))
+                .Do(arg => {
+                    objectSpace.CommitChanges();
+                    observer.OnNext(arg);
+                });
     }
 
 

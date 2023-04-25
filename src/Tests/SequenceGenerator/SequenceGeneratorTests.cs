@@ -8,10 +8,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp;
-using DevExpress.ExpressApp.Security;
 using DevExpress.ExpressApp.Security.ClientServer;
 using DevExpress.Persistent.Base;
-using DevExpress.Persistent.BaseImpl.PermissionPolicy;
 using DevExpress.Persistent.Validation;
 using DevExpress.Xpo;
 using Moq;
@@ -22,6 +20,7 @@ using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.Extensions.XAF.Xpo.SessionExtensions;
+using Xpand.TestsLib.Common;
 using Xpand.TestsLib.Common.Attributes;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.SequenceGenerator.Tests.BO;
@@ -327,15 +326,13 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
         [Test][XpandTest]
         public async Task SecuredObjectSpaceProvider_Installed(){
 	        using var application = NewApplication();
-	        var securityStrategyComplex = new SecurityStrategyComplex(typeof(PermissionPolicyUser), typeof(PermissionPolicyRole), new AuthenticationStandard());
-	        securityStrategyComplex.AnonymousAllowedTypes.Add(typeof(TestObject));
-	        application.Security= securityStrategyComplex;
+	        application.SetupSecurity();
 	        SequenceGeneratorModule( application);
 	        SetSequences(application);
 
 	        var testObserver = SequenceGeneratorService.Sequence.OfType<TestObject>().Test();
                 
-	        await TestObjects(application, false, 1);
+	        await TestObjects(application, false, 1,nonSecured:true);
                 
 	        AssertNextSequences(application, 1,testObserver);
         }

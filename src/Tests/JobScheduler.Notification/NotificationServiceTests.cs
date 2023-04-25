@@ -28,7 +28,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Notification.Tests {
 
 		[Test]
 		[XpandTest()][Order(0)]
-		public void Persist_Last_Index_For_All_Notification_Jobs_At_Startup() {
+		public async Task Persist_Last_Index_For_All_Notification_Jobs_At_Startup() {
 			using var application = JobSchedulerNotificationModule().Application;
 
 			var objectSpace = application.CreateObjectSpace();
@@ -38,13 +38,15 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Notification.Tests {
 
 			notificationJobIndex.ShouldNotBeNull();
 			notificationJobIndex.Index.ShouldBe(1);
+
+			await WebHost.StopAsync();
 		}
 		[Test]
 		[XpandTest()][Order(1000)]
 		public async Task WhenNotification_Emits_Non_Indexed_Objects_For_Existing_Jobs() {
-			using var application = JobSchedulerNotificationModule().Application.ToBlazor();
+			await using var application = JobSchedulerNotificationModule().Application.ToBlazor();
 			await WhenNotification_Emits_Non_Indexed_Objects(application);
-			
+			await WebHost.StopAsync();
 		}
 
 		private async Task WhenNotification_Emits_Non_Indexed_Objects(BlazorApplication application,Type objectType=null) {
@@ -72,7 +74,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Notification.Tests {
 		[Test()]
 		[XpandTest()][Order(3000)][Ignore("")]
 		public async Task WhenNotification_For_Job_Created_After_Startup() {
-			using var application = JobSchedulerNotificationModule().Application.ToBlazor();
+			await using var application = JobSchedulerNotificationModule().Application.ToBlazor();
 			var objectSpace = application.CreateObjectSpace();
 			objectSpace.Delete(objectSpace.GetObjectsQuery<ObjectStateNotification>().ToArray());
 			objectSpace.Delete(objectSpace.GetObjectsQuery<NotificationJobIndex>().ToArray());
@@ -89,12 +91,13 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Notification.Tests {
 			testObserver.AwaitDone(Timeout);
 
 			await WhenNotification_Emits_Non_Indexed_Objects(application);
+			await WebHost.StopAsync();
 			
 		}
 		[Test]
 		[XpandTest()][Order(3000)]
 		public async Task WhenNotification_For_Modified_Job_Type() {
-			using var application = NewBlazorApplication().ToBlazor();
+			await using var application = NewBlazorApplication().ToBlazor();
 			application.CreateExistingObjects<JSNE2>().Test();
 			application.JobSchedulerNotificationModule();
 			
@@ -107,6 +110,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Notification.Tests {
 			testObserver.AwaitDone(Timeout);
 			
 			await WhenNotification_Emits_Non_Indexed_Objects(application,typeof(JSNE2));
+			await WebHost.StopAsync();
 		}
 		
 	

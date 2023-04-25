@@ -48,6 +48,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests {
 			await application.ExecuteAction(executeActionJob).FirstAsync();
 
 			testObserver.AwaitDone(Timeout).ItemCount.ShouldBe(1);
+			await WebHost.StopAsync();
 		}
 
         private static ActionBase CreateAction((ViewController controller, string id) t, string actionId, Type actionType) 
