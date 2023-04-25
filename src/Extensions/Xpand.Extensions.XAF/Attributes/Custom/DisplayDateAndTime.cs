@@ -27,7 +27,7 @@ namespace Xpand.Extensions.XAF.Attributes.Custom {
     public class DisplayDateAndTime : Attribute, ICustomAttribute {
         private readonly string _dateString;
         private readonly string _timeString;
-        public DisplayDateAndTime() { }
+        public DisplayDateAndTime():this(DisplayDateType.ddMMyy) { }
 
         public DisplayDateAndTime(DisplayDateType displayDateType = DisplayDateType.ddMMyy,DisplayTimeType displayTimeType=DisplayTimeType.hh_mm_ss) {
             _dateString = displayDateType.AsString(EnumFormat.Description);

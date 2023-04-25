@@ -43,7 +43,7 @@
               <TabbedGroup Id="Item4" CaptionLocation="Top" Index="0" RelativeSize="100" IsNewNode="True">
                 <LayoutGroup Id="Item1" ShowCaption="True" Caption="Criteria" CaptionLocation="Top" Index="0" RelativeSize="100" IsNewNode="True">
                   <LayoutItem Id="AuthenticateUserCriteria" ViewItem="AuthenticateUserCriteria" Index="0" RelativeSize="49.944629014396455" CaptionLocation="Top" IsNewNode="True" />
-                  <LayoutItem Id="SelectedObjectsCriteria" ShowCaption="True" ViewItem="SelectedObjectsCriteria" Index="1" RelativeSize="50.055370985603545" CaptionLocation="Top" IsNewNode="True" />
+                  <LayoutItem Id="SelectedObjectsCriteria" ViewItem="SelectedObjectsCriteria" Index="1" RelativeSize="50.055370985603545" CaptionLocation="Top" IsNewNode="True" />
                 </LayoutGroup>
                 <LayoutGroup Id="Item2" ShowCaption="True" CaptionLocation="Top" Direction="Vertical" Index="1" Caption="Chain Jobs" RelativeSize="100" IsNewNode="True">
                   <LayoutItem Id="ChainJobs" ViewItem="ChainJobs" Index="0" RelativeSize="100" IsNewNode="True" />
@@ -93,7 +93,7 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
-    <ListView Id="Job_Workers_ListView" MasterDetailMode="ListViewAndDetailView" />
+    <ListView Id="Job_Workers_ListView" MasterDetailMode="ListViewOnly" />
     <DetailView Id="JobWorker_DetailView">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
