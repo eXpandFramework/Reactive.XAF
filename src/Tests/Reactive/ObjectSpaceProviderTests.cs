@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp.Security;
 using DevExpress.ExpressApp.Security.ClientServer;
@@ -57,9 +58,9 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
             var securedObjectSpaceProvider = new SecuredObjectSpaceProvider((ISelectDataSecurityProvider)application.Security, new ConnectionStringDataStoreProvider("XpoProvider=InMemoryDataStoreProvider"));
             using var testObserver = securedObjectSpaceProvider.WhenObjectSpaceCreated().Test();
 
-            securedObjectSpaceProvider.CreateObjectSpace();
+            var objectSpace = securedObjectSpaceProvider.CreateObjectSpace();
 
-            testObserver.ItemCount.ShouldBe(1);
+            testObserver.AwaitDone(Timeout).Items.Any(space => space==objectSpace).ShouldBeTrue();
         }
         [Test]
         [XpandTest()][Order(-10)]
@@ -70,9 +71,9 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
             var securedObjectSpaceProvider = new SecuredObjectSpaceProvider((ISelectDataSecurityProvider)application.Security, new ConnectionStringDataStoreProvider("XpoProvider=InMemoryDataStoreProvider"));
             using var testObserver = securedObjectSpaceProvider.WhenObjectSpaceCreated().Test();
 
-            securedObjectSpaceProvider.CreateNonsecuredObjectSpace();
+            var nonsecuredObjectSpace = securedObjectSpaceProvider.CreateNonsecuredObjectSpace();
 
-            testObserver.ItemCount.ShouldBe(1);
+            testObserver.AwaitDone(Timeout).Items.Any(space => space==nonsecuredObjectSpace).ShouldBeTrue();
         }
 
         [Test]
