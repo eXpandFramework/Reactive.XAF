@@ -15,6 +15,7 @@ using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.Extensions.XAF.Xpo.ObjectSpaceExtensions;
+using Xpand.TestsLib.Blazor;
 using Xpand.TestsLib.Common;
 using Xpand.TestsLib.Common.Attributes;
 using Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects;
@@ -68,10 +69,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests{
         public async Task Commit_Objects_SecuredProvider() {
             var application = NewBlazorApplication();
             application.AddModule<JobSchedulerModule>(typeof(JS));
-            var providerContainer = application.ServiceProvider.GetService<IObjectSpaceProviderContainer>();
-            var securedObjectSpaceProvider = new SecuredObjectSpaceProvider((ISelectDataSecurityProvider)application.Security,application.ObjectSpaceProvider.DataStoreProvider());
-            providerContainer.Clear();
-            providerContainer.AddObjectSpaceProvider(securedObjectSpaceProvider);
+            application.UseSecuredProvider();
             
             using var testObserver = application.WhenProviderObject<JobState>()
                 .FirstAsync(worker => worker.State==WorkerState.Failed)

@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Security;
+using DevExpress.ExpressApp.Security.ClientServer;
+using DevExpress.ExpressApp.Xpo;
 using DevExpress.Persistent.BaseImpl.PermissionPolicy;
 using NUnit.Framework;
 using Shouldly;
@@ -14,7 +16,6 @@ using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.TestsLib.Common;
 using Xpand.TestsLib.Common.Attributes;
 using Xpand.XAF.Modules.Reactive.Services;
-using Xpand.XAF.Modules.Reactive.Tests.BOModel;
 using Xpand.XAF.Modules.Reactive.Tests.Common;
 
 
@@ -27,22 +28,26 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
             var platform = GetPlatform(platformName);
             using var application = DefaultReactiveModule(platform).Application;
             using var exiTest = application.WhenObjectSpaceCreated().Test();
-            
-            application.CreateObjectSpace();
 
-            exiTest.Items.Count.ShouldBe(1);
+            var objectSpace = application.CreateObjectSpace();
+
+            exiTest.Items.Any(space => space==objectSpace).ShouldBeTrue();
         }
         [XpandTest]
         [TestCase(nameof(Platform.Win))]
         public void WhenNonSecuredObjectSpaceCreated(string platformName){
             var application = NewXafApplication();
+            
             application.SetupSecurity();
+            application.AddObjectSpaceProvider(new SecuredObjectSpaceProvider(
+                (ISelectDataSecurityProvider)application.Security, new MemoryDataStoreProvider()));
             DefaultReactiveModule(application);
-            using var exiTest = application.WhenObjectSpaceCreated().Test();
+            
+            using var exiTest = application.WhenProviderObjectSpaceCreated().FirstAsync().Select(space => space).Test();
 
-            ((INonsecuredObjectSpaceProvider)application.ObjectSpaceProvider).CreateNonsecuredObjectSpace();
+            var nonsecuredObjectSpace = ((INonsecuredObjectSpaceProvider)application.ObjectSpaceProvider).CreateNonsecuredObjectSpace();
 
-            exiTest.Items.Count.ShouldBe(1);
+            exiTest.AwaitDone(Timeout).Items.Any(space => space==nonsecuredObjectSpace).ShouldBeTrue();
         }
 
     }
