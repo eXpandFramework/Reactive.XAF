@@ -26,10 +26,10 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         
         public static IObservable<(IMemberInfo memberInfo, T attribute)> AddTypesInfoAttribute<T>(this ApplicationModulesManager manager) where T : Attribute 
             => manager.WhenCustomizeTypesInfo()
-                .SelectMany(t => t.e.TypesInfo.PersistentTypes.ToObservable(Scheduler.Immediate)
-                    .SelectMany(info => info.Members.ToObservable(Scheduler.Immediate)
+                .SelectMany(t => t.e.TypesInfo.PersistentTypes.ToObservable(Transform.ImmediateScheduler)
+                    .SelectMany(info => info.Members.ToObservable(Transform.ImmediateScheduler)
                         .Where(memberInfo => memberInfo.MemberType.RealType().IsNumeric(true))
-                        .SelectMany(memberInfo => memberInfo.FindAttributes<T>().ToArray().ToObservable(Scheduler.Immediate)
+                        .SelectMany(memberInfo => memberInfo.FindAttributes<T>().ToArray().ToObservable(Transform.ImmediateScheduler)
                             .SwitchIfEmpty(typeof(T).CreateInstance().ReturnObservable().Cast<T>())
                             .Select(attribute=>(memberInfo,attribute)))
                         .Do(t1 => {

@@ -19,7 +19,7 @@ namespace Xpand.Extensions.Reactive.Transform{
 
 				source.Do(i => cache.TryAdd(i)).Subscribe();
 
-				return () => cache.ToObservable(Scheduler.Default).Do(observer);
+				return () => cache.ToObservable(global::System.Reactive.Concurrency.Scheduler.Default).Do(observer);
 			});
 		}
 		// public static IObservable<T> RoundRobin<T>(this IObservable<T> source){

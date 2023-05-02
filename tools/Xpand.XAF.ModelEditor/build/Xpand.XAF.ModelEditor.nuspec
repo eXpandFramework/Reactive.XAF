@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
   <metadata>
     <id>Xpand.XAF.ModelEditor</id>
-    <version>4.222.6.1</version>
+    <version>4.222.6.2</version>
     <title>DevExpress eXpandFramework Standalone Model Editor VS/Rider/Explorer integration.</title>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>

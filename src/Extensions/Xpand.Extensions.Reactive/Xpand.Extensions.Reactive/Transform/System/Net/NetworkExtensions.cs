@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Reactive;
-using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
@@ -17,6 +15,7 @@ using System.Text.Json.Nodes;
 using Fasterflect;
 using Xpand.Extensions.BytesExtensions;
 using Xpand.Extensions.JsonExtensions;
+using Xpand.Extensions.Network;
 using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Transform.System.Text.Json;
@@ -128,33 +127,52 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net {
             => client.Request<ResponseResult>(httpRequestMessage).WhenResponseObject(null, httpResponseMessage => new ResponseResult(httpResponseMessage).ReturnObservable())
                 .SelectMany(result => Observable.FromAsync(() => result.Message.Content.ReadAsByteArrayAsync()).ObserveOnDefault().Pair(result));
 
+        // public static IObservable<HttpResponseMessage> EnsureSuccessStatusCode1(this IObservable<HttpResponseMessage> source)
+        //     => source.If(message => !message.IsSuccessStatusCode,)
         public static IObservable<HttpResponseMessage> EnsureSuccessStatusCode(this IObservable<HttpResponseMessage> source) 
-            => source.If(message => !message.IsSuccessStatusCode, message => message.Content.ReadAsStreamAsync()
-                    .ToObservable().ToJsonDocument(document =>
-                        Observable.Throw<HttpResponseMessage>(new HttpResponseException(document.RootElement.ToString(), message)))
+            => source.If(message => !message.IsSuccessStatusCode, message => Observable.If(message.IsJsonResponse,message.WhenJsonDocument())
+                .Merge(Observable.If(() => !message.IsJsonResponse(),Observable.FromAsync(() => message.Content.ReadAsStringAsync())
+                    .SelectMany(content => Observable.Throw<(HttpResponseMessage[] objects, JsonDocument document)>(new HttpResponseException($"{message.StatusCode}, {message.ReasonPhrase}, {content}", message)))))
                 .SelectMany(t => t.objects),message => message.ReturnObservable());
 
-        
+        private static IObservable<(HttpResponseMessage[] objects, JsonDocument document)> WhenJsonDocument(this HttpResponseMessage message) 
+            => Observable.FromAsync(() => message.Content.ReadAsStreamAsync()).WHenJsonDocument(document =>
+                    Observable.Throw<HttpResponseMessage>(new HttpResponseException(document.RootElement.ToString(), message)))
+                .Catch<(HttpResponseMessage[] objects, JsonDocument document),Exception>(exception 
+                    => Observable.Throw<(HttpResponseMessage[] objects, JsonDocument document)>(new HttpResponseException($"{message.StatusCode}, {message.ReasonPhrase}, {exception}", message)));
+
+
         public static IObservable<(T[] objects, JsonDocument document)> WhenResponseDocument<T>(this HttpClient client,
             HttpRequestMessage httpRequestMessage, Func<(JsonDocument document, HttpResponseMessage message), IObservable<T>> selector) 
             => client.Request<ResponseResult>(httpRequestMessage)
                 .SelectMany(message => message.Content.ReadAsStreamAsync().ToObservable()
-                    .SelectMany(stream => stream.ToJsonDocument(document => selector((document, message)))));
+                    .SelectMany(stream => stream.WhenJsonDocument(document => selector((document, message)))));
+
+        public static IObservable<(JsonDocument document, HttpResponseMessage message)> WhenResponseDocument(
+            this HttpClient client, HttpRequestMessage httpRequestMessage)
+            => client.Request<ResponseResult>(httpRequestMessage)
+                .SelectMany(message => message.Content.ReadAsStreamAsync().ToObservable()
+                    .SelectMany(stream => stream.WhenJsonDocument()
+                        .Finally(() => { }).Select(document => (document, message))));
         
-        [Obsolete]
+        
         public static IObservable<(T[] objects, JsonDocument document)> WhenResponseDocument<T>(this HttpClient client,
             string url, Func<JsonDocument, IObservable<T>> selector) 
             => client.GetStreamAsync(url).ToObservable()
-                .SelectMany(stream => stream.ToJsonDocument(selector));
+                .SelectMany(stream => stream.WhenJsonDocument(selector));
         
-        public static IObservable<(T[] objects, JsonDocument document,Stream stream)> WhenResponseDocument2<T>(this HttpClient client,
-            string url, Func<(JsonDocument document, Stream stream), IObservable<T>> selector) 
-            => client.GetStreamAsync(url).ToObservable()
-                .SelectMany(stream => stream.ToJsonDocument(document => selector((document, stream))).Select(t => (t.objects,t.document,stream)));
-        
-
         public static IObservable<T> SelectMany<T>(this IObservable<(T[] objects, JsonDocument document)> source) => source.SelectMany(t => t.objects);
+        
+        public static IObservable<T> SelectElement<T>(this IObservable<(JsonDocument document,HttpResponseMessage message)> source,Func<JsonElement,IObservable<T>> selector) 
+            => source.SelectDocument(document => selector(document.RootElement));
 
+        public static IObservable<JsonDocument> SelectDocument(this IObservable<(JsonDocument document, HttpResponseMessage message)> source)
+            => source.Select(t => t.document);
+        
+        public static IObservable<T> SelectDocument<T>(this IObservable<(JsonDocument document, HttpResponseMessage message)> source,Func<JsonDocument,IObservable<T>> selector)
+            => source.SelectMany(t => selector(t.document).FinallySafe(() => t.document.Dispose()));
+        public static IObservable<JsonElement> SelectMany(this IObservable<(JsonDocument document,HttpResponseMessage message)> source) 
+            => source.SelectMany(t => t.document.SelectMany());
         private static IObservable<T> WhenResponseObject<T>(this IObservable<HttpResponseMessage> source,
             object obj, Func<HttpResponseMessage,IObservable<T>> deserializeResponse) 
             => source.SelectMany(responseMessage => deserializeResponse.DeserializeResponse()(responseMessage)
@@ -197,11 +215,11 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net {
             => returnType != null ? responseMessage.DeserializeJson(returnType).ToObservable().Cast<T>()
                     .If(obj => obj?.GetType().IsArray ?? false, arg => arg.Cast<IEnumerable<T>>().ToNowObservable(),
                         arg => arg.ReturnObservable()).Select(arg => arg) :
-                responseMessage.DeserializeJson<T>().ToObservable(Scheduler.Immediate).Select(arg => arg);
+                responseMessage.DeserializeJson<T>().ToObservable(Transform.ImmediateScheduler).Select(arg => arg);
 
 
         private static Func<HttpResponseMessage, IObservable<T>> DeserializeResponse<T>(this Func<HttpResponseMessage, IObservable<T>> deserializeResponse) 
-            => deserializeResponse ?? (message =>  message.DeserializeJson<T>().ToObservable(Scheduler.Immediate));
+            => deserializeResponse ?? (message =>  message.DeserializeJson<T>().ToObservable(Transform.ImmediateScheduler));
 
         public static T SetContent<T>(this T message,  string content, string key = null, string secret = null,bool formDataContent=false) where T:HttpRequestMessage {
             if (message.Method != HttpMethod.Get&&!string.IsNullOrEmpty(content) )

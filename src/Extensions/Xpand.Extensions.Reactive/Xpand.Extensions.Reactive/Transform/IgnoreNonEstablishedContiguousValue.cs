@@ -16,7 +16,7 @@ namespace Xpand.Extensions.Reactive.Transform {
                 IStopwatch stopwatch = null;
                 return source.Do(item => {
                         if ((comparer ??= EqualityComparer<T>.Default).Equals(item, value))
-                            stopwatch ??= (scheduler ??= Scheduler.Default).StartStopwatch();
+                            stopwatch ??= (scheduler ??= global::System.Reactive.Concurrency.Scheduler.Default).StartStopwatch();
                         else
                             stopwatch = null;
                     })

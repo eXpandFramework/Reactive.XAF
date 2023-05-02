@@ -48,7 +48,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             
         public static IObservable<T> WhenVisibilityChanged<T>(this T editor) where T:PropertyEditor 
             => Observable.FromEventPattern<EventHandler, EventArgs>(h => editor.VisibilityChanged += h,
-                    h => editor.VisibilityChanged -= h, Scheduler.Immediate)
+                    h => editor.VisibilityChanged -= h, Transform.ImmediateScheduler)
                 .Select(pattern => pattern.Sender).Cast<T>();
 
         public static IObservable<T> WhenVisibilityChanged<T>(this IObservable<T> source) where T:PropertyEditor 

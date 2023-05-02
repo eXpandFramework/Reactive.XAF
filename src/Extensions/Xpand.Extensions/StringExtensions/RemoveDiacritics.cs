@@ -1,18 +1,14 @@
-﻿using System;
-using System.Globalization;
+﻿using System.Globalization;
+using System.Linq;
 using System.Text;
-using Cysharp.Text;
+using Xpand.Extensions.LinqExtensions;
+
 
 namespace Xpand.Extensions.StringExtensions {
     public static partial class StringExtensions {
-        public static string RemoveDiacritics(this String s) {
-            var normalizedString = s.Normalize(NormalizationForm.FormD);
-            using var stringBuilder = ZString.CreateUtf8StringBuilder();
-            foreach (var c in normalizedString) {
-                if (CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark)
-                    stringBuilder.Append(c);
-            }
-            return stringBuilder.ToString();
-        }
+        public static string RemoveDiacritics(this string s) 
+            => s.Normalize(NormalizationForm.FormD)
+                .Where(c => CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark)
+                .JoinString();
     }
 }

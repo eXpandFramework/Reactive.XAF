@@ -88,7 +88,7 @@ namespace Xpand.XAF.Modules.Reactive.Services {
                         if (attribute.DisableListViewProcess && view is IModelListView) {
                             modelHiddenActions.AddNode<IModelActionLink>(ListViewProcessCurrentObjectController.ListViewShowObjectActionId, true);
                         }
-                    }).ToObservable(Scheduler.Immediate))
+                    }).ToObservable(Transform.ImmediateScheduler))
                 .ToUnit()
                 .Merge(manager.WhenCustomizeTypesInfo()
                     .SelectMany(t => t.e.TypesInfo.Members<ReadOnlyObjectViewAttribute>().ToObservable()

@@ -43,7 +43,7 @@ namespace Xpand.Extensions.Reactive.Transform {
         /// <param name="source"></param>
         /// <returns></returns>
         public static IConnectableObservable<T> BufferUntilSubscribed<T>(this IObservable<T> source) {
-            return new BufferUntilSubscribedObservable<T>(source, Scheduler.Immediate);
+            return new BufferUntilSubscribedObservable<T>(source, ImmediateScheduler);
         }
 
         class BufferUntilSubscribedObservable<T> : IConnectableObservable<T> {
@@ -137,8 +137,8 @@ namespace Xpand.Extensions.Reactive.Transform {
         /// </summary>
         public static IObservable<IList<TSource>> BufferHistorical<TSource>(this IObservable<TSource> source, TimeSpan interval, TimeSpan replayDuration) 
             => source.Replay(replayed => Observable.Interval(interval)
-                .SelectMany(_ => replayed.TakeUntil(Observable.Return(Unit.Default, Scheduler.CurrentThread)).ToList())
-                .TakeUntil(replayed.LastOrDefaultAsync()), replayDuration, Scheduler.Immediate);
+                .SelectMany(_ => replayed.TakeUntil(Observable.Return(Unit.Default, global::System.Reactive.Concurrency.Scheduler.CurrentThread)).ToList())
+                .TakeUntil(replayed.LastOrDefaultAsync()), replayDuration, ImmediateScheduler);
         
         public static IObservable<IList<TSource>> BufferOmitEmpty<TSource>(this IObservable<TSource> observable, TimeSpan maxDelay, int maxBufferCount) 
             => observable.GroupByUntil(_ => 1, g => Observable.Timer(maxDelay).Merge(g.Skip(maxBufferCount - 1).Take(1).Select(_ => 1L)))

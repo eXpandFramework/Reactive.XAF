@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Cysharp.Text;
 using Xpand.Extensions.ObjectExtensions;
 
 namespace Xpand.Extensions.LinqExtensions{
@@ -29,10 +28,10 @@ namespace Xpand.Extensions.LinqExtensions{
 		public static string JoinCommaSpace(this IEnumerable source) => source?.Join(", ");
 		public static string JoinDotSpace(this IEnumerable source) => source?.Join(". ");
 		
-		public static string Join(this IEnumerable<string> values, string separator) 
-			=> ZString.Join(separator, values);
-	
-		
+		public static string Join(this IEnumerable<string> values, string separator)
+			=> string.Join(separator, values);
+
+
 	}
 
 	

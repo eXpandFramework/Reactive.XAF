@@ -17,7 +17,7 @@ namespace Xpand.Extensions.Tests {
         [Test]
         public void ToJsonDocument_DisposesDocument_Selection() {
             using var stream = new MemoryStream("{\"name\": \"John Doe\", \"age\": 42}".Bytes());
-            var observer = stream.ToJsonDocument(jsonDocument => 1.Seconds().Timer().Where(_ => !jsonDocument.IsDisposed()))
+            var observer = stream.WhenJsonDocument(jsonDocument => 1.Seconds().Timer().Where(_ => !jsonDocument.IsDisposed()))
                 .Where(t => !t.document.IsDisposed())
                 .Test();
 
@@ -30,7 +30,7 @@ namespace Xpand.Extensions.Tests {
         [Test]
         public void ToJsonDocument_DisposesDocument_() {
             using var stream = new MemoryStream("{\"name\": \"John Doe\", \"age\": 42}".Bytes());
-            var observer = stream.ToJsonDocument(document => document.ReturnObservable()).SelectMany()
+            var observer = stream.WhenJsonDocument(document => document.ReturnObservable()).SelectMany()
                 .Where(t => !t.IsDisposed())
                 .Test();
 

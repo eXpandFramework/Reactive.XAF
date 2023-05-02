@@ -3,7 +3,6 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Security;
-using Xpand.Extensions.XAF.TypesInfoExtensions;
 
 namespace Xpand.Extensions.XAF.XafApplicationExtensions {
     public static partial class XafApplicationExtensions {
@@ -23,7 +22,7 @@ namespace Xpand.Extensions.XAF.XafApplicationExtensions {
                 if (type.IsArray) {
                     type = type.GetElementType();
                 }
-                if (!type.ToTypeInfo().IsPersistent) {
+                if (!application.TypesInfo.FindTypeInfo(type).IsPersistent) {
                     throw new InvalidOperationException($"{caller} {type?.FullName} is not a persistent object");
                 }
             }
@@ -32,10 +31,9 @@ namespace Xpand.Extensions.XAF.XafApplicationExtensions {
             var applicationObjectSpaceProvider = application.ObjectSpaceProviders(type ?? typeof(object)).First();
             if (!nonSecuredObjectSpace)
                 return applicationObjectSpaceProvider.CreateObjectSpace();
-            else if (applicationObjectSpaceProvider is INonsecuredObjectSpaceProvider nonsecuredObjectSpaceProvider)
+            if (applicationObjectSpaceProvider is INonsecuredObjectSpaceProvider nonsecuredObjectSpaceProvider)
                 return nonsecuredObjectSpaceProvider.CreateNonsecuredObjectSpace();
-            else
-                return applicationObjectSpaceProvider.CreateUpdatingObjectSpace(false);
+            return applicationObjectSpaceProvider.CreateUpdatingObjectSpace(false);
         }
     }
     

@@ -9,5 +9,6 @@ namespace Xpand.Extensions.BytesExtensions{
 			encoding ??= Encoding.UTF8;
 			return encoding.GetString(bytes);
 		}
+		
 	}
 }

@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Xpand.Extensions.ObjectExtensions;
 
 namespace Xpand.Extensions.LinqExtensions{
     public static partial class LinqExtensions {
@@ -53,13 +51,7 @@ namespace Xpand.Extensions.LinqExtensions{
             => source is IList<T> list
                     ? enumerable.Where(arg => !ignoreDuplicates || !source.Contains(arg)).Execute(list.Add).ToArray()
                     : source.AddToArray(enumerable, ignoreDuplicates);
-
-        public static void Add(this IList source, object item, bool ignoreDuplicates=false) {
-            if (!ignoreDuplicates || !source.Contains(item)) {
-                source.Add(item);
-            }
-        }
-
+        
         public static T[] AddToArray<T>(this IEnumerable<T> source, T item, bool ignoreDuplicates = false) {
             var enumerable = source as T[] ?? source.ToArray();
             return !ignoreDuplicates && enumerable.Any(arg => arg.Equals(item))

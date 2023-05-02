@@ -1,4 +1,5 @@
-﻿using DevExpress.ExpressApp;
+﻿using System.Reactive.Linq;
+using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.SystemModule;
 using Xpand.XAF.Modules.Reactive;
@@ -19,7 +20,7 @@ namespace Xpand.XAF.Modules.StoreToDisk {
 
         public override void Setup(ApplicationModulesManager moduleManager) {
             base.Setup(moduleManager);
-            moduleManager.Connect().Subscribe(this);
+            moduleManager.Connect().Finally(() => {}).Subscribe(this);
         }
 
         public override void ExtendModelInterfaces(ModelInterfaceExtenders extenders) {

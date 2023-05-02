@@ -1,9 +1,14 @@
 ﻿using System;
+using System.Linq;
+using System.Text;
+using System.Text.Json;
 using Xpand.Extensions.StringExtensions;
 using Xpand.Extensions.TypeExtensions;
 
 namespace Xpand.Extensions.ObjectExtensions {
+
     public static partial class ObjectExtensions {
+        
         public static string EnsureString(this object o)
             => o?.ToString().EnsureEndWith(String.Empty)??String.Empty;
         public static string EnsureStringEndWith(this object o, string end)

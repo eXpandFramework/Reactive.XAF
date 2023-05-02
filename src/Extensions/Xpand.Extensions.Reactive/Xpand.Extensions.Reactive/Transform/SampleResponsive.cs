@@ -9,7 +9,7 @@ namespace Xpand.Extensions.Reactive.Transform{
     public static partial class Transform {
         public static IObservable<T> SampleResponsive<T>(
             this IObservable<T> source, TimeSpan delay, IScheduler scheduler = null) {
-            scheduler ??= Scheduler.Default;
+            scheduler ??= global::System.Reactive.Concurrency.Scheduler.Default;
             return delay == TimeSpan.Zero ? source
                 : source.Publish(src => {
                     var fire = new Subject<T>();

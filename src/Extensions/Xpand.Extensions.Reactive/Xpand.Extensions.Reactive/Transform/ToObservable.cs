@@ -10,9 +10,9 @@ namespace Xpand.Extensions.Reactive.Transform{
         public static IObservable<TSource> ToObservable<TSource>(this IEnumerable<TSource> source, SynchronizationContext context)
             => source.ToObservable().ObserveOn(context);
         public static IObservable<TSource> ToNowObservable<TSource>(this IEnumerable<TSource> source)
-            => source.ToObservable(ImmediateScheduler.Instance);
+            => source.ToObservable(ImmediateScheduler);
         
         public static IObservable<TSource> Consume<TSource>(this BlockingCollection<TSource> source)
-            => source.GetConsumingEnumerable().ToObservable(Scheduler.Default);
+            => source.GetConsumingEnumerable().ToObservable(global::System.Reactive.Concurrency.Scheduler.Default);
     }
 }

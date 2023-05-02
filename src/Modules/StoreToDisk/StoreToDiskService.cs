@@ -35,6 +35,7 @@ namespace Xpand.XAF.Modules.StoreToDisk{
                 .SelectMany(_ =>application.StoreToDisk(application.Model.ToReactiveModule<IModelReactiveModulesStoreToDisk>().StoreToDisk.Folder)
                     .MergeToUnit(application.DailyBackup()) )
                 .ToUnit());
+        
 
         private static IObservable<Unit> DailyBackup(this XafApplication application)
             => application.WhenLoggedOn()

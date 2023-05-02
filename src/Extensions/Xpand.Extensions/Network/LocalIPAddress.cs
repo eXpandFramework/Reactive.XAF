@@ -1,18 +1,14 @@
 using System;
 using System.Net;
 using System.Net.Sockets;
+using Xpand.Extensions.LinqExtensions;
 
 namespace Xpand.Extensions.Network {
     public static partial class NetworkExtensions {
-        public static string LocalIPAddress(this AppDomain domain){
-            var host = Dns.GetHostEntry(Dns.GetHostName());
-            foreach (var ip in host.AddressList) {
-                if (ip.AddressFamily == AddressFamily.InterNetwork) {
-                    return ip.ToString();
-                }
-            }
-            throw new Exception("No network adapters with an IPv4 address in the system!");
-        }
-
+        static string _localIPAddress;
+        public static string LocalIPAddress(this AppDomain domain) 
+            => _localIPAddress ??= Dns.GetHostEntry(Dns.GetHostName()).AddressList.First(
+                address => address.AddressFamily == AddressFamily.InterNetwork,
+                () => "No network adapters with an IPv4 address in the system!").ToString();
     }
 }

@@ -5,7 +5,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reactive;
-using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
@@ -264,10 +263,10 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static IEnumerable<Frame> WhenFrame<T>(this IEnumerable<T> source, Type objectType = null,
             ViewType viewType = ViewType.Any, Nesting nesting = Nesting.Any) where T:Frame
-            => source.ToObservable(Scheduler.Immediate).WhenFrame(objectType,viewType,nesting).ToEnumerable();
+            => source.ToObservable(Transform.ImmediateScheduler).WhenFrame(objectType,viewType,nesting).ToEnumerable();
         
         public static IEnumerable<Frame> WhenFrame<T>(this IEnumerable<T> source, params string[] viewIds) where T:Frame 
-            => source.ToObservable(Scheduler.Immediate).Where(arg => viewIds.Contains(arg.View.Id)).ToEnumerable();
+            => source.ToObservable(Transform.ImmediateScheduler).Where(arg => viewIds.Contains(arg.View.Id)).ToEnumerable();
 
         public static IObservable<T> WhenFrame<T>(this IObservable<T> source, params Type[] objectTypes) where T:Frame 
             => source.Where(frame => frame.Is(objectTypes));
@@ -589,7 +588,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<(IObjectSpace objectSpace, (object instance, ObjectModification modification)[] details)> WhenCommittingDetailed(this IObservable<IObjectSpace> source,
             Type objectType,ObjectModification objectModification,Func<object,bool> criteria,params string[] modifiedProperties)
             => source.SelectMany(objectSpace => 
-                objectSpace.WhenCommitingDetailed(objectType,objectModification,false,criteria,modifiedProperties).TakeUntil(objectSpace.WhenDisposed()));
+                objectSpace.WhenCommitingDetailed(objectType,objectModification,false,criteria,modifiedProperties));
         
         public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)> WhenCommittingDetailed<T>(
             this XafApplication application,ObjectModification objectModification,Func<T,bool> criteria,params string[] modifiedProperties) where T:class
@@ -655,7 +654,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => Observable.Using(() => application.CreateNonSecuredObjectSpace(typeof(T)), factory);
 
         public static IObservable<TResult> UseObject<TSource,TResult>(this XafApplication application,TSource instance,Func<TSource,IObservable<TResult>> selector,bool useObjectSpaceProvider=false,[CallerMemberName]string caller="") 
-            => application.UseObjectSpace(space => selector(space.GetObjectFromKey(instance)),useObjectSpaceProvider);
+            => application.UseObjectSpace(space => selector(space.GetObjectFromKey(instance)),useObjectSpaceProvider,caller);
 
         public static IObservable<T2> UseProviderObjectSpace<T,T2>(this XafApplication application,T obj, Func<T, IObservable<T2>> factory, 
             [CallerMemberName] string caller = "") 
@@ -813,7 +812,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .WhenNotDefault();
         
         public static IObservable<SimpleActionExecuteEventArgs> WhenListViewProcessSelectedItem<T>(this XafApplication application,Nesting nesting=Nesting.Any,bool handled=true)  
-            => application.WhenFrame().WhenFrame(typeof(T),ViewType.ListView,nesting)
+            => application.WhenFrame(typeof(T),ViewType.ListView,nesting)
                 .SelectMany(frame => frame.GetController<ListViewProcessCurrentObjectController>().WhenCustomProcessSelectedItem(handled));
         
         public static IObservable<IMemberInfo> IgnoreNonPersistentMembersDataLocking(this ApplicationModulesManager manager,Func<Assembly,bool> filterTypes=null)  
@@ -836,18 +835,20 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             Func<IObjectSpace, IObservable<T>> commit, Func<Func<IObjectSpace, IObservable<T[]>>, Type, IObservable<T>> objectSpaceSource = null, int retry = 3,
             [CallerMemberName] string caller = "") 
             => Observable.Using(() => new BehaviorSubject<T[]>(null), subject => {
-                CommitChangesSubject.OnNext(() => subject.CommitChangesSequential(application.ObjectSpaceSource( objectSpaceSource, caller), objectType, commit, retry, caller));
+                CommitChangesSubject.OnNext(() => subject.CommitChangesSequential(application,application.ObjectSpaceSource( objectSpaceSource, caller), objectType, commit, retry, caller));
                 return subject.DoNotComplete().WhenNotDefault().Take(1).Select(arg => arg).DoOnComplete(() => {});
             });
 
         private static Func<Func<IObjectSpace, IObservable<T[]>>, Type, IObservable<T>> ObjectSpaceSource<T>(this XafApplication application,
             Func<Func<IObjectSpace, IObservable<T[]>>, Type, IObservable<T>> objectSpaceSource, string caller)
-            => (factory, type) => objectSpaceSource?.Invoke(factory, type) ?? application.UseProviderObjectSpace(factory, type, caller).SelectMany( );
+            => (factory, type) => objectSpaceSource?.Invoke(factory, type) ?? application.UseProviderObjectSpace(factory, type, caller).SelectMany( )
+                .TakeUntil(application.WhenDisposed());
 
         private static IObservable<object> CommitChangesSequential<T>(this IObserver<T[]> observer,
+            XafApplication xafApplication,
             Func<Func<IObjectSpace, IObservable<T[]>>, Type, IObservable<T>> objectSpaceSource, Type objectType,
             Func<IObjectSpace, IObservable<T>> commit, int retry, string caller) 
-            => objectSpaceSource(space => space.Commit(commit, caller, observer), objectType)
+            => objectSpaceSource(space => !xafApplication.IsDisposed() ? space.Commit(commit, caller, observer) : Observable.Empty<T[]>(), objectType)
                 .RetryWithBackoff(retry).DoOnError(observer.OnError).Select(_ => default(object));
 
 
