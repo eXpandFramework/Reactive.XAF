@@ -11,6 +11,9 @@ namespace Xpand.Extensions.DateTimeExtensions{
             return new DateTime(unixStart.Ticks + unixTimeStampInTicks, DateTimeKind.Utc);
         }
 
-        public static double UnixTimestampFromDateTimeMilliseconds(this DateTime dateTime) => (dateTime - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds;
+        public static double UnixTimestampFromDateTimeMilliseconds(this DateTime dateTime) {
+            var milliseconds = (dateTime - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds;
+            return milliseconds<0?0:milliseconds;
+        }
     }
 }

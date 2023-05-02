@@ -140,20 +140,21 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |**DevExpress.Persistent.Base**|**Any**
  |**DevExpress.ExpressApp.Xpo**|**Any**
  |**DevExpress.ExpressApp.Blazor**|**Any**
-|[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.222.6
- |Xpand.Extensions.Reactive|4.222.6
- |Xpand.Extensions|4.222.6
- |Xpand.Extensions.XAF|4.222.6
- |Xpand.Extensions.XAF.Xpo|4.222.6
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.222.6
- |[Xpand.XAF.Modules.Blazor](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Blazor)|4.222.6
- |Xpand.Extensions.Blazor|4.222.6
+|[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.222.7
+ |Xpand.Extensions.Reactive|4.222.7
+ |Xpand.Extensions|4.222.7
+ |Xpand.Extensions.XAF|4.222.7
+ |Xpand.Extensions.XAF.Xpo|4.222.7
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.222.7
+ |[Xpand.XAF.Modules.Blazor](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Blazor)|4.222.7
+ |Xpand.Extensions.Blazor|4.222.7
  |Xpand.Patcher|3.0.17
  |System.Reactive|5.0.0
  |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
  |System.Text.Json|7.0.2
  |Xpand.Collections|1.0.4
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.222.6
+ |System.Threading.Tasks.Dataflow|7.0.0
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.222.7
 
 ## Issues-Debugging-Troubleshooting
 

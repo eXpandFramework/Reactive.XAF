@@ -15,7 +15,7 @@ namespace Xpand.Extensions.Reactive.Transform.System.Text.Json {
         public static IObservable<T> WhenJsonElement<T>(this string source, Func<JsonElement, IObservable<T>> selector)
             => Observable.Using(() => source.MemoryStream(),stream => stream.WhenJsonDocument(document => selector(document.RootElement))).SelectMany();
 
-        public static IObservable<(T[] objects, JsonDocument document)> WHenJsonDocument<T>(this IObservable<Stream> source, Func<JsonDocument, IObservable<T>> selector)
+        public static IObservable<(T[] objects, JsonDocument document)> WhenJsonDocument<T>(this IObservable<Stream> source, Func<JsonDocument, IObservable<T>> selector)
             => source.SelectMany(stream => stream.WhenJsonDocument(selector));
         public static IObservable<(T[] objects, JsonDocument document)> WhenJsonDocument<T>(this Stream stream,Func<JsonDocument,IObservable<T>> selector) 
             => JsonDocument.ParseAsync(stream).ToObservable().SelectMany(document => selector(document)
@@ -25,6 +25,8 @@ namespace Xpand.Extensions.Reactive.Transform.System.Text.Json {
         
         public static IObservable<JsonDocument> WhenJsonDocument(this Stream stream) 
             => JsonDocument.ParseAsync(stream).ToObservable();
+        public static IObservable<JsonDocument> WhenJsonDocument(this byte[] bytes) 
+            => Observable.Using(() => new MemoryStream(bytes),stream => JsonDocument.ParseAsync(stream).ToObservable());
 
 
         public static bool IsDisposed(this JsonElement element) {

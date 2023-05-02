@@ -22,7 +22,7 @@ namespace Xpand.Extensions.XAF.XafApplicationExtensions {
                 if (type.IsArray) {
                     type = type.GetElementType();
                 }
-                if (!application.TypesInfo.FindTypeInfo(type).IsPersistent) {
+                if (!XafTypesInfo.Instance.FindTypeInfo(type).IsPersistent) {
                     throw new InvalidOperationException($"{caller} {type?.FullName} is not a persistent object");
                 }
             }

@@ -136,7 +136,7 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net {
                 .SelectMany(t => t.objects),message => message.ReturnObservable());
 
         private static IObservable<(HttpResponseMessage[] objects, JsonDocument document)> WhenJsonDocument(this HttpResponseMessage message) 
-            => Observable.FromAsync(() => message.Content.ReadAsStreamAsync()).WHenJsonDocument(document =>
+            => Observable.FromAsync(() => message.Content.ReadAsStreamAsync()).WhenJsonDocument(document =>
                     Observable.Throw<HttpResponseMessage>(new HttpResponseException(document.RootElement.ToString(), message)))
                 .Catch<(HttpResponseMessage[] objects, JsonDocument document),Exception>(exception 
                     => Observable.Throw<(HttpResponseMessage[] objects, JsonDocument document)>(new HttpResponseException($"{message.StatusCode}, {message.ReasonPhrase}, {exception}", message)));
