@@ -78,9 +78,9 @@ jobs:
         searchFolder: '$(System.DefaultWorkingDirectory)\bin'
         testSelector: 'testAssemblies'
         testAssemblyVer2: |
-          **\Xpand.XAF.Modules.ModelMapper.Tests.dll
           **\Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.dll
           **\Xpand.XAF.Modules.Windows.Tests.dll
+          **\Xpand.XAF.Modules.ModelMapper.Tests.dll
           !**\obj\**    
         diagnosticsEnabled: true
         codeCoverageEnabled: true

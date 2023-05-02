@@ -18,7 +18,6 @@
     <GenerateRuntimeConfigDevFile>true</GenerateRuntimeConfigDevFile>
   </PropertyGroup>
   <ItemGroup>
-
     <ProjectReference Include="..\TestsLib\Xpand.TestsLib.csproj" />
     <Reference Include="Xpand.TestsLib.Common">
       <HintPath>..\..\..\bin\Xpand.TestsLib.Common.dll</HintPath>

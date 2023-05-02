@@ -34,7 +34,7 @@
   </ItemGroup>
   <ItemGroup>
     <!-- <PackageReference Include="Lib.Harmony" Version="2.2.2" /> -->
-    <PackageReference Include="DevExpress.ExpressApp.Security.Xpo" Version="22.2.5" />
+    <PackageReference Include="DevExpress.ExpressApp.Security.Xpo" Version="22.2.6" />
     <PackageReference Include="Serialize.Linq" Version="2.0.0" />
   </ItemGroup>
   <ItemGroup>

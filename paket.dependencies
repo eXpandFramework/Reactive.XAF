@@ -9,17 +9,17 @@ specific_version : false
 framework:net6.0,net6.0-windows,netstandard2.0
 
 
-nuget DevExpress.ExpressApp.Office 22.2.5
-nuget DevExpress.ExpressApp.Core.All 22.2.5
-nuget DevExpress.ExpressApp.Win.All 22.2.5
-nuget DevExpress.ExpressApp.Web.All 22.2.5
-nuget DevExpress.ExpressApp.Blazor.All 22.2.5
-nuget DevExpress.ExpressApp.Blazor 22.2.5
-nuget DevExpress.ExpressApp.Validation.Blazor 22.2.5
-nuget DevExpress.EasyTest 22.2.5 
-nuget DevExpress.ExpressApp.EasyTest.WinAdapter 22.2.5  
-nuget DevExpress.ExpressApp.Security.Xpo 22.2.5  
-nuget DevExpress.Win.SpellChecker 22.2.5  
+nuget DevExpress.ExpressApp.Office 22.2.6
+nuget DevExpress.ExpressApp.Core.All 22.2.6
+nuget DevExpress.ExpressApp.Win.All 22.2.6
+nuget DevExpress.ExpressApp.Web.All 22.2.6
+nuget DevExpress.ExpressApp.Blazor.All 22.2.6
+nuget DevExpress.ExpressApp.Blazor 22.2.6
+nuget DevExpress.ExpressApp.Validation.Blazor 22.2.6
+nuget DevExpress.EasyTest 22.2.6 
+nuget DevExpress.ExpressApp.EasyTest.WinAdapter 22.2.6  
+nuget DevExpress.ExpressApp.Security.Xpo 22.2.6  
+nuget DevExpress.Win.SpellChecker 22.2.6  
 nuget ZString 2.5.0
 nuget System.CodeDom == 6.0.0
 nuget System.Text.Json == 7.0.2

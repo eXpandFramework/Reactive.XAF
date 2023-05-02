@@ -21,9 +21,9 @@
     <Compile Include="..\..\Common\AssemblyInfoVersion.cs" Link="Properties\AssemblyInfoVersion.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DevExpress.ExpressApp.Blazor" Version="22.2.5" />
-    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="22.2.5" />
-    <PackageReference Include="DevExpress.ExpressApp" Version="22.2.5" />
+    <PackageReference Include="DevExpress.ExpressApp.Blazor" Version="22.2.6" />
+    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="22.2.6" />
+    <PackageReference Include="DevExpress.ExpressApp" Version="22.2.6" />
     <PackageReference Include="System.ServiceModel.NetTcp" Version="4.10" />
     <PackageReference Include="System.ServiceModel.Http" Version="4.10" />
     <PackageReference Include="System.ServiceModel.Security" Version="4.10" />

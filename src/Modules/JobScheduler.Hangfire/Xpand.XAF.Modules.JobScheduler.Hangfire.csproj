@@ -59,13 +59,13 @@
     <PackageReference Include="System.CodeDom" Version="6.0" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="6.0.0" />
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
-    <PackageReference Include="DevExpress.ExpressApp" Version="22.2.5" />
-    <PackageReference Include="DevExpress.ExpressApp.Blazor" Version="22.2.5" />
-    <PackageReference Include="DevExpress.ExpressApp.ConditionalAppearance" Version="22.2.5" />
-    <PackageReference Include="DevExpress.ExpressApp.Validation" Version="22.2.5" />
-    <PackageReference Include="DevExpress.ExpressApp.Validation.Blazor" Version="22.2.5" />
-    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="22.2.5" />
-    <PackageReference Include="DevExpress.Persistent.Base" Version="22.2.5" />
+    <PackageReference Include="DevExpress.ExpressApp" Version="22.2.6" />
+    <PackageReference Include="DevExpress.ExpressApp.Blazor" Version="22.2.6" />
+    <PackageReference Include="DevExpress.ExpressApp.ConditionalAppearance" Version="22.2.6" />
+    <PackageReference Include="DevExpress.ExpressApp.Validation" Version="22.2.6" />
+    <PackageReference Include="DevExpress.ExpressApp.Validation.Blazor" Version="22.2.6" />
+    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="22.2.6" />
+    <PackageReference Include="DevExpress.Persistent.Base" Version="22.2.6" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Model.DesignedDiffs.xafml" />
