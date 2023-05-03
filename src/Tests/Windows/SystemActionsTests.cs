@@ -15,7 +15,7 @@ namespace Xpand.XAF.Modules.Windows.Tests {
     public class SystemActionsTests:BaseWindowsTest {
 
         
-        [XpandTest]
+        
         [Apartment(ApartmentState.STA)][Test]
         public void RegisterWindowsAction() {
             var observer = SystemActionsService.CustomizeHotKeyManager.Test();
@@ -34,7 +34,7 @@ namespace Xpand.XAF.Modules.Windows.Tests {
             hotKeyManager.GlobalHotKeyCount.ShouldBe(0);
         }
         
-        [XpandTest]
+        
         [Apartment(ApartmentState.STA)][Test]
         public void RegisterViewAction() {
             var observer = SystemActionsService.CustomizeHotKeyManager.Test();

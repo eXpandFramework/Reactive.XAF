@@ -16,7 +16,7 @@ namespace Xpand.XAF.Modules.PositionInListView.Tests{
 		[TestCase(null, 1, 2, 3, 4)]
 		[TestCase(PositionInListViewNewObjectsStrategy.Last, 1, 2, 3, 4)]
 		[TestCase(PositionInListViewNewObjectsStrategy.First, -1, -2, -3, -4)]
-		[XpandTest]
+		
 		public void When_new_objects_position_them_by_model_strategy(PositionInListViewNewObjectsStrategy? strategy,
 			int first, int second, int third, int fourth) {
             using var application = PositionInListViewModuleModule(xafApplication => {
@@ -48,7 +48,7 @@ namespace Xpand.XAF.Modules.PositionInListView.Tests{
 
 		[TestCase(SortingDirection.Descending, 2, 0)]
 		[TestCase(SortingDirection.Ascending, 0, 2)]
-		[XpandTest]
+		
 		public void When_ListView_Creating_Sort_CollectionSource(SortingDirection sortingDirection, int first, int last) {
             using var application = PositionInListViewModuleModule().Application;
             var positionInListView = ListViewItem;

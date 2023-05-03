@@ -14,7 +14,7 @@ using Xpand.XAF.Modules.PositionInListView.Tests.BOModel;
 namespace Xpand.XAF.Modules.PositionInListView.Tests{
 	public class SwapPositionInListViewServiceTest : PositionInListViewCommonTest{
 		[Test]
-		[XpandTest]
+		
 		public void Move_object_actions_are_active_only_for_model_views() {
             using var application = PositionInListViewModuleModule().Application;
             
@@ -29,7 +29,7 @@ namespace Xpand.XAF.Modules.PositionInListView.Tests{
 
 		[TestCase(nameof(SwapPositionInListViewService.MoveObjectUp),nameof(SwapPositionInListViewService.MoveObjectDown))]
 		[TestCase(nameof(SwapPositionInListViewService.MoveObjectDown),nameof(SwapPositionInListViewService.MoveObjectUp))]
-		[XpandTest]
+		
 		[SuppressMessage("ReSharper", "AccessToModifiedClosure")][Apartment(ApartmentState.STA)]
 		public void Move_object_action_is_disabled_when_on_edge(string disabledAction,string enabledAction) {
             using var application = PositionInListViewModuleModule().Application;
@@ -58,7 +58,7 @@ namespace Xpand.XAF.Modules.PositionInListView.Tests{
 
 		[TestCase(nameof(SwapPositionInListViewService.MoveObjectUp), 3)]
 		[TestCase(nameof(SwapPositionInListViewService.MoveObjectDown), 1)]
-		[XpandTest]
+		
 		public void When_moving_object_swap_position_with_next_object(string direction, int otherObjectPosition) {
 			
             using var application = PositionInListViewModuleModule().Application;
@@ -90,7 +90,7 @@ namespace Xpand.XAF.Modules.PositionInListView.Tests{
 
 		[TestCase(nameof(SwapPositionInListViewService.MoveObjectUp))]
 		[TestCase(nameof(SwapPositionInListViewService.MoveObjectDown))]
-		[XpandTest]
+		
 		public void When_moving_edge_object_towards_edge_position_should_not_change(string direction) {
             using var application = PositionInListViewModuleModule().Application;
             

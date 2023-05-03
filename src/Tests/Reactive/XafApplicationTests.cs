@@ -22,7 +22,7 @@ using Xpand.XAF.Modules.Reactive.Tests.Common;
 namespace Xpand.XAF.Modules.Reactive.Tests{
     
     public class ObjectSpaceCreatedTests : ReactiveCommonTest {
-        [XpandTest]
+        
         [TestCase(nameof(Platform.Win))]
         public void WhenObjectSpaceCreated(string platformName){
             var platform = GetPlatform(platformName);
@@ -33,7 +33,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
 
             exiTest.Items.Any(space => space==objectSpace).ShouldBeTrue();
         }
-        [XpandTest]
+        
         [TestCase(nameof(Platform.Win))]
         public void WhenNonSecuredObjectSpaceCreated(string platformName){
             var application = NewXafApplication();
@@ -53,7 +53,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
     }
 
     public class XafApplicationTests : ReactiveCommonTest{
-        [XpandTest]
+        
         [TestCase(nameof(Platform.Win))]
         public async Task WhenFrameCreated(string platformName){
             var platform = GetPlatform(platformName);
@@ -72,7 +72,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
             (await frames.Take(4)).ShouldBe(popupWindow);
         }
 
-        [XpandTest]
+        
         [TestCase(nameof(Platform.Win))]
         public async Task WhenWindowCreated(string platformName){
             var platform = GetPlatform(platformName);
@@ -86,7 +86,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
             (await windows.Take(2)).ShouldBe(popupWindow);
         }
 
-        [XpandTest]
+        
         [TestCase(nameof(Platform.Win))]
         public async Task WhenPopupWindowCreated(string platformName){
             var platform = GetPlatform(platformName);
@@ -98,7 +98,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
             (await windows.Take(1)).ShouldBe(popupWindow);
         }
 
-        [XpandTest]
+        
         [TestCase(nameof(Platform.Win))]
         public async Task WHen_NestedFrameCreated(string platformName){
             var platform = GetPlatform(platformName);
@@ -112,7 +112,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
         
 
         [Test]
-        [XpandTest]
+        
         public void BufferUntilCompatibilityChecked(){
             var source = new Subject<int>();
             using var application = DefaultReactiveModule().Application;
@@ -145,7 +145,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
             SecuritySystem.CurrentUserId.ShouldBe(policyUser.Oid);
         }
 
-        [XpandTest]
+        
         [TestCase(nameof(Platform.Win))]
         public void WHen_Exiting(string platformName){
             var platform = GetPlatform(platformName);

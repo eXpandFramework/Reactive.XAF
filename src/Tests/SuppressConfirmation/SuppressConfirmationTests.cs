@@ -16,7 +16,7 @@ namespace Xpand.XAF.Modules.SuppressConfirmation.Tests{
     [NonParallelizable]
     public class SuppressConfirmationTests : BaseTest{
 
-        [XpandTest]
+        
         [TestCase(typeof(ListView),nameof(Platform.Win))]
         [TestCase(typeof(DetailView),nameof(Platform.Win))]
         public async Task Signal_When_Window_with_PressuresConfirmation_Enabled_ObjectView_changed(Type viewType,string platformName){
@@ -31,7 +31,7 @@ namespace Xpand.XAF.Modules.SuppressConfirmation.Tests{
             await windows.FirstAsync();
         }
 
-        [XpandTest]
+        
         [TestCase(nameof(Platform.Win))]
         public async Task Signal_When_DashboardView_with_PressuresConfirmation_Enabled_ObjectView_changed(string platformName){
             var platform = GetPlatform(platformName);
@@ -48,7 +48,7 @@ namespace Xpand.XAF.Modules.SuppressConfirmation.Tests{
             frame.ShouldBeOfType<NestedFrame>();
         }
 
-        [XpandTest]
+        
         [TestCase(typeof(ListView),nameof(Platform.Win))]
         [TestCase(typeof(DetailView),nameof(Platform.Win))]
         public void Change_Modification_Handling_Mode(Type viewType,string platformName){

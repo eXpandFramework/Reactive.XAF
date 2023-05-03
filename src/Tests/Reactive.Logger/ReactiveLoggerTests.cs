@@ -26,7 +26,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
     [NonParallelizable]
     [Serializable]
     public class ReactiveLoggerTests : BaseTest{
-        [XpandTest]
+        
         [TestCase("NoLastEvent")]
         [TestCase("DifferentLastEvent")]
         [TestCase("SameLastEvent")][Order(0)]
@@ -70,7 +70,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
         }
 
         [Test]
-        [XpandTest]
+        
         [Apartment(ApartmentState.STA)][Order(-200)]
         public async Task Do_Not_Trace_If_TraceSources_Level_Off(){
             using var application = NewApplication();
@@ -95,7 +95,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
         }
 
         [Test]
-        [XpandTest]
+        
         [Apartment(ApartmentState.STA)][Order(-300)]
         public async Task Do_Not_Trace_If_TraceSources_Disabled(){
             using var application = NewApplication();
@@ -119,7 +119,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
             objectSpace.GetObjectsCount(typeof(TraceEvent),null).ShouldBe(0);
         }
         [Test]
-        [XpandTest]
+        
         [Apartment(ApartmentState.STA)][Order(-100)]
         public async Task Do_Not_Persist_TraceSources(){
             using var application = NewApplication();
@@ -144,12 +144,12 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
             objectSpace.GetObjectsCount(typeof(TraceEvent),null).ShouldBe(0);
         }
         
-        [XpandTest]
+        
         [Apartment(ApartmentState.STA)]
         [TestCase(ObservableTraceStrategy.OnNext)][Order(400)]
         public void Persist_Only_OnNext(ObservableTraceStrategy strategy) => Persist_Only(strategy);
         
-        [XpandTest]
+        
         [Apartment(ApartmentState.STA)]
         [TestCase(ObservableTraceStrategy.OnError)][Order(500)]
         public void Persist_Only_OnError(ObservableTraceStrategy strategy) => Persist_Only(strategy);
@@ -185,7 +185,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
         }
 
         [Test]
-        [XpandTest]
+        
         [Apartment(ApartmentState.STA)][Order(600)]
         public async Task Save_TraceEvent(){
             using var application = LoggerModule().Application;
@@ -219,7 +219,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
         }
 
         [Test]
-        [XpandTest][Order(700)]
+        [Order(700)]
         public  void Populate_TracedSource_Modules_to_Model(){
             using var application = LoggerModule().Application;
             var logger = application.Model.ToReactiveModule<IModelReactiveModuleLogger>().ReactiveLogger;
@@ -232,7 +232,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
 
 
         [Test]
-        [XpandTest]
+        
         [Apartment(ApartmentState.STA)][Order(800)]
         public async Task Refresh_TraceEvent_ListView_when_trace(){
             using var application = NewApplication();
@@ -259,7 +259,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
         }
 
         [Test]
-        [XpandTest]
+        
         [Apartment(ApartmentState.STA)][Order(900)]
         public async Task Trace_Events_Before_CompatibilityCheck(){
             using var application = Platform.Win.NewApplication<ReactiveLoggerModule>();
@@ -274,7 +274,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
         
         [TestCase(TraceEventType.Error)]
         [TestCase(TraceEventType.Warning)]
-        [XpandTest]
+        
         [Apartment(ApartmentState.STA)][Order(1000)]
         public async Task Trace_EventType(TraceEventType eventType){
             using var application = Platform.Win.NewApplication<ReactiveLoggerModule>();
@@ -290,7 +290,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
         }
         
         [Test()]
-        // [XpandTest]
+        // 
         [Apartment(ApartmentState.STA)][Order(1100)]
         public async Task Customize_OnNext_Message(){
             using var application = Platform.Win.NewApplication<ReactiveLoggerModule>();

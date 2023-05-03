@@ -15,7 +15,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
     [NonParallelizable]
     public class ContainerTests:ModelMapperCommonTest{
         [Test]
-        [XpandTest]
+        
         public async Task Custom_Container_Image(){
             InitializeMapperService();
             var typeToMap = typeof(TestModelMapper);
@@ -31,7 +31,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
 
 
         [Test]
-        [XpandTest]
+        
         public async Task Container_Interface(){
             InitializeMapperService();
             var typeToMap = typeof(TestModelMapper);
@@ -47,7 +47,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         }
 
         [Test]
-        [XpandTest]
+        
         public async Task Custom_Container_Name(){
             InitializeMapperService();
             var typeToMap = typeof(TestModelMapper);
@@ -65,7 +65,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         }
 
         [Test]
-        [XpandTest]
+        
         public async Task ModelMappers_Interface(){
             InitializeMapperService();
             var typeToMap = typeof(TestModelMapper);

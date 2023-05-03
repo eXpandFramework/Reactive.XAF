@@ -31,7 +31,7 @@ namespace Xpand.XAF.Modules.CloneMemberValue.Tests{
             return cloneMemberValueModule;
         }
 
-        [XpandTest]
+        
         [Test()]
         public async Task Collect_Previous_Current_DetailViews_with_cloneable_members(){
             using var application = DefaultCloneMemberValueModule(nameof(Collect_Previous_Current_DetailViews_with_cloneable_members)).Application;
@@ -53,7 +53,7 @@ namespace Xpand.XAF.Modules.CloneMemberValue.Tests{
             }
         }
 
-        [XpandTest]
+        
         [Test()]
         public async Task Collect_editable_ListViews_with_clonable_members(){
             var cloneMemberValueModule = DefaultCloneMemberValueModule(nameof(Collect_editable_ListViews_with_clonable_members));
@@ -79,7 +79,7 @@ namespace Xpand.XAF.Modules.CloneMemberValue.Tests{
             application.Dispose();
             
         }
-        [XpandTest]
+        
         [Test()]
         public async Task Collect_ListView_Previous_Current_New_Objects(){
             using var application = DefaultCloneMemberValueModule( nameof(Collect_ListView_Previous_Current_New_Objects)).Application;
@@ -107,7 +107,7 @@ namespace Xpand.XAF.Modules.CloneMemberValue.Tests{
             objectPair.current.ShouldBe(aCmv2);                
             application.Dispose();
         }
-        [XpandTest]
+        
         [Test()]
         public async Task CloneMemberValues(){
             using var application = DefaultCloneMemberValueModule(nameof(CloneMemberValues)).Application;

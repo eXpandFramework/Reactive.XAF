@@ -24,7 +24,7 @@ namespace Xpand.XAF.Modules.HideToolBar.Tests{
     [NonParallelizable]
     public class HideToolBarTests : BaseTest{
 
-        [XpandTest]
+        
         [TestCase(nameof(Platform.Win))]
         public async Task Signal_When_frame_with_HideToolBar_Enabled_ListView_controls_created(string platformName){
             var platform = GetPlatform(platformName);
@@ -49,7 +49,7 @@ namespace Xpand.XAF.Modules.HideToolBar.Tests{
             templateMock.Setup(template => template.GetContainers()).Returns(new ActionContainerCollection());
             return templateMock;
         }
-        [XpandTest]
+        
         [TestCase(nameof(Platform.Win))]
         public async Task Hide_Nested_ToolBar(string platformName){
             var platform = GetPlatform(platformName);
@@ -72,7 +72,7 @@ namespace Xpand.XAF.Modules.HideToolBar.Tests{
         }
 
         [Test]
-        [XpandTest]
+        
         public async Task Hide_ToolbarVisibilityController() {
             using var application = Platform.Win.NewApplication<HideToolBarModule>();
             application.Title = nameof(Hide_ToolbarVisibilityController);

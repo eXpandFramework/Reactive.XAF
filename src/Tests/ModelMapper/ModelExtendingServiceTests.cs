@@ -37,7 +37,7 @@ using TypeMappingService = Xpand.XAF.Modules.ModelMapper.Services.TypeMapping.Ty
 namespace Xpand.XAF.Modules.ModelMapper.Tests{
     [NonParallelizable]
     public class ModelMapperExtenderServiceTests : ModelMapperCommonTest{
-        [XpandTest]
+        
         [TestCase(typeof(TestModelMapper),nameof(Platform.Win))]
         [TestCase(typeof(RootType),nameof(Platform.Win))]
         public void ExtendModel_Any_Type(Type typeToMap,string platformName) {
@@ -50,7 +50,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         }
 
         [Test]
-        [XpandTest]
+        
         public void Get_PredefinedModelNode(){
             InitializeMapperService(Platform.Win);
 
@@ -60,7 +60,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         }
 
         [Test]
-        [XpandTest]
+        
         public void Get_PredefinedViewItemMergedModelNode(){
             InitializeMapperService(Platform.Win);
 
@@ -84,7 +84,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         }
 
         [Test]
-        [XpandTest]
+        
         public void Customize_PredefineMaps_TargetInterface(){
             InitializeMapperService(Platform.Win);
 
@@ -206,7 +206,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         }
 
 
-        [XpandTest]
+        
         [TestCase(PredefinedMap.ChartControlRadarDiagram, typeof(RadarDiagram),nameof(Platform.Win))]
         [TestCase(PredefinedMap.ChartControlPolarDiagram, typeof(PolarDiagram),nameof(Platform.Win))]
         [TestCase(PredefinedMap.ChartControlXYDiagram2D, typeof(XYDiagram2D),nameof(Platform.Win))]
@@ -233,7 +233,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         }
 
         [Test]
-        [XpandTest]
+        
         public void ExtendModel_All_PredefinedChartDiagram(){
             Assembly.LoadFile(typeof(ChartControl).Assembly.Location);
             Assembly.LoadFile(typeof(Diagram).Assembly.Location);
@@ -265,7 +265,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         }
 
         [Test]
-        [XpandTest]
+        
         public void Extend_Existing_PredefinedMap(){
             InitializeMapperService(Platform.Win);
             using var module = new[]{PredefinedMap.PivotGridControl, PredefinedMap.GridView}.Extend();
@@ -282,7 +282,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             (modelNode is IModelPredefinedMapExtension).ShouldBeTrue();
         }
 
-        [XpandTest]
+        
         [TestCase(nameof(Platform.Win),PredefinedMap.RichEditControl)]
         [TestCase(nameof(Platform.Win),PredefinedMap.RepositoryItem)]
         public void Extend_Existing_ViewItemMap(string platformName,PredefinedMap predefinedMap){
@@ -309,7 +309,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         }
 
         [Test]
-        [XpandTest]
+        
         public void Extend_Multiple_Objects_with_common_types(){
             var typeToMap1 = typeof(TestModelMapperCommonType1);
             var typeToMap2 = typeof(TestModelMapperCommonType2);
@@ -325,7 +325,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             appearanceCell.GetNodeByPath($"{nameof(AppearanceObjectEx.TextOptions)}");
         }
 
-        [XpandTest]
+        
         [TestCase(nameof(Platform.Win))]
         public void ModelMapperContexts(string platformName){
             var platform = GetPlatform(platformName);
@@ -339,7 +339,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             modelModelMappers.First().Id().ShouldBe(typeToMap.Name);
         }
 
-        [XpandTest]
+        
         [TestCase(nameof(Platform.Win))]
         public void Container_ModelMapperContexts(string platformName){
             var platform = GetPlatform(platformName);
@@ -363,7 +363,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
                     ModelMapperContextNodeGenerator.Default]);
         }
 
-        [XpandTest]
+        
         [TestCase("Parent.AllowEdit=?", true,false,null)]
         [TestCase("Parent.AllowEdit=?", false,true,null)]
         [TestCase(VisibilityCriteriaLeftOperand.IsAssignableFromModelListVideEditorType, true,typeof(WinColumnsListEditor),"Parent.")]

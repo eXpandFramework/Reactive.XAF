@@ -36,7 +36,7 @@ namespace Xpand.XAF.Modules.Windows.Tests{
     
         
         [Test()]
-        [XpandTest]
+        
         [Apartment(ApartmentState.STA)]
         public void Hide_On_Exit(){
             using var application = WindowsModule().Application;
@@ -60,7 +60,7 @@ namespace Xpand.XAF.Modules.Windows.Tests{
         }
 
         
-        [XpandTest][Test][Combinatorial]
+        [Test][Combinatorial]
         [Apartment(ApartmentState.STA)]
         public void CloseWindow_On([Values(false, true)] bool hideMainWindow, [Values(false, true)] bool popup,
             [Values("OnDeactivate", "OnKeyDown")] string when, [Values(nameof(IModelOn.ExitApplication),nameof(IModelOn.CloseWindow))] string action) {
@@ -110,7 +110,7 @@ namespace Xpand.XAF.Modules.Windows.Tests{
 
 
         [Test]
-        [XpandTest]
+        
         [Apartment(ApartmentState.STA)]
         public  void Minimize_On_Exit(){
 	        using var application = WindowsModule().Application;
@@ -134,7 +134,7 @@ namespace Xpand.XAF.Modules.Windows.Tests{
 
 
         [Test]
-        [XpandTest]
+        
         [Apartment(ApartmentState.STA)]
         public  void Edit_Model(){
             using var application = WindowsModule().Application;
@@ -162,7 +162,7 @@ namespace Xpand.XAF.Modules.Windows.Tests{
         }
 
         [Test]
-        [XpandTest]
+        
         [Apartment(ApartmentState.STA)]
         public void LogOffApplication() {
             using var application = Platform.Win.NewApplication<WindowsModule>();
@@ -182,7 +182,7 @@ namespace Xpand.XAF.Modules.Windows.Tests{
 
         [TestCase(DialogResult.No)]
         [TestCase(DialogResult.Yes)]
-        [XpandTest]
+        
         [Apartment(ApartmentState.STA)]
         public  void PromptOn_Exit(DialogResult dialogResult){
             using var application = WindowsModule().Application;

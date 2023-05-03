@@ -51,7 +51,7 @@ using Task = System.Threading.Tasks.Task;
 namespace Xpand.XAF.Modules.ModelMapper.Tests{
     [NonParallelizable]
     public class ModelMapperBinderServiceTests:ModelMapperCommonTest{
-        [XpandTest]
+        
         [TestCase(nameof(Platform.Win))]
         public void Bind_Only_NullAble_Properties_That_are_not_Null(string platformName){
             var platform = GetPlatform(platformName);
@@ -71,7 +71,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             stringValueTypeProperties.RwString.ShouldBe("shouldNotChange");
         }
 
-        [XpandTest]
+        
         [TestCase(nameof(Platform.Win))]
         public void Do_not_bind_Disable_mode_nodes(string platformName){
             var platform = GetPlatform(platformName);
@@ -91,7 +91,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             stringValueTypeProperties.RwInteger.ShouldBe(0);
         }
 
-        [XpandTest]
+        
         [TestCase(nameof(Platform.Win))]
         public void Do_not_throw_if_target_object_properties_do_not_exist(string platformName){
             var platform = GetPlatform(platformName);
@@ -107,7 +107,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             modelModelMap.BindTo(stringValueTypeProperties);
         }
 
-        [XpandTest]
+        
         [TestCase(nameof(Platform.Win))]
         public void Bind_all_public_nullable_type_properties(string platformName){
             var platform = GetPlatform(platformName);
@@ -127,7 +127,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             stringValueTypeProperties.NullAbleRwInteger.ShouldBe(200);
         }
 
-        [XpandTest]
+        
         [TestCase(nameof(Platform.Win))]
         public void Bind_all_public_rw_string_properties(string platformName){
             var platform = GetPlatform(platformName);
@@ -145,7 +145,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             stringValueTypeProperties.RwString.ShouldBe("test");
         }
 
-        [XpandTest]
+        
         [TestCase(nameof(Platform.Win))]
         public void Bind_all_public_rw_nested_properties(string platformName){
             var platform = GetPlatform(platformName);
@@ -162,7 +162,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             referenceTypeProperties.RStringValueTypeProperties.RwString.ShouldBe("test");
         }
 
-        [XpandTest]
+        
         [TestCase(nameof(Platform.Win))]
         [Ignore(NotImplemented)]
         public void Apply_AllMapper_Contexts(string platformName){
@@ -330,7 +330,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             
 
         }
-        [XpandTest]
+        
         [TestCase(typeof(ListView))]
         [TestCase(typeof(DetailView))]
         public async Task Bind_RepositoryItems(Type viewType){
