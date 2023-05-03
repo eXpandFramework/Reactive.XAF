@@ -16,7 +16,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
     [NonParallelizable]
     public class MapAttributesTests:ModelMapperCommonTest{
         [Test]
-        
+        [XpandTest]
         public async Task Map_Private_DescriptionAttributes(){
             InitializeMapperService();
             
@@ -31,7 +31,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         }
 
         [Test]
-        
+        [XpandTest]
         public async Task Map_Attributes(){
             
             InitializeMapperService();
@@ -53,7 +53,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
 
 
         [Test]
-        
+        [XpandTest]
         public async Task Escape_strings(){
 
             InitializeMapperService();
@@ -66,7 +66,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
 
 
         [Test]
-        
+        [XpandTest]
         public async Task Customize_Attributes_Mapping(){
             InitializeMapperService();
             TypeMappingService.PropertyMappingRules.Add(("Custom", tuple => {
@@ -81,7 +81,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         }
 
         [Test]
-        
+        [XpandTest]
         public async Task Remove_LocalizableAttribute_from_Non_String_Properties(){
             InitializeMapperService();
             var typeToMap = typeof(LocalizableAttributeClass);
@@ -94,7 +94,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         }
 
         [Test]
-        
+        [XpandTest]
         public async Task Attribute_Mapping_Can_Be_Disabled(){
             InitializeMapperService();
             TypeMappingService.PropertyMappingRules.Add(("Disable", tuple => {

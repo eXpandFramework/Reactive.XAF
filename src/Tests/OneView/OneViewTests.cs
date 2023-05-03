@@ -28,7 +28,7 @@ namespace Xpand.XAF.Modules.OneView.Tests{
     [NonParallelizable][SuppressMessage("ReSharper", "AccessToDisposedClosure")]
     public class OneViewTests : BaseTest{
         [Test]
-        
+        [XpandTest]
         [Apartment(ApartmentState.STA)]
         public  void Hide_MainWindow_Template_OnStart(){
 	        using var application = OneViewModule().Application;
@@ -45,7 +45,7 @@ namespace Xpand.XAF.Modules.OneView.Tests{
         }
 
         [Test]
-        
+        [XpandTest]
         [Apartment(ApartmentState.STA)]
         public void Show_OneView_OnStart(){
 	        using var application = (TestWinApplication) OneViewModule().Application;
@@ -60,7 +60,7 @@ namespace Xpand.XAF.Modules.OneView.Tests{
         }
 
         [Test]
-        
+        [XpandTest]
         [Apartment(ApartmentState.STA)]
         public async Task Exit_Application_On_View_Close(){
 	        using var application = OneViewModule().Application;
@@ -79,7 +79,7 @@ namespace Xpand.XAF.Modules.OneView.Tests{
 
 
         [Test]
-        
+        [XpandTest]
         [Apartment(ApartmentState.STA)]
         public void Edit_Model(){
 	        using var application = OneViewModule().Application;

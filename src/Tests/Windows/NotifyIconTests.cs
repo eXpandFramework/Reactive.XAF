@@ -19,7 +19,7 @@ namespace Xpand.XAF.Modules.Windows.Tests {
     [NonParallelizable]
     public class NotifyIconTests : BaseWindowsTest {
         [Test]
-        
+        [XpandTest]
         [Apartment(ApartmentState.STA)]
         public async Task Enable() {
             using var application = Platform.Win.NewApplication<WindowsModule>();
@@ -37,7 +37,7 @@ namespace Xpand.XAF.Modules.Windows.Tests {
         }
 
         [Test]
-        
+        [XpandTest]
         [Apartment(ApartmentState.STA)]
         public async Task ExitApplication() {
             using var application = Platform.Win.NewApplication<WindowsModule>();
@@ -62,7 +62,7 @@ namespace Xpand.XAF.Modules.Windows.Tests {
 
 
         [Test]
-        
+        [XpandTest]
         [Apartment(ApartmentState.STA)]
         public async Task LogOffApplication() {
             using var application = Platform.Win.NewApplication<WindowsModule>();
@@ -85,7 +85,7 @@ namespace Xpand.XAF.Modules.Windows.Tests {
         }
 
         [Test]
-        
+        [XpandTest]
         [Apartment(ApartmentState.STA)]
         public async Task HideApplication() {
             

@@ -18,7 +18,7 @@ namespace Xpand.XAF.Modules.Windows.Tests {
 	public class FormNodeTests:BaseWindowsTest {
 		[TestCase(true)]
 		[TestCase(false)]
-		
+		[XpandTest]
 		[Apartment(ApartmentState.STA)]
 		public  void Disable_ControlBox(bool popup){
 			using var application = WindowsModule().Application;
@@ -47,7 +47,7 @@ namespace Xpand.XAF.Modules.Windows.Tests {
         }
 
 		[Test]
-		
+		[XpandTest]
 		[Apartment(ApartmentState.STA)]
 		public  void Disable_Minimize(){
 			using var application = WindowsModule().Application;
@@ -65,7 +65,7 @@ namespace Xpand.XAF.Modules.Windows.Tests {
         }
 
 		[Test]
-		
+		[XpandTest]
 		[Apartment(ApartmentState.STA)]
 		public  void Disable_Maximize(){
 			using var application = WindowsModule().Application;

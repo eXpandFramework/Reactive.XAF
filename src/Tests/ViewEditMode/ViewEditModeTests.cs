@@ -15,7 +15,7 @@ namespace Xpand.XAF.Modules.ViewEditMode.Tests{
     [NonParallelizable]
     public class ViewEditModeTests : BaseTest{
 
-        
+        [XpandTest]
         [TestCase(true,DevExpress.ExpressApp.Editors.ViewEditMode.Edit,nameof(Platform.Win))]
         [TestCase(false,DevExpress.ExpressApp.Editors.ViewEditMode.View,nameof(Platform.Win))]
         public void Change_ViewEditMode_when_detailview_created(bool lockViewEditMode,DevExpress.ExpressApp.Editors.ViewEditMode viewEditMode,string platformName){
@@ -42,7 +42,7 @@ namespace Xpand.XAF.Modules.ViewEditMode.Tests{
         }
 
         [Test]
-        [Ignore("")]
+        [XpandTest][Ignore("")]
         public async Task UnLock_ViewDittoMode_When_SwitchToEditMode_Action_Executed(){
             using var application = DefaultViewEditModeModule(Platform.Web,nameof(UnLock_ViewDittoMode_When_SwitchToEditMode_Action_Executed)).Application;
             var viewViewEditMode = ((IModelDetailViewViewEditMode) application.Model.BOModel.GetClass(typeof(VEM)).DefaultDetailView);

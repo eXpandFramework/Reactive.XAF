@@ -26,7 +26,7 @@ namespace Xpand.XAF.Modules.Windows.Tests {
             return true;
         }
 
-        [Test]
+        [Test][XpandTest]
         [Apartment(ApartmentState.STA)]
         public  void Disable_With_Message(){
             var harmony = new Harmony(nameof(Disable_With_Message));
@@ -44,7 +44,7 @@ namespace Xpand.XAF.Modules.Windows.Tests {
             harmony.UnpatchAll(nameof(Disable_With_Message));
         }
 
-        [Test]
+        [Test][XpandTest]
         [Apartment(ApartmentState.STA)]
         public  void Exit_Silent(){
             var harmony = new Harmony(nameof(Exit_Silent));

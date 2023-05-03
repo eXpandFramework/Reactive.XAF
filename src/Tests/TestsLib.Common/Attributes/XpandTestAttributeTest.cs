@@ -20,7 +20,7 @@ namespace Xpand.TestsLib.Common.Attributes{
         }
 
 
-        
+        [XpandTest]
         [Test]
         [Apartment(ApartmentState.STA)]
         public void Donot_Change_AppartmentState(){

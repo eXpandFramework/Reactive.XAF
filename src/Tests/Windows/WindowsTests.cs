@@ -12,7 +12,7 @@ using Xpand.XAF.Modules.Reactive.Services;
 namespace Xpand.XAF.Modules.Windows.Tests {
     public class WindowsTests : BaseWindowsTest {
         [Test]
-        
+        [XpandTest]
         [Apartment(ApartmentState.STA)]
         [TestCase(true)]
         [TestCase(false)]

@@ -28,7 +28,7 @@ namespace Xpand.Extensions.Tests {
         }
 
         [Test]
-        
+        [XpandTest]
         public void CountSubSequent(){
             var subject = new ReplaySubject<int>();
             subject.OnNext(0);

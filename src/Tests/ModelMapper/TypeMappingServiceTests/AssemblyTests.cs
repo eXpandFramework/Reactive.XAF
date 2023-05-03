@@ -19,7 +19,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
     [NonParallelizable]
     public class AssemblyTests:ModelMapperCommonTest{
 	    
-        
+        [XpandTest]
         [TestCase(nameof(Platform.Win))]
         public async Task Create_Model_Assembly_in_path_if_not_Exist(string platformName){
             var platform = GetPlatform(platformName);
@@ -30,7 +30,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
 
             File.Exists(mapToModel.Assembly.Location).ShouldBeTrue();
         }
-        
+        [XpandTest]
         [TestCase(typeof(TestModelMapper),nameof(Platform.Win))]
         public void Platform_Detection(Type typeToMap,string platformName){
             var platform = GetPlatform(platformName);
@@ -43,7 +43,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         }
 
         [Test]
-        
+        [XpandTest]
         public async Task Assembly_Version_Should_Match_Model_Mapper_Version(){
             InitializeMapperService();
             var typeToMap = typeof(TestModelMapper);
@@ -55,7 +55,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         }
 
         [Test]
-        
+        [XpandTest]
         public async Task Do_Not_Map_If_Type_Assembly_Version_Not_Changed(){
             InitializeMapperService();
             var mappedType = typeof(TestModelMapper);
@@ -78,7 +78,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         }
 
         [Test]
-        [Ignore("")]
+        [XpandTest][Ignore("")]
         public async Task Always_Map_If_Any_Type_Assembly_HashCode_Changed(){
 
             
@@ -99,7 +99,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         }
 
         [Test]
-        
+        [XpandTest]
         public async Task Always_Map_If_ModelMapperModule_HashCode_Changed(){
             InitializeMapperService();
             var mappedType = typeof(TestModelMapper);
@@ -111,7 +111,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         }
 
         [Test]
-        
+        [XpandTest]
         public async Task Always_Map_If_ModelMapperConfiguration_Changed(){
             
             InitializeMapperService();
@@ -128,7 +128,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         }
 
         [Test]
-        
+        [XpandTest]
         public void Use_separate_assembly_for_custom_map(){
             
             InitializeMapperService(Platform.Win);

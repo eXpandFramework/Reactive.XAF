@@ -20,7 +20,7 @@ using Xpand.XAF.Modules.Reactive.Services;
 namespace Xpand.XAF.Modules.ModelViewInheritance.Tests{
     [NonParallelizable]
     public class ModelViewInheritanceTests:BaseTest {
-        
+        [XpandTest]
         [TestCase(ViewType.DetailView,false,nameof(Platform.Win))]
         [TestCase(ViewType.DetailView,true,nameof(Platform.Win))]
         [TestCase(ViewType.ListView,false,nameof(Platform.Win))]
@@ -94,7 +94,7 @@ namespace Xpand.XAF.Modules.ModelViewInheritance.Tests{
             return modelViewInheritanceModule;
         }
          
-        
+        [XpandTest]
         [Test]
         public void Chained_Cloned_ListView_merging(){
             using var newApplication = Platform.Win.NewApplication<ModelViewInheritanceModule>();

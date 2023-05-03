@@ -45,7 +45,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
     public class MapTests:ModelMapperCommonTest{
         
         [Test]
-        
+        [XpandTest]
         public async Task Map_RW_StringValueType_Public_Properties(){
             InitializeMapperService();
             var typeToMap = typeof(StringValueTypeProperties);
@@ -77,7 +77,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
             modelTypeProperties.Length.ShouldBe(propertiesToMap.Length);
         }
 
-        
+        [XpandTest]
         [TestCase(typeof(CollectionsType), new[] {
             nameof(CollectionsType.TestModelMappersList), nameof(CollectionsType.TestModelMappersArray),
             nameof(CollectionsType.ValueTypeArray)
@@ -96,7 +96,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
 
 
         [Test]
-        
+        [XpandTest]
         public async Task Map_All_ReferenceType_Public_Properties(){
             
             InitializeMapperService();
@@ -117,7 +117,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         }
 
         [Test]
-        
+        [XpandTest]
         public async Task Map_Nested_type_properties(){
             InitializeMapperService();
             var typeToMap = typeof(NestedTypeProperties);
@@ -130,7 +130,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         }
 
         [Test]
-        
+        [XpandTest]
         public async Task Map_Multiple_Objects_from_the_same_subscription_In_the_same_assembly(){
             var typeToMap1 = typeof(TestModelMapper);
             var typeToMap2 = typeof(StringValueTypeProperties);
@@ -145,7 +145,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         }
 
         [Test]
-        
+        [XpandTest]
         public void Map_Multiple_Objects_with_common_types(){
             var typeToMap1 = typeof(TestModelMapperCommonType1);
             var typeToMap2 = typeof(TestModelMapperCommonType2);
@@ -170,7 +170,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         }
 
         [Test]
-        
+        [XpandTest]
         public async Task Map_Multiple_Objects_from_the_different_subscription_In_the_same_assembly(){
             var typeToMap1 = typeof(TestModelMapper);
             var typeToMap2 = typeof(StringValueTypeProperties);
@@ -289,7 +289,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
             }
         }
 
-        
+        [XpandTest]
         [TestCase(nameof(Platform.Win))]
         public async Task Map_PredefinedMap_PropertyEditor_Controls(string platformName){
             var platform = GetPlatform(platformName);
@@ -299,7 +299,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
             await Map_PredefinedMap_ViewItems(platform, predefinedMaps, typeof(PropertyEditorControlMap).ModelTypeName(), ViewItemService.PropertyEditorControlMapName);
         }
 
-        
+        [XpandTest]
         [TestCase(PredefinedMap.ChartControl,new[]{typeof(ChartControl),typeof(ChartListEditor)},nameof(Platform.Win),new[]{nameof(ChartControl.Series),"Diagrams"})]
         [TestCase(PredefinedMap.ChartControlDiagram3D,new[]{typeof(Diagram3D),typeof(ChartListEditor)},nameof(Platform.Win),new string[0])]
         [TestCase(PredefinedMap.ChartControlSimpleDiagram3D,new[]{typeof(SimpleDiagram3D),typeof(ChartListEditor)},nameof(Platform.Win),new string[0])]
@@ -377,7 +377,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
             }
         }
         [Test]
-        
+        [XpandTest]
         public void Map_PredefinedConfigurations_Combination(){
             InitializeMapperService(Platform.Win);
 
@@ -393,7 +393,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         }
 
         [Test]
-        
+        [XpandTest]
         public void Customize_TypeMapping(){
             InitializeMapperService(Platform.Win);
             TypeMappingService.PropertyMappingRules.Add(("RemoveTreeListMap", _ => {

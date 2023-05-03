@@ -16,7 +16,7 @@ namespace Xpand.XAF.Modules.AutoCommit.Tests{
     [NonParallelizable]
     public class AutoCommitTests : BaseTest{
 
-        
+        [XpandTest]
         [Test()]
         public async Task Signal_When_AutoCommit_Enabled_ObjectView_Created(){
             using var application = DefaultAutoCommitModule(Platform.Win,nameof(Signal_When_AutoCommit_Enabled_ObjectView_Created)).Application;
@@ -27,7 +27,7 @@ namespace Xpand.XAF.Modules.AutoCommit.Tests{
             (await objectViews.Take(1).WithTimeOut()).ShouldBe(listView);
             (await objectViews.Take(2).WithTimeOut()).ShouldBe(detailView);
         }
-        
+        [XpandTest]
         [Test]
         public void AutoCommit_When_object_view_closing(){
             using var application = DefaultAutoCommitModule(Platform.Win, nameof(AutoCommit_When_object_view_closing)).Application;

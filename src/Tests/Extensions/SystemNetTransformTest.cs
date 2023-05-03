@@ -16,7 +16,7 @@ using Xpand.TestsLib.Common.Attributes;
 namespace Xpand.Extensions.Tests{
 	public class SystemNetTransformTest:BaseTest{
         [Test]
-        [Apartment(ApartmentState.MTA)]
+        [XpandTest][Apartment(ApartmentState.MTA)]
         public async System.Threading.Tasks.Task Signal_When_In_Listening(){
             var portInUse = Observable.Range(10000,2).Select(port => new IPEndPoint(IPAddress.Loopback, port)).Listening().SubscribeReplay();
             var tcpListener = new TcpListener(IPAddress.Loopback,10001);

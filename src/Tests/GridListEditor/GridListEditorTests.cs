@@ -27,7 +27,7 @@ namespace Xpand.XAF.Modules.GridListEditor.Tests{
     [NonParallelizable]
     public class GridListEditorTests : BaseTest{
         // [Test]
-        
+        [XpandTest]
         [Ignore("Random fail on azure")]
         [Apartment(ApartmentState.STA)]
         public async Task Remember_TopRowIndex_WHen_Refresh_View_DataSource(){
@@ -70,7 +70,7 @@ namespace Xpand.XAF.Modules.GridListEditor.Tests{
 
         [TestCase(true)]
         // [TestCase(false)]
-        [Apartment(ApartmentState.STA)]
+        [XpandTest][Apartment(ApartmentState.STA)]
         public void FocusRow(bool upArrowMoveToRowHandle){
             
             using var application = GridListEditorModule().Application;
