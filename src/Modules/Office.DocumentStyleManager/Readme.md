@@ -1,6 +1,6 @@
-![](http://45-126-125-189.cloud-xip.com/nuget/v/Xpand.XAF.Modules.Office.DocumentStyleManager.svg?&style=flat) ![](http://45-126-125-189.cloud-xip.com/nuget/dt/Xpand.XAF.Modules.Office.DocumentStyleManager.svg?&style=flat)
+![](http://185-229-225-45.cloud-xip.com/nuget/v/Xpand.XAF.Modules.Office.DocumentStyleManager.svg?&style=flat) ![](http://185-229-225-45.cloud-xip.com/nuget/dt/Xpand.XAF.Modules.Office.DocumentStyleManager.svg?&style=flat)
 
-[![GitHub issues](http://45-126-125-189.cloud-xip.com/github/issues/eXpandFramework/expand/Office.DocumentStyleManager.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AReactive.XAF+label%3AOffice.DocumentStyleManager) [![GitHub close issues](http://45-126-125-189.cloud-xip.com/github/issues-closed/eXpandFramework/eXpand/Office.DocumentStyleManager.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AReactive.XAF+label%3AOffice.DocumentStyleManager)
+[![GitHub issues](http://185-229-225-45.cloud-xip.com/github/issues/eXpandFramework/expand/Office.DocumentStyleManager.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AReactive.XAF+label%3AOffice.DocumentStyleManager) [![GitHub close issues](http://185-229-225-45.cloud-xip.com/github/issues-closed/eXpandFramework/eXpand/Office.DocumentStyleManager.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AReactive.XAF+label%3AOffice.DocumentStyleManager)
 # About 
 
 The DocumentStyleManager can re-brand a large number of documents using style templates.
@@ -121,22 +121,21 @@ The module follows the Nuget [Version Basics](https://docs.Google.com/en-us/nuge
 |----|----
 |**DevExpress.ExpressApp.Office**|**Any**
  |**DevExpress.ExpressApp.ConditionalAppearance**|**Any**
-|[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.222.7
- |Xpand.Extensions|4.222.7
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.222.7
- |[Xpand.XAF.Modules.SuppressConfirmation](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.SuppressConfirmation)|4.222.7
- |[Xpand.XAF.Modules.HideToolBar](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.HideToolBar)|4.222.7
- |[Xpand.XAF.Modules.ViewItemValue](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.ViewItemValue)|4.222.7
- |Xpand.Extensions.Reactive|4.222.7
- |Xpand.Extensions.XAF|4.222.7
- |Xpand.Extensions.XAF.Xpo|4.222.7
+|[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.222.6
+ |Xpand.Extensions|4.222.6
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.222.6
+ |[Xpand.XAF.Modules.SuppressConfirmation](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.SuppressConfirmation)|4.222.6
+ |[Xpand.XAF.Modules.HideToolBar](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.HideToolBar)|4.222.6
+ |[Xpand.XAF.Modules.ViewItemValue](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.ViewItemValue)|4.222.6
+ |Xpand.Extensions.Reactive|4.222.6
+ |Xpand.Extensions.XAF|4.222.6
+ |Xpand.Extensions.XAF.Xpo|4.222.6
  |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
  |System.Reactive|5.0.0
  |System.Text.Json|7.0.2
  |System.Interactive|5.0.0
- |System.Threading.Tasks.Dataflow|7.0.0
  |Xpand.Patcher|3.0.17
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.222.7
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.222.6
 
 ## Issues-Debugging-Troubleshooting
 

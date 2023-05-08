@@ -1,6 +1,6 @@
-![](http://45-126-125-189.cloud-xip.com/nuget/v/Xpand.XAF.Modules.Office.Cloud.Google.svg?&style=flat) ![](http://45-126-125-189.cloud-xip.com/nuget/dt/Xpand.XAF.Modules.Office.Cloud.Google.svg?&style=flat)
+![](http://185-229-225-45.cloud-xip.com/nuget/v/Xpand.XAF.Modules.Office.Cloud.Google.svg?&style=flat) ![](http://185-229-225-45.cloud-xip.com/nuget/dt/Xpand.XAF.Modules.Office.Cloud.Google.svg?&style=flat)
 
-[![GitHub issues](http://45-126-125-189.cloud-xip.com/github/issues/eXpandFramework/expand/Office.Cloud.Google.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AReactive.XAF+label%3AOffice.Cloud.Google) [![GitHub close issues](http://45-126-125-189.cloud-xip.com/github/issues-closed/eXpandFramework/eXpand/Office.Cloud.Google.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AReactive.XAF+label%3AOffice.Cloud.Google)
+[![GitHub issues](http://185-229-225-45.cloud-xip.com/github/issues/eXpandFramework/expand/Office.Cloud.Google.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AReactive.XAF+label%3AOffice.Cloud.Google) [![GitHub close issues](http://185-229-225-45.cloud-xip.com/github/issues-closed/eXpandFramework/eXpand/Office.Cloud.Google.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AReactive.XAF+label%3AOffice.Cloud.Google)
 # About 
 
 The `Google` package authenticates against the Google Cloud services.
@@ -156,19 +156,18 @@ The module follows the Nuget [Version Basics](https://docs.Google.com/en-us/nuge
 |<!-- -->|<!-- -->
 |----|----
 |**DevExpress.Persistent.Base**|**Any**
-|[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.222.7
- |Xpand.Extensions|4.222.7
- |Xpand.Extensions.Office.Cloud|4.222.7
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.222.7
- |Xpand.Extensions.Reactive|4.222.7
- |Xpand.Extensions.XAF|4.222.7
- |Xpand.Extensions.XAF.Xpo|4.222.7
+|[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.222.6
+ |Xpand.Extensions|4.222.6
+ |Xpand.Extensions.Office.Cloud|4.222.6
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.222.6
+ |Xpand.Extensions.Reactive|4.222.6
+ |Xpand.Extensions.XAF|4.222.6
+ |Xpand.Extensions.XAF.Xpo|4.222.6
  |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
  |System.Reactive|5.0.0
  |Google.Apis.Auth|1.55.0
- |System.Threading.Tasks.Dataflow|7.0.0
  |Xpand.Patcher|3.0.17
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.222.7
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.222.6
 
 ## Issues-Debugging-Troubleshooting
 

@@ -1,6 +1,6 @@
-![](http://45-126-125-189.cloud-xip.com/nuget/v/Xpand.XAF.Modules.Blazor.svg?&style=flat) ![](http://45-126-125-189.cloud-xip.com/nuget/dt/Xpand.XAF.Modules.Blazor.svg?&style=flat)
+![](http://185-229-225-45.cloud-xip.com/nuget/v/Xpand.XAF.Modules.Blazor.svg?&style=flat) ![](http://185-229-225-45.cloud-xip.com/nuget/dt/Xpand.XAF.Modules.Blazor.svg?&style=flat)
 
-[![GitHub issues](http://45-126-125-189.cloud-xip.com/github/issues/eXpandFramework/expand/Blazor.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AReactive.XAF+label%3ABlazor) [![GitHub close issues](http://45-126-125-189.cloud-xip.com/github/issues-closed/eXpandFramework/eXpand/Blazor.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AReactive.XAF+label%3ABlazor)
+[![GitHub issues](http://185-229-225-45.cloud-xip.com/github/issues/eXpandFramework/expand/Blazor.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AReactive.XAF+label%3ABlazor) [![GitHub close issues](http://185-229-225-45.cloud-xip.com/github/issues-closed/eXpandFramework/eXpand/Blazor.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AReactive.XAF+label%3ABlazor)
 # About 
 
 The `Blazor` package hosts and activates Blazor specific XAF artifacts (Editors, Services, etc).
@@ -88,13 +88,13 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |----|----
 |**DevExpress.ExpressApp.Blazor**|**Any**
  |**DevExpress.ExpressApp.Validation.Blazor**|**Any**
-|[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.222.7
- |Xpand.Extensions.Blazor|4.222.7
- |Xpand.Extensions.Reactive|4.222.7
- |Xpand.Extensions.XAF|4.222.7
- |Xpand.Extensions|4.222.7
- |Xpand.Extensions.XAF.Xpo|4.222.7
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.222.7
+|[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.222.6
+ |Xpand.Extensions.Blazor|4.222.6
+ |Xpand.Extensions.Reactive|4.222.6
+ |Xpand.Extensions.XAF|4.222.6
+ |Xpand.Extensions|4.222.6
+ |Xpand.Extensions.XAF.Xpo|4.222.6
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.222.6
  |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
  |System.Reactive|5.0.0
  |System.Interactive|5.0.0
@@ -102,14 +102,13 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |Microsoft.CodeAnalysis|4.2.0
  |System.Data.SqlClient|4.8.5
  |System.Text.Json|7.0.2
- |System.Threading.Tasks.Dataflow|7.0.0
  |System.CodeDom|6.0.0
  |System.Configuration.ConfigurationManager|6.0.0
  |System.ServiceModel.NetTcp|4.10.0
  |System.ServiceModel.Http|4.10.0
  |System.ServiceModel.Security|4.10.0
  |Xpand.Patcher|3.0.17
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.222.7
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.222.6
 
 ## Issues-Debugging-Troubleshooting
 

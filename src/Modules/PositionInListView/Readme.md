@@ -1,6 +1,6 @@
-![](http://45-126-125-189.cloud-xip.com/nuget/v/Xpand.XAF.Modules.PositionInListView.svg?&style=flat) ![](http://45-126-125-189.cloud-xip.com/nuget/dt/Xpand.XAF.Modules.PositionInListView.svg?&style=flat)
+![](http://185-229-225-45.cloud-xip.com/nuget/v/Xpand.XAF.Modules.PositionInListView.svg?&style=flat) ![](http://185-229-225-45.cloud-xip.com/nuget/dt/Xpand.XAF.Modules.PositionInListView.svg?&style=flat)
 
-[![GitHub issues](http://45-126-125-189.cloud-xip.com/github/issues/eXpandFramework/expand/PositionInListView.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AStandalone_xaf_modules+label%3APositionInListView) [![GitHub close issues](http://45-126-125-189.cloud-xip.com/github/issues-closed/eXpandFramework/eXpand/PositionInListView.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AStandalone_XAF_Modules+label%3APositionInListView)
+[![GitHub issues](http://185-229-225-45.cloud-xip.com/github/issues/eXpandFramework/expand/PositionInListView.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AStandalone_xaf_modules+label%3APositionInListView) [![GitHub close issues](http://185-229-225-45.cloud-xip.com/github/issues-closed/eXpandFramework/eXpand/PositionInListView.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AStandalone_XAF_Modules+label%3APositionInListView)
 # About 
 
 The `PositionInListView`, controls how objects are positioned in a ListView at runtime.    

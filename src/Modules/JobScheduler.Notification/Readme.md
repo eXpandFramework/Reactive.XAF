@@ -1,6 +1,6 @@
-![](http://45-126-125-189.cloud-xip.com/nuget/v/Xpand.XAF.Modules.JobScheduler.Notification.svg?&style=flat) ![](http://45-126-125-189.cloud-xip.com/nuget/dt/Xpand.XAF.Modules.JobScheduler.Notification.svg?&style=flat)
+![](http://185-229-225-45.cloud-xip.com/nuget/v/Xpand.XAF.Modules.JobScheduler.Notification.svg?&style=flat) ![](http://185-229-225-45.cloud-xip.com/nuget/dt/Xpand.XAF.Modules.JobScheduler.Notification.svg?&style=flat)
 
-[![GitHub issues](http://45-126-125-189.cloud-xip.com/github/issues/eXpandFramework/expand/JobScheduler.Notification.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AReactive.XAF+label%3AJobScheduler.Notification) [![GitHub close issues](http://45-126-125-189.cloud-xip.com/github/issues-closed/eXpandFramework/eXpand/JobScheduler.Notification.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AReactive.XAF+label%3AJobScheduler.Notification)
+[![GitHub issues](http://185-229-225-45.cloud-xip.com/github/issues/eXpandFramework/expand/JobScheduler.Notification.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AReactive.XAF+label%3AJobScheduler.Notification) [![GitHub close issues](http://185-229-225-45.cloud-xip.com/github/issues-closed/eXpandFramework/eXpand/JobScheduler.Notification.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AReactive.XAF+label%3AJobScheduler.Notification)
 # About 
 
 The `JobScheduler.Notification` emits Object creation events and offers a Blazor UI for fine tuning them.
@@ -93,20 +93,19 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |**DevExpress.ExpressApp.Validation**|**Any**
  |**DevExpress.ExpressApp.Validation.Blazor**|**Any**
  |**DevExpress.ExpressApp.Xpo**|**Any**
-|[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.222.7
- |Xpand.Extensions.Blazor|4.222.7
- |Xpand.Extensions.Reactive|4.222.7
- |Xpand.Extensions.XAF|4.222.7
- |Xpand.Extensions|4.222.7
- |Xpand.Extensions.XAF.Xpo|4.222.7
- |[Xpand.XAF.Modules.Blazor](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Blazor)|4.222.7
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.222.7
+|[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.222.6
+ |Xpand.Extensions.Blazor|4.222.6
+ |Xpand.Extensions.Reactive|4.222.6
+ |Xpand.Extensions.XAF|4.222.6
+ |Xpand.Extensions|4.222.6
+ |Xpand.Extensions.XAF.Xpo|4.222.6
+ |[Xpand.XAF.Modules.Blazor](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Blazor)|4.222.6
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.222.6
  |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
  |System.Reactive|5.0.0
- |Hangfire.AspNetCore|1.7.34
+ |Hangfire.AspNetCore|1.7.30
  |Xpand.Patcher|3.0.17
- |System.Threading.Tasks.Dataflow|7.0.0
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.222.7
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.222.6
 
 ## Issues-Debugging-Troubleshooting
 

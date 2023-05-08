@@ -1,8 +1,8 @@
 ![image](https://user-images.githubusercontent.com/159464/66713086-c8c5a800-edae-11e9-9bc1-73ffc0c215fb.png)
 
-[![image](http://45-126-125-189.cloud-xip.com/badge/Exclusive%20services%3F-Head%20to%20the%20dashboard-Blue)](https://github.com/sponsors/apobekiaris) ![GitHub stars](http://45-126-125-189.cloud-xip.com/github/stars/expandframework/devexpress.xaf?label=Star%20the%20project%20if%20you%20think%20it%20deserves%20it&style=social) ![GitHub forks](http://45-126-125-189.cloud-xip.com/github/forks/expandframework/Devexpress.Xaf?label=Fork%20the%20project%20to%20extend%20and%20contribute&style=social)
+[![image](http://185-229-225-45.cloud-xip.com/badge/Exclusive%20services%3F-Head%20to%20the%20dashboard-Blue)](https://github.com/sponsors/apobekiaris) ![GitHub stars](http://185-229-225-45.cloud-xip.com/github/stars/expandframework/devexpress.xaf?label=Star%20the%20project%20if%20you%20think%20it%20deserves%20it&style=social) ![GitHub forks](http://185-229-225-45.cloud-xip.com/github/forks/expandframework/Devexpress.Xaf?label=Fork%20the%20project%20to%20extend%20and%20contribute&style=social)
 
-![](http://45-126-125-189.cloud-xip.com/nuget/v/Xpand.VersionConverter.svg?label=nuget.org&style=flat) ![](http://45-126-125-189.cloud-xip.com/nuget/dt/Xpand.VersionConverter.svg?style=flat)
+![](http://185-229-225-45.cloud-xip.com/nuget/v/Xpand.VersionConverter.svg?label=nuget.org&style=flat) ![](http://185-229-225-45.cloud-xip.com/nuget/dt/Xpand.VersionConverter.svg?style=flat)
 
 # About
 The `Xpand.VersionConverter` can your nuget packages to version agnostic.
@@ -49,4 +49,4 @@ Install-Package Xpand.VersionConverter
 ## Issues
 Use main project [issues](https://github.com/eXpandFramework/eXpand/issues/new/choose)
 
-[![GitHub issues by-label](http://45-126-125-189.cloud-xip.com/github/issues/expandframework/expand/VersionConverter)](https://github.com/eXpandFramework/eXpand/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AVersionConverter) [![GitHub close issues](http://45-126-125-189.cloud-xip.com/github/issues-closed/eXpandFramework/eXpand/VersionConverter.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AVersionConverter)
+[![GitHub issues by-label](http://185-229-225-45.cloud-xip.com/github/issues/expandframework/expand/VersionConverter)](https://github.com/eXpandFramework/eXpand/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AVersionConverter) [![GitHub close issues](http://185-229-225-45.cloud-xip.com/github/issues-closed/eXpandFramework/eXpand/VersionConverter.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AVersionConverter)
