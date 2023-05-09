@@ -21,9 +21,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => source.ReturnObservable().ControlCreated();
 
         public static IObservable<T> ControlCreated<T>(this IObservable<T> source) where T:ViewItem
-            => source.SelectMany(item => Observable
-                .FromEventPattern<EventHandler<EventArgs>, EventArgs>(h => item.ControlCreated += h,
-                    h => item.ControlCreated -= h,ImmediateScheduler.Instance)
+            => source.SelectMany(item => item.WhenEvent(nameof(ViewItem.ControlCreated))
                 .Select(_ => item));
     }
 }

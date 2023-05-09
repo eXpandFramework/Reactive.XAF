@@ -20,7 +20,6 @@ using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.Extensions.XAF.Xpo.SessionExtensions;
-using Xpand.TestsLib.Common;
 using Xpand.TestsLib.Common.Attributes;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.SequenceGenerator.Tests.BO;
@@ -284,11 +283,11 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
 	        explicitUnitOfWork.FlushChanges();
 	        await TestObjects(application, false, 1)
 		        .Merge(Unit.Default.ReturnObservable().Delay(TimeSpan.FromMilliseconds(300))
-		        .Do(_ => explicitUnitOfWork.CommitChanges())).FirstAsync();
+		        .Do(_ => explicitUnitOfWork.CommitChanges())).FirstAsync().Timeout(Timeout);
 	        explicitUnitOfWork.Close();
 	        simpleDataLayer.Dispose();
                 
-	        var firstAsync = await testObjectObserver.FirstAsync();
+	        var firstAsync = await testObjectObserver.FirstAsync().Timeout(Timeout);
 	        firstAsync.SequentialNumber.ShouldBe(10);
         }
 
@@ -323,16 +322,17 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
 	        testObserver.Items.Last().SequentialNumber.ShouldBe(21);
         }
 
-        [Test][XpandTest]
-        public async Task SecuredObjectSpaceProvider_Installed(){
+        [TestCase(true)]
+        // [TestCase(false)]
+        [XpandTest]
+        public async Task SecuredObjectSpaceProvider_Installed(bool nonSecured){
 	        using var application = NewApplication();
-	        application.SetupSecurity();
-	        SequenceGeneratorModule( application);
+	        SecuredSequenceGeneratorModule( application);
 	        SetSequences(application);
 
 	        var testObserver = SequenceGeneratorService.Sequence.OfType<TestObject>().Test();
                 
-	        await TestObjects(application, false, 1,nonSecured:true);
+	        await TestObjects(application, false, 1,nonSecured:nonSecured).Timeout(Timeout);
                 
 	        AssertNextSequences(application, 1,testObserver);
         }

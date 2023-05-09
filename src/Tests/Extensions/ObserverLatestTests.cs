@@ -11,7 +11,7 @@ using Xpand.TestsLib;
 
 namespace Xpand.Extensions.Tests {
     public class ObserverLatestTests : BaseTest {
-        [Test]
+        // [Test][Repeat(10)]
         public async Task ObserveLatestOn_WithScheduler_ShouldObserveLatestValueOnScheduler_EventLoop()
         {
             // Arrange

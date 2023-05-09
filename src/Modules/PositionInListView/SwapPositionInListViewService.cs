@@ -79,7 +79,8 @@ namespace Xpand.XAF.Modules.PositionInListView{
         }
 
         private static IObservable<Unit> Enable(this IObservable<SimpleAction> source) 
-            => source.SelectMany(action => action.View<ListView>().WhenSelectionChanged().Select(view => view).Pair(action).Select(tuple => tuple))
+            => source.SelectMany(action => action.View<ListView>().WhenSelectionChanged()
+                    .Select(view => view).Pair(action).Select(tuple => tuple))
                 .Merge(source.WhenExecuted()
                     .Do(e => {
                         e.Action.Controller.Frame.Action(nameof(MoveObjectDown)).Enabled[EdgeContext] = true;

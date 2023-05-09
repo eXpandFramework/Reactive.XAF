@@ -22,6 +22,9 @@ namespace Xpand.Extensions.JsonExtensions {
                  yield return enumerator.Current;
              }
          }
+         public static IEnumerable<JsonElement> EnumerateArray(this JsonElement tokenOrArray,string propertyName) 
+             => tokenOrArray.GetProperty(propertyName).EnumerateArrayUnboxed();
+
          public static IEnumerable<JsonProperty> EnumerateObjectUnboxed(this JsonElement tokenOrArray,[CallerMemberName]string caller="") {
              using var enumerator = tokenOrArray.EnumerateObject();
              while (enumerator.MoveNext()) {

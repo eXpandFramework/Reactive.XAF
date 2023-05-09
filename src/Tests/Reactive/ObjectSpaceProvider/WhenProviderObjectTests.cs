@@ -10,7 +10,7 @@ using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Tests.BOModel;
 using Xpand.XAF.Modules.Reactive.Tests.Common;
 
-namespace Xpand.XAF.Modules.Reactive.Tests.ObjectSpace {
+namespace Xpand.XAF.Modules.Reactive.Tests.ObjectSpaceProvider {
     public class WhenProviderObjectTests : ReactiveCommonAppTest {
         [Test]
         public async Task Emits_Existing_Or_Only_When_Changed_Property() {

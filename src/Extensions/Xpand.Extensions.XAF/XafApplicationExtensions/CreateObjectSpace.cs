@@ -29,11 +29,21 @@ namespace Xpand.Extensions.XAF.XafApplicationExtensions {
             if (!useObjectSpaceProvider)
                 return application.CreateObjectSpace(type ?? typeof(object));
             var applicationObjectSpaceProvider = application.ObjectSpaceProviders(type ?? typeof(object)).First();
-            if (!nonSecuredObjectSpace)
-                return applicationObjectSpaceProvider.CreateObjectSpace();
-            if (applicationObjectSpaceProvider is INonsecuredObjectSpaceProvider nonsecuredObjectSpaceProvider)
-                return nonsecuredObjectSpaceProvider.CreateNonsecuredObjectSpace();
-            return applicationObjectSpaceProvider.CreateUpdatingObjectSpace(false);
+            IObjectSpace objectSpace;
+            if (!nonSecuredObjectSpace) {
+                objectSpace = applicationObjectSpaceProvider.CreateObjectSpace();
+            }
+            else if (applicationObjectSpaceProvider is INonsecuredObjectSpaceProvider nonsecuredObjectSpaceProvider) {
+                objectSpace= nonsecuredObjectSpaceProvider.CreateNonsecuredObjectSpace();
+            }
+            else {
+                objectSpace= applicationObjectSpaceProvider.CreateUpdatingObjectSpace(false);    
+            }
+
+            if (objectSpace is CompositeObjectSpace compositeObjectSpace) {
+                compositeObjectSpace.PopulateAdditionalObjectSpaces(application);
+            }
+            return objectSpace;
         }
     }
     

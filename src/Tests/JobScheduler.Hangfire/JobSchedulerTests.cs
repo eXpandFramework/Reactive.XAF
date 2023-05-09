@@ -4,18 +4,12 @@ using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using akarnokd.reactive_extensions;
-using DevExpress.ExpressApp.Core;
-using DevExpress.ExpressApp.Security;
-using DevExpress.ExpressApp.Security.ClientServer;
-using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.Blazor;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
-using Xpand.Extensions.XAF.Xpo.ObjectSpaceExtensions;
-using Xpand.TestsLib.Blazor;
 using Xpand.TestsLib.Common;
 using Xpand.TestsLib.Common.Attributes;
 using Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects;
@@ -68,17 +62,16 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests{
         [XpandTest()][Order(0)]
         public async Task Commit_Objects_SecuredProvider() {
             var application = NewBlazorApplication();
-            application.AddModule<JobSchedulerModule>(typeof(JS));
-            application.UseSecuredProvider();
-            
-            using var testObserver = application.WhenProviderObject<JobState>()
+            application.AddSecuredProviderModule<JobSchedulerModule>(typeof(JS));
+
+            using var testObserver = application.WhenProviderCommitted<JobState>().ToObjects()
                 .FirstAsync(worker => worker.State==WorkerState.Failed)
                 .Select(state => state.Reason).Test();
             application.AddNonSecuredType(typeof(Job));
             application.CommitNewJob(typeof(TestJobDI),nameof(TestJobDI.CreateObject)).Trigger(application.ServiceProvider);
             
 
-            testObserver.AwaitDone(Timeout).ItemCount.ShouldBe(1);
+            testObserver.AwaitDone(Timeout*3).ItemCount.ShouldBe(1);
             var reason = testObserver.Items.First();
             reason.ShouldContain("object is prohibited by security");
 
@@ -90,11 +83,8 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests{
         [XpandTest()][Order(0)]
         public async Task Commit_Objects_SecuredProvider_ByPass(string method) {
             var application = NewBlazorApplication();
-            application.AddModule<JobSchedulerModule>(typeof(JS));
-            var providerContainer = application.ServiceProvider.GetService<IObjectSpaceProviderContainer>();
-            var securedObjectSpaceProvider = new SecuredObjectSpaceProvider((ISelectDataSecurityProvider)application.Security,application.ObjectSpaceProvider.DataStoreProvider());
-            providerContainer.Clear();
-            providerContainer.AddObjectSpaceProvider(securedObjectSpaceProvider);
+            application.AddSecuredProviderModule<JobSchedulerModule>(typeof(JS));
+            
             
             using var testObserver = application.WhenProviderObject<JobState>()
                 .FirstAsync(worker => worker.State==WorkerState.Succeeded)

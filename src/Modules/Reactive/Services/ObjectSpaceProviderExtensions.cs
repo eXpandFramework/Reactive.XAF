@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reactive;
@@ -21,10 +22,11 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => provider == null ? Observable.Empty<TResult>() : Observable.Using(provider.CreateObjectSpace, factory);
 
         private static readonly ISubject<IObjectSpaceProvider> SchemaUpdatingSubject=Subject.Synchronize(new Subject<IObjectSpaceProvider>());
+        
         private static readonly ISubject<IObjectSpaceProvider> SchemaUpdatedSubject=Subject.Synchronize(new Subject<IObjectSpaceProvider>());
 
         private static readonly ISubject<(IObjectSpace objectSpace, IObjectSpaceProvider objectSpaceProvider,bool updating)>
-            ObjectSpaceCreatedSubject = new Subject<(IObjectSpace objectSpace, IObjectSpaceProvider objectSpaceProvider,bool updating)>();
+            ObjectSpaceCreatedSubject = Subject.Synchronize(new Subject<(IObjectSpace objectSpace, IObjectSpaceProvider objectSpaceProvider,bool updating)>());
 
         private static MethodInfo GetMethodInfo(string methodName) 
             => typeof(ObjectSpaceProviderExtensions).GetMethods(BindingFlags.Static|BindingFlags.NonPublic).First(info => info.Name == methodName);
@@ -34,34 +36,40 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .Do(_ => {
                     application.PatchSchemaUpdated();
                     application.PatchObjectSpaceCreated();
+                    application.PatchPopulateAdditionalObjectSpaces();
                     application.PatchNonSecuredObjectSpaceCreated();
-                    application.PatchUpdatingObjectSpaceCreated();
                     application.PatchUpdatingObjectSpaceCreated();
                 })
                 .ToUnit();
 
+        private static void PatchPopulateAdditionalObjectSpaces(this XafApplication application) 
+            => application.PatchProviderObjectSpaceCreated<IObjectSpaceProvider>(nameof(IObjectSpaceProvider.CreateObjectSpace), _ => true, nameof(CreateObjectSpace));
+
         private static void PatchObjectSpaceCreated(this XafApplication application) 
-            => application.PatchProviderObjectSpaceCreated( nameof(IObjectSpaceProvider.CreateObjectSpace),info => info.Parameters().Any(),nameof(CreateObjectSpace));
+            => application.PatchProviderObjectSpaceCreated<IObjectSpaceProvider>( nameof(IObjectSpaceProvider.CreateObjectSpace),_ => true,nameof(CreateObjectSpace));
+        
         private static void PatchNonSecuredObjectSpaceCreated(this XafApplication application) 
-            => application.PatchProviderObjectSpaceCreated( nameof(INonsecuredObjectSpaceProvider.CreateNonsecuredObjectSpace),_ => true,nameof(CreateObjectSpace1));
+            => application.PatchProviderObjectSpaceCreated<INonsecuredObjectSpaceProvider>( nameof(INonsecuredObjectSpaceProvider.CreateNonsecuredObjectSpace),_ => true,nameof(CreateObjectSpace));
 
         private static void PatchUpdatingObjectSpaceCreated(this XafApplication application) 
-            => application.PatchProviderObjectSpaceCreated( nameof(IObjectSpaceProvider.CreateUpdatingObjectSpace),info => {
+            => application.PatchProviderObjectSpaceCreated<IObjectSpaceProvider>( nameof(IObjectSpaceProvider.CreateUpdatingObjectSpace),info => {
                 var parameterInfos = info.Parameters();
                 return info.DeclaringType != typeof(NonPersistentObjectSpaceProvider) && info.IsPublic && parameterInfos.Count == 1 &&
                        parameterInfos.Any(parameterInfo => parameterInfo.ParameterType == typeof(bool));
             },nameof(CreateUpdatingObjectSpace));
 
-        private static void PatchProviderObjectSpaceCreated(this XafApplication application, string targetMethodName,Func<MethodInfo,bool> match,string patchMethodName) 
-            => application.ObjectSpaceProviders.SelectMany(provider => provider.GetType().Methods(targetMethodName).Where(match).Take(1))
+        private static void PatchProviderObjectSpaceCreated<TDeclaringType>(this XafApplication application, string targetMethodName,Func<MethodInfo,bool> match,string patchMethodName) 
+            => application.ObjectSpaceProviders.SelectMany(provider => {
+                    var name = $"{typeof(TDeclaringType).FullName}.{targetMethodName}";
+                    return provider.GetType().Methods(targetMethodName, name)
+                        .Where(match)
+                        .OrderBy(info => info.Parameters().Count).Take(1);
+                })
                 .ForEach(methodInfo => new HarmonyMethod(typeof(ObjectSpaceProviderExtensions), patchMethodName)
                     .PostFix(methodInfo, true));
 
         [SuppressMessage("ReSharper", "InconsistentNaming")]
         private static void CreateObjectSpace(IObjectSpaceProvider __instance,IObjectSpace __result) 
-            => ObjectSpaceCreatedSubject.OnNext((__result, __instance,false));
-        [SuppressMessage("ReSharper", "InconsistentNaming")]
-        private static void CreateObjectSpace1(IObjectSpaceProvider __instance,IObjectSpace __result) 
             => ObjectSpaceCreatedSubject.OnNext((__result, __instance,false));
         
         [SuppressMessage("ReSharper", "InconsistentNaming")]
@@ -91,14 +99,18 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => SchemaUpdatedSubject.OnNext(__instance);
 
         public static IObservable<TProvider> WhenSchemaUpdating<TProvider>(this TProvider provider) where TProvider:IObjectSpaceProvider 
-            => SchemaUpdatingSubject.AsObservable().Where(spaceProvider => spaceProvider==(IObjectSpaceProvider)provider).Cast<TProvider>();
+            => SchemaUpdatingSubject.AsObservable().Where(spaceProvider => spaceProvider.IsSame(provider)).Cast<TProvider>();
 
         public static IObservable<TProvider> WhenSchemaUpdated<TProvider>(this TProvider provider) where TProvider:IObjectSpaceProvider 
-            => SchemaUpdatedSubject.AsObservable().Where(spaceProvider => spaceProvider==(IObjectSpaceProvider)provider).Cast<TProvider>();
+            => SchemaUpdatedSubject.AsObservable().Where(spaceProvider => spaceProvider.IsSame(provider)).Cast<TProvider>();
         
-        public static IObservable<IObjectSpace> WhenObjectSpaceCreated<TProvider>(this TProvider provider,bool emitUpdatingObjectSpace=false) where TProvider:IObjectSpaceProvider 
-            => ObjectSpaceCreatedSubject.AsObservable().Where(t => emitUpdatingObjectSpace||!t.updating)
-                .Where(t=>t.objectSpaceProvider==(IObjectSpaceProvider)provider).Select(t => t.objectSpace);
+        public static IObservable<IObjectSpace> WhenObjectSpaceCreated<TProvider>(this TProvider provider, bool emitUpdatingObjectSpace = false) where TProvider : IObjectSpaceProvider 
+            => ObjectSpaceCreatedSubject.Where(t => emitUpdatingObjectSpace || !t.updating)
+                .Where(t => t.objectSpaceProvider.IsSame( provider)).Select(t => t.objectSpace);
+
+        static bool IsSame<TExpected, TActual>(this TActual actual, TExpected expected) where TExpected : TActual 
+            => EqualityComparer<TExpected>.Default.Equals((TExpected)actual, expected);
+
         public static IObservable<IDataStore> WhenDataStoreCreated<TProvider>(this TProvider provider) where TProvider:IObjectSpaceProvider 
             => provider.GetPropertyValue("DataStoreProvider").When("DevExpress.ExpressApp.Xpo.ConnectionStringDataStoreProvider")
                 .SelectMany(spaceProvider => spaceProvider.WhenEvent("DataStoreCreated").Select(pattern => pattern.EventArgs.GetPropertyValue("DataStore")))

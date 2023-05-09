@@ -18,6 +18,7 @@ using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Security;
+using DevExpress.ExpressApp.Security.ClientServer;
 using DevExpress.ExpressApp.SystemModule;
 using DevExpress.ExpressApp.Templates;
 using DevExpress.ExpressApp.Templates.ActionContainers;
@@ -118,8 +119,10 @@ namespace Xpand.TestsLib.Common{
             view.CreateControls();
         }
 
-        public static void SetupDefaults(this XafApplication application, params ModuleBase[] modules){
-            application.RegisterDefaults(modules);
+        public static void SetupDefaults(this XafApplication application, params ModuleBase[] modules) => application.SetupDefaults(Array.Empty<IObjectSpaceProvider>(),modules);
+
+        public static void SetupDefaults(this XafApplication application,IObjectSpaceProvider[] providers, params ModuleBase[] modules){
+            application.RegisterDefaults(providers,modules);
             application.Setup();
             
             if (!string.IsNullOrEmpty(application.ConnectionString)&&!application.ConnectionString.Contains(InMemoryDataStoreProvider.ConnectionString)){
@@ -127,7 +130,7 @@ namespace Xpand.TestsLib.Common{
             }
         }
 
-        public static void RegisterDefaults(this XafApplication application, params ModuleBase[] modules){
+        public static void RegisterDefaults(this XafApplication application,IObjectSpaceProvider[] providers, params ModuleBase[] modules){
             if (modules.Any() && application.Security is SecurityStrategyComplex){
                 if (!modules.OfType<TestApplicationModule>().Any()){
                     modules=modules.AddToArray(new TestApplicationModule());
@@ -171,7 +174,8 @@ namespace Xpand.TestsLib.Common{
                 }
             }
 
-            application.AddObjectSpaceProvider();
+            application.AddObjectSpaceProvider(providers);
+            
         }
 
         public static readonly Dictionary<string, int> ModulePorts = new(){
@@ -268,12 +272,17 @@ namespace Xpand.TestsLib.Common{
         }
 
         public static ModuleBase AddModule(this XafApplication application, ModuleBase moduleBase, string title = null,
-            bool setup = true, params Type[] additionalExportedTypes){
+            bool setup = true, params Type[] additionalExportedTypes) 
+            => application.AddModule(moduleBase, Array.Empty<IObjectSpaceProvider>(), title, setup, additionalExportedTypes);
+
+        public static ModuleBase AddModule(this XafApplication application, ModuleBase moduleBase,IObjectSpaceProvider[] providers, string title = null,
+            bool setup = true, params Type[] additionalExportedTypes) {
+            providers ??= Array.Empty<IObjectSpaceProvider>();
             var applicationTitle = title ?? application.Title;
             application.Title = applicationTitle;
             moduleBase.AdditionalExportedTypes.AddRange(additionalExportedTypes);
             if (setup){
-                application.SetupDefaults(moduleBase);
+                application.SetupDefaults(providers,moduleBase);
                 return application.Modules.FirstOrDefault(m => m.Name == moduleBase.Name);
             }
 
@@ -282,13 +291,21 @@ namespace Xpand.TestsLib.Common{
 
         public static T AddModule<T>(this XafApplication application, string title,
             params Type[] additionalExportedTypes) where T : ModuleBase, new() 
-            => (T) application.AddModule(new T(), title, true, additionalExportedTypes);
+            => (T) application.AddModule(new T(),Array.Empty<IObjectSpaceProvider>(), title, true, additionalExportedTypes);
         public static T AddModule<T>(this XafApplication application, string title,bool setup,
             params Type[] additionalExportedTypes) where T : ModuleBase, new() 
-            => (T) application.AddModule(new T(), title, setup, additionalExportedTypes);
+            => (T) application.AddModule(new T(),Array.Empty<IObjectSpaceProvider>(), title, setup, additionalExportedTypes);
 
         public static T AddModule<T>(this XafApplication application, params Type[] additionalExportedTypes) where T : ModuleBase, new() 
-            => (T) application.AddModule(new T(), null, true, additionalExportedTypes);
+            => (T) application.AddModule(new T(),Array.Empty<IObjectSpaceProvider>(), null, true, additionalExportedTypes);
+        public static T AddModule<T>(this XafApplication application,IObjectSpaceProvider objectSpaceProvider, params Type[] additionalExportedTypes) where T : ModuleBase, new() 
+            => (T) application.AddModule(new T(),objectSpaceProvider.YieldItem().ToArray(), null, true, additionalExportedTypes);
+        public static T AddSecuredProviderModule<T>(this XafApplication application,params Type[] additionalExportedTypes) where T : ModuleBase, new() 
+            => (T) application.AddModule(new T(),new SecuredObjectSpaceProvider(
+                (ISelectDataSecurityProvider)application.Security, new MemoryDataStoreProvider()).YieldItem().Cast<IObjectSpaceProvider>().ToArray(), null, true, additionalExportedTypes);
+        public static T AddSecuredProviderModule<T>(this XafApplication application,IXpoDataStoreProvider dataStoreProvider,params Type[] additionalExportedTypes) where T : ModuleBase, new() 
+            => (T) application.AddModule(new T(),new SecuredObjectSpaceProvider(
+                (ISelectDataSecurityProvider)application.Security, dataStoreProvider).YieldItem().Cast<IObjectSpaceProvider>().ToArray(), null, true, additionalExportedTypes);
 
         public static TModule NewModule<TModule>(this Platform platform, string title = null,
             params Type[] additionalExportedTypes) where TModule : ModuleBase, new() 

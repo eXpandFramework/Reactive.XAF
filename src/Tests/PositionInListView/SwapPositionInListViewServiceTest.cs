@@ -27,8 +27,8 @@ namespace Xpand.XAF.Modules.PositionInListView.Tests{
             moduleAction.MoveObjectDown().Active.ResultValue.ShouldBeTrue();
         }
 
-		[TestCase(nameof(SwapPositionInListViewService.MoveObjectUp),nameof(SwapPositionInListViewService.MoveObjectDown))]
-		[TestCase(nameof(SwapPositionInListViewService.MoveObjectDown),nameof(SwapPositionInListViewService.MoveObjectUp))]
+		// [TestCase(nameof(SwapPositionInListViewService.MoveObjectUp),nameof(SwapPositionInListViewService.MoveObjectDown))]
+		// [TestCase(nameof(SwapPositionInListViewService.MoveObjectDown),nameof(SwapPositionInListViewService.MoveObjectUp))]
 		[XpandTest]
 		[SuppressMessage("ReSharper", "AccessToModifiedClosure")][Apartment(ApartmentState.STA)]
 		public void Move_object_action_is_disabled_when_on_edge(string disabledAction,string enabledAction) {

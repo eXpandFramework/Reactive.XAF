@@ -280,9 +280,10 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
                 .Merge(source.WhenControllerDeActivated().Do(action => action.Items.Clear()).IgnoreElements())
         ;
 
-        public static IObservable<TArgs> CreateDetailView<TArgs>(this IObservable<TArgs> source, Type objectType, TargetWindow? targetWindow =null) where TArgs:ActionBaseEventArgs
+        public static IObservable<TArgs> CreateDetailView<TArgs>(this IObservable<TArgs> source, Type objectType=null, TargetWindow? targetWindow =null) where TArgs:ActionBaseEventArgs
 	        => source.Do(e => {
 		        var parameters = e.ShowViewParameters;
+                objectType ??= e.Action.View().ObjectTypeInfo.Type;
 		        parameters.CreatedView = e.Action.Application.NewDetailView(objectType);
                 parameters.CreatedView.CurrentObject = parameters.CreatedView.ObjectSpace.CreateObject(objectType);
 		        if (targetWindow.HasValue) {

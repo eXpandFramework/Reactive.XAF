@@ -363,14 +363,11 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static T CreateObject<T>(this IObjectSpaceLink link)
             => link.ObjectSpace.CreateObject<T>();
         
-        public static Task CommitChangesAsync(this IObjectSpace objectSpace) {
-            if (objectSpace is  NonPersistentObjectSpace nonPersistentObjectSpace) {
-                return Task.WhenAll(nonPersistentObjectSpace.AdditionalObjectSpaces.OfType<IObjectSpaceAsync>().ToNowObservable()
-                    .SelectMany(async => Observable.FromAsync(() => async.CommitChangesAsync()))
-                    .ToTask());
-            }
-            return ((IObjectSpaceAsync)objectSpace).CommitChangesAsync();
-        }
+        public static Task CommitChangesAsync(this IObjectSpace objectSpace) 
+            => objectSpace is NonPersistentObjectSpace nonPersistentObjectSpace
+                ? Task.WhenAll(nonPersistentObjectSpace.AdditionalObjectSpaces.OfType<IObjectSpaceAsync>().ToObservable()
+                    .SelectMany(async => Observable.FromAsync(() => async.CommitChangesAsync())).ToTask())
+                : ((IObjectSpaceAsync)objectSpace).CommitChangesAsync();
 
         public static IObservable<Unit> Commit(this IObjectSpace objectSpace) 
             => objectSpace.CommitChangesAsync().ToObservable();
@@ -526,8 +523,9 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .TakeUntil(objectSpace.WhenDisposed());
 
         public static IObservable<(IObjectSpace objectSpace, CancelEventArgs e)> WhenCommiting(this IObjectSpace item) 
-            => item.WhenEvent<CancelEventArgs>(nameof(IObjectSpace.Committing)).InversePair(item)
-                .TakeUntil(item.WhenDisposed());
+            => Observable.FromEventPattern<EventHandler<CancelEventArgs>, CancelEventArgs>(h => item.Committing += h, h => item.Committing -= h,ImmediateScheduler.Instance)
+                .TakeUntil(item.WhenDisposed())
+                .TransformPattern<CancelEventArgs, IObjectSpace>();
 
         
         public static IObservable<(IObjectSpace objectSpace,ObjectsManipulatingEventArgs e)> ObjectDeleted(this IObservable<IObjectSpace> source) 

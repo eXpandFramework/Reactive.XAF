@@ -88,6 +88,7 @@ jobs:
         runInParallel: false
         runSettingsFile: $(System.DefaultWorkingDirectory)\build\Tests.runsettings
         runTestsInIsolation: false
+        otherConsoleOptions: '/Framework:.NETCoreApp,Version=v6.0 /logger:console;verbosity="normal"'
         collectDumpOn: never
 - job: TestNet6_1
   dependsOn: 
@@ -183,7 +184,7 @@ jobs:
         runInParallel: false
         runSettingsFile: $(System.DefaultWorkingDirectory)\build\Tests.runsettings
         runTestsInIsolation: false
-        otherConsoleOptions: '/Framework:.NETCoreApp,Version=v5.0 /logger:console;verbosity="normal"'
+        otherConsoleOptions: '/Framework:.NETCoreApp,Version=v6.0 /logger:console;verbosity="normal"'
         collectDumpOn: never
 - job: TestNet6_2
   dependsOn: 

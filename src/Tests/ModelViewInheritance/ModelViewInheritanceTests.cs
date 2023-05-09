@@ -37,8 +37,8 @@ namespace Xpand.XAF.Modules.ModelViewInheritance.Tests{
             var testModule2 = new TestModule2{DiffsStore = new ResourcesModelStore(GetType().Assembly,"Model1")};
             testModule2.AdditionalExportedTypes.AddRange(boTypes);
 
-            application.SetupDefaults(module, testModule1, testModule2,
-                new TestModule3{DiffsStore = new ResourcesModelStore(GetType().Assembly,"Model2")});
+            application.SetupDefaults(Array.Empty<IObjectSpaceProvider>(), new ModuleBase[]{module,testModule1, testModule2,
+                new TestModule3{DiffsStore = new ResourcesModelStore(GetType().Assembly,"Model2")}});
 
             var modelClassB = application.Model.BOModel.GetClass(typeof(AMvi));
             var viewB =viewType==ViewType.ListView? modelClassB.DefaultListView.AsObjectView:modelClassB.DefaultDetailView;
@@ -90,7 +90,7 @@ namespace Xpand.XAF.Modules.ModelViewInheritance.Tests{
             var boTypes = new[]{typeof(AMvi), typeof(FileMvi)};
             var modelViewInheritanceModule = new ModelViewInheritanceModule();
             modelViewInheritanceModule.RequiredModuleTypes.AddRange(modules);
-            application.AddModule(modelViewInheritanceModule,null,setup,baseBoTypes.Concat(boTypes).ToArray());
+            application.AddModule(modelViewInheritanceModule,Array.Empty<IObjectSpaceProvider>(),null,setup,baseBoTypes.Concat(boTypes).ToArray());
             return modelViewInheritanceModule;
         }
          
@@ -101,7 +101,7 @@ namespace Xpand.XAF.Modules.ModelViewInheritance.Tests{
             var module = DefaultModelViewInheritanceModule(newApplication,false, typeof(CloneModelViewModule));
             var testModule1 = new TestModule1{DiffsStore = new ResourcesModelStore(GetType().Assembly,"ChainedListView")};
             testModule1.AdditionalExportedTypes.Add(typeof(Element));
-            newApplication.SetupDefaults(module, testModule1,new CloneModelViewModule());
+            newApplication.SetupDefaults(Array.Empty<IObjectSpaceProvider>(), module, testModule1,new CloneModelViewModule());
 
             var listViewBase = ((IModelListView) newApplication.Model.Views[Element.ListViewBase]);
             listViewBase.Columns[nameof(Element.Street)].Index.ShouldBe(-1);

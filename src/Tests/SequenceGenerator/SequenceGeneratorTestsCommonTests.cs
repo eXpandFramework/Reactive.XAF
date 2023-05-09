@@ -29,6 +29,16 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
             // application.Model.ToReactiveModule<IModelReactiveModuleLogger>().ReactiveLogger.TraceSources.Enabled = false;
             return sequenceGeneratorModule;
         }
+        protected  SequenceGeneratorModule SecuredSequenceGeneratorModule( XafApplication application=null,Platform platform=Platform.Win){
+            application ??= NewApplication(platform);
+            application.SetupSecurity();
+            var sequenceGeneratorModule = application.AddSecuredProviderModule<SequenceGeneratorModule>(
+                new ConnectionStringDataStoreProvider(application.ConnectionString),
+                typeof(TestObject).Assembly.GetTypes().Where(type => typeof(IXPSimpleObject).IsAssignableFrom(type))
+                    .Concat(new[] { typeof(CustomSequenceTypeName) }).ToArray());
+            // application.Model.ToReactiveModule<IModelReactiveModuleLogger>().ReactiveLogger.TraceSources.Enabled = false;
+            return sequenceGeneratorModule;
+        }
 
         protected XafApplication NewApplication(Platform platform=Platform.Win,bool usePersistentStorage=true,bool handleExceptions=true){
             return platform.NewApplication<SequenceGeneratorModule>(usePersistentStorage:usePersistentStorage,handleExceptions:handleExceptions);
@@ -64,8 +74,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
                 XpoTypesInfoHelper.GetXpoTypeInfoSource().XPDictionary,
                 AutoCreateOption.DatabaseAndSchema
             );
-
-
+        
         protected IObservable<Unit> TestObjects<T>(XafApplication application,bool parallel, int count = 100, int objectSpaceCount = 1, Action beforeSave = null,bool nonSecured=false){
             if (parallel){
                 return Observable.Range(1, count).SelectMany(_ => Observable.Defer(() => Observable.Start(() => {

@@ -37,7 +37,7 @@ namespace Xpand.Extensions.XAF.TypesInfoExtensions{
 			if (includeBaseTypes) {
 				infos = info.FromHierarchy(typeInfo => typeInfo.Base).Prepend(info);
 			}
-			return infos.SelectMany(typeInfo => typeInfo.FindAttributes<Attribute>(includeBaseTypes).OfType<TAttribute>().Select(attribute => (attribute, info)));
+			return infos.Distinct().SelectMany(typeInfo => typeInfo.FindAttributes<Attribute>(includeBaseTypes).OfType<TAttribute>().Select(attribute => (attribute, info)));
 		}
 
 		public static IMemberInfo FindMember<T>(this ITypeInfo typeInfo,Expression<Func<T, object>> memberName) 

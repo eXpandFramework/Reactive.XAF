@@ -7,7 +7,7 @@ using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Tests.BOModel;
 using Xpand.XAF.Modules.Reactive.Tests.Common;
 
-namespace Xpand.XAF.Modules.Reactive.Tests.ObjectSpace {
+namespace Xpand.XAF.Modules.Reactive.Tests.ObjectSpaceProvider {
     public class WhenProviderCommittedDetailedTests : ReactiveCommonAppTest {
         [Test]
         public void WhenProviderCommittedDetailed() {

@@ -141,7 +141,7 @@ namespace Xpand.XAF.Modules.CloneModelView.Tests{
 
 
 			cloneModelViewModule.RequiredModuleTypes.Add(typeof(ReactiveModule));
-			return (CloneModelViewModule) application.AddModule(cloneModelViewModule, null, true, typeof(CMV));
+			return (CloneModelViewModule) application.AddModule(cloneModelViewModule,  additionalExportedTypes:typeof(CMV));
 		}
 
 		private static CloneModelViewModule DefaultCloneModelViewModule(Action<ITypesInfo> customizeTypesInfo,

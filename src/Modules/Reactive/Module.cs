@@ -41,6 +41,6 @@ namespace Xpand.XAF.Modules.Reactive {
                 .Subscribe(this);
         }
 
-        public static bool PopulateAdditionalObjectSpaces { get; set; } = true;
+        
     }
 }

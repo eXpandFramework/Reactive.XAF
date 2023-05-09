@@ -1,14 +1,12 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.ApplicationBuilder;
 using DevExpress.ExpressApp.Blazor.ApplicationBuilder;
 using DevExpress.ExpressApp.Security;
 using DevExpress.ExpressApp.Blazor.Services;
-using DevExpress.ExpressApp.Blazor.SystemModule;
-using DevExpress.ExpressApp.Office.Blazor;
 using Hangfire;
 using Hangfire.MemoryStorage;
-using Hangfire.SqlServer;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components.Server.Circuits;
@@ -23,7 +21,6 @@ using Xpand.XAF.Modules.JobScheduler.Hangfire.Hangfire;
 using DevExpress.Persistent.BaseImpl.PermissionPolicy;
 using Fasterflect;
 using HarmonyLib;
-using TestApplication.Module;
 using TestApplication.Module.Blazor;
 using Xpand.Extensions.Harmony;
 
@@ -33,12 +30,10 @@ using Xpand.Extensions.Harmony;
 [assembly: HostingStartup(typeof(Xpand.XAF.Modules.Blazor.BlazorStartup))]
 namespace TestApplication.Blazor.Server {
     public class Startup {
+        [SuppressMessage("ReSharper", "InconsistentNaming")]
         public static void CheckValueOnInsert(ModuleList __instance,object value) {
-            if (value.GetType() == typeof(SystemBlazorModule)) {
-                
-            }
             if (__instance.FindModule(value.GetType()) != null)
-                throw new ArgumentException(string.Format("The {0} module has already been added.", (object) value.GetType().FullName), nameof (value));   
+                throw new ArgumentException($"The {(object)value.GetType().FullName} module has already been added.", nameof (value));   
         }
         public Startup(IConfiguration configuration) {
             Configuration = configuration;
@@ -81,7 +76,7 @@ namespace TestApplication.Blazor.Server {
             	// .Add<DXApplication24BlazorModule>()
                 ;
             builder.ObjectSpaceProviders
-                .AddSecuredXpo((serviceProvider, options) => {
+                .AddSecuredXpo((_, options) => {
                     string connectionString = null;
                     if(Configuration.GetConnectionString("ConnectionString") != null) {
                         connectionString = Configuration.GetConnectionString("ConnectionString");

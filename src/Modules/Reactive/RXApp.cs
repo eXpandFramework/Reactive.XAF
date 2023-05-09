@@ -172,12 +172,6 @@ namespace Xpand.XAF.Modules.Reactive{
             => applicationModulesManager.WhereApplication().ToObservable().SelectMany(_ => _.SetupPropertyEditorParentView());
 
         
-        public static IObservable<Unit> UpdateMainWindowStatus<T>(IObservable<T> messages,TimeSpan period=default){
-            if (period==default)
-                period=TimeSpan.FromSeconds(5);
-            return WindowTemplateService.UpdateStatus(period, messages);
-        }
-
         internal static IObservable<ApplicationModulesManager> ApplicationModulesManager => ApplicationModulesManagerSubject.AsObservable();
     }
 

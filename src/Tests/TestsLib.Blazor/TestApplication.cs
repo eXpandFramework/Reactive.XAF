@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
@@ -46,15 +47,13 @@ namespace Xpand.TestsLib.Blazor {
 
 
 		protected override void OnCreateCustomObjectSpaceProvider(CreateCustomObjectSpaceProviderEventArgs args) {
-			var provider = ServiceProvider.GetRequiredService<XpoDataStoreProviderAccessor>().DataStoreProvider;
-			// if (provider != null) {
-			args.ObjectSpaceProvider = this.NewObjectSpaceProvider(provider);
+			base.OnCreateCustomObjectSpaceProvider(args);
+			if (!args.ObjectSpaceProviders.OfType<XPObjectSpaceProvider>().Any()) {
+				var provider = ServiceProvider.GetRequiredService<XpoDataStoreProviderAccessor>().DataStoreProvider;
+				args.ObjectSpaceProvider = this.NewObjectSpaceProvider(provider);
+			}
 			args.ObjectSpaceProviders.Add(ServiceProvider.GetService<NonPersistentObjectSpaceProvider>() ??
 			                              new NonPersistentObjectSpaceProvider(TypesInfo, null));
-			// }
-			// else {
-			// base.OnCreateCustomObjectSpaceProvider(args);
-			// }
 		}
 
 		protected override string GetModelCacheFileLocationPath() => null;

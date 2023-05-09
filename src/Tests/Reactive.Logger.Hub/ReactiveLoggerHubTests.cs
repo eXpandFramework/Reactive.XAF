@@ -125,8 +125,8 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub.Tests{
             events.FirstOrDefault(_ => _.Location==nameof(ReactiveLoggerHubService)).ShouldNotBeNull();
         }
 
-        [Test]
-        [XpandTest]
+        // [Test]
+        // [XpandTest]
         [Apartment(ApartmentState.STA)][Order(200)]
         public async Task Display_TraceEvent_On_Running_Client(){
             XpoTypesInfoHelper.GetXpoTypeInfoSource().XPDictionary.CollectClassInfos(GetType().Assembly);

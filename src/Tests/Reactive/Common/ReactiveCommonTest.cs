@@ -10,8 +10,17 @@ namespace Xpand.XAF.Modules.Reactive.Tests.Common{
             application.AddModule<TestModule>(typeof(R),typeof(NonPersistentObject));
             return application.Modules.FindModule<ReactiveModule>();
         }
+        protected virtual ReactiveModule DefaultSecuredReactiveModule(XafApplication application){
+            application.SetupSecurity();
+            application.AddSecuredProviderModule<TestModule>(typeof(R),typeof(NonPersistentObject));
+            return application.Modules.FindModule<ReactiveModule>();
+        }
 
         protected ReactiveModule DefaultReactiveModule(Platform platform=Platform.Win){
+            var application = NewXafApplication(platform);
+            return DefaultReactiveModule(application);
+        }
+        protected ReactiveModule DefaultSecuredReactiveModule(Platform platform=Platform.Win){
             var application = NewXafApplication(platform);
             return DefaultReactiveModule(application);
         }

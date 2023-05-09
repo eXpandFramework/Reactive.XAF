@@ -1,11 +1,9 @@
 ﻿using DevExpress.Persistent.Base;
 using DevExpress.Xpo;
-using System.Diagnostics.CodeAnalysis;
 using Xpand.XAF.Persistent.BaseImpl;
 
 namespace Xpand.TestsLib.Common.BO{
     [DefaultClassOptions]
-    [SuppressMessage("Design", "XAF0023:Do not implement IObjectSpaceLink in the XPO types")]
     public class Order : CustomBaseObject{
         private Accessory _accessory;
         private Product _product;
@@ -31,7 +29,7 @@ namespace Xpand.TestsLib.Common.BO{
         }
 
         [Association("Order-AggregatedOrders")] [Aggregated]
-        public XPCollection<Order> AggregatedOrders => GetCollection<Order>(nameof(AggregatedOrders));
+        public XPCollection<Order> AggregatedOrders => GetCollection<Order>();
 
         Order _aggregatedOrder;
 

@@ -129,8 +129,9 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => application.WhenFrameCreated().SelectMany(window => window.Actions(actions)).WhenExecuted();
         public static IObservable<ActionBaseEventArgs> WhenActionExecuteCompleted(this XafApplication application,params string[] actions) 
             => application.WhenFrameCreated().SelectMany(window => window.Actions(actions)).WhenExecuteCompleted();
-        public static IObservable<ActionBase> WhenActionExecuteConcat(this XafApplication application,params string[] actions) 
-            => application.WhenFrameCreated().SelectMany(window => window.Actions(actions)).WhenExecuteConcat();
+        public static IObservable<T> WhenActionExecuteConcat<T>(this XafApplication application,Func<SimpleActionExecuteEventArgs,IObservable<T>> selector,params string[] actions)  
+            => application.WhenFrameCreated().SelectMany(window => window.Actions(actions).OfType<SimpleAction>().ToObservable()
+                .SelectMany(a => a.WhenConcatExecution(selector)));
         
         public static IObservable<(TAction action, CancelEventArgs e)> WhenActionExecuting<TController,TAction>(
             this XafApplication application, Func<TController, TAction> action) where TController : Controller where TAction:ActionBase 
@@ -778,10 +779,9 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => application.WhenObject(objectModification, existing, Array.Empty<string>(), criteriaExpression);
 
         internal static IObservable<Unit> PopulateAdditionalObjectSpaces(this XafApplication application) 
-            => Observable.If(() => ReactiveModule.PopulateAdditionalObjectSpaces,application.WhenObjectSpaceCreated().OfType<NonPersistentObjectSpace>()
-                .Merge(application.ObjectSpaceProviders.ToNowObservable().SelectMany(provider => provider.WhenObjectSpaceCreated().OfType<CompositeObjectSpace>()))
-                .Do(space => space.PopulateAdditionalObjectSpaces(application))
-                .ToUnit());
+            => application.WhenObjectSpaceCreated().OfType<CompositeObjectSpace>()
+                .Where(space => space.Owner is not CompositeObjectSpace)
+                .Do(space => space.PopulateAdditionalObjectSpaces(application)).ToUnit();
 
         public static IObservable<(Frame source, Frame target, T1 sourceObject, T2 targetObject, int targetIndex)> SynchronizeGridListEditor<T1, T2>(
                 this IObservable<(Frame source, Frame target, T1 sourceObject, T2 targetObject, int targetIndex)>  source)
