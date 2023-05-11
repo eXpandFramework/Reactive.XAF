@@ -54,145 +54,116 @@ jobs:
           $env:AzOrganization="eXpandDevops"
           $env:AzProject ="eXpandFramework"
           & '$(System.DefaultWorkingDirectory)\Build\BuildPipeline.ps1' @goArgs
-    - task: PublishPipelineArtifact@1
-      condition: eq(variables['UseLastVersion'], '')
-      name: PublishBin
+    - task: DotNetCoreCLI@2
+      displayName: 'AutoCommit'
       inputs:
-        targetPath: '$(System.DefaultWorkingDirectory)\bin'
-        artifact: 'bin'
-        publishLocation: 'pipeline'
-    - task: DownloadPipelineArtifact@2
-      condition: ne(variables['UseLastVersion'], '')
-      name: UseLastVersion
+        command: 'test'
+        projects: '**/Xpand.XAF.Modules.AutoCommit.Tests.csproj'
+        workingDirectory: '$(System.DefaultWorkingDirectory)'
+    - task: DotNetCoreCLI@2
+      displayName: 'BulkObjectUpdate'
       inputs:
-        buildType: 'specific'
-        project: 'dc0010e5-9ecf-45ac-b89d-2d51897f3855'
-        definition: '23'
-        buildVersionToDownload: 'latestFromBranch'
-        branchName: 'refs/heads/$(Build.SourceBranchName)'
-        tags: '$(CustomVersion)'
-        artifactName: 'bin'
-        targetPath: '$(System.DefaultWorkingDirectory)\bin'
-    - task: AzurePowerShell@5
-      name: BuildNugetConsumers
+        command: 'test'
+        projects: '**/Xpand.XAF.Modules.BulkObjectUpdate.Tests.csproj'
+        workingDirectory: '$(System.DefaultWorkingDirectory)'
+    - task: DotNetCoreCLI@2
+      displayName: 'CloneMemberValue'
       inputs:
-        errorActionPreference: stop
-        FailOnStandardError: true
-        azureSubscription: 'Visual Studio Enterprise(b48a609a-17f6-4e48-a317-54ab77fbf822)'
-        ScriptType: 'InlineScript'
-        azurePowerShellVersion: 'LatestVersion'
-        pwsh: true
-        Inline: |
-          $ErrorView="NormalView"
-          "Nugetpackage=$env:Nuget_PACKAGES"
-          $ErrorActionPreference="stop"
-          $goArgs = @{
-              GithubToken              = '$(GitHubToken)'
-              AzureToken               = '$(AzureToken)' 
-              GitHubUserName           = '$(GitHubUserName)' 
-              DXApiFeed                = '$(DXApiFeed)'
-              Branch                   = '$(Build.SourceBranchName)'
-              SourcePath               = '$(System.DefaultworkingDirectory)'
-              ArtifactStagingDirectory = '$(Build.Artifactstagingdirectory)'
-              BinDirectory             = '$(System.DefaultworkingDirectory)\bin'
-              CustomVersion            = '$(CustomVersion)'
-              UseLastVersion           = '$(UseLastVersion)'
-              XpandBlobOwnerSecret     = '$(XpandBlobOwnerSecret)'
-              AzureApplicationId       = '$(AzureApplicationId)'
-              AzureTenantId            = '$(AzureTenantId)'
-          }
-          "goArgs:"
-          $goArgs | Out-String
-          $env:AzureToken='($AzureToken)'
-          $env:AzOrganization="eXpandDevops"
-          $env:AzProject ="eXpandFramework"
-          $goArgs = @{
-              packageSources = 'https://xpandnugetserver.azurewebsites.net/nuget;$(DXApiFeed)'
-              tasklist       = "BuildNugetConsumers"
-              dxVersion      = '$(CustomVersion)'
-              Branch         = '$(Build.SourceBranchName)'
-          }
-          
-          & "$(System.DefaultWorkingDirectory)\go.ps1" -InstallModules
-          $env:AzureToken='$(AzureToken)'
-          $env:AzOrganization="eXpandDevOps"
-          $env:AzProject ="eXpandFramework"
-          $env:DXFeed='$(DXApiFeed)'
-          $BuildPastVersion='Yes'
-          $lastVersion=(Get-XAFLatestMinors -source '$(DXApiFeed)'|select-object -last 1)
-          if ('$(CustomVersion)' -eq $lastVersion){
-              $BuildPastVersion='No'
-          }
-          $parameters = @{
-              DxPipelineBuildId = '$(Build.BuildId)'
-              CustomVersion = '$(CustomVersion)'
-              BuildPastVersion = $BuildPastVersion
-              AzStorageLookup = '0'
-          }
-          $minor=(Get-VersionPart '$(CustomVersion)' Minor)
-          "minor=$minor"
-          $env:BranchName=$env:Build_SourceBranchName
-          $env:BranchName
-          if ($minor -ne "19.2"){
-              Add-AzBuild -Definition Reactive.XAF-Tests -Tag '$(CustomVersion)' -Parameters $parameters
-          }
-          else{
-                $xafMinors=Get-XAFLatestMinors -Source '$(DXApiFeed)'
-                
-                $failedBuilds = $xafMinors|Where-Object{$_ -gt "20.1.0"} | ForEach-Object {
-                  $build = Get-AzBuilds -Definition Reactive.XAF-Tests -Tag "$_" -Top 1 
-                  Get-AzTestRuns -buildIds $build.Id -FailedOnly
-                }
-                "failedBuilds=$failedBuilds"
-                if ($failedBuilds){
-                  $failedBuilds
-                  throw "Failed tests "
-                }
-                "PublishNugets-Reactive.XAF"
-                $env:DXFeed = '$(DXApiFeed)'
-                $xafMinor=$xafMinors|select-object -first 1
-                $build=Get-AzBuilds -Definition Reactive.XAF -Tag "$xafMinor" -Top 1 
-                $parameters = @{
-                    CustomVersion     = "$xafMinor"
-                    DxPipelineBuildId = "$($build.Id)"
-                }
-                $parameters|Out-String
-                Add-AzBuild -Definition PublishNugets-Reactive.XAF -Parameters $parameters
-          }
-          & "$(System.DefaultWorkingDirectory)\go.ps1" @goArgs
-          New-Item '$(System.DefaultWorkingDirectory)\bin\Nupkg' -ItemType Directory -ErrorAction SilentlyContinue
-          & '$(System.DefaultWorkingDirectory)\Build\DownloadCloudCreds.ps1' -GitHubToken '$(GitHubToken)' -GitUserEmail '$(GitUserEmail)'
-    - task: PublishPipelineArtifact@1
-      name: PublishZips
+        command: 'test'
+        projects: '**/Xpand.XAF.Modules.CloneMemberValue.Tests.csproj'
+        workingDirectory: '$(System.DefaultWorkingDirectory)'
+    - task: DotNetCoreCLI@2
+      displayName: 'CloneModelView'
       inputs:
-        targetPath: '$(System.DefaultWorkingDirectory)\bin\zip'
-        artifact: 'Zip'
-        publishLocation: 'pipeline'
-    - task: VSTest@2
-      displayName: 'TestNugetConsumers'
-      enabled: false
-      continueOnError: true
+        command: 'test'
+        projects: '**/Xpand.XAF.Modules.CloneModelView.Tests.csproj'
+        workingDirectory: '$(System.DefaultWorkingDirectory)'
+    - task: DotNetCoreCLI@2
+      displayName: 'Email'
       inputs:
-        searchFolder: '$(System.DefaultWorkingDirectory)\bin\'
-        testSelector: 'testAssemblies'
-        testAssemblyVer2: |
-          **\Blazor.Tests.dll
-          **\WinDesktop.Tests.dll
-          **\Win.Tests.dll
-          **\Web.Tests.dll
-          !**\obj\**    
-        diagnosticsEnabled: true
-        codeCoverageEnabled: true
-        distributionBatchType: basedOnAssembly
-        runInParallel: false
-        runSettingsFile: $(System.DefaultWorkingDirectory)\build\Tests.runsettings
-        runTestsInIsolation: false
-        collectDumpOn: never
+        command: 'test'
+        projects: '**/Xpand.XAF.Modules.Email.Tests.csproj'
+        workingDirectory: '$(System.DefaultWorkingDirectory)'
+    - task: DotNetCoreCLI@2
+      displayName: 'Test: Xpand.Extensions'
+      inputs:
+        command: 'test'
+        projects: '**/Xpand.Extensions.Tests.csproj'
+        workingDirectory: '$(System.DefaultWorkingDirectory)'
+    - task: DotNetCoreCLI@2
+      displayName: 'GridListEditor'
+      inputs:
+        command: 'test'
+        projects: '**/Xpand.XAF.Modules.GridListEditor.Tests.csproj'
+        workingDirectory: '$(System.DefaultWorkingDirectory)'
+    - task: DotNetCoreCLI@2
+      displayName: 'HideToolBar'
+      inputs:
+        command: 'test'
+        projects: '**/Xpand.XAF.Modules.HideToolBar.Tests.csproj'
+        workingDirectory: '$(System.DefaultWorkingDirectory)'
+    - task: DotNetCoreCLI@2
+      displayName: 'JobScheduler.Hangfire'
+      inputs:
+        command: 'test'
+        projects: '**/Xpand.XAF.Modules.JobScheduler.Hangfire.Tests.csproj'
+        workingDirectory: '$(System.DefaultWorkingDirectory)'
+    - task: DotNetCoreCLI@2
+      displayName: 'JobScheduler.Notification'
+      inputs:
+        command: 'test'
+        projects: '**/Xpand.XAF.Modules.JobScheduler.Notification.Tests.csproj'
+        workingDirectory: '$(System.DefaultWorkingDirectory)'
+    - task: DotNetCoreCLI@2
+      displayName: 'MasterDetail'
+      inputs:
+        command: 'test'
+        projects: '**/Xpand.XAF.Modules.MasterDetail.Tests.csproj'
+        workingDirectory: '$(System.DefaultWorkingDirectory)'
+    - task: DotNetCoreCLI@2
+      displayName: 'ModelMapper'
+      inputs:
+        command: 'test'
+        projects: '**/Xpand.XAF.Modules.ModelMapper.Tests.csproj'
+        workingDirectory: '$(System.DefaultWorkingDirectory)'
+    - task: DotNetCoreCLI@2
+      displayName: 'ModelViewInheritance'
+      inputs:
+        command: 'test'
+        projects: '**/Xpand.XAF.Modules.ModelViewInheritance.Tests.csproj'
+        workingDirectory: '$(System.DefaultWorkingDirectory)'
+    - task: DotNetCoreCLI@2
+      displayName: 'Office.Cloud'
+      inputs:
+        command: 'test'
+        projects: '**/Xpand.XAF.Modules.Office.Cloud.Tests.csproj'
+        workingDirectory: '$(System.DefaultWorkingDirectory)'
+    - task: DotNetCoreCLI@2
+      displayName: 'Office.Cloud.Google'
+      inputs:
+        command: 'test'
+        projects: '**/Xpand.XAF.Modules.Office.Cloud.Google.Tests.csproj'
+        workingDirectory: '$(System.DefaultWorkingDirectory)'
+    - task: DotNetCoreCLI@2
+      displayName: 'Office.Cloud.Google.Calendar'
+      inputs:
+        command: 'test'
+        projects: '**/Xpand.XAF.Modules.Office.Cloud.Google.Calendar.Tests.csproj'
+        workingDirectory: '$(System.DefaultWorkingDirectory)'
+    - task: DotNetCoreCLI@2
+      displayName: 'Office.Cloud.Google.Tasks'
+      inputs:
+        command: 'test'
+        projects: '**/Xpand.XAF.Modules.Office.Cloud.Google.Tasks.Tests.csproj'
+        workingDirectory: '$(System.DefaultWorkingDirectory)'
+    - task: DotNetCoreCLI@2
+      displayName: 'Office.DocumentStyleManager'
+      inputs:
+        command: 'test'
+        projects: '**/Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.csproj'
+        workingDirectory: '$(System.DefaultWorkingDirectory)'
     - task: PowerShell@2
-      continueOnError: false
-      name: CheckTests
       inputs:
-        pwsh: true
         targetType: 'inline'
         script: |
           $ErrorView="NormalView"
@@ -200,43 +171,19 @@ jobs:
           $env:AzureToken='$(AzureToken)'
           $env:AzProject="eXpandFramework"
           $env:AzOrganization="eXpandDevOps"
-          $testbuild=$null
-          do {
-              
-              try {
-                $testbuild=(Get-AzBuilds -Definition Reactive.XAF-Tests )|Select-Object -First 1
-              }
-              catch {
-                  
-              }
-              Write-Host "Waiting build  $($testbuild.id)..."
-              Start-Sleep 20
-          } while ($testbuild.status -ne "completed")
-          Write-Host "Checking build  $($testbuild.id)..."
-          $(System.DefaultWorkingDirectory)\Build\check-tests.ps1 '$(System.DefaultWorkingDirectory)' '$(AzureToken)' '$(DXApiFeed)' '$(testBuild.Id)'
-          Write-Host "Checking build  '$(Build.BuildId)'..."
-          "PublishNugets-Reactive.XAF"
-          $env:DXFeed = '$(DXApiFeed)'
+          & '$(System.DefaultWorkingDirectory)\go.ps1' -InstallModules
           $xafMinors=Get-XAFLatestMinors -Source '$(DXApiFeed)'
           $xafMinor=$xafMinors|select-object -first 1
-          $env:CustomVersion=$xafminor
-          $env:DxPipelineBuildId='$(Build.BuildId)'
-          $(System.DefaultWorkingDirectory)\Build\check-tests.ps1 '$(System.DefaultWorkingDirectory)' '$(AzureToken)' '$(DXApiFeed)' '$(Build.BuildId)' -publish
-
-          
-          
-    # - task: PublishPipelineArtifact@1
-    #   name: PublishNugetConsumers
-    #   inputs:
-    #     targetPath: '$(System.DefaultWorkingDirectory)\bin\'
-    #     artifact: 'NugetConsumers'
-    #     publishLocation: 'pipeline'
-    # - task: PublishPipelineArtifact@1
-    #   name: All
-    #   inputs:
-    #     targetPath: '$(System.DefaultWorkingDirectory)\'
-    #     artifact: 'All'
-    #     publishLocation: 'pipeline'
+          $parameters = @{
+            CustomVersion     = "$xafminor"
+            DxPipelineBuildId = '$(Build.BuildId)'
+          }
+          $parameters
+          Add-AzBuild -Definition PublishNugets-Reactive.XAF -Parameters $parameters -Branch $env:Build_SourceBranchName
+          Write-Host "Hello World"
+        failOnStderr: true
+        ignoreLASTEXITCODE: true
+        pwsh: true
     - task: PublishPipelineArtifact@1
       name: PublishNugets
       inputs:
@@ -244,11 +191,6 @@ jobs:
         artifact: 'Nupkg'
         publishLocation: 'pipeline'
     
-    # - task: PublishPipelineArtifact@1
-    #   name: PublishNugetCache
-    #   inputs:
-    #     targetPath: '$(NUGET_PACKAGES)'
-    #     artifact: 'NupkgCache'
-    #     publishLocation: 'pipeline'
+    
     
     

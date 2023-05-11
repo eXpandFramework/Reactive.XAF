@@ -83,9 +83,9 @@ Task CompileTests -precondition { return ((Get-VersionPart $DXVersion Minor) -ne
         
     } -Maximum 3
 
-    if (!(Test-AzDevops)) {
+    # if (!(Test-AzDevops)) {
         Invoke-Task -taskName BuildNugetConsumers
-    }
+    # }
     
     Get-ChildItem $root\bin "*xpand*.dll" | Test-AssemblyReference -VersionFilter $DXVersion
     
