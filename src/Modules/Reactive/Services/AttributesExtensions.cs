@@ -32,11 +32,21 @@ namespace Xpand.XAF.Modules.Reactive.Services {
                     .MapTypeMembersAttributes()
                     .VisibleInAllViewsAttribute()
                     .ToUnit())
+                .Merge(manager.ListViewShowFooterCollection())
                 .Merge(manager.ReadOnlyCollection())
                 .Merge(manager.ReadOnlyProperty())
                 .Merge(manager.LookupPropertyAttribute())
-                .Merge(manager.ReadOnlyObjectViewAttribute())
-        ;
+                .Merge(manager.ReadOnlyObjectViewAttribute());
+
+        static IObservable<Unit> ListViewShowFooterCollection(this ApplicationModulesManager manager)
+            => manager.WhenGeneratingModelNodes<IModelViews>()
+                .SelectMany(views => views.OfType<IModelListView>()).Where(view =>
+                    view.ModelClass.TypeInfo.FindAttributes<ListViewShowFooterAttribute>(true).Any())
+                .Do(view => view.IsFooterVisible = true)
+                .SelectMany(view => view.Columns.SelectMany(column =>
+                    column.ModelMember.MemberInfo.FindAttributes<ColumnSummaryAttribute>(true)
+                        .Do(attribute => column.Summary.AddNode<IModelColumnSummaryItem>().SummaryType = attribute.SummaryType)))
+                .ToUnit();
         static IObservable<Unit> ReadOnlyProperty(this ApplicationModulesManager manager)
             => manager.WhenGeneratingModelNodes<IModelBOModelClassMembers>()
                 .SelectMany(members => members.SelectMany(member => member.MemberInfo.FindAttributes<ReadOnlyPropertyAttribute>()
@@ -97,6 +107,7 @@ namespace Xpand.XAF.Modules.Reactive.Services {
                         .Do(info => ((TypeInfo) info).AddAttribute(new ReadOnlyObjectViewAttribute()))
                         .ToUnit()));
 
+        
         static IObservable<Unit> VisibleInAllViewsAttribute(this IObservable<(ApplicationModulesManager manager, CustomizeTypesInfoEventArgs e)> source)
             => source.ConcatIgnored(t => t.e.TypesInfo.Members<VisibleInAllViewsAttribute>().ToArray().ToObservable()
                     .SelectMany(t1 => new Attribute[] { new VisibleInDetailViewAttribute(true), new VisibleInListViewAttribute(true), new VisibleInLookupListViewAttribute(true) }
