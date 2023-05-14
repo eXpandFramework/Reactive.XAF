@@ -190,6 +190,12 @@ jobs:
         targetPath: '$(System.DefaultWorkingDirectory)\bin\Nupkg'
         artifact: 'Nupkg'
         publishLocation: 'pipeline'
+    - task: PublishPipelineArtifact@1
+      name: PublishZips
+      inputs:
+        targetPath: '$(System.DefaultWorkingDirectory)\bin\zip'
+        artifact: 'Zip'
+        publishLocation: 'pipeline'
     
     
     

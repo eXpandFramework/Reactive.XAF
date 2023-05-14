@@ -84,19 +84,19 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |<!-- -->|<!-- -->
 |----|----
 |**DevExpress.ExpressApp.Validation**|**Any**
-|[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.222.12
- |Xpand.Extensions.Reactive|4.222.12
- |Xpand.Extensions|4.222.12
- |Xpand.Extensions.XAF|4.222.12
- |Xpand.Extensions.XAF.Xpo|4.222.12
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.222.12
+|[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.222.13
+ |Xpand.Extensions.Reactive|4.222.13
+ |Xpand.Extensions|4.222.13
+ |Xpand.Extensions.XAF|4.222.13
+ |Xpand.Extensions.XAF.Xpo|4.222.13
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.222.13
  |Xpand.Patcher|3.0.17
  |System.Reactive|5.0.0
  |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
  |System.Text.Json|7.0.2
  |Xpand.Collections|1.0.4
  |System.Threading.Tasks.Dataflow|7.0.0
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.222.12
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.222.13
 
 ## Issues-Debugging-Troubleshooting
 

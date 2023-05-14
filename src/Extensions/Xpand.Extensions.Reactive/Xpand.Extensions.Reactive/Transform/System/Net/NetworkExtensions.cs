@@ -171,8 +171,8 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net {
         
         public static IObservable<T> SelectDocument<T>(this IObservable<(JsonDocument document, HttpResponseMessage message)> source,Func<JsonDocument,IObservable<T>> selector)
             => source.SelectMany(t => selector(t.document).FinallySafe(() => t.document.Dispose()));
-        public static IObservable<JsonElement> SelectMany(this IObservable<(JsonDocument document,HttpResponseMessage message)> source) 
-            => source.SelectMany(t => t.document.SelectMany());
+        public static IObservable<JsonElement> SelectMany(this IObservable<(JsonDocument document,HttpResponseMessage message)> source,bool dispose=true) 
+            => source.SelectMany(t => t.document.SelectMany(dispose));
         private static IObservable<T> WhenResponseObject<T>(this IObservable<HttpResponseMessage> source,
             object obj, Func<HttpResponseMessage,IObservable<T>> deserializeResponse) 
             => source.SelectMany(responseMessage => deserializeResponse.DeserializeResponse()(responseMessage)

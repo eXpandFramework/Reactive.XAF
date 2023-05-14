@@ -7,7 +7,7 @@ using Xpand.Extensions.LinqExtensions;
 
 namespace Xpand.Extensions.JsonExtensions {
     public static partial class JsonExtensions {
-         public static IEnumerable<JsonElement> SelectMany(this JsonDocument document,bool dispose=true)
+         public static IEnumerable<JsonElement> SelectMany(this JsonDocument document,bool dispose=false)
              => document.RootElement.SelectMany().Finally(() => {
                  if (dispose) {
                      document.Dispose();
