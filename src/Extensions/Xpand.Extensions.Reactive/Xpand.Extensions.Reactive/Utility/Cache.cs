@@ -6,20 +6,20 @@ using System.Reactive.Subjects;
 namespace Xpand.Extensions.Reactive.Utility {
     public static partial class Utility {
         
-        public static IObservable<T2> Cache<T, T2>(this IObservable<T> source,
-            ConcurrentDictionary<object, IConnectableObservable<object>> storage, object key,
+        public static IObservable<T2> Cache<T, T2,TKey>(this IObservable<T> source,
+            ConcurrentDictionary<TKey, IConnectableObservable<object>> storage, TKey key,
             Func<T, IObservable<T2>> secondSelector, TimeSpan? interval) where T2 : class
             => source.SelectMany(message => {
                     if (interval.HasValue) {
                         if (storage.TryGetValue(key, out var value)) {
-                            return value.Select(o => o).FirstAsync().Cast<T2>().Finally(() => { });
+                            return value.FirstAsync().Cast<T2>();
                         }
-                        var publish = Observable.Interval(interval.Value).StartWith(0)
+                        var publish = Observable.Interval(interval.Value)
                             .SelectMany(_ => secondSelector(message))
                             .Publish().RefCount().Replay(1);
-                        publish.Connect();
+                        var connection = publish.Connect();
                         storage.TryAdd(key, publish);
-                        return publish.Select(o => o).FirstAsync().Cast<T2>().Finally(() => { });
+                        return publish.FirstAsync().Finally(() =>connection.Dispose() ).Cast<T2>();
                     }
 
                     return secondSelector(message);

@@ -6,7 +6,6 @@ using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using Xpand.Extensions.Numeric;
-using Xpand.Extensions.Reactive.Filter;
 
 namespace Xpand.Extensions.Reactive.Transform {
     public static partial class Transform {
@@ -137,7 +136,7 @@ namespace Xpand.Extensions.Reactive.Transform {
         /// </summary>
         public static IObservable<IList<TSource>> BufferHistorical<TSource>(this IObservable<TSource> source, TimeSpan interval, TimeSpan replayDuration) 
             => source.Replay(replayed => Observable.Interval(interval)
-                .SelectMany(_ => replayed.TakeUntil(Observable.Return(Unit.Default, global::System.Reactive.Concurrency.Scheduler.CurrentThread)).ToList())
+                .SelectMany(_ => replayed.TakeUntil(Observable.Return(Unit.Default, Scheduler.CurrentThread)).ToList())
                 .TakeUntil(replayed.LastOrDefaultAsync()), replayDuration, ImmediateScheduler);
         
         public static IObservable<IList<TSource>> BufferOmitEmpty<TSource>(this IObservable<TSource> observable, TimeSpan maxDelay, int maxBufferCount) 
