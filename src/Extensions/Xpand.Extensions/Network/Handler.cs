@@ -23,4 +23,6 @@ namespace Xpand.Extensions.Network {
         private static readonly MemberGetter HandlerAccessor=typeof(HttpClient).DelegateForGetFieldValue("_handler");
 
     }
+    
+    
 }

@@ -15,6 +15,7 @@ using System.Text.Json.Nodes;
 using Fasterflect;
 using Xpand.Extensions.BytesExtensions;
 using Xpand.Extensions.JsonExtensions;
+using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Network;
 using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Conditional;
@@ -66,12 +67,11 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net {
             }).Subtract(DateTime.Now);
         }
 
-        
-        static T Sign<T>(this T requestMessage,string key,string secret) where T:HttpRequestMessage{
+        public static T Sign<T>(this T requestMessage,string key,string secret) where T:HttpRequestMessage{
             if (key != null) {
                 var toSing = requestMessage.RequestUri!.PathAndQuery;
                 if (requestMessage.Method != HttpMethod.Get) {
-                    toSing = $"{requestMessage.RequestUri.AbsolutePath}?{requestMessage.Content!.ReadAsStringAsync().Result}";
+                    toSing = requestMessage.RequestUri.AbsolutePath.JoinString("?",requestMessage.Content!.ReadAsStringAsync().Result);
                 }
                 var sign = secret.Bytes().CryptoSign(toSing).Replace("-", "").ToLower();
                 requestMessage.Headers.Add("Signature", sign);
@@ -224,7 +224,7 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net {
         public static T SetContent<T>(this T message,  string content, string key = null, string secret = null,bool formDataContent=false) where T:HttpRequestMessage {
             if (message.Method != HttpMethod.Get&&!string.IsNullOrEmpty(content) )
                 message.Content = new StringContent(content, Encoding.UTF8, formDataContent ? "application/x-www-form-urlencoded" : "application/json");
-            
+
             return message.Sign(key, secret);
         }
 
@@ -232,7 +232,6 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net {
             => new HttpRequestMessage(httpMethod,requestUri).SetContent(o.Serialize(),key,secret);
         
     }
-
     
     public class HttpResponseException:HttpRequestException {
         public HttpResponseMessage HttpResponseMessage{ get; }
