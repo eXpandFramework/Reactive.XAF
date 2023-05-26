@@ -48,11 +48,13 @@ namespace Xpand.Extensions.SpanExtensions {
             return result;
         }
         
+        public static DateTime? ToNullableDateTime(this ReadOnlySpan<char> span) 
+            => span.IsEmpty ? null : DateTime.TryParse(span, out var result) ? result : null;
         public static DateTime ToDateTime(this ReadOnlySpan<char> span) {
             DateTime.TryParse(span, out var result);
             return result;
         }
-        
+
         public static DateTimeOffset ToDateTimeOffset(this ReadOnlySpan<char> span) {
             DateTimeOffset.TryParse(span, out var result);
             return result;

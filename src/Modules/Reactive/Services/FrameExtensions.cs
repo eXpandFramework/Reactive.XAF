@@ -10,6 +10,7 @@ using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.SystemModule;
+using Xpand.Extensions.Numeric;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
@@ -28,7 +29,9 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => source.Where(_ => _.Application.Modules.FindModule(moduleType) != null);
 
         public static IObservable<TFrame> MergeViewCurrentObjectChanged<TFrame>(this IObservable<TFrame> source) where TFrame : Frame
-            => source.MergeWith(frame => frame.View.WhenCurrentObjectChanged().TakeUntil(frame.View.WhenClosed()).To(frame));
+            => source.SelectMany(frame => frame.View.WhenCurrentObjectChanged().DistinctUntilChanged(view => view.ObjectSpace.GetKeyValue(view.CurrentObject))
+                    .WhenNotDefault(view => view.CurrentObject).To(frame).WaitUntilInactive(3.Seconds()).ObserveOnContext())
+                ;
         
         public static IObservable<TFrame> When<TFrame>(this IObservable<TFrame> source, TemplateContext templateContext)
             where TFrame : Frame 

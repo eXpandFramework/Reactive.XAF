@@ -29,6 +29,6 @@ namespace Xpand.Extensions.Network{
             return response;
         }
 
-        public static byte[] EmptyContent { get; } = "{}".Bytes();
+        public static byte[] EmptyContent { get; } = "[]".Bytes();
     }
 }

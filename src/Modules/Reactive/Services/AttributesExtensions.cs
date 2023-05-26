@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
@@ -14,12 +15,14 @@ using DevExpress.Persistent.Base;
 using Fasterflect;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.LinqExtensions;
+using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.Attributes;
 using Xpand.Extensions.XAF.Attributes.Custom;
 using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.Extensions.XAF.TypesInfoExtensions;
 using Xpand.Extensions.XAF.ViewExtensions;
+using Xpand.XAF.Modules.Reactive.Services.Actions;
 
 namespace Xpand.XAF.Modules.Reactive.Services {
     public static class AttributesExtensions {
@@ -33,11 +36,28 @@ namespace Xpand.XAF.Modules.Reactive.Services {
                     .VisibleInAllViewsAttribute()
                     .ToUnit())
                 .Merge(manager.ListViewShowFooterCollection())
+                .Merge(manager.HiddenActions())
                 .Merge(manager.ReadOnlyCollection())
                 .Merge(manager.ReadOnlyProperty())
                 .Merge(manager.LookupPropertyAttribute())
+                .Merge(manager.LinkUnlinkPropertyAttribute())
                 .Merge(manager.ReadOnlyObjectViewAttribute());
 
+        static IObservable<Unit> LinkUnlinkPropertyAttribute(this ApplicationModulesManager manager)
+            => manager.WhenApplication(application => application.WhenFrame(typeof(object),ViewType.DetailView)
+                .SelectMany(frame => frame.View.ObjectTypeInfo.AttributedMembers<LinkUnlinkPropertyAttribute>().ToNowObservable()
+                    .SelectMany(t => frame.View.AsDetailView().NestedListViews(t.memberInfo.ListElementType)
+                        .Select(editor => editor.Frame.GetController<LinkUnlinkController>())
+                        .SelectMany(controller => controller.LinkAction.WhenExecuteCompleted()
+                            .SelectMany(e => e.PopupWindowViewSelectedObjects.Cast<object>())
+                            .Do(value => ((IList)frame.View.ObjectTypeInfo.FindMember(t.attribute.PropertyName)
+                                .GetValue(frame.View.CurrentObject)).Add(value))
+                            .MergeToUnit(controller.UnlinkAction.WhenExecuteCompleted()
+                                .SelectMany(e => e.SelectedObjects.Cast<object>())
+                                .Do(value => ((IList)frame.View.ObjectTypeInfo.FindMember(t.attribute.PropertyName)
+                                    .GetValue(frame.View.CurrentObject)).Remove(value)))))))
+                .ToUnit();
+                
         static IObservable<Unit> ListViewShowFooterCollection(this ApplicationModulesManager manager)
             => manager.WhenGeneratingModelNodes<IModelViews>()
                 .SelectMany(views => views.OfType<IModelListView>()).Where(view =>
@@ -46,6 +66,13 @@ namespace Xpand.XAF.Modules.Reactive.Services {
                 .SelectMany(view => view.Columns.SelectMany(column =>
                     column.ModelMember.MemberInfo.FindAttributes<ColumnSummaryAttribute>(true)
                         .Do(attribute => column.Summary.AddNode<IModelColumnSummaryItem>().SummaryType = attribute.SummaryType)))
+                .ToUnit();
+        
+        static IObservable<Unit> HiddenActions(this ApplicationModulesManager manager)
+            => manager.WhenGeneratingModelNodes<IModelViews>()
+                .SelectMany(views =>views.OfType<IModelObjectView>()
+                    .SelectMany(view => view.ModelClass.TypeInfo.Attributed<HiddenActionAttribute>()
+                        .SelectMany(t => t.attribute.Actions).Do(action => ((IModelViewHiddenActions)view).HiddenActions.AddNode<IModelActionLink>(action))))
                 .ToUnit();
         static IObservable<Unit> ReadOnlyProperty(this ApplicationModulesManager manager)
             => manager.WhenGeneratingModelNodes<IModelBOModelClassMembers>()

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
@@ -123,11 +124,10 @@ namespace Xpand.TestsLib.Common{
 
         public static void SetupDefaults(this XafApplication application,IObjectSpaceProvider[] providers, params ModuleBase[] modules){
             application.RegisterDefaults(providers,modules);
-            application.Setup();
-            
             if (!string.IsNullOrEmpty(application.ConnectionString)&&!application.ConnectionString.Contains(InMemoryDataStoreProvider.ConnectionString)){
-                application.ObjectSpaceProvider.DeleteAllData();
+                application.DeleteAllData();
             }
+            application.Setup();
         }
 
         public static void RegisterDefaults(this XafApplication application,IObjectSpaceProvider[] providers, params ModuleBase[] modules){
@@ -317,10 +317,8 @@ namespace Xpand.TestsLib.Common{
 	        => platform.NewXafApplication<TModule>(transmitMessage, handleExceptions).Configure<TModule>(platform, transmitMessage, usePersistentStorage);
 
         public static XafApplication Configure<TModule>(this XafApplication application,Platform platform, bool transmitMessage = true, bool usePersistentStorage=false) where TModule : ModuleBase {
-	        application.ConnectionString = usePersistentStorage
-		        ? @$"Integrated Security=SSPI;Pooling=false;Data Source=(localdb)\mssqllocaldb;Initial Catalog={typeof(TModule).Name}"
-		        : InMemoryDataStoreProvider.ConnectionString;
-	        application.DatabaseUpdateMode = DatabaseUpdateMode.UpdateDatabaseAlways;
+            application.ConnectionString = usePersistentStorage ? @$"Integrated Security=SSPI;Pooling=false;Data Source=(localdb)\mssqllocaldb;Initial Catalog={typeof(TModule).Name}" : InMemoryDataStoreProvider.ConnectionString;
+            application.DatabaseUpdateMode = DatabaseUpdateMode.UpdateDatabaseAlways;
 	        application.CheckCompatibilityType = CheckCompatibilityType.DatabaseSchema;
 	        application.ConfigureModel<TModule>(transmitMessage).SubscribeReplay();
 	        application.MockEditorsFactory();
@@ -341,6 +339,9 @@ namespace Xpand.TestsLib.Common{
 
 	        return application;
         }
+
+        
+        
 
         public static XafApplication NewXafApplication<TModule>(this Platform platform, bool transmitMessage=true, bool handleExceptions=true)
 	        where TModule : ModuleBase {

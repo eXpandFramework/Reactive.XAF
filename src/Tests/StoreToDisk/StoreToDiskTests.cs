@@ -46,11 +46,16 @@ namespace Xpand.XAF.Modules.StoreToDisk.Tests {
             var jToken = deserializeJson.First();
             jToken[nameof(STD.Secret)].Change<string>().ShouldBe("secret");
             jToken[nameof(STD.Name)].Change<string>().ShouldBe(nameof(When_Application_ObjectSpace_Commits_New_Objects));
-            jToken[nameof(STD.Dep)].Change<int>().ShouldBe(0);
+            jToken.AsObject().ContainsKey(nameof(STD.Dep)).ShouldBeFalse();
             jToken = deserializeJson.Last();
             jToken[nameof(STD.Secret)].Change<string>().ShouldBe("secret1");
             jToken[nameof(STD.Name)].Change<string>().ShouldBe(nameof(When_Application_ObjectSpace_Commits_New_Objects));
-            jToken[nameof(STD.Dep)].Change<int>().ShouldBe(0);
+            
+            jToken.AsObject().ContainsKey(nameof(STD.Dep)).ShouldBeFalse();
+            jToken.AsObject().ContainsKey(nameof(STD.DefaultValue)).ShouldBeFalse();
+            jToken.AsObject().ContainsKey(nameof(STD.NotStored)).ShouldBeFalse();
+            
+            
         }
         
         [Test][Order(1)]

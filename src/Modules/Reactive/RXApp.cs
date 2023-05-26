@@ -17,6 +17,7 @@ using Fasterflect;
 using HarmonyLib;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.LinqExtensions;
+using Xpand.Extensions.Numeric;
 using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
@@ -106,6 +107,7 @@ namespace Xpand.XAF.Modules.Reactive{
                 .Merge(application.NonPersistentChangesEnabledAttribute())
                 .Merge(application.PopulateAdditionalObjectSpaces())
                 .Merge(application.ReloadWhenChanged())
+                .Merge(application.FireChanged())
                 .Merge(application.ShowMessages())
                 .Merge(application.ShowInstanceDetailView());
         }
@@ -114,6 +116,20 @@ namespace Xpand.XAF.Modules.Reactive{
         private static IObservable<Unit> ShowInstanceDetailView(this XafApplication application)
             => application.WhenSetupComplete().SelectMany(_ => application.WhenViewOnFrame().ShowInstanceDetailView(application.TypesInfo
                     .PersistentTypes.Attributed<ShowInstanceDetailViewAttribute>().Types().Select(info => info.Type).ToArray())).ToUnit();
+        
+        private static IObservable<Unit> FireChanged(this XafApplication application)
+            => application.WhenSetupComplete().SelectMany(_ => {
+                var attributes = application.Model.BOModel.TypeInfos().AttributedMembers<FireChangedAttribute>().ToArray();
+                var objectTypes = attributes.Select(t => t.memberInfo.Owner.Type).Distinct().ToArray();
+                return application.WhenFrame(objectTypes)
+                    .SelectUntilViewClosed(frame => {
+                        var properties = attributes.Where(t => frame.View.ObjectTypeInfo.Members.Contains(t.memberInfo))
+                            .SelectMany(t => t.attribute.Properties).ToArray();
+                        return frame.View.ObjectSpace.WhenModifiedObjects(objectTypes, properties)
+                            .ObserveOnContext().Select(o => o);
+                    })
+                    .ToUnit();
+            });
         
         private static IObservable<Unit> ReloadWhenChanged(this XafApplication application)
             => application.WhenSetupComplete().SelectMany(_ => {
@@ -125,9 +141,6 @@ namespace Xpand.XAF.Modules.Reactive{
                         .Do(t => {
                             if (t.attribute.ObjectPropertyChangeMethodName != null) {
                                 frame.View.CurrentObject.CallMethod(t.attribute.ObjectPropertyChangeMethodName, t.info.Name);      
-                            }
-                            else if (frame.View == null) {
-                                
                             }
                             else if (typeof(IReloadWhenChange).IsAssignableFrom(frame.View.ObjectTypeInfo.Type)) {
                                 frame.View.CurrentObject.As<IReloadWhenChange>().WhenPropertyChanged(t.info.Name);
