@@ -37,7 +37,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Services.DocumentStyleMa
                 documentStyleManager.Content = server.Document.ToByteArray(DocumentFormat.OpenXml);
                 return view.Application().DefaultPropertiesProvider(document => {
 		                documentStyleManager.SynchronizeStyles(document);
-		                return Unit.Default.ReturnObservable();
+		                return Unit.Default.Observe();
 	                })
                     .TraceDocumentStyleModule(_ => styles.Select(style => style.StyleName).Join(","));
             });

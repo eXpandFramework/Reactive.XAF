@@ -23,7 +23,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
     public static class XAFWinApiExtensions{
         public static IObservable<IXAFAppWinAPI> WhenWin(this XafApplication application) 
-            => application.GetPlatform() == Platform.Win ? new XAFAppWinAPI(application).ReturnObservable() : Observable.Empty<IXAFAppWinAPI>();
+            => application.GetPlatform() == Platform.Win ? new XAFAppWinAPI(application).Observe() : Observable.Empty<IXAFAppWinAPI>();
 
         public static IObservable<Window> WhenMainFormShown(this IXAFAppWinAPI api) 
             => api.Application.WhenWindowCreated().When(TemplateContext.ApplicationWindow)

@@ -13,6 +13,6 @@ namespace Xpand.Extensions.Reactive.Transform{
             => source.ToObservable(ImmediateScheduler);
         
         public static IObservable<TSource> Consume<TSource>(this BlockingCollection<TSource> source)
-            => source.GetConsumingEnumerable().ToObservable(global::System.Reactive.Concurrency.Scheduler.Default);
+            => source.GetConsumingEnumerable().ToObservable(Scheduler.Default);
     }
 }

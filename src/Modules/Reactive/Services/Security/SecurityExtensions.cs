@@ -61,7 +61,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Security{
         public static IObservable<Unit> Logon(this XafApplication application,object userKey) 
             => AuthenticateSubject.Where(_ => _.authentication== application.Security.GetPropertyValue("Authentication"))
                 .Do(_ => _.args.SetInstance(_ => userKey)).SelectMany(_ => application.WhenLoggedOn().FirstAsync()).ToUnit()
-                .Merge(Unit.Default.ReturnObservable().Do(_ => application.Logon()).IgnoreElements())
+                .Merge(Unit.Default.Observe().Do(_ => application.Logon()).IgnoreElements())
                 .TraceRX(_ => $"{userKey}");
 
         public static IObjectSpace CreateAuthenticatedObjectSpace<TUser>(this IServiceProvider provider, string userName) 

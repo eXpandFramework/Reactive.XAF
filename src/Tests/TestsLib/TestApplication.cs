@@ -93,12 +93,12 @@ namespace Xpand.TestsLib{
             => Process.GetProcessesByName("Xpand.XAF.Modules.Reactive.Logger.Client.Win").Any()
                 ? TraceEventHub.Trace.FirstAsync(_ => _.Source == application.SUTModule.Name).ToUnit()
                     .SubscribeReplay()
-                : Unit.Default.ReturnObservable();
+                : Unit.Default.Observe();
 
         
         public static IObservable<Unit> ClientConnect(this ITestApplication application) 
             => Process.GetProcessesByName("Xpand.XAF.Modules.Reactive.Logger.Client.Win").Any()
                 ? TraceEventHub.Connecting.FirstAsync().SubscribeReplay()
-                : Unit.Default.ReturnObservable();
+                : Unit.Default.Observe();
     }
 }

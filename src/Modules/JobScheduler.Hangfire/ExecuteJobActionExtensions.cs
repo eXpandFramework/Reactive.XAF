@@ -25,7 +25,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
             => Observable.Using(() => application.CreateNonSecuredObjectSpace(typeof(ExecuteActionJob)), objectSpace 
                 => objectSpace.GetObjectsQuery<ExecuteActionJob>().Where(actionJob => actionJob.Id == jobId).ToArray().ToNowObservable()
                 .ConcatIgnored(job => {
-                    if (job.AuthenticateUserCriteria == null) return job.ReturnObservable();
+                    if (job.AuthenticateUserCriteria == null) return job.Observe();
                     var user = objectSpace.FindObject(SecuritySystem.UserType, CriteriaOperator.Parse(job.AuthenticateUserCriteria));
                     return user != null ? application.LogonUser(objectSpace.GetKeyValue(user)).FirstAsync().To(job)
                         : Observable.Throw<Job>(new Exception($"{nameof(user)} not found"));
@@ -63,7 +63,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
         
         private static IObservable<Unit> ListViewExecute(this ActionBase action) 
             => action.WhenExecuteFinished().FirstAsync().ToUnit()
-                .Merge(Unit.Default.ReturnObservable().Do(_ => action.DoTheExecute()).IgnoreElements());
+                .Merge(Unit.Default.Observe().Do(_ => action.DoTheExecute()).IgnoreElements());
 
         private static IObservable<Unit> DetailViewExecute(this ActionBase action, ExecuteActionJob job, CompositeView newView) {
             var objects = newView.ObjectSpace
@@ -78,7 +78,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
         }
         
         private static IObservable<Unit> ExecuteAction(this XafApplication application, ExecuteActionJob job) 
-            => Unit.Default.ReturnObservable()
+            => Unit.Default.Observe()
                 .SelectMany(_ => {
                     var modelView = application.Model.Views[job.View.Name];
                     var newView = application.NewView(modelView.ViewType(),

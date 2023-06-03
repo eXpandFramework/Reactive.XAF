@@ -106,7 +106,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
 
         private static IObservable<Type> GetMappedTypes(this IObservable<IModelMapperConfiguration> distinctTypesToMap,bool skipCompilation,bool isCustom) 
             => (!skipCompilation ? distinctTypesToMap.ModelCode().SelectMany(t => t.references.Compile(t.code,isCustom))
-                : AppDomain.CurrentDomain.LoadAssembly(GetLastAssemblyPath(isCustom)).ReturnObservable())
+                : AppDomain.CurrentDomain.LoadAssembly(GetLastAssemblyPath(isCustom)).Observe())
                 .SelectMany(assembly1 => assembly1.GetTypes()
                     .Where(type => typeof(IModelModelMap).IsAssignableFrom(type))
                     .Where(type => !type.Attributes<ModelAbstractClassAttribute>().Any())

@@ -9,6 +9,7 @@ using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.SystemModule;
 using Xpand.Extensions.ObjectExtensions;
+using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.Tracing;
@@ -27,8 +28,9 @@ namespace Xpand.XAF.Modules.BulkObjectUpdate{
             => tuple.frame.Action(nameof(BulkUpdate)).As<SingleChoiceAction>();
 
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) 
-            => manager.RegisterAction().AddItems(action => action.AddItems().ToUnit()
-                .Concat(Observable.Defer(() => action.ShowView().UpdateListViewObjects()))).ToUnit();
+            => manager.RegisterAction()
+                .MergeIgnored(action => action.ShowView().UpdateListViewObjects())
+                .AddItems(action => action.AddItems().ToUnit()).ToUnit();
 
         static IObservable<Unit> UpdateListViewObjects(this IObservable<(Frame listView, Frame detailView)> source) 
 	        => source.SelectMany(t => t.detailView.GetController<DialogController>().AcceptAction.WhenExecuted(
@@ -53,8 +55,7 @@ namespace Xpand.XAF.Modules.BulkObjectUpdate{
                 .Where(editor => ((IAppearanceVisibility)editor).Visibility == ViewItemVisibility.Show&&editor.Model.LayoutItem()!=null);
 
         static IObservable<(Frame listView, Frame detailView)> ShowView(this SingleChoiceAction action) 
-            => action.WhenActive()
-                .WhenExecuted(e => {
+            => action.WhenExecuted(e => {
                     var showViewParameters = e.ShowViewParameters;
                     var application = e.Action.Application;
                     var modelDetailView = ((IModelBulkObjectUpdateRule)e.SelectedChoiceActionItem.Data).DetailView;

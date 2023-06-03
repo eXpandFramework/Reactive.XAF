@@ -69,7 +69,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
 				        .SelectMany(e => {
 					        if (e.Method != nameof(RefreshViewDataSource)){
 						        frame?.View?.RefreshDataSource();
-						        return e.ReturnObservable();
+						        return e.Observe();
 					        }
 
 					        return Observable.Never<ITraceEvent>();

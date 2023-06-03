@@ -10,13 +10,13 @@ namespace Xpand.Extensions.Reactive.Utility {
         
         public static IObservable<T> Do<T>(this T self,Action execute) {
             execute();
-            return self.ReturnObservable();
+            return self.Observe();
         }
 
         
 
         public static IObservable<T> DoAfter<T>(this T self,TimeSpan delay,Action execute) 
-            => self.ReturnObservable().Delay(delay);
+            => self.Observe().Delay(delay);
 
         public static IObservable<T> TryDo<T>(this IObservable<T> source, Action<T> tryDo)
             => source.Do(obj => {

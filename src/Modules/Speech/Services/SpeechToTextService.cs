@@ -313,7 +313,7 @@ namespace Xpand.XAF.Modules.Speech.Services {
 				        .SelectMany(current => {
 					        if (timeSpan == 0) {
 						        current.Start = current.Previous?.End??TimeSpan.Zero;
-						        return Unit.Default.ReturnObservable();
+						        return Unit.Default.Observe();
 					        }
 
 					        return Observable.While(() => current.Next != null && speechTexts.Contains(current.Next),
@@ -477,7 +477,7 @@ namespace Xpand.XAF.Modules.Speech.Services {
 
         private static IObservable<SSMLFile> NewSSMLFile(this  SpeechText[] readers, string fileName)  
 	        => Observable.Using(() => new AudioFileReader(fileName), reader => 
-		        readers.NewSSMLFile(readers.First().SpeechToText, fileName,reader.TotalTime).ReturnObservable());
+		        readers.NewSSMLFile(readers.First().SpeechToText, fileName,reader.TotalTime).Observe());
 
         private static IObservable<SpeechSynthesisResult> NotifyWhenSynthesisCanceled(this SpeechSynthesizer speechSynthesizer) 
 	        => speechSynthesizer.WhenSynthesisCanceled().Select(args => args.Result)

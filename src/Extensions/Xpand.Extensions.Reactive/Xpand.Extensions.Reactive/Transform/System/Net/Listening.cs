@@ -20,9 +20,9 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net{
 
         private static IObservable<IPEndPoint> LocalHostListening(this IPEndPoint endPoint,bool repeatWhenOffline, TimeSpan timeSpan) {
             var inUsed = Observable.While(() => !endPoint.Listening(), Observable.Empty<IPEndPoint>().Delay(timeSpan))
-                .Concat(endPoint.ReturnObservable());
+                .Concat(endPoint.Observe());
             var notInUse = Observable.While(endPoint.Listening, Observable.Empty<IPEndPoint>().Delay(timeSpan))
-                .Concat(endPoint.ReturnObservable());
+                .Concat(endPoint.Observe());
             return repeatWhenOffline ? inUsed.RepeatWhen(_ => _.SelectMany(_ => notInUse)) : inUsed;
         }
 
@@ -31,7 +31,7 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net{
                 var result = client.BeginConnect(address, port, null, null);
                 result.AsyncWaitHandle.WaitOne(TimeSpan.FromMilliseconds(1500));
                 client.EndConnect(result);
-                return (address, port).ReturnObservable();
+                return (address, port).Observe();
             }).CompleteOnError();
 
         public static IObservable<IPEndPoint> Ping(this IPEndPoint endPoint) 

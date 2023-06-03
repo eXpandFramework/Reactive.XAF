@@ -85,7 +85,7 @@ namespace Xpand.XAF.Modules.OneView{
                 showViewParameters.Context = TemplateContext.PopupWindow;
                 showViewParameters.TargetWindow = TargetWindow.NewWindow;
                 showViewParameters.CreatedView = application.NewView(modelView.View,objectSpace);
-                return showViewParameters.ReturnObservable();
+                return showViewParameters.Observe();
             }
 
             return Observable.Empty<ShowViewParameters>();

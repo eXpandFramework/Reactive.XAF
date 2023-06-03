@@ -11,6 +11,6 @@ namespace Xpand.Extensions.Reactive.Transform{
                 .TransformPattern<EventArgs,TDisposable>();
 
         public static IObservable<(TDisposable component, EventArgs args)> WhenDisposed<TDisposable>(this TDisposable source) where TDisposable : IComponent =>
-            source.ReturnObservable().Disposed();
+            source.Observe().Disposed();
     }
 }

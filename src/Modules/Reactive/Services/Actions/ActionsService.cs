@@ -66,18 +66,18 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
         public static IObservable<Unit> WhenExecuted(this IObservable<SimpleAction> source,Action<SimpleActionExecuteEventArgs> retriedExecution) 
             => source.SelectMany(action => action.WhenExecuted(args => {
                 retriedExecution(args);
-                return Unit.Default.ReturnObservable();
+                return Unit.Default.Observe();
             }));
         public static IObservable<Unit> WhenExecuted(this IObservable<SingleChoiceAction> source,Action<SingleChoiceActionExecuteEventArgs> retriedExecution) 
             => source.SelectMany(action => action.WhenExecuted(args => {
                 retriedExecution(args);
-                return Unit.Default.ReturnObservable();
+                return Unit.Default.Observe();
             }));
         
         public static IObservable<Unit> WhenExecuted(this IObservable<ParametrizedAction> source,Action<ParametrizedActionExecuteEventArgs> retriedExecution) 
             => source.SelectMany(action => action.WhenExecuted(args => {
                 retriedExecution(args);
-                return Unit.Default.ReturnObservable();
+                return Unit.Default.Observe();
             }));
         
         public static IObservable<T> WhenExecuted<T>(this IObservable<SingleChoiceAction> source,Func<SingleChoiceActionExecuteEventArgs, IObservable<T>> retriedExecution) 
@@ -129,7 +129,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
 
         private static IObservable<T> WhenConcatExecution<T,TArgs>(this TArgs e,Func<TArgs, IObservable<T>> sourceSelector) where TArgs:ActionBaseEventArgs{
             e.Action.Enabled[nameof(WhenConcatExecution)] = false;
-            return sourceSelector(e).ObserveOnContext().Finally(() => e.Action.Enabled[nameof(WhenConcatExecution)] = true);
+            return sourceSelector(e).TakeUntilDisposed(e.Action).ObserveOnContext().Finally(() => e.Action.Enabled[nameof(WhenConcatExecution)] = true);
         }
 
         public static IObservable<Unit> WhenConcatExecution(this ParametrizedAction action,Action<ParametrizedActionExecuteEventArgs> sourceSelector) 
@@ -193,7 +193,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
         public static IObservable<Unit> WhenConcatExecution(this IObservable<SingleChoiceAction> source,Action<SingleChoiceActionExecuteEventArgs> retriedExecution) 
         => source.SelectMany(action => action.WhenConcatExecution<Unit,SingleChoiceActionExecuteEventArgs>(args => {
             retriedExecution(args);
-            return Unit.Default.ReturnObservable();
+            return Unit.Default.Observe();
         }));
         
         public static IObservable<Unit> WhenConcatExecution(this IObservable<SimpleAction> source,Action<SimpleActionExecuteEventArgs> retriedExecution) 
@@ -215,19 +215,13 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
             => source.SelectMany(action => action.WhenExecute());
 
         public static IObservable<SimpleActionExecuteEventArgs> WhenExecute(this SimpleAction simpleAction) 
-            => Observable.FromEventPattern<SimpleActionExecuteEventHandler, SimpleActionExecuteEventArgs>(
-			        h => simpleAction.Execute += h, h => simpleAction.Execute -= h, ImmediateScheduler.Instance)
-		        .Select(pattern => pattern.EventArgs);
+            => simpleAction.WhenEvent<SimpleActionExecuteEventArgs>(nameof(SimpleAction.Execute)).TakeUntilDisposed(simpleAction);
         
         public static IObservable<PopupWindowShowActionExecuteEventArgs> WhenExecute(this PopupWindowShowAction action) 
-            => Observable.FromEventPattern<PopupWindowShowActionExecuteEventHandler, PopupWindowShowActionExecuteEventArgs>(
-			        h => action.Execute += h, h => action.Execute -= h, ImmediateScheduler.Instance)
-		        .Select(pattern => pattern.EventArgs);
+            => action.WhenEvent<PopupWindowShowActionExecuteEventArgs>(nameof(PopupWindowShowAction.Execute)).TakeUntilDisposed(action);
         
         public static IObservable<ParametrizedActionExecuteEventArgs> WhenExecute(this ParametrizedAction action) 
-            => Observable.FromEventPattern<ParametrizedActionExecuteEventHandler, ParametrizedActionExecuteEventArgs>(
-			        h => action.Execute += h, h => action.Execute -= h, ImmediateScheduler.Instance)
-		        .Select(pattern => pattern.EventArgs);
+            => action.WhenEvent<ParametrizedActionExecuteEventArgs>(nameof(ParametrizedAction.Execute)).TakeUntilDisposed(action);
 
         public static IObservable<SingleChoiceActionExecuteEventArgs> WhenExecute(this SingleChoiceAction singleChoiceAction) 
             => Observable.FromEventPattern<SingleChoiceActionExecuteEventHandler, SingleChoiceActionExecuteEventArgs>(
@@ -238,7 +232,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
             => source.SelectMany(action => action.WhenExecute());
 
         public static IObservable<TFrame> WhenView<TFrame>(this IObservable<TFrame> source, Type objectType) where TFrame : Frame 
-            => source.SelectMany(frame => frame.View.ReturnObservable().When(objectType).Select(_ => frame));
+            => source.SelectMany(frame => frame.View.Observe().When(objectType).Select(_ => frame));
 
         public static IObservable<TAction> When<TAction>(this IObservable<TAction> source, Type objectType) where TAction : ActionBase 
             => source.Where(_ => objectType.IsAssignableFrom(_.Controller.Frame.View.ObjectTypeInfo.Type));
@@ -254,8 +248,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
             this IObservable<(TAction action, CancelEventArgs e)> source) where TAction : ActionBase
             => source.Where(t => !t.e.Cancel);
         public static IObservable<(TAction action, CancelEventArgs e)> WhenExecuting<TAction>(this TAction action) where TAction : ActionBase 
-            => Observable.FromEventPattern<CancelEventHandler, CancelEventArgs>(h => action.Executing += h,
-		        h => action.Executing -= h, ImmediateScheduler.Instance).TransformPattern<CancelEventArgs, TAction>();
+            => action.WhenEvent<CancelEventArgs>(nameof(ActionBase.Executing)).InversePair(action);
 
         public static  IObservable<(TAction action, Type objectType, View view, Frame frame, IObjectSpace objectSpace, ShowViewParameters showViewParameters)> ToParameter<TAction>(
                 this IObservable<(TAction action, ActionBaseEventArgs e)> source) where TAction : ActionBase => source.Select(_ => {
@@ -267,18 +260,19 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
             => source.Select(_ => _.action);
 
         public static IObservable<CustomizePopupWindowParamsEventArgs> WhenCustomizePopupWindowParams(this PopupWindowShowAction action) 
-            => Observable.FromEventPattern<CustomizePopupWindowParamsEventHandler, CustomizePopupWindowParamsEventArgs>(
-			        h => action.CustomizePopupWindowParams += h, h => action.CustomizePopupWindowParams -= h, ImmediateScheduler.Instance)
-		        .Select(pattern => pattern.EventArgs);
+            => action.WhenEvent<CustomizePopupWindowParamsEventArgs>(nameof(PopupWindowShowAction.CustomizePopupWindowParams))
+                .TakeUntilDisposed(action);
 
         public static IObservable<SimpleActionExecuteEventArgs> WhenExecuted(this SimpleAction action) 
-            => Observable.FromEventPattern<EventHandler<ActionBaseEventArgs>, ActionBaseEventArgs>(
-		        h => action.Executed += h, h => action.Executed -= h, ImmediateScheduler.Instance).Select(_ =>(SimpleActionExecuteEventArgs) _.EventArgs);
+            => action.WhenEvent<SimpleActionExecuteEventArgs>(nameof(SimpleAction.Executed))
+                .TakeUntilDisposed(action);
 
         public static IObservable<SingleChoiceAction> AddItems(this IObservable<SingleChoiceAction> source,Func<SingleChoiceAction,IObservable<Unit>> addItems)
-            => source.WhenControllerActivated().ConcatIgnored(addItems).WhenActive()
-                .Merge(source.WhenControllerDeActivated().Do(action => action.Items.Clear()).IgnoreElements())
-        ;
+            => source.MergeIgnored(action => action.Controller.WhenActivated()
+                // .SelectMany(controller => action.View().WhenCurrentObjectChanged().StartWith(controller.Frame.View)
+                    // .TakeUntilDisposed(controller))
+                // .WaitUntilInactive(1).ObserveOnContext()
+                .Do(_ => action.Items.Clear()).SelectMany(_ => addItems(action)).TakeUntilDisposed(action));
 
         public static IObservable<TArgs> CreateDetailView<TArgs>(this IObservable<TArgs> source, Type objectType=null, TargetWindow? targetWindow =null) where TArgs:ActionBaseEventArgs
 	        => source.Do(e => {
@@ -292,26 +286,19 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
 	        });
 
         public static IObservable<SingleChoiceActionExecuteEventArgs> WhenExecuted(this SingleChoiceAction action) 
-            => Observable.FromEventPattern<EventHandler<ActionBaseEventArgs>, ActionBaseEventArgs>(
-		        h => action.Executed += h, h => action.Executed -= h, ImmediateScheduler.Instance).Select(_ => (SingleChoiceActionExecuteEventArgs)_.EventArgs);
+            => action.WhenEvent<SingleChoiceActionExecuteEventArgs>(nameof(SingleChoiceAction.Executed)).TakeUntilDisposed(action);
 
         public static IObservable<ParametrizedActionExecuteEventArgs> WhenExecuted(this ParametrizedAction action) 
-            => Observable.FromEventPattern<EventHandler<ActionBaseEventArgs>, ActionBaseEventArgs>(
-		        h => action.Executed += h, h => action.Executed -= h, ImmediateScheduler.Instance).Select(_ => (ParametrizedActionExecuteEventArgs)_.EventArgs);
+            => action.WhenEvent<ParametrizedActionExecuteEventArgs>(nameof(SingleChoiceAction.Executed)).TakeUntilDisposed(action);
 
         public static IObservable<PopupWindowShowActionExecuteEventArgs> WhenExecuted(this PopupWindowShowAction action) 
-            => Observable.FromEventPattern<EventHandler<ActionBaseEventArgs>, ActionBaseEventArgs>(
-		        h => action.Executed += h, h => action.Executed -= h, ImmediateScheduler.Instance).Select(_ => (PopupWindowShowActionExecuteEventArgs)_.EventArgs);
+            => action.WhenEvent<PopupWindowShowActionExecuteEventArgs>(nameof(SingleChoiceAction.Executed)).TakeUntilDisposed(action);
 
         public static IObservable<ActionBaseEventArgs> WhenExecuted<TAction>(this TAction action) where TAction : ActionBase 
-            => Observable.FromEventPattern<EventHandler<ActionBaseEventArgs>, ActionBaseEventArgs>(
-			        h => action.Executed += h, h => action.Executed -= h, ImmediateScheduler.Instance)
-		        .Select(pattern => pattern.EventArgs);
+            => action.WhenEvent<ActionBaseEventArgs>(nameof(SingleChoiceAction.Executed)).TakeUntilDisposed(action);
 
         public static IObservable<ActionBaseEventArgs> WhenExecuteCompleted<TAction>(this TAction action) where TAction : ActionBase 
-            => Observable.FromEventPattern<EventHandler<ActionBaseEventArgs>, ActionBaseEventArgs>(
-			        h => action.ExecuteCompleted += h, h => action.ExecuteCompleted -= h, ImmediateScheduler.Instance)
-		        .Select(pattern => pattern.EventArgs);
+            => action.WhenEvent<ActionBaseEventArgs>(nameof(ActionBase.ExecuteCompleted)).TakeUntilDisposed(action);
         
         public static IObservable<TAction> WhenExecuteConcat<TAction>(this TAction action) where TAction : ActionBase 
             => action.WhenDisabled().Where(a => a.Enabled.Contains(nameof(WhenConcatExecution)))
@@ -349,28 +336,20 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
             => source.SelectMany(a=>a.WhenExecuted()).Cast<PopupWindowShowActionExecuteEventArgs>();
 
         public static IObservable<SimpleActionExecuteEventArgs> WhenExecuteCompleted(this SimpleAction action) 
-            => Observable.FromEventPattern<EventHandler<ActionBaseEventArgs>, ActionBaseEventArgs>(
-			        h => action.ExecuteCompleted += h, h => action.ExecuteCompleted -= h, ImmediateScheduler.Instance)
-		        .Select(pattern => (SimpleActionExecuteEventArgs) pattern.EventArgs);
+            => action.WhenEvent<SimpleActionExecuteEventArgs>(nameof(ActionBase.ExecuteCompleted)).TakeUntilDisposed(action);
 
         public static IObservable<SingleChoiceActionExecuteEventArgs> WhenExecuteCompleted(this SingleChoiceAction action) 
-            => Observable.FromEventPattern<EventHandler<ActionBaseEventArgs>, ActionBaseEventArgs>(
-			        h => action.ExecuteCompleted += h, h => action.ExecuteCompleted -= h, ImmediateScheduler.Instance)
-		        .Select(pattern => (SingleChoiceActionExecuteEventArgs)pattern.EventArgs);
+            => action.WhenEvent<SingleChoiceActionExecuteEventArgs>(nameof(ActionBase.ExecuteCompleted)).TakeUntilDisposed(action);
 
         public static IObservable<ParametrizedActionExecuteEventArgs> WhenExecuteCompleted(this ParametrizedAction action) 
-            => Observable.FromEventPattern<EventHandler<ActionBaseEventArgs>, ActionBaseEventArgs>(
-			        h => action.ExecuteCompleted += h, h => action.ExecuteCompleted -= h, ImmediateScheduler.Instance)
-		        .Select(pattern => (ParametrizedActionExecuteEventArgs)pattern.EventArgs);
+            => action.WhenEvent<ParametrizedActionExecuteEventArgs>(nameof(ActionBase.ExecuteCompleted)).TakeUntilDisposed(action);
 
         public static IObservable<PopupWindowShowActionExecuteEventArgs> WhenExecuteCompleted(this PopupWindowShowAction action) 
-            => Observable.FromEventPattern<EventHandler<ActionBaseEventArgs>, ActionBaseEventArgs>(
-			        h => action.ExecuteCompleted += h, h => action.ExecuteCompleted -= h, ImmediateScheduler.Instance)
-		        .Select(pattern => (PopupWindowShowActionExecuteEventArgs)pattern.EventArgs);
+            => action.WhenEvent<PopupWindowShowActionExecuteEventArgs>(nameof(ActionBase.ExecuteCompleted)).TakeUntilDisposed(action);
 
         public static IObservable<(TAction action, BoolList boolList, BoolValueChangedEventArgs e)> ResultValueChanged<TAction>(
                 this TAction source, Func<TAction, BoolList> boolListSelector) where TAction : ActionBase 
-            => boolListSelector(source).ReturnObservable().ResultValueChanged().Select(tuple => (source, tuple.boolList, tuple.e));
+            => boolListSelector(source).Observe().ResultValueChanged().Select(tuple => (source, tuple.boolList, tuple.e));
 
         public static IObservable<SingleChoiceAction> WhenSelectedItemChanged(this IObservable<SingleChoiceAction> source) 
             =>source.SelectMany(action => action.WhenSelectedItemChanged());
@@ -383,7 +362,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
             => ((TAction) action);
 
         public static IObservable<Unit> WhenDisposing<TAction>(this TAction simpleAction) where TAction : ActionBase 
-            => Disposing(simpleAction.ReturnObservable());
+            => Disposing(simpleAction.Observe());
 
         public static IObservable<TAction> WhenControllerActivated<TAction>(this IObservable<TAction> source,bool emitWhenActive=false) where TAction : ActionBase 
             => source.SelectMany(a =>a.Controller.WhenActivated(emitWhenActive).To(a) );
@@ -404,13 +383,13 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
             => source.Where(a => !a.Active);
 
         public static IObservable<TAction> WhenActive<TAction>(this TAction simpleAction) where TAction : ActionBase 
-            => simpleAction.ReturnObservable().WhenActive();
+            => simpleAction.Observe().WhenActive();
 
 		public static IObservable<TAction> WhenActivated<TAction>(this IObservable<TAction> source,params string[] contexts) where TAction : ActionBase 
             => source.SelectMany(a => a.WhenActivated());
 		
 		public static IObservable<TAction> WhenInActive<TAction>(this TAction simpleAction) where TAction : ActionBase 
-            => simpleAction.ReturnObservable().WhenInActive();
+            => simpleAction.Observe().WhenInActive();
 
 		public static IObservable<TAction> WhenDeactivated<TAction>(this IObservable<TAction> source) where TAction : ActionBase 
             => source.SelectMany(a => a.WhenDeactivated());
@@ -444,7 +423,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
             => source.Where(a => a.Enabled);
 
         public static IObservable<TAction> WhenEnable<TAction>(this TAction simpleAction) where TAction : ActionBase 
-            =>simpleAction.ReturnObservable().WhenEnable();
+            =>simpleAction.Observe().WhenEnable();
 
         public static IObservable<TAction> WhenEnabled<TAction>(this IObservable<TAction> source)where TAction : ActionBase 
             => source.SelectMany(a => a.WhenEnabled());

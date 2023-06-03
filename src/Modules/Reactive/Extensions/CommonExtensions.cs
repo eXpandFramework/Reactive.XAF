@@ -43,12 +43,12 @@ namespace Xpand.XAF.Modules.Reactive.Extensions{
             => source.RetryWhen(_ => {
                 var application = applicationSelector();
                 return _.Do(application.HandleException)
-                    .SelectMany(e => application.GetPlatform()==Platform.Win?e.ReturnObservable():Observable.Empty<Exception>());
+                    .SelectMany(e => application.GetPlatform()==Platform.Win?e.Observe():Observable.Empty<Exception>());
             });
 
         public static IObservable<T> Retry<T>(this IObservable<T> source, XafApplication application) 
             => source.RetryWhen(_ => _.DistinctUntilChanged().Do(application.HandleException)
-                // .SelectMany(e => application.GetPlatform()==Platform.Win?e.ReturnObservable():Observable.Empty<Exception>())
+                // .SelectMany(e => application.GetPlatform()==Platform.Win?e.Observe():Observable.Empty<Exception>())
             );
 
         public static IObservable<T> HandleErrors<T>(this IObservable<T> source, XafApplication application, CancelEventArgs args=null,Func<Exception, IObservable<T>> exceptionSelector=null) 
@@ -61,7 +61,7 @@ namespace Xpand.XAF.Modules.Reactive.Extensions{
 
 
         public static IObservable<T> Handle<T>(this Exception exception, Func<Exception, IObservable<T>> exceptionSelector = null) 
-            => exception is WarningException ? default(T).ReturnObservable() : exceptionSelector != null ? exceptionSelector(exception) : Observable.Throw<T>(exception);
+            => exception is WarningException ? default(T).Observe() : exceptionSelector != null ? exceptionSelector(exception) : Observable.Throw<T>(exception);
 
         
         public static IObservable<T> HandleException<T>(this IObservable<T> source,Func<Exception,IObservable<T>> exceptionSelector=null) 
@@ -74,7 +74,7 @@ namespace Xpand.XAF.Modules.Reactive.Extensions{
                         return smtpClient.SendMailAsync(errorMail).ToObservable().To(default(T));
                     });
                 }
-                return result.SelectMany(_ => exception is WarningException ? default(T).ReturnObservable() :
+                return result.SelectMany(_ => exception is WarningException ? default(T).Observe() :
                     exceptionSelector != null ? exceptionSelector(exception) : Observable.Throw<T>(exception));
             });
 

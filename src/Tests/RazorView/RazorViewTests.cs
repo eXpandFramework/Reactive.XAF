@@ -95,7 +95,7 @@ namespace Xpand.XAF.Modules.RazorView.Tests {
             objectSpace.CommitChanges();
             using var testObserver = Application.WhenRazorViewDataSourceObjectRendering()
                 .Do(e => e.Handled=e.SetInstance(t => {
-                    t.renderedView = nameof(Customize_Render_For_DataSource_Object).ReturnObservable()
+                    t.renderedView = nameof(Customize_Render_For_DataSource_Object).Observe()
 	                    .Select(s => s).FirstAsync();
                     return t;
                 }))
@@ -104,7 +104,7 @@ namespace Xpand.XAF.Modules.RazorView.Tests {
             
             window.SetView(Application.CreateDetailView(objectSpace,objectTemplate));
 
-            await Observable.While(() => objectTemplate.Preview == null, Unit.Default.ReturnObservable()).DefaultIfEmpty().Timeout(Timeout);
+            await Observable.While(() => objectTemplate.Preview == null, Unit.Default.Observe()).DefaultIfEmpty().Timeout(Timeout);
             testObserver.ItemCount.ShouldBe(1);
             objectTemplate.Preview.ShouldBe(nameof(Customize_Render_For_DataSource_Object));
             RemoveObjects(objectSpace);

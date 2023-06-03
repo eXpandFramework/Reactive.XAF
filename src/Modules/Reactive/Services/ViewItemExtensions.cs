@@ -18,7 +18,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => source.ToObservable(ImmediateScheduler.Instance).ControlCreated();
 
         public static IObservable<T> WhenControlCreated<T>(this T source) where T:ViewItem 
-            => source.ReturnObservable().ControlCreated();
+            => source.Observe().ControlCreated();
 
         public static IObservable<T> ControlCreated<T>(this IObservable<T> source) where T:ViewItem
             => source.SelectMany(item => item.WhenEvent(nameof(ViewItem.ControlCreated))

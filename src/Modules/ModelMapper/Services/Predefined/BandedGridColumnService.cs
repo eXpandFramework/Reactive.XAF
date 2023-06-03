@@ -26,7 +26,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.Predefined{
 
         public static IObservable<Unit> Connect(){
             TypeMappingService.PropertyMappingRules.Insert(0,(nameof(BandedGridColumnPropertyRules),BandedGridColumnPropertyRules));
-            return Unit.Default.ReturnObservable();
+            return Unit.Default.Observe();
         }
 
     }

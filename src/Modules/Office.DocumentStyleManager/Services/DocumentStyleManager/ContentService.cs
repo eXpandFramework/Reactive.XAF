@@ -47,7 +47,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Services.DocumentStyleMa
 			                allStylesListView.CurrentObject = currentObject;
 		                }
 
-		                return Unit.Default.ReturnObservable().TraceDocumentStyleModule(_ => documentStyle?.StyleName??nameof(SelectActiveStyle));
+		                return Unit.Default.Observe().TraceDocumentStyleModule(_ => documentStyle?.StyleName??nameof(SelectActiveStyle));
                 }));
 
         private static IObservable<Unit> SynchronizeEditorPositions(this IObservable<DetailView> source, IObservable<IRichEditDocumentServer> contentRichEditServer){
@@ -63,7 +63,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Services.DocumentStyleMa
                 .SelectMany(view => view.ObjectSpace.WhenModifiedObjects<BusinessObjects.DocumentStyleManager>(m => m.Content)
 	                .SelectMany(manager => view.Application().DefaultPropertiesProvider(document => {
 			                manager.SynchronizeStyles(document);
-			                return Unit.Default.ReturnObservable();
+			                return Unit.Default.Observe();
 		                })))
                 
 	                .ToUnit();

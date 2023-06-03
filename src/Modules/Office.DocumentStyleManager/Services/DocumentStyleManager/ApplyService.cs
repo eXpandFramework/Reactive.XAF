@@ -48,7 +48,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Services.DocumentStyleMa
                     var server = view.DocumentManagerContentRichEditServer();
                     var styles = view.AllStylesListView().SelectedObjects.Cast<IDocumentStyle>().ToArray();
                     server.Document.ApplyStyle(styles.First(), document);
-                    return Unit.Default.ReturnObservable().TraceDocumentStyleModule(_ => styles.First().StyleName);
+                    return Unit.Default.Observe().TraceDocumentStyleModule(_ => styles.First().StyleName);
                 }))
                 .ToUnit();
     }

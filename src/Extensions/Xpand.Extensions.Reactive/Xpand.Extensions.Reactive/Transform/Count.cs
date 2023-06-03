@@ -11,7 +11,7 @@ namespace Xpand.Extensions.Reactive.Transform{
                 .SelectMany(ob => {
                     var r = ob.Replay();
                     r.Connect();
-                    return r.IgnoreElements().Concat(default(T).ReturnObservable())
+                    return r.IgnoreElements().Concat(default(T).Observe())
                         .Select(_ => r.ToEnumerable().ToArray());
                 })
                 .Select(_ => (_.First(), _.Length));

@@ -185,7 +185,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
                 SetSequence(sequenceStorage.GetType(), sequenceStorage.Type.Type,
                     sequenceStorage.ObjectSpace.UnitOfWork(), sequenceStorage.Member?.Name,
                     sequenceStorage.CustomSequence, sequenceStorage.NextSequence, sequenceStorage);
-                return sequenceStorage.ReturnObservable();
+                return sequenceStorage.Observe();
             }
             catch (Exception e){
                 return Observable.Throw<SequenceStorage>(e);
@@ -278,7 +278,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
                         sequenceStorage.NextSequence--;
                         throw;
                     }
-                    return theObject.ReturnObservable();
+                    return theObject.Observe();
                 }
                 return Observable.Empty<object>();
             }
@@ -306,7 +306,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
         internal static IObservable<IDataLayer> SequenceGeneratorDatalayer(this  IObjectSpaceProvider objectSpaceProvider) 
             => Observable.Defer(() => XpoDefault.GetDataLayer(objectSpaceProvider.GetConnectionString(),
                 ((TypesInfo) objectSpaceProvider.TypesInfo).EntityStores.OfType<XpoTypeInfoSource>().First().XPDictionary, AutoCreateOption.None
-            ).ReturnObservable().Where(layer => layer!=null)).SubscribeReplay()
+            ).Observe().Where(layer => layer!=null)).SubscribeReplay()
                 .TraceSequenceGeneratorModule();
     }
 }

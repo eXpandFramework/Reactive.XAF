@@ -1,6 +1,7 @@
 using System;
 using DevExpress.ExpressApp;
 using Fasterflect;
+using Xpand.Extensions.XAF.NonPersistentObjects;
 
 namespace Xpand.Extensions.XAF.ObjectSpaceExtensions {
     public static partial class ObjectSpaceExtensions {

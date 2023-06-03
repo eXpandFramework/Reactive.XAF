@@ -86,7 +86,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Tasks{
             if (returnDefault){
                 return tasksService.Tasklists.Get(DefaultTasksListId).ToObservable();
             }
-            var addNew = createNew.ReturnObservable().WhenNotDefault()
+            var addNew = createNew.Observe().WhenNotDefault()
                 .SelectMany(_ => tasksService.Tasklists.Insert(new TaskList() { Title = title }).ToObservable())
                 .SelectMany(_ => tasksService.GetTaskList(title));
             return tasksService.Tasklists.List().ToObservable().SelectMany(list => list.Items).FirstOrDefaultAsync(entry => entry.Title == title)
@@ -115,13 +115,13 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Tasks{
             => source.Select(_ => {
                     var defaultTaskListName = _.frame.View.AsObjectView().Application().Model
                         .ToReactiveModule<IModelReactiveModuleOffice>().Office.Google().Tasks().DefaultTaskListName;
-                    return Observable.Start(() => _.credential.NewService<TasksService>().GetTaskList(defaultTaskListName, true,defaultTaskListName==DefaultTasksListId)).Merge().Wait().ReturnObservable()
+                    return Observable.Start(() => _.credential.NewService<TasksService>().GetTaskList(defaultTaskListName, true,defaultTaskListName==DefaultTasksListId)).Merge().Wait().Observe()
                         .Select(folder => (_.frame, _.credential, folder));
                 }).Merge()
                 .TraceGoogleTasksModule(folder => folder.folder.Title);
 
         private static IObservable<(Task serviceObject, MapAction mapAction)> SynchronizeCloud(this IObservable<(Frame frame, UserCredential credential, TaskList taskList,IModelTasksItem modelTodoItem)> source) 
-            => source.Select(t => t.credential.NewService<TasksService>().ReturnObservable().SynchronizeCloud(
+            => source.Select(t => t.credential.NewService<TasksService>().Observe().SynchronizeCloud(
                         t.modelTodoItem, t.frame.View.ObjectSpace, t.frame.View.AsObjectView().Application().CreateObjectSpace,t.taskList)
                     .TakeUntil(t.frame.View.WhenClosing())
                 ).Switch()

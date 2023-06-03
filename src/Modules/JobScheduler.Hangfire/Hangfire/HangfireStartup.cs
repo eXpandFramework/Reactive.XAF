@@ -38,13 +38,13 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Hangfire {
             var httpContext = context.GetHttpContext();
             return httpContext.User.Identity!.IsAuthenticated && httpContext.RequestServices.RunWithStorageAsync(application => {
                 var security = application.Security;
-                if (!security.IsSecurityStrategyComplex()) return true.ReturnObservable();
-                if (security.IsActionPermissionGranted(nameof(JobSchedulerService.JobDashboard))) return true.ReturnObservable();
+                if (!security.IsSecurityStrategyComplex()) return true.Observe();
+                if (security.IsActionPermissionGranted(nameof(JobSchedulerService.JobDashboard))) return true.Observe();
                 using var objectSpace = application.CreateObjectSpace(security?.UserType);
                 var user = (ISecurityUserWithRoles)objectSpace.FindObject(security?.UserType,
                     CriteriaOperator.Parse($"{nameof(ISecurityUser.UserName)}=?", httpContext.User.Identity.Name));
                 var any = user.Roles.Cast<IPermissionPolicyRole>().Any(role => role.IsAdministrative);
-                return any.ReturnObservable();
+                return any.Observe();
 
             }).Result;
         }

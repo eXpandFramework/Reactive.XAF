@@ -36,14 +36,14 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google{
                     cloudAuthentication.OAuthToken[key] = serialize;
                 cloudAuthentication.Save();
                 objectSpace.CommitChanges();
-                return default(T).ReturnObservable();
+                return default(T).Observe();
             }).ToTask();
 
         Task IDataStore.DeleteAsync<T>(string key) 
             => Observable.Using(_objectSpaceFactory, objectSpace => {
                 objectSpace.Delete(objectSpace.GetObjectByKey<GoogleAuthentication>(_userId));
                 objectSpace.CommitChanges();
-                return Unit.Default.ReturnObservable();
+                return Unit.Default.Observe();
             }).ToTask();
 
         Task<T> IDataStore.GetAsync<T>(string key) 
@@ -51,7 +51,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google{
                     key = FileDataStore.GenerateStoredKey(key, typeof(T));
                     var cloudAuthentication = objectSpace.GetObjectByKey<GoogleAuthentication>(_userId);
                     return (cloudAuthentication != null && cloudAuthentication.OAuthToken.ContainsKey(key)
-                        ? cloudAuthentication.OAuthToken[key] : null).ReturnObservable();
+                        ? cloudAuthentication.OAuthToken[key] : null).Observe();
                 })
                 .Select(s => NewtonsoftJsonSerializer.Instance.Deserialize<T>(s))
                 .ToTask();
@@ -61,7 +61,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google{
                 var cloudAuthentication = objectSpace.GetObjectByKey<GoogleAuthentication>(_userId);
                 cloudAuthentication.OAuthToken.Clear();
                 objectSpace.CommitChanges();
-                return Unit.Default.ReturnObservable();
+                return Unit.Default.Observe();
             }).ToTask();
     }
 }

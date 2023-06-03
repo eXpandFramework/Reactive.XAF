@@ -10,7 +10,7 @@ namespace Xpand.Extensions.XAF.ActionExtensions{
         public static T ParentObject<T>(this ActionBaseEventArgs actionBase) => actionBase.Frame().ParentObject<T>();
         public static Frame Frame(this ActionBaseEventArgs actionBase) => actionBase.Action.Controller.Frame;
 
-        public static T View<T>(this ActionBase actionBase) where T : View => actionBase.Controller.Frame.View as T;
+        public static T View<T>(this ActionBase actionBase) where T : View => actionBase.Controller.Frame?.View as T;
         
     }
 }

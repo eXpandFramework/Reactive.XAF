@@ -42,7 +42,7 @@ namespace Xpand.XAF.Modules.Reactive.Rest.Extensions {
             => source.Catch<object, Exception>(exception => {
                 var message = $"{url}-{o}";
                 return handleErrors
-                    ? message.ReturnObservable().IgnoreElements()
+                    ? message.Observe().IgnoreElements()
                     : Observable.Throw<object>(new Exception(new[]{exception.Message,message}.JoinNewLine(), exception));
             });
     }

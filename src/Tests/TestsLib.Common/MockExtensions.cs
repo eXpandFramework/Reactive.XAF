@@ -92,7 +92,7 @@ namespace Xpand.TestsLib.Common {
             mock.Setup(socket => socket.ReceiveAsync(It.IsAny<ArraySegment<byte>>(), It.IsAny<CancellationToken>()))
                 .Returns((ArraySegment<byte> buffer, CancellationToken _) => {
                     Array.Copy(bytes,buffer.Array!,bytes.Length);
-                    return resultSelector?.Invoke()??new WebSocketReceiveResult(bytes.Length,WebSocketMessageType.Text, true).ReturnObservable().ObserveOnDefault().ToTask(_);
+                    return resultSelector?.Invoke()??new WebSocketReceiveResult(bytes.Length,WebSocketMessageType.Text, true).Observe().ObserveOnDefault().ToTask(_);
                 });
             mock.Setup(socket => socket.State).Returns(WebSocketState.Open);
         }
@@ -108,7 +108,7 @@ namespace Xpand.TestsLib.Common {
             Action<HttpResponseMessage> configure=null, IScheduler scheduler = null) where THandler : HttpMessageHandler 
             => handlerMock.Protected().Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
                 .Returns((HttpRequestMessage requestMessage, CancellationToken _)
-                    =>  new HttpResponseMessage { StatusCode = HttpStatusCode.OK, RequestMessage = requestMessage }.ReturnObservable()
+                    =>  new HttpResponseMessage { StatusCode = HttpStatusCode.OK, RequestMessage = requestMessage }.Observe()
                         .Do(message => message.Content=new StringContent("[]"))
                         .Do(message => configure?.Invoke(message))
                         .Delay(Delay,scheduler??=Scheduler.Default)

@@ -28,7 +28,7 @@ namespace Xpand.XAF.Modules.Windows {
 
         private static IObservable<Process> WhenSameNameProcesses(this Process currentProcess) {
             var processesByName = Process.GetProcessesByName(currentProcess.ProcessName);
-            return processesByName.Length == 1 ? Observable.Empty<Process>() : currentProcess.ReturnObservable()
+            return processesByName.Length == 1 ? Observable.Empty<Process>() : currentProcess.Observe()
                 .TraceWindows(_ => processesByName.Length.ToString());
         }
 

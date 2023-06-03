@@ -79,7 +79,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar{
                     var defaultCalendarName = _.frame.View.AsObjectView().Application().Model
                         .ToReactiveModule<IModelReactiveModuleOffice>().Office.Google().Calendar().DefaultCalendarName;
                     return Observable.Start(() => _.credential.NewService<global::Google.Apis.Calendar.v3.CalendarService>()
-                            .GetCalendar(defaultCalendarName, true,defaultCalendarName==DefaultCalendarId)).Merge().Wait().ReturnObservable()
+                            .GetCalendar(defaultCalendarName, true,defaultCalendarName==DefaultCalendarId)).Merge().Wait().Observe()
                         .Select(calendarListEntry => (_.frame, _.credential, calendarListEntry));
                 })
                 .Merge()
@@ -99,7 +99,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar{
             var newCloudEventType = _.frame.View.Model.Application.Calendar().NewCloudEvent.TypeInfo.Type;
             Func<IObjectSpace> objectSpaceFactory = _.frame.Application.CreateObjectSpace;
             
-            return _.userCredential.NewService<global::Google.Apis.Calendar.v3.CalendarService>().ReturnObservable()
+            return _.userCredential.NewService<global::Google.Apis.Calendar.v3.CalendarService>().Observe()
                 .SynchronizeLocalEvent(objectSpaceFactory,synchronizationType,
                     Guid.Parse($"{_.frame.Application.Security.UserId}"), _.frame.View.ObjectTypeInfo.Type, newCloudEventType,_.calendar);
         }
@@ -124,7 +124,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar{
         private static IObservable<(Event serviceObject, MapAction mapAction)> SynchronizeCloud(
             this IObservable<(Frame frame, UserCredential credential, CalendarListEntry
                 calendar, IModelCalendarItem modelCalendarItem)> source) 
-            => source.Select(t => t.credential.NewService<global::Google.Apis.Calendar.v3.CalendarService>().ReturnObservable().SynchronizeCloud(
+            => source.Select(t => t.credential.NewService<global::Google.Apis.Calendar.v3.CalendarService>().Observe().SynchronizeCloud(
                         t.modelCalendarItem.SynchronizationType, t.frame.View.ObjectSpace, t.frame.View.AsObjectView().Application().CreateObjectSpace,t.calendar)
                     .TakeUntil(t.frame.View.WhenClosing())
                 ).Switch()
@@ -232,7 +232,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar{
             if (returnDefault){
                 return calendarService.CalendarList.Get("primary").ToObservable();
             }
-            var addNew = createNew.ReturnObservable().WhenNotDefault()
+            var addNew = createNew.Observe().WhenNotDefault()
                 .SelectMany(_ => calendarService.Calendars.Insert(new global::Google.Apis.Calendar.v3.Data.Calendar() { Summary = summary}).ToObservable())
                 .SelectMany(_ => calendarService.GetCalendar(summary));
             return calendarService.CalendarList.List().ToObservable().SelectMany(list => list.Items)

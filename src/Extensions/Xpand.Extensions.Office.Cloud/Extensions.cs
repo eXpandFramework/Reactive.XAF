@@ -109,7 +109,7 @@ namespace Xpand.Extensions.Office.Cloud{
             cloudObject.CloudId = cloudId;
             cloudObject.CloudObjectType = cloudObjectType;
             space.CommitChanges();
-            return cloudObject.ReturnObservable();
+            return cloudObject.Observe();
         }
 
         
@@ -144,8 +144,8 @@ namespace Xpand.Extensions.Office.Cloud{
         }
 
         public static IObservable<bool> NeedsAuthentication<TAuthentication>(this XafApplication application,Func<IObservable<bool>> authorize) where TAuthentication:CloudOfficeBaseObject 
-            => application.UseObjectSpace(typeof(TAuthentication),space => (space.GetObjectByKey<TAuthentication>( application.CurrentUserId())).ReturnObservable())
-                .SelectMany(b => b!=null ? authorize() : true.ReturnObservable());
+            => application.UseObjectSpace(typeof(TAuthentication),space => (space.GetObjectByKey<TAuthentication>( application.CurrentUserId())).Observe())
+                .SelectMany(b => b!=null ? authorize() : true.Observe());
 
         private static IObservable<Unit> ConfigureStyle(this IObservable<SimpleAction> source) 
             => source.WhenCustomizeControl()
@@ -210,7 +210,7 @@ namespace Xpand.Extensions.Office.Cloud{
                         objectSpace.Delete(objectSpace.GetObjectByKey(serviceStorageType,e.Action.Application.CurrentUserId()));
                         objectSpace.CommitChanges();
                         e.Action.Data.Clear();
-                        return e.Action.AsSimpleAction().ReturnObservable();
+                        return e.Action.AsSimpleAction().Observe();
                     })
                     : authorize(e.Action.Application).To(e.Action.AsSimpleAction());
                 return execute.SelectMany(simpleAction => needsAuthentication(simpleAction.Application).Pair(simpleAction))

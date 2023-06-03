@@ -50,8 +50,17 @@ namespace Xpand.XAF.Modules.Reactive.Services {
                         .Select(editor => editor.Frame.GetController<LinkUnlinkController>())
                         .SelectMany(controller => controller.LinkAction.WhenExecuteCompleted()
                             .SelectMany(e => e.PopupWindowViewSelectedObjects.Cast<object>())
-                            .Do(value => ((IList)frame.View.ObjectTypeInfo.FindMember(t.attribute.PropertyName)
-                                .GetValue(frame.View.CurrentObject)).Add(value))
+                            .Do(value => {
+                                var memberInfo = frame.View.ObjectTypeInfo.FindMember(t.attribute.PropertyName);
+                                if (memberInfo.ListElementType != t.memberInfo.ListElementType) {
+                                    var target = frame.View.ObjectSpace.CreateObject(memberInfo.ListElementType);
+                                    memberInfo.AssociatedMemberInfo.SetValue(target,frame.View.CurrentObject);
+                                    memberInfo.ListElementTypeInfo.Members.Single(info =>info.IsPublic&& info.MemberType==t.memberInfo.ListElementType)
+                                        .SetValue(target,value);
+                                    value = target;
+                                }
+                                ((IList)memberInfo.GetValue(frame.View.CurrentObject)).Add(value);
+                            })
                             .MergeToUnit(controller.UnlinkAction.WhenExecuteCompleted()
                                 .SelectMany(e => e.SelectedObjects.Cast<object>())
                                 .Do(value => ((IList)frame.View.ObjectTypeInfo.FindMember(t.attribute.PropertyName)
@@ -72,7 +81,14 @@ namespace Xpand.XAF.Modules.Reactive.Services {
             => manager.WhenGeneratingModelNodes<IModelViews>()
                 .SelectMany(views =>views.OfType<IModelObjectView>()
                     .SelectMany(view => view.ModelClass.TypeInfo.Attributed<HiddenActionAttribute>()
-                        .SelectMany(t => t.attribute.Actions).Do(action => ((IModelViewHiddenActions)view).HiddenActions.AddNode<IModelActionLink>(action))))
+                        .SelectMany(t => t.attribute.Actions).Do(action => ((IModelViewHiddenActions)view).HiddenActions.AddNode<IModelActionLink>(action))
+                        .ToUnit()
+                        .Concat(view.ModelClass.TypeInfo.AttributedMembers<HiddenActionAttribute>()
+                            .SelectMany(t => views.OfType<IModelListView>().Where(listView => listView.ModelClass.TypeInfo.Type==t.memberInfo.ListElementType)
+                                .Where(listView => listView.Id==$"{t.memberInfo.Owner.Name}_{t.memberInfo.Name}_ListView").Distinct()
+                                .SelectMany(listView => t.attribute.Actions.Where(action => ((IModelViewHiddenActions)listView).HiddenActions[action]==null)
+                                    .Do(action => ((IModelViewHiddenActions)listView).HiddenActions.AddNode<IModelActionLink>(action))))
+                            .ToUnit())))
                 .ToUnit();
         static IObservable<Unit> ReadOnlyProperty(this ApplicationModulesManager manager)
             => manager.WhenGeneratingModelNodes<IModelBOModelClassMembers>()
@@ -142,7 +158,7 @@ namespace Xpand.XAF.Modules.Reactive.Services {
                 .ToUnit();
 
         static IObservable<(ApplicationModulesManager manager, CustomizeTypesInfoEventArgs e)> InvisibleInAllViewsAttribute(this IObservable<(ApplicationModulesManager manager, CustomizeTypesInfoEventArgs e)> source)
-            => source.ConcatIgnored(t => t.e.TypesInfo.Members<InvisibleInAllViewsAttribute>().ToArray().ReturnObservable()
+            => source.ConcatIgnored(t => t.e.TypesInfo.Members<InvisibleInAllViewsAttribute>().ToArray().Observe()
                 .SelectMany(attributes => attributes.AddVisibleViewAttributes()
                     .Concat(attributes.Distinct(t1 => t1.info).ToArray().AddAppearanceAttributes())));
 

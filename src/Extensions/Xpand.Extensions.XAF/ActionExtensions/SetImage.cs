@@ -1,8 +1,6 @@
-﻿using System;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Linq.Expressions;
 using DevExpress.ExpressApp.Actions;
 using EnumsNET;
 
@@ -36,6 +34,8 @@ namespace Xpand.Extensions.XAF.ActionExtensions {
         [Description("Language")]
         Language,
         [Description("Find")]
-        Find
+        Find,
+        [Description("Actions_Bookmark")]
+        Mark
     }
 }

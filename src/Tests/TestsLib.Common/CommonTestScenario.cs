@@ -33,7 +33,7 @@ namespace Xpand.TestsLib.Common {
                 application.CallMethod("CreateMainWindow");
             }
             var listView = application.NewListView(objectType);
-            var whenProxyCollectionChanged = ((ProxyCollection) listView.CollectionSource.Collection).Count.ReturnObservable()
+            var whenProxyCollectionChanged = ((ProxyCollection) listView.CollectionSource.Collection).Count.Observe()
                 .SelectMany(_ => listView.CollectionSource.WhenProxyCollectionChanged()).SubscribeReplay();
             var window = application.CreateViewWindow(() => listView);
             await whenProxyCollectionChanged.FirstAsync();

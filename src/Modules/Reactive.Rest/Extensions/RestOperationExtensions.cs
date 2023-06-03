@@ -22,7 +22,7 @@ using Xpand.XAF.Modules.Reactive.Services.Actions;
 namespace Xpand.XAF.Modules.Reactive.Rest.Extensions {
     internal static class RestOperationExtensions {
         public static IObservable<ApplicationModulesManager> ConfigureRestOperationTypes(this ApplicationModulesManager manager) 
-            => manager.ReturnObservable(modulesManager => modulesManager.WhenCustomizeTypesInfo().Select(t => t.e.TypesInfo)
+            => manager.Observe(modulesManager => modulesManager.WhenCustomizeTypesInfo().Select(t => t.e.TypesInfo)
                 .SelectMany(typesInfo => typesInfo.KeyDefaultAttributes()));
 
         public static IObservable<object> Commit(this IObjectSpace objectSpace, object o,ICredentialBearer bearer) 

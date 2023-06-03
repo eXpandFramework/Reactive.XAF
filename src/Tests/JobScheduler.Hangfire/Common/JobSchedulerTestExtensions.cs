@@ -17,7 +17,7 @@ using Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects;
 namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests.Common {
     public static class JobSchedulerTestExtensions {
         public static IObservable<Unit> ExecuteAction(this BlazorApplication application,Job job) 
-            => Unit.Default.ReturnObservable().Delay(TimeSpan.FromMilliseconds(300))
+            => Unit.Default.Observe().Delay(TimeSpan.FromMilliseconds(300))
                 .SelectMany(_ => ((IObservable<Unit>)AppDomain.CurrentDomain.GetAssemblyType("Xpand.XAF.Modules.JobScheduler.Hangfire.ExecuteJobActionExtensions")
                     .Method("ExecuteAction", new []{typeof(XafApplication),typeof(string)},Flags.StaticPrivate)
                     .Call(new object[] { application, job.Id })).Select(unit => unit));
@@ -58,7 +58,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests.Common {
                 if (job.CronExpression.Name != nameof(Cron.Never)) {
                     return Observable.Start(job.Trigger).To(job);
                 }
-                return job.ReturnObservable();
+                return job.Observe();
 
             }));
 

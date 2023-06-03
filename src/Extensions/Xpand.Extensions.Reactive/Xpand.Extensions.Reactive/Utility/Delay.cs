@@ -31,7 +31,7 @@ namespace Xpand.Extensions.Reactive.Utility {
         public static IObservable<T> DelayRandomly<T>(this IObservable<T> source, int maxValue, int minValue = 0)
             => source.SelectMany(arg => {
                 var value = Random.Next(minValue, maxValue);
-                return value == 0 ? arg.ReturnObservable() : Observable.Timer(TimeSpan.FromSeconds(value)).To(arg);
+                return value == 0 ? arg.Observe() : Observable.Timer(TimeSpan.FromSeconds(value)).To(arg);
             });
     }
 }

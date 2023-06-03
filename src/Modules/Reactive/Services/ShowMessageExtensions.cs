@@ -44,7 +44,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         
         
         public static IObservable<Unit> ShowXafInfoMessage<T>(this Func<IObservable<T>> showSignal,Func<T, string> messageSelector,[CallerMemberName]string caller="") 
-            => Unit.Default.ReturnObservable().ShowXafInfoMessage(_ => showSignal(),messageSelector,caller ).ToUnit();
+            => Unit.Default.Observe().ShowXafInfoMessage(_ => showSignal(),messageSelector,caller ).ToUnit();
         
         public static IObservable<T> ShowXafInfoMessage<T,T2>(this IObservable<T> source, 
             Func<T, IObservable<T2>> showSignal, Func<T2, string> messageSelector, [CallerMemberName] string caller = "") 

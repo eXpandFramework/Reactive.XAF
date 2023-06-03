@@ -41,7 +41,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                 memoryStream.Bytes().Save(outputAssembly);
             }
             var assembly = RemoveRecursiveProperties(outputAssembly);
-            return assembly.ReturnObservable().TraceModelMapper();
+            return assembly.Observe().TraceModelMapper();
         }
 
         private static string FormatOutputAssembly(bool isCustom) {

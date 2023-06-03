@@ -98,7 +98,7 @@ namespace Xpand.XAF.Modules.Speech.Services {
 
         private static IObservable<VoiceInfo[]> UpdateVoices(this BusinessObjects.SpeechService service) 
             => Observable.Using(() => new SpeechSynthesizer(service.SpeechConfig()),synthesizer => synthesizer.GetVoicesAsync().ToObservable()
-                .ObserveOnContext().SelectMany(result => !string.IsNullOrEmpty(result.ErrorDetails)?Observable.Throw<SynthesisVoicesResult>(new SpeechException(result.ErrorDetails)):result.ReturnObservable()))
+                .ObserveOnContext().SelectMany(result => !string.IsNullOrEmpty(result.ErrorDetails)?Observable.Throw<SynthesisVoicesResult>(new SpeechException(result.ErrorDetails)):result.Observe()))
                 .SelectMany(result => result.Voices.ToNowObservable()
                     .Do(service.EnsureVoice ).BufferUntilCompleted().Do(_ => {
                         service.CommitChanges();

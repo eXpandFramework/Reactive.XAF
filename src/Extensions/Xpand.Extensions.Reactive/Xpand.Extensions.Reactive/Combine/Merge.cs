@@ -27,11 +27,11 @@ namespace Xpand.Extensions.Reactive.Combine{
             => source.Publish(obs => obs.Merge(obs.SelectMany(selector),scheduler??Scheduler.Default));
         
         public static IObservable<TValue> MergeWith<TSource, TValue>(this IObservable<TSource> source, TValue value, IScheduler scheduler = null) 
-            => source.Merge(default(TSource).ReturnObservable(scheduler ?? CurrentThreadScheduler.Instance)).Select(_ => value);
+            => source.Merge(default(TSource).Observe(scheduler ?? CurrentThreadScheduler.Instance)).Select(_ => value);
 
         public static IObservable<Unit> MergeToUnit<TSource, TValue>(this IObservable<TSource> source, IObservable<TValue> value, IScheduler scheduler = null) 
             => source.ToUnit().Merge(value.ToUnit());
-        
+
         public static IObservable<T> MergeIgnored<T,T2>(this IObservable<T> source,Func<T,IObservable<T2>> secondSelector,Func<T,bool> merge=null)
             => source.Publish(obs => obs.SelectMany(arg => {
                 merge ??= _ => true;
@@ -39,7 +39,7 @@ namespace Xpand.Extensions.Reactive.Combine{
                 if (merge(arg)) {
                     observable = secondSelector(arg).IgnoreElements().To(arg);
                 }
-                return observable.Merge(arg.ReturnObservable());
+                return observable.Merge(arg.Observe());
             }));
         
         public static IObservable<T> MergeIgnored<T,T2>(this IObservable<T> source,Func<T,bool> merge,Func<T,IObservable<T2>> secondSelector)

@@ -248,7 +248,7 @@ namespace Xpand.XAF.Modules.TenantManager{
 	            var organizationTypeInfo = application.Model.TenantManager().Organization.TypeInfo;
                 var lastOrganizationKey = application.LastOrganizationKey();
                 return space.GetObjectByKey(organizationTypeInfo.Type, lastOrganizationKey)
-                    .ReturnObservable().WhenNotDefault();
+                    .Observe().WhenNotDefault();
             }).TraceTenantManager(o => $"{o} - {SecuritySystem.CurrentUserName}  ");
 
         public static object LastOrganizationKey(this XafApplication application) { 
@@ -284,7 +284,7 @@ namespace Xpand.XAF.Modules.TenantManager{
             else {
                 singletonItems.TryAdd(SecuritySystem.CurrentUserName, value);
             }
-            return Unit.Default.ReturnObservable();
+            return Unit.Default.Observe();
         }
 
         private static void UpdateRoles(this ISecurityUserWithRoles applicationUser,XafApplication application, IObjectSpace objectSpace){

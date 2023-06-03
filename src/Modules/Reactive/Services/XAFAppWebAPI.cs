@@ -31,12 +31,12 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                     return whenTemplate
                         .WhenDefault(window => (bool)window.Template.GetPropertyValue("IsAsync")).ToUnit()
                         .Do(_ => AppDomain.CurrentDomain.Web().WriteHttpResponse($"<span style='color:red'>Asynchronous operations not supported, please mark the Page as async, for details refer to {module} wiki page. </span>",true))
-                        .Merge(whenTemplate.SelectMany(_ => SynchronizationContext.Current.ReturnObservable().Where(context => context.GetType().Name!="AspNetSynchronizationContext")
+                        .Merge(whenTemplate.SelectMany(_ => SynchronizationContext.Current.Observe().Where(context => context.GetType().Name!="AspNetSynchronizationContext")
                             .Do(context => AppDomain.CurrentDomain.Web().WriteHttpResponse($"<span style='color:red'>{context.GetType().FullName} is used instead of System.Web.AspNetSynchronizationContext, please modify your httpRuntime configuration. For details refer to {module} wiki page.</span>",true)).ToUnit()));
                 });
 
         public static IObservable<IXAFAppWebAPI> WhenWeb(this XafApplication application) 
-            => application.GetPlatform() == Platform.Win ?  Observable.Empty<IXAFAppWebAPI>():new XAFAppWebAPI(application).ReturnObservable();
+            => application.GetPlatform() == Platform.Win ?  Observable.Empty<IXAFAppWebAPI>():new XAFAppWebAPI(application).Observe();
 
         
         public static void SetPageError(this IXAFAppWebAPI api, Exception exception) 

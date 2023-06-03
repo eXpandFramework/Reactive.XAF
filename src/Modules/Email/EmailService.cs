@@ -82,7 +82,7 @@ namespace Xpand.XAF.Modules.Email{
                 emailStorage.Key = $"{space.GetKeyValue(t.o)}";
                 emailStorage.ViewRecipient = t.recipient.Id();
                 space.CommitChanges();
-                return Unit.Default.ReturnObservable();
+                return Unit.Default.Observe();
             }));
 
         private static IObservable<(IModelEmailViewRecipient recipient,object o)> SendEmail(this MailMessage message,IModelEmailViewRecipient recipient,  object o) {

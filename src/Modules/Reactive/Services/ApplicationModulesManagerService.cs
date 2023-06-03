@@ -30,7 +30,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                     .SelectMany(info => info.Members.ToObservable(Transform.ImmediateScheduler)
                         .Where(memberInfo => memberInfo.MemberType.RealType().IsNumeric(true))
                         .SelectMany(memberInfo => memberInfo.FindAttributes<T>().ToArray().ToObservable(Transform.ImmediateScheduler)
-                            .SwitchIfEmpty(typeof(T).CreateInstance().ReturnObservable().Cast<T>())
+                            .SwitchIfEmpty(typeof(T).CreateInstance().Observe().Cast<T>())
                             .Select(attribute=>(memberInfo,attribute)))
                         .Do(t1 => {
                             if (t1.attribute is ICustomAttribute customAttribute) {

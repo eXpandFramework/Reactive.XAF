@@ -17,14 +17,14 @@ namespace Xpand.Extensions.Reactive.Transform {
             => source.ToUnit().Concat(Observable.Defer(target.ToUnit));
         
         public static IObservable<TTarget> ConcatIgnoredValue<TSource,TTarget>(this IObservable<TSource> source, TTarget value) 
-            => source.Select(_ => default(TTarget)).WhenNotDefault().Concat(value.ReturnObservable());
+            => source.Select(_ => default(TTarget)).WhenNotDefault().Concat(value.Observe());
         
         public static IObservable<Unit> ConcatIgnoredUnit<TSource>(this IObservable<TSource> source) 
             => source.ConcatIgnoredValue(Unit.Default);
         public static IObservable<T> ConcatIgnored<T,T2>(this IObservable<T> source,Func<T,IObservable<T2>> secondSelector,Func<T,bool> merge=null)
             => source.SelectMany(arg => {
                 merge ??= _ => true;
-                return merge(arg) ? secondSelector(arg).IgnoreElements().ConcatIgnoredValue(arg).Finally(() => {}) : arg.ReturnObservable();
+                return merge(arg) ? secondSelector(arg).IgnoreElements().ConcatIgnoredValue(arg).Finally(() => {}) : arg.Observe();
             });
         public static IObservable<T> ConcatIgnored<T>(this IObservable<T> source,Action<T> action,Func<T,bool> merge=null)
             => source.SelectMany(arg => {
@@ -33,7 +33,7 @@ namespace Xpand.Extensions.Reactive.Transform {
                     action(arg);
                     return Observable.Empty<T>().ConcatIgnoredValue(arg);
                 }
-                return arg.ReturnObservable();
+                return arg.Observe();
             });
         public static IObservable<T> ConcatIgnoredFirst<T,T2>(this IObservable<T> source,Func<T,IObservable<T2>> secondSelector,Func<T,bool> merge=null)
             => source.SelectMany((arg, i) => {
@@ -43,10 +43,10 @@ namespace Xpand.Extensions.Reactive.Transform {
                     if (merge(arg)) {
                         observable = secondSelector(arg).IgnoreElements().To(arg);
                     }
-                    return observable.Concat(arg.ReturnObservable());
+                    return observable.Concat(arg.Observe());
                 }
 
-                return arg.ReturnObservable();
+                return arg.Observe();
 
             });
     }

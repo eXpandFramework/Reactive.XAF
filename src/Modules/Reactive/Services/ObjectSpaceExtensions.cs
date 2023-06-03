@@ -16,6 +16,7 @@ using DevExpress.Xpo;
 using Fasterflect;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.LinqExtensions;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Transform.Collections;
@@ -46,6 +47,11 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 }
             });
 
+        public static IObservable<T> RefreshObjectSpace<T>(this IObservable<T> source,Func<IObjectSpace> objectSpaceSelector) 
+            => source.Select(arg => (arg,space:objectSpaceSelector()))
+                .If(t => !t.space.IsModified,t => t.arg.Observe().Do(_ => t.space.Refresh()),t =>
+                    t.space.WhenCommitted().Take(1).Do(space => space.Refresh()).To(t.arg));
+        
         public static IEnumerable<T> ShapeData<T>(this IObjectSpace objectSpace,Type objectType,CriteriaOperator criteria=null,IEnumerable<SortProperty> sorting=null,int topReturned=0,params T[] objects) where T:class{
             var filterEvaluator = objectSpace.GetExpressionEvaluator(objectType,criteria);
             var data = objects.Where(o => filterEvaluator.Fit(o));
@@ -178,7 +184,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => objectSpace.WhenCommiting().SelectMany(_ => {
                     var modifiedObjects = objectSpace.ModifiedObjects<T>(objectModification).Where(t => criteria==null|| criteria.Invoke(t.instance)).ToArray();
                     return modifiedObjects.Any() ? emitAfterCommit ? objectSpace.WhenCommitted().FirstAsync().Select(space => (space, modifiedObjects))
-                            : (objectSpace, modifiedObjects).ReturnObservable() : Observable.Empty<(IObjectSpace, (T instance, ObjectModification modification)[])>();
+                            : (objectSpace, modifiedObjects).Observe() : Observable.Empty<(IObjectSpace, (T instance, ObjectModification modification)[])>();
                 })
                 .TraceRX(_ => typeof(T).Name);
         
@@ -194,7 +200,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                         var modifiedObjects = objectSpace.ModifiedObjects(objectType, objectModification)
                             .Where(t => criteria==null|| criteria.Invoke(t.instance)).ToArray();
                         return modifiedObjects.Any() ? emitAfterCommit ? objectSpace.WhenCommitted().FirstAsync().Select(space => (space, modifiedObjects))
-                            : (objectSpace, modifiedObjects).ReturnObservable() : Observable.Empty<(IObjectSpace, (object instance, ObjectModification modification)[])>();
+                            : (objectSpace, modifiedObjects).Observe() : Observable.Empty<(IObjectSpace, (object instance, ObjectModification modification)[])>();
                     }))
                 .TraceRX(_ => caller.JoinString(" ->",objectType.Name ));
 
@@ -215,8 +221,12 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             WhenCommittedDetailed<T>(this IObjectSpace objectSpace, ObjectModification objectModification) 
             => objectSpace.ParentObjectSpace().WhenCommitingDetailed<T>(true, objectModification);
 
-        public static IObjectSpace ParentObjectSpace(this IObjectSpace objectSpace) 
-            => !objectSpace.IsNested() ? objectSpace : (IObjectSpace)objectSpace.GetPropertyValue("ParentObjectSpace");
+        public static IObjectSpace ParentObjectSpace(this IObjectSpace objectSpace) {
+            while (objectSpace.IsNested()) {
+                objectSpace = (IObjectSpace)objectSpace.GetPropertyValue("ParentObjectSpace");
+            }
+            return objectSpace;
+        }
 
         public static bool IsNested(this IObjectSpace objectSpace) 
             => objectSpace.GetType().InheritsFrom("DevExpress.ExpressApp.Xpo.XPNestedObjectSpace");
@@ -243,12 +253,9 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                     .Buffer(objectSpace.WhenCommitingDetailed(false, objectModification, criteria,caller)).WhenNotEmpty()
                     .TakeUntil(objectSpace.WhenDisposed())
                     .SelectMany(modifiedObjects => {
-                        var objectSpaceModifiedObjects = objectSpace.ModifiedObjects(objectModification, modifiedObjects).ToArray();
-                        if (emitAfterCommit) {
-                            return objectSpace.WhenCommitted<T>(caller).Take(1)
-                                .Select(_ => (objectSpace, details:objectSpaceModifiedObjects));
-                        }
-                        return (objectSpace, details: objectSpaceModifiedObjects).ReturnObservable();
+                        var details = objectSpace.ModifiedObjects(objectModification, modifiedObjects).ToArray();
+                        return emitAfterCommit ? objectSpace.WhenCommitted().Take(1)
+                            .Select(_ => (objectSpace, details)) : (objectSpace, details).Observe();
                     }).Where(t => t.details.Any());
 
         public static void DeleteObject<T>(this T value, Expression<Func<T, bool>> criteria = null) where T:class,IObjectSpaceLink => value.ObjectSpace.Delete(value);
@@ -353,7 +360,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => Observable.If(() => link!=null,link.Defer(() => link.ObjectSpace.CommitChangesAsync().ToObservable().To(link)));
         
         public static IObservable<T> Commit<T>(this IObservable<T> source) where T:IObjectSpaceLink
-            => source.BufferUntilCompleted(true).SelectMany(links => links.First().Commit());
+            => source.BufferUntilCompleted().SelectMany().Take(1).ThrowIfEmpty().Do(link => link.CommitChanges());
         
         public static T CreateObject<T>(this IObjectSpaceLink link)
             => link.ObjectSpace.CreateObject<T>();
@@ -580,7 +587,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                     if (link.GetType().Implements(XPInvalidateableObjectType)) {
 
                         if (!(bool)link.GetPropertyValue("IsInvalidated") && !(bool)link.GetPropertyValue("Session").GetPropertyValue("IsObjectsLoading"))
-                            return link.ReloadObject().ReturnObservable();
+                            return link.ReloadObject().Observe();
                         return link.GetPropertyValue("Session").WhenEvent("ObjectLoaded").FirstAsync()
                             .Do(_ => link.ReloadObject()).To(link);
                     }

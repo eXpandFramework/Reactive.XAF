@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Reactive;
-using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
@@ -11,7 +10,6 @@ using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.SystemModule;
 using Xpand.Extensions.Numeric;
-using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
@@ -49,7 +47,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         internal static IObservable<TFrame> WhenFits<TFrame>(this IObservable<TFrame> source, ViewType viewType,
             Type objectType = null, Nesting nesting = Nesting.Any, bool? isPopupLookup = null) where TFrame : Frame 
-            => source.SelectMany(_ => _.View != null ? _.ReturnObservable() : _.WhenViewChanged().Select(tuple => _))
+            => source.SelectMany(frame => frame.View != null ? frame.Observe() : frame.WhenViewChanged().Select(_ => frame))
                 .Where(frame => frame.View.Is(viewType, nesting, objectType))
                 .Where(_ => {
                     if (isPopupLookup.HasValue){
@@ -64,65 +62,38 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             Action<SimpleActionExecuteEventArgs> retriedExecution) where TFrame : Frame
             => source.GetController<RefreshController>().RefreshAction.WhenExecuted(retriedExecution).To(source);
         
-        public static IObservable<Unit> WhenInvalid<TFrame>(this TFrame source) where TFrame : Frame 
-            => source.WhenViewChangedToNull().ToUnit().Merge(source.WhenDisposingFrame().ToUnit());
-
-        public static IObservable<(TFrame frame, ViewChangedEventArgs args)>
-            WhenViewChangedToNull<TFrame>(this TFrame source) where TFrame : Frame 
-            => source.WhenViewChanged().Where(_ => _.frame.View == null);
-
-        public static IObservable<(TFrame frame, ViewChangedEventArgs args)> WhenViewChanged<TFrame>(this TFrame source) where TFrame : Frame 
-            => source.ReturnObservable().ViewChanged();
-
-        public static IObservable<(TFrame frame, ViewChangedEventArgs args)> ViewChanged<TFrame>(
-            this IObservable<TFrame> source) where TFrame : Frame 
-            => source.SelectMany(item =>
-			        Observable.FromEventPattern<EventHandler<ViewChangedEventArgs>, ViewChangedEventArgs>(
-				        h => item.ViewChanged += h, h => item.ViewChanged -= h, ImmediateScheduler.Instance))
-		        .Select(pattern => pattern)
-		        .TransformPattern<ViewChangedEventArgs, TFrame>();
-        
         public static IObservable<(TFrame frame, ViewChangingEventArgs args)> WhenViewChanging<TFrame>(this TFrame source) where TFrame : Frame 
-            => source.ReturnObservable().WhenViewChanging();
+            => source.WhenEvent<ViewChangingEventArgs>(nameof(Frame.ViewChanging)).InversePair(source);
 
-        public static IObservable<(TFrame frame, ViewChangingEventArgs args)> WhenViewChanging<TFrame>(
+        public static IObservable<(TFrame frame, ViewChangingEventArgs args)> ViewChanging<TFrame>(
             this IObservable<TFrame> source) where TFrame : Frame 
-            => source.SelectMany(item => Observable.FromEventPattern<EventHandler<ViewChangingEventArgs>, ViewChangingEventArgs>(
-				        h => item.ViewChanging += h, h => item.ViewChanging -= h, ImmediateScheduler.Instance))
-		        .Select(pattern => pattern)
-		        .TransformPattern<ViewChangingEventArgs, TFrame>();
+            => source.SelectMany(item => item.WhenViewChanging());
+        
+        public static IObservable<TFrame> ViewChanged<TFrame>(
+            this IObservable<TFrame> source) where TFrame : Frame 
+            => source.SelectMany(item => item.WhenViewChanged().Select(t => t.frame));
 
-        public static IObservable<TFrame> ToFrame<TFrame>(
-            this IObservable<(TFrame frame, ViewChangedEventArgs args)> source) where TFrame : Frame
-            => source.Select(t => t.frame);
-        public static IObservable<(TFrame frame, ViewChangedEventArgs args)> WhenViewChanged<TFrame>(
-            this IObservable<TFrame> source) where TFrame : Frame 
-            => source.SelectMany(item => Observable.FromEventPattern<EventHandler<ViewChangedEventArgs>, ViewChangedEventArgs>(
-				        h => item.ViewChanged += h, h => item.ViewChanged -= h, ImmediateScheduler.Instance))
-		        .Select(pattern => pattern)
-		        .TransformPattern<ViewChangedEventArgs, TFrame>();
+        public static IObservable<(TFrame frame, Frame source)> WhenViewChanged<TFrame>(this IObservable<TFrame> source) where TFrame : Frame
+            => source.SelectMany(frame => frame.WhenViewChanged());
         
-        
+        public static IObservable<(TFrame frame, Frame source)> WhenViewChanged<TFrame>(this TFrame item) where TFrame : Frame 
+            => item.WhenEvent<ViewChangedEventArgs>(nameof(Frame.ViewChanged))
+                .TakeUntil(item.WhenDisposingFrame()).Select(e => e.SourceFrame).InversePair(item);
 
         public static IObservable<T> TemplateChanged<T>(this IObservable<T> source) where T : Frame 
-            => source.SelectMany(item => {
-                if (item.Template != null) return item.ReturnObservable();
-                return Observable.FromEventPattern<EventHandler, EventArgs>(
-                        handler => item.TemplateChanged += handler,
-                        handler => item.TemplateChanged -= handler,ImmediateScheduler.Instance)
-                    .Select(_ => item);
-            });
+            => source.SelectMany(item => item.Template != null
+                    ? item.Observe() : item.WhenEvent(nameof(Frame.TemplateChanged))
+                        .TakeUntil(item.WhenDisposingFrame()).Select(_ => item));
 
         public static IObservable<TFrame> WhenTemplateChanged<TFrame>(this TFrame source) where TFrame : Frame 
-            => source.ReturnObservable().TemplateChanged();
+            => source.Observe().TemplateChanged();
 
         public static IObservable<TFrame> WhenTemplateViewChanged<TFrame>(this TFrame source) where TFrame : Frame 
-            => source.ReturnObservable().TemplateViewChanged();
+            => source.WhenEvent(nameof(Frame.TemplateViewChanged)).To(source)
+                .TakeUntil(source.WhenDisposedFrame());
 
         public static IObservable<T> TemplateViewChanged<T>(this IObservable<T> source) where T : Frame 
-            => source.SelectMany(item => Observable.FromEventPattern<EventHandler, EventArgs>(
-                handler => item.TemplateViewChanged += handler,
-                handler => item.TemplateViewChanged -= handler,ImmediateScheduler.Instance).Select(_ => item));
+            => source.SelectMany(item => item.WhenTemplateViewChanged().Select(_ => item));
 
         public static IObservable<TFrame> DisableSimultaneousModificationsException<TFrame>(this TFrame frame) where TFrame : Frame 
             => frame.Controllers.Cast<Controller>().Where(controller1 => controller1.Name=="DevExpress.ExpressApp.Win.SystemModule.LockController").Take(1).ToNowObservable()
@@ -130,12 +101,15 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .To(frame);
 
         public static IObservable<Unit> WhenDisposingFrame<TFrame>(this TFrame source) where TFrame : Frame 
-            => DisposingFrame(source.ReturnObservable());
+            => source.WhenEvent(nameof(Frame.Disposing)).ToUnit();
+        
+        public static IObservable<Unit> WhenDisposedFrame<TFrame>(this TFrame source) where TFrame : Frame 
+            => source.WhenEvent(nameof(Frame.Disposed)).ToUnit();
 
         public static IObservable<Unit> DisposingFrame<TFrame>(this IObservable<TFrame> source) where TFrame : Frame 
-            => source.WhenNotDefault().SelectMany(item => Observable.FromEventPattern<EventHandler, EventArgs>(
-                handler => item.Disposing += handler,
-                handler => item.Disposing -= handler,ImmediateScheduler.Instance)).ToUnit();
+            => source.WhenNotDefault().SelectMany(item => item.WhenDisposingFrame()).ToUnit();
+        
+        
 
         public static IObservable<T> SelectUntilViewClosed<TFrame, T>(this IObservable<TFrame> source,
             Func<TFrame, IObservable<T>> selector) where TFrame : View
@@ -156,6 +130,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                     e => e.ShowViewParameters.CreatedView = e.Application().NewDetailView(space => space.GetObject(e.Action.View().CurrentObject),
                         e.View().CurrentObject.GetType().GetModelClass().DefaultDetailView));
     
-        
+    
+        public static IObservable<ListPropertyEditor> NestedListViews(this Frame frame, params Type[] objectTypes ) 
+            => frame.View.ToDetailView().NestedListViews(objectTypes);
     }
 }

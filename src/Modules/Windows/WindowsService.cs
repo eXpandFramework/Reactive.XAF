@@ -49,7 +49,7 @@ namespace Xpand.XAF.Modules.Windows{
             });
 
         private static IObservable<Window> ConfigureForm(this IObservable<Window> source,Func<Window,bool> apply=null)
-	        => source.SelectMany(frame => apply == null || apply(frame) ? frame.ConfigureForm() : frame.ReturnObservable());
+	        => source.SelectMany(frame => apply == null || apply(frame) ? frame.ConfigureForm() : frame.Observe());
 
         private static IObservable<Window> ConfigureForm(this Window frame) {
             var form = ((Form)frame.Template);
@@ -61,7 +61,7 @@ namespace Xpand.XAF.Modules.Windows{
             form.FormBorderStyle = modelForm.FormBorderStyle;
             return modelForm.Text != null ? form.WhenEvent(nameof(Form.TextChanged))
                 .Where(_ => form.Text != modelForm.Text)
-                .Do(_ => form.Text = modelForm.Text).To(frame) : frame.ReturnObservable()
+                .Do(_ => form.Text = modelForm.Text).To(frame) : frame.Observe()
                 .TraceWindows();
         }
 

@@ -81,7 +81,7 @@ namespace Xpand.XAF.Modules.Windows.Tests{
                     
                 }).Test();
             var test = application.WhenWindowCreated(!popup)
-                .SelectMany(window => popup?window.WhenTemplateViewChanged():window.ReturnObservable())
+                .SelectMany(window => popup?window.WhenTemplateViewChanged():window.Observe())
                 .When(!popup?TemplateContext.ApplicationWindow:TemplateContext.PopupWindow)
                 .Select(frame => {
                     var eventArgs =when=="OnKeyDown"? new KeyEventArgs(Keys.Escape):new EventArgs();

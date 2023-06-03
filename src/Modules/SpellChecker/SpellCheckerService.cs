@@ -43,7 +43,7 @@ namespace Xpand.XAF.Modules.SpellChecker{
                 typeOptions.CheckControlsInParentContainer = true;
                 spellChecker.Culture = CultureInfo.CurrentUICulture;
                 spellChecker.CheckContainer();
-                return spellChecker.ReturnObservable().DoNotComplete();
+                return spellChecker.Observe().DoNotComplete();
             });
 
         internal static IObservable<TSource> TraceSpellChecker<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<ITraceEvent> traceAction = null,

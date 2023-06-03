@@ -20,7 +20,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 	}
 	public static class FrameTemplateExtensions{
 		public static IObservable<IWindowsForm> WhenWindowsForm(this IFrameTemplate frameTemplate) 
-			=> frameTemplate.ReturnObservable().Where(_ => frameTemplate != null && frameTemplate.GetType().InheritsFrom("System.Windows.Forms.Form")).WhenNotDefault()
+			=> frameTemplate.Observe().Where(_ => frameTemplate != null && frameTemplate.GetType().InheritsFrom("System.Windows.Forms.Form")).WhenNotDefault()
 				.Select(template => new WindowsForm(template));
 
 

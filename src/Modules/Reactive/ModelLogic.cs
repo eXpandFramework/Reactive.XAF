@@ -41,7 +41,7 @@ namespace Xpand.XAF.Modules.Reactive{
         private static IObservable<T> ReactiveModule<T>(this XafApplication application,Func<T> model) {
             var applicationModel = (bool) application.GetFieldValue("isLoggedOn");
             return applicationModel
-                ? model().ReturnObservable()
+                ? model().Observe()
                 : application.WhenLoggedOn().Select(_ => model()).WhenNotDefault();
         }
 

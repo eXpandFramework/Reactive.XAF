@@ -47,7 +47,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 spaceLink.CallMethod("Invalidate", true);
                 spaceLink.ObjectSpace.Dispose();
                 if (match)
-                    return objectSpaceLinks.AddOrUpdate(value, spaceLink, (_, _) => spaceLink).ReturnObservable();
+                    return objectSpaceLinks.AddOrUpdate(value, spaceLink, (_, _) => spaceLink).Observe();
                 objectSpaceLinks.TryRemove((TKey)link.ObjectSpace.GetKeyValue(link), out _);
                 return Observable.Empty<TObject>();
 

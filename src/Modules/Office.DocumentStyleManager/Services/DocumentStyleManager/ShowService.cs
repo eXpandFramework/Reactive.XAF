@@ -32,7 +32,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Services.DocumentStyleMa
                 .WhenExecute()
                 .SelectMany(args => args.Action.Application.DefaultPropertiesProvider(document => {
 	                args.ShowStyleManagerOnExecute(document);
-	                return Unit.Default.ReturnObservable();
+	                return Unit.Default.Observe();
                 }));
             var configureAction = manager
 		            .WhenApplication(application => application.WhenViewOnFrame()

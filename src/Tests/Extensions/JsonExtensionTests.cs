@@ -30,7 +30,7 @@ namespace Xpand.Extensions.Tests {
         [Test]
         public void ToJsonDocument_DisposesDocument_() {
             using var stream = new MemoryStream("{\"name\": \"John Doe\", \"age\": 42}".Bytes());
-            var observer = stream.WhenJsonDocument(document => document.ReturnObservable()).SelectMany()
+            var observer = stream.WhenJsonDocument(document => document.Observe()).SelectMany()
                 .Where(t => !t.IsDisposed())
                 .Test();
 

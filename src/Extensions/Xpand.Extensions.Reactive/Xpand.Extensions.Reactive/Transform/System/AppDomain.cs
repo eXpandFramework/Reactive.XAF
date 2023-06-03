@@ -10,7 +10,7 @@ namespace Xpand.Extensions.Reactive.Transform.System {
     public static class AppDomainExtensions {
         static readonly IConnectableObservable<AppDomain> AppdomainOneEmission;
         static AppDomainExtensions() {
-            AppdomainOneEmission = AppDomain.CurrentDomain.ReturnObservable().BufferUntilSubscribed();
+            AppdomainOneEmission = AppDomain.CurrentDomain.Observe().BufferUntilSubscribed();
             AppdomainOneEmission.Connect();
         }
         public static IObservable<Assembly> WhenAssemblyLoad(this AppDomain appDomain) 

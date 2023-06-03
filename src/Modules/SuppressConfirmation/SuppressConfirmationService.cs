@@ -60,9 +60,9 @@ namespace Xpand.XAF.Modules.SuppressConfirmation{
             application.WhenWindowCreated().Cast<Frame>()
                 .Merge(application.WhenNestedFrameCreated().Cast<Frame>())
                 .WhenModule(typeof(SuppressConfirmationModule))
-                .ViewChanged().Where(_ => _.frame.View is ObjectView)
-                .Where(_ => ((IModelObjectViewSupressConfirmation) _.frame.View.Model).SupressConfirmation)
-                .Select(_ => _.frame)
+                .ViewChanged().Where(frame => frame.View is ObjectView)
+                .Where(frame => ((IModelObjectViewSupressConfirmation) frame.View.Model).SupressConfirmation)
+                .Select(frame => frame)
                 .TraceSuppressConfirmationModule(frame => frame.View.Id);
     }
 }

@@ -44,7 +44,7 @@ namespace Xpand.Extensions.Office.Cloud{
                 .QueryCloudOfficeObject((string)t.@event.GetPropertyValue("Id"), t.@event.GetType().ToCloudObjectType()).ToObservable(Scheduler.Immediate)
                 .Select(cloudObject => ((IEvent) objectSpace.GetObjectByKey(localEventType,new Guid(cloudObject.LocalId)))).Pair(t)
                 .Select(tuple => (objectSpace,tuple.source,tuple.other.@event,tuple.other.mapAction))
-                .SwitchIfEmpty((objectSpace,(IEvent)null,t.@event,t.mapAction).ReturnObservable().Select(tuple => tuple))
+                .SwitchIfEmpty((objectSpace,(IEvent)null,t.@event,t.mapAction).Observe().Select(tuple => tuple))
                 .Finally(objectSpace.CommitChanges)));
 
         public static IObservable<(TCloudEntity serviceObject, MapAction mapAction)>

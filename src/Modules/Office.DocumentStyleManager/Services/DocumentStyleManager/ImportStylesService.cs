@@ -42,7 +42,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Services.DocumentStyleMa
                             var filterImportStyles = frame.Action<DocumentStyleManagerModule>().FilterImportStyles();
                             var selectedItemData = (IModelImportStylesItem) filterImportStyles.SelectedItem?.Data;
                             t.e.Objects = application.CreateDocumentStyles(document, selectedItemData);
-                            return Unit.Default.ReturnObservable().TraceDocumentStyleModule(_ =>nameof(CreateDocumentStyles) );
+                            return Unit.Default.Observe().TraceDocumentStyleModule(_ =>nameof(CreateDocumentStyles) );
                         }))
                     )
                     .Merge(viewOnFrame.Do(frame => frame.View.ObjectSpace.Refresh()).TraceDocumentStyleModule(_ => nameof(IObjectSpace.Refresh)).IgnoreElements().ToUnit());
@@ -135,7 +135,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Services.DocumentStyleMa
                     }
 
                     server.Document.EndUpdate();
-                    return styles.ReturnObservable().TraceDocumentStyleModule(documentStyles => documentStyles.Select(style => style.StyleName).Join(", "));
+                    return styles.Observe().TraceDocumentStyleModule(documentStyles => documentStyles.Select(style => style.StyleName).Join(", "));
                 }));
 
         private static IObservable<Unit> ShowDocumentStyleListView(this IObservable<SimpleAction> source)

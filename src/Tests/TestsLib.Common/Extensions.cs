@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
@@ -29,7 +28,7 @@ using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.PermissionPolicy;
 using DevExpress.Xpo;
 using Fasterflect;
-
+using Humanizer;
 using Moq;
 using Moq.Protected;
 using NUnit.Framework;
@@ -339,10 +338,7 @@ namespace Xpand.TestsLib.Common{
 
 	        return application;
         }
-
         
-        
-
         public static XafApplication NewXafApplication<TModule>(this Platform platform, bool transmitMessage=true, bool handleExceptions=true)
 	        where TModule : ModuleBase {
 	        Tracing.Initialize(AppDomain.CurrentDomain.ApplicationPath(), TraceLevel.Verbose.ToString());
@@ -377,7 +373,7 @@ namespace Xpand.TestsLib.Common{
 		        throw new NotSupportedException(
 			        "if implemented make sure all tests pass with TestExplorer and live testing");
 	        }
-	        application.Title = TestContext.CurrentContext.Test.FullName;
+	        application.Title = TestContext.CurrentContext.Test.FullName.Truncate(255);
 	        return application;
         }
 
@@ -498,13 +494,13 @@ namespace Xpand.TestsLib.Common{
             => Process.GetProcessesByName("Xpand.XAF.Modules.Reactive.Logger.Client.Win").Any()
                 ? TraceEventHub.Trace.FirstAsync(_ => _.Source == application.SUTModule.Name).ToUnit()
                     .SubscribeReplay()
-                : Unit.Default.ReturnObservable();
+                : Unit.Default.Observe();
 
         
         public static IObservable<Unit> ClientConnect(this ITestApplication application) 
             => Process.GetProcessesByName("Xpand.XAF.Modules.Reactive.Logger.Client.Win").Any()
                 ? TraceEventHub.Connecting.FirstAsync().SubscribeReplay()
-                : Unit.Default.ReturnObservable();
+                : Unit.Default.Observe();
     }
 
     public class TestApplicationModule : ModuleBase{

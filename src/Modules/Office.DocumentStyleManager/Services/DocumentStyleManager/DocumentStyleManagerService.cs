@@ -76,7 +76,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Services.DocumentStyleMa
 
         internal static IObservable<Unit> DocumentStyleManagerDetailView(this ApplicationModulesManager manager,Func<IObservable<DetailView>,IObservable<Unit>> detailView) 
             => manager.WhenApplication(application => application.WhenDetailViewCreated(typeof(BusinessObjects.DocumentStyleManager)).ToDetailView()
-		            .SelectMany(view => detailView(view.ReturnObservable())));
+		            .SelectMany(view => detailView(view.Observe())));
 
         private static IObservable<Unit> FilterReplacementStyles(this IObservable<DetailView> controlsCreated)
             => controlsCreated.SelectMany(view => view.AllStylesListView()

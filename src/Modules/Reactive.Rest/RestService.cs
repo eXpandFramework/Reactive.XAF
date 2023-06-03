@@ -67,7 +67,7 @@ namespace Xpand.XAF.Modules.Reactive.Rest {
                                 return dynamicCollection.WhenObjects().IgnoreElements()
                                     .Merge(dynamicCollection.WhenLoaded())
                                     .Merge(dynamicCollection.Objects().Cast<ObjectString>().FirstOrDefault()
-                                        .ReturnObservable().WhenNotDefault())
+                                        .Observe().WhenNotDefault())
                                     .Do(_ => objectString.DataSource.AddRange(dynamicCollection.Objects().Cast<ObjectString>(), true));
                             })).ToUnit()
                     : Observable.Empty<Unit>())

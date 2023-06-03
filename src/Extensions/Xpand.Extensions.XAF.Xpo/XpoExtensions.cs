@@ -40,9 +40,7 @@ namespace Xpand.Extensions.XAF.Xpo {
                 .Select(t => (t.attribute, memberInfo: t.memberInfo.Owner.QueryXPClassInfo().FindMember(t.memberInfo.Name)))
                 .ForEach(t => {
                     var providedAssociationAttribute = (RuntimeAssociationAttribute)t.memberInfo.FindAttributeInfo(typeof(RuntimeAssociationAttribute));
-                    var associationAttribute = t.memberInfo.GetAssociationAttribute(providedAssociationAttribute);
-                    var customMemberInfo =
-                        typesInfo.CreateMemberInfo(t.memberInfo, providedAssociationAttribute, associationAttribute);
+                    var customMemberInfo = typesInfo.CreateMemberInfo(t.memberInfo, providedAssociationAttribute, t.memberInfo.GetAssociationAttribute(providedAssociationAttribute));
                     t.memberInfo.AddExtraAttributes(providedAssociationAttribute, customMemberInfo);
                 });
 
@@ -238,7 +236,7 @@ namespace Xpand.Extensions.XAF.Xpo {
 
         public static void XpoMigrateDatabase(this XafApplication application, string connectionString=null) {
             var provider = XpoDefault.GetConnectionProvider(connectionString??application.ConnectionString, AutoCreateOption.DatabaseAndSchema);
-            if (provider is IUpdateSchemaSqlFormatter sqlFormatter) {
+            if (provider is IUpdateSchemaSqlFormatter sqlFormatter&&((ConnectionProviderSql)provider).Connection.DbExists()) {
                 var sql = sqlFormatter.FormatUpdateSchemaScript(((IDataStoreSchemaMigrationProvider)provider)
                     .CompareSchema(new ReflectionDictionary().GetDataStoreSchema(application.TypesInfo.PersistentTypes
                         .Where(info => info.IsPersistent).Select(info => info.Type).ToArray()), new SchemaMigrationOptions()));

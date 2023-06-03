@@ -62,12 +62,16 @@ namespace Xpand.XAF.Modules.StoreToDisk{
                     .LoadFromDisk( keyMember, memberInfos, source.Where(details => details.modification == ObjectModification.New)
                         .Select(t => t.instance).Select(space.GetObject).ToArray(), jsonArray, space),typeInfo.Type)));
 
-        private static IObservable<(object[], JsonArray JsonArray)> LoadFromDisk(this (object instance, ObjectModification modification)[] source, IMemberInfo keyMember, IMemberInfo[] memberInfos, object[] objects, JsonArray jsonArray, IObjectSpace space) 
+        private static IObservable<(object[], JsonArray JsonArray)> LoadFromDisk(this (object instance, ObjectModification modification)[] source, IMemberInfo keyMember,
+            IMemberInfo[] memberInfos, object[] objects, JsonArray jsonArray, IObjectSpace space) 
             => objects.ToNowObservable().BufferUntilCompleted().SelectMany(objects1 => objects1.ToNowObservable()
                     .SelectMany(o1 => jsonArray.Cast<JsonObject>().Where(jToken => keyMember.MatchByKey(jToken, o1)).Take(1).ToNowObservable()
                         .SelectMany(jToken => memberInfos.ToNowObservable().WhenDefault(info => info.GetValue(o1))
                             .Do(info => {
                                 var value = ((JsonValue)jToken[info.Name])?.Deserialize(!info.MemberTypeInfo.IsPersistent?info.MemberType:info.MemberTypeInfo.KeyMember.MemberType);
+                                if (value != null) {
+                                    
+                                }
                                 var change = !info.MemberTypeInfo.IsPersistent ? value : value == null ? null : space.GetObjectByKey(info.MemberType, value);
                                 info.SetValue(o1, change);
                             })
@@ -91,17 +95,21 @@ namespace Xpand.XAF.Modules.StoreToDisk{
         private static IObservable<JsonObject[]> StoreToDisk(this IObservable<(object[] objects, JsonArray JsonArray)> source,
                 (IObjectSpace objectSpace, (object instance, ObjectModification modification)[] details) committed,
                 (IMemberInfo keyMember, IMemberInfo[] memberInfos, ITypeInfo typeInfo, string filePath, StoreToDiskAttribute attribute) data)
-            => source.SelectMany(loadFromDisk => data.ObjectsToStore(committed,  loadFromDisk.objects,loadFromDisk.objects.Select(o => data.keyMember.GetValue(o)).ToHashSet())
+            => source.SelectMany(loadFromDisk => data.ObjectsToStore(committed,  loadFromDisk.objects)
                 .StoreToDisk(loadFromDisk.JsonArray, data.keyMember, data.memberInfos, data.filePath, data.attribute));
 
         private static object[] ObjectsToStore(this (IMemberInfo keyMember, IMemberInfo[] memberInfos, ITypeInfo typeInfo, string filePath, StoreToDiskAttribute attribute) data,
-            (IObjectSpace objectSpace, (object instance, ObjectModification modification)[] details) committed, object [] loadedObjects, HashSet<object> loadedKeys) 
-            => committed.details.Where(details => !loadedKeys.Contains(data.keyMember.GetValue(details.instance)))
-                .Select(updated => updated.instance).Concat(loadedObjects).ToArray();
+            (IObjectSpace objectSpace, (object instance, ObjectModification modification)[] details) committed, object [] loadedObjects) {
+            var loadedKeys = loadedObjects.Select(o => data.keyMember.GetValue(o)).ToHashSet();
+            var valueTuples = committed.details.Where(details => !loadedKeys.Contains(data.keyMember.GetValue(details.instance))).ToArray();
+            return valueTuples.Select(updated => updated.instance).Concat(loadedObjects).ToArray();
+        }
 
         private static IObservable<(IMemberInfo keyMember, IMemberInfo[] memberInfos, ITypeInfo typeInfo, string filePath, StoreToDiskAttribute attribute)> StoreToDiskData(
                 this XafApplication application, string directory)
-            => application.TypesInfo.PersistentTypes.Attributed<StoreToDiskAttribute>().ToNowObservable()
+            => application.TypesInfo.PersistentTypes
+                // .Where(info => info.Name=="CoinGeckoNetwork")
+                .Select(info => info).Attributed<StoreToDiskAttribute>().ToNowObservable()
                 .Select(t => (keyMember:t.typeInfo.FindMember(t.attribute.Key),memberInfos:t.attribute.Properties.Select(property =>t.typeInfo.FindMember(property)).ToArray(),t.attribute,t.typeInfo))
                 .SelectMany(t => new DirectoryInfo(directory).WhenDirectory().Select(_ => t.typeInfo.EnsureFile(directory))
                     .Select(filePath => ( t.keyMember, t.memberInfos, t.typeInfo, filePath,t.attribute)))

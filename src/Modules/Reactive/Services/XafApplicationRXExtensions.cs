@@ -5,6 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reactive;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
@@ -65,16 +66,16 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => application.SelectMany(execute.ToTask);
 
         public static IObservable<T> SelectMany<T>(this XafApplication application, Func<IObservable<T>> execute) 
-            => Observable.Defer(() => application.GetPlatform()==Platform.Web?Observable.Start(execute).Merge().Wait().ReturnObservable():Observable.Start(execute).Merge())
+            => Observable.Defer(() => application.GetPlatform()==Platform.Web?Observable.Start(execute).Merge().Wait().Observe():Observable.Start(execute).Merge())
 	            .Catch<T,InvalidOperationException>(_ => Observable.Empty<T>());
         
 	    public static IObservable<T> SelectMany<T>(this XafApplication application, Func<Task<T>> execute) 
-            => application.GetPlatform()==Platform.Web?Task.Run(execute).Result.ReturnObservable():Observable.FromAsync(execute);
+            => application.GetPlatform()==Platform.Web?Task.Run(execute).Result.Observe():Observable.FromAsync(execute);
         
         public static IObservable<Unit> LogonUser(this XafApplication application,object userKey) 
             => SecurityExtensions.AuthenticateSubject.Where(_ => _.authentication== application.Security.GetPropertyValue("Authentication"))
                 .Do(_ => _.args.SetInstance(_ => userKey)).SelectMany(_ => application.WhenLoggedOn().FirstAsync()).ToUnit()
-                .Merge(Unit.Default.ReturnObservable().Do(_ => application.Logon()).IgnoreElements());
+                .Merge(Unit.Default.Observe().Do(_ => application.Logon()).IgnoreElements());
 
         public static IObservable<TSource> BufferUntilCompatibilityChecked<TSource>(this XafApplication application,IObservable<TSource> source) 
             => source.Buffer(application.WhenCompatibilityChecked().FirstAsync()).FirstAsync().SelectMany()
@@ -82,7 +83,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static IObservable<XafApplication> WhenCompatibilityChecked(this XafApplication application) 
             => (bool) application.GetPropertyValue("IsCompatibilityChecked")
-                ? application.ReturnObservable() : application.WhenObjectSpaceCreated().FirstAsync()
+                ? application.Observe() : application.WhenObjectSpaceCreated().FirstAsync()
                     .Select(_ => application);
 
         
@@ -127,6 +128,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static IObservable<ActionBaseEventArgs> WhenActionExecuted(this XafApplication application,params string[] actions) 
             => application.WhenFrameCreated().SelectMany(window => window.Actions(actions)).WhenExecuted();
+
         public static IObservable<ActionBaseEventArgs> WhenActionExecuteCompleted(this XafApplication application,params string[] actions) 
             => application.WhenFrameCreated().SelectMany(window => window.Actions(actions)).WhenExecuteCompleted();
         public static IObservable<T> WhenActionExecuteConcat<T>(this XafApplication application,Func<SimpleActionExecuteEventArgs,IObservable<T>> selector,params string[] actions)  
@@ -143,7 +145,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static IObservable<Window> WhenWindowCreated(this XafApplication application,bool isMain=false,bool emitIfMainExists=true) {
             var windowCreated = application.WhenFrameCreated().Select(frame => frame).OfType<Window>();
-            return isMain ? emitIfMainExists && application.MainWindow != null ? application.MainWindow.ReturnObservable().ObserveOn(SynchronizationContext.Current!)
+            return isMain ? emitIfMainExists && application.MainWindow != null ? application.MainWindow.Observe().ObserveOn(SynchronizationContext.Current!)
                     : application.WhenMainWindowAvailable(windowCreated) : windowCreated.TraceRX(window => window.Context);
         }
 
@@ -163,7 +165,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => application.WhenCreateCustomObjectSpaceProvider()
                 .SelectMany(t => application.WhenWeb()
                     .Do(api => application.AddObjectSpaceProvider(objectSpaceProviders, t, api.GetService<NonPersistentObjectSpaceProvider>())).ToUnit()
-                    .SwitchIfEmpty(Unit.Default.ReturnObservable().Do(_ => application.AddObjectSpaceProvider(objectSpaceProviders, t))))
+                    .SwitchIfEmpty(Unit.Default.Observe().Do(_ => application.AddObjectSpaceProvider(objectSpaceProviders, t))))
                 .Subscribe();
 
         private static void AddObjectSpaceProvider(this XafApplication application, IObjectSpaceProvider[] objectSpaceProviders,
@@ -259,7 +261,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<Frame> WhenViewOnFrame(this XafApplication application,Type objectType=null,ViewType viewType=ViewType.Any,Nesting nesting=Nesting.Any) 
             => application.WhenFrameCreated().TemplateViewChanged()
 	            .Where(frame => nesting==Nesting.Any|| frame is NestedFrame&&nesting==Nesting.Nested||!(frame is NestedFrame)&&nesting==Nesting.Root)
-                .SelectMany(window => (window.View.ReturnObservable().When(objectType, viewType, nesting)).To(window))
+                .SelectMany(window => (window.View.Observe().When(objectType, viewType, nesting)).To(window))
                 .TraceRX(window => window.View.Id);
 
         public static IEnumerable<Frame> WhenFrame<T>(this IEnumerable<T> source, Type objectType = null,
@@ -314,7 +316,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         private static IObservable<T> WhenFrame<T>(this T frame,ViewType viewType, Type types) where T : Frame 
             => frame.View != null
-                ? frame.Is(viewType) && frame.Is(types) ? frame.ReturnObservable() : Observable.Empty<T>()
+                ? frame.Is(viewType) && frame.Is(types) ? frame.Observe() : Observable.Empty<T>()
                 : frame.WhenViewChanged().Where(t => t.frame.Is(viewType) && t.frame.Is(types)).To(frame);
 
         public static IObservable<Frame> WhenFrame(this XafApplication application)
@@ -339,9 +341,10 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => application.WhenFrame().WhenFrame(objectType,viewType,nesting);
         
         static IObservable<Frame> WhenFrameViewChanged(this XafApplication application) 
-            => application.WhenFrameCreated().Merge(application.MainWindow.ReturnObservable().WhenNotDefault())
+            => application.WhenFrameCreated().Merge(application.MainWindow.Observe().WhenNotDefault())
+                
                 .WhenViewChanged().Select(tuple => tuple.frame)
-                .StartWith(application.MainWindow).WhenNotDefault(frame => frame?.View);
+                .StartWith(application.MainWindow.Cast<Frame>()).WhenNotDefault(frame => frame?.View);
         
         public static IObservable<Frame> WhenFrameViewControls(this XafApplication application) 
             => application.WhenFrame().SelectMany(frame => frame.View.WhenControlsCreated().Select(view => view).To(frame));
@@ -390,13 +393,13 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => source.SelectMany(application => application.WhenDetailViewCreated());
 
         public static IObservable<ObjectView> WhenObjectViewCreated(this XafApplication application) 
-            => application.ReturnObservable().ObjectViewCreated();
+            => application.Observe().ObjectViewCreated();
 
         public static IObservable<ObjectView> ObjectViewCreated(this IObservable<XafApplication> source) 
             => source.ViewCreated().OfType<ObjectView>();
         
         public static IObservable<(XafApplication application, ViewCreatingEventArgs e)> WhenObjectViewCreating(this XafApplication application) 
-            => application.ReturnObservable().ObjectViewCreating();
+            => application.Observe().ObjectViewCreating();
 
         public static IObservable<(XafApplication application, ViewCreatingEventArgs e)> ObjectViewCreating(this IObservable<XafApplication> source) 
             => source.ViewCreating().WhenNotDefault(t => t.application.Model.Views[t.e.ViewID]?.AsObjectView);
@@ -465,7 +468,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => application.WhenEvent(nameof(XafApplication.LoggedOff)).To(application);
 
         public static IObservable<XafApplication> WhenSetupComplete(this XafApplication application,bool emitIfSetupAlready=true) 
-            => emitIfSetupAlready && application.MainWindow != null ? application.ReturnObservable()
+            => emitIfSetupAlready && application.MainWindow != null ? application.Observe()
                 : application.WhenEvent(nameof(XafApplication.SetupComplete)).Take(1)
                     .To(application);
 
@@ -640,12 +643,12 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => application.WhenProviderCommittedDetailed(objectType,objectModification,emitUpdatingObjectSpace,Array.Empty<string>(),criteria,caller);
         
         public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)> WhenProviderCommittedDetailed<T>(
-            this XafApplication application,ObjectModification objectModification,string[] modifiedProperties,Func<T,bool> criteria=null,[CallerMemberName]string caller="") where T:class
-            => application.WhenProviderObjectSpaceCreated()
+            this XafApplication application,ObjectModification objectModification,string[] modifiedProperties,Func<T,bool> criteria=null,bool emitUpdatingObjectSpace=false,[CallerMemberName]string caller="") where T:class
+            => application.WhenProviderObjectSpaceCreated(emitUpdatingObjectSpace)
                 .SelectMany(objectSpace => objectSpace.WhenCommittedDetailed(objectModification,modifiedProperties,criteria,caller:caller));
         public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)> WhenProviderCommittedDetailed<T>(
-            this XafApplication application,ObjectModification objectModification,Func<T,bool> criteria=null,[CallerMemberName]string caller="") where T:class 
-            => application.WhenProviderCommittedDetailed(objectModification, Array.Empty<string>(), criteria, caller);
+            this XafApplication application,ObjectModification objectModification,Func<T,bool> criteria=null,bool emitUpdatingObjectSpace=false,[CallerMemberName]string caller="") where T:class 
+            => application.WhenProviderCommittedDetailed(objectModification, Array.Empty<string>(), criteria,emitUpdatingObjectSpace, caller);
 
         public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)> WhenProviderNewOrUpdatedCommittedDetailed<T>(
             this XafApplication application,Func<T,bool> criteria,string[] updatedObjectModifiedProperties,[CallerMemberName]string caller="") where T:class
@@ -667,7 +670,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => Observable.Using(() => application.CreateNonSecuredObjectSpace(typeof(T)), factory);
 
         public static IObservable<TResult> UseObject<TSource,TResult>(this XafApplication application,TSource instance,Func<TSource,IObservable<TResult>> selector,bool useObjectSpaceProvider=false,[CallerMemberName]string caller="") 
-            => application.UseObjectSpace(space => selector(space.GetObjectFromKey(instance)),useObjectSpaceProvider,caller);
+            => application.UseObjectSpace( space => selector(space.GetObjectFromKey(instance)),useObjectSpaceProvider,caller);
 
         public static IObservable<T2> UseProviderObjectSpace<T,T2>(this XafApplication application,T obj, Func<T, IObservable<T2>> factory, 
             [CallerMemberName] string caller = "") 
@@ -704,7 +707,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             });
         
         public static IObservable<T> UseObjectSpace<T>(this XafApplication application,Type objectType,Func<IObjectSpace,T> selector) 
-            => Observable.Using(() => application.CreateObjectSpace(objectType),space => selector(space).ReturnObservable());
+            => Observable.Using(() => application.CreateObjectSpace(objectType),space => selector(space).Observe());
         
 
         public static IObservable<T> WhenObject<T>(this XafApplication application,string[] modifiedProperties,Expression<Func<T, bool>> criteriaExpression=null,
@@ -726,6 +729,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<T[]> WhenProviderObjects<T>(this XafApplication application,string[] modifiedProperties,Expression<Func<T, bool>> criteriaExpression=null,
             [CallerMemberName] string caller = "")where T:class
             => application.WhenProviderObjects(ObjectModification.NewOrUpdated,modifiedProperties,criteriaExpression,caller);
+        
         public static IObservable<T[]> WhenProviderObjects<T>(this XafApplication application,Expression<Func<T, bool>> criteriaExpression=null,
             [CallerMemberName] string caller = "")where T:class
             => application.WhenProviderObjects(Array.Empty<string>(),criteriaExpression,caller );
@@ -776,7 +780,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         private static IObservable<T[]> WhenObjects<T>(this XafApplication application, ObjectModification objectModification,
             Expression<Func<T, bool>> criteriaExpression, string[] modifiedProperties, Func<T, bool> criteria,IObservable<IObjectSpace> spaceSource,
             [CallerMemberName] string caller = "")where T:class 
-            => application.UseObjectSpace(space => space.GetObjectsQuery<T>().Where(criteriaExpression ?? (arg => true)).ToArray().ReturnObservable(),caller:caller)
+            => application.UseObjectSpace(space => space.GetObjectsQuery<T>().Where(criteriaExpression ?? (arg => true)).ToArray().Observe(),caller:caller)
                 .Merge(spaceSource.SelectMany(space => space.WhenCommittedDetailed(objectModification,modifiedProperties, criteria)
                     .Select(t => t.details.Select(t1 => t1.instance).ToArray()))).WhenNotEmpty();
 
@@ -842,6 +846,10 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             Func<IObjectSpace, IObservable<T>> commit, Func<Func<IObjectSpace, IObservable<T[]>>, Type, IObservable<T>> objectSpaceSource = null, int retry = 3,
             [CallerMemberName] string caller = "") 
             => application.CommitChangesSequential(typeof(T),commit,objectSpaceSource,retry,caller);
+        public static IObservable<T[]> CommitChangesSequential<T>(this XafApplication application,
+            Func<IObjectSpace, Task<T>> commit, Func<Func<IObjectSpace, IObservable<T[]>>, Type, IObservable<T>> objectSpaceSource = null, int retry = 3,
+            [CallerMemberName] string caller = "") 
+            => application.CommitChangesSequential(typeof(T),space => commit(space).ToObservable(),objectSpaceSource,retry,caller);
 
         public static IObservable<T[]> CommitChangesSequential<T>(this XafApplication application, Type objectType,
             Func<IObjectSpace, IObservable<T>> commit, Func<Func<IObjectSpace, IObservable<T[]>>, Type, IObservable<T>> objectSpaceSource = null, int retry = 3,

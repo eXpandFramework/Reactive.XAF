@@ -29,7 +29,7 @@ namespace Xpand.Extensions.Reactive.Transform.System.IO {
         }
 
         public static IObservable<FileInfo> WhenCreated(this FileInfo fileInfo) 
-            => fileInfo.Exists?fileInfo.ReturnObservable():Observable.Defer(() => fileInfo.Directory.WhenFileCreated(fileInfo.Name).Take(1));
+            => fileInfo.Exists?fileInfo.Observe():Observable.Defer(() => fileInfo.Directory.WhenFileCreated(fileInfo.Name).Take(1));
         
         public static IObservable<FileInfo> WhenChanged(this FileInfo fileInfo) 
             => fileInfo.When(nameof(FileSystemWatcher.Changed));
@@ -51,7 +51,7 @@ namespace Xpand.Extensions.Reactive.Transform.System.IO {
         
         public static IObservable<byte[]> WhenFileReadAsBytes(this FileInfo fileInfo,
             FileMode fileMode = FileMode.OpenOrCreate, FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read,int retry=5) 
-            => fileInfo.WhenFileRead(stream => stream.Bytes().ReturnObservable(),fileMode,fileAccess,fileShare,retry);
+            => fileInfo.WhenFileRead(stream => stream.Bytes().Observe(),fileMode,fileAccess,fileShare,retry);
 
         public static IObservable<T> WhenFileRead<T>(this FileInfo fileInfo,Func<FileStream,IObservable<T>> selector,
             FileMode fileMode = FileMode.OpenOrCreate, FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read,int retry=5) 
@@ -60,7 +60,7 @@ namespace Xpand.Extensions.Reactive.Transform.System.IO {
                     Directory.CreateDirectory(fileInfo.DirectoryName!);
                 }
                 await using var fileStream = File.Open(fileInfo.FullName, fileMode, fileAccess, fileShare);
-                return (await selector(fileStream)).ReturnObservable();
+                return (await selector(fileStream)).Observe();
             }).RetryWithBackoff(retry);
 
         public static IObservable<DirectoryInfo> WhenDirectory(this DirectoryInfo directory,bool create=true) 
@@ -68,18 +68,18 @@ namespace Xpand.Extensions.Reactive.Transform.System.IO {
                 if (!directory.Exists){
                     if (create) {
                         Directory.CreateDirectory(directory.FullName);
-                        return directory.ReturnObservable();
+                        return directory.Observe();
                     }
                     return Observable.Empty<DirectoryInfo>();
                 }
-                return directory.ReturnObservable();
+                return directory.Observe();
             });
 
         public static IObservable<FileInfo> OpenFile(this FileInfo fileInfo,FileMode fileMode=FileMode.Open,FileAccess fileAccess=FileAccess.Read,FileShare fileShare=FileShare.Read) 
             => Observable.Defer(() => Observable.Using(() => File.Open(fileInfo.FullName, fileMode, fileAccess, fileShare),
                     _ => {
                         _.Dispose();
-                        return fileInfo.ReturnObservable();
+                        return fileInfo.Observe();
                     }))
                 .RetryWithBackoff(strategy:_ => TimeSpan.FromMilliseconds(200));
 

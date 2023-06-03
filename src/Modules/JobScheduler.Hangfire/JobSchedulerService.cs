@@ -199,7 +199,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
         static IObservable<Unit> ScheduleJobs(this XafApplication application) 
             => application.WhenCommitted<Job>(ObjectModification.NewOrUpdated).Objects()
                 .SelectMany(scheduledJob => {
-                    var args = new GenericEventArgs<IObservable<Job>>(scheduledJob.ReturnObservable());
+                    var args = new GenericEventArgs<IObservable<Job>>(scheduledJob.Observe());
                     CustomJobScheduleSubject.OnNext(args);
                     if (!args.Handled) {
                         scheduledJob.AddOrUpdateHangfire(application.ServiceProvider);

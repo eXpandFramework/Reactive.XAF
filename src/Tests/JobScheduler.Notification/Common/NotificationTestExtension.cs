@@ -35,7 +35,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Notification.Tests.Common {
         }
 
         public static IObservable<Unit> NotificationJob(this BlazorApplication application,JobWorker notificationJob) 
-            => Unit.Default.ReturnObservable().Delay(TimeSpan.FromMilliseconds(300))
+            => Unit.Default.Observe().Delay(TimeSpan.FromMilliseconds(300))
                 .SelectMany(_ => ((IObservable<Unit>)typeof(NotificationService).Method("JobNotification", Flags.StaticPrivate)
                     .Call(new object[] { application, notificationJob.Id })).Select(unit => unit));
 

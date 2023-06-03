@@ -4,6 +4,7 @@ using System.Reflection;
 using DevExpress.ExpressApp.DC;
 using DevExpress.Xpo;
 using DevExpress.Xpo.Metadata;
+using AggregatedAttribute = DevExpress.Xpo.AggregatedAttribute;
 
 namespace Xpand.Extensions.XAF.Xpo.Attributes {
     public enum RuntimeRelationType {
@@ -15,6 +16,9 @@ namespace Xpand.Extensions.XAF.Xpo.Attributes {
     public class RuntimeAssociationAttribute : Attribute {
         public RuntimeAssociationAttribute(string associationName, RuntimeRelationType runtimeRelationType)
             : this(associationName, null, runtimeRelationType, null) {
+        }
+        public RuntimeAssociationAttribute(string associationName)
+            : this(associationName, null,RuntimeRelationType.OneToMany, null) {
         }
 
 
@@ -35,8 +39,7 @@ namespace Xpand.Extensions.XAF.Xpo.Attributes {
 
         public RuntimeRelationType RelationType { get; }
 
-        
-
+        public bool IsAggregated { get; set; }
     }
 
     internal static class RuntimeAssociationExtensions {
@@ -62,31 +65,28 @@ namespace Xpand.Extensions.XAF.Xpo.Attributes {
             return memberInfo != null ? (IEnumerable<Attribute>)memberInfo.GetValue(null, null) : new List<Attribute>();
         }
 
-        internal static XPMemberInfo CreateMemberInfo(this ITypesInfo typesInfo, XPMemberInfo memberInfo, RuntimeAssociationAttribute providedAssociationAttribute, AssociationAttribute associationAttribute) {
+        internal static XPMemberInfo CreateMemberInfo(this ITypesInfo typesInfo, XPMemberInfo memberInfo, RuntimeAssociationAttribute runtimeAssociationAttribute, AssociationAttribute associationAttribute) {
             var typeToCreateOn = GetTypeToCreateOn(memberInfo, associationAttribute);
             if (typeToCreateOn == null)
                 throw new NotImplementedException();
-            XPMemberInfo xpCustomMemberInfo;
-            if (!(memberInfo.IsNonAssociationList) || (memberInfo.IsNonAssociationList && providedAssociationAttribute.RelationType == RuntimeRelationType.ManyToMany)) {
-                xpCustomMemberInfo = typesInfo.CreateCollection(
-                    typeToCreateOn,
-                    memberInfo.Owner.ClassType,
-                    associationAttribute.Name,
-                    providedAssociationAttribute.ProvidedPropertyName ?? memberInfo.Owner.ClassType.Name + "s", false);
+            XPMemberInfo member;
+            if (!(memberInfo.IsNonAssociationList) || (memberInfo.IsNonAssociationList && runtimeAssociationAttribute.RelationType == RuntimeRelationType.ManyToMany)) {
+                member = typesInfo.CreateCollection(typeToCreateOn, memberInfo.Owner.ClassType, associationAttribute.Name,
+                    runtimeAssociationAttribute.ProvidedPropertyName ?? memberInfo.Owner.ClassType.Name + "s", false);
+                if (runtimeAssociationAttribute.IsAggregated) {
+                    member.AddAttribute(new AggregatedAttribute());
+                }
             } else {
-                xpCustomMemberInfo = typesInfo.CreateMember(
-                    typeToCreateOn,
-                    memberInfo.Owner.ClassType,
-                    associationAttribute.Name,
-                    providedAssociationAttribute.ProvidedPropertyName ?? memberInfo.Owner.ClassType.Name, false);
+                member = typesInfo.CreateMember(typeToCreateOn, memberInfo.Owner.ClassType, associationAttribute.Name,
+                    runtimeAssociationAttribute.ProvidedPropertyName ?? memberInfo.Owner.ClassType.Name, false);
             }
 
-            if (!string.IsNullOrEmpty(providedAssociationAttribute.AssociationName) && !memberInfo.HasAttribute(typeof(AssociationAttribute)))
-                memberInfo.AddAttribute(new AssociationAttribute(providedAssociationAttribute.AssociationName));
+            if (!string.IsNullOrEmpty(runtimeAssociationAttribute.AssociationName) && !memberInfo.HasAttribute(typeof(AssociationAttribute)))
+                memberInfo.AddAttribute(new AssociationAttribute(runtimeAssociationAttribute.AssociationName));
             typesInfo.RefreshInfo(typeToCreateOn);
             typesInfo.RefreshInfo(memberInfo.Owner.ClassType);
 
-            return xpCustomMemberInfo;
+            return member;
         }
 
         private static Type GetTypeToCreateOn(XPMemberInfo memberInfo, AssociationAttribute associationAttribute) {

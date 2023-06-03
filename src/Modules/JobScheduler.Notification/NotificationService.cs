@@ -60,7 +60,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Notification {
                                     return publish.Select(unit => unit)
                                         .ToUnit()
                                         .Select(unit => unit)
-                                        .Merge(Unit.Default.ReturnObservable().Do(_ => NotificationSubject.OnNext((jobWorker, objects))).IgnoreElements());
+                                        .Merge(Unit.Default.Observe().Do(_ => NotificationSubject.OnNext((jobWorker, objects))).IgnoreElements());
                                 }
                                 NotificationSubject.OnNext((jobWorker, objects));
                             }

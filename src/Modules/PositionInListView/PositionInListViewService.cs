@@ -27,7 +27,7 @@ namespace Xpand.XAF.Modules.PositionInListView{
                 var positionInListCreated = application.WhenPositionInListCreated();
                 return positionInListCreated.SortCollectionSource()
                     .Merge(positionInListCreated.DisableSorting())
-                    .Merge(application.ReturnObservable().PositionNewObjects());
+                    .Merge(application.Observe().PositionNewObjects());
             });
 
         internal static IObservable<TSource> TracePositionInListView<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<ITraceEvent> traceAction = null,

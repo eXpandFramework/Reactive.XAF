@@ -23,7 +23,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                     .Select(pattern => pattern.EventArgs).Cast<CustomizeShowViewParametersEventArgs>());
 
         public static IObservable<T> WhenClosing<T>(this T view) where T : View 
-            => view.ReturnObservable().WhenNotDefault().Closing();
+            => view.Observe().WhenNotDefault().Closing();
         
         public static IObservable<object> WhenObjects(this View view) 
             => view is ListView listView?listView.Objects().ToNowObservable():view.ToDetailView().WhenCurrentObjectChanged()
@@ -43,21 +43,21 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => source.SelectMany(view => view.WhenActivated());
         
         public static IObservable<T> WhenModelChanged<T>(this T view) where T : View 
-            => view.ReturnObservable().ModelChanged();
+            => view.Observe().ModelChanged();
 
         public static IObservable<T> ModelChanged<T>(this IObservable<T> source) where T:View 
             => source.Cast<View>().SelectMany(view => view.WhenEvent(nameof(View.ModelChanged)))
                 .Select(pattern => (T)pattern.Sender);
 
         public static IObservable<T> WhenClosed<T>(this T view) where T : View 
-            => view == null ? Observable.Empty<T>() : view.ReturnObservable().Closed();
+            => view == null ? Observable.Empty<T>() : view.Observe().Closed();
 
         public static IObservable<T> Closed<T>(this IObservable<T> source) where T:View 
             => source.SelectMany(view => view.WhenEvent(nameof(View.Closed)))
                 .Select(pattern => (T)pattern.Sender);
 
         public static IObservable<(T view, CancelEventArgs e)> WhenQueryCanClose<T>(this T view) where T : View 
-            => view.ReturnObservable().QueryCanClose();
+            => view.Observe().QueryCanClose();
 
         public static IObservable<(T view, CancelEventArgs e)> QueryCanClose<T>(this IObservable<T> source) where T:View 
             => source.Cast<T>().SelectMany(view => view.WhenEvent<CancelEventArgs>(nameof(View.QueryCanClose))
@@ -110,7 +110,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         
         public static IObservable<IFrameContainer> NestedFrameContainers<TView>(this TView view, params Type[] objectTypes ) where TView : DetailView  
             => view.GetItems<IFrameContainer>().Where(editor =>editor.Frame?.View == null).ToNowObservable()
-                .SelectMany(frameContainer =>frameContainer.Cast<ViewItem>().Control==null? frameContainer.Cast<ViewItem>().WhenControlCreated().To(frameContainer):frameContainer.ReturnObservable())
+                .SelectMany(frameContainer =>frameContainer.Cast<ViewItem>().Control==null? frameContainer.Cast<ViewItem>().WhenControlCreated().To(frameContainer):frameContainer.Observe())
                 .NestedFrameContainers(view, objectTypes);
         
         public static IObservable<DashboardViewItem> NestedDashboards<TView>(this TView view, params Type[] objectTypes ) where TView : DetailView 

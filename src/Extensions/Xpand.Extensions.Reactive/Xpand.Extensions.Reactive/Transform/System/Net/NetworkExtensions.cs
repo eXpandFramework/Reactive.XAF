@@ -45,7 +45,7 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net {
         public static IObservable<TimeSpan> RetryAfter(this HttpResponseException e,Func<TimeSpan,IObservable<Unit>> selector=null) {
             IObservable<TimeSpan> Retry(TimeSpan retryAfter1) => Observable.If(() => retryAfter1>TimeSpan.Zero,retryAfter1.Timer())
                 .DefaultIfEmpty().To(retryAfter1);
-            return e.HttpResponseMessage.RetryAfter().ReturnObservable()
+            return e.HttpResponseMessage.RetryAfter().Observe()
                 .SelectMany(retryAfter => selector?.Invoke(retryAfter).To<TimeSpan>() ?? Retry(retryAfter));
         }
 
@@ -84,7 +84,7 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net {
             ConcurrentDictionary<object, IConnectableObservable<object>> cache, T obj, string key = null,
             string secret = null, Func<HttpResponseMessage, IObservable<T>> deserializeResponse = null, TimeSpan? pollInterval = null)
             where T : class ,new()
-            => httpMethod.ReturnObservable()
+            => httpMethod.Observe()
                 .Cache(cache, requestUrl, method => Observable.FromAsync(() => HttpClient.SendAsync(method.NewHttpRequestMessage( requestUrl,obj, key, secret)))
                         .Do(message => ResponseSubject.OnNext((message, obj))),pollInterval).
                 Send(obj,deserializeResponse);
@@ -95,6 +95,11 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net {
                 .Do(message => ResponseSubject.OnNext((message, obj)))
                 .WhenResponseObject(obj??typeof(T).CreateInstance(),httpResponseMessage => deserializeResponse?.Invoke(httpResponseMessage));
 
+        private static readonly JsonDocument EmptyArrayDoc = JsonDocument.Parse("[]");
+
+        public static JsonDocument EmptyArrayJsonDocument(this HttpClient client)
+            => EmptyArrayDoc;
+        
         public static IObservable<T> Send<T>(this HttpClient client, HttpRequestMessage httpRequestMessage) where T:class,new()
             => client.Send(httpRequestMessage, default(Func<HttpResponseMessage, IObservable<T>>));
 
@@ -124,7 +129,7 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net {
             => client.WhenResponse(httpRequestMessage).Select(t => (t.result.Message,t.response.DeserializeJsonNode().ToJsonObjects().ToArray()));
         
         static IObservable<(byte[] response, ResponseResult result)> WhenResponse(this HttpClient client, HttpRequestMessage httpRequestMessage) 
-            => client.Request<ResponseResult>(httpRequestMessage).WhenResponseObject(null, httpResponseMessage => new ResponseResult(httpResponseMessage).ReturnObservable())
+            => client.Request<ResponseResult>(httpRequestMessage).WhenResponseObject(null, httpResponseMessage => new ResponseResult(httpResponseMessage).Observe())
                 .SelectMany(result => Observable.FromAsync(() => result.Message.Content.ReadAsByteArrayAsync()).ObserveOnDefault().Pair(result));
 
         // public static IObservable<HttpResponseMessage> EnsureSuccessStatusCode1(this IObservable<HttpResponseMessage> source)
@@ -133,7 +138,7 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net {
             => source.If(message => !message.IsSuccessStatusCode, message => Observable.If(message.IsJsonResponse,message.WhenJsonDocument())
                 .Merge(Observable.If(() => !message.IsJsonResponse(),Observable.FromAsync(() => message.Content.ReadAsStringAsync())
                     .SelectMany(content => Observable.Throw<(HttpResponseMessage[] objects, JsonDocument document)>(new HttpResponseException($"{message.StatusCode}, {message.ReasonPhrase}, {content}", message)))))
-                .SelectMany(t => t.objects),message => message.ReturnObservable());
+                .SelectMany(t => t.objects),message => message.Observe());
 
         private static IObservable<(HttpResponseMessage[] objects, JsonDocument document)> WhenJsonDocument(this HttpResponseMessage message) 
             => Observable.FromAsync(() => message.Content.ReadAsStreamAsync()).WhenJsonDocument(document =>
@@ -168,6 +173,9 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net {
 
         public static IObservable<JsonDocument> SelectDocument(this IObservable<(JsonDocument document, HttpResponseMessage message)> source)
             => source.Select(t => t.document);
+        
+        public static IObservable<string> SelectString(this IObservable<(JsonDocument document, HttpResponseMessage message)> source)
+            => source.SelectDocument(document => document.RootElement.GetString().Observe());
         
         public static IObservable<T> SelectDocument<T>(this IObservable<(JsonDocument document, HttpResponseMessage message)> source,Func<JsonDocument,IObservable<T>> selector)
             => source.SelectMany(t => selector(t.document).FinallySafe(() => t.document.Dispose()));
@@ -214,7 +222,7 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net {
         private static IObservable<T> DeserializeJson<T>(this HttpResponseMessage responseMessage,Type returnType) where T:class,new() 
             => returnType != null ? responseMessage.DeserializeJson(returnType).ToObservable().Cast<T>()
                     .If(obj => obj?.GetType().IsArray ?? false, arg => arg.Cast<IEnumerable<T>>().ToNowObservable(),
-                        arg => arg.ReturnObservable()).Select(arg => arg) :
+                        arg => arg.Observe()).Select(arg => arg) :
                 responseMessage.DeserializeJson<T>().ToObservable(Transform.ImmediateScheduler).Select(arg => arg);
 
 

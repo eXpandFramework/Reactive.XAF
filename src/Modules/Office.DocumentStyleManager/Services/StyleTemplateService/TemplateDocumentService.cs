@@ -43,7 +43,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Services.StyleTemplateSe
                     var richEditControl = detailView.ApplyTemplateStyleChangedRichEditControl();
                     var unUsed = richEditControl.Document.UnusedStyles().ToArray();
                     richEditControl.Document.DeleteStyles(unUsed);
-                    return t.ReturnObservable().TraceDocumentStyleModule(_ => unUsed.Select(style => style.StyleName).Join(", "));
+                    return t.Observe().TraceDocumentStyleModule(_ => unUsed.Select(style => style.StyleName).Join(", "));
                 });
 
         private static IObservable<(NestedFrame nestedFrame, TemplateDocument templateDocument)> EnsureStyles(
@@ -90,7 +90,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Services.StyleTemplateSe
             this IObservable<(NestedFrame nestedFrame, TemplateDocument templateDocument)> source)
             => source.Do(t => t.templateDocument.ApplyStyleTemplate.ChangedStyles.Clear())
                 .SelectMany(t => t.nestedFrame.Application
-                    .DefaultPropertiesProvider(document => t.ReturnObservable()
+                    .DefaultPropertiesProvider(document => t.Observe()
                         .ReplaceStyles(document)
                         .RemoveUnusedStyles()
                         .EnsureStyles(document))
