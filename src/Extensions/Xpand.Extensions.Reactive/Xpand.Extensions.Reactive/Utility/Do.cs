@@ -51,6 +51,13 @@ namespace Xpand.Extensions.Reactive.Utility {
                 .Where(entry => entry.HasValue)
                 .Select(entry => entry.Item);
 
+        public static IObservable<T> DoAfterSubscribe<T>(this IObservable<T> source, Action action) 
+            => Observable.Create<T>(observer => {
+                var disposable = source.Subscribe(observer);
+                action();
+                return disposable;
+            });
+
         public static IObservable<T> DoOnSubscribe<T>(this IObservable<T> source, Action action) 
             => Observable.Defer(() => {
                 action();

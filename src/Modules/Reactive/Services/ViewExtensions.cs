@@ -26,7 +26,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => view.Observe().WhenNotDefault().Closing();
         
         public static IObservable<object> WhenObjects(this View view) 
-            => view is ListView listView?listView.Objects().ToNowObservable():view.ToDetailView().WhenCurrentObjectChanged()
+            => view is ListView listView?listView.CollectionSource.WhenCollectionChanged().SelectMany(_ => listView.Objects())
+                .StartWith(listView.Objects()):view.ToDetailView().WhenCurrentObjectChanged()
                 .Select(detailView => detailView.CurrentObject).StartWith(view.CurrentObject).WhenNotDefault();
         
         public static IObservable<T> WhenObjects<T>(this View view) 
@@ -134,5 +135,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static IObservable<TSource[]> RefreshObjectSpace<TSource>(this IObservable<TSource> source,View view) 
             => source.BufferUntilCompleted().ObserveOnContext().Do(_ => view.ObjectSpace.Refresh());
+
+
     }
 }

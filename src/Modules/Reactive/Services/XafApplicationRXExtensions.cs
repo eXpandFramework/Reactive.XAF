@@ -5,7 +5,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reactive;
-using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
@@ -163,9 +162,15 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         
         public static void AddObjectSpaceProvider(this XafApplication application, params IObjectSpaceProvider[] objectSpaceProviders) 
             => application.WhenCreateCustomObjectSpaceProvider()
-                .SelectMany(t => application.WhenWeb()
-                    .Do(api => application.AddObjectSpaceProvider(objectSpaceProviders, t, api.GetService<NonPersistentObjectSpaceProvider>())).ToUnit()
-                    .SwitchIfEmpty(Unit.Default.Observe().Do(_ => application.AddObjectSpaceProvider(objectSpaceProviders, t))))
+                .Do(t => {
+                    var webAPI = application.WhenWeb().FirstOrDefaultAsync().Wait();
+                    if (webAPI != null) {
+                        application.AddObjectSpaceProvider(objectSpaceProviders, t, webAPI.GetService<NonPersistentObjectSpaceProvider>());
+                    }
+                    else {
+                        application.AddObjectSpaceProvider(objectSpaceProviders, t);
+                    }
+                })
                 .Subscribe();
 
         private static void AddObjectSpaceProvider(this XafApplication application, IObjectSpaceProvider[] objectSpaceProviders,
@@ -632,6 +637,9 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<(IObjectSpace objectSpace, (object instance, ObjectModification modification)[] details)> WhenProviderCommittedDetailed(
             this XafApplication application,Type objectType,string[] modifiedProperties,ObjectModification objectModification,Func<object,bool> criteria=null,[CallerMemberName]string caller="")
             => application.WhenProviderCommittedDetailed(objectType, objectModification,false,modifiedProperties,criteria,caller);
+        public static IObservable<(IObjectSpace objectSpace, (object instance, ObjectModification modification)[] details)> WhenProviderCommittedDetailed(
+            this XafApplication application,Type objectType,ObjectModification objectModification,Func<object,bool> criteria=null,[CallerMemberName]string caller="")
+            => application.WhenProviderCommittedDetailed(objectType, objectModification,false,Array.Empty<string>(),criteria,caller);
         
         public static IObservable<(IObjectSpace objectSpace, (object instance, ObjectModification modification)[] details)> WhenProviderCommittedDetailed(
             this XafApplication application,Type objectType,ObjectModification objectModification,bool emitUpdatingObjectSpace,string[] modifiedProperties,Func<object,bool> criteria=null,[CallerMemberName]string caller="")
@@ -669,8 +677,12 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<T> UseNonSecuredObjectSpace<T>(this XafApplication application,Func<IObjectSpace,IObservable<T>> factory,bool useObjectSpaceProvider=false,[CallerMemberName]string caller="") 
             => Observable.Using(() => application.CreateNonSecuredObjectSpace(typeof(T)), factory);
 
-        public static IObservable<TResult> UseObject<TSource,TResult>(this XafApplication application,TSource instance,Func<TSource,IObservable<TResult>> selector,bool useObjectSpaceProvider=false,[CallerMemberName]string caller="") 
-            => application.UseObjectSpace( space => selector(space.GetObjectFromKey(instance)),useObjectSpaceProvider,caller);
+        public static IObservable<TResult> UseObject<TSource, TResult>(this XafApplication application,
+            TSource instance, Func<TSource, IObservable<TResult>> selector, bool useObjectSpaceProvider = false, [CallerMemberName] string caller = "") 
+            => Observable.Using(() => application.CreateObjectSpace(useObjectSpaceProvider, typeof(TSource), caller: caller),
+                space => selector(space.GetObjectFromKey(instance)));
+        public static IObservable<TResult> UseArray<TSource,TResult>(this XafApplication application,TSource[] instance,Func<TSource[],IObservable<TResult>> selector,bool useObjectSpaceProvider=false,[CallerMemberName]string caller="") 
+            => application.UseObjectSpace( space => selector(instance.Select(space.GetObject).ToArray()) ,useObjectSpaceProvider,caller);
 
         public static IObservable<T2> UseProviderObjectSpace<T,T2>(this XafApplication application,T obj, Func<T, IObservable<T2>> factory, 
             [CallerMemberName] string caller = "") 
@@ -869,7 +881,23 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             Func<IObjectSpace, IObservable<T>> commit, int retry, string caller) 
             => objectSpaceSource(space => !xafApplication.IsDisposed() ? space.Commit(commit, caller, observer) : Observable.Empty<T[]>(), objectType)
                 .RetryWithBackoff(retry).DoOnError(observer.OnError).Select(_ => default(object));
+        
+        public static IObservable<Frame> Navigate(this XafApplication application, string viewId, Type objectType,params ViewType[] viewTypes)
+            => application.WhenFrame(objectType,viewTypes).Publish(frames => application.Navigate(viewId, frames));
+        public static IObservable<Frame> Navigate(this XafApplication application,string viewId, IObservable<Frame> afterNavigation) 
+            => application.Defer(() => {
+                var controller = application.MainWindow.GetController<ShowNavigationItemController>();
+                controller.ShowNavigationItemAction.SelectedItem= controller.FindNavigationItemByViewShortcut(new ViewShortcut(viewId, null));
+                return controller.ShowNavigationItemAction.Trigger(afterNavigation);
+            });
 
+        // return afterNavigation.Merge(Unit.Default.Observe().ObserveOnDefault().ObserveOnContext().Do(_ => {
+        //     var controller = application.MainWindow.GetController<ShowNavigationItemController>();
+        //     var item = controller.FindNavigationItemByViewShortcut(new ViewShortcut(viewId, null));
+        //     controller.ShowNavigationItemAction.DoExecute(item);
+        // }).IgnoreElements().To<Frame>());
+        public static IObservable<Frame> Navigate(this XafApplication application,string viewId) 
+            => application.Navigate(viewId,application.WhenFrame(viewId));
 
         private static IObservable<T[]> Commit<T>(this IObjectSpace objectSpace,Func<IObjectSpace, IObservable<T>> commit, string caller, IObserver<T[]> observer) 
             => commit(objectSpace).BufferUntilCompleted()

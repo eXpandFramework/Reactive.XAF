@@ -45,7 +45,7 @@
   <ItemGroup>
     <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="22.2.6" />
     <PackageReference Include="DevExpress.ExpressApp.Win.All" Version="22.2.6" />
-    <PackageReference Include="Xpand.XAF.Win.All" Version="4.222.13.0" />
+    <PackageReference Include="Xpand.XAF.Win.All" Version="4.222.13.1" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="TestApplication.Module">

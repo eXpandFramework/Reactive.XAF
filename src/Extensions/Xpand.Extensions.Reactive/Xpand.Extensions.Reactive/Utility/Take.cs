@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Reactive;
-using System.Reactive.Disposables;
 using System.Reactive.Linq;
 
 namespace Xpand.Extensions.Reactive.Utility {

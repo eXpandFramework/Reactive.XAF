@@ -12,6 +12,7 @@ using DevExpress.ExpressApp.SystemModule;
 using DevExpress.ExpressApp.Utils;
 using Fasterflect;
 using Xpand.Extensions.LinqExtensions;
+using Xpand.Extensions.Numeric;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Filter;
@@ -129,7 +130,11 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
 
         private static IObservable<T> WhenConcatExecution<T,TArgs>(this TArgs e,Func<TArgs, IObservable<T>> sourceSelector) where TArgs:ActionBaseEventArgs{
             e.Action.Enabled[nameof(WhenConcatExecution)] = false;
-            return sourceSelector(e).TakeUntilDisposed(e.Action).ObserveOnContext().Finally(() => e.Action.Enabled[nameof(WhenConcatExecution)] = true);
+            return sourceSelector(e).TakeUntilDisposed(e.Action).ObserveOnContext()
+                .Finally(() => {
+                    e.Action.Enabled[nameof(WhenConcatExecution)] = true;
+                    e.Action.ExecutionFinished();
+                });
         }
 
         public static IObservable<Unit> WhenConcatExecution(this ParametrizedAction action,Action<ParametrizedActionExecuteEventArgs> sourceSelector) 
@@ -269,9 +274,9 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
 
         public static IObservable<SingleChoiceAction> AddItems(this IObservable<SingleChoiceAction> source,Func<SingleChoiceAction,IObservable<Unit>> addItems)
             => source.MergeIgnored(action => action.Controller.WhenActivated()
-                // .SelectMany(controller => action.View().WhenCurrentObjectChanged().StartWith(controller.Frame.View)
-                    // .TakeUntilDisposed(controller))
-                // .WaitUntilInactive(1).ObserveOnContext()
+                .SelectMany(controller => action.View().WhenCurrentObjectChanged().StartWith(controller.Frame.View)
+                    .TakeUntilDisposed(controller))
+                .WaitUntilInactive(1).ObserveOnContext()
                 .Do(_ => action.Items.Clear()).SelectMany(_ => addItems(action)).TakeUntilDisposed(action));
 
         public static IObservable<TArgs> CreateDetailView<TArgs>(this IObservable<TArgs> source, Type objectType=null, TargetWindow? targetWindow =null) where TArgs:ActionBaseEventArgs
@@ -488,6 +493,21 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
                 .If(_ => closeOnCancel,controller => controller.CancelAction.WhenExecuted(_ => e.ShowViewParameters.CreatedView.Close())
                     .IgnoreElements().To<DialogController>().StartWith(dialogController));
         }
+
+        public static IObservable<T> Trigger<T>(this SingleChoiceAction action, IObservable<T> afterNavigation,params object[] selection)
+            => afterNavigation.Trigger(() => action.DoExecute(action.SelectedItem, selection));
+        
+        public static IObservable<T> Trigger<T>(this SingleChoiceAction action,ChoiceActionItem selectedItem, IObservable<T> afterNavigation,params object[] selection)
+            => afterNavigation.Trigger(() => action.DoExecute(selectedItem, selection));
+        private static IObservable<T> Trigger<T>(this IObservable<T> afterNavigation,Action action) 
+            => afterNavigation.Buffer(Observable.Return(Unit.Default)
+                .Delay(1.Seconds()).ObserveOnContext()
+                .Do(_ => action())).Select(list => list).SelectMany();
+
+        public static IObservable<T> Trigger<T>(this ParametrizedAction action, IObservable<T> afterNavigation)
+            => afterNavigation.Trigger(() => action.DoExecute(action.Value));
+        public static IObservable<T> Trigger<T>(this SimpleAction action, IObservable<T> afterNavigation,params object[] selection)
+            => afterNavigation.Trigger(() => action.DoExecute(selection));
 
     }
 }

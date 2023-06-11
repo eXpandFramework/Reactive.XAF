@@ -80,6 +80,9 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects {
         public override void AfterConstruction() {
             base.AfterConstruction();
             _cronExpression=Session.Query<CronExpression>().FirstOrDefault(expression => expression.Name == nameof(Cron.Never));
+            _jobType = JobTypes.FirstOrDefault();
+            _jobMethod = JobMethods.FirstOrDefault();
+            Id = Guid.NewGuid().ToString();
         }
 
         CronExpression _cronExpression;

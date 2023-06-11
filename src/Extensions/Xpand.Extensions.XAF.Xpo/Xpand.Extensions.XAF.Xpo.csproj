@@ -29,12 +29,12 @@
     <Reference Include="Xpand.Extensions.XAF">
       <HintPath>..\..\..\bin\Xpand.Extensions.XAF.dll</HintPath>
     </Reference>
+    <Reference Include="Xpand.Extensions.Reactive">
+      <HintPath>..\..\..\bin\Xpand.Extensions.Reactive.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\..\Common\AssemblyInfoVersion.cs" Link="Properties\AssemblyInfoVersion.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="RunTimeAssociation" />
   </ItemGroup>
   <Import Project="..\..\..\.paket\Paket.Restore.targets" />
 </Project>

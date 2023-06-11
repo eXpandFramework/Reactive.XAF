@@ -123,15 +123,24 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         
         public static IObservable<TFrame> TakeUntilViewClosed<TFrame>(this IObservable<TFrame> source,Frame frame)  
             => source.TakeUntil(frame.View.WhenClosing());
-
+        
         public static IObservable<SimpleActionExecuteEventArgs> ShowInstanceDetailView(this IObservable<Frame> source,params  Type[] objectTypes) 
             => source.WhenFrame(objectTypes).WhenFrame(ViewType.ListView).ToController<ListViewProcessCurrentObjectController>().CustomProcessSelectedItem(true)
                 .DoWhen(e => e.View().ObjectTypeInfo.Type.IsInstanceOfType(e.View().CurrentObject),
                     e => e.ShowViewParameters.CreatedView = e.Application().NewDetailView(space => space.GetObject(e.Action.View().CurrentObject),
                         e.View().CurrentObject.GetType().GetModelClass().DefaultDetailView));
-    
-    
+        
         public static IObservable<ListPropertyEditor> NestedListViews(this Frame frame, params Type[] objectTypes ) 
             => frame.View.ToDetailView().NestedListViews(objectTypes);
+
+        public static IObservable<Frame> ListViewProcessSelectedItem(this IObservable<Frame> source) 
+            => source.SelectMany(frame => frame.ListViewProcessSelectedItem().FirstAsync());
+
+        public static IObservable<Frame> ListViewProcessSelectedItem(this Frame frame) {
+            var action = frame.GetController<ListViewProcessCurrentObjectController>().ProcessCurrentObjectAction;
+            var afterNavigation = action.WhenExecuted().SelectMany(e =>
+                frame.Application.WhenFrame(e.ShowViewParameters.CreatedView.ObjectTypeInfo.Type).Take(1));
+            return action.Trigger(afterNavigation);
+        }
     }
 }

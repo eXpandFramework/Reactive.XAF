@@ -35,7 +35,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
             return modelReactiveModuleLogger?.ReactiveLogger;
         }
     }
-    public interface IModelReactiveLogger:IModelReactiveModule{
+    public interface IModelReactiveLogger:IModelNode{
         IModelTraceSourcedModules TraceSources{ get; }
         [Description("Requires XAF NotificationsModule")]
         IModelReactiveLoggerNotifications Notifications { get; }

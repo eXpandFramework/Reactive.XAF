@@ -13,7 +13,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => manager.WhenGeneratingModelNodes<IModelBOModel>()
                 .SelectMany(modelClass => modelClass)
                 .SelectMany(mc => mc.OwnMembers.SelectMany(member => member.MemberInfo
-                    .FindAttributes<LookupPropertyAttribute>()
+                    .FindAttributes<ModelLookupPropertyAttribute>()
                     .Do(attribute => member.LookupProperty = attribute.Property)))
                 .ToUnit();
     }

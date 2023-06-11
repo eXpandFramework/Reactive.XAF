@@ -15,9 +15,9 @@ namespace Xpand.Extensions.Network {
         }
 
 
-        public static HttpMessageHandler Handler(this HttpClient client)
-            => (HttpMessageHandler)HandlerAccessor(client);
-        public static T Handler<T>(this HttpClient client) where T:HttpMessageHandler
+        public static DelegatingHandler Handler(this HttpClient client)
+            => (DelegatingHandler)HandlerAccessor(client);
+        public static T Handler<T>(this HttpClient client) where T:DelegatingHandler
             => (T)client.Handler();
         
         private static readonly MemberGetter HandlerAccessor=typeof(HttpClient).DelegateForGetFieldValue("_handler");

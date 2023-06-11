@@ -24,8 +24,11 @@ namespace Xpand.Extensions.Blazor {
 	        return provider.GetRequiredService<IXafApplicationProvider>().GetApplication();
         }
 
-        public static async Task<T> RunWithStorageAsync<T>(this IServiceProvider provider,Func<BlazorApplication,IObservable<T>> selector,string marker=null)
-            => await provider.RunWithStorageAsync(() => selector(provider.GetApplication(marker)));
+        public static Task<T> RunWithStorageAsync<T>(this IServiceProvider provider,Func<BlazorApplication,IObservable<T>> selector,string marker=null)
+            => provider.RunWithStorageAsync(application => selector(application).ToTask(),marker);
+        
+        public static async Task<T> RunWithStorageAsync<T>(this IServiceProvider provider,Func<BlazorApplication,Task<T>> selector,string marker=null)
+            => await provider.RunWithStorageAsync(async () => await selector(provider.GetApplication(marker)));
 
         public static void RunIsolated(this IServiceProvider provider, Action<BlazorApplication> action, string marker = null)
             => ValueManagerContext.RunIsolated(() => action(provider.GetApplication(marker)));
@@ -37,7 +40,10 @@ namespace Xpand.Extensions.Blazor {
 	        => provider.GetRequiredService<IValueManagerStorageContext>().RunWithStorage(action);
 
         public static async Task<T> RunWithStorageAsync<T>(this IServiceProvider provider,Func<IObservable<T>> selector) 
+	        => await provider.RunWithStorageAsync(selector().ToTask);
+        
+        public static async Task<T> RunWithStorageAsync<T>(this IServiceProvider provider,Func<Task<T>> selector) 
 	        => await provider.GetRequiredService<IValueManagerStorageContext>()
-		        .RunWithStorageAsync(() => Observable.DefaultIfEmpty(selector()).ToTask());
+		        .RunWithStorageAsync(selector);
     }
 }

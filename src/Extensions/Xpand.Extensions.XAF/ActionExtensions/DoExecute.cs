@@ -42,14 +42,19 @@ namespace Xpand.Extensions.XAF.ActionExtensions{
             => action.DoExecute(action.Items.FirstOrDefault(item => item.Data==data));
 
         public static void DoExecute(this SingleChoiceAction action,ChoiceActionItem selectedItem, params object[] objectSelection) {
-            var context = action.SelectionContext;
-            if (objectSelection.Length > 1) {
-                throw new NotImplementedException();
-            }
+            action.DoExecute( () => action.DoExecute(selectedItem), objectSelection);
+        }
 
-            action.SelectionContext = new SelectionContext(objectSelection.Single());
-            action.DoExecute(selectedItem);
-            action.SelectionContext=context;
+        public static void DoExecute(this ActionBase action, Action execute, object[] objectSelection){
+            if (objectSelection.Any()) {
+                var context = action.SelectionContext;
+                action.SelectionContext = new SelectionContext(objectSelection.Single());
+                execute();
+                action.SelectionContext = context;
+            }
+            else {
+                execute();
+            }
         }
 
         [SuppressMessage("ReSharper", "ArrangeTypeMemberModifiers")]
@@ -74,6 +79,10 @@ namespace Xpand.Extensions.XAF.ActionExtensions{
             private void OnSelectionChanged() => SelectionChanged?.Invoke(this, EventArgs.Empty);
             private void OnCurrentObjectChanged() => CurrentObjectChanged?.Invoke(this, EventArgs.Empty);
         }
+
+        public static void DoExecute(this SimpleAction action, params object[] selection) 
+            => action.DoExecute(() => action.DoExecute(),selection);
+
         public static bool DoTheExecute(this ActionBase actionBase,bool force=false) {
             BoolList active = null;
             BoolList enable = null;

@@ -129,9 +129,11 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
 		        .SelectMany(ports => ports.LoggerPorts.OfType<IModelLoggerServerPort>()
 			        .ToObservable().SelectMany(_ => IpEndPoint(_.Host,_.Port)));
 
-        public static IObservable<IModelReactiveLoggerHub> ModelLoggerPorts(this XafApplication application) 
-	        => application.ToReactiveModule<IModelReactiveModuleLogger>().Select(logger => logger.ReactiveLogger).Cast<IModelReactiveLoggerHub>()
+        public static IObservable<IModelReactiveLoggerHub> ModelLoggerPorts(this XafApplication application) {
+	        var reactiveModule = application.ToReactiveModule<IModelReactiveModuleLogger>();
+	        return reactiveModule.Select(logger => logger.ReactiveLogger).Cast<IModelReactiveLoggerHub>()
 		        .Where(ports => ports.LoggerPorts.Enabled).Cast<IModelReactiveLoggerHub>();
+        }
 
         public static Server StartServer(this ServerPort serverPort){
 	        var options = new MagicOnionOptions{IsReturnExceptionStackTraceInErrorDetail = true};

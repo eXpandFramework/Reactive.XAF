@@ -10,6 +10,7 @@ using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
+using System.Threading;
 using System.Threading.Tasks;
 using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp;
@@ -100,6 +101,9 @@ namespace Xpand.TestsLib.Common{
 	        }).FirstAsync().Subscribe();
 	        return application.NewView(modelView,objectSpace);
         }
+
+        public static IObservable<Frame> ListViewProcessSelectedItem(this Frame frame,Func<IObjectSpace,IList> selectedObjectsFactory) 
+            => frame.ListViewProcessSelectedItem();
 
         public static void DoExecute(this ActionBase action,Func<IObjectSpace,IList> selectedObjectsFactory,bool force=false){
             var selectionContextMock = new Mock<ISelectionContext>();
@@ -217,9 +221,17 @@ namespace Xpand.TestsLib.Common{
             {"SpeechManagerModule", 61494},
         };
 
+        public static TestObserver<T> StartWinTest<T>(this XafApplication application, IObservable<T> test,int delay = 200) 
+            => application.StartTest(application.WhenFrame().Take(1)
+                .Do(_ => SynchronizationContext.SetSynchronizationContext((SynchronizationContext)AppDomain.CurrentDomain
+                    .GetAssemblyType("System.Windows.Forms.WindowsFormsSynchronizationContext").CreateInstance()))
+                .SelectMany(frame => (frame.Template)
+                    .WhenEvent("Activated").Take(1).WaitUntilInactive(2.Seconds()).Take(1).ObserveOnContext()
+                    .SelectMany(_ => test.BufferUntilCompleted().Do(_ => application.Exit()).SelectMany()))
+                .DoNotComplete(),delay);
+
         public static TestObserver<T> StartTest<T>(this XafApplication application,IObservable<T> test,int delay=200) {
             var testObserver = test
-                .Timeout(TimeSpan.FromSeconds(10))
                 .AsyncFinally(async () => await Task.Delay(delay).ToObservable().Do(_ => application.Exit()).ToTask())
                 .Test();
             application.CallMethod("Start");
@@ -374,6 +386,7 @@ namespace Xpand.TestsLib.Common{
 			        "if implemented make sure all tests pass with TestExplorer and live testing");
 	        }
 	        application.Title = TestContext.CurrentContext.Test.FullName.Truncate(255);
+            
 	        return application;
         }
 

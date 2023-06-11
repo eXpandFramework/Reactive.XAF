@@ -9,7 +9,7 @@ namespace Xpand.Extensions.Reactive.Transform{
             => Observable.Return(self, scheduler ?? ImmediateScheduler);
         
         public static IObservable<T> Observe<T,T2>(this T self,Func<T,IObservable<T2>> secondSelector, IScheduler scheduler = null) 
-            => self.Observe().MergeIgnored(secondSelector);
+            => self.Observe(scheduler).MergeIgnored(secondSelector);
         
         [Obsolete()]
         public static IObservable<T> ReturnObservable<T>(this T self, IScheduler scheduler = null) 
@@ -17,6 +17,6 @@ namespace Xpand.Extensions.Reactive.Transform{
 
         [Obsolete()]
         public static IObservable<T> ReturnObservable<T,T2>(this T self,Func<T,IObservable<T2>> secondSelector, IScheduler scheduler = null) 
-            => self.Observe().MergeIgnored(secondSelector);
+            => self.Observe(scheduler).MergeIgnored(secondSelector);
     }
 }
