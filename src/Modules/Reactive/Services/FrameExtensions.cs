@@ -22,17 +22,14 @@ using Xpand.XAF.Modules.Reactive.Services.Controllers;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
     public static class FrameExtensions{
-        public static IObservable<TFrame> WhenModule<TFrame>(
-            this IObservable<TFrame> source, Type moduleType) where TFrame : Frame 
+        public static IObservable<TFrame> WhenModule<TFrame>(this IObservable<TFrame> source, Type moduleType) where TFrame : Frame 
             => source.Where(_ => _.Application.Modules.FindModule(moduleType) != null);
 
         public static IObservable<TFrame> MergeViewCurrentObjectChanged<TFrame>(this IObservable<TFrame> source) where TFrame : Frame
             => source.SelectMany(frame => frame.View.WhenCurrentObjectChanged().DistinctUntilChanged(view => view.ObjectSpace.GetKeyValue(view.CurrentObject))
-                    .WhenNotDefault(view => view.CurrentObject).To(frame).WaitUntilInactive(3.Seconds()).ObserveOnContext())
-                ;
+                    .WhenNotDefault(view => view.CurrentObject).To(frame).WaitUntilInactive(3.Seconds()).ObserveOnContext());
         
-        public static IObservable<TFrame> When<TFrame>(this IObservable<TFrame> source, TemplateContext templateContext)
-            where TFrame : Frame 
+        public static IObservable<TFrame> When<TFrame>(this IObservable<TFrame> source, TemplateContext templateContext) where TFrame : Frame 
             => source.Where(window => window.Context == templateContext);
 
         public static IObservable<Frame> When(this IObservable<Frame> source, Func<Frame,IEnumerable<IModelObjectView>> objectViewsSelector) 
@@ -41,8 +38,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<T> When<T>(this IObservable<T> source, Frame parentFrame, NestedFrame nestedFrame) 
             => source.Where(_ => nestedFrame?.View != null && parentFrame?.View != null);
 
-        internal static IObservable<TFrame> WhenFits<TFrame>(this IObservable<TFrame> source, ActionBase action)
-            where TFrame : Frame 
+        internal static IObservable<TFrame> WhenFits<TFrame>(this IObservable<TFrame> source, ActionBase action) where TFrame : Frame 
             => source.WhenFits(action.TargetViewType, action.TargetObjectType);
 
         internal static IObservable<TFrame> WhenFits<TFrame>(this IObservable<TFrame> source, ViewType viewType,
@@ -54,7 +50,6 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                         var popupLookupTemplate = _.Template is ILookupPopupFrameTemplate;
                         return isPopupLookup.Value ? popupLookupTemplate : !popupLookupTemplate;
                     }
-
                     return true;
                 });
 
@@ -81,8 +76,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .TakeUntil(item.WhenDisposingFrame()).Select(e => e.SourceFrame).InversePair(item);
 
         public static IObservable<T> TemplateChanged<T>(this IObservable<T> source) where T : Frame 
-            => source.SelectMany(item => item.Template != null
-                    ? item.Observe() : item.WhenEvent(nameof(Frame.TemplateChanged))
+            => source.SelectMany(item => item.Template != null ? item.Observe() : item.WhenEvent(nameof(Frame.TemplateChanged))
                         .TakeUntil(item.WhenDisposingFrame()).Select(_ => item));
 
         public static IObservable<TFrame> WhenTemplateChanged<TFrame>(this TFrame source) where TFrame : Frame 
@@ -108,8 +102,6 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static IObservable<Unit> DisposingFrame<TFrame>(this IObservable<TFrame> source) where TFrame : Frame 
             => source.WhenNotDefault().SelectMany(item => item.WhenDisposingFrame()).ToUnit();
-        
-        
 
         public static IObservable<T> SelectUntilViewClosed<TFrame, T>(this IObservable<TFrame> source,
             Func<TFrame, IObservable<T>> selector) where TFrame : View

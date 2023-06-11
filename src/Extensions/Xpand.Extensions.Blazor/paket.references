@@ -4,3 +4,4 @@ System.Reactive
 System.Text.Json
 Microsoft.CodeAnalysis
 System.Data.SqlClient
+System.Threading.Tasks.Dataflow

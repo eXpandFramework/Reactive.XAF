@@ -4,6 +4,7 @@ using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 
 namespace Xpand.Extensions.Reactive.Combine{
@@ -31,6 +32,12 @@ namespace Xpand.Extensions.Reactive.Combine{
 
         public static IObservable<Unit> MergeToUnit<TSource, TValue>(this IObservable<TSource> source, IObservable<TValue> value, IScheduler scheduler = null) 
             => source.ToUnit().Merge(value.ToUnit());
+        
+        public static IObservable<TValue> MergeTo<TSource, TValue>(this IObservable<TSource> source, IObservable<TValue> value, IScheduler scheduler = null) where TValue:class 
+            => source.Select(source1 => source1 as TValue).WhenNotDefault().Merge(value.To<TValue>());
+        
+        public static IObservable<object> MergeToObject<TSource, TValue>(this IObservable<TSource> source, IObservable<TValue> value, IScheduler scheduler = null) where TValue:class 
+            => source.Select(source1 => source1 as object).WhenNotDefault().Merge(value.To<TValue>());
 
         public static IObservable<T> MergeIgnored<T,T2>(this IObservable<T> source,Func<T,IObservable<T2>> secondSelector,Func<T,bool> merge=null)
             => source.Publish(obs => obs.SelectMany(arg => {

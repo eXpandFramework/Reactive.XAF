@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Reactive;
 using System.Reactive.Subjects;
 using akarnokd.reactive_extensions;
@@ -12,6 +13,7 @@ public class BufferTests : BaseTest {
 
     [Test]
     public void BufferUntilCompleted() {
+    
         var subject = new Subject<Unit>();
         var testObserver = subject.BufferUntilCompleted().Test();
             
@@ -23,6 +25,7 @@ public class BufferTests : BaseTest {
         testObserver.ItemCount.ShouldBe(1);
         testObserver.Items.First().Length.ShouldBe(2);
         testObserver.CompletionCount.ShouldBe(1);
+        throw new NotImplementedException();
             
     }
 
