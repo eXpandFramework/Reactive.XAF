@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Mail;
 using System.Reactive;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
@@ -21,17 +22,20 @@ using Xpand.Extensions.XAF.ActionExtensions;
 using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.XAF.Modules.Email.BusinessObjects;
+using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
 
 namespace Xpand.XAF.Modules.Email{
     public static class EmailService {
+        private static IScheduler Scheduler => ReactiveModuleBase.Scheduler;
         public static SingleChoiceAction Email(this (EmailModule, Frame frame) tuple) 
             => tuple.frame.Action(nameof(Email)).As<SingleChoiceAction>();
 
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) 
-            => manager.RegisterAction().AddItems(action => action.AddItems().ToUnit()
-                .Concat(Observable.Defer(() => action.DisableIfSent().SendEmail()))).ToUnit();
+            => manager.RegisterAction()
+                .AddItems(action => action.AddItems().ToUnit()
+                .Concat(Observable.Defer(() => action.DisableIfSent().SendEmail())),Scheduler).ToUnit();
 
         private static IObservable<SingleChoiceAction> DisableIfSent(this SingleChoiceAction singleChoiceAction) {
             var view = singleChoiceAction.View();

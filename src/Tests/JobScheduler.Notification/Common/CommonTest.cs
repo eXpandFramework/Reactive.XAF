@@ -3,6 +3,7 @@ using DevExpress.ExpressApp.Blazor;
 using Hangfire;
 using Hangfire.MemoryStorage;
 using Xpand.TestsLib.Blazor;
+using Xpand.XAF.Modules.Reactive;
 
 namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Notification.Tests.Common {
     public abstract class CommonTest : BlazorCommonTest {
@@ -13,7 +14,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Notification.Tests.Common {
 
         public override void Init() {
             base.Init();
-            Notification.JobSchedulerNotificationModule.Scheduler=TestScheduler;
+            ReactiveModuleBase.Scheduler=TestScheduler;
             GlobalConfiguration.Configuration.UseMemoryStorage();
         }
 

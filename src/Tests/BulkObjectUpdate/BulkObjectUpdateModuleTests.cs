@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp;
@@ -6,6 +5,7 @@ using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.SystemModule;
 using NUnit.Framework;
 using Shouldly;
+using Xpand.Extensions.Numeric;
 using Xpand.Extensions.XAF.CollectionSourceExtensions;
 using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.ViewExtensions;
@@ -23,6 +23,8 @@ namespace Xpand.XAF.Modules.BulkObjectUpdate.Tests {
         private Frame _detailViewFrame;
 
         public override void Init() {
+            ReactiveModuleBase.Scheduler=TestScheduler;
+            TestScheduler.AdvanceTimeBy(2.Seconds());
             base.Init();
             var objectSpace = Application.CreateObjectSpace();
             objectSpace.CreateObject<BOU>();
@@ -36,10 +38,12 @@ namespace Xpand.XAF.Modules.BulkObjectUpdate.Tests {
             
             _window = Application.CreateViewWindow();
             _window.SetView(Application.NewView<ListView>(typeof(BOU)));
+            TestScheduler.AdvanceTimeBy(2.Seconds());
         }
 
         [Test][Order(0)]
         public void BulkUpdate_Items_Contain_Model_Rules() {
+            
             var action = _window.Action(nameof(BulkObjectUpdateService.BulkUpdate)) as SingleChoiceAction;
             
             action.ShouldNotBeNull();

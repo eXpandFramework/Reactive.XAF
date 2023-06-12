@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using DevExpress.ExpressApp;
@@ -19,18 +20,21 @@ using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.Extensions.XAF.ObjectSpaceExtensions;
 using Xpand.Extensions.XAF.ViewExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
+using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
 
 namespace Xpand.XAF.Modules.BulkObjectUpdate{
     public static class BulkObjectUpdateService {
+        static IScheduler Scheduler=>ReactiveModuleBase.Scheduler;
         public static SingleChoiceAction BulkUpdate(this (BulkObjectUpdateModule, Frame frame) tuple) 
             => tuple.frame.Action(nameof(BulkUpdate)).As<SingleChoiceAction>();
 
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) 
             => manager.RegisterAction()
+                .AddItems(action => action.AddItems().ToUnit(),Scheduler)
                 .MergeIgnored(action => action.ShowView().UpdateListViewObjects())
-                .AddItems(action => action.AddItems().ToUnit()).ToUnit();
+                .ToUnit();
 
         static IObservable<Unit> UpdateListViewObjects(this IObservable<(Frame listView, Frame detailView)> source) 
 	        => source.SelectMany(t => t.detailView.GetController<DialogController>().AcceptAction.WhenExecuted(

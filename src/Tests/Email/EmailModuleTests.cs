@@ -3,6 +3,7 @@ using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp;
 using NUnit.Framework;
 using Shouldly;
+using Xpand.Extensions.Numeric;
 using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
@@ -20,6 +21,7 @@ namespace Xpand.XAF.Modules.Email.Tests {
         private IModelEmailViewRecipient _viewRecipient;
 
         public override void Init() {
+            ReactiveModuleBase.Scheduler=TestScheduler;
             base.Init();
             var modelEmail = Application.Model.ToReactiveModule<IModelReactiveModulesEmail>().Email;
             Application.Model.Title = nameof(EmailModuleTests);
@@ -41,6 +43,7 @@ namespace Xpand.XAF.Modules.Email.Tests {
             _viewRecipient.ObjectView=emailObjectView;
             _viewRecipient.Recipient = emailRecipient;
             _viewRecipient.SmtpClient=smtpClient;
+            
         }
 
         [Test][Order(0)]
@@ -49,7 +52,7 @@ namespace Xpand.XAF.Modules.Email.Tests {
             var detailView = Application.NewView<DetailView>(typeof(E));
             detailView.CurrentObject = detailView.ObjectSpace.CreateObject<E>();
             window.SetView(detailView);
-            
+            TestScheduler.AdvanceTimeBy(2.Seconds());
             window.Action(nameof(EmailService.Email)).Active.ResultValue.ShouldBeTrue();
             window.Action(nameof(EmailService.Email)).Enabled.ResultValue.ShouldBeTrue();
             
@@ -71,7 +74,7 @@ namespace Xpand.XAF.Modules.Email.Tests {
             var detailView = Application.NewView<DetailView>(typeof(E));
             detailView.CurrentObject = detailView.ObjectSpace.GetObject(e);
             window.SetView(detailView);
-            
+            TestScheduler.AdvanceTimeBy(2.Seconds());
             window.Action(nameof(EmailService.Email)).Enabled["DisableIfSent"].ShouldBeFalse();
             
             emailStorage.ObjectSpace.Delete(emailStorage);
@@ -86,6 +89,7 @@ namespace Xpand.XAF.Modules.Email.Tests {
             var e = detailView.ObjectSpace.CreateObject<E>();
             detailView.CurrentObject = e;
             window.SetView(detailView);
+            TestScheduler.AdvanceTimeBy(2.Seconds());
             using var testObserver = Application.WhenSendingEmail().FirstAsync().Test();
             var action = window.Action(nameof(EmailService.Email));
             
