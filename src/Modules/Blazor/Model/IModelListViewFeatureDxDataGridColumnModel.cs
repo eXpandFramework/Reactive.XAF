@@ -9,18 +9,22 @@ namespace Xpand.XAF.Modules.Blazor.Model {
     }
 
     public interface IDxDataGridColumnModel {
-        DataGridTextAlign TextAlignment { get; set; }
-        bool? AllowSort { get; set; }
-        DataGridColumnSortOrder SortOrder { get; set; }
-        int? SortIndex { get; set; }
-        int? GroupIndex { get; set; }
         bool? AllowGroup { get; set; }
-        bool? AllowFilter { get; set; }
-        DataEditorClearButtonDisplayMode? ClearButtonDisplayMode { get; set; }
-        bool? EditorVisible { get; set; }
-        int? EditFormVisibleIndex { get; set; }
-        DataGridFixedStyle? FixedStyle { get; set; }
-        bool? ShowInColumnChooser { get; set; }
+        bool? AllowSort { get; set; }
+        bool? ExportEnabled { get; set; }
+        int? ExportWidth { get; set; }
+        GridColumnFilterMode? FilterMode { get; set; }
+        bool? FilterRowEditorVisible { get; set; }
+        GridFilterRowOperatorType? FilterRowOperatorType { get; set; }
+        GridColumnSortMode? SortMode { get; set; }
+        GridColumnSortOrder? SortOrder { get; set; }
+        GridTextAlignment? TextAlignment { get; set; }
+        string UnboundExpression { get; set; }
+        GridUnboundColumnType? UnboundType { get; set; }
+        bool? Visible { get; set; }
+        int? VisibleIndex { get; set; }
+        string Width { get; set; }
+        int? MinWidth { get; set; }
     }
 
 

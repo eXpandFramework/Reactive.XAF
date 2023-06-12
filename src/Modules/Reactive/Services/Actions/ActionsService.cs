@@ -345,6 +345,9 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
         public static IObservable<SingleChoiceActionExecuteEventArgs> WhenExecuteCompleted(this SingleChoiceAction action) 
             => action.WhenEvent<SingleChoiceActionExecuteEventArgs>(nameof(ActionBase.ExecuteCompleted)).TakeUntilDisposed(action);
 
+        public static IObservable<T> TakeUntilDisposed<T>(this IObservable<T> source, ActionBase component) 
+            => source.TakeUntil(_ => component.IsDisposed);
+        
         public static IObservable<ParametrizedActionExecuteEventArgs> WhenExecuteCompleted(this ParametrizedAction action) 
             => action.WhenEvent<ParametrizedActionExecuteEventArgs>(nameof(ActionBase.ExecuteCompleted)).TakeUntilDisposed(action);
 

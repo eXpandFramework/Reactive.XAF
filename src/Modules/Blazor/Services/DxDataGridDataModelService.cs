@@ -3,7 +3,9 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.Blazor.Editors;
 using DevExpress.ExpressApp.Blazor.Editors.Grid;
+using DevExpress.ExpressApp.Blazor.Editors.Models;
 using Fasterflect;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Transform;
@@ -18,7 +20,7 @@ namespace Xpand.XAF.Modules.Blazor.Services {
         internal static IObservable<Unit> ApplyDxDataGridModel(this XafApplication application) 
             => application.WhenFrameViewControls()
                 .WhenFrame(viewType: ViewType.ListView)
-                .MergeIgnored(frame => frame.GridModel().Apply())
+                // .MergeIgnored(frame => frame.GridModel().Apply())
                 .MergeIgnored(frame => frame.ColumnModel().Apply())
                 .ToUnit();
 
@@ -36,8 +38,8 @@ namespace Xpand.XAF.Modules.Blazor.Services {
             => source.SelectMany(t => ColumnModelProperties
                     .Select(s => (name:s,value:t.model.GetValue(s))).Where(t3 => t3.value!=null)
                     .Select(t1 =>( t1.name,t1.value,t.frame))
-                    .SelectMany(t2 => ((GridListEditor) t.frame.View.AsListView().Editor).Columns.Cast<GridColumnWrapper>()
-                        .Select(wrapper => wrapper.DxDataGridColumnModel)
+                    .SelectMany(t2 => ((DxGridListEditor) t.frame.View.AsListView().Editor).Columns.Cast<DxGridColumnWrapper>()
+                        .Select(wrapper => wrapper.GetPropertyValue("DxGridDataColumnModel")).Cast<DxGridDataColumnModel>()
                         .Do(model => model.SetPropertyValue(t2.name, t2.value))))
                 .ToUnit();
 
@@ -45,8 +47,8 @@ namespace Xpand.XAF.Modules.Blazor.Services {
             => source.SelectMany(t => GridModelProperties
                     .Select(s => (name:s,value:t.model.GetValue(s))).Where(t3 => t3.value!=null)
                     .Select(t1 =>( t1.name,t1.value,t.frame))
-                    .Do(t2 => ((GridListEditor) t.frame.View.AsListView().Editor).GetDataGridAdapter()
-                        .DataGridModel.SetPropertyValue(t2.name, t2.value)))
+                    .Do(t2 => ((DxGridListEditor) t.frame.View.AsListView().Editor).GetGridAdapter()
+                        .GridModel.SetPropertyValue(t2.name, t2.value)))
                 .ToUnit();
 
         private static string[] GridModelProperties { get; } = typeof(IModelListViewFeatureDxDataGridModel).GetProperties()

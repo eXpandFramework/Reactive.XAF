@@ -56,8 +56,8 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Extensions{
             => documentStyle.Find( document) ?? document.CreateNewStyle(documentStyle,defaultPropertiesProvider);
 
         public static CharacterPropertiesBase Find(this IDocumentStyle documentStyle, Document document) 
-            => documentStyle.DocumentStyleType==DocumentStyleType.Paragraph ?(CharacterPropertiesBase) document.ParagraphStyles
-		        .FirstOrDefault(_ => _.Name==documentStyle.StyleName):document.CharacterStyles
+            => documentStyle.DocumentStyleType==DocumentStyleType.Paragraph ?document.ParagraphStyles
+	            .FirstOrDefault(_ => _.Name==documentStyle.StyleName):document.CharacterStyles
 		        .FirstOrDefault(_ => _.Name==documentStyle.StyleName);
 
         public static CharacterPropertiesBase CreateNewStyle(this Document document,IDocumentStyle documentStyle,Document defaultPropertiesProvider=null){

@@ -72,7 +72,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Services.DocumentStyleMa
 	            .Zip(contentRichEditServer)
                 .SelectMany(_ => _.Second.WhenContentChanged()
                     .Throttle(TimeSpan.FromSeconds(1))
-                    .ObserveOn(SynchronizationContext.Current)
+                    .ObserveOn(SynchronizationContext.Current!)
                     .SelectMany(server => _.First.Application().DefaultPropertiesProvider(document => server.ResetStyleCollections((_.First,document))
 		                .Do(documentServer => documentServer.SelectActiveStyle((_.First,document))))))
                 .ToUnit();
