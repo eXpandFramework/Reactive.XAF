@@ -7,7 +7,8 @@ using Shouldly;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.TestsLib;
 
-namespace Xpand.Extensions.Tests; 
+namespace Xpand.Extensions.Tests;
+
 public class BufferTests : BaseTest {
 
     [Test]

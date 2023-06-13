@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Reactive;
-using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Threading;
 using DevExpress.ExpressApp;
@@ -17,9 +16,9 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<(string parameter, object result)> WhenCallBack(this IObservable<IXAFAppWebAPI> source,string parameter=null) 
             => source.SelectMany(api => api.Application.WhenWindowCreated().When(TemplateContext.ApplicationWindow)
                     .TemplateChanged()
-                    .SelectMany(_ => Observable.FromEventPattern<EventArgs>(AppDomain.CurrentDomain.XAF().CurrentRequestPage(),"InitComplete",ImmediateScheduler.Instance).To(_))
+                    .SelectMany(_ => AppDomain.CurrentDomain.XAF().CurrentRequestPage().WhenEvent("InitComplete").To(_))
                     .Select(_ => _.Template.GetPropertyValue("CallbackManager").GetPropertyValue("CallbackControl"))
-                    .SelectMany(_ => Observable.FromEventPattern<EventArgs>(_,"Callback",ImmediateScheduler.Instance)))
+                    .SelectMany(o =>o.WhenEvent("Callback") ))
                 .Select(_ => (parameter:$"{_.EventArgs.GetPropertyValue("Parameter")}",result:_.EventArgs.GetPropertyValue("Result")))
                 .Where(_ => parameter==null||_.parameter.StartsWith($"{parameter}:"));
 
@@ -68,7 +67,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static Uri GetRequestUri(this IXAFAppWebAPI api) 
             => (Uri) (api.Application.GetPlatform() == Platform.Blazor
-                ? new Uri(AppDomain.CurrentDomain.GetAssemblyType("Microsoft.AspNetCore.Http.Extensions.UriHelper").Method("GetDisplayUrl", Flags.StaticPublic).Call(null, api.HttpContext().GetPropertyValue("Request")).ToString())
+                ? new Uri(AppDomain.CurrentDomain.GetAssemblyType("Microsoft.AspNetCore.Http.Extensions.UriHelper").Method("GetDisplayUrl", Flags.StaticPublic).Call(null, api.HttpContext().GetPropertyValue("Request")).ToString()!)
                 : api.HttpContext().GetPropertyValue("Request").GetPropertyValue("Url"));
     }
 
