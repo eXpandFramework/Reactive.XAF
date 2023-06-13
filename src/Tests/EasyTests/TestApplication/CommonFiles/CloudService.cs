@@ -63,9 +63,9 @@ namespace TestApplication{
         private static IObservable<(string creds, TModelOauth modelOAuth)> GenerateCloudViews<TModelOauth>(
             this ApplicationModulesManager manager, string serviceName) where TModelOauth : IModelOAuth 
             => manager.WhenCustomizeTypesInfo()
-                .Do(t => {
+                .Do(e => {
                     foreach (var type in new[]{typeof(Event),typeof(Task)}){
-                        var typeInfo = t.e?.TypesInfo.FindTypeInfo(type);
+                        var typeInfo = e?.TypesInfo.FindTypeInfo(type);
                         typeInfo?.AddAttribute(new CloneModelViewAttribute(CloneViewType.ListView, ViewType.ListView.ViewId(type,serviceName)));
                         typeInfo?.AddAttribute(new CloneModelViewAttribute(CloneViewType.DetailView, ViewType.DetailView.ViewId(type,serviceName)));
                     }
@@ -88,7 +88,7 @@ namespace TestApplication{
                     var modelOAuth = oauthFactory(views.Application.ToReactiveModule<IModelReactiveModuleOffice>().Office);
                     var path = $"{AppDomain.CurrentDomain.ApplicationPath()}\\..\\{parentFolder}{serviceName}{platform}AppCredentials.json";
                     return Observable.If(() => File.Exists(path),Observable.Using(() => File.OpenRead(path),
-                            stream => new StreamReader(stream).ReadToEnd().ReturnObservable()).Select(s => (creds:s,modelOAuth))
+                            stream => new StreamReader(stream).ReadToEnd().Observe()).Select(s => (creds:s,modelOAuth))
                         .Finally(() => modelOAuth.Prompt=OAuthPrompt.Login));
                 });
 

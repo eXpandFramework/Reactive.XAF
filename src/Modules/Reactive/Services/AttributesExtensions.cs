@@ -116,7 +116,7 @@ namespace Xpand.XAF.Modules.Reactive.Services {
                 .ToUnit();
 
         static IObservable<Unit> XpoAttributes(this ApplicationModulesManager manager)
-            => manager.WhenCustomizeTypesInfo().Take(1).Select(t => t.e.TypesInfo)
+            => manager.WhenCustomizeTypesInfo().Take(1).Select(e => e.TypesInfo)
                 .Do(typesInfo => AppDomain.CurrentDomain.GetAssemblyType("Xpand.Extensions.XAF.Xpo.XpoExtensions")
                     ?.Method("CustomizeTypesInfo",Flags.StaticAnyVisibility).Call(null,typesInfo))
                 .ToUnit();
@@ -144,21 +144,21 @@ namespace Xpand.XAF.Modules.Reactive.Services {
                     }).ToObservable(Transform.ImmediateScheduler))
                 .ToUnit()
                 .Merge(manager.WhenCustomizeTypesInfo()
-                    .SelectMany(t => t.e.TypesInfo.Members<ReadOnlyObjectViewAttribute>().ToObservable()
+                    .SelectMany(e => e.TypesInfo.Members<ReadOnlyObjectViewAttribute>().ToObservable()
                         .Where(t1 => t1.info.IsList)
                         .GroupBy(t2 => t2.info.ListElementTypeInfo).Select(tuples => tuples.Key)
                         .Do(info => ((TypeInfo) info).AddAttribute(new ReadOnlyObjectViewAttribute()))
                         .ToUnit()));
 
         
-        static IObservable<Unit> VisibleInAllViewsAttribute(this IObservable<(ApplicationModulesManager manager, CustomizeTypesInfoEventArgs e)> source)
-            => source.ConcatIgnored(t => t.e.TypesInfo.Members<VisibleInAllViewsAttribute>().ToArray().ToObservable()
+        static IObservable<Unit> VisibleInAllViewsAttribute(this IObservable<CustomizeTypesInfoEventArgs> source)
+            => source.ConcatIgnored(e => e.TypesInfo.Members<VisibleInAllViewsAttribute>().ToArray().ToObservable()
                     .SelectMany(t1 => new Attribute[] { new VisibleInDetailViewAttribute(true), new VisibleInListViewAttribute(true), new VisibleInLookupListViewAttribute(true) }
                         .Execute(attribute => t1.info.AddAttribute(attribute))))
                 .ToUnit();
 
-        static IObservable<(ApplicationModulesManager manager, CustomizeTypesInfoEventArgs e)> InvisibleInAllViewsAttribute(this IObservable<(ApplicationModulesManager manager, CustomizeTypesInfoEventArgs e)> source)
-            => source.ConcatIgnored(t => t.e.TypesInfo.Members<InvisibleInAllViewsAttribute>().ToArray().Observe()
+        static IObservable<CustomizeTypesInfoEventArgs> InvisibleInAllViewsAttribute(this IObservable<CustomizeTypesInfoEventArgs> source)
+            => source.ConcatIgnored(e => e.TypesInfo.Members<InvisibleInAllViewsAttribute>().ToArray().Observe()
                 .SelectMany(attributes => attributes.AddVisibleViewAttributes()
                     .Concat(attributes.Distinct(t1 => t1.info).ToArray().AddAppearanceAttributes())));
 
@@ -177,26 +177,27 @@ namespace Xpand.XAF.Modules.Reactive.Services {
                     }
                 }.Execute(attribute => t.info.Owner.AddAttribute(attribute)));
 
-        static IObservable<(ApplicationModulesManager manager, CustomizeTypesInfoEventArgs e)> InvisibleInAllListViewsAttribute(this IObservable<(ApplicationModulesManager manager, CustomizeTypesInfoEventArgs e)> source)
-            => source.ConcatIgnored(t => t.e.TypesInfo.Members<InvisibleInAllListViewsAttribute>().ToArray().ToObservable()
+        static IObservable<CustomizeTypesInfoEventArgs> InvisibleInAllListViewsAttribute(this IObservable<CustomizeTypesInfoEventArgs> source)
+            => source.ConcatIgnored(e => e.TypesInfo.Members<InvisibleInAllListViewsAttribute>().ToArray().ToObservable()
                     .SelectMany(t1 => new Attribute[] {
                         new VisibleInListViewAttribute(false),
                         new VisibleInLookupListViewAttribute(false)
                     }.Execute(attribute => t1.info.AddAttribute(attribute))));
 
-        static IObservable<(ApplicationModulesManager manager, CustomizeTypesInfoEventArgs e)> MapTypeMembersAttributes(this IObservable<(ApplicationModulesManager manager, CustomizeTypesInfoEventArgs e)> source)
-            => source.ConcatIgnored(t => t.e.TypesInfo.PersistentTypes.ToNowObservable()
+        static IObservable<CustomizeTypesInfoEventArgs> MapTypeMembersAttributes(this IObservable<CustomizeTypesInfoEventArgs> source)
+            => source.ConcatIgnored(e => e.TypesInfo.PersistentTypes.ToNowObservable()
                 .SelectMany(info => info.FindAttributes<MapTypeMembersAttribute>()
                 .SelectMany(attribute => attribute.Source.ToTypeInfo().OwnMembers)
                 .WhereDefault(memberInfo => info.FindMember(memberInfo.Name))
                 .Execute(memberInfo => info.CreateMember(memberInfo.Name, memberInfo.MemberType)).IgnoreElements()
                 .ToArray().Finally(() => XafTypesInfo.Instance.RefreshInfo(info))
                 .ToNowObservable()));
-        static IObservable<(ApplicationModulesManager manager, CustomizeTypesInfoEventArgs e)> CustomAttributes(this IObservable<(ApplicationModulesManager manager, CustomizeTypesInfoEventArgs e)> source) 
-            => source.ConcatIgnored(t => t.e.TypesInfo.PersistentTypes
+        
+        static IObservable<CustomizeTypesInfoEventArgs> CustomAttributes(this IObservable<CustomizeTypesInfoEventArgs> source) 
+            => source.ConcatIgnored(e => e.TypesInfo.PersistentTypes
                 .SelectMany(info => info.Members.SelectMany(memberInfo => memberInfo.FindAttributes<Attribute>()
                     .OfType<ICustomAttribute>().ToArray().Select(memberInfo.AddCustomAttribute))
-                ).Concat(t.e.TypesInfo.PersistentTypes.SelectMany(typeInfo => typeInfo
+                ).Concat(e.TypesInfo.PersistentTypes.SelectMany(typeInfo => typeInfo
                     .FindAttributes<Attribute>().OfType<ICustomAttribute>().ToArray().Select(typeInfo.AddCustomAttribute)))
                 .ToObservable(Scheduler.Immediate)
                 );

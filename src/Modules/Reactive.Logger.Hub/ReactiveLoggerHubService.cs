@@ -32,9 +32,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
 			        TraceEventHub.Init();
 		        }
 		        else {
-			        Observable.FromEventPattern<EventHandler, EventArgs>(h => GrpcEnvironment.ShuttingDown += h,
-					        h => GrpcEnvironment.ShuttingDown -= h)
-				        .Select(pattern => pattern).IgnoreElements().ToUnit().Subscribe();
+			        typeof(GrpcEnvironment).WhenEvent(nameof(GrpcEnvironment.ShuttingDown)).IgnoreElements().ToUnit().Subscribe();
 		        }
 		        var startServer = application.StartServer().Publish().RefCount();
 		        

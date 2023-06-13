@@ -21,6 +21,7 @@ using DevExpress.ExpressApp.TreeListEditors.Win;
 using DevExpress.ExpressApp.Win.Editors;
 using DevExpress.ExpressApp.Win.Layout;
 using DevExpress.Persistent.BaseImpl;
+using DevExpress.Utils.Helpers;
 using DevExpress.XtraCharts;
 using DevExpress.XtraEditors;
 using DevExpress.XtraEditors.Repository;
@@ -182,8 +183,10 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             var platform = GetPlatform(platformName);
             controlTypes.ToObservable().Do(type => Assembly.LoadFile(type.Assembly.Location)).Subscribe();
             InitializeMapperService(platform);
+            
 
             using var module = predefinedMaps.Extend();
+            
             var moduleBases = extraModules.Select(type => {
                     var instance = type.CreateInstance();
                     return instance;

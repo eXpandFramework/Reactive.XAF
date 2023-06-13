@@ -41,7 +41,7 @@ namespace Xpand.XAF.Modules.CloneMemberValue{
 
         public static IObservable<(object previous, object current)> NewObjectPairs(this ListEditor listEditor) 
             => listEditor.WhenNewObjectAdding()
-                .Select(_ => _.e.AddedObject).Cast<object>()
+                .Select(e => e.AddedObject).Cast<object>()
                 .CombineWithPrevious().Where(_ => _.previous != null);
 
         public static IObservable<(DetailView previous, DetailView current)> WhenCloneMemberValueDetailViewPairs(this XafApplication application) 

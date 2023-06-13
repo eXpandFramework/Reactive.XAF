@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Linq;
-using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reflection;
@@ -12,6 +11,7 @@ using DevExpress.ExpressApp.Core;
 using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using HarmonyLib;
+using Xpand.Extensions.Reactive.Transform;
 
 
 namespace Xpand.XAF.Modules.Reactive.Services.Actions{
@@ -94,7 +94,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
             }
             var action =  (TAction)Activator.CreateInstance(typeof(TAction),args);
             configure?.Invoke(action);
-            if (action.Controller is ViewController viewController){
+            if (action?.Controller is ViewController viewController){
                 viewController.TargetObjectType=action.TargetObjectType;
                 viewController.TargetViewType=action.TargetViewType;
                 viewController.TargetViewId=action.TargetViewId;
@@ -169,9 +169,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
         }
 
         public static IObservable<ActionBase> WhenActionAdded(this ActionList actionList)
-            => Observable.FromEventPattern<EventHandler<ActionManipulationEventArgs>, ActionManipulationEventArgs>(
-                h => actionList.ActionAdded += h, h => actionList.ActionAdded -= h, ImmediateScheduler.Instance)
-                .Select(p => p.EventArgs.Action);
+            => actionList.WhenEvent<ActionManipulationEventArgs>(nameof(ActionList.ActionAdded)).Select(e => e.Action);
         
         private static Type NewControllerType<T>(string id) where T:Controller{
             var baseController = GetBaseController<T>();

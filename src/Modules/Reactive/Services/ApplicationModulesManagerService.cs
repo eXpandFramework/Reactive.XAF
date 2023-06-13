@@ -26,7 +26,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         
         public static IObservable<(IMemberInfo memberInfo, T attribute)> AddTypesInfoAttribute<T>(this ApplicationModulesManager manager) where T : Attribute 
             => manager.WhenCustomizeTypesInfo()
-                .SelectMany(t => t.e.TypesInfo.PersistentTypes.ToObservable(Transform.ImmediateScheduler)
+                .SelectMany(e => e.TypesInfo.PersistentTypes.ToObservable(Transform.ImmediateScheduler)
                     .SelectMany(info => info.Members.ToObservable(Transform.ImmediateScheduler)
                         .Where(memberInfo => memberInfo.MemberType.RealType().IsNumeric(true))
                         .SelectMany(memberInfo => memberInfo.FindAttributes<T>().ToArray().ToObservable(Transform.ImmediateScheduler)
@@ -46,19 +46,18 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 	            .SelectMany(application => Observable.Defer(() => retriedExecution(application)).Retry(application));
 		
 
-	    public static IObservable<(ApplicationModulesManager manager, CustomizeTypesInfoEventArgs e)> WhenCustomizeTypesInfo(this IObservable<ApplicationModulesManager> source) 
+	    public static IObservable<CustomizeTypesInfoEventArgs> WhenCustomizeTypesInfo(this IObservable<ApplicationModulesManager> source) 
             => source.SelectMany(manager => manager.WhenCustomizeTypesInfo());
 
 	    public static IObservable<ITypesInfo> ToTypesInfo(
 		    this IObservable<(ApplicationModulesManager manager, CustomizeTypesInfoEventArgs e)> source)
 		    => source.Select(t => t.e.TypesInfo);
-	    public static IObservable<(ApplicationModulesManager manager, CustomizeTypesInfoEventArgs e)> WhenCustomizeTypesInfo(this ApplicationModulesManager manager) 
-            => Observable.FromEventPattern<EventHandler<CustomizeTypesInfoEventArgs>, CustomizeTypesInfoEventArgs>(
-			        h => manager.CustomizeTypesInfo += h, h => manager.CustomizeTypesInfo += h, ImmediateScheduler.Instance)
-		        .TransformPattern<CustomizeTypesInfoEventArgs,ApplicationModulesManager>();
 	    
-	    public static IObservable<ITypeInfo> DomainComponents(this IObservable<(ApplicationModulesManager manager, CustomizeTypesInfoEventArgs e)> source) 
-            => source.SelectMany(t => t.e.TypesInfo.PersistentTypes);
+	    public static IObservable<CustomizeTypesInfoEventArgs> WhenCustomizeTypesInfo(this ApplicationModulesManager manager) 
+            => manager.WhenEvent<CustomizeTypesInfoEventArgs>(nameof(ApplicationModulesManager.CustomizeTypesInfo));
+	    
+	    public static IObservable<ITypeInfo> DomainComponents(this IObservable<CustomizeTypesInfoEventArgs> source) 
+            => source.SelectMany(e => e.TypesInfo.PersistentTypes);
 	    
 	    public static IObservable<ModelInterfaceExtenders> WhenExtendingModel(this IObservable<ApplicationModulesManager> source) 
             => source.SelectMany(manager => manager.WhenExtendingModel());

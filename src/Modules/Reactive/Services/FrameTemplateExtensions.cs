@@ -28,8 +28,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => application.WhenFrameCreated(templateContext==default?TemplateContext.ApplicationWindow:templateContext)
                 .SelectMany(frame => frame.WhenTemplateChanged()).Cast<Window>();
 
-		public static IObservable<IWindowsForm> When(this IObservable<IWindowsForm> source, string eventName) 
-			=> source.SelectMany(form => Observable.FromEventPattern(form.Template,eventName).To(form));
+		public static IObservable<IWindowsForm> When(this IObservable<IWindowsForm> source, params string[] eventNames) 
+			=> source.SelectMany(form => eventNames.ToNowObservable().SelectMany(eventName => form.Template.WhenEvent(eventName).To(form)));
 		
 	}
 }

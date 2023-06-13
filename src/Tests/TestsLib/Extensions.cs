@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Reactive.Concurrency;
-using System.Reactive.Linq;
 using System.Windows.Forms;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Win;
@@ -9,15 +7,13 @@ using Fasterflect;
 using HarmonyLib;
 using Moq;
 using Moq.Protected;
+using Xpand.Extensions.Reactive.Transform;
 using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.TestsLib {
     public static class Extensions {
         public static IObservable<ConfirmationDialogClosedEventArgs> WhenConfirmationDialogClosed(this Messaging messaging)
-            => Observable
-                .FromEventPattern<EventHandler<ConfirmationDialogClosedEventArgs>, ConfirmationDialogClosedEventArgs>(
-                    h => Messaging.ConfirmationDialogClosed += h, h => Messaging.ConfirmationDialogClosed -= h,ImmediateScheduler.Instance)
-                .Select(p => p.EventArgs);
+            => typeof(Messaging).WhenEvent<ConfirmationDialogClosedEventArgs>(nameof(Messaging.ConfirmationDialogClosed));
 
         public static bool ShowDialog() => false;
 

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
-using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Editors;
@@ -16,11 +15,7 @@ using Xpand.Extensions.XAF.TypesInfoExtensions;
 namespace Xpand.XAF.Modules.Reactive.Services{
     public static class PropertyEditorExtensions{
         public static IObservable<ListPropertyEditor> FrameChanged(this IEnumerable<ListPropertyEditor> source) 
-            => source.ToObservable()
-                .SelectMany(item => Observable
-                    .FromEventPattern<EventHandler<EventArgs>, EventArgs>(h => item.FrameChanged += h,
-                        h => item.FrameChanged -= h,ImmediateScheduler.Instance)
-                    .Select(_ => item));
+            => source.ToObservable().SelectMany(item => item.WhenEvent(nameof(ListPropertyEditor.FrameChanged)).Select(_ => item));
 
         internal static IObservable<Unit> SetupPropertyEditorParentView(this XafApplication application){
             var detailViewEditors = application.WhenDetailViewCreated().ToDetailView()
@@ -47,9 +42,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         }
             
         public static IObservable<T> WhenVisibilityChanged<T>(this T editor) where T:PropertyEditor 
-            => Observable.FromEventPattern<EventHandler, EventArgs>(h => editor.VisibilityChanged += h,
-                    h => editor.VisibilityChanged -= h, Transform.ImmediateScheduler)
-                .Select(pattern => pattern.Sender).Cast<T>();
+            => editor.WhenEvent(nameof(PropertyEditor.VisibilityChanged)).To(editor);
 
         public static IObservable<T> WhenVisibilityChanged<T>(this IObservable<T> source) where T:PropertyEditor 
             => source.SelectMany(editor => editor.WhenVisibilityChanged());

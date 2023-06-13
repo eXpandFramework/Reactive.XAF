@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using DevExpress.ExpressApp;
@@ -17,37 +15,24 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static IObservable<ProxyCollection> WhenProxyCollectionChanged(this CollectionSourceBase collectionSourceBase) 
             => collectionSourceBase.Collection is not ProxyCollection proxyCollection ? Observable.Empty<ProxyCollection>()
-                : Observable.FromEventPattern<ListChangedEventHandler, EventArgs>(h => proxyCollection.ListChanged += h,
-                        h => proxyCollection.ListChanged -= h, ImmediateScheduler.Instance)
-                    .Select(_ => _.Sender).Cast<ProxyCollection>().TraceRX(_ => collectionSourceBase.ObjectTypeInfo.Type.FullName);
+                : proxyCollection.WhenEvent(nameof(ProxyCollection.ListChanged))
+                    .Select(pattern => pattern.Sender).Cast<ProxyCollection>().TraceRX(_ => collectionSourceBase.ObjectTypeInfo.Type.FullName);
 
-        public static IObservable<T> WhenCollectionReloaded<T>(this T collectionSourceBase) where T:CollectionSourceBase 
-            => Observable.FromEventPattern<EventHandler, EventArgs>(
-                    h => collectionSourceBase.CollectionReloaded += h, h => collectionSourceBase.CollectionReloaded -= h,ImmediateScheduler.Instance)
-                .Select(_ => _.Sender).Cast<T>()
+        public static IObservable<T> WhenCollectionReloaded<T>(this T collection) where T:CollectionSourceBase 
+            => collection.WhenEvent(nameof(CollectionSourceBase.CollectionReloaded)).Select(_ => _.Sender).Cast<T>()
                 .TraceRX(c => c.ObjectTypeInfo.Type.FullName);
 
         public static IObservable<T> WhenCollectionChanged<T>(this T collectionSourceBase) where T:CollectionSourceBase 
-            => Observable.FromEventPattern<EventHandler, EventArgs>(
-                    h => collectionSourceBase.CollectionChanged += h, h => collectionSourceBase.CollectionChanged -= h,ImmediateScheduler.Instance)
-                .Select(_ => _.Sender).Cast<T>()
-                .TraceRX();
+            => collectionSourceBase.WhenEvent(nameof(CollectionSourceBase.CollectionChanged)).To(collectionSourceBase).TraceRX();
         
-        public static IObservable<(T sender, FetchObjectsEventArgs e)> WhenFetchObjects<T>(this T collection) where T:DynamicCollection
-            => Observable.FromEventPattern<EventHandler<FetchObjectsEventArgs>, FetchObjectsEventArgs>(
-                    h => collection.FetchObjects += h, h => collection.FetchObjects -= h,ImmediateScheduler.Instance)
-                .TransformPattern<FetchObjectsEventArgs,T>();
+        public static IObservable<FetchObjectsEventArgs> WhenFetchObjects<T>(this T collection) where T:DynamicCollection
+            => collection.WhenEvent<FetchObjectsEventArgs>(nameof(DynamicCollection.FetchObjects));
         
         public static IObservable<DynamicCollection> WhenLoaded(this DynamicCollection collection) 
-            => Observable.FromEventPattern<EventHandler, EventArgs>(
-                    h => collection.Loaded += h, h => collection.Loaded -= h,ImmediateScheduler.Instance)
-                .Select(_ => collection);
+            => collection.WhenEvent(nameof(DynamicCollection.Loaded)).To(collection);
 
         public static IObservable<T> WhenDisposed<T>(this T collectionSourceBase) where T:CollectionSourceBase 
-            => Observable.FromEventPattern<EventHandler, EventArgs>(
-                    h => collectionSourceBase.Disposed += h, h => collectionSourceBase.Disposed -= h,ImmediateScheduler.Instance)
-                .Select(_ => _.Sender).Cast<T>()
-                .TraceRX();
+            => collectionSourceBase.WhenEvent(nameof(CollectionSourceBase.Disposed)).To(collectionSourceBase);
 
         public static NonPersistentPropertyCollectionSource NewSource(this CreateCustomPropertyCollectionSourceEventArgs e) 
             => new(e.ObjectSpace, e.MasterObjectType, e.MasterObject, e.MemberInfo, e.DataAccessMode,e.Mode);

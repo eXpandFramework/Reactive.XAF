@@ -30,8 +30,8 @@ namespace Xpand.XAF.Modules.Reactive.Rest.Extensions {
     internal static class RestPropertyExtensions {
         public static IObservable<ApplicationModulesManager> RestPropertyTypes(this IObservable<ApplicationModulesManager> source)
             => source.MergeIgnored(manager => manager.WhenCustomizeTypesInfo()
-                .SelectMany(t => {
-                    var concatIgnored = t.e.TypesInfo.PersistentTypes.ToObservable(Scheduler.Immediate)
+                .SelectMany(e => {
+                    var concatIgnored = e.TypesInfo.PersistentTypes.ToObservable(Scheduler.Immediate)
                         .MarkListMembers()
                         .MarkReactiveCollectionMembers()
                         .MarkNonBrowsableMembers()
@@ -168,21 +168,17 @@ namespace Xpand.XAF.Modules.Reactive.Rest.Extensions {
                 .SelectMany(t => {
                     var dynamicCollection = ((DynamicCollection) t.info.GetValue(o));
                     return dynamicCollection.WhenFetchObjects()
-                        
-                        
-                        .SelectMany(t2 => {
+                        .SelectMany(_ => {
                             var realType = t.info.MemberType.RealType();
                             return t.attribute.Send(realType.CreateInstance(), bearer, t.attribute.RequestUrl(o),
-                                        realType.DeserializeResponse(t2.sender.ObjectSpace))
-
+                                        DeserializeResponse())
                                     .BufferUntilCompleted()
-
-                                    .Do(objects => t2.sender.AddObjects(objects, true))
+                                    .Do(objects => dynamicCollection.AddObjects(objects, true))
                                 ;
                         });
                 }));
 
-        private static Func<HttpResponseMessage, IObservable<object>> DeserializeResponse(this Type realType, IObjectSpace objectSpace) 
+        private static Func<HttpResponseMessage, IObservable<object>> DeserializeResponse() 
             => responseMessage => responseMessage.DeserializeJson<object>().ToObservable();
     }
 }

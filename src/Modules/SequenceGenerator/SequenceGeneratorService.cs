@@ -169,12 +169,12 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
                 .Where(view => view is ObjectView objectView && typeof(ISequenceStorage).IsAssignableFrom(objectView.ObjectTypeInfo.Type))
                 .Cast<ObjectView>()
                 .SelectMany(view => view.ObjectSpace.WhenCommiting()
-                    .SelectMany(t => application.Configure( view, t)))
+                    .SelectMany(e => application.Configure( view, e)))
                 .Select(_ => new object()).IgnoreElements();
 
-        private static IObservable<object> Configure(this XafApplication application, ObjectView view, (IObjectSpace objectSpace, CancelEventArgs e) t) 
+        private static IObservable<object> Configure(this XafApplication application, ObjectView view, CancelEventArgs e) 
             => view.ObjectSpace.ModifiedObjects.Cast<SequenceStorage>().Where(storage => !storage.ObjectSpace.IsObjectToDelete(storage)).ToNowObservable()
-                .SelectMany(storage => storage.Configure().HandleErrors(application, t.e)).ToUnit()
+                .SelectMany(storage => storage.Configure().HandleErrors(application, e)).ToUnit()
                 .To(new object());
 
         static IObservable<SequenceStorage> Configure(this SequenceStorage sequenceStorage){

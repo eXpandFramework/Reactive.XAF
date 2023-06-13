@@ -149,14 +149,14 @@ namespace Xpand.Extensions.Office.Cloud{
 
         private static IObservable<Unit> ConfigureStyle(this IObservable<SimpleAction> source) 
             => source.WhenCustomizeControl()
-                .Select(_ => {
-                    var application = _.sender.Application;
+                .Select(t => {
+                    var application = t.action.Application;
                     if (application.GetPlatform() == Platform.Web) {
-                        if (_.sender.Id.StartsWith("Connect")) {
-                            _.sender.Model.SetValue("IsPostBackRequired", true);
+                        if (t.action.Id.StartsWith("Connect")) {
+                            t.action.Model.SetValue("IsPostBackRequired", true);
                         }
 
-                        var menuItem = _.e.Control.GetPropertyValue("MenuItem");
+                        var menuItem = t.e.Control.GetPropertyValue("MenuItem");
                         var itemStyle = menuItem.GetPropertyValue("ItemStyle");
                         itemStyle.GetPropertyValue("Font").SetPropertyValue("Name", "Roboto Medium");
                         itemStyle.GetPropertyValue("SelectedStyle").SetPropertyValue("BackColor", Color.White);
@@ -165,7 +165,7 @@ namespace Xpand.Extensions.Office.Cloud{
                         menuItem.CallMethod("ForceMenuRendering");
                     }
 
-                    return _.sender;
+                    return t.action;
                 })
                 .ToUnit();
 

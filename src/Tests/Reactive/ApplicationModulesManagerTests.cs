@@ -17,7 +17,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
 		public void WhenCustomizeTypeInfo(){
 			using (var application = NewXafApplication()){
 				application.WhenApplicationModulesManager().WhenCustomizeTypesInfo()
-					.Do(_ => (_.e.TypesInfo.FindTypeInfo(typeof(R))).CreateMember(nameof(WhenCustomizeTypeInfo),
+					.Do(_ => (_.TypesInfo.FindTypeInfo(typeof(R))).CreateMember(nameof(WhenCustomizeTypeInfo),
 						typeof(string))).Test();
 
 				DefaultReactiveModule(application);
@@ -42,9 +42,6 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
 
 		}
 
-		protected override void ResetXAF() {
-			base.ResetXAF();
-		}
 
 		[Test][XpandTest()]
 		public void WhenGeneratingModelNodes_FromType(){

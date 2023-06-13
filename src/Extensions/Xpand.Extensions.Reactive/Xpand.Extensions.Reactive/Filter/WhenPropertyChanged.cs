@@ -13,11 +13,8 @@ namespace Xpand.Extensions.Reactive.Filter{
             => o.WhenPropertyChanged().Where(_ =>memberSelector==null|| _.e.PropertyName == memberSelector.MemberExpressionName());
 
         public static IObservable<(TObject sender, PropertyChangedEventArgs e)> WhenPropertyChanged<TObject>(this TObject o,params string[] names) where TObject : INotifyPropertyChanged 
-            => Observable.FromEventPattern<PropertyChangedEventHandler, PropertyChangedEventArgs>(
-                    h => o.PropertyChanged += h,
-                    h => o.PropertyChanged -= h, ImmediateScheduler.Instance)
-                .TransformPattern<PropertyChangedEventArgs, TObject>()
-                .Where(t =>!names.Any()|| names.Any(s => s==t.e.PropertyName));
+            => o.WhenEvent<PropertyChangedEventArgs>(nameof(INotifyPropertyChanged.PropertyChanged))
+                .Where(eventArgs =>!names.Any()|| names.Any(s => s==eventArgs.PropertyName)).InversePair(o);
 
         public static IObservable<(TObject sender, PropertyChangedEventArgs e)> WhenPropertyChanged<TObject>(this IObservable<TObject> source,
             Expression<Func<TObject, object>> memberSelector, IScheduler scheduler = null) where TObject : INotifyPropertyChanged 

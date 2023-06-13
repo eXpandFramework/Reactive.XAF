@@ -70,18 +70,18 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
 
         private static IObservable<(IModelModelMap modelMap, object control, ObjectView view)> BindLayoutGroupControl(this XafApplication application) 
             => application.WhenDetailViewCreated().ToDetailView()
-                .SelectMany(_ => _.LayoutManager.WhenCustomizeAppearence().Select(pattern => (view: _, pattern.EventArgs)))
-                .WhenNotDefault(t => t.EventArgs.Item)
-                .Where(_ => {
-                    var item = _.EventArgs.Item.GetPropertyValue("Item");
+                .SelectMany(_ => _.LayoutManager.WhenCustomizeAppearance().Select(e => (view: _, e)))
+                .WhenNotDefault(t => t.e.Item)
+                .Where(t => {
+                    var item = t.e.Item.GetPropertyValue("Item");
                     if (item.GetType().Name != "XafLayoutControlGroup") return false;
                     var model = (IModelNode) item.GetPropertyValue("Model");
                     var showCaption = model.GetValue<bool?>("ShowCaption");
                     return showCaption != null && (bool) showCaption;
                 })
-                .SelectMany(_ => {
-                    var control = _.EventArgs.Item.GetPropertyValue("Item");
-                    return ((IModelNode) control.GetPropertyValue("Model")).ToBindableData(_.view)
+                .SelectMany(t => {
+                    var control = t.e.Item.GetPropertyValue("Item");
+                    return ((IModelNode) control.GetPropertyValue("Model")).ToBindableData(t.view)
                         .Select(tuple => BindData(tuple,control)).Where(tuple => tuple.modelMap!=null);
                 })
                 .TraceModelMapper(_ => $"{_.control.GetType().Name}, {_.view.Id}, {_.modelMap.Id()}")

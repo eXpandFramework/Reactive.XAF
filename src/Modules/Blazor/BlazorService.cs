@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Linq;
 using System.Reactive;
-using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Blazor;
@@ -60,7 +59,6 @@ namespace Xpand.XAF.Modules.Blazor {
         }
 
         public static IObservable<FrameTemplate> WhenViewChanged(this FrameTemplate frameTemplate) 
-            => Observable.FromEventPattern<EventHandler,EventArgs>(h => frameTemplate.ViewChanged+=h,h => frameTemplate.ViewChanged-=h,Scheduler.Immediate)
-                .TransformPattern<FrameTemplate>();
+            => frameTemplate.WhenEvent(nameof(FrameTemplate.ViewChanged)).To(frameTemplate);
     }
 }

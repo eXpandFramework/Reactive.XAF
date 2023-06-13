@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp.Editors;
 using Fasterflect;
@@ -19,22 +18,13 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
             }).Finally(() => editor.GetPropertyValue("GridView")?.CallMethod("EndDataUpdate"));
 
-        public static IObservable<(ListEditor sender, EventArgs e)> WhenModelApplied(this ListEditor editor) 
-            => Observable.FromEventPattern<EventHandler<EventArgs>, EventArgs>(
-                    handler => editor.ModelApplied += handler,
-                    handler => editor.ModelApplied -= handler,ImmediateScheduler.Instance)
-                .TransformPattern<EventArgs, ListEditor>();
+        public static IObservable<ListEditor> WhenModelApplied(this ListEditor editor) 
+            => editor.WhenEvent(nameof(ListEditor.ModelApplied)).To(editor);
 
-        public static IObservable<(ListEditor editor, NewObjectAddingEventArgs e)> WhenNewObjectAdding(this ListEditor editor) 
-            => Observable.FromEventPattern<EventHandler<NewObjectAddingEventArgs>, NewObjectAddingEventArgs>(
-                    handler => editor.NewObjectAdding += handler,
-                    handler => editor.NewObjectAdding -= handler,ImmediateScheduler.Instance)
-                .TransformPattern<NewObjectAddingEventArgs, ListEditor>();
+        public static IObservable<NewObjectAddingEventArgs> WhenNewObjectAdding(this ListEditor editor) 
+            => editor.WhenEvent<NewObjectAddingEventArgs>(nameof(editor.NewObjectAdding));
 
-        public static IObservable<(ListEditor editor, EventArgs e)> WhenProcessSelectedItem(this ListEditor editor) 
-            => Observable.FromEventPattern<EventHandler, EventArgs>(
-                    handler => editor.ProcessSelectedItem += handler,
-                    handler => editor.ProcessSelectedItem -= handler,ImmediateScheduler.Instance)
-                .TransformPattern<EventArgs, ListEditor>();
+        public static IObservable<ListEditor> WhenProcessSelectedItem(this ListEditor editor) 
+            => editor.WhenEvent(nameof(ListEditor.ProcessSelectedItem)).To(editor);
     }
 }

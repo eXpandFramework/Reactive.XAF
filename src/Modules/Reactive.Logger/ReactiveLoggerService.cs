@@ -133,7 +133,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
 
 
         private static IObservable<Unit> RegisterListener(this XafApplication application, ReactiveTraceListener reactiveTraceListener) 
-            => application.Modules.WhenListChanged().SelectMany(_ => _.list.ToTraceSource().ToObservable(Transform.ImmediateScheduler))
+            => application.Modules.WhenListChanged().SelectMany(_ => application.Modules.ToTraceSource().ToObservable(Transform.ImmediateScheduler))
                 .Do(_ => {
                     if (!_.traceSource.Listeners.Contains(reactiveTraceListener)){
                         _.traceSource.Listeners.Add(reactiveTraceListener);

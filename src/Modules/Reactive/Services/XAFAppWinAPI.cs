@@ -35,7 +35,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                     .SelectMany(template => template.WhenWindowsForm().When("VisibleChanged")).To(window));
 
         public static IObservable<(HandledEventArgs handledEventArgs, Exception exception, Exception originalException)> WhenCustomHandleException(this IObservable<IXAFAppWinAPI> source) 
-            => source.SelectMany(api => Observable.FromEventPattern(api.Application, "CustomHandleException")
+            => source.SelectMany(api => api.Application.WhenEvent("CustomHandleException")
                 .Select(pattern => (((HandledEventArgs) pattern.EventArgs), exception:((Exception) pattern.EventArgs.GetPropertyValue("Exception")
                     ),originalException:((Exception) pattern.EventArgs.GetPropertyValue("Exception")))));
 

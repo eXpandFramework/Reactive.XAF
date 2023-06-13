@@ -342,7 +342,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
 			
             using var application = NewApplication();
             application.WhenApplicationModulesManager().WhenCustomizeTypesInfo()
-                .Do(t => t.e?.TypesInfo.FindTypeInfo(typeof(TestObject)).FindMember(nameof(TestObject.Title))
+                .Do(t => t.TypesInfo.FindTypeInfo(typeof(TestObject)).FindMember(nameof(TestObject.Title))
                     .AddAttribute(new RuleRequiredFieldAttribute())).Test();
             SequenceGeneratorModule( application);
             SetSequences(application);

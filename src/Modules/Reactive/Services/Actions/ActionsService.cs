@@ -229,9 +229,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
             => action.WhenEvent<ParametrizedActionExecuteEventArgs>(nameof(ParametrizedAction.Execute)).TakeUntilDisposed(action);
 
         public static IObservable<SingleChoiceActionExecuteEventArgs> WhenExecute(this SingleChoiceAction singleChoiceAction) 
-            => Observable.FromEventPattern<SingleChoiceActionExecuteEventHandler, SingleChoiceActionExecuteEventArgs>(
-			        h => singleChoiceAction.Execute += h, h => singleChoiceAction.Execute -= h, ImmediateScheduler.Instance)
-		        .Select(pattern => pattern.EventArgs);
+            => singleChoiceAction.WhenEvent<SingleChoiceActionExecuteEventArgs>(nameof(SingleChoiceAction.Execute));
 
         public static IObservable<SingleChoiceActionExecuteEventArgs> WhenExecute(this IObservable<SingleChoiceAction> source) 
             => source.SelectMany(action => action.WhenExecute());
@@ -362,8 +360,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
             =>source.SelectMany(action => action.WhenSelectedItemChanged());
 
         public static IObservable<SingleChoiceAction> WhenSelectedItemChanged(this SingleChoiceAction action) 
-            => Observable.FromEventPattern<EventHandler,EventArgs>(h => action.SelectedItemChanged+=h,h => action.SelectedItemChanged-=h,ImmediateScheduler.Instance)
-		        .Select(_ => _.Sender).Cast<SingleChoiceAction>();
+            => action.WhenEvent(nameof(SingleChoiceAction.SelectedItemChanged)).To(action);
 
         public static TAction As<TAction>(this ActionBase action) where TAction:ActionBase 
             => ((TAction) action);
@@ -421,10 +418,8 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
             => source.SelectMany(a => a.WhenChanged(actionChangedType));
 
         public static IObservable<TAction> WhenChanged<TAction>(this TAction action, ActionChangedType? actionChangedType = null) where TAction : ActionBase 
-            => Observable.FromEventPattern<EventHandler<ActionChangedEventArgs>, ActionChangedEventArgs>(
-			        h => action.Changed += h, h => action.Changed -= h)
-		        .Where(pattern =>actionChangedType==null|| pattern.EventArgs.ChangedPropertyType == actionChangedType)
-		        .Select(pattern => pattern.Sender).Cast<TAction>();
+            => action.WhenEvent<ActionChangedEventArgs>(nameof(ActionBase.Changed))
+		        .Where(eventArgs =>actionChangedType==null|| eventArgs.ChangedPropertyType == actionChangedType).To(action);
 
         public static IObservable<TAction> WhenEnable<TAction>(this IObservable<TAction> source)where TAction : ActionBase 
             => source.Where(a => a.Enabled);
@@ -442,9 +437,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
 	        .Select(_ => _.action);
 
         public static IObservable<Unit> Disposing<TAction>(this IObservable<TAction> source) where TAction : ActionBase 
-            => source .SelectMany(item => Observable.FromEventPattern<EventHandler, EventArgs>(h => item.Disposing += h,
-			        h => item.Disposing -= h, ImmediateScheduler.Instance)
-		        .Select(pattern => pattern).ToUnit());
+            => source .SelectMany(item => item.WhenEvent(nameof(ActionBase.Disposing)).ToUnit());
 
         public static IObservable<TAction> ActivateInUserDetails<TAction>(this IObservable<TAction> registerAction) where TAction:ActionBase 
 	        => registerAction.WhenControllerActivated()
@@ -459,14 +452,11 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
                 .WhenNotDefault(a => a.Active[nameof(ActivateInUserDetails)])
 		        .TraceRX(action => $"{action.Id}, {SecuritySystem.CurrentUserName}");
 
-        public static IObservable<(TAction sender, CustomizeControlEventArgs e)> WhenCustomizeControl<TAction>(this IObservable<TAction> source) where TAction : ActionBase 
-            => source.SelectMany(a => a.WhenCustomizeControl());
+        public static IObservable<(TAction action, CustomizeControlEventArgs e)> WhenCustomizeControl<TAction>(this IObservable<TAction> source) where TAction : ActionBase 
+            => source.SelectMany(a => a.WhenCustomizeControl().InversePair(a));
 
-        public static IObservable<(TAction sender, CustomizeControlEventArgs e)> WhenCustomizeControl<TAction>(this TAction action) where TAction:ActionBase 
-            => Observable.FromEventPattern<EventHandler<CustomizeControlEventArgs>, CustomizeControlEventArgs>(
-			        h => action.CustomizeControl += h, h => action.CustomizeControl -= h, ImmediateScheduler.Instance)
-		        .TransformPattern<CustomizeControlEventArgs, TAction>()
-		        .TraceRX();
+        public static IObservable<CustomizeControlEventArgs> WhenCustomizeControl<TAction>(this TAction action) where TAction:ActionBase 
+            => action.WhenEvent<CustomizeControlEventArgs>(nameof(ActionBase.CustomizeControl));
         
         public static IObservable<T2> WhenUpdating<T2>(this ActionBase action,Func<UpdateActionEventArgs,IObservable<T2>> selector) 
             => action.Controller.WhenActivated(true)

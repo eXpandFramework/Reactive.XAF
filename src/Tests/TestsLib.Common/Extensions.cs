@@ -56,10 +56,9 @@ namespace Xpand.TestsLib.Common{
     
     public static class Extensions{
         public static IObservable<Exception> WhenException(this TestTracing tracing) 
-            => Observable.FromEventPattern<EventHandler<CreateCustomTracerEventArgs>, CreateCustomTracerEventArgs>(
-                    h => Tracing.CreateCustomTracer += h, h => Tracing.CreateCustomTracer -= h, ImmediateScheduler.Instance).FirstAsync()
-                .SelectMany(_ => {
-                    _.EventArgs.Tracer=tracing;
+            => typeof(Tracing).WhenEvent<CreateCustomTracerEventArgs>(nameof(Tracing.CreateCustomTracer)).FirstAsync()
+                .SelectMany(eventArgs => {
+                    eventArgs.Tracer=tracing;
                     return tracing.Exceptions;
                 });
 

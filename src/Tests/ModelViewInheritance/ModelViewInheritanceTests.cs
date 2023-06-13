@@ -76,7 +76,7 @@ namespace Xpand.XAF.Modules.ModelViewInheritance.Tests{
                 application.Modules.Add(new ReactiveModule());
                 application.WhenApplicationModulesManager().WhenCustomizeTypesInfo()
                     .FirstAsync(_=> {
-                        _.e?.TypesInfo.FindTypeInfo(typeof(AMvi))
+                        _.TypesInfo.FindTypeInfo(typeof(AMvi))
                             .AddAttribute(new ModelMergedDifferencesAttribute($"{nameof(AMvi)}_{viewType}",
                                 $"{nameof(ABaseMvi)}_{viewType}"));
                         return true;

@@ -11,8 +11,8 @@ namespace TestApplication.Module.ViewWizard {
     public static class ViewWizardService{
         public static IObservable<Unit> ConnectViewWizardService(this ApplicationModulesManager manager) 
             => manager.WhenCustomizeTypesInfo()
-                .Do(_ => {
-                    var typeInfo = _.e.TypesInfo.FindTypeInfo(typeof(Order));
+                .Do(e => {
+                    var typeInfo = e.TypesInfo.FindTypeInfo(typeof(Order));
                     typeInfo.AddAttribute(new CloneModelViewAttribute(CloneViewType.DetailView, "OrderPage1_DetailVIew"));
                 }).ToUnit();
     }

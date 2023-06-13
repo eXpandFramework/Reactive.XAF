@@ -3,7 +3,6 @@ using System.ComponentModel;
 using System.Configuration;
 using System.Net;
 using System.Reactive;
-using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using DevExpress.ExpressApp;
@@ -70,7 +69,7 @@ namespace Xpand.XAF.Modules.Reactive.Extensions{
                 var result=Observable.Empty<T>();
                 if (ConfigurationManager.AppSettings["ExceptionMailer"]!=null){
                     result = Observable.Using(() => ConfigurationManager.AppSettings.NewSmtpClient(), smtpClient => {
-                        var errorMail = exception.ToMailMessage(((NetworkCredential) smtpClient.Credentials).UserName);
+                        var errorMail = exception.ToMailMessage((((NetworkCredential) smtpClient.Credentials)!).UserName);
                         return smtpClient.SendMailAsync(errorMail).ToObservable().To(default(T));
                     });
                 }
@@ -78,9 +77,7 @@ namespace Xpand.XAF.Modules.Reactive.Extensions{
                     exceptionSelector != null ? exceptionSelector(exception) : Observable.Throw<T>(exception));
             });
 
-        public static IObservable<(BindingListBase<T> list, ListChangedEventArgs e)> WhenListChanged<T>(this BindingListBase<T> listBase) 
-            => Observable.FromEventPattern<ListChangedEventHandler, ListChangedEventArgs>(
-                    h => listBase.ListChanged += h, h => listBase.ListChanged -= h, ImmediateScheduler.Instance)
-                .Select(_ => (list: (BindingListBase<T>) _.Sender, e: _.EventArgs));
+        public static IObservable<ListChangedEventArgs> WhenListChanged<T>(this BindingListBase<T> listBase) 
+            => listBase.WhenEvent<ListChangedEventArgs>(nameof(BindingListBase<T>.ListChanged));
     }
 }

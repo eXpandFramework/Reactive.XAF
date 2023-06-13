@@ -34,9 +34,9 @@ namespace Xpand.XAF.Modules.OneView.Tests{
 	        using var application = OneViewModule().Application;
 	        var visibility = application.WhenViewOnFrame(typeof(OV))
 		        .SelectMany(frame => frame.Template.WhenWindowsForm().When("Shown"))
-		        .Select(form => ((Form) application.MainWindow.Template).Visible)
+		        .Select(_ => ((Form) application.MainWindow.Template).Visible)
 		        .FirstAsync()
-		        .Do(form => application.Exit())
+		        .Do(_ => application.Exit())
 		        .SubscribeReplay();
 
 	        ((TestWinApplication)application).Start();
@@ -89,7 +89,7 @@ namespace Xpand.XAF.Modules.OneView.Tests{
 		        .FirstAsync()
 		        .SubscribeReplay();
 	        var testWinApplication = ((TestWinApplication) application);
-	        var editModel = testWinApplication.ModelEditorForm.SelectMany(form => Observable.FromEventPattern(form,nameof(Form.Shown)).To(form))
+	        var editModel = testWinApplication.ModelEditorForm.SelectMany(form => form.WhenEvent(nameof(Form.Shown)).To(form))
 		        .SelectMany(form => {
 			        form.Close();
 			        return form.WhenDisposed();

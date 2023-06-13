@@ -28,13 +28,12 @@ namespace Xpand.Extensions.Reactive.Transform.System.Diagnostics{
         }
 
         public static IObservable<string> WhenOutputDataReceived(this Process process) 
-            => Observable.FromEventPattern<DataReceivedEventArgs>(process, nameof(Process.OutputDataReceived)).Select(ep => ep.EventArgs.Data);
+            => process.WhenEvent<DataReceivedEventArgs>(nameof(Process.OutputDataReceived)).Select(pattern => pattern.Data);
 
-        public static IObservable<string> WhenErrorDataReceived(this Process that)
-            => Observable.FromEventPattern<DataReceivedEventArgs>(that, nameof(Process.ErrorDataReceived))
-                .Select(ep => ep.EventArgs.Data);
+        public static IObservable<string> WhenErrorDataReceived(this Process process)
+            => process.WhenEvent<DataReceivedEventArgs>(nameof(Process.ErrorDataReceived)).Select(e => e.Data);
 
-        public static IObservable<Unit> WhenExited(this Process process) 
-            => Observable.FromEventPattern<EventArgs>(process, nameof(Process.Exited)).Select(_ => Unit.Default);
+        public static IObservable<Process> WhenExited(this Process process) 
+            => process.WhenEvent(nameof(Process.Exited)).To(process);
     }
 }

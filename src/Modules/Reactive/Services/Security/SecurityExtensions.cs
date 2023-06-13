@@ -50,7 +50,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Security{
 
         internal static IObservable<Unit> AddNonSecuredTypes(this ApplicationModulesManager applicationModulesManager) 
             => applicationModulesManager.WhenCustomizeTypesInfo()
-                .Select(_ =>_.e.TypesInfo.PersistentTypes.Where(info => info.Attributes.OfType<NonSecuredTypeAttribute>().Any())
+                .Select(e =>e.TypesInfo.PersistentTypes.Where(info => info.Attributes.OfType<NonSecuredTypeAttribute>().Any())
                     .Select(info => info.Type))
                 .Do(infos => {
                     var xafApplication = applicationModulesManager.Application();

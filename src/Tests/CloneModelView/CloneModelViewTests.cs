@@ -122,7 +122,7 @@ namespace Xpand.XAF.Modules.CloneModelView.Tests{
 			using var application = Platform.Win.NewApplication<CloneModelViewModule>();
 			var testObserver = application.WhenApplicationModulesManager()
 				.SelectMany(manager => manager.WhenGeneratingModelNodes(modelApplication => modelApplication.Views))
-				.Do(views => {})
+				.Do(_ => {})
 				.Test();
 			application.AddModule<CloneModelViewModule>();
 			application.Model.Views.Count.ShouldBeGreaterThan(0);
@@ -134,7 +134,7 @@ namespace Xpand.XAF.Modules.CloneModelView.Tests{
 			var application = platform.NewApplication<CloneModelViewModule>();
 			application.Modules.Add(new ReactiveModule());
 			application.WhenApplicationModulesManager().WhenCustomizeTypesInfo().FirstAsync(info => {
-					customizeTypesInfo(info.e.TypesInfo);
+					customizeTypesInfo(info.TypesInfo);
 					return true;
 				})
 				.Subscribe();

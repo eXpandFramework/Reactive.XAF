@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Net.Http;
-using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reflection;
@@ -14,9 +13,7 @@ namespace Xpand.Extensions.Reactive.Transform.System {
             AppdomainOneEmission.Connect();
         }
         public static IObservable<Assembly> WhenAssemblyLoad(this AppDomain appDomain) 
-            => Observable.FromEventPattern<AssemblyLoadEventHandler, AssemblyLoadEventArgs>(
-                    h => appDomain.AssemblyLoad += h, h => appDomain.AssemblyLoad -= h,ImmediateScheduler.Instance)
-                .Select(pattern => pattern.EventArgs.LoadedAssembly);
+            => appDomain.WhenEvent<AssemblyLoadEventArgs>(nameof(AppDomain.AssemblyLoad)).Select(eventArgs => eventArgs.LoadedAssembly);
 
         public static IObservable<ResolveEventArgs> WhenAssemblyResolve(this AppDomain appDomain)
 	        => appDomain.WhenEvent<ResolveEventArgs>(nameof(AppDomain.AssemblyResolve));

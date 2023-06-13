@@ -89,11 +89,11 @@ namespace Xpand.XAF.Modules.CloneMemberValue.Tests{
             var aCmv2 = objectSpace.CreateObject<ACmv>();
             var listEditor = mock.Object;
             var createObjects = listEditor.WhenNewObjectAdding()
-                .FirstAsync().Do(t => {
-                    if (t.e != null) t.e.AddedObject = aCmv1;
+                .FirstAsync().Do(e => {
+                    if (e != null) e.AddedObject = aCmv1;
                 })
-                .Merge(listEditor.WhenNewObjectAdding().Skip(1).FirstAsync().Do(t => {
-                    if (t.e != null) t.e.AddedObject = aCmv2;
+                .Merge(listEditor.WhenNewObjectAdding().Skip(1).FirstAsync().Do(e => {
+                    if (e != null) e.AddedObject = aCmv2;
                 }))
                 .Replay();
             createObjects.Connect();

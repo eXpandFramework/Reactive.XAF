@@ -57,8 +57,8 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Services.DocumentStyleMa
 
         private static IObservable<Unit> SynchronizeTemplateStyleAttributes(this ApplicationModulesManager manager)
             => manager.WhenCustomizeTypesInfo()
-                .Do(_ => {
-                    var typesInfo = _.e.TypesInfo;
+                .Do(e => {
+                    var typesInfo = e.TypesInfo;
                     var documentStyle = typesInfo.FindTypeInfo(typeof(DocumentStyle));
                     var memberInfos = documentStyle.OwnMembers;
                     var templateStyle = typesInfo.FindTypeInfo(typeof(TemplateStyle));

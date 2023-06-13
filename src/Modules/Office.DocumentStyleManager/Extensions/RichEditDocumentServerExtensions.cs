@@ -23,30 +23,24 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Extensions{
         
         public static IScheduler EventsScheduler=ImmediateScheduler.Instance;
 
-        public static IObservable<IRichEditDocumentServer> WhenModifiedChanged(this IRichEditDocumentServer server) =>
-            Observable.FromEventPattern<EventHandler,EventArgs>(h => server.ModifiedChanged+=h,h => server.ModifiedChanged-=h,EventsScheduler)
-                .TransformPattern<EventArgs,IRichEditDocumentServer>()
-                .Select(_ => _.sender);
+        public static IObservable<IRichEditDocumentServer> WhenModifiedChanged(this IRichEditDocumentServer server) 
+            => server.WhenEvent(nameof(IRichEditDocumentServer.ModifiedChanged)).To(server);
 
-        public static IObservable<IRichEditDocumentServer> WhenContentChanged(this IRichEditDocumentServer server) =>
-            Observable.FromEventPattern<EventHandler,EventArgs>(h => server.ContentChanged+=h,h => server.ContentChanged-=h,EventsScheduler)
-                .TransformPattern<EventArgs,IRichEditDocumentServer>()
-                .Select(_ => _.sender);
+        public static IObservable<IRichEditDocumentServer> WhenContentChanged(this IRichEditDocumentServer server) 
+            => server.WhenEvent(nameof(IRichEditDocumentServer.ContentChanged)).To(server);
 
-        public static IObservable<IRichEditDocumentServer> WhenSelectionChanged(this IRichEditDocumentServer server) =>
-            Observable.FromEventPattern<EventHandler,EventArgs>(h => server.SelectionChanged+=h,h => server.SelectionChanged-=h,EventsScheduler)
-                .TransformPattern<EventArgs,IRichEditDocumentServer>()
-                .Select(_ => _.sender);
+        public static IObservable<IRichEditDocumentServer> WhenSelectionChanged(this IRichEditDocumentServer server) 
+            => server.WhenEvent(nameof(IRichEditDocumentServer.SelectionChanged)).To(server);
 
-        internal static IObservable<IRichEditDocumentServer> WhenRichEditDocumentServer(this DetailView detailView, string member) =>
-            detailView.GetPropertyEditor(member).WhenControlCreated().Cast<PropertyEditor>().Select(RichEditControl);
+        internal static IObservable<IRichEditDocumentServer> WhenRichEditDocumentServer(this DetailView detailView, string member) 
+            => detailView.GetPropertyEditor(member).WhenControlCreated().Cast<PropertyEditor>().Select(RichEditControl);
 
-        internal static IRichEditDocumentServer RichEditControl(this PropertyEditor propertyEditor) => 
+        internal static IRichEditDocumentServer RichEditControl(this PropertyEditor propertyEditor) 
+            =>
             (IRichEditDocumentServer) propertyEditor.GetPropertyValue("RichEditControl");
 
-        internal static IObservable<IRichEditDocumentServer> WhenRichEditDocumentServer<T>(this DetailView detailView, Expression<Func<T, object>> memberSelector){
-            return detailView.WhenRichEditDocumentServer(memberSelector.MemberExpressionName());
-        }
+        internal static IObservable<IRichEditDocumentServer> WhenRichEditDocumentServer<T>(this DetailView detailView, Expression<Func<T, object>> memberSelector) 
+            => detailView.WhenRichEditDocumentServer(memberSelector.MemberExpressionName());
 
         public static Document LoadDocument(this RichEditDocumentServer richEditDocumentServer, Byte[] bytes){
             using var memoryStream = new MemoryStream(bytes);
@@ -55,21 +49,15 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Extensions{
         }
 
         public static IObservable<Unit> SynchronizeScrolling<TObject>(this IObservable<DetailView> source,
-            Expression<Func<TObject, object>> memberSelector1, Expression<Func<TObject, object>> memberSelector2) =>
-            source.When(typeof(TObject)).SelectMany(view => view.WhenRichEditDocumentServer(memberSelector1))
+            Expression<Func<TObject, object>> memberSelector1, Expression<Func<TObject, object>> memberSelector2) 
+            => source.When(typeof(TObject)).SelectMany(view => view.WhenRichEditDocumentServer(memberSelector1))
                 .SynchronizeScrolling(source.When(typeof(TObject)).SelectMany(view => view.WhenRichEditDocumentServer(memberSelector2)));
         
-        public static IObservable<Unit> SynchronizeScrolling(this IObservable<IRichEditDocumentServer> source,IObservable<IRichEditDocumentServer> target) =>
-            AppDomain.CurrentDomain.IsHosted()?Observable.Empty<Unit>() : source.Zip(target, (sourceServer, targetServer) => Observable
-                    .FromEventPattern(sourceServer.VScrollBar(), "ValueChanged")
-                    .Do(_ => targetServer.SetPropertyValue("VerticalScrollValue",
-                        sourceServer.GetPropertyValue("VerticalScrollValue")))
-                    .ToUnit()
-                    .Merge(Observable.FromEventPattern(targetServer.VScrollBar(), "ValueChanged")
-                        .Do(_ => sourceServer.SetPropertyValue("VerticalScrollValue",
-                            targetServer.GetPropertyValue("VerticalScrollValue")))
-                        .ToUnit()))
-                .Merge();
+        public static IObservable<Unit> SynchronizeScrolling(this IObservable<IRichEditDocumentServer> source,IObservable<IRichEditDocumentServer> target) 
+            => AppDomain.CurrentDomain.IsHosted()?Observable.Empty<Unit>() : source.Zip(target, (sourceServer, targetServer) => sourceServer.VScrollBar().WhenEvent("ValueChanged")
+                    .Do(_ => targetServer.SetPropertyValue("VerticalScrollValue", sourceServer.GetPropertyValue("VerticalScrollValue"))).ToUnit()
+                    .Merge(targetServer.VScrollBar().WhenEvent("ValueChanged")
+                        .Do(_ => sourceServer.SetPropertyValue("VerticalScrollValue", targetServer.GetPropertyValue("VerticalScrollValue"))).ToUnit())).Merge();
 
         private static object VScrollBar(this IRichEditDocumentServer server){
             return ((IEnumerable) server.GetPropertyValue("Controls")).Cast<object>()
