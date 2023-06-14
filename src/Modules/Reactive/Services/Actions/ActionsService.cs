@@ -266,10 +266,6 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
             => action.WhenEvent<CustomizePopupWindowParamsEventArgs>(nameof(PopupWindowShowAction.CustomizePopupWindowParams))
                 .TakeUntilDisposed(action);
 
-        public static IObservable<SimpleActionExecuteEventArgs> WhenExecuted(this SimpleAction action) 
-            => action.WhenEvent<SimpleActionExecuteEventArgs>(nameof(SimpleAction.Executed))
-                .TakeUntilDisposed(action);
-
         public static IObservable<SingleChoiceAction> AddItems(this IObservable<SingleChoiceAction> source,Func<SingleChoiceAction,IObservable<Unit>> addItems,IScheduler scheduler=null)
             => source.MergeIgnored(action => action.Controller.WhenActivated()
                 .SelectMany(_ => action.View().WhenCurrentObjectChanged().StartWith(action.View()).TakeUntilDisposed(action))
@@ -287,17 +283,32 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
 		        }
 	        });
 
+        public static IObservable<SimpleActionExecuteEventArgs> WhenExecuted(this SimpleAction action) 
+            => action.WhenEvent<ActionBaseEventArgs>(nameof(SimpleAction.Executed)).Cast<SimpleActionExecuteEventArgs>().TakeUntilDisposed(action);
+        
+        public static IObservable<SimpleActionExecuteEventArgs> WhenExecuteCompleted(this SimpleAction action) 
+            => action.WhenEvent<SimpleActionExecuteEventArgs>(nameof(ActionBase.ExecuteCompleted)).Cast<SimpleActionExecuteEventArgs>().TakeUntilDisposed(action);
+        
         public static IObservable<SingleChoiceActionExecuteEventArgs> WhenExecuted(this SingleChoiceAction action) 
-            => action.WhenEvent<SingleChoiceActionExecuteEventArgs>(nameof(SingleChoiceAction.Executed)).TakeUntilDisposed(action);
+            => action.WhenEvent<ActionBaseEventArgs>(nameof(SingleChoiceAction.Executed)).Cast<SingleChoiceActionExecuteEventArgs>().TakeUntilDisposed(action);
+        
+        public static IObservable<SingleChoiceActionExecuteEventArgs> WhenExecuteCompleted(this SingleChoiceAction action) 
+            => action.WhenEvent<SingleChoiceActionExecuteEventArgs>(nameof(ActionBase.ExecuteCompleted)).Cast<SingleChoiceActionExecuteEventArgs>().TakeUntilDisposed(action);
 
         public static IObservable<ParametrizedActionExecuteEventArgs> WhenExecuted(this ParametrizedAction action) 
-            => action.WhenEvent<ParametrizedActionExecuteEventArgs>(nameof(SingleChoiceAction.Executed)).TakeUntilDisposed(action);
+            => action.WhenEvent<ActionBaseEventArgs>(nameof(ParametrizedAction.Executed)).Cast<ParametrizedActionExecuteEventArgs>().TakeUntilDisposed(action);
+        
+        public static IObservable<ParametrizedActionExecuteEventArgs> WhenExecuteCompleted(this ParametrizedAction action) 
+            => action.WhenEvent<ParametrizedActionExecuteEventArgs>(nameof(ActionBase.ExecuteCompleted)).Cast<ParametrizedActionExecuteEventArgs>().TakeUntilDisposed(action);
 
         public static IObservable<PopupWindowShowActionExecuteEventArgs> WhenExecuted(this PopupWindowShowAction action) 
-            => action.WhenEvent<PopupWindowShowActionExecuteEventArgs>(nameof(SingleChoiceAction.Executed)).TakeUntilDisposed(action);
+            => action.WhenEvent<ActionBaseEventArgs>(nameof(PopupWindowShowAction.Executed)).Cast<PopupWindowShowActionExecuteEventArgs>().TakeUntilDisposed(action);
+        
+        public static IObservable<PopupWindowShowActionExecuteEventArgs> WhenExecuteCompleted(this PopupWindowShowAction action) 
+            => action.WhenEvent<PopupWindowShowActionExecuteEventArgs>(nameof(ActionBase.ExecuteCompleted)).Cast<PopupWindowShowActionExecuteEventArgs>().TakeUntilDisposed(action);
 
         public static IObservable<ActionBaseEventArgs> WhenExecuted<TAction>(this TAction action) where TAction : ActionBase 
-            => action.WhenEvent<ActionBaseEventArgs>(nameof(SingleChoiceAction.Executed)).TakeUntilDisposed(action);
+            => action.WhenEvent<ActionBaseEventArgs>(nameof(ActionBase.Executed)).TakeUntilDisposed(action);
 
         public static IObservable<ActionBaseEventArgs> WhenExecuteCompleted<TAction>(this TAction action) where TAction : ActionBase 
             => action.WhenEvent<ActionBaseEventArgs>(nameof(ActionBase.ExecuteCompleted)).TakeUntilDisposed(action);
@@ -336,21 +347,9 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
         
         public static IObservable<PopupWindowShowActionExecuteEventArgs> WhenExecuted(this IObservable<PopupWindowShowAction> source) 
             => source.SelectMany(a=>a.WhenExecuted()).Cast<PopupWindowShowActionExecuteEventArgs>();
-
-        public static IObservable<SimpleActionExecuteEventArgs> WhenExecuteCompleted(this SimpleAction action) 
-            => action.WhenEvent<SimpleActionExecuteEventArgs>(nameof(ActionBase.ExecuteCompleted)).TakeUntilDisposed(action);
-
-        public static IObservable<SingleChoiceActionExecuteEventArgs> WhenExecuteCompleted(this SingleChoiceAction action) 
-            => action.WhenEvent<SingleChoiceActionExecuteEventArgs>(nameof(ActionBase.ExecuteCompleted)).TakeUntilDisposed(action);
-
+        
         public static IObservable<T> TakeUntilDisposed<T>(this IObservable<T> source, ActionBase component) 
             => source.TakeUntil(_ => component.IsDisposed);
-        
-        public static IObservable<ParametrizedActionExecuteEventArgs> WhenExecuteCompleted(this ParametrizedAction action) 
-            => action.WhenEvent<ParametrizedActionExecuteEventArgs>(nameof(ActionBase.ExecuteCompleted)).TakeUntilDisposed(action);
-
-        public static IObservable<PopupWindowShowActionExecuteEventArgs> WhenExecuteCompleted(this PopupWindowShowAction action) 
-            => action.WhenEvent<PopupWindowShowActionExecuteEventArgs>(nameof(ActionBase.ExecuteCompleted)).TakeUntilDisposed(action);
 
         public static IObservable<(TAction action, BoolList boolList, BoolValueChangedEventArgs e)> ResultValueChanged<TAction>(
                 this TAction source, Func<TAction, BoolList> boolListSelector) where TAction : ActionBase 

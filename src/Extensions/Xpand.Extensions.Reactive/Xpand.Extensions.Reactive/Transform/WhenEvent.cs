@@ -20,12 +20,12 @@ namespace Xpand.Extensions.Reactive.Transform {
         
         private static IObservable<EventPattern<TArgs>> FromEventPattern<TArgs>(this object source, string eventName) {
             var eventInfo = source.EventInfo(eventName);
-            return eventInfo.info.EventHandlerType?.IsGenericType ?? false
-                ? Observable.FromEventPattern<TArgs>(handler => eventInfo.add.Invoke(source, new object[] { handler }),
+            return eventInfo.info.EventHandlerType?.IsGenericType ?? false ? Observable.FromEventPattern<TArgs>(
+                        handler => eventInfo.add.Invoke(source, new object[] { handler }),
                         handler => eventInfo.remove.Invoke(source, new object[] { handler }))
                     .Select(pattern => new EventPattern<TArgs>(pattern.Sender, pattern.EventArgs))
-                : Observable.FromEventPattern(handler => eventInfo.info.AddEventHandler(source, handler),
-                        handler => eventInfo.info.RemoveEventHandler(source, handler))
+                : Observable.FromEventPattern(handler => eventInfo.add.Invoke(source, new object[] { handler }),
+                        handler => eventInfo.remove.Invoke(source, new object[] { handler }))
                     .Select(pattern => new EventPattern<TArgs>(pattern.Sender, (TArgs)pattern.EventArgs));
         }
         
