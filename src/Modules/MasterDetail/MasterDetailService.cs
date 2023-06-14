@@ -27,7 +27,7 @@ namespace Xpand.XAF.Modules.MasterDetail{
         internal static IObservable<TSource> TraceMasterDetailModule<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<ITraceEvent> traceAction = null,
             Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.OnNextOrOnError,
             [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) =>
-            source.Trace(name, MasterDetailModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
+            source.Trace(name, ReactiveMasterDetailModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
 
 
         internal static IObservable<Unit> Connect(this ApplicationModulesManager applicationModulesManager,XafApplication application){
@@ -64,7 +64,7 @@ namespace Xpand.XAF.Modules.MasterDetail{
         private static IObservable<Unit> WhenSaveAction(this XafApplication application) 
 	        => application.WhenMasterDetailDashboardViewItems()
                 .Do(_ => _.detailViewItem.Frame.Actions().First(action => action.Id == MasterDetailSaveAction)
-                    .Active[MasterDetailModule.CategoryName] = true)
+                    .Active[ReactiveMasterDetailModule.CategoryName] = true)
                 .SelectMany(_ => _.detailViewItem.Frame.Actions<SimpleAction>().Where(action => action.Id == MasterDetailSaveAction)
                     .Select(action => action.WhenExecuted()).Merge()
                     .Do(tuple => { tuple.Action.Controller.Frame.View.ObjectSpace.CommitChanges(); }))
@@ -157,7 +157,7 @@ namespace Xpand.XAF.Modules.MasterDetail{
                         ImageName = "MenuBar_Save",
                         TargetViewType = ViewType.DetailView
                     };
-                simpleAction.Active[MasterDetailModule.CategoryName] = false;
+                simpleAction.Active[ReactiveMasterDetailModule.CategoryName] = false;
                 return simpleAction;
             }).TraceMasterDetailModule(action => action.Id);
 
@@ -175,13 +175,13 @@ namespace Xpand.XAF.Modules.MasterDetail{
         static IObservable<Unit> DisableListViewController(this XafApplication application, string typeName) 
 	        => application.WhenMasterDetailDashboardViewItems()
 		        .SelectMany(_ => _.listViewItem.Frame.Controllers.Cast<Controller>().Where(controller => controller.GetType().Name==typeName))
-		        .Do(controller => controller.Active[MasterDetailModule.CategoryName]=false).ToUnit()
+		        .Do(controller => controller.Active[ReactiveMasterDetailModule.CategoryName]=false).ToUnit()
 		        .TraceMasterDetailModule();
 
         static IObservable<Unit> DisableDetailViewViewController(this XafApplication application,string typeName) 
 	        => application.WhenMasterDetailDashboardViewItems()
 		        .SelectMany(_ => _.detailViewItem.Frame.Controllers.Cast<Controller>().Where(controller => controller.GetType().Name==typeName))
-		        .Do(controller => controller.Active[MasterDetailModule.CategoryName]=false).ToUnit()
+		        .Do(controller => controller.Active[ReactiveMasterDetailModule.CategoryName]=false).ToUnit()
 		        .TraceMasterDetailModule();
     }
 }

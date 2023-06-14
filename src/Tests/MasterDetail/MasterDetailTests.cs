@@ -110,7 +110,7 @@ namespace Xpand.XAF.Modules.MasterDetail.Tests{
             var valueTuple = await ViewItems(xafApplication).WithTimeOut();
             valueTuple.DetailViewItem.Frame.Actions()
 	            .First(action => action.Id == MasterDetailService.MasterDetailSaveAction)
-	            .Active[MasterDetailModule.CategoryName]
+	            .Active[ReactiveMasterDetailModule.CategoryName]
 	            .ShouldBe(true);
         }
         [XpandTest]
@@ -169,9 +169,9 @@ namespace Xpand.XAF.Modules.MasterDetail.Tests{
             return new DashboardViewItemInfo(){ListViewItem=tuple.listViewItem,DetailViewItem=tuple.detailViewItem};
         }
 
-        private static MasterDetailModule DefaultMasterDetailModule(Platform platform){
-            var application = platform.NewApplication<MasterDetailModule>();
-            var masterDetailModule = application.AddModule<MasterDetailModule>(TestContext.CurrentContext.Test.FullName,typeof(Md), typeof(MdParent));
+        private static ReactiveMasterDetailModule DefaultMasterDetailModule(Platform platform){
+            var application = platform.NewApplication<ReactiveMasterDetailModule>();
+            var masterDetailModule = application.AddModule<ReactiveMasterDetailModule>(TestContext.CurrentContext.Test.FullName,typeof(Md), typeof(MdParent));
             application.Logon();
             return masterDetailModule;
         }

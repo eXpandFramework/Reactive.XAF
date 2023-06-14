@@ -9,15 +9,15 @@ using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.MasterDetail{
     
-    public sealed class MasterDetailModule : ReactiveModuleBase{
+    public sealed class ReactiveMasterDetailModule : ReactiveModuleBase{
         public const string CategoryName = "Xpand.XAF.Modules.MasterDetail";
         
         public static ReactiveTraceSource TraceSource{ get; set; }
-        static MasterDetailModule(){
-            TraceSource=new ReactiveTraceSource(nameof(MasterDetailModule));
+        static ReactiveMasterDetailModule(){
+            TraceSource=new ReactiveTraceSource(nameof(ReactiveMasterDetailModule));
         }
         
-        public MasterDetailModule(){
+        public ReactiveMasterDetailModule(){
             RequiredModuleTypes.Add(typeof(SystemModule));
             RequiredModuleTypes.Add(typeof(ReactiveModule));
         }

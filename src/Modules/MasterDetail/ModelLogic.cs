@@ -13,12 +13,12 @@ namespace Xpand.XAF.Modules.MasterDetail{
     }
     [ModelAbstractClass]
     public interface IModelDashboardViewMasterDetail : IModelDashboardView {
-        [Category(MasterDetailModule.CategoryName)]
+        [Category(ReactiveMasterDetailModule.CategoryName)]
         [ModelBrowsable(typeof(ModelDashboardViewMasterDetailVisibilityCalculator))]
         bool MasterDetail { get; set; }
 
 
-        [Category(MasterDetailModule.CategoryName)]
+        [Category(ReactiveMasterDetailModule.CategoryName)]
         [ModelBrowsable(typeof(ModelDashboardViewMasterDetailVisibilityCalculator))]
         IModelMasterDetailDetailViewObjectTypeLinks MasterDetailDetailViewObjectTypeLinks { get; }
     }

@@ -10,7 +10,7 @@ using Xpand.XAF.Modules.MasterDetail;
 // associated with an assembly.
 [assembly: AssemblyTitle("Xpand.XAF.Modules.MasterDetail")]
 [assembly: AssemblyMetadata("Platform","Core")]
-[assembly: AssemblyMetadata("Module",nameof(MasterDetailModule))]
+[assembly: AssemblyMetadata("Module",nameof(ReactiveMasterDetailModule))]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
