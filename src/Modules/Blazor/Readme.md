@@ -88,13 +88,13 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |----|----
 |**DevExpress.ExpressApp.Blazor**|**Any**
  |**DevExpress.ExpressApp.Validation.Blazor**|**Any**
-|[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.222.13
- |Xpand.Extensions.Blazor|4.222.13
- |Xpand.Extensions.Reactive|4.222.13
- |Xpand.Extensions.XAF|4.222.13
- |Xpand.Extensions|4.222.13
- |Xpand.Extensions.XAF.Xpo|4.222.13
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.222.13
+|[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.231.0
+ |Xpand.Extensions.Blazor|4.231.0
+ |Xpand.Extensions.Reactive|4.231.0
+ |Xpand.Extensions.XAF|4.231.0
+ |Xpand.Extensions|4.231.0
+ |Xpand.Extensions.XAF.Xpo|4.231.0
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.231.0
  |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
  |System.Reactive|5.0.0
  |System.Interactive|5.0.0
@@ -103,13 +103,14 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |System.Data.SqlClient|4.8.5
  |System.Text.Json|7.0.2
  |System.Threading.Tasks.Dataflow|7.0.0
+ |System.Security.Cryptography.ProtectedData|7.0.1
  |System.CodeDom|6.0.0
  |System.Configuration.ConfigurationManager|6.0.0
- |System.ServiceModel.NetTcp|4.10.0
- |System.ServiceModel.Http|4.10.0
- |System.ServiceModel.Security|4.10.0
+ |System.ServiceModel.NetTcp|4.10.2
+ |System.ServiceModel.Http|4.10.2
+ |System.ServiceModel.Security|4.10.2
  |Xpand.Patcher|3.0.17
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.222.13
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.231.0
 
 ## Issues-Debugging-Troubleshooting
 

@@ -1,4 +1,4 @@
-source https://nuget.devexpress.com/88luCgoeuPFTrDrTDcc6zKg22U2cVcTm3vdKCv88I7PHF9St6i/api
+source C:\Program Files (x86)\DevExpress 23.1\Components\System\Components\Packages
 source https://api.nuget.org/v3/index.json
 source https://xpandnugetserver.azurewebsites.net/nuget
 storage:none
@@ -84,5 +84,3 @@ nuget System.Memory 4.5.5
 nuget Microsoft.NETCore.Targets 5.0.0
 nuget Xpand.VersionConverter 2.202.11
 nuget Microsoft.VisualBasic 10.3.0
-
-
