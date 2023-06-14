@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Concurrency;
@@ -17,16 +18,36 @@ namespace Xpand.Extensions.Reactive.Transform {
         public static IObservable<EventPattern<object>> WhenEvent(this object source,params string[] eventNames) 
             => eventNames.ToNowObservable().SelectMany(source.FromEventPattern<EventArgs>)
                 .Select(pattern => new EventPattern<object>(pattern.Sender, pattern.EventArgs));
-        
+        // private static IObservable<EventPattern<TArgs>> FromEventHandler<TArgs>(this object source, EventHandler eventHandler) {
+        //     return Observable.FromEventPattern(
+        //             (sender, args) => eventHandler(sender, args),
+        //             (sender, args) => eventHandler.Remove(sender, args))
+        //         .Select(pattern => new EventPattern<TArgs>(pattern.Sender, (TArgs)pattern.EventArgs));
+        // }
         private static IObservable<EventPattern<TArgs>> FromEventPattern<TArgs>(this object source, string eventName) {
             var eventInfo = source.EventInfo(eventName);
-            return eventInfo.info.EventHandlerType?.IsGenericType ?? false ? Observable.FromEventPattern<TArgs>(
+            
+            if (eventInfo.info.EventHandlerType?.IsGenericType??false) {
+                return Observable.FromEventPattern<TArgs>(
                         handler => eventInfo.add.Invoke(source, new object[] { handler }),
                         handler => eventInfo.remove.Invoke(source, new object[] { handler }))
-                    .Select(pattern => new EventPattern<TArgs>(pattern.Sender, pattern.EventArgs))
-                : Observable.FromEventPattern(handler => eventInfo.add.Invoke(source, new object[] { handler }),
+                    .Select(pattern => new EventPattern<TArgs>(pattern.Sender, pattern.EventArgs));
+            }
+
+            if (eventInfo.add.IsPublic&&!eventInfo.add.IsStatic) {
+                return Observable.FromEventPattern<TArgs>(source, eventName);    
+            }
+
+            if (eventInfo.info.EventHandlerType == typeof(EventHandler)) {
+                return Observable.FromEventPattern(
+                        handler => eventInfo.add.Invoke(source, new object[] { handler }),
                         handler => eventInfo.remove.Invoke(source, new object[] { handler }))
-                    .Select(pattern => new EventPattern<TArgs>(pattern.Sender, (TArgs)pattern.EventArgs));
+                    .Select(pattern => new EventPattern<TArgs>(pattern.Sender, (TArgs)pattern.EventArgs));    
+            }
+            return Observable.FromEventPattern<TArgs>(
+                    handler => eventInfo.add.Invoke(source, new object[] { handler }),
+                    handler => eventInfo.remove.Invoke(source, new object[] { handler }))
+                .Select(pattern => new EventPattern<TArgs>(pattern.Sender, pattern.EventArgs));
         }
         
         private static (EventInfo info,MethodInfo add,MethodInfo remove) EventInfo(this object source,string eventName) 

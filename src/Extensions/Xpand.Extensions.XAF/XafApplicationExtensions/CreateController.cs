@@ -10,19 +10,17 @@ namespace Xpand.Extensions.XAF.XafApplicationExtensions{
 		static Controller CreateController(this ControllersManager controllersManager, Type controllerType,IModelApplication modelApplication){
 			var registeredControllers = ((Dictionary<Type, Controller>) controllersManager.GetFieldValue("registeredControllers"));
 			return registeredControllers.TryGetValue(controllerType, out var sourceController)
-				? sourceController.Clone(modelApplication) : (Controller) controllerType.CreateInstance();
+				? sourceController.Clone(modelApplication,ServiceProvider(controllersManager)) : (Controller) controllerType.CreateInstance();
 		}
 
-		public static Controller CreateController(this XafApplication application, Type controllerType){
-			Controller result;
-			var controllersManager = application.ControllersManager();
-			if (controllersManager == null){
-				result = (Controller) controllerType.CreateInstance();
-			}
-			else{
-				result = controllersManager.CreateController(controllerType, application.Model);
-			}
+		public static IServiceProvider ServiceProvider(this ControllersManager controllersManager) 
+			=> (IServiceProvider)controllersManager.GetFieldValue("serviceProvider");
 
+		public static Controller CreateController(this XafApplication application, Type controllerType){
+			var controllersManager = application.ControllersManager();
+			var result = controllersManager == null
+				? (Controller)controllerType.CreateInstance()
+				: controllersManager.CreateController(controllerType, application.Model);
 			result.Application = application;
 			return result;
 		}

@@ -27,11 +27,11 @@ namespace Xpand.Extensions.Reactive.Transform.System.Diagnostics{
             return start;
         }
 
-        public static IObservable<string> WhenOutputDataReceived(this Process process) 
+        public static IObservable<string> WhenOutputDataReceived(this Process process)
             => process.WhenEvent<DataReceivedEventArgs>(nameof(Process.OutputDataReceived)).Select(pattern => pattern.Data);
 
         public static IObservable<string> WhenErrorDataReceived(this Process process)
-            => process.WhenEvent<DataReceivedEventArgs>(nameof(Process.ErrorDataReceived)).Select(e => e.Data);
+            => process.WhenEvent<DataReceivedEventArgs>(nameof(Process.ErrorDataReceived)).Select(pattern => pattern.Data);
 
         public static IObservable<Process> WhenExited(this Process process) 
             => process.WhenEvent(nameof(Process.Exited)).To(process);

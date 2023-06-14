@@ -129,8 +129,8 @@ namespace Xpand.TestsLib.Blazor {
 		}
 
 		void IDisposable.Dispose() {
-			if (_application is { IsValueCreated: true })
-				_valueManagerStorageContext.RunWithStorage(() => _application.Value.Dispose());
+			// if (_application is { IsValueCreated: true })
+				// _valueManagerStorageContext.RunWithStorage(() => _application.Value.Dispose());
 			_application = null;
 		}
 	}

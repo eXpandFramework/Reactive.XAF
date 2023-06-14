@@ -17,11 +17,11 @@
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DefineConstants>TRACE;XAF222</DefineConstants>
+    <DefineConstants>TRACE;XAF231</DefineConstants>
     <WarningsAsErrors>;NU1605</WarningsAsErrors>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <DefineConstants>TRACE;XAF222;</DefineConstants>
+    <DefineConstants>TRACE;XAF231;</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Xpand.Extensions">

@@ -6,3 +6,4 @@ Microsoft.CodeAnalysis
 System.Data.SqlClient
 System.Text.Json
 System.Threading.Tasks.Dataflow
+System.Security.Cryptography.ProtectedData

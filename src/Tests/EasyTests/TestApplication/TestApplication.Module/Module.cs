@@ -92,7 +92,7 @@ namespace TestApplication.Module {
             RequiredModuleTypes.Add(typeof(AutoCommitModule));
             RequiredModuleTypes.Add(typeof(CloneMemberValueModule));
             RequiredModuleTypes.Add(typeof(HideToolBarModule));
-            RequiredModuleTypes.Add(typeof(MasterDetailModule));
+            RequiredModuleTypes.Add(typeof(ReactiveMasterDetailModule));
             RequiredModuleTypes.Add(typeof(ModelViewInheritanceModule));
             // RequiredModuleTypes.Add(typeof(ProgressBarViewItemModule));
             RequiredModuleTypes.Add(typeof(ModelMapperModule));

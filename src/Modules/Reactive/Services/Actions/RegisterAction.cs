@@ -12,6 +12,7 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using HarmonyLib;
 using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.XAF.XafApplicationExtensions;
 
 
 namespace Xpand.XAF.Modules.Reactive.Services.Actions{
@@ -161,7 +162,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
 		        ControllerCtorState
                     .AddOrUpdate(controllerType, type1 => (id, _ => actionBase(((TController) _.controller, _.id))),(_, tuple) => tuple);
             }
-            var controller = (TController) Controller.Create(controllerType);
+            var controller = (TController) Controller.Create(controllerType,applicationModulesManager.ControllersManager.ServiceProvider());
             applicationModulesManager.ControllersManager.RegisterController(controller);
             return ((IActionController) controller).WhenCloned
                 .SelectMany(viewController => viewController.Actions).Cast<TAction>()
@@ -199,8 +200,8 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
 	    protected ActionWindowController() => this.NewAction();
         readonly Subject<Controller> _clonedSubject=new();
         public IObservable<Controller> WhenCloned => _clonedSubject.AsObservable();
-        public override Controller Clone(IModelApplication modelApplication) {
-            var controller = base.Clone(modelApplication);
+        public override Controller Clone(IModelApplication modelApplication, IServiceProvider serviceProvider) {
+            var controller = base.Clone(modelApplication,serviceProvider);
             _clonedSubject.OnNext(this);
             return controller;
         }
@@ -215,8 +216,8 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
         readonly Subject<ActionViewController> _clonedSubject=new();
         public IObservable<Controller> WhenCloned => _clonedSubject.AsObservable();
 
-        public override Controller Clone(IModelApplication modelApplication) {
-            var controller = base.Clone(modelApplication);
+        public override Controller Clone(IModelApplication modelApplication, IServiceProvider serviceProvider) {
+            var controller = base.Clone(modelApplication,serviceProvider);
             _clonedSubject.OnNext((ActionViewController) controller);
             return controller;
         }

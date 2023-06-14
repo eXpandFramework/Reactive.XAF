@@ -19,10 +19,10 @@
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DefineConstants>TRACE;XAF222</DefineConstants>
+    <DefineConstants>TRACE;XAF231</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DefineConstants>TRACE;XAF222</DefineConstants>
+    <DefineConstants>TRACE;XAF231</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Xpand.Extensions">

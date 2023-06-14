@@ -6,3 +6,4 @@ Hangfire.AspNetCore
 Microsoft.CodeAnalysis
 System.Data.SqlClient
 System.Threading.Tasks.Dataflow
+System.Security.Cryptography.ProtectedData

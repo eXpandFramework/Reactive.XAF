@@ -287,25 +287,25 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
             => action.WhenEvent<ActionBaseEventArgs>(nameof(SimpleAction.Executed)).Cast<SimpleActionExecuteEventArgs>().TakeUntilDisposed(action);
         
         public static IObservable<SimpleActionExecuteEventArgs> WhenExecuteCompleted(this SimpleAction action) 
-            => action.WhenEvent<SimpleActionExecuteEventArgs>(nameof(ActionBase.ExecuteCompleted)).Cast<SimpleActionExecuteEventArgs>().TakeUntilDisposed(action);
+            => action.WhenEvent<ActionBaseEventArgs>(nameof(ActionBase.ExecuteCompleted)).Cast<SimpleActionExecuteEventArgs>().TakeUntilDisposed(action);
         
         public static IObservable<SingleChoiceActionExecuteEventArgs> WhenExecuted(this SingleChoiceAction action) 
             => action.WhenEvent<ActionBaseEventArgs>(nameof(SingleChoiceAction.Executed)).Cast<SingleChoiceActionExecuteEventArgs>().TakeUntilDisposed(action);
         
         public static IObservable<SingleChoiceActionExecuteEventArgs> WhenExecuteCompleted(this SingleChoiceAction action) 
-            => action.WhenEvent<SingleChoiceActionExecuteEventArgs>(nameof(ActionBase.ExecuteCompleted)).Cast<SingleChoiceActionExecuteEventArgs>().TakeUntilDisposed(action);
+            => action.WhenEvent<ActionBaseEventArgs>(nameof(ActionBase.ExecuteCompleted)).Cast<SingleChoiceActionExecuteEventArgs>().TakeUntilDisposed(action);
 
         public static IObservable<ParametrizedActionExecuteEventArgs> WhenExecuted(this ParametrizedAction action) 
             => action.WhenEvent<ActionBaseEventArgs>(nameof(ParametrizedAction.Executed)).Cast<ParametrizedActionExecuteEventArgs>().TakeUntilDisposed(action);
         
         public static IObservable<ParametrizedActionExecuteEventArgs> WhenExecuteCompleted(this ParametrizedAction action) 
-            => action.WhenEvent<ParametrizedActionExecuteEventArgs>(nameof(ActionBase.ExecuteCompleted)).Cast<ParametrizedActionExecuteEventArgs>().TakeUntilDisposed(action);
+            => action.WhenEvent<ActionBaseEventArgs>(nameof(ActionBase.ExecuteCompleted)).Cast<ParametrizedActionExecuteEventArgs>().TakeUntilDisposed(action);
 
         public static IObservable<PopupWindowShowActionExecuteEventArgs> WhenExecuted(this PopupWindowShowAction action) 
             => action.WhenEvent<ActionBaseEventArgs>(nameof(PopupWindowShowAction.Executed)).Cast<PopupWindowShowActionExecuteEventArgs>().TakeUntilDisposed(action);
         
         public static IObservable<PopupWindowShowActionExecuteEventArgs> WhenExecuteCompleted(this PopupWindowShowAction action) 
-            => action.WhenEvent<PopupWindowShowActionExecuteEventArgs>(nameof(ActionBase.ExecuteCompleted)).Cast<PopupWindowShowActionExecuteEventArgs>().TakeUntilDisposed(action);
+            => action.WhenEvent<ActionBaseEventArgs>(nameof(ActionBase.ExecuteCompleted)).Cast<PopupWindowShowActionExecuteEventArgs>().TakeUntilDisposed(action);
 
         public static IObservable<ActionBaseEventArgs> WhenExecuted<TAction>(this TAction action) where TAction : ActionBase 
             => action.WhenEvent<ActionBaseEventArgs>(nameof(ActionBase.Executed)).TakeUntilDisposed(action);
@@ -322,8 +322,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
             => customEmit || (action.Data.ContainsKey(nameof(ExecutionFinished)) && (bool)action.Data[nameof(ExecutionFinished)])
                 ? ExecuteFinishedSubject.Where(a => a == action).Cast<TAction>() : action.WhenExecuteCompleted().To(action);
 
-        public static void CustomizeExecutionFinished<TAction>(this TAction action, bool enable=true)
-            where TAction : ActionBase
+        public static void CustomizeExecutionFinished<TAction>(this TAction action, bool enable=true) where TAction : ActionBase
             => action.Data[nameof(ExecutionFinished)] = enable;
         
         public static void ExecutionFinished<TAction>(this TAction action) where TAction:ActionBase 
