@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Diagnostics;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Concurrency;
@@ -8,6 +7,7 @@ using System.Reactive.Linq;
 using System.Reflection;
 using Fasterflect;
 using Xpand.Extensions.LinqExtensions;
+using Xpand.Extensions.TypeExtensions;
 using Type = System.Type;
 
 namespace Xpand.Extensions.Reactive.Transform {
@@ -27,7 +27,7 @@ namespace Xpand.Extensions.Reactive.Transform {
         private static IObservable<EventPattern<TArgs>> FromEventPattern<TArgs>(this object source, string eventName) {
             var eventInfo = source.EventInfo(eventName);
             
-            if (eventInfo.info.EventHandlerType?.IsGenericType??false) {
+            if ((eventInfo.info.EventHandlerType?.IsGenericType ?? false)&&eventInfo.info.EventHandlerType.GenericTypeArguments.First()==typeof(TArgs)) {
                 return Observable.FromEventPattern<TArgs>(
                         handler => eventInfo.add.Invoke(source, new object[] { handler }),
                         handler => eventInfo.remove.Invoke(source, new object[] { handler }))
@@ -52,8 +52,8 @@ namespace Xpand.Extensions.Reactive.Transform {
         
         private static (EventInfo info,MethodInfo add,MethodInfo remove) EventInfo(this object source,string eventName) 
             => Events.GetOrAdd((source as Type ?? source.GetType(), eventName), t => {
-                var eventInfo = (EventInfo)t.type.Members(MemberTypes.Event,Flags.AllMembers).First(info =>
-                    info.Name == eventName || info.Name.EndsWith(".".JoinString(eventName)));
+                var eventInfo = (EventInfo)t.type.Members(MemberTypes.Event,Flags.AllMembers).OrderByDescending(info => info.IsPublic())
+                    .First(info => info.Name == eventName || info.Name.EndsWith(".".JoinString(eventName)));
                 return (eventInfo, eventInfo.AddMethod,eventInfo.RemoveMethod);
             });
 
