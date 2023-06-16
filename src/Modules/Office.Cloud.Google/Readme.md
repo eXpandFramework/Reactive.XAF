@@ -156,19 +156,19 @@ The module follows the Nuget [Version Basics](https://docs.Google.com/en-us/nuge
 |<!-- -->|<!-- -->
 |----|----
 |**DevExpress.Persistent.Base**|**Any**
-|[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.231.0
- |Xpand.Extensions|4.231.0
- |Xpand.Extensions.Office.Cloud|4.231.0
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.231.0
- |Xpand.Extensions.Reactive|4.231.0
- |Xpand.Extensions.XAF|4.231.0
- |Xpand.Extensions.XAF.Xpo|4.231.0
+|[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.231.1
+ |Xpand.Extensions|4.231.1
+ |Xpand.Extensions.Office.Cloud|4.231.1
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.231.1
+ |Xpand.Extensions.Reactive|4.231.1
+ |Xpand.Extensions.XAF|4.231.1
+ |Xpand.Extensions.XAF.Xpo|4.231.1
  |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
  |System.Reactive|5.0.0
  |Google.Apis.Auth|1.55.0
  |System.Threading.Tasks.Dataflow|7.0.0
  |Xpand.Patcher|3.0.17
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.231.0
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.231.1
 
 ## Issues-Debugging-Troubleshooting
 

@@ -66,7 +66,7 @@
     <PackageReference Include="Shouldly" Version="4.0.3" />
     <PackageReference Include="NUnit" Version="3.13.2" />
     <PackageReference Include="NUnit3TestAdapter" Version="4.0" />
-    <PackageReference Include="Xpand.XAF.Web.All" Version="4.231.0.0" />
+    <PackageReference Include="Xpand.XAF.Web.All" Version="4.231.1.0" />
     <PackageReference Include="Selenium.WebDriver" Version="4.1" />
     <PackageReference Include="Microsoft.Reactive.Testing" Version="5.0" />
   </ItemGroup>

@@ -30,12 +30,7 @@ namespace Xpand.Extensions.StringExtensions{
             }
         }
 
-        public static string ToBase64String(this byte[] bytes) => Convert.ToBase64String(bytes);
-
-        public static byte[] Bytes(this string s, Encoding encoding = null) {
-            encoding ??= Encoding.UTF8;
-            return s == null ? Array.Empty<byte>() : encoding.GetBytes(s);
-        }
-        
+        public static byte[] Bytes(this string s, Encoding encoding = null) 
+            => s == null ? Array.Empty<byte>() : (encoding ?? Encoding.UTF8).GetBytes(s);
     }
 }
