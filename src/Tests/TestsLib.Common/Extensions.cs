@@ -7,7 +7,6 @@ using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reactive;
-using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Threading;
@@ -39,6 +38,7 @@ using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
+using Xpand.Extensions.StringExtensions;
 using Xpand.Extensions.XAF.ActionExtensions;
 using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.Extensions.XAF.ViewExtensions;
@@ -384,7 +384,7 @@ namespace Xpand.TestsLib.Common{
 		        throw new NotSupportedException(
 			        "if implemented make sure all tests pass with TestExplorer and live testing");
 	        }
-	        application.Title = TestContext.CurrentContext.Test.FullName.Truncate(255);
+	        application.Title = TestContext.CurrentContext.Test.FullName.CleanCodeName().Truncate(255);
             
 	        return application;
         }

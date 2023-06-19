@@ -69,7 +69,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects {
         [Browsable(false)]
         public IList<ObjectString> JobMethods 
             => AppDomain.CurrentDomain.JobMethods().Where(info => info.DeclaringType==JobType?.Type)
-                .Select(info => new ObjectString(info.Attribute<JobProviderAttribute>()?.DisplayName??info.Name.CompoundName() ))
+                .Select(info => new ObjectString(info.Name ){Caption = info.Attribute<JobProviderAttribute>()?.DisplayName??info.Name.CompoundName()})
                 .ToArray();
         
         [Browsable(false)]
@@ -80,9 +80,6 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects {
         public override void AfterConstruction() {
             base.AfterConstruction();
             _cronExpression=Session.Query<CronExpression>().FirstOrDefault(expression => expression.Name == nameof(Cron.Never));
-            _jobType = JobTypes.FirstOrDefault();
-            _jobMethod = JobMethods.FirstOrDefault();
-            Id = Guid.NewGuid().ToString();
         }
 
         CronExpression _cronExpression;
