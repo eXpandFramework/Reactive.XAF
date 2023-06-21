@@ -123,13 +123,11 @@ namespace Xpand.XAF.Modules.Reactive.Services {
 
         
         static IObservable<Unit> ReadOnlyObjectViewAttribute(this ApplicationModulesManager manager)
-            => manager.WhenGeneratingModelNodes<IModelViews>()
-                .Select(views => views)
-                .SelectMany().OfType<IModelObjectView>()
+            => manager.WhenGeneratingModelNodes<IModelViews>().SelectMany().OfType<IModelObjectView>()
                 .SelectMany(view => view.ModelClass.TypeInfo.FindAttributes<ReadOnlyObjectViewAttribute>()
-                    .Where(objectView => objectView is IModelDetailView && objectView.ViewType == ViewType.DetailView ||
-                                         objectView is IModelListView && objectView.ViewType == ViewType.ListView ||
-                                         objectView.ViewType == ViewType.Any).ToArray()
+                    .Where(attribute => view is IModelDetailView && attribute.ViewType == ViewType.DetailView ||
+                                         view is IModelListView && attribute.ViewType == ViewType.ListView ||
+                                         attribute.ViewType == ViewType.Any).ToArray()
                     .Execute(attribute => {
                         view.AllowEdit = attribute.AllowEdit;
                         view.AllowDelete = attribute.AllowDelete;
