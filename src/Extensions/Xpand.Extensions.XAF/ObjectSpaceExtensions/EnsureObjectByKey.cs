@@ -14,8 +14,8 @@ namespace Xpand.Extensions.XAF.ObjectSpaceExtensions {
         public static T EnsureObjectByKey<T>(this IObjectSpace objectSpace, object key,bool inTransaction=false)
             => objectSpace.GetObjectByKey<T>(key)??objectSpace.EnsureInTransaction<T>(key,inTransaction) ?? objectSpace.NewObject<T>(key);
         
-        public static T EnsureObject<T>(this IObjectSpace objectSpace, Expression<Func<T, bool>> criteriaExpression,Action<T> initialize=null,Action<T> update=null,bool inTransaction=false) where T : class {
-            var o = objectSpace.FirstOrDefault(criteriaExpression,inTransaction);
+        public static T EnsureObject<T>(this IObjectSpace objectSpace, Expression<Func<T, bool>> criteriaExpression=null,Action<T> initialize=null,Action<T> update=null,bool inTransaction=false) where T : class {
+            var o = objectSpace.FirstOrDefault(criteriaExpression??(arg =>true) ,inTransaction);
             if (o != null) {
                 update?.Invoke(o);
                 return o;

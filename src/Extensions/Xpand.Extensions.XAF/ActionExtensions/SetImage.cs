@@ -21,6 +21,8 @@ namespace Xpand.Extensions.XAF.ActionExtensions {
     public enum CommonImage {
         [Description("Action_Refresh")]
         Refresh,
+        [Description("ModelEditor_Links")]
+        Link,
         [Description("New")]
         New,
         [Description("Action_Debug_Start")]

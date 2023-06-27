@@ -221,7 +221,7 @@ namespace Xpand.TestsLib.Common{
         };
 
         public static TestObserver<T> StartWinTest<T>(this XafApplication application, IObservable<T> test,int delay = 200) 
-            => application.StartTest(application.WhenFrame().Take(1)
+            => application.StartTest(application.WhenFrame(Nesting.Root).Take(1)
                 .Do(_ => SynchronizationContext.SetSynchronizationContext((SynchronizationContext)AppDomain.CurrentDomain
                     .GetAssemblyType("System.Windows.Forms.WindowsFormsSynchronizationContext").CreateInstance()))
                 .SelectMany(frame => (frame.Template)

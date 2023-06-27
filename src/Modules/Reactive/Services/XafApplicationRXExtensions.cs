@@ -330,6 +330,9 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => application.WhenFrame().WhenFrame(objectTypes);
         public static IObservable<Frame> WhenFrame(this XafApplication application, params ViewType[] viewTypes) 
             => application.WhenFrame().WhenFrame(viewTypes);
+        
+        public static IObservable<Frame> WhenFrame(this XafApplication application, Nesting nesting) 
+            => application.WhenFrame().WhenFrame(nesting);
         public static IObservable<Frame> WhenFrame(this XafApplication application, params string[] viewIds) 
             => application.WhenFrame().WhenFrame(viewIds);
         
@@ -881,9 +884,10 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             Func<IObjectSpace, IObservable<T>> commit, int retry, string caller) 
             => objectSpaceSource(space => !xafApplication.IsDisposed() ? space.Commit(commit, caller, observer) : Observable.Empty<T[]>(), objectType)
                 .RetryWithBackoff(retry).DoOnError(observer.OnError).Select(_ => default(object));
+
+        public static IObservable<Frame> Navigate(this XafApplication application, Type objectType,ViewType viewType)
+            => application.WhenFrame(objectType,viewType).Publish(frames => application.Navigate(application.FindViewId(viewType, objectType), frames));
         
-        public static IObservable<Frame> Navigate(this XafApplication application, string viewId, Type objectType,params ViewType[] viewTypes)
-            => application.WhenFrame(objectType,viewTypes).Publish(frames => application.Navigate(viewId, frames));
         public static IObservable<Frame> Navigate(this XafApplication application,string viewId, IObservable<Frame> afterNavigation) 
             => application.Defer(() => {
                 var controller = application.MainWindow.GetController<ShowNavigationItemController>();
@@ -891,11 +895,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 return controller.ShowNavigationItemAction.Trigger(afterNavigation);
             });
 
-        // return afterNavigation.Merge(Unit.Default.Observe().ObserveOnDefault().ObserveOnContext().Do(_ => {
-        //     var controller = application.MainWindow.GetController<ShowNavigationItemController>();
-        //     var item = controller.FindNavigationItemByViewShortcut(new ViewShortcut(viewId, null));
-        //     controller.ShowNavigationItemAction.DoExecute(item);
-        // }).IgnoreElements().To<Frame>());
+
         public static IObservable<Frame> Navigate(this XafApplication application,string viewId) 
             => application.Navigate(viewId,application.WhenFrame(viewId));
 

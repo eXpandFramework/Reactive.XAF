@@ -120,14 +120,11 @@ namespace Xpand.XAF.Modules.Reactive.Services {
                 .Do(typesInfo => AppDomain.CurrentDomain.GetAssemblyType("Xpand.Extensions.XAF.Xpo.XpoExtensions")
                     ?.Method("CustomizeTypesInfo",Flags.StaticAnyVisibility).Call(null,typesInfo))
                 .ToUnit();
-
         
         static IObservable<Unit> ReadOnlyObjectViewAttribute(this ApplicationModulesManager manager)
             => manager.WhenGeneratingModelNodes<IModelViews>().SelectMany().OfType<IModelObjectView>()
                 .SelectMany(view => view.ModelClass.TypeInfo.FindAttributes<ReadOnlyObjectViewAttribute>()
-                    .Where(attribute => view is IModelDetailView && attribute.ViewType == ViewType.DetailView ||
-                                         view is IModelListView && attribute.ViewType == ViewType.ListView ||
-                                         attribute.ViewType == ViewType.Any).ToArray()
+                    .Where(attribute => view.Is( attribute.ViewType)).ToArray()
                     .Execute(attribute => {
                         view.AllowEdit = attribute.AllowEdit;
                         view.AllowDelete = attribute.AllowDelete;
@@ -142,13 +139,11 @@ namespace Xpand.XAF.Modules.Reactive.Services {
                     }).ToObservable(Transform.ImmediateScheduler))
                 .ToUnit()
                 .Merge(manager.WhenCustomizeTypesInfo()
-                    .SelectMany(e => e.TypesInfo.Members<ReadOnlyObjectViewAttribute>().ToObservable()
-                        .Where(t1 => t1.info.IsList)
-                        .GroupBy(t2 => t2.info.ListElementTypeInfo).Select(tuples => tuples.Key)
+                    .SelectMany(e => e.TypesInfo.Members<ReadOnlyObjectViewAttribute>().ToObservable().Where(t1 => t1.info.IsList)
+                        .GroupBy(t2 => t2.info.ListElementTypeInfo).Select(ts => ts.Key)
                         .Do(info => ((TypeInfo) info).AddAttribute(new ReadOnlyObjectViewAttribute()))
                         .ToUnit()));
 
-        
         static IObservable<Unit> VisibleInAllViewsAttribute(this IObservable<CustomizeTypesInfoEventArgs> source)
             => source.ConcatIgnored(e => e.TypesInfo.Members<VisibleInAllViewsAttribute>().ToArray().ToObservable()
                     .SelectMany(t1 => new Attribute[] { new VisibleInDetailViewAttribute(true), new VisibleInListViewAttribute(true), new VisibleInLookupListViewAttribute(true) }
@@ -199,8 +194,5 @@ namespace Xpand.XAF.Modules.Reactive.Services {
                     .FindAttributes<Attribute>().OfType<ICustomAttribute>().ToArray().Select(typeInfo.AddCustomAttribute)))
                 .ToObservable(Scheduler.Immediate)
                 );
-
-        
-
     }
 }

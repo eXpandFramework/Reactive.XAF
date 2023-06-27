@@ -7,9 +7,4 @@ namespace Xpand.Extensions.XAF.Attributes{
 
         public HiddenActionAttribute(params string[] actions) => Actions = actions;
     }
-    
-    public class HideModificationActionsAttribute:HiddenActionAttribute {
-        public HideModificationActionsAttribute() : base("Save","New","SaveAndNew","Delete","SaveAndClose"){
-        }
-    }
 }

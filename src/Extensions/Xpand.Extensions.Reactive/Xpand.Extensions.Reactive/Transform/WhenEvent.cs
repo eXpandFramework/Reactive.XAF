@@ -18,15 +18,9 @@ namespace Xpand.Extensions.Reactive.Transform {
         public static IObservable<EventPattern<object>> WhenEvent(this object source,params string[] eventNames) 
             => eventNames.ToNowObservable().SelectMany(source.FromEventPattern<EventArgs>)
                 .Select(pattern => new EventPattern<object>(pattern.Sender, pattern.EventArgs));
-        // private static IObservable<EventPattern<TArgs>> FromEventHandler<TArgs>(this object source, EventHandler eventHandler) {
-        //     return Observable.FromEventPattern(
-        //             (sender, args) => eventHandler(sender, args),
-        //             (sender, args) => eventHandler.Remove(sender, args))
-        //         .Select(pattern => new EventPattern<TArgs>(pattern.Sender, (TArgs)pattern.EventArgs));
-        // }
+
         private static IObservable<EventPattern<TArgs>> FromEventPattern<TArgs>(this object source, string eventName) {
             var eventInfo = source.EventInfo(eventName);
-            
             if ((eventInfo.info.EventHandlerType?.IsGenericType ?? false)&&eventInfo.info.EventHandlerType.GenericTypeArguments.First()==typeof(TArgs)) {
                 return Observable.FromEventPattern<TArgs>(
                         handler => eventInfo.add.Invoke(source, new object[] { handler }),
