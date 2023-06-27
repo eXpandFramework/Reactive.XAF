@@ -17,7 +17,6 @@ using Fasterflect;
 using HarmonyLib;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.LinqExtensions;
-using Xpand.Extensions.Numeric;
 using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
@@ -27,6 +26,7 @@ using Xpand.Extensions.XAF.Attributes;
 using Xpand.Extensions.XAF.Harmony;
 using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.Extensions.XAF.ModuleExtensions;
+using Xpand.Extensions.XAF.ObjectSpaceExtensions;
 using Xpand.Extensions.XAF.TypesInfoExtensions;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Security;
@@ -109,6 +109,7 @@ namespace Xpand.XAF.Modules.Reactive{
                 .Merge(application.ReloadWhenChanged())
                 .Merge(application.FireChanged())
                 .Merge(application.ShowMessages())
+                .Merge(application.EnsureNewInstanceOnNonPersistentDetailView())
                 .Merge(application.ShowInstanceDetailView());
         }
 
@@ -116,6 +117,11 @@ namespace Xpand.XAF.Modules.Reactive{
         private static IObservable<Unit> ShowInstanceDetailView(this XafApplication application)
             => application.WhenSetupComplete().SelectMany(_ => application.WhenViewOnFrame().ShowInstanceDetailView(application.TypesInfo
                     .PersistentTypes.Attributed<ShowInstanceDetailViewAttribute>().Types().Select(info => info.Type).ToArray())).ToUnit();
+        
+        private static IObservable<Unit> EnsureNewInstanceOnNonPersistentDetailView(this XafApplication application)
+            => application.WhenSetupComplete().SelectMany(_ => application.WhenFrame(ViewType.DetailView)
+                .Where(frame => frame.View.CurrentObject==null&&!frame.View.ObjectTypeInfo.IsPersistent&&frame.View.ObjectSpace.CanCreateObject(frame.View.ObjectTypeInfo))
+                .Do(frame => frame.View.CurrentObject=frame.View.ObjectSpace.CreateObject(frame.View.ObjectTypeInfo.Type))).ToUnit();
         
         private static IObservable<Unit> FireChanged(this XafApplication application)
             => application.WhenSetupComplete().SelectMany(_ => {
