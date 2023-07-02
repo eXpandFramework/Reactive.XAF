@@ -126,7 +126,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 return detailView != null ? detailView.NestedFrameContainers(objectTypes).OfType<TFrameContainer>() : Observable.Never<TFrameContainer>();
             });
             return listFrameContainers.WhenNotDefault(container => container.Frame)
-                .Where(frameContainer => objectTypes.Any(type => type.IsAssignableFrom(frameContainer.Frame.View.ObjectTypeInfo.Type)))
+                .Where(frameContainer =>!objectTypes.Any()|| objectTypes.Any(type => type.IsAssignableFrom(frameContainer.Frame.View.ObjectTypeInfo.Type)))
                 .Merge(nestedEditors);
         }
 

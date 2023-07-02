@@ -100,7 +100,7 @@ namespace Xpand.XAF.Modules.Reactive.Services {
                 .ToUnit();
         
         static IObservable<Unit> ReadOnlyCollection(this ApplicationModulesManager manager)
-            => manager.WhenApplication(application => application.WhenFrame().WhenFrame(ViewType.DetailView)
+            => manager.WhenApplication(application => application.WhenFrame(ViewType.DetailView)
                 .SelectMany(frame => frame.View.AsDetailView().NestedListViews()
                     .SelectMany(editor => editor.MemberInfo.FindAttributes<ReadOnlyCollectionAttribute>()
                         .Select(attribute => (attribute, editor))
@@ -109,6 +109,10 @@ namespace Xpand.XAF.Modules.Reactive.Services {
                             nestedFrameView.AllowEdit[nameof(ReadOnlyCollectionAttribute)] = t.attribute.AllowEdit;
                             nestedFrameView.AllowDelete[nameof(ReadOnlyCollectionAttribute)] = t.attribute.AllowDelete;
                             nestedFrameView.AllowNew[nameof(ReadOnlyCollectionAttribute)] = t.attribute.AllowNew;
+                            var linkUnlinkController = t.editor.Frame.GetController<LinkUnlinkController>();
+                            if (linkUnlinkController != null) {
+                                linkUnlinkController.Active[nameof(ReadOnlyCollectionAttribute)] = t.attribute.AllowLinkUnLink;   
+                            }
                             t.editor.Frame.GetController<ListViewProcessCurrentObjectController>()
                                     .ProcessCurrentObjectAction.Active[nameof(ReadOnlyCollectionAttribute)] =
                                 !t.attribute.DisableListViewProcess;

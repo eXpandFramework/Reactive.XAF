@@ -1,4 +1,8 @@
 ﻿using System;
+using System.Linq;
+using System.Linq.Expressions;
+using DevExpress.Data.Linq.Helpers;
+using DevExpress.Data.ODataLinq.Helpers;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;
 using Fasterflect;

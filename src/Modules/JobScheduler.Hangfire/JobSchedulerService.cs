@@ -187,11 +187,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
             RecurringJob.Trigger(job.Id);
             return job;
         }
-        
-        [Obsolete]
-        public static void AddOrUpdateHangfire(this Job job) 
-            => RecurringJob.AddOrUpdate(job.Id, job.Expression(), () => job.CronExpression?.Expression??Cron.Never());
-        
+
         public static void AddOrUpdateHangfire(this Job job,IServiceProvider serviceProvider) 
             => serviceProvider.GetService<IRecurringJobManager>()
                 .AddOrUpdate(job.Id, job.Expression(), () => job.CronExpression?.Expression??Cron.Never());

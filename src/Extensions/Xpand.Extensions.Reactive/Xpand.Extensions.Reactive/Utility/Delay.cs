@@ -10,12 +10,17 @@ namespace Xpand.Extensions.Reactive.Utility {
         public static IObservable<T> Defer<T>(this object o, IObservable<T> execute)
             => Observable.Defer(() => execute);
         
+        public static IObservable<Unit> DeferAction<T>(this T o, Action execute)
+            => Observable.Defer(() => {
+                execute();
+                return Observable.Empty<Unit>();
+            });
         public static IObservable<Unit> DeferAction<T>(this T o, Action<T> execute)
             => Observable.Defer(() => {
                 execute(o);
                 return Observable.Empty<Unit>();
             });
-        
+
         public static IObservable<T> Defer<T,TObject>(this TObject o, Func<TObject,IObservable<T>> selector)
             => Observable.Defer(() => selector(o));
         

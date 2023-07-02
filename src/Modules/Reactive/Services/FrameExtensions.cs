@@ -15,7 +15,9 @@ using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.ActionExtensions;
+using Xpand.Extensions.XAF.Attributes;
 using Xpand.Extensions.XAF.ModelExtensions;
+using Xpand.Extensions.XAF.TypesInfoExtensions;
 using Xpand.Extensions.XAF.ViewExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
@@ -27,7 +29,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => source.Where(_ => _.Application.Modules.FindModule(moduleType) != null);
 
         public static IObservable<TFrame> MergeViewCurrentObjectChanged<TFrame>(this IObservable<TFrame> source) where TFrame : Frame
-            => source.SelectMany(frame => frame.View.WhenCurrentObjectChanged().DistinctUntilChanged(view => view.ObjectSpace.GetKeyValue(view.CurrentObject))
+            => source.SelectMany(frame => frame.View.WhenCurrentObjectChanged().WhenNotDefault(view => view.CurrentObject)
+                .DistinctUntilChanged(view => view.ObjectSpace.GetKeyValue(view.CurrentObject))
                     .WhenNotDefault(view => view.CurrentObject).To(frame).WaitUntilInactive(3.Seconds()).ObserveOnContext());
         
         public static IObservable<TFrame> When<TFrame>(this IObservable<TFrame> source, TemplateContext templateContext) where TFrame : Frame 
@@ -120,8 +123,15 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<SimpleActionExecuteEventArgs> ShowInstanceDetailView(this IObservable<Frame> source,params  Type[] objectTypes) 
             => source.WhenFrame(objectTypes).WhenFrame(ViewType.ListView).ToController<ListViewProcessCurrentObjectController>().CustomProcessSelectedItem(true)
                 .DoWhen(e => e.View().ObjectTypeInfo.Type.IsInstanceOfType(e.View().CurrentObject),
-                    e => e.ShowViewParameters.CreatedView = e.Application().NewDetailView(space => space.GetObject(e.Action.View().CurrentObject),
-                        e.View().CurrentObject.GetType().GetModelClass().DefaultDetailView));
+                    e => {
+                        var currentObject = e.Action.View().CurrentObject;
+                        var typeInfo = currentObject.GetType().ToTypeInfo();
+                        var property = typeInfo.FindAttribute<ShowInstanceDetailViewAttribute>().Property;
+                        if (property != null) {
+                            currentObject = typeInfo.FindMember(property).GetValue(currentObject);
+                        }
+                        e.ShowViewParameters.CreatedView = e.Application().NewDetailView(space => space.GetObject(currentObject), currentObject.GetType().GetModelClass().DefaultDetailView);
+                    });
         
         public static IObservable<ListPropertyEditor> NestedListViews(this Frame frame, params Type[] objectTypes ) 
             => frame.View.ToDetailView().NestedListViews(objectTypes);

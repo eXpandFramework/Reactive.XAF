@@ -121,7 +121,11 @@ namespace Xpand.XAF.Modules.Reactive{
         private static IObservable<Unit> EnsureNewInstanceOnNonPersistentDetailView(this XafApplication application)
             => application.WhenSetupComplete().SelectMany(_ => application.WhenFrame(ViewType.DetailView)
                 .Where(frame => frame.View.CurrentObject==null&&!frame.View.ObjectTypeInfo.IsPersistent&&frame.View.ObjectSpace.CanCreateObject(frame.View.ObjectTypeInfo))
-                .Do(frame => frame.View.CurrentObject=frame.View.ObjectSpace.CreateObject(frame.View.ObjectTypeInfo.Type))).ToUnit();
+                .Do(frame => {
+                    var currentObject = frame.View.ObjectSpace.CreateObject(frame.View.ObjectTypeInfo.Type);
+                    frame.View.ObjectSpace.CommitChanges();
+                    frame.View.CurrentObject = currentObject;
+                })).ToUnit();
         
         private static IObservable<Unit> FireChanged(this XafApplication application)
             => application.WhenSetupComplete().SelectMany(_ => {
