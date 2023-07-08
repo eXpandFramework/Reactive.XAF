@@ -16,11 +16,13 @@ using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.DC;
+using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using DevExpress.ExpressApp.SystemModule;
 using Fasterflect;
 using Xpand.Extensions.EventArgExtensions;
+using Xpand.Extensions.ExpressionExtensions;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Combine;
@@ -35,6 +37,7 @@ using Xpand.Extensions.XAF.ApplicationModulesManagerExtensions;
 using Xpand.Extensions.XAF.Attributes;
 using Xpand.Extensions.XAF.CollectionSourceExtensions;
 using Xpand.Extensions.XAF.FrameExtensions;
+using Xpand.Extensions.XAF.ObjectExtensions;
 using Xpand.Extensions.XAF.ObjectSpaceExtensions;
 using Xpand.Extensions.XAF.ObjectSpaceProviderExtensions;
 using Xpand.Extensions.XAF.SecurityExtensions;
@@ -814,7 +817,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .Where(space => space.Owner is not CompositeObjectSpace)
                 .Do(space => space.PopulateAdditionalObjectSpaces(application)).ToUnit();
 
-        public static IObservable<(Frame source, Frame target, T1 sourceObject, T2 targetObject, int targetIndex)> SynchronizeGridListEditor<T1, T2>(
+        public static IObservable<(Frame source, Frame target, T1 sourceObject, T2 targetObject, int targetIndex)> SynchronizeGridListEditorSelection<T1, T2>(
                 this IObservable<(Frame source, Frame target, T1 sourceObject, T2 targetObject, int targetIndex)>  source)
             => source.Do(t => {
                 var editor = t.target.View.AsListView().Editor;
@@ -826,20 +829,46 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                     gridView.SetPropertyValue("FocusedRowHandle", index);
                 }
             });
+        
+        public static IObservable<Unit> SynchronizeNestedListViewSource<T1, T2>(
+            this XafApplication application, Expression<Func<T2, T1>> collection) 
+            => application.WhenNestedListViewsSelectionChanged(typeof(T1),typeof(T2), collection.MemberExpressionName(), whenSourceViewSelectionChanged:
+                    t => t.target.View.ToListView().Observe().Do(view => view.CollectionSource.Criteria[nameof(SynchronizeNestedListViewSource)]=null))
+                .Do(t => t.target.View.ToListView().CollectionSource.Criteria[nameof(SynchronizeNestedListViewSource)] =
+                    CriteriaOperator.Parse($"{collection.MemberExpressionName()}=?", collection.Compile()((T2)t.targetObject)))
+                .ToUnit();
+        public static IObservable<Unit> SynchronizeNestedListViewSource(
+            this XafApplication application,Type sourceType,Type targetType, string targetPropertyName) 
+            => application.WhenNestedListViewsSelectionChanged(sourceType, targetType, targetPropertyName, whenSourceViewSelectionChanged:
+                    t => t.target.View.ToListView().Observe().Do(view => view.CollectionSource.Criteria[nameof(SynchronizeNestedListViewSource)]=null))
+                .Do(t => t.target.View.ToListView().CollectionSource.Criteria[nameof(SynchronizeNestedListViewSource)] =
+                    CriteriaOperator.Parse($"{targetPropertyName}=?", t.targetObject.GetTypeInfo().FindMember(targetPropertyName).GetValue(t.targetObject)))
+                .ToUnit();
+        public static IObservable<Unit> SynchronizeNestedListViewSource(
+            this XafApplication application,IMemberInfo sourceMember,IMemberInfo targetMember, string targetPropertyName) 
+            => application.WhenNestedListViewsSelectionChanged(sourceMember.ListElementType, targetMember.ListElementType, targetPropertyName
+                    ,sourceSelector:sourceFrame =>sourceFrame.Where(frame => frame.ViewItem is ListPropertyEditor editor&&editor.MemberInfo==sourceMember) 
+                    ,targetSelector:targetFrame =>targetFrame.Where(frame => frame.ViewItem is ListPropertyEditor editor&&editor.MemberInfo==targetMember) 
+                    , whenSourceViewSelectionChanged: t => t.target.View.ToListView().Observe().Do(view => view.CollectionSource.Criteria[nameof(SynchronizeNestedListViewSource)]=null))
+                .Do(t => t.target.View.ToListView().CollectionSource.Criteria[nameof(SynchronizeNestedListViewSource)] =
+                    CriteriaOperator.Parse($"{targetPropertyName}=?", t.targetObject.GetTypeInfo().FindMember(targetPropertyName).GetValue(t.targetObject)))
+                .ToUnit();
 
-        public static IObservable<(Frame source, Frame target, T1 sourceObject, T2 targetObject, int targetIndex)> WhenNestedListViewsSelectionChanged<T1, T2>(
-            this XafApplication application, Func<T1, T2, bool> objectSelector, Func<IObservable<Frame>, IObservable<Frame>> sourceSelector = null,
-                Func<IObservable<Frame>, IObservable<Frame>> targetSelector = null,Func<T1, object> sourceOrderSelector=null,Func<T2, object> targetOrderSelector=null) 
-            => application.WhenFrame().WhenFrame(typeof(T1), ViewType.ListView, Nesting.Nested)
-                .Publish(sourceFrame => sourceSelector?.Invoke(sourceFrame) ?? sourceFrame)
-                .Zip(application.WhenFrame().WhenFrame(typeof(T2), ViewType.ListView, Nesting.Nested)
-                    .Publish(targetFrame => targetSelector?.Invoke(targetFrame) ?? targetFrame))
-                .Select(t => (source: t.First, target: t.Second)).SelectMany(t => t.source.View.WhenSelectionChanged()
-                    .SelectMany(sourceView => sourceView.SelectedObjects.Cast<T1>().OrderBy(arg =>sourceOrderSelector?.Invoke(arg) ).ToArray().ToNowObservable()
-                        .SelectMany(sourceObject => t.target.View.AsListView().CollectionSource.Objects().Cast<T2>()
-                            .OrderBy(arg => targetOrderSelector?.Invoke(arg)).ToArray().ToNowObservable()
-                            .Select((targetObject, targetIndex) => objectSelector(sourceObject, targetObject)
-                                ? (t.source, t.target, sourceObject, targetObject, targetIndex) : default))))
+        public static IObservable<(NestedFrame source, NestedFrame target, object sourceObject, object targetObject, int targetIndex)> WhenNestedListViewsSelectionChanged(
+            this XafApplication application,Type sourceType,Type targetType, string targetPropertyName, Func<IObservable<NestedFrame>, IObservable<NestedFrame>> sourceSelector = null,
+                Func<IObservable<NestedFrame>, IObservable<NestedFrame>> targetSelector = null,Func<object, object> sourceSortSelector=null,Func<object, object> targetSortSelector=null,
+            Func<(Frame source,Frame target),IObservable<object>> whenSourceViewSelectionChanged=null) 
+            => application.WhenFrame(sourceType, ViewType.ListView, Nesting.Nested).Cast<NestedFrame>()
+                .Publish(sourceFrame => (sourceSelector?.Invoke(sourceFrame) ?? sourceFrame).Select(frame => frame))
+                .Zip(application.WhenFrame(targetType, ViewType.ListView, Nesting.Nested).Cast<NestedFrame>()
+                    .Publish(targetFrame => (targetSelector?.Invoke(targetFrame) ?? targetFrame).Select(frame => frame)))
+                .Select(t => (source: t.First, target: t.Second)).SelectMany(t => t.source.View.WhenSelectionChanged().StartWith(t.source.View)
+                    .ConcatIgnored(_ => whenSourceViewSelectionChanged?.Invoke((t.source,t.target))??Observable.Empty<object>())
+                    .SelectMany(sourceView => sourceView.SelectedObjects.Cast<object>().OrderBy(arg =>sourceSortSelector?.Invoke(arg) ).ToArray().ToNowObservable()
+                        .SelectMany(sourceObject => t.target.View.AsListView().CollectionSource.Objects()
+                            .OrderBy(arg => targetSortSelector?.Invoke(arg)).ToArray().ToNowObservable()
+                            .Select((targetObject, targetIndex) => targetObject.GetTypeInfo().FindMember(targetPropertyName).GetValue(targetObject).Equals(sourceObject) ?
+                                (t.source, t.target, sourceObject, targetObject, targetIndex) : default))))
                 .WhenNotDefault();
         
         public static IObservable<SimpleActionExecuteEventArgs> WhenListViewProcessSelectedItem<T>(this XafApplication application,Nesting nesting=Nesting.Any,bool handled=true)  
@@ -858,19 +887,20 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                     .DoWhen(_ => objectTypes.Contains(controller.Frame.View?.ObjectTypeInfo?.Type),e =>  e.WindowCaption.FirstPart = $"{controller.Frame.View?.CurrentObject}")).ToUnit();
 
         public static IObservable<T[]> CommitChangesSequential<T>(this XafApplication application,
-            Func<IObjectSpace, IObservable<T>> commit, Func<Func<IObjectSpace, IObservable<T[]>>, Type, IObservable<T>> objectSpaceSource = null, int retry = 3,
+            Func<IObjectSpace, IObservable<T>> commit, Func<Func<IObjectSpace, IObservable<T[]>>, Type, IObservable<T>> objectSpaceSource = null,bool validate=false, int retry = 3,
             [CallerMemberName] string caller = "") 
-            => application.CommitChangesSequential(typeof(T),commit,objectSpaceSource,retry,caller);
+            => application.CommitChangesSequential(typeof(T),commit,objectSpaceSource,validate,retry,caller);
+        
         public static IObservable<T[]> CommitChangesSequential<T>(this XafApplication application,
-            Func<IObjectSpace, Task<T>> commit, Func<Func<IObjectSpace, IObservable<T[]>>, Type, IObservable<T>> objectSpaceSource = null, int retry = 3,
-            [CallerMemberName] string caller = "") 
-            => application.CommitChangesSequential(typeof(T),space => commit(space).ToObservable(),objectSpaceSource,retry,caller);
+            Func<IObjectSpace, Task<T>> commit, Func<Func<IObjectSpace, IObservable<T[]>>, Type, IObservable<T>> objectSpaceSource = null
+            ,bool validate=false, int retry = 3, [CallerMemberName] string caller = "") 
+            => application.CommitChangesSequential(typeof(T),space => commit(space).ToObservable(),objectSpaceSource,validate,retry,caller);
 
         public static IObservable<T[]> CommitChangesSequential<T>(this XafApplication application, Type objectType,
-            Func<IObjectSpace, IObservable<T>> commit, Func<Func<IObjectSpace, IObservable<T[]>>, Type, IObservable<T>> objectSpaceSource = null, int retry = 3,
+            Func<IObjectSpace, IObservable<T>> commit, Func<Func<IObjectSpace, IObservable<T[]>>, Type, IObservable<T>> objectSpaceSource = null,bool validate=false, int retry = 3,
             [CallerMemberName] string caller = "") 
             => Observable.Using(() => new BehaviorSubject<T[]>(null), subject => {
-                CommitChangesSubject.OnNext(() => subject.CommitChangesSequential(application,application.ObjectSpaceSource( objectSpaceSource, caller), objectType, commit, retry, caller));
+                CommitChangesSubject.OnNext(() => subject.CommitChangesSequential(application,application.ObjectSpaceSource( objectSpaceSource, caller), objectType, commit, retry, caller,validate));
                 return subject.DoNotComplete().WhenNotDefault().Take(1).Select(arg => arg).DoOnComplete(() => {});
             });
 
@@ -881,8 +911,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         private static IObservable<object> CommitChangesSequential<T>(this IObserver<T[]> observer, XafApplication xafApplication,
             Func<Func<IObjectSpace, IObservable<T[]>>, Type, IObservable<T>> objectSpaceSource, Type objectType,
-            Func<IObjectSpace, IObservable<T>> commit, int retry, string caller) 
-            => objectSpaceSource(space => !xafApplication.IsDisposed() ? space.Commit(commit, caller, observer) : Observable.Empty<T[]>(), objectType)
+            Func<IObjectSpace, IObservable<T>> commit, int retry, string caller,bool validate) 
+            => objectSpaceSource(space => !xafApplication.IsDisposed() ? space.Commit(commit, caller, observer,validate) : Observable.Empty<T[]>(), objectType)
                 .RetryWithBackoff(retry).DoOnError(observer.OnError).Select(_ => default(object));
 
         public static IObservable<Frame> Navigate(this XafApplication application, Type objectType,ViewType viewType)
@@ -899,12 +929,17 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<Frame> Navigate(this XafApplication application,string viewId) 
             => application.Navigate(viewId,application.WhenFrame(viewId));
 
-        private static IObservable<T[]> Commit<T>(this IObjectSpace objectSpace,Func<IObjectSpace, IObservable<T>> commit, string caller, IObserver<T[]> observer) 
+        private static IObservable<T[]> Commit<T>(this IObjectSpace objectSpace,Func<IObjectSpace, IObservable<T>> commit, string caller, IObserver<T[]> observer,bool validate) 
             => commit(objectSpace).BufferUntilCompleted()
                 .Timeout(TimeSpan.FromMinutes(10))
                 .Catch<T[], TimeoutException>(_ => Observable.Throw<T[]>(new TimeoutException(caller)))
                 .Do(arg => {
-                    objectSpace.CommitChanges();
+                    if (validate) {
+                        objectSpace.CommitChangesAndValidate();
+                    }
+                    else {
+                        objectSpace.CommitChanges();    
+                    }
                     observer.OnNext(arg);
                 });
     }

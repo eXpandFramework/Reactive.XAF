@@ -41,7 +41,9 @@ namespace Xpand.XAF.Modules.Reactive.Services {
                 .Merge(manager.ReadOnlyProperty())
                 .Merge(manager.LookupPropertyAttribute())
                 .Merge(manager.LinkUnlinkPropertyAttribute())
-                .Merge(manager.ReadOnlyObjectViewAttribute());
+                .Merge(manager.ReadOnlyObjectViewAttribute())
+                .Merge(manager.DetailCollectionAttribute())
+            ;
 
         static IObservable<Unit> LinkUnlinkPropertyAttribute(this ApplicationModulesManager manager)
             => manager.WhenApplication(application => application.WhenFrame(typeof(object),ViewType.DetailView)
@@ -124,7 +126,14 @@ namespace Xpand.XAF.Modules.Reactive.Services {
                 .Do(typesInfo => AppDomain.CurrentDomain.GetAssemblyType("Xpand.Extensions.XAF.Xpo.XpoExtensions")
                     ?.Method("CustomizeTypesInfo",Flags.StaticAnyVisibility).Call(null,typesInfo))
                 .ToUnit();
-        
+
+        static IObservable<Unit> DetailCollectionAttribute(this ApplicationModulesManager manager)
+            => manager.WhenApplication(application => application.WhenSetupComplete()
+                .SelectMany(_ => application.TypesInfo.PersistentTypes.Where(info => !info.IsAbstract)
+                    .AttributedMembers<DetailCollectionAttribute>().ToObservable()
+                    .SelectMany(t => application.SynchronizeNestedListViewSource(
+                        t.memberInfo.Owner.FindMember(t.attribute.MasterCollectionName),
+                        t.memberInfo, t.attribute.ChildPropertyName))));
         static IObservable<Unit> ReadOnlyObjectViewAttribute(this ApplicationModulesManager manager)
             => manager.WhenGeneratingModelNodes<IModelViews>().SelectMany().OfType<IModelObjectView>()
                 .SelectMany(view => view.ModelClass.TypeInfo.FindAttributes<ReadOnlyObjectViewAttribute>()
