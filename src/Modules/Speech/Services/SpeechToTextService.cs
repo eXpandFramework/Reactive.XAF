@@ -137,14 +137,11 @@ namespace Xpand.XAF.Modules.Speech.Services {
 		        .MergeToUnit(manager.WhenSpeechApplication(application => application.WhenFrame(typeof(SpeechToText),ViewType.DetailView)
 			        .SelectUntilViewClosed(frame => frame.View.ObjectSpace.WhenCommitted<SpeechText>(ObjectModification.Deleted)
 				        .Do(_ => frame.GetController<RefreshController>().RefreshAction.DoExecute()))));
-
-
-        private static IObservable<Unit> SynchronizeSpeechTextListViewSelection(this XafApplication application) {
-	        return application.WhenNestedListViewsSelectionChanged<SpeechText, SpeechTranslation>(
-			        (speechText, speechTranslation) => speechText.Start == speechTranslation.SourceText?.Start, 
-			        sourceOrderSelector: text => text.Start,targetOrderSelector:translation => translation.Start)
-		        .SynchronizeGridListEditor().ToUnit();
-        }
+        
+        private static IObservable<Unit> SynchronizeSpeechTextListViewSelection(this XafApplication application) 
+	        => application.WhenNestedListViewsSelectionChanged<SpeechText,SpeechTranslation>((speechText, speechTranslation) => speechText.Start == speechTranslation.SourceText?.Start,
+			        sourceSortSelector:speechText => speechText.Start,targetSortSelector:speechTranslation =>speechTranslation.Start )
+		        .SynchronizeGridListEditorSelection().ToUnit();
 
 
         private static IObservable<Unit> SSML(this ApplicationModulesManager manager) 

@@ -95,11 +95,11 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static IObservable<TFrame> DisableSimultaneousModificationsException<TFrame>(this TFrame frame) where TFrame : Frame 
             => frame.Controllers.Cast<Controller>().Where(controller1 => controller1.Name=="DevExpress.ExpressApp.Win.SystemModule.LockController").Take(1).ToNowObservable()
-                .SelectMany(controller1 => controller1.WhenEvent("CustomProcessSimultaneousModificationsException")
+                .SelectMany(controller1 => controller1.WhenEvent("CustomProcessSimultaneousModificationsException").TakeUntil(frame.WhenDisposedFrame())
                     .Do(args => args.EventArgs.Cast<HandledEventArgs>().Handled=true)).To(frame);
 
         public static IObservable<Unit> WhenDisposingFrame<TFrame>(this TFrame source) where TFrame : Frame 
-            => source.WhenEvent(nameof(Frame.Disposing)).ToUnit();
+            => source.WhenEvent(nameof(Frame.Disposing)).TakeUntil(source.WhenDisposedFrame()).ToUnit();
         
         public static IObservable<Unit> WhenDisposedFrame<TFrame>(this TFrame source) where TFrame : Frame 
             => source.WhenEvent(nameof(Frame.Disposed)).ToUnit();

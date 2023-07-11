@@ -15,21 +15,23 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static IObservable<ProxyCollection> WhenProxyCollectionChanged(this CollectionSourceBase collectionSourceBase) 
             => collectionSourceBase.Collection is not ProxyCollection proxyCollection ? Observable.Empty<ProxyCollection>()
-                : proxyCollection.WhenEvent(nameof(ProxyCollection.ListChanged))
+                : proxyCollection.WhenEvent(nameof(ProxyCollection.ListChanged)).TakeUntil(collectionSourceBase.WhenDisposed())
                     .Select(pattern => pattern.Sender).Cast<ProxyCollection>().TraceRX(_ => collectionSourceBase.ObjectTypeInfo.Type.FullName);
 
         public static IObservable<T> WhenCollectionReloaded<T>(this T collection) where T:CollectionSourceBase 
             => collection.WhenEvent(nameof(CollectionSourceBase.CollectionReloaded)).Select(_ => _.Sender).Cast<T>()
+                .TakeUntil(collection.WhenDisposed())
                 .TraceRX(c => c.ObjectTypeInfo.Type.FullName);
 
         public static IObservable<T> WhenCollectionChanged<T>(this T collectionSourceBase) where T:CollectionSourceBase 
-            => collectionSourceBase.WhenEvent(nameof(CollectionSourceBase.CollectionChanged)).To(collectionSourceBase).TraceRX();
+            => collectionSourceBase.WhenEvent(nameof(CollectionSourceBase.CollectionChanged)).To(collectionSourceBase)
+                .TakeUntil(collectionSourceBase.WhenDisposed());
         
         public static IObservable<FetchObjectsEventArgs> WhenFetchObjects<T>(this T collection) where T:DynamicCollection
             => collection.WhenEvent<FetchObjectsEventArgs>(nameof(DynamicCollection.FetchObjects));
         
         public static IObservable<DynamicCollection> WhenLoaded(this DynamicCollection collection) 
-            => collection.WhenEvent(nameof(DynamicCollection.Loaded)).To(collection);
+            => collection.WhenEvent(nameof(DynamicCollection.Loaded)).To(collection).TakeUntil(dynamicCollection => dynamicCollection.IsDisposed);
 
         public static IObservable<T> WhenDisposed<T>(this T collectionSourceBase) where T:CollectionSourceBase 
             => collectionSourceBase.WhenEvent(nameof(CollectionSourceBase.Disposed)).To(collectionSourceBase);

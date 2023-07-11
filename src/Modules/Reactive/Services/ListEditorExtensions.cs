@@ -19,12 +19,12 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             }).Finally(() => editor.GetPropertyValue("GridView")?.CallMethod("EndDataUpdate"));
 
         public static IObservable<ListEditor> WhenModelApplied(this ListEditor editor) 
-            => editor.WhenEvent(nameof(ListEditor.ModelApplied)).To(editor);
+            => editor.WhenEvent(nameof(ListEditor.ModelApplied)).TakeUntil(_ => editor.IsDisposed).To(editor);
 
         public static IObservable<NewObjectAddingEventArgs> WhenNewObjectAdding(this ListEditor editor) 
             => editor.WhenEvent<NewObjectAddingEventArgs>(nameof(editor.NewObjectAdding));
 
         public static IObservable<ListEditor> WhenProcessSelectedItem(this ListEditor editor) 
-            => editor.WhenEvent(nameof(ListEditor.ProcessSelectedItem)).To(editor);
+            => editor.WhenEvent(nameof(ListEditor.ProcessSelectedItem)).TakeUntil(_ => editor.IsDisposed).To(editor);
     }
 }

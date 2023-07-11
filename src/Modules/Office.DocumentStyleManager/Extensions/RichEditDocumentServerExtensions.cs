@@ -24,20 +24,24 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Extensions{
         public static IScheduler EventsScheduler=ImmediateScheduler.Instance;
 
         public static IObservable<IRichEditDocumentServer> WhenModifiedChanged(this IRichEditDocumentServer server) 
-            => server.WhenEvent(nameof(IRichEditDocumentServer.ModifiedChanged)).To(server);
+            => server.WhenEvent(nameof(IRichEditDocumentServer.ModifiedChanged))
+                .TakeUntil(_ => server.IsDisposed).To(server);
 
         public static IObservable<IRichEditDocumentServer> WhenContentChanged(this IRichEditDocumentServer server) 
-            => server.WhenEvent(nameof(IRichEditDocumentServer.ContentChanged)).To(server);
+            => server.WhenEvent(nameof(IRichEditDocumentServer.ContentChanged))
+                .TakeUntil(_ => server.IsDisposed)
+                .To(server);
 
         public static IObservable<IRichEditDocumentServer> WhenSelectionChanged(this IRichEditDocumentServer server) 
-            => server.WhenEvent(nameof(IRichEditDocumentServer.SelectionChanged)).To(server);
+            => server.WhenEvent(nameof(IRichEditDocumentServer.SelectionChanged))
+                .TakeUntil(_ => server.IsDisposed)
+                .To(server);
 
         internal static IObservable<IRichEditDocumentServer> WhenRichEditDocumentServer(this DetailView detailView, string member) 
             => detailView.GetPropertyEditor(member).WhenControlCreated().Cast<PropertyEditor>().Select(RichEditControl);
 
         internal static IRichEditDocumentServer RichEditControl(this PropertyEditor propertyEditor) 
-            =>
-            (IRichEditDocumentServer) propertyEditor.GetPropertyValue("RichEditControl");
+            => (IRichEditDocumentServer) propertyEditor.GetPropertyValue("RichEditControl");
 
         internal static IObservable<IRichEditDocumentServer> WhenRichEditDocumentServer<T>(this DetailView detailView, Expression<Func<T, object>> memberSelector) 
             => detailView.WhenRichEditDocumentServer(memberSelector.MemberExpressionName());

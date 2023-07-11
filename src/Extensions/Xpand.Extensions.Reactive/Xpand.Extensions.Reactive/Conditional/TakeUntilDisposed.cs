@@ -6,6 +6,6 @@ using Xpand.Extensions.Reactive.Transform;
 namespace Xpand.Extensions.Reactive.Conditional{
     public static partial class Conditional{
         public static IObservable<T> TakeUntilDisposed<T>(this IObservable<T> source, IComponent component) 
-            => source.TakeUntil(component.WhenDisposed());
+            => component != null ? source.TakeUntil(component.WhenDisposed()) : source;
     }
 }

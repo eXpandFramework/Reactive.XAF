@@ -5,6 +5,7 @@ using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Editors;
+using Fasterflect;
 using Xpand.Extensions.Reactive.Transform;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
@@ -20,8 +21,12 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<T> WhenControlCreated<T>(this T source) where T:ViewItem 
             => source.Observe().ControlCreated();
 
+        public static bool IsDisposed<T>(this T source) where T : ViewItem
+            => (bool)source.GetPropertyValue("IsDisposed");
+        
         public static IObservable<T> ControlCreated<T>(this IObservable<T> source) where T:ViewItem
             => source.SelectMany(item => item.WhenEvent(nameof(ViewItem.ControlCreated))
+                .TakeUntil(_ => item.IsDisposed())
                 .Select(_ => item));
     }
 }

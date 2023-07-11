@@ -53,7 +53,7 @@ namespace Xpand.XAF.Modules.Speech.Services {
                     action.Value = 2;
                     action.ToolTip = $"{action.Caption} (CTRL+B)";
                 },PredefinedCategory.PopupActions)
-                .MergeIgnored(action => action.WhenEvent("ValueChanged").DoWhen(_ => action.Value==null,_ => action.Value=2))
+                .MergeIgnored(action => action.WhenValueChanged().DoWhen(_ => action.Value==null,_ => action.Value=2))
                 .WhenExecuted(e => {
                     Clipboard.SetText(@$"<break time=""{e.Action.AsParametrizedAction().Value}s""/>");
                     SendKeys.Send("^{v}");

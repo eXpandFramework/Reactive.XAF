@@ -34,7 +34,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         private static readonly Subject<(IObjectSpace objectSpace,object instance)> ObjectsSubject = new();
 
         public static IObservable<(IObjectSpace objectSpace, CancelEventArgs e)> WhenRollingBack(this IObjectSpace objectSpace) 
-            => objectSpace.WhenEvent<CancelEventArgs>(nameof(IObjectSpace.RollingBack)).InversePair(objectSpace);
+            => objectSpace.WhenEvent<CancelEventArgs>(nameof(IObjectSpace.RollingBack)).TakeUntil(objectSpace.WhenDisposed()).InversePair(objectSpace);
         
         public static IObservable<TObject> WhenNewObjectCreated<TObjectSpace, TObject>(
             this IObservable<TObjectSpace> source) where TObjectSpace : class,IObjectSpace where TObject : IObjectSpaceLink 
@@ -529,8 +529,9 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => objectSpace.WhenEvent(nameof(IObjectSpace.Committed)).To(objectSpace)
                 .TakeUntil(objectSpace.WhenDisposed());
 
-        public static IObservable<CancelEventArgs> WhenCommiting(this IObjectSpace item) 
-            => item.WhenEvent<CancelEventArgs>(nameof(IObjectSpace.Committing));
+        public static IObservable<CancelEventArgs> WhenCommiting(this IObjectSpace objectSpace) 
+            => objectSpace.WhenEvent<CancelEventArgs>(nameof(IObjectSpace.Committing))
+                .TakeUntil(objectSpace.WhenDisposed());
 
         
         public static IObservable<(IObjectSpace objectSpace,ObjectsManipulatingEventArgs e)> ObjectDeleted(this IObservable<IObjectSpace> source) 
@@ -561,7 +562,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => objectSpace.WhenEvent(nameof(IObjectSpace.Disposed)).ToUnit();
 
         public static IObservable<IObjectSpace> WhenModifyChanged(this IObjectSpace objectSpace) 
-            => objectSpace.WhenEvent(nameof(IObjectSpace.Disposed)).To(objectSpace);
+            => objectSpace.WhenEvent(nameof(IObjectSpace.ModifiedChanged)).To(objectSpace);
 
         public static IObservable<IObjectSpace> WhenModifyChanged(this IObservable<IObjectSpace> source) 
             => source.SelectMany(item => item.WhenModifyChanged());
@@ -603,9 +604,9 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => ReloadObjectSubject.Where(t => t.objectSpace==objectSpace&&t.obj is T tObj&&(obj==null||obj==tObj)).Select(t => (t.objectSpace,(T)t.obj)).AsObservable();
 
         public static IObservable<IObjectSpace> WhenRefreshing(this IObjectSpace objectSpace)
-            => objectSpace.WhenEvent(nameof(IObjectSpace.Refreshing)).To(objectSpace);
+            => objectSpace.WhenEvent(nameof(IObjectSpace.Refreshing)).TakeUntil(objectSpace.WhenDisposed()).To(objectSpace);
         public static IObservable<IObjectSpace> WhenReloaded(this IObjectSpace objectSpace) 
-            => objectSpace.WhenEvent(nameof(IObjectSpace.Reloaded)).To(objectSpace);
+            => objectSpace.WhenEvent(nameof(IObjectSpace.Reloaded)).TakeUntil(objectSpace.WhenDisposed()).To(objectSpace);
 
         public static IObservable<IObjectSpace> WhenReloaded(this IObservable<IObjectSpace> source) 
             => source.SelectMany(item => item.WhenReloaded());

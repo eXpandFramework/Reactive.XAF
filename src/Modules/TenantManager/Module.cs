@@ -1,20 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.Model;
-using DevExpress.ExpressApp.Security;
 using DevExpress.ExpressApp.SystemModule;
-using DevExpress.Persistent.Base;
-
-using Microsoft.AspNetCore.Components;
-using Microsoft.Extensions.DependencyInjection;
 using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.XAF.Modules.Blazor;
-using Xpand.XAF.Modules.Blazor.Services;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
@@ -38,7 +31,7 @@ namespace Xpand.XAF.Modules.TenantManager{
         public override void Setup(ApplicationModulesManager moduleManager){
             base.Setup(moduleManager);
             moduleManager.Connect()
-	            .Merge(Application.WhenViewCreated().SelectMany(view => view.WhenEvent(nameof(View.CustomizeViewShortcut)).Select(pattern => pattern)).ToUnit())
+	            .Merge(Application.WhenViewCreated().SelectMany(view => view.WhenCustomizeViewShortcut()).ToUnit())
                 .TakeUntilDisposed(this)
                 .Subscribe();
         }

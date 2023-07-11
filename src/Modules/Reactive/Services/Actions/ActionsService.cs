@@ -251,7 +251,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
             this IObservable<(TAction action, CancelEventArgs e)> source) where TAction : ActionBase
             => source.Where(t => !t.e.Cancel);
         public static IObservable<(TAction action, CancelEventArgs e)> WhenExecuting<TAction>(this TAction action) where TAction : ActionBase 
-            => action.WhenEvent<CancelEventArgs>(nameof(ActionBase.Executing)).InversePair(action);
+            => action.WhenEvent<CancelEventArgs>(nameof(ActionBase.Executing)).InversePair(action).TakeUntilDisposed(action);
 
         public static  IObservable<(TAction action, Type objectType, View view, Frame frame, IObjectSpace objectSpace, ShowViewParameters showViewParameters)> ToParameter<TAction>(
                 this IObservable<(TAction action, ActionBaseEventArgs e)> source) where TAction : ActionBase => source.Select(_ => {
@@ -437,6 +437,9 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
         public static IObservable<Unit> Disposing<TAction>(this IObservable<TAction> source) where TAction : ActionBase 
             => source .SelectMany(item => item.WhenEvent(nameof(ActionBase.Disposing)).ToUnit());
 
+        public static IObservable<ParametrizedAction> WhenValueChanged(this ParametrizedAction action)
+            => action.WhenEvent(nameof(ParametrizedAction.ValueChanged)).TakeUntilDisposed(action).Select(pattern => (ParametrizedAction)pattern.Sender);
+        
         public static IObservable<TAction> ActivateInUserDetails<TAction>(this IObservable<TAction> registerAction) where TAction:ActionBase 
 	        => registerAction.WhenControllerActivated()
                 .Do(action => {

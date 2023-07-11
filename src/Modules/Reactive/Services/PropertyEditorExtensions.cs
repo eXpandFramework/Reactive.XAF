@@ -15,7 +15,13 @@ using Xpand.Extensions.XAF.TypesInfoExtensions;
 namespace Xpand.XAF.Modules.Reactive.Services{
     public static class PropertyEditorExtensions{
         public static IObservable<ListPropertyEditor> FrameChanged(this IEnumerable<ListPropertyEditor> source) 
-            => source.ToObservable().SelectMany(item => item.WhenEvent(nameof(ListPropertyEditor.FrameChanged)).Select(_ => item));
+            => source.ToObservable().SelectMany(editor => WhenFrameChanged(editor).Select(_ => editor));
+
+        public static bool IsDisposed(this PropertyEditor editor)
+            => (bool)editor.GetPropertyValue("IsDisposed");
+        
+        public static IObservable<ListPropertyEditor> WhenFrameChanged(this ListPropertyEditor editor) 
+            => editor.WhenEvent(nameof(ListPropertyEditor.FrameChanged)).TakeUntil(_ => editor.IsDisposed()).To(editor);
 
         internal static IObservable<Unit> SetupPropertyEditorParentView(this XafApplication application){
             var detailViewEditors = application.WhenDetailViewCreated().ToDetailView()
@@ -42,7 +48,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         }
             
         public static IObservable<T> WhenVisibilityChanged<T>(this T editor) where T:PropertyEditor 
-            => editor.WhenEvent(nameof(PropertyEditor.VisibilityChanged)).To(editor);
+            => editor.WhenEvent(nameof(PropertyEditor.VisibilityChanged)).TakeUntil(_ => editor.IsDisposed()).To(editor);
 
         public static IObservable<T> WhenVisibilityChanged<T>(this IObservable<T> source) where T:PropertyEditor 
             => source.SelectMany(editor => editor.WhenVisibilityChanged());

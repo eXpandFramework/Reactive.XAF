@@ -18,6 +18,7 @@ namespace Xpand.XAF.Modules.Windows {
         public static IObservable<Window> OnWindowEscape(this IObservable<Window> source)
             => source.Cast<WinWindow>().MergeIgnored(window => window
                 .WhenEvent<WinWindow, KeyEventArgs>(nameof(WinWindow.KeyDown)).Where(t => t.args.KeyCode == Keys.Escape).To(window)
+                .TakeUntil(window.WhenDisposedFrame())
                 .OnWindowEscape(model => model.OnEscape.CloseWindow,model => model.OnEscape.MinimizeWindow,model => model.OnEscape.ExitApplication)
                 .To(window),window => {
                 var onEscape = window.Model().Exit.OnEscape;
@@ -45,7 +46,7 @@ namespace Xpand.XAF.Modules.Windows {
 
         public static IObservable<Window> OnWindowDeactivation(this IObservable<Window> source,Func<Window,bool> apply=null)
             => source.MergeIgnored(window => window.Template
-	            .WhenEvent<Form, EventArgs>(nameof(Form.Activated))
+	            .WhenEvent<Form, EventArgs>(nameof(Form.Activated)).TakeUntil(window.WhenDisposedFrame())
                 .Select(_ => window.Template.WhenEvent<Form, EventArgs>(nameof(Form.Deactivate))).Switch()
                 .WhenNotDefault(_ => window.Application)
                 .TraceWindows(_ => $"{nameof(IModelOn.CloseWindow)}={window.Model().Exit.OnDeactivation.CloseWindow}")
@@ -64,6 +65,7 @@ namespace Xpand.XAF.Modules.Windows {
 
         public static IObservable<Window> CancelExit(this IObservable<Window> source) 
             => source.MergeIgnored(window => window.Template.WhenEvent<Form, FormClosingEventArgs>(nameof(Form.FormClosing))
+                    .TakeUntil(window.WhenDisposedFrame())
                 .TakeUntil(window.WhenCustomExit())
                 .Select(t => {
                     t.args.Cancel = window.CanExit();

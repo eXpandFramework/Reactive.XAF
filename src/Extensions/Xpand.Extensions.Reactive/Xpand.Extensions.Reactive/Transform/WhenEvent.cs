@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.ComponentModel;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Concurrency;
@@ -7,6 +8,7 @@ using System.Reactive.Linq;
 using System.Reflection;
 using Fasterflect;
 using Xpand.Extensions.LinqExtensions;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.TypeExtensions;
 using Type = System.Type;
 
@@ -25,23 +27,27 @@ namespace Xpand.Extensions.Reactive.Transform {
                 return Observable.FromEventPattern<TArgs>(
                         handler => eventInfo.add.Invoke(source, new object[] { handler }),
                         handler => eventInfo.remove.Invoke(source, new object[] { handler }))
-                    .Select(pattern => new EventPattern<TArgs>(pattern.Sender, pattern.EventArgs));
+                    .Select(pattern => new EventPattern<TArgs>(pattern.Sender, pattern.EventArgs))
+                    .TakeUntilDisposed(source as IComponent);
             }
 
             if (eventInfo.add.IsPublic&&!eventInfo.add.IsStatic) {
-                return Observable.FromEventPattern<TArgs>(source, eventName);    
+                return Observable.FromEventPattern<TArgs>(source, eventName)
+                    .TakeUntilDisposed(source as IComponent);    
             }
 
             if (eventInfo.info.EventHandlerType == typeof(EventHandler)) {
                 return Observable.FromEventPattern(
                         handler => eventInfo.add.Invoke(source, new object[] { handler }),
                         handler => eventInfo.remove.Invoke(source, new object[] { handler }))
-                    .Select(pattern => new EventPattern<TArgs>(pattern.Sender, (TArgs)pattern.EventArgs));    
+                    .Select(pattern => new EventPattern<TArgs>(pattern.Sender, (TArgs)pattern.EventArgs))
+                    .TakeUntilDisposed(source as IComponent);    
             }
             return Observable.FromEventPattern<TArgs>(
                     handler => eventInfo.add.Invoke(source, new object[] { handler }),
                     handler => eventInfo.remove.Invoke(source, new object[] { handler }))
-                .Select(pattern => new EventPattern<TArgs>(pattern.Sender, pattern.EventArgs));
+                .Select(pattern => new EventPattern<TArgs>(pattern.Sender, pattern.EventArgs))
+                .TakeUntilDisposed(source as IComponent);
         }
         
         private static (EventInfo info,MethodInfo add,MethodInfo remove) EventInfo(this object source,string eventName) 

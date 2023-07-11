@@ -7,7 +7,8 @@ using Xpand.Extensions.Reactive.Transform;
 namespace Xpand.XAF.Modules.Reactive.Services{
     public static class WindowExtensions{
         public static IObservable<Window> ViewControllersActivated(this IObservable<Window> source) 
-            => source.SelectMany(item => item.WhenEvent(nameof(Window.ViewControllersActivated)).Select(_ => item));
+            => source.SelectMany(item => item.WhenEvent(nameof(Window.ViewControllersActivated))
+                .TakeUntil(item.WhenDisposedFrame()).Select(_ => item));
 
         public static IObservable<Window> WhenIsLookupPopup(this IObservable<Window> source) 
             => source.Where(controller => controller.Template is ILookupPopupFrameTemplate);

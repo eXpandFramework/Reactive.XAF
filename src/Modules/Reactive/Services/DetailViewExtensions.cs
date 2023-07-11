@@ -9,10 +9,10 @@ using Xpand.Extensions.Reactive.Transform;
 namespace Xpand.XAF.Modules.Reactive.Services{
     public static class DetailViewExtensions{
         public static IObservable<(DetailView detailView, CancelEventArgs e)> WhenViewEditModeChanging(this DetailView detailView) 
-            => detailView.WhenEvent<CancelEventArgs>(nameof(DetailView.ViewEditModeChanging)).InversePair(detailView);
+            => detailView.WhenEvent<CancelEventArgs>(nameof(DetailView.ViewEditModeChanging)).TakeUntil(detailView.WhenDisposingView()).InversePair(detailView);
 
         public static IObservable<(DetailView detailView, CancelEventArgs e)> ViewEditModeChanging<T>(this IObservable<T> source) where T : DetailView 
-            => source.SelectMany(_ => _.WhenViewEditModeChanging());
+            => source.SelectMany(view => view.WhenViewEditModeChanging());
 
         public static IObservable<(DetailView detailView, NestedFrame nestedFrame)> WhenChildren<TParentObject>(this IObservable<DetailView> source, params Type[] nestedObjectTypes) 
             => source.Where(view => typeof(TParentObject).IsAssignableFrom(view.ObjectTypeInfo.Type))
