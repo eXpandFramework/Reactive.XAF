@@ -200,6 +200,7 @@ namespace Xpand.XAF.Modules.Email{
 		
 		[Category("Credentials"), ModelBrowsable(typeof(ModelSmtpClientDeliveryMethodVisibilityCalculator)), DefaultValue(true), RefreshProperties(RefreshProperties.All)]
 		bool UseDefaultCredentials { get; set; }
+		[DataSourceProperty(nameof(FromEmails))]
 		[Category("Credentials"), ModelBrowsable(typeof(ModelSmtpClientUseDefaultCredentialsVisibilityCalculator)), Required(typeof(ModelSmtpClientDeliveryMethodRequiredCalculator))]
 		IModelEmailAddress UserName { get; set; }
 		[Category("SmtpClient"),RefreshProperties(RefreshProperties.All)]
