@@ -24,6 +24,7 @@ using TestScheduler = akarnokd.reactive_extensions.TestScheduler;
 
 namespace Xpand.TestsLib.Common{
     public abstract class CommonTest:ReactiveTest, IDisposable{
+        
         public readonly TestScheduler TestScheduler=new();
         public const int LongTimeout = 900000;
         
@@ -47,6 +48,17 @@ namespace Xpand.TestsLib.Common{
             TraceSource = new TraceSource(nameof(CommonTest)){Switch = traceSourceSwitch};
             TraceSource.Listeners.Add(TextListener);
             Trace.Listeners.Add(new TextWriterTraceListener($@"{AppDomain.CurrentDomain.ApplicationPath()}\easytest.log"));
+            if (!Debugger.IsAttached) {
+                Array.ForEach(Directory.GetFileSystemEntries(Path.GetTempPath()), entry => {
+                    try {
+                        if (Directory.Exists(entry)) Directory.Delete(entry, true);
+                        else File.Delete(entry);
+                    }
+                    catch (Exception) {
+                        // ignored
+                    }
+                });
+            }
         }
         
         public static IEnumerable<Platform> PlatformDataSource(){

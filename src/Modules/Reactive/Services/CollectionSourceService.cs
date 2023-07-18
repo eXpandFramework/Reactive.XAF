@@ -7,6 +7,7 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;
 using Xpand.Extensions.EventArgExtensions;
 using Xpand.Extensions.LinqExtensions;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.XAF.Modules.Reactive.Extensions;
 
@@ -31,7 +32,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => collection.WhenEvent<FetchObjectsEventArgs>(nameof(DynamicCollection.FetchObjects));
         
         public static IObservable<DynamicCollection> WhenLoaded(this DynamicCollection collection) 
-            => collection.WhenEvent(nameof(DynamicCollection.Loaded)).To(collection).TakeUntil(dynamicCollection => dynamicCollection.IsDisposed);
+            => collection.WhenEvent(nameof(DynamicCollection.Loaded)).To(collection).TakeWhileInclusive(dynamicCollection => !dynamicCollection.IsDisposed);
 
         public static IObservable<T> WhenDisposed<T>(this T collectionSourceBase) where T:CollectionSourceBase 
             => collectionSourceBase.WhenEvent(nameof(CollectionSourceBase.Disposed)).To(collectionSourceBase);

@@ -117,7 +117,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .SelectMany(_ => objectSpace.ModifiedObjects.Cast<object>().ToObservable(Transform.ImmediateScheduler)
                     .SelectMany(sourceSelector)
                     .ToUnit().IgnoreElements()
-                    .Merge(objectSpace.WhenModifyChanged().FirstAsync(space => !space.IsModified).Do(space => space.SetIsModified(true)).ToUnit().IgnoreElements())
+                    .Merge(objectSpace.WhenModifyChanged().Where(space => !space.IsModified).Take(1).Do(space => space.SetIsModified(true)).ToUnit().IgnoreElements())
                     .Concat(Observable.Return(Unit.Default).Do(_ => objectSpace.SetIsModified(false))))
                 .ToUnit();
 
@@ -135,10 +135,9 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => ((IBindingList) objectSpace.CreateCollection(objectType)).WhenObjects();
 
         public static IObservable<object> WhenObjects(this IBindingList bindingList,bool waitForTrigger=false) {
-            var whenListChanged = bindingList.WhenListChanged().Publish().RefCount();
-            var signalCompletion = whenListChanged.FirstAsync(e => e.ListChangedType == (ListChangedType) (-10000)).To(bindingList);
+            var signalCompletion = bindingList.WhenListChanged().Where(e => e.ListChangedType == (ListChangedType) (-10000)).To(bindingList).Take(1);
             return waitForTrigger ? signalCompletion.SelectMany(list => list.Cast<object>())
-                : signalCompletion.Merge(bindingList.Cast<object>().TakeLast(1).ToObservable(Transform.ImmediateScheduler)
+                : signalCompletion.Merge(bindingList.Cast<object>().TakeLast(1).ToNowObservable()
                         .IgnoreElements().To(bindingList))
                     .SelectMany(list => list.Cast<object>());
         }
@@ -183,7 +182,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 this IObjectSpace objectSpace, bool emitAfterCommit, ObjectModification objectModification,Func<T,bool> criteria=null,[CallerMemberName]string caller="") 
             => objectSpace.WhenCommiting().SelectMany(_ => {
                     var modifiedObjects = objectSpace.ModifiedObjects<T>(objectModification).Where(t => criteria==null|| criteria.Invoke(t.instance)).ToArray();
-                    return modifiedObjects.Any() ? emitAfterCommit ? objectSpace.WhenCommitted().FirstAsync().Select(space => (space, modifiedObjects))
+                    return modifiedObjects.Any() ? emitAfterCommit ? objectSpace.WhenCommitted().Take(1).Select(space => (space, modifiedObjects))
                             : (objectSpace, modifiedObjects).Observe() : Observable.Empty<(IObjectSpace, (T instance, ObjectModification modification)[])>();
                 })
                 .TraceRX(_ => typeof(T).Name);
@@ -199,7 +198,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                     .SelectMany(_ => {
                         var modifiedObjects = objectSpace.ModifiedObjects(objectType, objectModification)
                             .Where(t => criteria==null|| criteria.Invoke(t.instance)).ToArray();
-                        return modifiedObjects.Any() ? emitAfterCommit ? objectSpace.WhenCommitted().FirstAsync().Select(space => (space, modifiedObjects))
+                        return modifiedObjects.Any() ? emitAfterCommit ? objectSpace.WhenCommitted().Take(1).Select(space => (space, modifiedObjects))
                             : (objectSpace, modifiedObjects).Observe() : Observable.Empty<(IObjectSpace, (object instance, ObjectModification modification)[])>();
                     }))
                 .TraceRX(_ => caller.JoinString(" ->",objectType.Name ));
@@ -401,7 +400,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
 
         public static IObservable<T> WhenObjectCommitted<T>(this IObservable<T> source) where T:IObjectSpaceLink 
-            => source.SelectMany(_ => _.ObjectSpace.WhenCommitted().FirstAsync().Select(tuple => _));
+            => source.SelectMany(_ => _.ObjectSpace.WhenCommitted().Take(1).Select(tuple => _));
 
         public static IObservable<object> WhenNewObjectCreated(
             this IObjectSpace objectSpace, Type objectSpaceLinkType = null)
@@ -587,7 +586,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
                         if (!(bool)link.GetPropertyValue("IsInvalidated") && !(bool)link.GetPropertyValue("Session").GetPropertyValue("IsObjectsLoading"))
                             return link.ReloadObject().Observe();
-                        return link.GetPropertyValue("Session").WhenEvent("ObjectLoaded").FirstAsync()
+                        return link.GetPropertyValue("Session").WhenEvent("ObjectLoaded").Take(1)
                             .Do(_ => link.ReloadObject()).To(link);
                     }
                     throw new NotImplementedException();

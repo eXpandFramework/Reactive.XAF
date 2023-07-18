@@ -241,13 +241,13 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
         }
 
         private static IObservable<object> GenerateSequences(this (ObjectManipulationEventArgs e,ExplicitUnitOfWork explicitUnitOfWork) t, Type sequenceStorageType) 
-            => Unit.Default.Observe().MergeToObject(((UnitOfWork)t.e.Session).WhenAfterCommitTransaction().FirstAsync()
-                    .Do(_ => {
-                        t.explicitUnitOfWork.CommitChanges();
-                        t.explicitUnitOfWork.Close();
-                    }).IgnoreElements().DisposeOnException(t.explicitUnitOfWork)
-                    .Publish(afterCommit => afterCommit.Merge(t.e.Session.WhenTransactionFailed( Scheduler.CurrentThread, t.explicitUnitOfWork),Scheduler.CurrentThread)))
-                .Merge(t.explicitUnitOfWork.GenerateSequences(t.e.Object,sequenceStorageType))
+            => sequenceStorageType.Defer(() => (((UnitOfWork)t.e.Session).WhenAfterCommitTransaction().FirstAsync()
+                        .Do(_ => {
+                            t.explicitUnitOfWork.CommitChanges();
+                            t.explicitUnitOfWork.Close();
+                        }).IgnoreElements().DisposeOnException(t.explicitUnitOfWork)
+                        .Publish(afterCommit => afterCommit.Merge(t.e.Session.WhenTransactionFailed( Scheduler.CurrentThread, t.explicitUnitOfWork),Scheduler.CurrentThread)))
+                    .Merge(t.explicitUnitOfWork.GenerateSequences(t.e.Object,sequenceStorageType)))
                 .RetryWhen(exceptions => exceptions.Select(exception => exception).RetryException().Do(ExceptionsSubject.OnNext));
 
         

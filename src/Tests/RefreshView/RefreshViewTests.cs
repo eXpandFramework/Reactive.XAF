@@ -37,7 +37,8 @@ namespace Xpand.XAF.Modules.RefreshView.Tests{
             application.Logon();
             var listView = application.NewObjectView<ListView>(typeof(RV));
             var reloaded = listView.CollectionSource.WhenCollectionReloaded().Select(tuple => tuple).FirstAsync().SubscribeReplay();
-            application.CreateViewWindow().SetView(listView);
+            var viewWindow = application.CreateViewWindow();
+            viewWindow.SetView(listView);
             
             var objectSpace = application.CreateObjectSpace();
             objectSpace.CommitChanges();

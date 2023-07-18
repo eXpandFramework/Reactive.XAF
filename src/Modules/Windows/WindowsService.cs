@@ -17,7 +17,8 @@ namespace Xpand.XAF.Modules.Windows{
         
         internal static IObservable<Unit> Connect(this  ApplicationModulesManager manager) 
 	        => manager.WhenApplication(application => application.WhenWindowTemplate()
-                .MultiInstance().Startup().ConfigureForm().NotifyIcon()
+                .MultiInstance().Startup().ConfigureForm()
+                .NotifyIcon()
                 .ExitAfterModelEdit().CancelExit()
                 .OnWindowDeactivation(window => !window.Model().Exit.OnDeactivation.ApplyInMainWindow)
                 .OnWindowEscape()

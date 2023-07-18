@@ -115,21 +115,15 @@ namespace Xpand.XAF.Modules.Reactive.Rest {
             => application.WhenLoggedOn().SelectMany(_ => application.WhenNonPersistentObjectSpaceCreated()
                 .SelectMany(t => t.ObjectSpace.WhenObjects(t1 => t1.WhenRestObjects(application))
                     .Select(o => o)
-                    // .MergeIgnored(o => {
-                    //     var nonPersistentBaseObject = ((NonPersistentBaseObject) o);
-                    //     return nonPersistentBaseObject.WhenObjectSpaceChanged()
-                    //         .ReactiveCollectionsInit(((IObjectSpaceLink) nonPersistentBaseObject).ObjectSpace);
-                    // })
                     .RestPropertyDependentChange()
                     .RestPropertyBindingListsChange()
-                    // .RestPropertyBindingListsDataSource(t.ObjectSpace,application) //slow
                     .ReactiveCollectionsFetch(application.GetCurrentUser<ICredentialBearer>())
                     .ToUnit().IgnoreElements()
                     .Merge(Observable.Defer(() => t.ObjectSpace.WhenCommitingObjects(o => t.ObjectSpace.Commit(o,application.GetCurrentUser<ICredentialBearer>()))))));
 
         private static IObservable<object> WhenRestObjects(
             this (NonPersistentObjectSpace objectSpace, ObjectsGettingEventArgs e) t1, XafApplication application) 
-            => t1.objectSpace.Get(t1.e.ObjectType,application.GetCurrentUser<ICredentialBearer>())
+            => t1.objectSpace.Get(t1.e.ObjectType,application.GetCurrentUser<ICredentialBearer>()).Select(o => o)
                 .RestPropertyDependent(t1.objectSpace,t1.e.ObjectType,application.GetCurrentUser<ICredentialBearer>())
                 .RestPropertyBindingListsInit(t1.objectSpace)
                 .ReactiveCollectionsInit(t1.objectSpace)

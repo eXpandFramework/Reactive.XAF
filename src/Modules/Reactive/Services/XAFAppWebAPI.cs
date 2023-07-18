@@ -25,7 +25,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<Unit> CheckAsync(this IObservable<IXAFAppWebAPI> source,string module) 
             => source.Where(api => api.Application.GetPlatform()!=Platform.Blazor)
                 .SelectMany(_ => {
-                    var whenTemplate = source.SelectMany(webAPI => webAPI.Application.WhenWindowCreated().When(TemplateContext.ApplicationWindow).FirstAsync().TemplateChanged())
+                    var whenTemplate = source.SelectMany(webAPI => webAPI.Application.WhenWindowCreated().When(TemplateContext.ApplicationWindow).Take(1).TemplateChanged())
                         .WhenNotDefault(window => window.Template).Publish().RefCount();
                     return whenTemplate
                         .WhenDefault(window => (bool)window.Template.GetPropertyValue("IsAsync")).ToUnit()

@@ -147,7 +147,7 @@ namespace Xpand.XAF.Modules.ViewWizard.Tests{
 	        var whenClosed = frame.View.WhenClosed().Test();
 	        finishWizardView.DoExecute();
 
-	        whenClosed.Items.Count.ShouldBe(1);
+	        whenClosed.AwaitDone(Timeout).Items.Count.ShouldBe(1);
         }
 
     }

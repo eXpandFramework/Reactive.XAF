@@ -60,7 +60,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Security{
 
         public static IObservable<Unit> Logon(this XafApplication application,object userKey) 
             => AuthenticateSubject.Where(_ => _.authentication== application.Security.GetPropertyValue("Authentication"))
-                .Do(_ => _.args.SetInstance(_ => userKey)).SelectMany(_ => application.WhenLoggedOn().FirstAsync()).ToUnit()
+                .Do(_ => _.args.SetInstance(_ => userKey)).SelectMany(_ => application.WhenLoggedOn().Take(1)).ToUnit()
                 .Merge(Unit.Default.Observe().Do(_ => application.Logon()).IgnoreElements())
                 .TraceRX(_ => $"{userKey}");
 

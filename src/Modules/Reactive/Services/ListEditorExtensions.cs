@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp.Editors;
 using Fasterflect;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 
@@ -18,13 +19,16 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
             }).Finally(() => editor.GetPropertyValue("GridView")?.CallMethod("EndDataUpdate"));
 
+        public static IObservable<ListEditor> TakeUntilDisposed(this IObservable<ListEditor> source)
+            => source.TakeWhileInclusive(editor => !editor.IsDisposed);
+        
         public static IObservable<ListEditor> WhenModelApplied(this ListEditor editor) 
-            => editor.WhenEvent(nameof(ListEditor.ModelApplied)).TakeUntil(_ => editor.IsDisposed).To(editor);
+            => editor.WhenEvent(nameof(ListEditor.ModelApplied)).To(editor).TakeUntilDisposed();
 
         public static IObservable<NewObjectAddingEventArgs> WhenNewObjectAdding(this ListEditor editor) 
             => editor.WhenEvent<NewObjectAddingEventArgs>(nameof(editor.NewObjectAdding));
 
         public static IObservable<ListEditor> WhenProcessSelectedItem(this ListEditor editor) 
-            => editor.WhenEvent(nameof(ListEditor.ProcessSelectedItem)).TakeUntil(_ => editor.IsDisposed).To(editor);
+            => editor.WhenEvent(nameof(ListEditor.ProcessSelectedItem)).To(editor).TakeUntilDisposed();
     }
 }

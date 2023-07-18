@@ -25,7 +25,7 @@ namespace Xpand.XAF.Modules.Reactive.Rest.Tests {
             HandlerMock.SetupRestOperationObject(_restObjects);
             
             var restObject = await Application.CreateObjectSpace(typeof(RestOperationObject))
-                .Request<RestOperationObject>();
+                .Request<RestOperationObject>().Timeout(Timeout);
             
             restObject.Name.ShouldBe(_restObjects.Last().Name);
         }

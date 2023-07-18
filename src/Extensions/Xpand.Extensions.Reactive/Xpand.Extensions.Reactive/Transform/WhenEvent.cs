@@ -6,6 +6,7 @@ using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using Fasterflect;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Conditional;
@@ -17,23 +18,25 @@ namespace Xpand.Extensions.Reactive.Transform {
         private static readonly ConcurrentDictionary<(Type type, string eventName),(EventInfo info,MethodInfo add,MethodInfo remove)> Events = new();
         public static readonly IScheduler ImmediateScheduler=Scheduler.Immediate;
 
-        public static IObservable<EventPattern<object>> WhenEvent(this object source,params string[] eventNames) 
-            => eventNames.ToNowObservable().SelectMany(source.FromEventPattern<EventArgs>)
+        public static IObservable<EventPattern<object>> WhenEvent(this object source,string eventName,[CallerMemberName]string caller="") 
+            => source.FromEventPattern<EventArgs>(eventName,caller)
                 .Select(pattern => new EventPattern<object>(pattern.Sender, pattern.EventArgs));
 
-        private static IObservable<EventPattern<TArgs>> FromEventPattern<TArgs>(this object source, string eventName) {
+        private static IObservable<EventPattern<TArgs>> FromEventPattern<TArgs>(this object source, string eventName,[CallerMemberName]string caller="") {
             var eventInfo = source.EventInfo(eventName);
             if ((eventInfo.info.EventHandlerType?.IsGenericType ?? false)&&eventInfo.info.EventHandlerType.GenericTypeArguments.First()==typeof(TArgs)) {
                 return Observable.FromEventPattern<TArgs>(
                         handler => eventInfo.add.Invoke(source, new object[] { handler }),
                         handler => eventInfo.remove.Invoke(source, new object[] { handler }))
                     .Select(pattern => new EventPattern<TArgs>(pattern.Sender, pattern.EventArgs))
-                    .TakeUntilDisposed(source as IComponent);
+                    .TakeUntilDisposed(source as IComponent,caller)
+                    ;
             }
 
             if (eventInfo.add.IsPublic&&!eventInfo.add.IsStatic) {
                 return Observable.FromEventPattern<TArgs>(source, eventName)
-                    .TakeUntilDisposed(source as IComponent);    
+                    .TakeUntilDisposed(source as IComponent,caller)
+                    ;    
             }
 
             if (eventInfo.info.EventHandlerType == typeof(EventHandler)) {
@@ -41,13 +44,15 @@ namespace Xpand.Extensions.Reactive.Transform {
                         handler => eventInfo.add.Invoke(source, new object[] { handler }),
                         handler => eventInfo.remove.Invoke(source, new object[] { handler }))
                     .Select(pattern => new EventPattern<TArgs>(pattern.Sender, (TArgs)pattern.EventArgs))
-                    .TakeUntilDisposed(source as IComponent);    
+                    .TakeUntilDisposed(source as IComponent,caller)
+                    ;    
             }
             return Observable.FromEventPattern<TArgs>(
                     handler => eventInfo.add.Invoke(source, new object[] { handler }),
                     handler => eventInfo.remove.Invoke(source, new object[] { handler }))
                 .Select(pattern => new EventPattern<TArgs>(pattern.Sender, pattern.EventArgs))
-                .TakeUntilDisposed(source as IComponent);
+                .TakeUntilDisposed(source as IComponent,caller)
+                ;
         }
         
         private static (EventInfo info,MethodInfo add,MethodInfo remove) EventInfo(this object source,string eventName) 
@@ -57,11 +62,10 @@ namespace Xpand.Extensions.Reactive.Transform {
                 return (eventInfo, eventInfo.AddMethod,eventInfo.RemoveMethod);
             });
 
-        public static IObservable<(TEventArgs args, TSource source)> WhenEvent<TSource,TEventArgs>(this object source, params string[] eventNames)
-            => eventNames.ToNowObservable().SelectMany(eventName => source.FromEventPattern<TEventArgs>(eventName).Select(pattern => (pattern.EventArgs,(TSource)source)));
+        public static IObservable<(TEventArgs args, TSource source)> WhenEvent<TSource,TEventArgs>(this object source, string eventName,[CallerMemberName]string caller="")
+            => source.FromEventPattern<TEventArgs>(eventName,caller).Select(pattern => (pattern.EventArgs,(TSource)source));
         
-        public static IObservable<TEventArgs> WhenEvent<TEventArgs>(this object source, params string[] eventNames) 
-            => eventNames.ToNowObservable().SelectMany(eventName =>
-                source.FromEventPattern<TEventArgs>(eventName).Select(pattern => pattern.EventArgs));
+        public static IObservable<TEventArgs> WhenEvent<TEventArgs>(this object source, string eventName,[CallerMemberName]string caller="") 
+            => source.FromEventPattern<TEventArgs>(eventName,caller).Select(pattern => pattern.EventArgs);
     }
 }

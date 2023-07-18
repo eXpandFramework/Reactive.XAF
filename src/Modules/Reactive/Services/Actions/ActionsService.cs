@@ -348,7 +348,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
             => source.SelectMany(a=>a.WhenExecuted()).Cast<PopupWindowShowActionExecuteEventArgs>();
         
         public static IObservable<T> TakeUntilDisposed<T>(this IObservable<T> source, ActionBase component) 
-            => source.TakeUntil(_ => component.IsDisposed);
+            => source.TakeWhileInclusive(_ => !component.IsDisposed);
 
         public static IObservable<(TAction action, BoolList boolList, BoolValueChangedEventArgs e)> ResultValueChanged<TAction>(
                 this TAction source, Func<TAction, BoolList> boolListSelector) where TAction : ActionBase 

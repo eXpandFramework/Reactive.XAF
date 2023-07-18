@@ -7,6 +7,7 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.SystemModule;
 using Xpand.Extensions.ObjectExtensions;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
@@ -23,7 +24,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                     .Select(pattern => pattern.EventArgs).Cast<CustomizeShowViewParametersEventArgs>());
 
         public static IObservable<T> WhenClosing<T>(this T view) where T : View 
-            => view.Observe().WhenNotDefault().Closing();
+            => view.WhenViewEvent(nameof(view.Closing)).To(view).Select(view1 => view1);
         
         public static IObservable<object> WhenObjects(this View view) 
             => view is ListView listView?listView.CollectionSource.WhenCollectionChanged().SelectMany(_ => listView.Objects())
@@ -32,56 +33,37 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         
         public static IObservable<T> WhenObjects<T>(this View view) 
             => view.WhenObjects().Cast<T>();
-
-        public static IObservable<T> Closing<T>(this IObservable<T> source) where T:View 
-            => source.Cast<View>().SelectMany(view => view.WhenClosing())
-                .Select(pattern => (T)pattern);
-
+        
         public static IObservable<T> WhenActivated<T>(this T view) where T : View 
-            => view.WhenEvent(nameof(View.Activated)).TakeUntil(view.WhenDisposingView()).Select(pattern => (T)pattern.Sender);
+            => view.WhenViewEvent(nameof(View.Activated));
 
         public static IObservable<T> Activated<T>(this IObservable<T> source) where T:View 
             => source.SelectMany(view => view.WhenActivated());
-        
-        public static IObservable<T> WhenModelChanged<T>(this T view) where T : View 
-            => view.Observe().ModelChanged();
-
-        public static IObservable<T> ModelChanged<T>(this IObservable<T> source) where T:View 
-            => source.Cast<View>().SelectMany(view => view.WhenEvent(nameof(View.ModelChanged))
-                    .TakeUntil(view.WhenDisposingView()))
-                .Select(pattern => (T)pattern.Sender);
 
         public static IObservable<T> WhenClosed<T>(this T view) where T : View 
-            => view == null ? Observable.Empty<T>() : view.Observe().Closed();
-
-        public static IObservable<T> Closed<T>(this IObservable<T> source) where T:View 
-            => source.SelectMany(view => view.WhenEvent(nameof(View.Closed)).TakeUntil(view.WhenDisposingView()))
-                .Select(pattern => (T)pattern.Sender);
+            => view.WhenViewEvent(nameof(view.Closed));
 
         public static IObservable<(T view, CancelEventArgs e)> WhenQueryCanClose<T>(this T view) where T : View 
-            => view.WhenEvent<CancelEventArgs>(nameof(View.QueryCanClose)).TakeUntil(view.WhenDisposingView()).InversePair(view);
+            => view.WhenViewEvent<T,CancelEventArgs>(nameof(View.QueryCanClose));
 
         public static IObservable<(T view, CancelEventArgs e)> QueryCanClose<T>(this IObservable<T> source) where T:View 
             => source.Cast<T>().SelectMany(view => view.WhenQueryCanClose());
 
         public static IObservable<(T view, CancelEventArgs e)> WhenQueryCanChangeCurrentObject<T>(this T view) where T : View 
-            => view.WhenEvent<CancelEventArgs>(nameof(View.QueryCanChangeCurrentObject)).TakeUntil(view.WhenDisposingView()).InversePair(view);
+            => view.WhenViewEvent<T,CancelEventArgs>(nameof(View.QueryCanChangeCurrentObject));
 
         public static IObservable<(T view, CancelEventArgs e)> QueryCanChangeCurrentObject<T>(this IObservable<T> source) where T:View 
             => source.Cast<T>().SelectMany(view => view.WhenQueryCanChangeCurrentObject());
 
         public static IObservable<T> WhenControlsCreated<T>(this T view) where T : View 
-            => view.WhenEvent(nameof(View.ControlsCreated)).TakeUntil(view.WhenDisposingView()).To(view);
+            => view.WhenViewEvent(nameof(View.ControlsCreated));
 
         public static IObservable<T> WhenControlsCreated<T>(this IObservable<T> source) where T:View 
-            => source.SelectMany(view => view.WhenEvent(nameof(View.ControlsCreated))
-                .TakeUntil(view.WhenDisposingView())
-                .Select(pattern => pattern.Sender).Cast<T>());
+            => source.SelectMany(view => view.WhenViewEvent(nameof(View.ControlsCreated)));
 
         public static IObservable<T> WhenSelectionChanged<T>(this T view, int waitUntilInactiveSeconds = 0) where T : View
-            => view.WhenEvent(nameof(View.SelectionChanged)).To(view)
-                .Publish(changed => waitUntilInactiveSeconds > 0 ? changed.WaitUntilInactive(waitUntilInactiveSeconds) : changed)
-                .TakeUntil(view.WhenDisposingView());
+            => view.WhenViewEvent(nameof(View.SelectionChanged)).To(view)
+                .Publish(changed => waitUntilInactiveSeconds > 0 ? changed.WaitUntilInactive(waitUntilInactiveSeconds) : changed);
         
         public static IObservable<T[]> SelectedObjects<T>(this IObservable<ObjectView> source,ObjectView objectView=null) 
             => source.Select(view => view.SelectedObjects.Cast<T>().ToArray()).StartWith(objectView!=null?objectView.SelectedObjects.Cast<T>().ToArray():Array.Empty<T>());
@@ -94,23 +76,25 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => source.SelectMany(item => item.WhenCurrentObjectChanged());
 
         public static IObservable<T> WhenCurrentObjectChanged<T>(this T view) where T:View 
-            => view.WhenEvent(nameof(View.CurrentObjectChanged)).To(view)
-                .TakeUntil(view.WhenDisposingView());
+            => view.WhenViewEvent(nameof(View.CurrentObjectChanged)).To(view);
 
-        public static IObservable<Unit> WhenDisposingView<TView>(this TView view) where TView:View 
-            => view.WhenEvent(nameof(view.Disposing)).ToUnit();
+        public static IObservable<TView> TakeUntilViewDisposed<TView>(this IObservable<TView> source) where TView:View 
+            => source.TakeWhileInclusive(view => !view.IsDisposed);
+
+        public static IObservable<TView> WhenViewEvent<TView>(this TView view,string eventName) where TView:View 
+            => view.WhenEvent(eventName).To(view).TakeUntilViewDisposed();
         
-        public static IObservable<Unit> WhenViewEvent<TView>(this TView view,string eventName) where TView:View 
-            => view.WhenEvent(eventName).TakeUntil(view.WhenDisposingView()).ToUnit();
+        public static IObservable<(TView value, TArgs source)> WhenViewEvent<TView,TArgs>(this TView view,string eventName) where TView:View where TArgs : EventArgs 
+            => view.WhenEvent<TArgs>(eventName).InversePair(view).TakeUntilViewDisposed();
+        
+        public static IObservable<(TView view, TArgs e)> TakeUntilViewDisposed<TView,TArgs>(this IObservable<(TView view,TArgs)> source) where TView:View where TArgs:EventArgs 
+            => source.TakeWhileInclusive(t => !t.view.IsDisposed);
         
         public static IObservable<Unit> WhenCustomizeViewShortcut<TView>(this TView view) where TView:View 
             => view.WhenViewEvent(nameof(View.CustomizeViewShortcut)).ToUnit();
 
-        public static IObservable<Unit> Disposing<TView>(this IObservable<TView> source) where TView:View 
-            => source.SelectMany(item => item.WhenDisposingView()).ToUnit();
-
         public static IObservable<ListPropertyEditor> NestedListViews<TView>(this IObservable<TView> views, params Type[] objectTypes) where TView : DetailView 
-            => views.WhenControlsCreated().SelectMany(detailView => detailView.NestedListViews(objectTypes));
+            => views.SelectMany(detailView => detailView.NestedListViews(objectTypes));
 
         public static IObservable<ListPropertyEditor> NestedListViews<TView>(this TView view, params Type[] objectTypes ) where TView : DetailView 
             => view.NestedViewItems<TView,ListPropertyEditor>(objectTypes);

@@ -22,6 +22,7 @@ namespace Xpand.XAF.Modules.Windows.Tests {
         [XpandTest]
         [Apartment(ApartmentState.STA)]
         public async Task Enable() {
+            var updated = NotifyIconService.NotifyIconUpdated.FirstAsync().SubscribeReplay();
             using var application = Platform.Win.NewApplication<WindowsModule>();
             application.SetupSecurity();
             application.AddModule<WindowsModule>();
@@ -29,7 +30,7 @@ namespace Xpand.XAF.Modules.Windows.Tests {
             var modelWindows = application.Model.ToReactiveModule<IModelReactiveModuleWindows>().Windows;
             modelWindows.NotifyIcon.Enabled = true;
             application.CreateWindow(TemplateContext.ApplicationWindow, new List<Controller>(), true);
-            var updated = NotifyIconService.NotifyIconUpdated.FirstAsync().SubscribeReplay();
+            
 
             application.Logon();
 

@@ -14,6 +14,7 @@ using Fasterflect;
 
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.ExpressionExtensions;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.DetailViewExtensions;
 using Xpand.XAF.Modules.Reactive.Services;
@@ -24,18 +25,16 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Extensions{
         public static IScheduler EventsScheduler=ImmediateScheduler.Instance;
 
         public static IObservable<IRichEditDocumentServer> WhenModifiedChanged(this IRichEditDocumentServer server) 
-            => server.WhenEvent(nameof(IRichEditDocumentServer.ModifiedChanged))
-                .TakeUntil(_ => server.IsDisposed).To(server);
+            => server.WhenEvent(nameof(IRichEditDocumentServer.ModifiedChanged)).To(server).TakeUntilDisposed();
 
+        public static IObservable<IRichEditDocumentServer> TakeUntilDisposed(this IObservable<IRichEditDocumentServer> source)
+            => source.TakeWhileInclusive(server => !server.IsDisposed);
+        
         public static IObservable<IRichEditDocumentServer> WhenContentChanged(this IRichEditDocumentServer server) 
-            => server.WhenEvent(nameof(IRichEditDocumentServer.ContentChanged))
-                .TakeUntil(_ => server.IsDisposed)
-                .To(server);
+            => server.WhenEvent(nameof(IRichEditDocumentServer.ContentChanged)).To(server).TakeUntilDisposed();
 
         public static IObservable<IRichEditDocumentServer> WhenSelectionChanged(this IRichEditDocumentServer server) 
-            => server.WhenEvent(nameof(IRichEditDocumentServer.SelectionChanged))
-                .TakeUntil(_ => server.IsDisposed)
-                .To(server);
+            => server.WhenEvent(nameof(IRichEditDocumentServer.SelectionChanged)).To(server).TakeUntilDisposed();
 
         internal static IObservable<IRichEditDocumentServer> WhenRichEditDocumentServer(this DetailView detailView, string member) 
             => detailView.GetPropertyEditor(member).WhenControlCreated().Cast<PropertyEditor>().Select(RichEditControl);

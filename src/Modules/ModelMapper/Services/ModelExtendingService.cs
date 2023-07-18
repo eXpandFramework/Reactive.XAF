@@ -30,8 +30,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
 
         internal static IObservable<Unit> ConnectExtendingService(this ApplicationModulesManager applicationModulesManager){
 	        Platform = applicationModulesManager.Modules.GetPlatform();
-	        return applicationModulesManager.WhenExtendingModel().FirstAsync()
-                .SelectMany(AddExtenders).Select(tuple => tuple)
+	        return applicationModulesManager.WhenExtendingModel().Take(1)
+                .SelectMany(AddExtenders)
                 .Finally(() => {
                     ConnectedSubject.OnNext(Unit.Default);
                     ModelMapperConfigurations.Clear();

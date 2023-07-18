@@ -104,7 +104,8 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManag
                 objectSpace.CommitChanges();
             }
             Document.DeleteStyles(documentStyle);
-            var richEditServer = application.WhenDetailViewCreated().SelectMany(_ => _.e.View.WhenRichEditDocumentServer<BusinessObjects.DocumentStyleManager>(manager => manager.Content)).Test();
+            var richEditServer = application.WhenDetailViewCreated()
+	            .SelectMany(_ => _.e.View.WhenRichEditDocumentServer<BusinessObjects.DocumentStyleManager>(manager => manager.Content)).Test();
             var tuple = application.SetDocumentStyleManagerDetailView(Document);
             var listViewFrame = application.WhenViewOnFrame(typeof(DocumentStyle),ViewType.ListView,Nesting.Root).Test();
             var action = tuple.window.Action<DocumentStyleManagerModule>().ImportStyles();
@@ -116,7 +117,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManag
             mock.SetupGet(context => context.SelectedObjects).Returns(() => new[]{documentStyle});
             acceptAction.SelectionContext = mock.Object;
                 
-            acceptAction.DoExecute();
+            acceptAction.DoTheExecute(true);
 
             richEditServer.Items.First().Document.UnusedStyles().ShouldContain(documentStyle);
 

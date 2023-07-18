@@ -80,11 +80,12 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .TakeUntil(item.WhenDisposingFrame()).Select(e => e.SourceFrame).InversePair(item);
 
         public static IObservable<T> TemplateChanged<T>(this IObservable<T> source) where T : Frame 
-            => source.SelectMany(item => item.Template != null ? item.Observe() : item.WhenEvent(nameof(Frame.TemplateChanged))
-                        .TakeUntil(item.WhenDisposingFrame()).Select(_ => item));
+            => source.SelectMany(item => item.Template != null ? item.Observe() : item.WhenTemplateChanged().Select(_ => item));
 
-        public static IObservable<TFrame> WhenTemplateChanged<TFrame>(this TFrame source) where TFrame : Frame 
-            => source.Observe().TemplateChanged();
+        public static IObservable<TFrame> WhenTemplateChanged<TFrame>(this TFrame item) where TFrame : Frame 
+            => item.WhenEvent(nameof(Frame.TemplateChanged)).Select(pattern => pattern).To(item)
+                .TakeUntil(item.WhenDisposingFrame())
+            ;
 
         public static IObservable<TFrame> WhenTemplateViewChanged<TFrame>(this TFrame source) where TFrame : Frame 
             => source.WhenEvent(nameof(Frame.TemplateViewChanged)).To(source)
@@ -98,10 +99,10 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .SelectMany(controller1 => controller1.WhenEvent("CustomProcessSimultaneousModificationsException").TakeUntil(frame.WhenDisposedFrame())
                     .Do(args => args.EventArgs.Cast<HandledEventArgs>().Handled=true)).To(frame);
 
-        public static IObservable<Unit> WhenDisposingFrame<TFrame>(this TFrame source) where TFrame : Frame 
+        public static IObservable<Unit> WhenDisposingFrame<TFrame>(this TFrame source) where TFrame : Frame
             => source.WhenEvent(nameof(Frame.Disposing)).TakeUntil(source.WhenDisposedFrame()).ToUnit();
-        
-        public static IObservable<Unit> WhenDisposedFrame<TFrame>(this TFrame source) where TFrame : Frame 
+
+        public static IObservable<Unit> WhenDisposedFrame<TFrame>(this TFrame source) where TFrame : Frame
             => source.WhenEvent(nameof(Frame.Disposed)).ToUnit();
 
         public static IObservable<Unit> DisposingFrame<TFrame>(this IObservable<TFrame> source) where TFrame : Frame 
@@ -136,14 +137,19 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<ListPropertyEditor> NestedListViews(this Frame frame, params Type[] objectTypes ) 
             => frame.View.ToDetailView().NestedListViews(objectTypes);
 
-        public static IObservable<Frame> ListViewProcessSelectedItem(this IObservable<Frame> source) 
-            => source.SelectMany(frame => frame.ListViewProcessSelectedItem().FirstAsync());
+        public static IObservable<Frame> ListViewProcessSelectedItem(this IObservable<Frame> source,Action<SimpleActionExecuteEventArgs> executed=null) 
+            => source.SelectMany(frame => frame.ListViewProcessSelectedItem(executed).Take(1));
+        
+        public static IObservable<Frame> ListViewProcessSelectedItem(this IObservable<Frame> source,string defaultFocusedItem) 
+            => source.SelectMany(frame => frame.ListViewProcessSelectedItem(defaultFocusedItem).Take(1));
 
-        public static IObservable<Frame> ListViewProcessSelectedItem(this Frame frame) {
+        public static IObservable<Frame> ListViewProcessSelectedItem(this Frame frame,string defaultFocusedItem) 
+            => frame.ListViewProcessSelectedItem(e => e.ShowViewParameters.CreatedView.ToDetailView().SetDefaultFocusedItem(defaultFocusedItem));
+
+        public static IObservable<Frame> ListViewProcessSelectedItem(this Frame frame,Action<SimpleActionExecuteEventArgs> executed=null) {
             var action = frame.GetController<ListViewProcessCurrentObjectController>().ProcessCurrentObjectAction;
-            var afterNavigation = action.WhenExecuted().SelectMany(e =>
-                frame.Application.WhenFrame(e.ShowViewParameters.CreatedView.ObjectTypeInfo.Type).Take(1));
-            return action.Trigger(afterNavigation);
+            return action.Trigger(action.WhenExecuted().DoWhen(_ => executed!=null,e => executed!(e))
+                .SelectMany(e => frame.Application.WhenFrame(e.ShowViewParameters.CreatedView.ObjectTypeInfo.Type).Take(1)));
         }
     }
 }

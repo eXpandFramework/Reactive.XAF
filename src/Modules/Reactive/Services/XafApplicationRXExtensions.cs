@@ -76,16 +76,16 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         
         public static IObservable<Unit> LogonUser(this XafApplication application,object userKey) 
             => SecurityExtensions.AuthenticateSubject.Where(_ => _.authentication== application.Security.GetPropertyValue("Authentication"))
-                .Do(_ => _.args.SetInstance(_ => userKey)).SelectMany(_ => application.WhenLoggedOn().FirstAsync()).ToUnit()
+                .Do(_ => _.args.SetInstance(_ => userKey)).SelectMany(_ => application.WhenLoggedOn().Take(1)).ToUnit()
                 .Merge(Unit.Default.Observe().Do(_ => application.Logon()).IgnoreElements());
 
         public static IObservable<TSource> BufferUntilCompatibilityChecked<TSource>(this XafApplication application,IObservable<TSource> source) 
-            => source.Buffer(application.WhenCompatibilityChecked().FirstAsync()).FirstAsync().SelectMany()
+            => source.Buffer(application.WhenCompatibilityChecked().Take(1)).Take(1).SelectMany()
                 .Concat(Observable.Defer(() => source));
 
         public static IObservable<XafApplication> WhenCompatibilityChecked(this XafApplication application) 
             => (bool) application.GetPropertyValue("IsCompatibilityChecked")
-                ? application.Observe() : application.WhenObjectSpaceCreated().FirstAsync()
+                ? application.Observe() : application.WhenObjectSpaceCreated().Take(1)
                     .Select(_ => application);
 
         
@@ -105,7 +105,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         }
 
         public static IObservable<GenericEventArgs<XafApplication>> WhenExiting(this XafApplication application)
-            => WhenExitingSubject.FirstAsync(t => t.Instance==application);
+            => WhenExitingSubject.Where(t => t.Instance==application).Take(1);
 
         public static IObservable<NestedFrame> WhenNestedFrameCreated(this XafApplication application) 
             => application.WhenFrameCreated().OfType<NestedFrame>();
@@ -157,7 +157,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                     .ObserveOnWindows(SynchronizationContext.Current)
                     .Select(_ => application.MainWindow))
                 .WhenNotDefault()
-                .Select(window => window).Publish().RefCount().FirstAsync()
+                .Select(window => window).Publish().RefCount().Take(1)
                 .TraceRX(window => window.Context);
         
         public static IObservable<Window> WhenPopupWindowCreated(this XafApplication application) 
@@ -433,7 +433,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .Select(pattern => (pattern.SourceFrame,pattern.TargetFrame));
 
         public static IObservable<(XafApplication application, DatabaseVersionMismatchEventArgs e)> AlwaysUpdateOnDatabaseVersionMismatch(this XafApplication application) 
-            => application.WhenDatabaseVersionMismatch().Select(tuple => {
+            => application.WhenDatabaseVersionMismatch().Take(1).Select(tuple => {
                 var updater = tuple.e.Updater;
                 var isMiddleTier = ((IObjectSpaceProvider) updater.GetFieldValue("objectSpaceProvider")).IsMiddleTier();
                 if (!isMiddleTier) {
@@ -445,7 +445,6 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static IObservable<(XafApplication application, DatabaseVersionMismatchEventArgs e)> WhenDatabaseVersionMismatch(this XafApplication application) 
             => application.WhenEvent<DatabaseVersionMismatchEventArgs>(nameof(XafApplication.DatabaseVersionMismatch)).InversePair(application);
-
 
         public static IObservable<SynchronizationContext> WhenSynchronizationContext(this XafApplication application) 
             => application.WhenWindowCreated(true)
@@ -817,8 +816,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .Where(space => space.Owner is not CompositeObjectSpace)
                 .Do(space => space.PopulateAdditionalObjectSpaces(application)).ToUnit();
 
-        public static IObservable<(Frame source, Frame target, T1 sourceObject, T2 targetObject, int targetIndex)> SynchronizeGridListEditorSelection<T1, T2>(
-                this IObservable<(Frame source, Frame target, T1 sourceObject, T2 targetObject, int targetIndex)>  source)
+        public static IObservable<(NestedFrame source, NestedFrame target, T1 sourceObject, T2 targetObject, int targetIndex)> SynchronizeGridListEditorSelection<T1, T2>(
+                this IObservable<(NestedFrame source, NestedFrame target, T1 sourceObject, T2 targetObject, int targetIndex)>  source)
             => source.Do(t => {
                 var editor = t.target.View.AsListView().Editor;
                 var gridView = editor.GetPropertyValue("GridView");
@@ -834,14 +833,14 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             this XafApplication application, Expression<Func<T2, T1>> collection) 
             => application.WhenNestedListViewsSelectionChanged(typeof(T1),typeof(T2), collection.MemberExpressionName(), whenSourceViewSelectionChanged:
                     t => t.target.View.ToListView().Observe().Do(view => view.CollectionSource.Criteria[nameof(SynchronizeNestedListViewSource)]=null))
-                .Do(t => t.target.View.ToListView().CollectionSource.Criteria[nameof(SynchronizeNestedListViewSource)] =
+                .Do(t => t.targetFrame.View.ToListView().CollectionSource.Criteria[nameof(SynchronizeNestedListViewSource)] =
                     CriteriaOperator.Parse($"{collection.MemberExpressionName()}=?", collection.Compile()((T2)t.targetObject)))
                 .ToUnit();
         public static IObservable<Unit> SynchronizeNestedListViewSource(
             this XafApplication application,Type sourceType,Type targetType, string targetPropertyName) 
             => application.WhenNestedListViewsSelectionChanged(sourceType, targetType, targetPropertyName, whenSourceViewSelectionChanged:
                     t => t.target.View.ToListView().Observe().Do(view => view.CollectionSource.Criteria[nameof(SynchronizeNestedListViewSource)]=null))
-                .Do(t => t.target.View.ToListView().CollectionSource.Criteria[nameof(SynchronizeNestedListViewSource)] =
+                .Do(t => t.targetFrame.View.ToListView().CollectionSource.Criteria[nameof(SynchronizeNestedListViewSource)] =
                     CriteriaOperator.Parse($"{targetPropertyName}=?", t.targetObject.GetTypeInfo().FindMember(targetPropertyName).GetValue(t.targetObject)))
                 .ToUnit();
         public static IObservable<Unit> SynchronizeNestedListViewSource(
@@ -850,14 +849,23 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                     ,sourceSelector:sourceFrame =>sourceFrame.Where(frame => frame.ViewItem is ListPropertyEditor editor&&editor.MemberInfo==sourceMember) 
                     ,targetSelector:targetFrame =>targetFrame.Where(frame => frame.ViewItem is ListPropertyEditor editor&&editor.MemberInfo==targetMember) 
                     , whenSourceViewSelectionChanged: t => t.target.View.ToListView().Observe().Do(view => view.CollectionSource.Criteria[nameof(SynchronizeNestedListViewSource)]=null))
-                .Do(t => t.target.View.ToListView().CollectionSource.Criteria[nameof(SynchronizeNestedListViewSource)] =
+                .Do(t => t.targetFrame.View.ToListView().CollectionSource.Criteria[nameof(SynchronizeNestedListViewSource)] =
                     CriteriaOperator.Parse($"{targetPropertyName}=?", t.targetObject.GetTypeInfo().FindMember(targetPropertyName).GetValue(t.targetObject)))
                 .ToUnit();
 
-        public static IObservable<(NestedFrame source, NestedFrame target, object sourceObject, object targetObject, int targetIndex)> WhenNestedListViewsSelectionChanged(
+        public static IObservable<(NestedFrame sourceframe, NestedFrame targetFrame, object sourceObject, object targetObject, int targetIndex)> WhenNestedListViewsSelectionChanged(
             this XafApplication application,Type sourceType,Type targetType, string targetPropertyName, Func<IObservable<NestedFrame>, IObservable<NestedFrame>> sourceSelector = null,
                 Func<IObservable<NestedFrame>, IObservable<NestedFrame>> targetSelector = null,Func<object, object> sourceSortSelector=null,Func<object, object> targetSortSelector=null,
             Func<(Frame source,Frame target),IObservable<object>> whenSourceViewSelectionChanged=null) 
+            => application.WhenNestedListViewsSelectionChanged( sourceType, targetType, (sourceObject, targetObject) => targetObject.GetTypeInfo().FindMember(targetPropertyName).GetValue(targetObject)
+                .Equals(sourceObject), sourceSelector, targetSelector, sourceSortSelector, targetSortSelector, whenSourceViewSelectionChanged);
+
+        private static IObservable<(NestedFrame sourceFrame, NestedFrame targetframe, object sourceObject, object targetObject, int
+                targetIndex)> WhenNestedListViewsSelectionChanged(this XafApplication application, Type sourceType, Type targetType,
+                Func<object,object,bool> match, Func<IObservable<NestedFrame>, IObservable<NestedFrame>> sourceSelector,
+                Func<IObservable<NestedFrame>, IObservable<NestedFrame>> targetSelector,
+                Func<object, object> sourceSortSelector, Func<object, object> targetSortSelector,
+                Func<(Frame source, Frame target), IObservable<object>> whenSourceViewSelectionChanged) 
             => application.WhenFrame(sourceType, ViewType.ListView, Nesting.Nested).Cast<NestedFrame>()
                 .Publish(sourceFrame => (sourceSelector?.Invoke(sourceFrame) ?? sourceFrame).Select(frame => frame))
                 .Zip(application.WhenFrame(targetType, ViewType.ListView, Nesting.Nested).Cast<NestedFrame>()
@@ -867,9 +875,26 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                     .SelectMany(sourceView => sourceView.SelectedObjects.Cast<object>().OrderBy(arg =>sourceSortSelector?.Invoke(arg) ).ToArray().ToNowObservable()
                         .SelectMany(sourceObject => t.target.View.AsListView().CollectionSource.Objects()
                             .OrderBy(arg => targetSortSelector?.Invoke(arg)).ToArray().ToNowObservable()
-                            .Select((targetObject, targetIndex) => targetObject.GetTypeInfo().FindMember(targetPropertyName).GetValue(targetObject).Equals(sourceObject) ?
-                                (t.source, t.target, sourceObject, targetObject, targetIndex) : default))))
+                            .Select((targetObject, targetIndex) => match(sourceObject,targetObject)
+                                ? (t.source, t.target, sourceObject, targetObject, targetIndex) : default))))
                 .WhenNotDefault();
+
+        public static IObservable<(NestedFrame sourceframe, NestedFrame targetframe, TSource sourceObject, TTarget targetObject, int targetIndex)> WhenNestedListViewsSelectionChanged<TSource,TTarget>(
+            this XafApplication application, Expression<Func<TTarget,object>> targetProperty, Func<IObservable<NestedFrame>, IObservable<NestedFrame>> sourceSelector = null,
+                Func<IObservable<NestedFrame>, IObservable<NestedFrame>> targetSelector = null,Func<object, object> sourceSortSelector=null,Func<object, object> targetSortSelector=null,
+            Func<(Frame source,Frame target),IObservable<object>> whenSourceViewSelectionChanged=null) 
+            => application.WhenNestedListViewsSelectionChanged(typeof(TSource), typeof(TTarget),
+                targetProperty.MemberExpressionName(), sourceSelector, targetSelector, sourceSortSelector, targetSortSelector, whenSourceViewSelectionChanged)
+                .Select(t =>(t.sourceframe,t.targetFrame,(TSource)t.sourceObject,(TTarget)t.targetObject,t.targetIndex) );
+        
+        public static IObservable<(NestedFrame sourceframe, NestedFrame targetFrame, TSource sourceObject, TTarget targetObject, int targetIndex)> WhenNestedListViewsSelectionChanged<TSource,TTarget>(
+            this XafApplication application, Func<TSource,TTarget,bool> match, Func<IObservable<NestedFrame>, IObservable<NestedFrame>> sourceSelector = null,
+                Func<IObservable<NestedFrame>, IObservable<NestedFrame>> targetSelector = null,Func<TSource, object> sourceSortSelector=null,Func<TTarget, object> targetSortSelector=null,
+            Func<(Frame source,Frame target),IObservable<object>> whenSourceViewSelectionChanged=null) 
+            => application.WhenNestedListViewsSelectionChanged(typeof(TSource), typeof(TTarget),
+                (sourceObject, targetObject) => match((TSource)sourceObject, (TTarget)targetObject), sourceSelector,
+                targetSelector,sourceObject =>sourceSortSelector((TSource)sourceObject)  , targetObject => targetSortSelector((TTarget)targetObject), whenSourceViewSelectionChanged)
+                .Select(t => (t.sourceFrame,t.targetframe,(TSource)t.sourceObject,(TTarget)t.targetObject,t.targetIndex));
         
         public static IObservable<SimpleActionExecuteEventArgs> WhenListViewProcessSelectedItem<T>(this XafApplication application,Nesting nesting=Nesting.Any,bool handled=true)  
             => application.WhenFrame(typeof(T),ViewType.ListView,nesting)

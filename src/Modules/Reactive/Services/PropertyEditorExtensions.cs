@@ -21,7 +21,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => (bool)editor.GetPropertyValue("IsDisposed");
         
         public static IObservable<ListPropertyEditor> WhenFrameChanged(this ListPropertyEditor editor) 
-            => editor.WhenEvent(nameof(ListPropertyEditor.FrameChanged)).TakeUntil(_ => editor.IsDisposed()).To(editor);
+            => editor.WhenEvent(nameof(ListPropertyEditor.FrameChanged)).To(editor).TakeUntilDisposed();
 
         internal static IObservable<Unit> SetupPropertyEditorParentView(this XafApplication application){
             var detailViewEditors = application.WhenDetailViewCreated().ToDetailView()

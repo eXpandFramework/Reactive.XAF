@@ -2,6 +2,7 @@
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Templates;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.TypeExtensions;
@@ -26,7 +27,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static IObservable<Window> WhenWindowTemplate(this XafApplication application,TemplateContext templateContext=default)
             => application.WhenFrameCreated(templateContext==default?TemplateContext.ApplicationWindow:templateContext)
-                .SelectMany(frame => frame.WhenTemplateChanged()).Cast<Window>();
+	            .If(frame => frame.Context==TemplateContext.ApplicationWindow&&frame.Template!=null,frame => frame.Observe(),frame => frame.WhenTemplateChanged())
+	            .Cast<Window>();
 
 		public static IObservable<IWindowsForm> When(this IObservable<IWindowsForm> source, params string[] eventNames) 
 			=> source.SelectMany(form => eventNames.ToNowObservable().SelectMany(eventName => form.Template.WhenEvent(eventName).To(form)));

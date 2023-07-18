@@ -71,7 +71,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Services.DocumentStyleMa
         internal static IObservable<IRichEditDocumentServer> DocumentManagerContentRichEditServer(this IObservable<DetailView> detailView)
             => detailView.SelectMany(view => view.AsDetailView()
                     .WhenRichEditDocumentServer<BusinessObjects.DocumentStyleManager>(styleManager => styleManager.Content)
-                    .TakeUntil(view.WhenDisposingView()))
+                    .TakeUntilDisposed())
                 .Publish().RefCount();
 
         internal static IObservable<Unit> DocumentStyleManagerDetailView(this ApplicationModulesManager manager,Func<IObservable<DetailView>,IObservable<Unit>> detailView) 

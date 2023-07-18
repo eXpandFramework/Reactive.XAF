@@ -198,6 +198,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
 
 	        AssertWindowAction<ParametrizedAction>(application);
         }
+        
         [XpandTest()][TestCase(ViewType.DetailView)]
         public void Register_Popup_Action_For_Views(ViewType viewType){
 	        using var application = Platform.Win.NewApplication<ReactiveModule>();

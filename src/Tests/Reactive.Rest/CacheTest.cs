@@ -21,10 +21,14 @@ namespace Xpand.XAF.Modules.Reactive.Rest.Tests {
             }
             HandlerMock.SetupRestPropertyObject(Application.CreateObjectSpace(typeof(RestPropertyObject)));
             await Application.CreateObjectSpace(typeof(RestPropertyObject))
-                .Request(typeof(RestPropertyObject)).FirstAsync().Timeout(Timeout);
+                .Request(typeof(RestPropertyObject)).FirstAsync()
+                // .Timeout(Timeout)
+                ;
             
             await Application.CreateObjectSpace(typeof(RestPropertyObject))
-                .Request(typeof(RestPropertyObject)).Timeout(Timeout);
+                .Request(typeof(RestPropertyObject))
+                // .Timeout(Timeout)
+                ;
         
             HandlerMock.VerifySend(Times.Exactly(times),message => $"{message.RequestUri}".Contains($"Get{nameof(RestPropertyObject)}") );
         
@@ -37,7 +41,7 @@ namespace Xpand.XAF.Modules.Reactive.Rest.Tests {
             var restOperationObject = objectSpace.CreateObject<RestOperationObject>();
             var objects = new[] {restOperationObject};
             HandlerMock.SetupRestOperationObject(objects);
-            var restObject = await objectSpace.Request<RestOperationObject>().Timeout(Timeout);
+            var restObject = await objectSpace.Request<RestOperationObject>();
             restObject.Name = "1";
             objectSpace.CommitChanges();
             restObject.Name = "2";

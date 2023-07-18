@@ -49,12 +49,13 @@ namespace Xpand.XAF.Modules.OneView{
 
         public static IObservable<ShowViewParameters> EditModel(this IObservable<ShowViewParameters> showView) 
 	        => showView.SelectMany(parameters => parameters.Controllers.OfType<OneViewDialogController>().ToObservable()
-                    .SelectMany(controller => controller.AcceptAction.WhenExecuteCompleted()
+                    .SelectMany(controller => controller.AcceptAction.WhenExecuted()
                         .Select(e => e.Action.Application.MainWindow.GetController("DevExpress.ExpressApp.Win.SystemModule.EditModelController").GetPropertyValue("EditModelAction"))).Cast<SimpleAction>()
                     .Do(action => action.DoExecute()).To(parameters)
                 ).TraceOneView();
 
         private static IObservable<Unit> HideMainWindow(this XafApplication application) 
+        
 	        => application.WhenWin().SelectMany(api => api.WhenMainFormVisible())
 		        .Do(window => window.Template.SetPropertyValue("Visible",false))
 		        .TraceOneView(window => window.Context)

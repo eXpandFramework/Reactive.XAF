@@ -139,7 +139,7 @@ namespace Xpand.TestsLib.Common{
                 }
             }
 
-            application.AlwaysUpdateOnDatabaseVersionMismatch().FirstAsync().Subscribe();
+            application.AlwaysUpdateOnDatabaseVersionMismatch().Subscribe();
             object instance;
             var platform = application.GetPlatform();
             if (platform == Platform.Win)
@@ -221,15 +221,24 @@ namespace Xpand.TestsLib.Common{
         };
 
         public static TestObserver<T> StartWinTest<T>(this XafApplication application, IObservable<T> test,int delay = 200) 
-            => application.StartTest(application.WhenFrame(Nesting.Root).Take(1)
+            => application.Start(application.WhenFrame(Nesting.Root).Take(1)
                 .Do(_ => SynchronizationContext.SetSynchronizationContext((SynchronizationContext)AppDomain.CurrentDomain
                     .GetAssemblyType("System.Windows.Forms.WindowsFormsSynchronizationContext").CreateInstance()))
                 .SelectMany(frame => (frame.Template)
                     .WhenEvent("Activated").Take(1).WaitUntilInactive(2.Seconds()).Take(1).ObserveOnContext()
                     .SelectMany(_ => test.BufferUntilCompleted().Do(_ => application.Exit()).SelectMany()))
                 .DoNotComplete(),delay);
+        
+        public static TestObserver<T> StartWinTest<T>(this XafApplication application, Func<Frame,IObservable<T>> testFactory,int delay = 200) 
+            => application.Start(application.WhenFrame(Nesting.Root).Take(1)
+                .Do(_ => SynchronizationContext.SetSynchronizationContext((SynchronizationContext)AppDomain.CurrentDomain
+                    .GetAssemblyType("System.Windows.Forms.WindowsFormsSynchronizationContext").CreateInstance()))
+                .SelectMany(frame => (frame.Template)
+                    .WhenEvent("Activated").Take(1).WaitUntilInactive(2.Seconds()).Take(1).ObserveOnContext()
+                    .SelectMany(_ => testFactory(frame).BufferUntilCompleted().Do(_ => application.Exit()).SelectMany()))
+                .DoNotComplete(),delay);
 
-        public static TestObserver<T> StartTest<T>(this XafApplication application,IObservable<T> test,int delay=200) {
+        public static TestObserver<T> Start<T>(this XafApplication application,IObservable<T> test,int delay=200) {
             var testObserver = test
                 .AsyncFinally(async () => await Task.Delay(delay).ToObservable().Do(_ => application.Exit()).ToTask())
                 .Test();

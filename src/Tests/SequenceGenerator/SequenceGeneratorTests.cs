@@ -57,7 +57,6 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
 	        var tuple = await subscribeReplay.FirstAsync();
 	        tuple.sequenceGenerator.ShouldBe(tuple.CurrentManagedThreadId);
 	        tuple.commits.ShouldNotBe(tuple.CurrentManagedThreadId);
-	        eventLoopScheduler.Dispose();
         }
 
 
@@ -204,8 +203,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
 	        using var objectSpace = application.CreateObjectSpace();
 	        objectSpace.GetSequenceStorage(typeof(CustomSquenceNameTestObject)).Name.ShouldBe(typeof(CustomSequenceTypeName).FullName);
         }
-
-
+        
         [Test]
         [XpandTest]
         public async Task Custom_Sequence_Type(){

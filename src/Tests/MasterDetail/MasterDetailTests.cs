@@ -128,6 +128,7 @@ namespace Xpand.XAF.Modules.MasterDetail.Tests{
                 .ShouldBe("updated");
             info.DetailViewItem.Frame.Application.Dispose();
         }
+        
         [XpandTest]
         [TestCase(nameof(Platform.Win))]
         public async Task Conditional_Detailview(string platformName){

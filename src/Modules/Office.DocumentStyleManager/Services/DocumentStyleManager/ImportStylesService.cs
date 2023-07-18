@@ -122,12 +122,12 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Services.DocumentStyleMa
 				.ToUnit());
 
 		private static IObservable<DocumentStyle[]> Import(this IObservable<Frame> source, IRichEditDocumentServer server) 
-            => source.SelectMany(frame => frame.GetController<DialogController>().AcceptAction.WhenExecute()
-				.SelectMany(server.Import));
+            => source.SelectMany(frame => frame.GetController<DialogController>().AcceptAction.WhenExecuted()
+				.SelectMany(e => server.Import(e)));
 
         private static IObservable<DocumentStyle[]> Import(this IRichEditDocumentServer server, SimpleActionExecuteEventArgs args)
-            => args.Action.As<SimpleAction>().WhenExecuteCompleted()
-                .Select(_ => _.SelectedObjects.Cast<DocumentStyle>().ToArray())
+            => args.Observe()
+                .Select(e => e.SelectedObjects.Cast<DocumentStyle>().ToArray())
                 .SelectMany(styles => args.Action.Application.DefaultPropertiesProvider(document => {
                     server.Document.BeginUpdate();
                     foreach (var style in styles){
@@ -139,7 +139,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Services.DocumentStyleMa
                 }));
 
         private static IObservable<Unit> ShowDocumentStyleListView(this IObservable<SimpleAction> source)
-            => source.WhenExecute().SelectMany(e => {
+            => source.WhenExecuted().SelectMany(e => {
                 var showViewParameters = e.ShowViewParameters;
                 var application = e.Action.Application;
                 showViewParameters.CreatedView = application.NewView(application.FindListViewId(typeof(DocumentStyle)));

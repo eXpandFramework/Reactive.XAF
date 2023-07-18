@@ -79,7 +79,7 @@ namespace Xpand.XAF.Modules.ViewWizard{
 
         private static IObservable<SimpleActionExecuteEventArgs> FinishWizardView(
             this IObservable<(Frame Frame, IModelWizardView modelWizardView)> source){
-            return source.SelectMany(t => t.Frame.Action<ViewWizardModule>().FinishWizardView().WhenExecute())
+            return source.SelectMany(t => t.Frame.Action<ViewWizardModule>().FinishWizardView().WhenExecuted())
                 .Do(e => e.Action.View().Close());
         }
 
