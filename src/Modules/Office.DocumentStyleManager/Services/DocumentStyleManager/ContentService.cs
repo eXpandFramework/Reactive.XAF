@@ -11,6 +11,7 @@ using DevExpress.ExpressApp;
 using DevExpress.XtraRichEdit;
 using DevExpress.XtraRichEdit.API.Native;
 using Xpand.Extensions.EventArgExtensions;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.CollectionSourceExtensions;
 using Xpand.Extensions.XAF.ViewExtensions;
@@ -97,7 +98,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Services.DocumentStyleMa
 			        e.Handled = true;
 			        e.SetInstance(_ => new BindingList<DocumentStyle>(ImmutableList.CreateRange(styles!)));
 		        })
-		        .FirstAsync();
+		        .TakeFirst();
 	        return (styles == null
                 ? listView.Application()
                     .DefaultPropertiesProvider(document => {

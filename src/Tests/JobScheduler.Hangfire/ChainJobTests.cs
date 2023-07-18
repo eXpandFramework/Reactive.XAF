@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using akarnokd.reactive_extensions;
@@ -7,6 +6,7 @@ using Hangfire;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.Blazor;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.TestsLib.Common.Attributes;
 using Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects;
 using Xpand.XAF.Modules.JobScheduler.Hangfire.Tests.Common;
@@ -34,7 +34,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests {
                 job.ChainJobs.Add(chainJob);
             }).Trigger(application.ServiceProvider);
 
-            var chainJobObserver = WorkerState.Succeeded.Executed(job => !job.ChainJobs.Any()).FirstAsync().Test();
+            var chainJobObserver = WorkerState.Succeeded.Executed(job => !job.ChainJobs.Any()).TakeFirst().Test();
             var jobState = parentJobObserver.AwaitDone(Timeout).Items.First();
 
             chainJobObserver.AwaitDone(Timeout).ItemCount.ShouldBe(chainExecCount);

@@ -12,6 +12,7 @@ using DevExpress.ExpressApp.Xpo.Updating;
 using DevExpress.Persistent.BaseImpl;
 using NUnit.Framework;
 using Shouldly;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.CollectionSourceExtensions;
@@ -34,9 +35,9 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub.Tests{
         public async Task Start_Server_After_Logon() {
             using var application = HubModule().Application;
             var startServer = application.WhenTraceOnNext(nameof(ReactiveLoggerHubService.StartServer))
-                .FirstAsync().SubscribeReplay();
+                .TakeFirst().SubscribeReplay();
             var startServerSave = application.WhenTraceOnNextEvent(nameof(ReactiveLoggerHubService.StartServer))
-                .FirstAsync().SubscribeReplay();
+                .TakeFirst().SubscribeReplay();
 
             application.Logon();
             application.CreateObjectSpace();
@@ -51,7 +52,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub.Tests{
         public async Task Connect_Client() {
             using var clientWinApp = new ClientWinApp();
             clientWinApp.AddModule<ReactiveLoggerHubModule>(typeof(RLH),typeof(BaseObject));
-            var connectClient = clientWinApp.WhenTraceOnNextEvent(nameof(ReactiveLoggerHubService.ConnectClient)).FirstAsync()
+            var connectClient = clientWinApp.WhenTraceOnNextEvent(nameof(ReactiveLoggerHubService.ConnectClient)).TakeFirst()
                 .SubscribeOn(Scheduler.Default)
                 .SubscribeReplay();
             clientWinApp.Logon();
@@ -62,16 +63,16 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub.Tests{
                 application.AddModule<ReactiveLoggerHubModule>(nameof(Connect_Client), typeof(RLH),typeof(BaseObject));
                 application.Logon();
                 application.CreateObjectSpace();
-                await connectClient.FirstAsync().Timeout(Timeout);
+                await connectClient.TakeFirst().Timeout(Timeout);
             }
-            connectClient = clientWinApp.WhenTraceOnNextEvent(nameof(ReactiveLoggerHubService.ConnectClient)).FirstAsync()
+            connectClient = clientWinApp.WhenTraceOnNextEvent(nameof(ReactiveLoggerHubService.ConnectClient)).TakeFirst()
                 .SubscribeReplay();
             using (var application = Platform.Win.NewApplication<ReactiveLoggerHubModule>()){
                 application.AddModule<ReactiveLoggerHubModule>($"{nameof(Connect_Client)}_2",typeof(RLH),typeof(BaseObject));
                 application.Logon();
                 application.CreateObjectSpace();
 
-                await connectClient.FirstAsync().Timeout(Timeout);
+                await connectClient.TakeFirst().Timeout(Timeout);
                 connectClient.Test().ItemCount.ShouldBe(1);
             }
         }
@@ -85,16 +86,16 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub.Tests{
             dictionary.CollectClassInfos(typeof(ModuleInfo).Assembly);
             using var application = Platform.Win.NewApplication<ReactiveLoggerHubModule>();
             var startServer = application.WhenTraceOnNextEvent(nameof(ReactiveLoggerHubService.StartServer))
-                .FirstAsync().SubscribeReplay().SubscribeOn(Scheduler.Default);
-            var connecting = TraceEventHub.Connecting.FirstAsync().SubscribeReplay();
+                .TakeFirst().SubscribeReplay().SubscribeOn(Scheduler.Default);
+            var connecting = TraceEventHub.Connecting.TakeFirst().SubscribeReplay();
             application.AddModule<ReactiveLoggerHubModule>(typeof(RLH));
             application.Model.ToReactiveModule<IModelReactiveModuleLogger>().ReactiveLogger.TraceSources[nameof(ReactiveModule)].Level=SourceLevels.Verbose;
             application.Logon();
             application.CreateObjectSpace();
                 
             await startServer.Timeout(Timeout);
-            var receive = TraceEventReceiver.TraceEvent.FirstAsync(_ => _.Method==nameof(XafApplicationRxExtensions.WhenDetailViewCreated)).SubscribeReplay();
-            var broadcast = TraceEventHub.Trace.FirstAsync(_ => _.Method==nameof(XafApplicationRxExtensions.WhenDetailViewCreated))
+            var receive = TraceEventReceiver.TraceEvent.TakeFirst(_ => _.Method==nameof(XafApplicationRxExtensions.WhenDetailViewCreated)).SubscribeReplay();
+            var broadcast = TraceEventHub.Trace.TakeFirst(_ => _.Method==nameof(XafApplicationRxExtensions.WhenDetailViewCreated))
                 .SubscribeReplay();
             using var clientWinApp = new ClientWinApp {EditorFactory = new EditorsFactory()};
             clientWinApp.AddModule<ReactiveLoggerHubModule>();
@@ -103,13 +104,13 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub.Tests{
 
                     
             var listView = clientWinApp.NewObjectView<ListView>(typeof(TraceEvent));
-            var collectionReloaded = listView.CollectionSource.WhenCollectionReloaded().FirstAsync().SubscribeReplay();
+            var collectionReloaded = listView.CollectionSource.WhenCollectionReloaded().TakeFirst().SubscribeReplay();
             clientWinApp.CreateViewWindow().SetView(listView);
                     
             await connecting.Timeout(Timeout);
 
                     
-            var detailViewCreated=application.WhenDetailViewCreated().FirstAsync().SubscribeReplay();
+            var detailViewCreated=application.WhenDetailViewCreated().TakeFirst().SubscribeReplay();
                     
                     
                     
@@ -140,8 +141,8 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub.Tests{
 
             using var application = Platform.Win.NewApplication<ReactiveLoggerHubModule>();
             var startServer = application.WhenTraceOnNextEvent(nameof(ReactiveLoggerHubService.StartServer))
-                .FirstAsync().SubscribeReplay().SubscribeOn(Scheduler.Default);
-            var connecting = TraceEventHub.Connecting.FirstAsync().SubscribeReplay();
+                .TakeFirst().SubscribeReplay().SubscribeOn(Scheduler.Default);
+            var connecting = TraceEventHub.Connecting.TakeFirst().SubscribeReplay();
                     
             application.AddModule<ReactiveLoggerHubModule>(nameof(Display_TraceEvent_On_Running_Client),typeof(RLH));
             application.Model.ToReactiveModule<IModelReactiveModuleLogger>().ReactiveLogger.TraceSources[nameof(ReactiveModule)].Level=SourceLevels.Verbose;
@@ -152,11 +153,11 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub.Tests{
             await connecting.Timeout(Timeout);
                     
             var viewCreated = clientWinApp.WhenTraceOnNextEvent(nameof(XafApplicationRxExtensions.WhenDetailViewCreated))
-                .FirstAsync().SubscribeReplay();
-            var whenDetailViewCreated = application.WhenDetailViewCreated().FirstAsync().SubscribeReplay();
+                .TakeFirst().SubscribeReplay();
+            var whenDetailViewCreated = application.WhenDetailViewCreated().TakeFirst().SubscribeReplay();
             application.NewObjectView<DetailView>(typeof(RLH));
             await viewCreated.Timeout(Timeout).ToTaskWithoutConfigureAwait();
-            await listView.CollectionSource.WhenCollectionReloaded().FirstAsync();
+            await listView.CollectionSource.WhenCollectionReloaded().TakeFirst();
             await whenDetailViewCreated;
             var events = listView.CollectionSource.Objects<TraceEvent>().ToArray();
             events.FirstOrDefault(_ => _.Method==nameof(XafApplicationRxExtensions.WhenDetailViewCreated)).ShouldNotBeNull();

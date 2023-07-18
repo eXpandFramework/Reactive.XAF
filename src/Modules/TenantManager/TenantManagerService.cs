@@ -26,6 +26,7 @@ using Xpand.Extensions.Blazor;
 using Xpand.Extensions.EventArgExtensions;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Combine;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
@@ -47,7 +48,7 @@ namespace Xpand.XAF.Modules.TenantManager{
     public static class TenantManagerService {
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) 
             => manager.WhenApplication(application => application.WhenStartupView()
-	            .Merge(application.WhenModelChanged().FirstAsync().RegisterOrganizationNonSecured(application))
+	            .Merge(application.WhenModelChanged().TakeFirst().RegisterOrganizationNonSecured(application))
 	            .Merge(application.LogonLastOrganization())
 	            .Merge(application.HideOrganization())
                 .Merge(application.WhenLoggingOff().SelectMany(_ => application.SaveOrganizationKey()).ToUnit())
@@ -87,7 +88,7 @@ namespace Xpand.XAF.Modules.TenantManager{
                             collectionSourceBase.Criteria[nameof(TenantManagerService)] = CriteriaOperator.Parse(application.Model.TenantManager().Registration);
                             e.CollectionSource = collectionSourceBase;
                         })))
-                .FirstAsync()
+                .TakeFirst()
                 .ToUnit();
 
         internal static IObservable<Unit> CreateStartupView(this PopupWindowShowAction action)

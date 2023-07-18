@@ -11,6 +11,7 @@ using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.SystemModule;
 using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Combine;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.Tracing;
@@ -70,7 +71,7 @@ namespace Xpand.XAF.Modules.BulkObjectUpdate{
                     var dialogController = e.Application().CreateController<DialogController>();
                     dialogController.SaveOnAccept = false;
                     showViewParameters.Controllers.Add(dialogController);
-                    return application.WhenViewOnFrame(modelDetailView.ModelClass.TypeInfo.Type).WhenFrame(ViewType.DetailView).FirstAsync()
+                    return application.WhenViewOnFrame(modelDetailView.ModelClass.TypeInfo.Type).WhenFrame(ViewType.DetailView).TakeFirst()
 	                    .Select(frame => (listView:e.Action.Controller.Frame,detailView:frame));
                 });
 

@@ -8,6 +8,7 @@ using Fasterflect;
 using Moq;
 using NUnit.Framework;
 using Shouldly;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.TestsLib;
@@ -47,7 +48,7 @@ namespace Xpand.XAF.Modules.CloneMemberValue.Tests{
                 var objectSpace2 = application.CreateObjectSpace();
                 var detailView2 = application.CreateDetailView(objectSpace2, objectSpace2.CreateObject<ACmv>());
 
-                var viewsTuple = await detailViews.FirstAsync().WithTimeOut();
+                var viewsTuple = await detailViews.TakeFirst().WithTimeOut();
                 viewsTuple.previous.ShouldBe(detailView1);
                 viewsTuple.current.ShouldBe(detailView2);
             }
@@ -73,7 +74,7 @@ namespace Xpand.XAF.Modules.CloneMemberValue.Tests{
             var collectionSource = application.CreateCollectionSource(application.CreateObjectSpace(),typeof(ACmv),modelListView.Id);
             application.CreateListView(modelListView, collectionSource, true);
 
-            var listView = await listViews.FirstAsync().WithTimeOut();
+            var listView = await listViews.TakeFirst().WithTimeOut();
 
             listView.Model.ShouldBe(modelListView);                
             application.Dispose();
@@ -89,10 +90,10 @@ namespace Xpand.XAF.Modules.CloneMemberValue.Tests{
             var aCmv2 = objectSpace.CreateObject<ACmv>();
             var listEditor = mock.Object;
             var createObjects = listEditor.WhenNewObjectAdding()
-                .FirstAsync().Do(e => {
+                .TakeFirst().Do(e => {
                     if (e != null) e.AddedObject = aCmv1;
                 })
-                .Merge(listEditor.WhenNewObjectAdding().Skip(1).FirstAsync().Do(e => {
+                .Merge(listEditor.WhenNewObjectAdding().Skip(1).TakeFirst().Do(e => {
                     if (e != null) e.AddedObject = aCmv2;
                 }))
                 .Replay();
@@ -102,7 +103,7 @@ namespace Xpand.XAF.Modules.CloneMemberValue.Tests{
             listEditor.CallMethod("OnNewObjectAdding");
             listEditor.CallMethod("OnNewObjectAdding");
 
-            var objectPair = await (objects).FirstAsync().WithTimeOut();
+            var objectPair = await (objects).TakeFirst().WithTimeOut();
             objectPair.previous.ShouldBe(aCmv1);
             objectPair.current.ShouldBe(aCmv2);                
             application.Dispose();

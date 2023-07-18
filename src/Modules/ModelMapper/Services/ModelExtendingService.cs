@@ -9,6 +9,7 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using Fasterflect;
 using Xpand.Extensions.LinqExtensions;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
@@ -50,7 +51,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 .Distinct().Replay().RefCount();
 
             return modelExtenders
-                .SelectMany(_ => mappedContainers.FirstAsync(type =>type.Attribute<ModelMapLinkAttribute>().LinkedTypeName == _.TypeToMap.AssemblyQualifiedName)
+                .SelectMany(_ => mappedContainers.TakeFirst(type =>type.Attribute<ModelMapLinkAttribute>().LinkedTypeName == _.TypeToMap.AssemblyQualifiedName)
                     .SelectMany(_.CollectExtenders))
                 .Do(_ => extenders.Add(_.targetInterfaceType,_.extenderInterface));
         }

@@ -8,6 +8,7 @@ using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Blazor;
 using Xpand.Extensions.ObjectExtensions;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
@@ -55,7 +56,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Notification {
                         if (!ReferenceEquals(criteriaOperator, null)) {
                             var objects = jobWorker.ObjectSpace.GetObjects(objectType, criteriaOperator).Cast<object>().ToArray();
                             if (objects.Any()) {
-                                var publish = NotifyWorkerFinished.FirstAsync(id => id==workerId); 
+                                var publish = NotifyWorkerFinished.TakeFirst(id => id==workerId); 
                                 if (job.ChainJobs.Any()) {
                                     return publish.Select(unit => unit)
                                         .ToUnit()

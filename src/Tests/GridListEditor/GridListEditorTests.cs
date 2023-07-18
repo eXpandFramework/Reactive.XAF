@@ -11,6 +11,7 @@ using DevExpress.XtraGrid;
 using Fasterflect;
 using NUnit.Framework;
 using Shouldly;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.ViewExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
@@ -56,7 +57,7 @@ namespace Xpand.XAF.Modules.GridListEditor.Tests{
                     frame.View.RefreshDataSource();
                     return reload.Select(_ => ((DevExpress.ExpressApp.Win.Editors.GridListEditor) ((ListView) frame.View).Editor).GridView.TopRowIndex);
                 })
-                .FirstAsync()
+                .TakeFirst()
                 .Do(_ => application.Exit())
                 .SubscribeReplay();
             

@@ -7,6 +7,7 @@ using DevExpress.ExpressApp.SystemModule;
 using Moq;
 using NUnit.Framework;
 using Shouldly;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.XAF.ActionExtensions;
 using Xpand.Extensions.XAF.CollectionSourceExtensions;
 using Xpand.Extensions.XAF.FrameExtensions;
@@ -51,7 +52,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManag
             var tuple = application.SetDocumentStyleManagerDetailView(Document);
 
             var action = tuple.window.Action<DocumentStyleManagerModule>().ImportStyles();
-            action.WhenExecuted().FirstAsync().Do(_ => _.ShowViewParameters.TargetWindow=TargetWindow.NewWindow).Test();
+            action.WhenExecuted().TakeFirst().Do(_ => _.ShowViewParameters.TargetWindow=TargetWindow.NewWindow).Test();
             var testObserver = application.WhenViewOnFrame(typeof(DocumentStyle),ViewType.ListView,Nesting.Root).Select(frame => frame.View).Test();
             action.DoTheExecute();
             
@@ -109,7 +110,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManag
             var tuple = application.SetDocumentStyleManagerDetailView(Document);
             var listViewFrame = application.WhenViewOnFrame(typeof(DocumentStyle),ViewType.ListView,Nesting.Root).Test();
             var action = tuple.window.Action<DocumentStyleManagerModule>().ImportStyles();
-            action.WhenExecuted().FirstAsync().Do(_ => _.ShowViewParameters.TargetWindow = TargetWindow.NewWindow).Test();
+            action.WhenExecuted().TakeFirst().Do(_ => _.ShowViewParameters.TargetWindow = TargetWindow.NewWindow).Test();
             action.DoTheExecute();
 
             var acceptAction = listViewFrame.Items.First().GetController<DialogController>().AcceptAction;
@@ -177,7 +178,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManag
 	        ModelSetup(application);
 	        var tuple = application.SetDocumentStyleManagerDetailView(Document);
 	        var action = tuple.window.Action<DocumentStyleManagerModule>().ImportStyles();
-	        using var _=action.WhenExecuted().FirstAsync().Do(_ => _.ShowViewParameters.TargetWindow = TargetWindow.NewWindow).Test();
+	        using var _=action.WhenExecuted().TakeFirst().Do(_ => _.ShowViewParameters.TargetWindow = TargetWindow.NewWindow).Test();
 	        using var listViewFrame = application.WhenViewOnFrame(typeof(DocumentStyle),ViewType.ListView,Nesting.Root).Test();
 	        action.DoExecute();
 

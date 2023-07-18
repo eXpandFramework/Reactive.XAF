@@ -9,6 +9,7 @@ using DevExpress.ExpressApp;
 using NUnit.Framework;
 using Shouldly;
 using Swordfish.NET.Collections.Auxiliary;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.TaskExtensions;
 using Xpand.Extensions.XAF.NonPersistentObjects;
@@ -96,7 +97,7 @@ namespace Xpand.XAF.Modules.RazorView.Tests {
             using var testObserver = Application.WhenRazorViewDataSourceObjectRendering()
                 .Do(e => e.Handled=e.SetInstance(t => {
                     t.renderedView = nameof(Customize_Render_For_DataSource_Object).Observe()
-	                    .Select(s => s).FirstAsync();
+	                    .Select(s => s).TakeFirst();
                     return t;
                 }))
                 .Test();

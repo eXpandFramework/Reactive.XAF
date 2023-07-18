@@ -8,6 +8,7 @@ using System.Windows.Forms;
 using DevExpress.ExpressApp.Win;
 
 using Xpand.Extensions.AppDomainExtensions;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.TestsLib.Common;
@@ -91,14 +92,14 @@ namespace Xpand.TestsLib{
     static class TestApplicationExtensions{
         public static IObservable<Unit> ClientBroadcast(this ITestApplication application) 
             => Process.GetProcessesByName("Xpand.XAF.Modules.Reactive.Logger.Client.Win").Any()
-                ? TraceEventHub.Trace.FirstAsync(_ => _.Source == application.SUTModule.Name).ToUnit()
+                ? TraceEventHub.Trace.TakeFirst(_ => _.Source == application.SUTModule.Name).ToUnit()
                     .SubscribeReplay()
                 : Unit.Default.Observe();
 
         
         public static IObservable<Unit> ClientConnect(this ITestApplication application) 
             => Process.GetProcessesByName("Xpand.XAF.Modules.Reactive.Logger.Client.Win").Any()
-                ? TraceEventHub.Connecting.FirstAsync().SubscribeReplay()
+                ? TraceEventHub.Connecting.TakeFirst().SubscribeReplay()
                 : Unit.Default.Observe();
     }
 }

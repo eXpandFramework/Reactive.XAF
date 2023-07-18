@@ -4,6 +4,7 @@ using DevExpress.ExpressApp;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.Numeric;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
@@ -90,7 +91,7 @@ namespace Xpand.XAF.Modules.Email.Tests {
             detailView.CurrentObject = e;
             window.SetView(detailView);
             TestScheduler.AdvanceTimeBy(2.Seconds());
-            using var testObserver = Application.WhenSendingEmail().FirstAsync().Test();
+            using var testObserver = Application.WhenSendingEmail().TakeFirst().Test();
             var action = window.Action(nameof(EmailService.Email));
             
             action.DoExecute(_ => new []{detailView.CurrentObject});
@@ -98,7 +99,7 @@ namespace Xpand.XAF.Modules.Email.Tests {
             testObserver.AwaitDone(Timeout).ItemCount.ShouldBe(1);
             var id = _viewRecipient.Id();
             Application.WhenCommitted<EmailStorage>().SelectMany(t => t.objects)
-                .FirstAsync(storage => storage.ViewRecipient == id && storage.Key == e.Oid.ToString()).Timeout(Timeout);
+                .TakeFirst(storage => storage.ViewRecipient == id && storage.Key == e.Oid.ToString()).Timeout(Timeout);
         }
 
 

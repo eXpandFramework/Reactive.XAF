@@ -8,6 +8,7 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.Model;
 using Xpand.Extensions.ObjectExtensions;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.ActionExtensions;
 using Xpand.Extensions.XAF.CollectionSourceExtensions;
@@ -27,7 +28,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
                 .ConcatIgnored(job => {
                     if (job.AuthenticateUserCriteria == null) return job.Observe();
                     var user = objectSpace.FindObject(SecuritySystem.UserType, CriteriaOperator.Parse(job.AuthenticateUserCriteria));
-                    return user != null ? application.LogonUser(objectSpace.GetKeyValue(user)).FirstAsync().To(job)
+                    return user != null ? application.LogonUser(objectSpace.GetKeyValue(user)).TakeFirst().To(job)
                         : Observable.Throw<Job>(new Exception($"{nameof(user)} not found"));
                 })
                 .SelectMany(job => application.CreateView(job, application.Model.Views[job.View.Name]).ToUnit()
@@ -40,7 +41,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
                     var objectType = modelView.AsObjectView.ModelClass.TypeInfo.Type;
                     t.e.View = application.CreateView( job, modelView, application.CreateObjectSpace(objectType,true), objectType);
                     return t.e.View;
-                }).FirstAsync().IgnoreElements();
+                }).TakeFirst().IgnoreElements();
 
         private static ObjectView CreateView(this XafApplication application, ExecuteActionJob job, IModelView modelView, IObjectSpace space, Type objectType) 
             => modelView is IModelListView modelListView
@@ -62,7 +63,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
         }
         
         private static IObservable<Unit> ListViewExecute(this ActionBase action) 
-            => action.WhenExecuteFinished().FirstAsync().ToUnit()
+            => action.WhenExecuteFinished().TakeFirst().ToUnit()
                 .Merge(Unit.Default.Observe().Do(_ => action.DoTheExecute()).IgnoreElements());
 
         private static IObservable<Unit> DetailViewExecute(this ActionBase action, ExecuteActionJob job, CompositeView newView) {

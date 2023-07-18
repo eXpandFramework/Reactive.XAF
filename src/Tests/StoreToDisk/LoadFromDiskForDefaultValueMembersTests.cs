@@ -5,6 +5,7 @@ using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp;
 using NUnit.Framework;
 using Shouldly;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.StoreToDisk.Tests.BOModel;
 using Xpand.XAF.Modules.StoreToDisk.Tests.Common;
@@ -33,7 +34,7 @@ namespace Xpand.XAF.Modules.StoreToDisk.Tests {
             objectSpace.CommitChanges();
             var std = objectSpace.CreateObject<STD>();
             std.Name = name;
-            using var testObserver = Application.WhenProviderCommitted<STD>().ToObjects().FirstAsync().Test();
+            using var testObserver = Application.WhenProviderCommitted<STD>().ToObjects().TakeFirst().Test();
 
             objectSpace.CommitChanges();
 

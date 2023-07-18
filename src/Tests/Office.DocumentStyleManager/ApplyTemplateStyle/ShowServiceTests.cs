@@ -8,6 +8,7 @@ using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp;
 using NUnit.Framework;
 using Shouldly;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.TestsLib.Common;
@@ -41,7 +42,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.ApplyTemplateStyle
 			item.ListView = application.Model.BOModel.GetClass(typeof(DataObject)).DefaultListView;
 			window.SetView(application.NewView(ViewType.ListView, typeof(DataObject)));
 			var action = window.Action<DocumentStyleManagerModule>().ShowApplyStylesTemplate();
-			action.WhenExecuted().FirstAsync()
+			action.WhenExecuted().TakeFirst()
 				.Do(e => e.ShowViewParameters.TargetWindow = TargetWindow.NewWindow).Test();
 			var testObserver = application.WhenViewOnFrame(typeof(BusinessObjects.ApplyTemplateStyle), ViewType.DetailView).Test();
 			var dataObject = window.View.ObjectSpace.CreateObject<DataObject>();

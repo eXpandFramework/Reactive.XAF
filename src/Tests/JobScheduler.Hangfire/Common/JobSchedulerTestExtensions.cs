@@ -10,6 +10,7 @@ using Hangfire;
 using NUnit.Framework;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.EventArgExtensions;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.NonPersistentObjects;
 using Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects;
@@ -23,10 +24,10 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests.Common {
                     .Call(new object[] { application, job.Id })).Select(unit => unit));
 
         public static IObservable<JobState> Executed(this WorkerState lastState,Func<Job,bool> job=null) 
-            => JobSchedulerService.JobState.FirstAsync(t => t.Fit(null, WorkerState.Enqueued)).IgnoreElements()
-                .Concat(Observable.Defer(() => JobSchedulerService.JobState.FirstAsync(jobState => jobState.Fit(null, WorkerState.Processing)).IgnoreElements()))
-                .Concat(Observable.Defer(() => JobSchedulerService.JobState.FirstAsync(jobState => jobState.Fit(job, lastState))))
-                .FirstAsync();
+            => JobSchedulerService.JobState.TakeFirst(t => t.Fit(null, WorkerState.Enqueued)).IgnoreElements()
+                .Concat(Observable.Defer(() => JobSchedulerService.JobState.TakeFirst(jobState => jobState.Fit(null, WorkerState.Processing)).IgnoreElements()))
+                .Concat(Observable.Defer(() => JobSchedulerService.JobState.TakeFirst(jobState => jobState.Fit(job, lastState))))
+                .TakeFirst();
 
         private static bool Fit(this JobState jobState, Func<Job, bool> job, WorkerState workerState) 
             => jobState.State == workerState && (job == null || job(jobState.JobWorker.Job));

@@ -27,6 +27,7 @@ using Microsoft.JSInterop;
 using Newtonsoft.Json;
 using Xpand.Extensions.EventArgExtensions;
 using Xpand.Extensions.ObjectExtensions;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
@@ -70,7 +71,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
 
         private static IObservable<StateHistoryDto> WhenSucceeded(this JobState state)
             => Observable.Defer(() => JobStorage.Current.GetMonitoringApi().JobDetails(state.JobWorker.Id).History.Where(dto => dto.StateName==SucceededState.StateName)
-                .ToNowObservable()).RepeatWhen(o => o.Delay(TimeSpan.FromSeconds(1))).FirstAsync();
+                .ToNowObservable()).RepeatWhen(o => o.Delay(TimeSpan.FromSeconds(1))).TakeFirst();
 
         
         private static IObservable<bool> WhenNeedTrigger(this IObservable<StateHistoryDto> source) 

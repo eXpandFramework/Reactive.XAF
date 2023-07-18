@@ -10,6 +10,7 @@ using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.SystemModule;
 using NUnit.Framework;
 using Shouldly;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
@@ -34,8 +35,7 @@ namespace Xpand.XAF.Modules.OneView.Tests{
 	        using var application = OneViewModule().Application;
 	        var visibility = application.WhenViewOnFrame(typeof(OV))
 		        .SelectMany(frame => frame.Template.WhenWindowsForm().When("Shown"))
-		        .Select(_ => ((Form) application.MainWindow.Template).Visible)
-		        .FirstAsync()
+		        .Select(_ => ((Form) application.MainWindow.Template).Visible).TakeFirst()
 		        .Do(_ => application.Exit())
 		        .SubscribeReplay();
 
@@ -67,7 +67,7 @@ namespace Xpand.XAF.Modules.OneView.Tests{
 	        var closeView = application.WhenViewOnFrame(typeof(OV))
 		        .SelectMany(frame => frame.Template.WhenWindowsForm().When("Shown").To(frame).Select(frame1 => frame1))
 		        .Do(frame => frame.View.Close())
-		        .FirstAsync()
+		        .TakeFirst()
 		        .SubscribeReplay();
 
 	        var testWinApplication = ((TestWinApplication) application);
@@ -86,7 +86,7 @@ namespace Xpand.XAF.Modules.OneView.Tests{
 	        var whenViewOneFrame=application.WhenViewOnFrame(typeof(OV))
 		        .SelectMany(frame => frame.Template.WhenWindowsForm().When("Shown").To(frame))
 		        .Do(frame => frame.GetController<DialogController>().AcceptAction.DoExecute())
-		        .FirstAsync()
+		        .TakeFirst()
 		        .SubscribeReplay();
 	        var testWinApplication = ((TestWinApplication) application);
 	        var editModel = testWinApplication.ModelEditorForm.SelectMany(form => form.WhenEvent(nameof(Form.Shown)).To(form))
@@ -95,13 +95,12 @@ namespace Xpand.XAF.Modules.OneView.Tests{
 			        return form.WhenDisposed();
 		        })
 		        .Select(tuple => tuple)
-		        .FirstAsync()
+		        .TakeFirst()
 		        .SubscribeReplay();
-	        var showViewAfterModelEdit = application.WhenViewOnFrame(typeof(OV)).Select(frame => frame).When(TemplateContext.PopupWindow)
-		        .SkipUntil(editModel)
+	        var showViewAfterModelEdit = application.WhenViewOnFrame(typeof(OV)).Select(frame => frame).When(TemplateContext.PopupWindow).SkipUntil( editModel)
 		        .SelectMany(frame => frame.Template.WhenWindowsForm().When("Shown").To(frame))
 		        .Do(frame => frame.View.Close())
-		        .FirstAsync().SubscribeReplay();
+		        .TakeFirst().SubscribeReplay();
 	        testWinApplication.WhenWin().WhenCustomHandleException().Subscribe(args => { args.handledEventArgs.Handled = true; });
 	        testWinApplication.Start();
 	        Await(async () => {

@@ -17,6 +17,7 @@ using Swordfish.NET.Collections.Auxiliary;
 using Xpand.Extensions.JsonExtensions;
 using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Combine;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Transform.System;
 using Xpand.Extensions.Reactive.Transform.System.Net;
@@ -100,7 +101,7 @@ namespace Xpand.XAF.Modules.Speech.Services {
                 .StartContinuousRecognitionAsync().ToObservable().MergeIgnored(_ => recognizer.NotifyWhenCanceled()).TraceSpeechManager(_ => "Started")
                 .SelectMany(_ => recognizer.WhenSessionStopped().TakeUntil(simpleAction.WhenExecuted().Where(e => e.Action.CommonImage()==CommonImage.Stop).Take(1)
                         .SelectMany(_ => recognizer.StopContinuousRecognitionAsync().ToObservable()))
-                    .FirstAsync().ObserveOn(context).Do(_ => simpleAction.SetImage(CommonImage.Language))
+                    .TakeFirst().ObserveOn(context).Do(_ => simpleAction.SetImage(CommonImage.Language))
                     .MergeToUnit(recognizer.Defer(() => {
                         var speechTexts = speechToText.SpeechTexts.OrderByDescending(text => text.Start).ToArray();
                         return recognizer.WhenRecognized().ObserveOn(context)

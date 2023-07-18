@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Linq;
-using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.SystemModule;
 using NUnit.Framework;
 using Shouldly;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.TestsLib;
@@ -75,7 +75,7 @@ namespace Xpand.XAF.Modules.ModelViewInheritance.Tests{
             if (attribute){
                 application.Modules.Add(new ReactiveModule());
                 application.WhenApplicationModulesManager().WhenCustomizeTypesInfo()
-                    .FirstAsync(_=> {
+                    .TakeFirst(_=> {
                         _.TypesInfo.FindTypeInfo(typeof(AMvi))
                             .AddAttribute(new ModelMergedDifferencesAttribute($"{nameof(AMvi)}_{viewType}",
                                 $"{nameof(ABaseMvi)}_{viewType}"));

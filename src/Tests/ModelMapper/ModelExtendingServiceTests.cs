@@ -22,6 +22,7 @@ using DevExpress.XtraTreeList.Columns;
 using EnumsNET;
 using NUnit.Framework;
 using Shouldly;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.Extensions.XAF.TypesInfoExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
@@ -270,7 +271,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             InitializeMapperService(Platform.Win);
             using var module = new[]{PredefinedMap.PivotGridControl, PredefinedMap.GridView}.Extend();
             module.ApplicationModulesManager
-                .FirstAsync()
+                .TakeFirst()
                 .SelectMany(_ => _.manager.ExtendMap(PredefinedMap.GridView))
                 .Subscribe(_ => {
                     _.extenders.Add(_.targetInterface,typeof(IModelPredefinedMapExtension));
@@ -291,7 +292,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             InitializeMapperService(platform);
             using var module = new[]{predefinedMap}.Extend();
             module.ApplicationModulesManager
-                .FirstAsync()
+                .TakeFirst()
                 .SelectMany(_ => _.manager.ExtendMap(predefinedMap))
                 .Subscribe(_ => {
                     _.extenders.Add(_.targetInterface,typeof(IModelPredefinedMapExtension));

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.SystemModule;
 using Fasterflect;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.CollectionSourceExtensions;
@@ -18,7 +19,7 @@ namespace Xpand.TestsLib.Common {
             var window = await TestListView(application, objectType);
             var action = window.GetController<ListViewProcessCurrentObjectController>().ProcessCurrentObjectAction;
             var frameViewChanged = application.WhenViewCreated().OfType<DetailView>()
-                .FirstAsync().SubscribeReplay();
+                .TakeFirst().SubscribeReplay();
 
             action.DoExecute(objectSpace => {
                 var objects = window.View.AsListView().CollectionSource.Objects().Take(1).ToArray();
@@ -36,7 +37,7 @@ namespace Xpand.TestsLib.Common {
             var whenProxyCollectionChanged = ((ProxyCollection) listView.CollectionSource.Collection).Count.Observe()
                 .SelectMany(_ => listView.CollectionSource.WhenProxyCollectionChanged()).SubscribeReplay();
             var window = application.CreateViewWindow(() => listView);
-            await whenProxyCollectionChanged.FirstAsync();
+            await whenProxyCollectionChanged.TakeFirst();
             return window;
         }
     }

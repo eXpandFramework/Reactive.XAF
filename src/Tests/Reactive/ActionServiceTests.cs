@@ -7,6 +7,7 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.SystemModule;
 using NUnit.Framework;
 using Shouldly;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.XAF.ActionExtensions;
 using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
@@ -38,7 +39,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests {
                 : modelRootNavigationItems.Items["Default"]
                     .Items[application.Model.BOModel.GetClass(typeof(R)).DefaultListView.Id];
 
-            await application.LogonUser(user).FirstAsync();
+            await application.LogonUser(user).TakeFirst();
             
             testObserver.ItemCount.ShouldBe(active?1:0);
             if (active){

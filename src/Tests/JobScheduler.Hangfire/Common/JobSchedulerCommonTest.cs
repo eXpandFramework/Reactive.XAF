@@ -43,7 +43,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests.Common {
                     .Do(sources => {
                         var source = sources.AddNode<IModelJobSchedulerSource>();
                         source.AssemblyName = GetType().Assembly.GetName().Name;
-                    })).FirstAsync().TakeUntilDisposed(newBlazorApplication).Subscribe();
+                    })).TakeFirst().TakeUntilDisposed(newBlazorApplication).Subscribe();
             return newBlazorApplication;
         }
 

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using DevExpress.ExpressApp.SystemModule;
 using NUnit.Framework;
 using Shouldly;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.CollectionSourceExtensions;
 using Xpand.Extensions.XAF.DetailViewExtensions;
@@ -31,7 +32,7 @@ namespace Xpand.XAF.Modules.Reactive.Rest.Tests {
 			var detailView = await Application.TestListViewProcessSelectedItem(typeof(RestPropertyObject));
 			var nestedFrame = detailView.GetListPropertyEditor<RestPropertyObject>(o => o.StringArrayList).Frame;
 			var whenDetailViewCreated =
-				Application.WhenDetailViewCreated(typeof(ObjectString)).FirstAsync().SubscribeReplay();
+				Application.WhenDetailViewCreated(typeof(ObjectString)).TakeFirst().SubscribeReplay();
 			var newObjectAction = nestedFrame.GetController<NewObjectViewController>().NewObjectAction;
 			newObjectAction.DoExecute(
 				space => new[] {space.GetObject(nestedFrame.View.AsListView().CollectionSource.Objects().First())},

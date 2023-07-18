@@ -41,7 +41,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
         public async Task RegisterAction_In_Parallel(int i) {
             var applicationModulesManager = new ApplicationModulesManager(new ControllersManager(), "");
             var id = $"test{i}";
-            var simpleAction = await applicationModulesManager.RegisterViewSimpleAction(id).FirstAsync();
+            var simpleAction = await applicationModulesManager.RegisterViewSimpleAction(id).TakeFirst();
 
             simpleAction.Id.ShouldBe(id);
         }
@@ -123,7 +123,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
                 var testObserver = detailViewAction.WhenExecuted().ToUnit().Test();
                 if (detailViewAction is PopupWindowShowAction popupWindowShowAction) {
                     popupWindowShowAction.IsModal = false;
-                    testObserver=popupWindowShowAction.WhenCustomizePopupWindowParams().Do(args => args.View = application.NewView<DetailView>(typeof(R))).FirstAsync().ToUnit().Test();
+                    testObserver=popupWindowShowAction.WhenCustomizePopupWindowParams().Do(args => args.View = application.NewView<DetailView>(typeof(R))).TakeFirst().ToUnit().Test();
                 }
                 
                 detailViewAction.DoTheExecute();

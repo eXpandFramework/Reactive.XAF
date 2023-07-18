@@ -85,7 +85,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
 
 
         private static IObservable<Server> StartServer(this  XafApplication application) 
-	        => application is ILoggerHubClientApplication ? Observable.Empty<Server>() : application.ServerPortsList().FirstAsync()
+	        => application is ILoggerHubClientApplication ? Observable.Empty<Server>() : application.ServerPortsList().Take(1)
 			        .Select(modelServerPort => modelServerPort.ToServerPort().StartServer())
 			        .TraceRXLoggerHub(server => string.Join(", ",server.Ports.Select(port => $"{port.Host}, {port.Port}")));
 

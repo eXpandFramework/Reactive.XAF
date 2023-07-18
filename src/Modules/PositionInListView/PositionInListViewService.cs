@@ -4,7 +4,6 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
-using System.Threading;
 using DevExpress.Data;
 using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
@@ -12,6 +11,7 @@ using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
 using DevExpress.Xpo;
 using Xpand.Extensions.LinqExtensions;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.Tracing;
@@ -91,7 +91,7 @@ namespace Xpand.XAF.Modules.PositionInListView{
             => applicationModel.ModelPositionInListView().ListViewItems.Select(item => item.ListView.Id()).Contains(viewID);
 
         private static IObservable<Unit> PositionNewObjects(this IObservable<XafApplication> whenApplication) 
-            => whenApplication.SelectMany(application => application.WhenModelChanged().To(application).Skip(1).FirstAsync())
+            => whenApplication.SelectMany(application => application.WhenModelChanged().To(application).Skip(1).TakeFirst())
 	            .SelectMany(application => {
 		            var modelPositionInListView = application.Model.ModelPositionInListView();
 		            var positionMembers = modelPositionInListView.ListViewItems

@@ -6,6 +6,7 @@ using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp;
 using NUnit.Framework;
 using Shouldly;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.TestsLib;
@@ -36,7 +37,7 @@ namespace Xpand.XAF.Modules.Windows.Tests {
 
                     return window;
                 })
-				.FirstAsync()
+				.TakeFirst()
 				.Select(window => ((Form) window.Template).ControlBox)
                 .Do(_ => application.Exit())
                 .SubscribeReplay();
@@ -54,7 +55,7 @@ namespace Xpand.XAF.Modules.Windows.Tests {
 			var modelWindows = application.Model.ToReactiveModule<IModelReactiveModuleWindows>().Windows;
 			modelWindows.Form.MinimizeBox = false;
 			var visibility = application.WhenWindowCreated(true)
-				.FirstAsync()
+				.TakeFirst()
 				.Select(_ => ((Form) application.MainWindow.Template).MinimizeBox)
 				.Do(_ => application.Exit())
 				.SubscribeReplay();
@@ -72,7 +73,7 @@ namespace Xpand.XAF.Modules.Windows.Tests {
 			var modelWindows = application.Model.ToReactiveModule<IModelReactiveModuleWindows>().Windows;
 			modelWindows.Form.MaximizeBox = false;
 			var visibility = application.WhenWindowCreated(true)
-				.FirstAsync()
+				.TakeFirst()
 				.Select(_ => ((Form) application.MainWindow.Template).MaximizeBox)
 				.Do(_ => application.Exit())
 				.SubscribeReplay();

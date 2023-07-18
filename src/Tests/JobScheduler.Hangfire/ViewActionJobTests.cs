@@ -9,6 +9,7 @@ using DevExpress.Persistent.Base;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.Blazor;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.NonPersistentObjects;
 using Xpand.TestsLib.Common.Attributes;
@@ -34,7 +35,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests {
 					t => CreateAction(t, actionId,actionType))).Test();
 			JobSchedulerModule(application);
 			using var testObserver = application.WhenViewOnFrame(typeof(JS))
-				.SelectMany(frame => frame.Action(actionId).WhenExecuted()).FirstAsync().Test();
+				.SelectMany(frame => frame.Action(actionId).WhenExecuted()).TakeFirst().Test();
 			var objectSpace = application.CreateObjectSpace();
 			objectSpace.CreateObject<JS>();
 			var executeActionJob = objectSpace.CreateObject<ExecuteActionJob>();
@@ -45,7 +46,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests {
 			executeActionJob.Id = nameof(Execute_Action);
 			objectSpace.CommitChanges();
 
-			await application.ExecuteAction(executeActionJob).FirstAsync();
+			await application.ExecuteAction(executeActionJob).TakeFirst();
 
 			testObserver.AwaitDone(Timeout).ItemCount.ShouldBe(1);
 			await WebHost.StopAsync();

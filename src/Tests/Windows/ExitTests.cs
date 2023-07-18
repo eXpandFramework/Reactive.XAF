@@ -1,14 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Net.Security;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Windows.Forms;
 using akarnokd.reactive_extensions;
@@ -18,6 +13,7 @@ using DevExpress.ExpressApp.Win.SystemModule;
 using Fasterflect;
 using NUnit.Framework;
 using Shouldly;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
@@ -84,7 +80,7 @@ namespace Xpand.XAF.Modules.Windows.Tests{
                 .SelectMany(window => popup?window.WhenTemplateViewChanged():window.Observe())
                 .When(!popup?TemplateContext.ApplicationWindow:TemplateContext.PopupWindow)
                 .Select(frame => {
-                    var eventArgs =when=="OnKeyDown"? new KeyEventArgs(Keys.Escape):new EventArgs();
+                    var eventArgs =when=="OnKeyDown"? new KeyEventArgs(Keys.Escape):EventArgs.Empty;
                     frame.Template.CallMethod("OnActivated",eventArgs);
                     frame.Template.CallMethod(when,eventArgs);
                     if (hideMainWindow && !popup) return frame.Template==null;
@@ -143,7 +139,7 @@ namespace Xpand.XAF.Modules.Windows.Tests{
             application.Model.ToReactiveModule<IModelReactiveModuleWindows>().Windows.EnableExit();
 
             var mainWindow = application.WhenWindowCreated(true).Publish().RefCount();
-            var test = mainWindow.FirstAsync()
+            var test = mainWindow.TakeFirst()
                 .Select(window => {
                     window.GetController<EditModelController>().EditModelAction.DoExecute();
                     var form = (Form) window.Template;

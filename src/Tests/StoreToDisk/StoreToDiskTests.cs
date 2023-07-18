@@ -1,6 +1,5 @@
 ﻿using System.IO;
 using System.Linq;
-using System.Reactive.Linq;
 using System.Text.Json;
 using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp;
@@ -9,6 +8,7 @@ using Shouldly;
 using Xpand.Extensions.BytesExtensions;
 using Xpand.Extensions.FileExtensions;
 using Xpand.Extensions.JsonExtensions;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Transform.System.IO;
 using Xpand.Extensions.TypeExtensions;
 using Xpand.Extensions.XAF.ObjectSpaceExtensions;
@@ -26,7 +26,7 @@ namespace Xpand.XAF.Modules.StoreToDisk.Tests {
                 Directory.Delete(folder, true);
                 CreateStorage(nameof(When_Application_ObjectSpace_Commits_New_Objects));
             }
-            var testObserver = new DirectoryInfo(folder!).WhenFileCreated().FirstAsync().Test();
+            var testObserver = new DirectoryInfo(folder!).WhenFileCreated().TakeFirst().Test();
             var objectSpace = Application.CreateObjectSpace();
             var std = objectSpace.CreateObject<STD>();
             std.Name = nameof(When_Application_ObjectSpace_Commits_New_Objects);

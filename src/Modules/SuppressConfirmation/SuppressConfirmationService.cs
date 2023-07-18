@@ -5,6 +5,7 @@ using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.SystemModule;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.Tracing;
@@ -29,7 +30,7 @@ namespace Xpand.XAF.Modules.SuppressConfirmation{
                         var whenNewDetailViewObjectChangedOnce = Observable.Empty<Unit>();
                         if (frame.View is DetailView detailView && detailView.ObjectSpace.IsNewObject(detailView.CurrentObject)){
                             whenNewDetailViewObjectChangedOnce = detailView.ObjectSpace.WhenObjectChanged()
-                                .Select(tuple => tuple).FirstAsync().ToUnit();
+                                .Select(tuple => tuple).TakeFirst().ToUnit();
                         }
                         return whenNewDetailViewObjectChangedOnce
                             .Merge(frame.View.ObjectSpace.WhenCommitted().Select(tuple => tuple).ToUnit()).ToUnit()

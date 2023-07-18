@@ -8,6 +8,7 @@ using DevExpress.ExpressApp.Blazor;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.Blazor;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.XAF.NonPersistentObjects;
 using Xpand.TestsLib.Common.Attributes;
 using Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects;
@@ -54,8 +55,8 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Notification.Tests {
 			var objectSpace = application.CreateObjectSpace();
 			var jsne =(IJSNE) objectSpace.CreateObject(objectType);
 			objectSpace.CommitChanges();
-			var jsneTestObserver = application.WhenNotification(objectType).SelectMany(t => t.objects).FirstAsync().Cast<IJSNE>().Test();
-			var notificationJobIndexTestObserver = application.WhenCommitted<NotificationJobIndex>().SelectMany(t => t.objects).FirstAsync().Test();
+			var jsneTestObserver = application.WhenNotification(objectType).SelectMany(t => t.objects).TakeFirst().Cast<IJSNE>().Test();
+			var notificationJobIndexTestObserver = application.WhenCommitted<NotificationJobIndex>().SelectMany(t => t.objects).TakeFirst().Test();
 			var notificationJob = objectSpace.GetObjectsQuery<ObjectStateNotification>().First();
 			var jobWorker = notificationJob.ObjectSpace.CreateObject<JobWorker>();
 			jobWorker.Job=notificationJob;
@@ -84,7 +85,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Notification.Tests {
 			objectSpace.GetObjectsQuery<NotificationJobIndex>().ToArray().Length.ShouldBe(0);
 			var testObserver = application.WhenCommitted<NotificationJobIndex>()
 				.SelectMany(t => t.objects)
-				.FirstAsync().Finally(() => {}).Timeout(Timeout).SubscribeOn(Scheduler.Default).Test();
+				.TakeFirst().Finally(() => {}).Timeout(Timeout).SubscribeOn(Scheduler.Default).Test();
 			objectSpace.NewNotificationJob();
 			objectSpace.CommitChanges();
 			
@@ -101,7 +102,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Notification.Tests {
 			application.CreateExistingObjects<JSNE2>().Test();
 			application.JobSchedulerNotificationModule();
 			
-			var testObserver = application.WhenCommitted<NotificationJobIndex>().SelectMany(t => t.objects).FirstAsync(index => index.ObjectType==typeof(JSNE2)).Timeout(Timeout).Test();
+			var testObserver = application.WhenCommitted<NotificationJobIndex>().SelectMany(t => t.objects).TakeFirst(index => index.ObjectType==typeof(JSNE2)).Timeout(Timeout).Test();
 			var objectSpace = application.CreateObjectSpace();
 			var notificationJob = objectSpace.GetObjectsQuery<ObjectStateNotification>().First();
 			notificationJob.Object = new ObjectType(typeof(JSNE2));

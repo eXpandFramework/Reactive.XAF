@@ -8,6 +8,7 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.XtraRichEdit;
 using DevExpress.XtraRichEdit.API.Native;
 using Fasterflect;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects;
@@ -64,7 +65,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests{
             }
         }
 
-        public static IObjectSpace NonPersisteObjectSpace(this XafApplication application){
+        public static IObjectSpace NonPersistentObjectSpace(this XafApplication application){
             return application.CreateObjectSpace(typeof(DocumentStyle));
         }
 
@@ -74,13 +75,13 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests{
 	        item.ListView = application.Model.BOModel.GetClass(typeof(DataObject)).DefaultListView;
 	        window.SetView(application.NewView(ViewType.ListView, typeof(DataObject)));
 	        var action = window.Action<DocumentStyleManagerModule>().ShowApplyStylesTemplate();
-	        action.WhenExecuted().FirstAsync()
+	        action.WhenExecuted().TakeFirst()
 		        .Do(e => e.ShowViewParameters.TargetWindow = TargetWindow.NewWindow).Test();
 	        return (window, (BusinessObjects.ApplyTemplateStyle) window.View.CurrentObject);
         }
         public static (Window window, BusinessObjects.DocumentStyleManager documentStyleManager) SetDocumentStyleManagerDetailView(
             this XafApplication application, Document document, Action<Window> windowCreated = null){
-            var objectSpace = application.NonPersisteObjectSpace();
+            var objectSpace = application.NonPersistentObjectSpace();
             var documentStyleManager = objectSpace.CreateObject<BusinessObjects.DocumentStyleManager>();
             documentStyleManager.Content = document.ToByteArray(DocumentFormat.OpenXml);
             documentStyleManager.SynchronizeStyles();
@@ -97,7 +98,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests{
             
             var singleChoiceAction = window.Action<DocumentStyleManagerModule>().ShowStyleManager();
             var testObserver = application.WhenWindowCreated().Test();
-            singleChoiceAction.WhenExecuted().FirstAsync()
+            singleChoiceAction.WhenExecuted().TakeFirst()
                 .Do(e => e.ShowViewParameters.TargetWindow = TargetWindow.NewWindow).Test();
             singleChoiceAction.DoExecute(singleChoiceAction.Items.First());
             var managerWindow = testObserver.Items.First();

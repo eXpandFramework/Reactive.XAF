@@ -4,6 +4,7 @@ using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.Editors;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
@@ -18,7 +19,7 @@ namespace Xpand.XAF.Modules.Windows.Tests {
 	public abstract class BaseWindowsTest:BaseTest {
 		protected WindowsModule WindowsModule(Platform platform=Platform.Win){
 			var application = platform.NewApplication<WindowsModule>();
-			application.WhenApplicationModulesManager().FirstAsync().SelectMany(manager => manager.TestWindowsConnect()).Subscribe();
+			application.WhenApplicationModulesManager().TakeFirst().SelectMany(manager => manager.TestWindowsConnect()).Subscribe();
 			application.EditorFactory=new EditorsFactory();
 			var oneViewModule = application.AddModule<WindowsModule>(typeof(W), typeof(W));
             

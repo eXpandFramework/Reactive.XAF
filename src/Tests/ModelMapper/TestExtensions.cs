@@ -7,6 +7,7 @@ using DevExpress.ExpressApp.Dashboards;
 using DevExpress.ExpressApp.Dashboards.Win;
 using DevExpress.ExpressApp.Model;
 using Fasterflect;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.XAF.Modules.ModelMapper.Configuration;
 using Xpand.XAF.Modules.ModelMapper.Services;
 using Xpand.XAF.Modules.ModelMapper.Services.TypeMapping;
@@ -35,7 +36,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
 
         public static ModelMapperTestModule Extend(this PredefinedMap[] maps, ModelMapperTestModule testModule = null, Action<ModelMapperConfiguration> configure = null){
             testModule ??= new ModelMapperTestModule();
-            testModule.ApplicationModulesManager.FirstAsync(_ => _.module==testModule)
+            testModule.ApplicationModulesManager.TakeFirst(_ => _.module==testModule)
                 .SelectMany(_ => maps.Select(map => {
                     _.manager.Extend(map, configure);
                     return Unit.Default;
@@ -46,7 +47,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
 
         public static ModelMapperTestModule Extend(this Type extenderType, Action<ModelMapperConfiguration> configure, ModelMapperTestModule testModule = null){
             testModule ??= new ModelMapperTestModule();
-            testModule.ApplicationModulesManager.FirstAsync()
+            testModule.ApplicationModulesManager.TakeFirst()
                 .Do(_ => {
                     var configuration = new ModelMapperConfiguration(extenderType);
                     configure?.Invoke(configuration);
@@ -59,7 +60,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         public static ModelMapperTestModule Extend<T>(this Type extenderType, ModelMapperTestModule testModule = null,
             Action<ModelMapperConfiguration> configure = null) where T : IModelNode{
             testModule ??= new ModelMapperTestModule();
-            testModule.ApplicationModulesManager.FirstAsync()
+            testModule.ApplicationModulesManager.TakeFirst()
                 .Do(_ => {
                     var configuration = new ModelMapperConfiguration(extenderType, typeof(T));
                     configure?.Invoke(configuration);

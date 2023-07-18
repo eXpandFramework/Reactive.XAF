@@ -5,6 +5,7 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.SystemModule;
 using NUnit.Framework;
 using Shouldly;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.TestsLib;
 using Xpand.TestsLib.Common;
@@ -28,7 +29,7 @@ namespace Xpand.XAF.Modules.SuppressConfirmation.Tests{
             var objectView = application.NewObjectView(viewType, typeof(SC));
             window.SetView(objectView);
 
-            await windows.FirstAsync();
+            await windows.TakeFirst();
         }
 
         [XpandTest]

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Moq;
 using NUnit.Framework;
 using Shouldly;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.TestsLib.Common;
@@ -38,7 +39,7 @@ namespace Xpand.XAF.Modules.Reactive.Rest.Tests {
             objectSpace.CreateObject<RestOperationObject>();
             
             objectSpace.CommitChanges();
-            await RestService.Object.FirstAsync();
+            await RestService.Object.TakeFirst();
         }
 
         [Test][Order(300)]
@@ -50,7 +51,7 @@ namespace Xpand.XAF.Modules.Reactive.Rest.Tests {
             restObject.Name = "update";
             
             objectSpace.CommitChanges();
-            await RestService.Object.FirstAsync();
+            await RestService.Object.TakeFirst();
         }
 
         [Test][Order(400)]
@@ -62,7 +63,7 @@ namespace Xpand.XAF.Modules.Reactive.Rest.Tests {
             
             objectSpace.Delete(restObject);
             objectSpace.CommitChanges();
-            await RestService.Object.FirstAsync();
+            await RestService.Object.TakeFirst();
         }
 
         [TestCase(false,"disable")]
@@ -75,7 +76,7 @@ namespace Xpand.XAF.Modules.Reactive.Rest.Tests {
             restObject.IsEnabled = isEnable;
             objectSpace.CommitChanges();
 
-            await RestService.Object.FirstAsync(t =>
+            await RestService.Object.TakeFirst(t =>
                 t.message.RequestMessage?.RequestUri is not null && t.message.RequestMessage != null &&
                 t.message.RequestMessage.RequestUri.AbsoluteUri.Contains(name));
 

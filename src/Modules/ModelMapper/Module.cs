@@ -24,7 +24,7 @@ namespace Xpand.XAF.Modules.ModelMapper{
 
         public ModelMapperModule(){
             RequiredModuleTypes.Add(typeof(ReactiveModule));
-            _modelExtended = ModelExtendingService.Connected.FirstAsync().Replay(1);
+            _modelExtended = ModelExtendingService.Connected.TakeFirst().Replay(1);
             _modelExtended.Connect();
         }
 
@@ -35,7 +35,7 @@ namespace Xpand.XAF.Modules.ModelMapper{
 
         public override void ExtendModelInterfaces(ModelInterfaceExtenders extenders){
             base.ExtendModelInterfaces(extenders);
-            _modelExtended.FirstAsync().Wait();
+            _modelExtended.TakeFirst().Wait();
             extenders.Add<IModelApplication,IModelApplicationModelMapper>();
         }
 

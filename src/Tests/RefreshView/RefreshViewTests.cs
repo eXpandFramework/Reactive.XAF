@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using DevExpress.ExpressApp;
 using NUnit.Framework;
 using Shouldly;
-using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.TestsLib;
@@ -36,7 +36,7 @@ namespace Xpand.XAF.Modules.RefreshView.Tests{
             
             application.Logon();
             var listView = application.NewObjectView<ListView>(typeof(RV));
-            var reloaded = listView.CollectionSource.WhenCollectionReloaded().Select(tuple => tuple).FirstAsync().SubscribeReplay();
+            var reloaded = listView.CollectionSource.WhenCollectionReloaded().Select(tuple => tuple).TakeFirst().SubscribeReplay();
             var viewWindow = application.CreateViewWindow();
             viewWindow.SetView(listView);
             

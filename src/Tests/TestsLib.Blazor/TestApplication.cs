@@ -8,6 +8,7 @@ using DevExpress.ExpressApp.Blazor;
 using DevExpress.ExpressApp.Xpo;
 using Microsoft.Extensions.DependencyInjection;
 using Xpand.Extensions.AppDomainExtensions;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.XAF.Xpo.ObjectSpaceExtensions;
 using Xpand.TestsLib.Common;
 using Xpand.XAF.Modules.Reactive.Services;
@@ -19,7 +20,7 @@ namespace Xpand.TestsLib.Blazor {
 
 	public class TestBlazorApplication : BlazorApplication, ITestApplication {
 		public TestBlazorApplication() {
-			// this.AlwaysUpdateOnDatabaseVersionMismatch().FirstAsync().Subscribe();
+			// this.AlwaysUpdateOnDatabaseVersionMismatch().TakeFirst().Subscribe();
 		}
 
 		[SuppressMessage("ReSharper", "UnusedParameter.Local")]
@@ -29,7 +30,7 @@ namespace Xpand.TestsLib.Blazor {
 			SUTModule = sutModule;
 			TraceClientConnected = this.ClientConnect();
 			TraceClientBroadcast = this.ClientBroadcast();
-			this.WhenSetupComplete().FirstAsync()
+			this.WhenSetupComplete().TakeFirst()
 				.Select(application => application.ObjectSpaceProvider.DataStoreProvider())
 				.Do(provider => {
 					var dataStoreProviderAccessor = ServiceProvider.GetService<XpoDataStoreProviderAccessor>();

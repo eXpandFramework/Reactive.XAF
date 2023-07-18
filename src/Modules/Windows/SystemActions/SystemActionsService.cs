@@ -7,6 +7,7 @@ using System.Windows.Forms;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using Xpand.Extensions.Reactive.Combine;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.ActionExtensions;
@@ -34,8 +35,8 @@ namespace Xpand.XAF.Modules.Windows.SystemActions {
                         .SelectAndOmit(model => activated.WaitTheExecute( model)))));
 
         private static IObservable<Unit> WaitTheExecute(this (ActionBase action, IModelHotkeyAction model) activated, IModelHotkeyAction model) 
-            => activated.action.WhenExecuteCompleted().FirstAsync()
-                .MergeToUnit(model.DeferAction(_ => activated.action.DoTheExecute(model)).IgnoreElements()).FirstAsync();
+            => activated.action.WhenExecuteCompleted().TakeFirst()
+                .MergeToUnit(model.DeferAction(_ => activated.action.DoTheExecute(model)).IgnoreElements()).TakeFirst();
 
         private static IObservable<(ActionBase action, IModelHotkeyAction model)> WhenActionActivated(this XafApplication application, (HotKeyManager manager, Frame window) hotKeyManager) 
             => hotKeyManager.window.Actions().Where(a => a.Available()).ToNowObservable()

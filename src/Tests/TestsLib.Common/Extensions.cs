@@ -56,7 +56,7 @@ namespace Xpand.TestsLib.Common{
     
     public static class Extensions{
         public static IObservable<Exception> WhenException(this TestTracing tracing) 
-            => typeof(Tracing).WhenEvent<CreateCustomTracerEventArgs>(nameof(Tracing.CreateCustomTracer)).FirstAsync()
+            => typeof(Tracing).WhenEvent<CreateCustomTracerEventArgs>(nameof(Tracing.CreateCustomTracer)).TakeFirst()
                 .SelectMany(eventArgs => {
                     eventArgs.Tracer=tracing;
                     return tracing.Exceptions;
@@ -97,7 +97,7 @@ namespace Xpand.TestsLib.Common{
 		        viewMock.As<ISelectionContext>().SetupGet(context => context.SelectedObjects)
 			        .Returns(() => selectedObjectsFactory(viewMock.Object.ObjectSpace));
 		        _.e.View = viewMock.Object;
-	        }).FirstAsync().Subscribe();
+	        }).TakeFirst().Subscribe();
 	        return application.NewView(modelView,objectSpace);
         }
 
@@ -249,7 +249,7 @@ namespace Xpand.TestsLib.Common{
         [SuppressMessage("ReSharper", "SuspiciousTypeConversion.Global")]
         public static IObservable<IModelReactiveLogger> ConfigureModel<TModule>(this XafApplication application,
             bool transmitMessage = true) where TModule : ModuleBase{
-            return application.WhenModelChanged().FirstAsync()
+            return application.WhenModelChanged().TakeFirst()
                 .Where(_ => application.Modules.Any(m => m is ReactiveLoggerModule))
                 .Select(_ => {
                     var logger = application.Model.ToReactiveModule<IModelReactiveModuleLogger>()?.ReactiveLogger;
@@ -513,14 +513,14 @@ namespace Xpand.TestsLib.Common{
 
         public static IObservable<Unit> ClientBroadcast(this ITestApplication application) 
             => Process.GetProcessesByName("Xpand.XAF.Modules.Reactive.Logger.Client.Win").Any()
-                ? TraceEventHub.Trace.FirstAsync(_ => _.Source == application.SUTModule.Name).ToUnit()
+                ? TraceEventHub.Trace.TakeFirst(_ => _.Source == application.SUTModule.Name).ToUnit()
                     .SubscribeReplay()
                 : Unit.Default.Observe();
 
         
         public static IObservable<Unit> ClientConnect(this ITestApplication application) 
             => Process.GetProcessesByName("Xpand.XAF.Modules.Reactive.Logger.Client.Win").Any()
-                ? TraceEventHub.Connecting.FirstAsync().SubscribeReplay()
+                ? TraceEventHub.Connecting.TakeFirst().SubscribeReplay()
                 : Unit.Default.Observe();
     }
 

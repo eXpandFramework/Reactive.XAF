@@ -6,6 +6,7 @@ using DevExpress.ExpressApp;
 using DevExpress.XtraRichEdit;
 using NUnit.Framework;
 using Shouldly;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
@@ -50,10 +51,10 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManag
                 using (var detailView = window.Application.CreateDetailView(dataObject)){
                     window.SetView(detailView);
             
-                    var whenDetailViewCreated = application.WhenDetailViewCreated().FirstAsync().SubscribeReplay();
+                    var whenDetailViewCreated = application.WhenDetailViewCreated().TakeFirst().SubscribeReplay();
             
                     var singleChoiceAction = window.Action<DocumentStyleManagerModule>().ShowStyleManager();
-                    singleChoiceAction.WhenExecuted().Do(e => e.ShowViewParameters.TargetWindow = TargetWindow.NewWindow).FirstAsync().Test();
+                    singleChoiceAction.WhenExecuted().Do(e => e.ShowViewParameters.TargetWindow = TargetWindow.NewWindow).TakeFirst().Test();
                     singleChoiceAction.DoExecute(singleChoiceAction.Items.First());
 
                     var styleManager = ((BusinessObjects.DocumentStyleManager) whenDetailViewCreated.Test().Items.First().e.View.CurrentObject);
@@ -79,7 +80,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManag
             var styleManagerViewObserver = application.WhenViewOnFrame(typeof(BusinessObjects.DocumentStyleManager)).Test();
             window.SetView(window.Application.CreateDetailView(dataObject));
             var singleChoiceAction = window.Action<DocumentStyleManagerModule>().ShowStyleManager();
-            singleChoiceAction.WhenExecuted().Do(e => e.ShowViewParameters.TargetWindow = TargetWindow.NewWindow).FirstAsync().Test();
+            singleChoiceAction.WhenExecuted().Do(e => e.ShowViewParameters.TargetWindow = TargetWindow.NewWindow).TakeFirst().Test();
             singleChoiceAction.DoExecute(singleChoiceAction.Items.First());
 
             var documentStyleManager = ((BusinessObjects.DocumentStyleManager) ((DetailView) styleManagerViewObserver.Items.First().View).CurrentObject);

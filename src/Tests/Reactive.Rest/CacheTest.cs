@@ -3,6 +3,7 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Moq;
 using NUnit.Framework;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.TestsLib.Common;
 using Xpand.XAF.Modules.Reactive.Rest.Tests.BO;
@@ -21,14 +22,12 @@ namespace Xpand.XAF.Modules.Reactive.Rest.Tests {
             }
             HandlerMock.SetupRestPropertyObject(Application.CreateObjectSpace(typeof(RestPropertyObject)));
             await Application.CreateObjectSpace(typeof(RestPropertyObject))
-                .Request(typeof(RestPropertyObject)).FirstAsync()
-                // .Timeout(Timeout)
-                ;
+                .Request(typeof(RestPropertyObject)).TakeFirst()
+                .Timeout(Timeout);
             
             await Application.CreateObjectSpace(typeof(RestPropertyObject))
                 .Request(typeof(RestPropertyObject))
-                // .Timeout(Timeout)
-                ;
+                .Timeout(Timeout);
         
             HandlerMock.VerifySend(Times.Exactly(times),message => $"{message.RequestUri}".Contains($"Get{nameof(RestPropertyObject)}") );
         
@@ -46,7 +45,7 @@ namespace Xpand.XAF.Modules.Reactive.Rest.Tests {
             objectSpace.CommitChanges();
             restObject.Name = "2";
             objectSpace.CommitChanges();
-            await RestService.Object.FirstAsync().ToTaskWithoutConfigureAwait();
+            await RestService.Object.TakeFirst().ToTaskWithoutConfigureAwait();
 
             HandlerMock.VerifySend(Times.Exactly(2),message => $"{message.RequestUri}".Contains($"Update{nameof(RestOperationObject)}") );
 

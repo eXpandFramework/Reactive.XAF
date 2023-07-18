@@ -11,6 +11,7 @@ using Fasterflect;
 using Moq;
 using NUnit.Framework;
 using Shouldly;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.XAF.ActionExtensions;
 using Xpand.Extensions.XAF.CollectionSourceExtensions;
 using Xpand.Extensions.XAF.FrameExtensions;
@@ -49,7 +50,7 @@ namespace Xpand.XAF.Modules.MasterDetail.Tests{
             dashboardView.MockCreateControls();
             window.SetView(dashboardView);
 
-            var pair = await masterDetailDashboardViewItems.FirstAsync().WithTimeOut();
+            var pair = await masterDetailDashboardViewItems.TakeFirst().WithTimeOut();
 
             (pair.listViewItem.Model.View as IModelListView).ShouldNotBeNull();
             (pair.detailViewItem.Model.View as IModelDetailView).ShouldNotBeNull();
@@ -64,7 +65,7 @@ namespace Xpand.XAF.Modules.MasterDetail.Tests{
             masterDetailDashboardViewItems.Connect();
             var dashboardView = xafApplication.CreateDashboardView(xafApplication.CreateObjectSpace(), modelDashboardView.Id, true);
             dashboardView.MockCreateControls();
-            var viewItems = await masterDetailDashboardViewItems.FirstAsync().WithTimeOut();
+            var viewItems = await masterDetailDashboardViewItems.TakeFirst().WithTimeOut();
             var controller = viewItems.listViewItem.Frame.GetController<ListViewProcessCurrentObjectController>();
             controller.ShouldNotBeNull();
             controller.ProcessCurrentObjectAction.Active.Clear();
@@ -77,7 +78,7 @@ namespace Xpand.XAF.Modules.MasterDetail.Tests{
 
             controller.ProcessCurrentObjectAction.DoTheExecute(true);
 
-            // (await customProcessSelectedItem.FirstAsync().WithTimeOut()).Handled.ShouldBe(true);
+            // (await customProcessSelectedItem.TakeFirst().WithTimeOut()).Handled.ShouldBe(true);
         }
         [XpandTest]
         [TestCase(nameof(Platform.Win))]
@@ -149,13 +150,13 @@ namespace Xpand.XAF.Modules.MasterDetail.Tests{
             detailView.Connect();
             listView.Editor.CallMethod("OnSelectionChanged");
 
-            await detailView.FirstAsync(view => view.ObjectTypeInfo.Type==typeof(MdParent)).WithTimeOut();
+            await detailView.TakeFirst(view => view.ObjectTypeInfo.Type==typeof(MdParent)).WithTimeOut();
 
             var firstObject = listView.CollectionSource.Objects<Md>().First();
             listView.Editor.GetMock().Setup(editor => editor.GetSelectedObjects()).Returns(() => new[]{firstObject});
             listView.Editor.CallMethod("OnSelectionChanged");
             
-            await detailView.FirstAsync(view => view.ObjectTypeInfo?.Type==typeof(Md)).WithTimeOut();
+            await detailView.TakeFirst(view => view.ObjectTypeInfo?.Type==typeof(Md)).WithTimeOut();
             
             application.Dispose();
         }
@@ -166,7 +167,7 @@ namespace Xpand.XAF.Modules.MasterDetail.Tests{
             masterDetailDashboardViewItems.Connect();
             var dashboardView = xafApplication.CreateDashboardView(xafApplication.CreateObjectSpace(), modelDashboardView.Id, true);
             dashboardView.MockCreateControls();
-            var tuple = await masterDetailDashboardViewItems.FirstAsync().WithTimeOut();
+            var tuple = await masterDetailDashboardViewItems.TakeFirst().WithTimeOut();
             return new DashboardViewItemInfo(){ListViewItem=tuple.listViewItem,DetailViewItem=tuple.detailViewItem};
         }
 

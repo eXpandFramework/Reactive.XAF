@@ -27,6 +27,7 @@ using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Numeric;
 using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Combine;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.ErrorHandling;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
@@ -228,7 +229,7 @@ namespace Xpand.XAF.Modules.Speech.Services {
 	        => Observable.Using(() => new SpeechRecognizer(speechToText.Speech.SpeechConfig(speechToText.RecognitionLanguage), audioConfig),recognizer => recognizer.StartContinuousRecognitionAsync().ToObservable()
 		        .SelectMany(_ => recognizer.WhenSessionStopped().TakeUntil(simpleAction.WhenExecuted().Where(e => e.Action.CommonImage()==CommonImage.Stop).Take(1)
 				        .SelectMany(_ => recognizer.StopContinuousRecognitionAsync().ToObservable()))
-			        .FirstAsync().ObserveOn(context).Do(_ => simpleAction.SetImage(CommonImage.ConvertTo))
+			        .TakeFirst().ObserveOn(context).Do(_ => simpleAction.SetImage(CommonImage.ConvertTo))
 			        .MergeToUnit(recognizer.WhenRecognized()
 				        .Publish(source => source.Buffer(source.CombineWithPrevious().Where(t => t.previous.SpareTime(t.current)>TimeSpan.FromSeconds(2)))).ObserveOn(context)
 				        .CombineWithPrevious()
@@ -453,9 +454,9 @@ namespace Xpand.XAF.Modules.Speech.Services {
 			        speechSynthesizer.Defer(() => Observable.FromAsync(() => speechSynthesizer.SpeakSsmlAsync(ssml()))
 				        .Merge( Observable.Defer(() => speechSynthesizer.NotifyWhenSynthesisCanceled().TakeUntil(whenSynthesisCompleted.Select(c=>c))))
 				        .Zip(whenSynthesisCompleted)
-				        .FirstAsync().Select(t1 => t1.First))
+				        .TakeFirst().Select(t1 => t1.First))
 		        ))
-		        .RetryWithBackoff(3).FirstAsync();
+		        .RetryWithBackoff(3).TakeFirst();
         
         
         static IObservable<SSMLFile> NewSSMLFile<TLink>(this IEnumerable<TLink> sourceFiles,IModelSpeech modelSpeech) where TLink:IAudioFileLink 

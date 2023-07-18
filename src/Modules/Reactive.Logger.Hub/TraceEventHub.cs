@@ -47,7 +47,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
         }
 
         public static void Init(){
-            // _listenerEvents = ReactiveLoggerService.ListenerEvents.Buffer(ConnectingSubject).FirstAsync().Replay(1);
+            // _listenerEvents = ReactiveLoggerService.ListenerEvents.Buffer(ConnectingSubject).TakeFirst().Replay(1);
             // _listenerEvents.Connect();
         }
     }

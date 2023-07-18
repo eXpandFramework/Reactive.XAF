@@ -21,7 +21,6 @@ using DevExpress.ExpressApp.TreeListEditors.Win;
 using DevExpress.ExpressApp.Win.Editors;
 using DevExpress.ExpressApp.Win.Layout;
 using DevExpress.Persistent.BaseImpl;
-using DevExpress.Utils.Helpers;
 using DevExpress.XtraCharts;
 using DevExpress.XtraEditors;
 using DevExpress.XtraEditors.Repository;
@@ -34,6 +33,7 @@ using DevExpress.XtraTreeList.Columns;
 using Fasterflect;
 using NUnit.Framework;
 using Shouldly;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.ModelExtensions;
@@ -215,7 +215,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             InitializeMapperService(Platform.Win);
             using var module = PredefinedMap.GridView.Extend();
             using var application = DefaultModelMapperModule( Platform.Win, module).Application;
-            var bound = ModelBindingService.ControlBind.FirstAsync().SubscribeReplay();
+            var bound = ModelBindingService.ControlBind.TakeFirst().SubscribeReplay();
             application.Logon();
             application.CreateObjectSpace();
             application.EditorFactory=new EditorsFactory();
@@ -223,7 +223,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             listView.CreateControls();
             await bound;
                     
-            bound = ModelBindingService.ControlBind.FirstAsync().SubscribeReplay();
+            bound = ModelBindingService.ControlBind.TakeFirst().SubscribeReplay();
             listView = application.NewObjectView<ListView>(typeof(MM));
             listView.CreateControls();
             await bound;

@@ -11,6 +11,7 @@ using DevExpress.ExpressApp.Model;
 using Fasterflect;
 
 using Xpand.Extensions.AppDomainExtensions;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.StringExtensions;
 using Xpand.Extensions.XAF.AppDomainExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
@@ -22,9 +23,9 @@ namespace Xpand.XAF.Modules.ProgressBarViewItem{
 
     
     public abstract class ProgressBarViewItemBase:ViewItem,IComplexViewItem,IObserver<decimal>{
-        readonly Subject<Unit> _breakLinksToControl=new Subject<Unit>();
+        readonly Subject<Unit> _breakLinksToControl=new();
         private static Type _progressBarControlType;
-        readonly Subject<decimal> _positionSubject=new Subject<decimal>();
+        readonly Subject<decimal> _positionSubject=new();
         private static Platform? _platform;
         private static MethodInvoker _percentage;
         private XafApplication _application;
@@ -35,12 +36,12 @@ namespace Xpand.XAF.Modules.ProgressBarViewItem{
                 var assemblies = AppDomain.CurrentDomain.GetAssemblies();
                 if (_platform == Platform.Win){
                     var assembly = assemblies
-                        .FirstOrDefault(a => a.FullName.StartsWith("DevExpress.XtraEditors"));
+                        .FirstOrDefault(a => a.FullName!.StartsWith("DevExpress.XtraEditors"));
                     _progressBarControlType = assembly?.GetType("DevExpress.XtraEditors.ProgressBarControl");
                 }
                 else if (_platform == Platform.Web){
                     var assembly = assemblies
-                        .FirstOrDefault(a => a.FullName.StartsWith("DevExpress.Web.v"));
+                        .FirstOrDefault(a => a.FullName!.StartsWith("DevExpress.Web.v"));
                     _progressBarControlType = assembly?.GetType("DevExpress.Web.ASPxProgressBar");
 
                     _percentage = AppDomain.CurrentDomain.Web().TypeUnitPercentage();
@@ -48,7 +49,7 @@ namespace Xpand.XAF.Modules.ProgressBarViewItem{
                     _assignClientHandlerSafe = assemblyDevExpressExpressAppWeb.TypeClientSideEventsHelper().AsssignClientHanderSafe();
 
                 
-                    var methodInfoGetShowMessageScript = assemblyDevExpressExpressAppWeb.GetType("DevExpress.ExpressApp.Web.PopupWindowManager").GetMethod("GetShowMessageScript",BindingFlags.Static|BindingFlags.NonPublic);
+                    var methodInfoGetShowMessageScript = assemblyDevExpressExpressAppWeb.GetType("DevExpress.ExpressApp.Web.PopupWindowManager")!.GetMethod("GetShowMessageScript",BindingFlags.Static|BindingFlags.NonPublic);
                     _delegateForGetShowMessageScript = methodInfoGetShowMessageScript.DelegateForCallMethod();
                 }
             }
@@ -144,7 +145,7 @@ console.log('p='+previous);
                 instance.SetPropertyValue("ClientInstanceName", _clientInstance);
                 instance.SetPropertyValue("Width", _percentage(null, 100d));
                 _registerHandlerSubscription = View.WhenControlsCreated()
-                    .FirstAsync()
+                    .TakeFirst()
                     .Do(_ => {
                         _clientInstance = Id.CleanCodeName();
                         _handlerId = $"{GetType().FullName}{_clientInstance}";

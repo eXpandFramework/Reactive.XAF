@@ -10,6 +10,7 @@ using NAudio.Wave;
 using Xpand.Extensions.DateTimeExtensions;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Numeric;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.XAF.Modules.Speech.BusinessObjects;
@@ -107,7 +108,7 @@ namespace Xpand.XAF.Modules.Speech.Services {
             => File.WriteAllBytesAsync(fileName, result.AudioData).ToObservable()
                 .BufferUntilCompleted().ObserveOnContext()
                 .Select(_ => speechText.UpdateSSMLFile(result, fileName))
-                .FirstAsync();
+                .TakeFirst();
         public static SpeechLanguage Language(this SpeechText speechText)
             => speechText is SpeechTranslation translation?translation.Language:speechText.SpeechToText.RecognitionLanguage;
 

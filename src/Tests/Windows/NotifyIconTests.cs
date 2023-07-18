@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using DevExpress.ExpressApp;
 using NUnit.Framework;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
@@ -22,7 +23,7 @@ namespace Xpand.XAF.Modules.Windows.Tests {
         [XpandTest]
         [Apartment(ApartmentState.STA)]
         public async Task Enable() {
-            var updated = NotifyIconService.NotifyIconUpdated.FirstAsync().SubscribeReplay();
+            var updated = NotifyIconService.NotifyIconUpdated.TakeFirst().SubscribeReplay();
             using var application = Platform.Win.NewApplication<WindowsModule>();
             application.SetupSecurity();
             application.AddModule<WindowsModule>();
@@ -51,8 +52,8 @@ namespace Xpand.XAF.Modules.Windows.Tests {
             var updated = NotifyIconService.NotifyIconUpdated
                 .Do(icon => icon.ContextMenuStrip.Items.Cast<ToolStripMenuItem>()
                     .First(item => item.Text == modelWindows.NotifyIcon.ExitText).PerformClick())
-                .FirstAsync().SubscribeReplay();
-            var whenExiting = application.WhenExiting().FirstAsync().SubscribeReplay();
+                .TakeFirst().SubscribeReplay();
+            var whenExiting = application.WhenExiting().TakeFirst().SubscribeReplay();
             application.Logon();
             await updated;
             await whenExiting;
@@ -76,9 +77,9 @@ namespace Xpand.XAF.Modules.Windows.Tests {
             var updated = NotifyIconService.NotifyIconUpdated
                 .Do(icon => icon.ContextMenuStrip.Items.Cast<ToolStripMenuItem>()
                     .First(item => item.Text == modelWindows.NotifyIcon.LogOffText).PerformClick())
-                .FirstAsync().SubscribeReplay();
+                .TakeFirst().SubscribeReplay();
             application.Logon();
-            var testObserver = application.WhenLoggingOff().Do(t => t.e.Cancel=true).FirstAsync().SubscribeReplay();
+            var testObserver = application.WhenLoggingOff().Do(t => t.e.Cancel=true).TakeFirst().SubscribeReplay();
             await updated;
 
             await testObserver;
@@ -100,10 +101,10 @@ namespace Xpand.XAF.Modules.Windows.Tests {
             var updated = NotifyIconService.NotifyIconUpdated
                 .Do(icon => icon.ContextMenuStrip.Items.Cast<ToolStripMenuItem>()
                     .First(item => item.Text == modelWindows.NotifyIcon.HideText).PerformClick())
-                .FirstAsync().SubscribeReplay();
+                .TakeFirst().SubscribeReplay();
             application.Logon();
 
-            var visibleChanged = application.MainWindow.Template.WhenEvent(nameof(Form.VisibleChanged)).FirstAsync()
+            var visibleChanged = application.MainWindow.Template.WhenEvent(nameof(Form.VisibleChanged)).TakeFirst()
                 .SubscribeReplay();
                 
             await updated;

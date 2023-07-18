@@ -11,6 +11,7 @@ using DevExpress.ExpressApp.Xpo;
 using DevExpress.Persistent.BaseImpl.PermissionPolicy;
 using NUnit.Framework;
 using Shouldly;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.TestsLib.Common;
@@ -43,7 +44,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
                 (ISelectDataSecurityProvider)application.Security, new MemoryDataStoreProvider()));
             DefaultReactiveModule(application);
             
-            using var exiTest = application.WhenProviderObjectSpaceCreated().FirstAsync().Select(space => space).Test();
+            using var exiTest = application.WhenProviderObjectSpaceCreated().TakeFirst().Select(space => space).Test();
 
             var nonsecuredObjectSpace = ((INonsecuredObjectSpaceProvider)application.ObjectSpaceProvider).CreateNonsecuredObjectSpace();
 
@@ -107,7 +108,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
             nestedFrames.Connect();
 
             var nestedFrame = application.CreateNestedFrame(null, TemplateContext.ApplicationWindow);
-            (await nestedFrames.FirstAsync()).ShouldBe(nestedFrame);
+            (await nestedFrames.TakeFirst()).ShouldBe(nestedFrame);
         }
         
 
@@ -140,7 +141,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
             policyUser.SetPassword("test");
             objectSpace.CommitChanges();
                 
-            await application.LogonUser(policyUser.Oid).FirstAsync();
+            await application.LogonUser(policyUser.Oid).TakeFirst();
                 
             SecuritySystem.CurrentUserId.ShouldBe(policyUser.Oid);
         }

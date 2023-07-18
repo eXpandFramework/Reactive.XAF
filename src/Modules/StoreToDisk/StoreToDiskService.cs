@@ -68,9 +68,6 @@ namespace Xpand.XAF.Modules.StoreToDisk{
                         .SelectMany(jToken => memberInfos.ToNowObservable().WhenDefault(info => info.GetValue(o1))
                             .Do(info => {
                                 var value = ((JsonValue)jToken[info.Name])?.Deserialize(!info.MemberTypeInfo.IsPersistent?info.MemberType:info.MemberTypeInfo.KeyMember.MemberType);
-                                if (value != null) {
-                                    
-                                }
                                 var change = !info.MemberTypeInfo.IsPersistent ? value : value == null ? null : space.GetObjectByKey(info.MemberType, value);
                                 info.SetValue(o1, change);
                             })
@@ -107,7 +104,6 @@ namespace Xpand.XAF.Modules.StoreToDisk{
         private static IObservable<(IMemberInfo keyMember, IMemberInfo[] memberInfos, ITypeInfo typeInfo, string filePath, StoreToDiskAttribute attribute)> StoreToDiskData(
                 this XafApplication application, string directory)
             => application.TypesInfo.PersistentTypes
-                // .Where(info => info.Name=="CoinGeckoNetwork")
                 .Select(info => info).Attributed<StoreToDiskAttribute>().ToNowObservable()
                 .Select(t => (keyMember:t.typeInfo.FindMember(t.attribute.Key),memberInfos:t.attribute.Properties.Select(property =>t.typeInfo.FindMember(property)).ToArray(),t.attribute,t.typeInfo))
                 .SelectMany(t => new DirectoryInfo(directory).WhenDirectory().Select(_ => t.typeInfo.EnsureFile(directory))

@@ -22,6 +22,7 @@ using DevExpress.Xpo.Helpers;
 using Fasterflect;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Combine;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.Tracing;
@@ -154,7 +155,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager,Type sequenceStorageType=null){
             sequenceStorageType ??= typeof(SequenceStorage);
             Guard.TypeArgumentIs(typeof(ISequenceStorage),sequenceStorageType,nameof(sequenceStorageType));
-            return manager.WhenApplication(application => application.WhenCompatibilityChecked().FirstAsync()
+            return manager.WhenApplication(application => application.WhenCompatibilityChecked().TakeFirst()
                 .Select(xafApplication => xafApplication.ObjectSpaceProvider)
                 .Where(provider => !provider.IsMiddleTier())
                 .SelectMany(provider => provider.SequenceGeneratorDatalayer()
@@ -241,7 +242,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
         }
 
         private static IObservable<object> GenerateSequences(this (ObjectManipulationEventArgs e,ExplicitUnitOfWork explicitUnitOfWork) t, Type sequenceStorageType) 
-            => sequenceStorageType.Defer(() => (((UnitOfWork)t.e.Session).WhenAfterCommitTransaction().FirstAsync()
+            => sequenceStorageType.Defer(() => (((UnitOfWork)t.e.Session).WhenAfterCommitTransaction().TakeFirst()
                         .Do(_ => {
                             t.explicitUnitOfWork.CommitChanges();
                             t.explicitUnitOfWork.Close();
@@ -279,7 +280,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
                 .Merge(session.WhenFailedCommitTransaction().Select(pattern => pattern),scheduler)
                 .IgnoreElements()
                 .DisposeOnException(explicitUnitOfWork)
-                .Do(_ => explicitUnitOfWork.Close()).FirstAsync();
+                .Do(_ => explicitUnitOfWork.Close()).TakeFirst();
 
         private static IObservable<Exception> RetryException(this IObservable<Exception> source) 
             => source.OfType<Exception>().Where(exception => exception.HResult == ParallelTransactionExceptionHResult)

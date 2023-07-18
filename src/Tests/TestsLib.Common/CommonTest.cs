@@ -12,6 +12,7 @@ using DevExpress.ExpressApp;
 using Microsoft.Reactive.Testing;
 using NUnit.Framework;
 using Xpand.Extensions.AppDomainExtensions;
+using Xpand.Extensions.FileExtensions;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.StringExtensions;
 using Xpand.Extensions.Threading;
@@ -32,7 +33,22 @@ namespace Xpand.TestsLib.Common{
 
         public static TimeSpan Timeout = TimeSpan.FromSeconds(Debugger.IsAttached ? 120 : 5);
 
-        protected CommonTest() => AssemblyExtensions.EntryAssembly=GetType().Assembly;
+        protected CommonTest() => AssemblyExtensions.EntryAssembly = GetType().Assembly;
+
+        private void CleanTempFolder() {
+            if (!Debugger.IsAttached&&new DriveInfo(Path.GetPathRoot(Path.GetTempPath())!).IsDriveFull(95)) {
+                Array.ForEach(Directory.GetFileSystemEntries(Path.GetTempPath()), entry => {
+                    try {
+                        if (Directory.Exists(entry)) Directory.Delete(entry, true);
+                        else File.Delete(entry);
+                    }
+                    catch (Exception) {
+                        // ignored
+                    }
+                });
+            }
+        }
+
         public static string EasyTestTraceLevel = "Verbose";
         [SuppressMessage("ReSharper", "InconsistentNaming")]
         public static bool Get(string name,ref object __result) {
@@ -48,17 +64,6 @@ namespace Xpand.TestsLib.Common{
             TraceSource = new TraceSource(nameof(CommonTest)){Switch = traceSourceSwitch};
             TraceSource.Listeners.Add(TextListener);
             Trace.Listeners.Add(new TextWriterTraceListener($@"{AppDomain.CurrentDomain.ApplicationPath()}\easytest.log"));
-            if (!Debugger.IsAttached) {
-                Array.ForEach(Directory.GetFileSystemEntries(Path.GetTempPath()), entry => {
-                    try {
-                        if (Directory.Exists(entry)) Directory.Delete(entry, true);
-                        else File.Delete(entry);
-                    }
-                    catch (Exception) {
-                        // ignored
-                    }
-                });
-            }
         }
         
         public static IEnumerable<Platform> PlatformDataSource(){
@@ -73,7 +78,7 @@ namespace Xpand.TestsLib.Common{
 
         [OneTimeTearDown]
         public virtual void Cleanup() {
-            
+            CleanTempFolder();    
         }
 
         protected static object[] AgnosticModules() 

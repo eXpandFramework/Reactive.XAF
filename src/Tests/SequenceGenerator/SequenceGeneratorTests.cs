@@ -16,6 +16,7 @@ using Moq;
 using NUnit.Framework;
 using Shouldly;
 using Tests.SequenceGenerator.BO.Tests.SequenceGenerator.BO.Tests.SequenceGenerator.BO.Tests.SequenceGenerator.BO.Tests.SequenceGenerator.BO.Tests.SequenceGenerator.BO.BO.Tests.SequenceGenerator.BO.Tests.SequenceGenerator.BO.Tests.SequenceGenerator.BO;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
@@ -54,7 +55,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
 		        .SubscribeReplay();
 
 	        await TestObjects(application, true, 2);
-	        var tuple = await subscribeReplay.FirstAsync();
+	        var tuple = await subscribeReplay.TakeFirst();
 	        tuple.sequenceGenerator.ShouldBe(tuple.CurrentManagedThreadId);
 	        tuple.commits.ShouldNotBe(tuple.CurrentManagedThreadId);
         }
@@ -281,12 +282,12 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
 	        explicitUnitOfWork.FlushChanges();
 	        await TestObjects(application, false, 1)
 		        .Merge(Unit.Default.Observe().Delay(TimeSpan.FromMilliseconds(300))
-		        .Do(_ => explicitUnitOfWork.CommitChanges())).FirstAsync().Timeout(Timeout);
+		        .Do(_ => explicitUnitOfWork.CommitChanges())).TakeFirst().Timeout(Timeout);
 	        explicitUnitOfWork.Close();
 	        simpleDataLayer.Dispose();
                 
-	        var firstAsync = await testObjectObserver.FirstAsync().Timeout(Timeout);
-	        firstAsync.SequentialNumber.ShouldBe(10);
+	        var takeFirst = await testObjectObserver.TakeFirst().Timeout(Timeout);
+	        takeFirst.SequentialNumber.ShouldBe(10);
         }
 
 

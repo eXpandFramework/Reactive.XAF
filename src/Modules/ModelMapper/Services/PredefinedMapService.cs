@@ -14,6 +14,7 @@ using DevExpress.ExpressApp.SystemModule;
 using DevExpress.Persistent.Base;
 using Fasterflect;
 using Xpand.Extensions.AppDomainExtensions;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.ModelMapper.Configuration;
@@ -60,10 +61,10 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
 
         internal static void Init(){
             _layoutViewListEditorTypeName = "Xpand.ExpressApp.Win.ListEditors.GridListEditors.LayoutView.LayoutViewListEditor";
-            var dxAssemblyName = typeof(ModelMapperModule).Assembly.GetReferencedAssemblies().First(_ => _.Name.Contains("DevExpress"));
+            var dxAssemblyName = typeof(ModelMapperModule).Assembly.GetReferencedAssemblies().First(name => name.Name!.Contains("DevExpress"));
             var version = dxAssemblyName.Version;
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-            var versionSuffix = $".v{version.Major}.{version.Minor}";
+            var versionSuffix = $".v{version!.Major}.{version.Minor}";
             _dxAssemblyNamePostfix = dxAssemblyName.FullName.Substring(dxAssemblyName.FullName.IndexOf(",", StringComparison.Ordinal));
             _dxUtilsAssembly = assemblies.GetAssembly($"DevExpress.Utils{versionSuffix}");
             if (ModelExtendingService.Platform == Extensions.XAF.XafApplicationExtensions.Platform.Win){
@@ -101,7 +102,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         }
 
         private static Assembly GetAssembly(this Assembly[] assemblies,string name,bool partialMatch=false){
-            var assembly = assemblies.FirstOrDefault(_ =>!partialMatch?_.GetName().Name==name: _.GetName().Name.StartsWith(name));
+            var assembly = assemblies.FirstOrDefault(assembly1 =>!partialMatch?assembly1.GetName().Name==name: assembly1.GetName().Name!.StartsWith(name));
 
             if (assembly == null){
                 var wildCard=partialMatch?"*":"";
@@ -140,7 +141,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                         return Type.GetType(typeName) == typeToMap;
                     })
                     .Select(type => (extenders, type)))
-                    .FirstAsync();
+                    .TakeFirst();
 
             }
 
@@ -154,7 +155,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
 				        .Where(_ => _.Properties().Any(info => type.IsAssignableFrom(info.PropertyType)))
 				        .Where(_ => Type.GetType(_.Attribute<ModelMapLinkAttribute>().LinkedTypeName) == typeToMap)
 				        .Select(_ => (extenders, type))))
-		        .FirstAsync();
+		        .TakeFirst();
 
         public static void Extend(this ApplicationModulesManager modulesManager,params PredefinedMap[] maps){
             foreach (var map in maps){
@@ -216,7 +217,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
 //                    "Multiple ModelMapper assemblies in the domain check your Model.DesignedDiffs.log if you are at design time. Make sure ModelMapper is referenced from the same path. Try deleting *ModelMapper*.dll from your system.");
 //            }
             try{
-//                mapperModule.SetupCompleted.FirstAsync().Select(_ => _).Wait(TimeSpan.FromSeconds(1));
+//                mapperModule.SetupCompleted.TakeFirst().Select(_ => _).Wait(TimeSpan.FromSeconds(1));
             }
             catch (TimeoutException){
                 throw new NotSupportedException($"{nameof(ModelMapperModule)} API consumers must have the module installed.");

@@ -3,6 +3,7 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Transform.Collections;
 using Xpand.XAF.Modules.Reactive.Rest.Tests.BO;
 using Xpand.XAF.Modules.Reactive.Rest.Tests.Common;
@@ -50,7 +51,7 @@ namespace Xpand.XAF.Modules.Reactive.Rest.Tests {
             var restObject = await Application.CreateObjectSpace(typeof(RestPropertyObject))
                 .Request<RestPropertyObject>();
 
-            var whenListChanged = restObject.ActiveObjects.WhenListChanged().FirstAsync();
+            var whenListChanged = restObject.ActiveObjects.WhenListChanged().TakeFirst();
             var activeObjectsCount = restObject.ActiveObjects.Count;
             activeObjectsCount.ShouldBe(0);
             await whenListChanged;

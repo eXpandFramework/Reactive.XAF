@@ -4,6 +4,7 @@ using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using NUnit.Framework;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Transform.System.Diagnostics;
 using Xpand.TestsLib.Common.Attributes;
 
@@ -28,7 +29,7 @@ namespace Xpand.Extensions.Tests{
             
             process.StartWithEvents();
             
-            await process.WhenOutputDataReceived().FirstAsync(s => s=="Hello");
+            await process.WhenOutputDataReceived().TakeFirst(s => s=="Hello");
             
         }
         
@@ -42,7 +43,7 @@ namespace Xpand.Extensions.Tests{
             
             process.StartWithEvents();
             
-            await process.WhenErrorDataReceived().FirstAsync(s => s.Contains("Fail"));
+            await process.WhenErrorDataReceived().TakeFirst(s => s.Contains("Fail"));
             
         }
 
@@ -54,7 +55,7 @@ namespace Xpand.Extensions.Tests{
             }};
             process.StartWithEvents();
             
-            await process.WhenExited().FirstAsync();
+            await process.WhenExited().TakeFirst();
             
         }
 

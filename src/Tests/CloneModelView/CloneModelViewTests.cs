@@ -7,6 +7,7 @@ using DevExpress.ExpressApp.Model;
 using Fasterflect;
 using NUnit.Framework;
 using Shouldly;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.TestsLib;
 using Xpand.TestsLib.Common;
@@ -133,7 +134,7 @@ namespace Xpand.XAF.Modules.CloneModelView.Tests{
 			Action<ITypesInfo> customizeTypesInfo, Platform platform){
 			var application = platform.NewApplication<CloneModelViewModule>();
 			application.Modules.Add(new ReactiveModule());
-			application.WhenApplicationModulesManager().WhenCustomizeTypesInfo().FirstAsync(info => {
+			application.WhenApplicationModulesManager().WhenCustomizeTypesInfo().TakeFirst(info => {
 					customizeTypesInfo(info.TypesInfo);
 					return true;
 				})

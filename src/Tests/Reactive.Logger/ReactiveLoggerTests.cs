@@ -11,6 +11,7 @@ using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp;
 using NUnit.Framework;
 using Shouldly;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.TaskExtensions;
@@ -74,7 +75,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
         [Apartment(ApartmentState.STA)][Order(-200)]
         public async Task Do_Not_Trace_If_TraceSources_Level_Off(){
             using var application = NewApplication();
-            application.WhenModelChanged().FirstAsync()
+            application.WhenModelChanged().TakeFirst()
                 .Select(_ => {
                     var logger = application.Model.ToReactiveModule<IModelReactiveModuleLogger>().ReactiveLogger;
                     logger.TraceSources[nameof(ReactiveLoggerModule)].Level = SourceLevels.Off;
@@ -83,10 +84,10 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
             LoggerModule(application);
 
             application.CreateViewWindow(() => application.NewListView(typeof(TraceEvent)));
-            var testObserver = application.WhenTraceEvent().FirstAsync(e => e.Value.Contains("test")).Test();
+            var testObserver = application.WhenTraceEvent().TakeFirst(e => e.Value.Contains("test")).Test();
 
             ReactiveLoggerModule.TraceSource.TraceMessage("test");
-            await Should.ThrowAsync<Exception>(application.WhenTrace().FirstAsync(e => e.Value.Contains("test")).ToTask()).Timeout(Timeout);
+            await Should.ThrowAsync<Exception>(application.WhenTrace().TakeFirst(e => e.Value.Contains("test")).ToTask()).Timeout(Timeout);
 
             testObserver.ItemCount.ShouldBe(0);
             var objectSpace = application.CreateObjectSpace();
@@ -99,7 +100,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
         [Apartment(ApartmentState.STA)][Order(-300)]
         public async Task Do_Not_Trace_If_TraceSources_Disabled(){
             using var application = NewApplication();
-            application.WhenModelChanged().FirstAsync()
+            application.WhenModelChanged().TakeFirst()
                 .Select(_ => {
                     var logger = application.Model.ToReactiveModule<IModelReactiveModuleLogger>().ReactiveLogger;
                     logger.TraceSources.Enabled=false;
@@ -108,10 +109,10 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
             LoggerModule(application);
 
             application.CreateViewWindow(() => application.NewListView(typeof(TraceEvent)));
-            var testObserver = application.WhenTraceEvent().FirstAsync(e => e.Value.Contains("test")).Test();
+            var testObserver = application.WhenTraceEvent().TakeFirst(e => e.Value.Contains("test")).Test();
 
             ReactiveLoggerModule.TraceSource.TraceMessage("test");
-            await Should.ThrowAsync<Exception>(() => application.WhenTrace().FirstAsync(e => e.Value.Contains("test")).ToTask()).Timeout(Timeout);
+            await Should.ThrowAsync<Exception>(() => application.WhenTrace().TakeFirst(e => e.Value.Contains("test")).ToTask()).Timeout(Timeout);
 
             testObserver.ItemCount.ShouldBe(0);
             var objectSpace = application.CreateObjectSpace();
@@ -123,7 +124,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
         [Apartment(ApartmentState.STA)][Order(-100)]
         public async Task Do_Not_Persist_TraceSources(){
             using var application = NewApplication();
-            application.WhenModelChanged().FirstAsync()
+            application.WhenModelChanged().TakeFirst()
                 .Select(_ => {
                     var logger = application.Model.ToReactiveModule<IModelReactiveModuleLogger>().ReactiveLogger;
                     logger.TraceSources.PersistStrategy=ObservableTraceStrategy.None;
@@ -132,11 +133,11 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
             LoggerModule(application);
             
             application.CreateViewWindow(() => application.NewListView(typeof(TraceEvent)));
-            var testObserver = application.WhenTraceEvent().FirstAsync(e => e.Value.Contains("test")).Test();
+            var testObserver = application.WhenTraceEvent().TakeFirst(e => e.Value.Contains("test")).Test();
 
-            var firstAsync = application.WhenTrace().FirstAsync(e => e.Value.Contains("test")).ReplayConnect();
+            var takeFirst = application.WhenTrace().TakeFirst(e => e.Value.Contains("test")).ReplayConnect();
             ReactiveLoggerModule.TraceSource.TraceMessage("test");
-            await firstAsync;
+            await takeFirst;
 
             testObserver.ItemCount.ShouldBe(0);
             var objectSpace = application.CreateObjectSpace();
@@ -156,7 +157,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
 
         private void Persist_Only(ObservableTraceStrategy strategy) {
             using var application = Platform.Win.NewApplication<ReactiveLoggerModule>();
-            application.WhenModelChanged().FirstAsync()
+            application.WhenModelChanged().TakeFirst()
                 .Select(_ => {
                     var logger = application.Model.ToReactiveModule<IModelReactiveModuleLogger>().ReactiveLogger;
                     logger.TraceSources[nameof(ReactiveModule)].Level = SourceLevels.Verbose;
@@ -175,8 +176,8 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
                     if (strategy == ObservableTraceStrategy.OnError) {
                         throw new NotImplementedException();
                     }
-                }).FirstAsync().Trace(traceSource:ReactiveLoggerModule.TraceSource).Test();
-            var eventObserver = application.WhenTraceEvent(rxAction:EnumsNET.Enums.Parse<RXAction>(strategy.ToString())).FirstAsync().Test();
+                }).TakeFirst().Trace(traceSource:ReactiveLoggerModule.TraceSource).Test();
+            var eventObserver = application.WhenTraceEvent(rxAction:EnumsNET.Enums.Parse<RXAction>(strategy.ToString())).TakeFirst().Test();
             application.CreateObjectSpace();
             testObserver.AwaitDone(Timeout);
             eventObserver.AwaitDone(Timeout).ItemCount.ShouldBe(1);
@@ -195,7 +196,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
             
             ReactiveLoggerModule.TraceSource.TraceMessage("test");
 
-            await application.WhenTraceEvent().FirstAsync(e => e.Value.Contains("test"));
+            await application.WhenTraceEvent().TakeFirst(e => e.Value.Contains("test"));
 
             var objectSpace = application.CreateObjectSpace();
             objectSpace.GetObjectsQuery<TraceEvent>().FirstOrDefault(_ => _.Value.Contains("test")).ShouldNotBeNull();
@@ -207,7 +208,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
             created?.Invoke(application);
             application.AddModule<ReactiveLoggerModule>();
             application.CreateObjectSpace();
-            var test = application.WhenTraceEvent().FirstAsync(_ => _.Value == "test").SubscribeReplay(Scheduler.Default);
+            var test = application.WhenTraceEvent().TakeFirst(_ => _.Value == "test").SubscribeReplay(Scheduler.Default);
             ReactiveLoggerModule.TraceSource.TraceMessage("test");
             application.Logon();
 
@@ -236,7 +237,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
         [Apartment(ApartmentState.STA)][Order(800)]
         public async Task Refresh_TraceEvent_ListView_when_trace(){
             using var application = NewApplication();
-            application.WhenModelChanged().FirstAsync()
+            application.WhenModelChanged().TakeFirst()
                 .Select(_ => {
                     var logger = application.Model.ToReactiveModule<IModelReactiveModuleLogger>().ReactiveLogger;
                     logger.TraceSources.PersistStrategy=ObservableTraceStrategy.All;
@@ -250,8 +251,8 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
             var listView = application.NewObjectView<ListView>(typeof(TraceEvent));
             application.CreateViewWindow().SetView(listView);
             var refresh = application.WhenTraceEvent(typeof(ReactiveLoggerService), RXAction.OnNext,
-                nameof(ReactiveLoggerService.RefreshViewDataSource)).FirstAsync().SubscribeReplay();
-            var test = application.WhenTraceEvent().FirstAsync(_ => _.Value == "test").SubscribeReplay();
+                nameof(ReactiveLoggerService.RefreshViewDataSource)).TakeFirst().SubscribeReplay();
+            var test = application.WhenTraceEvent().TakeFirst(_ => _.Value == "test").SubscribeReplay();
             ReactiveLoggerModule.TraceSource.TraceMessage("test");
 
             await refresh.ToTaskWithoutConfigureAwait();
@@ -264,7 +265,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
         public async Task Trace_Events_Before_CompatibilityCheck(){
             using var application = Platform.Win.NewApplication<ReactiveLoggerModule>();
             application.AddModule<ReactiveLoggerModule>();
-            var test = application.WhenTraceEvent().FirstAsync(_ => _.Value == "test").SubscribeReplay();
+            var test = application.WhenTraceEvent().TakeFirst(_ => _.Value == "test").SubscribeReplay();
             ReactiveLoggerModule.TraceSource.TraceMessage("test");
             application.Logon();
             application.CreateObjectSpace();
@@ -279,7 +280,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
         public async Task Trace_EventType(TraceEventType eventType){
             using var application = Platform.Win.NewApplication<ReactiveLoggerModule>();
             application.AddModule<ReactiveLoggerModule>();
-            var test = application.WhenTraceEvent().FirstAsync(_ => _.Value == "test").SubscribeReplay();
+            var test = application.WhenTraceEvent().TakeFirst(_ => _.Value == "test").SubscribeReplay();
             ReactiveLoggerModule.TraceSource.TraceMessage("test",eventType);
             application.Logon();
             application.CreateObjectSpace();
@@ -298,7 +299,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
             application.Logon();
             application.CreateObjectSpace();
             
-            var testTrace = application.WhenTraceEvent().FirstAsync(traceEvent => traceEvent.Message=="test").SubscribeReplay();
+            var testTrace = application.WhenTraceEvent().TakeFirst(traceEvent => traceEvent.Message=="test").SubscribeReplay();
             application.WhenObjectSpaceCreated().Trace(traceSource:ReactiveLoggerModule.TraceSource, messageFactory:_ => "test").Test();
             application.CreateObjectSpace();
 

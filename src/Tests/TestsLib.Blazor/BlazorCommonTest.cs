@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Xpand.Extensions.AppDomainExtensions;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.TestsLib.Common;
 using Xpand.XAF.Modules.Reactive.Services;
@@ -50,8 +51,8 @@ namespace Xpand.TestsLib.Blazor {
 			containerInitializer.Initialize();
 			var newBlazorApplication = WebHost.Services.GetService<IXafApplicationProvider>()?.GetApplication();
 
-			newBlazorApplication.WhenApplicationModulesManager().FirstAsync()
-				.SelectMany(manager => manager.WhenGeneratingModelNodes<IModelViews>().FirstAsync()
+			newBlazorApplication.WhenApplicationModulesManager().TakeFirst()
+				.SelectMany(manager => manager.WhenGeneratingModelNodes<IModelViews>().TakeFirst()
 					.SelectMany().OfType<IModelListView>().Where(view => view.EditorType == typeof(GridListEditor))
 					.Do(view => view.DataAccessMode = CollectionSourceDataAccessMode.Client))
 				.Subscribe();

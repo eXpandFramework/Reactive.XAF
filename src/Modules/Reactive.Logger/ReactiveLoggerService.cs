@@ -22,6 +22,7 @@ using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.ExpressionExtensions;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.ObjectExtensions;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
@@ -245,7 +246,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
             => xafApplication.WhenSetupComplete().SelectMany(_ => {
                 var moduleType = AppDomain.CurrentDomain.GetAssemblyType("DevExpress.ExpressApp.Notifications.NotificationsModule");
                 var service = (NotificationsService)xafApplication.Modules.FindModule(moduleType)?.GetPropertyValue("NotificationsService");
-                return service != null ? xafApplication.WhenModelChanged().FirstAsync()
+                return service != null ? xafApplication.WhenModelChanged().TakeFirst()
                         .SelectMany(application => {
                             var notifications = application.ToReactiveModule<IModelReactiveModuleLogger>().ReactiveLogger.Notifications;
                             var rules = notifications.Select(notification => (notification.ObjectType.TypeInfo.Type, notification.Criteria,notification.ShowXafMessage,notification.XafMessageType,notification.MessageDisplayInterval)).ToArray();

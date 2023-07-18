@@ -21,7 +21,7 @@ namespace Xpand.XAF.Modules.Windows{
                 var modelWindows = applicationModel.ToReactiveModule<IModelReactiveModuleWindows>().Windows;
                 __instance.FormLocation = modelWindows.Alert.FormLocation;
                 if (modelWindows.Alert.FormWidth != null) {
-                    __instance.WhenEvent<AlertFormWidthEventArgs>(nameof(AlertControl.GetDesiredAlertFormWidth)).FirstAsync()
+                    __instance.WhenEvent<AlertFormWidthEventArgs>(nameof(AlertControl.GetDesiredAlertFormWidth)).Take(1)
                         .Subscribe(e => e.Width = modelWindows.Alert.FormWidth.Value);
                 }
             }

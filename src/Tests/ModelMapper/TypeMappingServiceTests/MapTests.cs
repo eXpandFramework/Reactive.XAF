@@ -30,6 +30,7 @@ using EnumsNET;
 using Fasterflect;
 using NUnit.Framework;
 using Shouldly;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.TestsLib.Common.Attributes;
@@ -138,8 +139,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
 
             var mappedTypes = new[]{typeToMap1, typeToMap2}.MapToModel().ModelInterfaces();
 
-            var mappedType1 = await mappedTypes.FirstAsync(type => typeToMap1.ModelTypeName()==type.Name).Timeout(Timeout);
-            var mappedType2 = await mappedTypes.FirstAsync(type => typeToMap2.ModelTypeName()==type.Name).Timeout(Timeout);
+            var mappedType1 = await mappedTypes.TakeFirst(type => typeToMap1.ModelTypeName()==type.Name).Timeout(Timeout);
+            var mappedType2 = await mappedTypes.TakeFirst(type => typeToMap2.ModelTypeName()==type.Name).Timeout(Timeout);
 
             mappedType1.Assembly.ShouldBe(mappedType2.Assembly);
         }
@@ -212,7 +213,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
             InitializeMapperService(platform);
             assembliesToLoad.ToObservable().Do(type => Assembly.LoadFile(type.Assembly.Location)).Subscribe();
 
-            var modelType = await predefinedMap.MapToModel().ModelInterfaces().FirstAsync();
+            var modelType = await predefinedMap.MapToModel().ModelInterfaces().TakeFirst();
             
             var propertyInfos = modelType.GetProperties();
 
