@@ -4,11 +4,14 @@ using System.Reactive.Linq;
 using DevExpress.ExpressApp.Editors;
 using Fasterflect;
 using Xpand.Extensions.Reactive.Conditional;
+using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
     public static class ListEditorExtensions {
+        public static IObservable<TListEditor> WhenControlsCreated<TListEditor>(this TListEditor listEditor) where TListEditor:ListEditor 
+            => listEditor.WhenEvent(nameof(listEditor.ControlsCreated)).StartWith(listEditor.Control).WhenNotDefault().To(listEditor);
         public static IObservable<T> UpdateGridView<T>(this ListEditor editor, Func<IEnumerable<T>> selector)
             => editor.UpdateGridView(() => selector().ToNowObservable());
         
@@ -18,7 +21,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 return selector();
 
             }).Finally(() => editor.GetPropertyValue("GridView")?.CallMethod("EndDataUpdate"));
-
+        
         public static IObservable<ListEditor> TakeUntilDisposed(this IObservable<ListEditor> source)
             => source.TakeWhileInclusive(editor => !editor.IsDisposed);
         

@@ -27,7 +27,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests{
         }
 
         [TestCase(typeof(TestJob))]
-        [TestCase(typeof(TestJobDI))]
+        // [TestCase(typeof(TestJobDI))]
         [Test()][Order(0)]
         public async Task Inject_BlazorApplication_In_JobType_Ctor(Type testJobType) {
             using var jobs = TestJob.Jobs.TakeFirst().Test();

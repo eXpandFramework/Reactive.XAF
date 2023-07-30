@@ -57,7 +57,7 @@ namespace Xpand.Extensions.Office.Cloud{
         public static IObservable<(TCloudEntity serviceObject, MapAction mapAction)>
             ModifiedObjects<TLocalEntity, TCloudEntity>(this IObjectSpace objectSpace, SynchronizationType synchronizationType, 
                 Func<(CloudOfficeObject cloudOfficeObject, TLocalEntity localEntity), IObservable<(TCloudEntity , MapAction mapAction)>> delete,
-                Func<TLocalEntity, IObservable<(TCloudEntity serviceObject, MapAction mapAction)>> map){
+                Func<TLocalEntity, IObservable<(TCloudEntity serviceObject, MapAction mapAction)>> map) where TLocalEntity : class {
             
             var deleteObjects =synchronizationType.IsDelete()? objectSpace.WhenDeletedObjects<TLocalEntity>(true)
                 .SelectMany(_ => _.objects.SelectMany(o => {

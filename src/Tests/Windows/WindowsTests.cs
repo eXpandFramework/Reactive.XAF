@@ -16,7 +16,7 @@ namespace Xpand.XAF.Modules.Windows.Tests {
         [Apartment(ApartmentState.STA)]
         [TestCase(true)]
         [TestCase(false)]
-        public  void StartupWithWindows(bool enable){
+        public  void StartupWithWindows(bool enable) {
             using var application = WindowsModule().Application;
             var modelWindows = application.Model.ToReactiveModule<IModelReactiveModuleWindows>().Windows;
             modelWindows.Startup=enable;

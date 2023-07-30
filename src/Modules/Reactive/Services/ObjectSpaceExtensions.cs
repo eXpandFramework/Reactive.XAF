@@ -633,8 +633,5 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                             return nonPersistentObjectSpace.WhenDisposed().Do(_ => objectSpace.Dispose()).ToUnit();
                         })
                     : Observable.Empty<Unit>());
-
-        
-
     }
 }

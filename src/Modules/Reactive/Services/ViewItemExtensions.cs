@@ -8,9 +8,16 @@ using DevExpress.ExpressApp.Editors;
 using Fasterflect;
 using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.XAF.ViewExtensions;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
     public static class ViewItemExtensions{
+        public static IObservable<TTabbedControl> TabControl<TTabbedControl>(this IObservable<DashboardViewItem> source) 
+            => source.SelectMany(item => item.Frame.View.ToDetailView().WhenTabControl().Cast<TTabbedControl>());
+        
+        public static IObservable<TView> ToView<TView>(this IObservable<DashboardViewItem> source)
+            => source.Select(item => item.Frame.View).Cast<TView>();
+        
         public static IObservable<(T viewItem, NestedFrame nestedFrame)> ToNestedFrames<T>(this IObservable<T> source, params Type[] nestedObjectTypes) where T:ViewItem 
             => source.Cast<IFrameContainer>().Where(container => container.Frame!=null)
                 .Select(container => (viewItem: ((T) container),nestedFrame: ((NestedFrame) container.Frame)))
@@ -24,7 +31,13 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static IObservable<T> TakeUntilDisposed<T>(this IObservable<T> source) where T : ViewItem
             => source.TakeWhileInclusive(item => !item.IsDisposed());
+
+        public static IObservable<TView> OfView<TView>(this IObservable<DashboardViewItem> source)
+            => source.Select(item => item.Frame.View).OfType<TView>();
         
+        public static IObservable<DashboardViewItem> When(this IObservable<DashboardViewItem> source, params ViewType[] viewTypes) 
+            => source.Where(item => viewTypes.All(viewType => item.InnerView.Is(viewType)));
+
         public static bool IsDisposed<T>(this T source) where T : ViewItem
             => (bool)source.GetPropertyValue("IsDisposed");
         

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reactive.Linq;
+using Xpand.Extensions.Reactive.Transform;
 
 namespace Xpand.Extensions.Reactive.Conditional {
     public static partial class Conditional {

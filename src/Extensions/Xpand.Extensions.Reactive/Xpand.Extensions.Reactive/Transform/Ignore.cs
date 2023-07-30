@@ -16,11 +16,14 @@ namespace Xpand.Extensions.Reactive.Transform {
                 IStopwatch stopwatch = null;
                 return source.Do(item => {
                         if ((comparer ??= EqualityComparer<T>.Default).Equals(item, value))
-                            stopwatch ??= (scheduler ??= global::System.Reactive.Concurrency.Scheduler.Default).StartStopwatch();
+                            stopwatch ??= (scheduler ??= Scheduler.Default).StartStopwatch();
                         else
                             stopwatch = null;
                     })
                     .Where(_ => stopwatch == null || stopwatch.Elapsed >= dueTimeUntilEstablished);
             });
+
+        public static IObservable<T[]> WhenCompleted<T>(this IObservable<T> source) 
+            => source.IgnoreElements().Select(_ => Array.Empty<T>()).Concat(Array.Empty<T>().Observe());
     }
 }

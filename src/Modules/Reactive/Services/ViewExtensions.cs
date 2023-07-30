@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Reactive;
@@ -6,16 +7,55 @@ using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.SystemModule;
-using Xpand.Extensions.ObjectExtensions;
+using DevExpress.Persistent.Validation;
+using Fasterflect;
+using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
+using Xpand.Extensions.TypeExtensions;
 using Xpand.Extensions.XAF.DetailViewExtensions;
+using Xpand.Extensions.XAF.ObjectSpaceExtensions;
 using Xpand.Extensions.XAF.ViewExtensions;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
     public static class ViewExtensions{
+        private static readonly Type GridListEditorType;
+
+        static ViewExtensions() {
+            GridListEditorType = AppDomain.CurrentDomain.GetAssemblyType("DevExpress.ExpressApp.Win.Editors.GridListEditor");
+        }
+
+        public static IObservable<object> SelectObject(this ListView listView, params object[] objects)
+            => listView.SelectObject<object>(objects);
+        
+        public static IObservable<TO> SelectObject<TO>(this ListView listView,params TO[] objects) where TO : class 
+            => listView.Editor.WhenControlsCreated()
+                .SelectMany(editor => editor.Control.WhenEvent("DataSourceChanged")).To(listView)
+                .SelectObject(objects);
+        
+        static IObservable<T> SelectObject<T>(this IObservable<ListView> source,params T[] objects) where T : class 
+            => source.SelectMany(view => {
+                if (view.Editor.GetType().InheritsFrom(GridListEditorType)){
+                    var gridView = view.Editor.GetPropertyValue("GridView");
+                    return objects.Select(obj => {
+                            gridView.CallMethod("ClearSelection");
+                            var index = (int)gridView.CallMethod("FindRow", obj);
+                            gridView.CallMethod("SelectRow", index);
+                            return index;
+                        }).ToNowObservable()
+                        .BufferUntilCompleted()
+                        .Select(indexes => {
+                            if (indexes.Length==1){
+                                gridView.SetPropertyValue("FocusedRowHandle", indexes.First()) ;
+                            }
+                            return gridView.GetPropertyValue("FocusedRowObject") as T;
+                        });
+                }
+                throw new NotImplementedException(nameof(view.Editor));
+            });
+        
         public static IObservable<CustomizeShowViewParametersEventArgs> WhenNestedListViewProcessCustomizeShowViewParameters(
             this DetailView detailView, params Type[] objectTypes) 
             => detailView.FrameContainers(objectTypes).ToNowObservable()
@@ -25,7 +65,13 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static IObservable<T> WhenClosing<T>(this T view) where T : View 
             => view.WhenViewEvent(nameof(view.Closing)).To(view).Select(view1 => view1);
-        
+
+        public static IEnumerable<PropertyEditor> CloneRequiredMembers(this CompositeView compositeView,object existingObject=null) {
+            existingObject ??= compositeView.ObjectSpace.FindObject(compositeView.ObjectTypeInfo.Type);
+            return compositeView.GetItems<PropertyEditor>().Where(editor =>
+                    editor.MemberInfo.FindAttributes<RuleRequiredFieldAttribute>().Any())
+                .Do(editor => { editor.MemberInfo.SetValue(compositeView.CurrentObject, editor.MemberInfo.GetValue(existingObject)); });
+        }
         public static IObservable<object> WhenObjects(this View view) 
             => view is ListView listView?listView.CollectionSource.WhenCollectionChanged().SelectMany(_ => listView.Objects())
                 .StartWith(listView.Objects()):view.ToDetailView().WhenCurrentObjectChanged()
@@ -101,19 +147,17 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         
         public static IObservable<TViewItem> NestedViewItems<TView,TViewItem>(this TView view, params Type[] objectTypes ) where TView : DetailView where TViewItem:ViewItem,IFrameContainer 
             => view.NestedFrameContainers(objectTypes).OfType<TViewItem>();
-        
-        public static IObservable<IFrameContainer> NestedFrameContainers<TView>(this TView view, params Type[] objectTypes ) where TView : DetailView  
-            => view.GetItems<IFrameContainer>().Where(editor =>editor.Frame?.View == null).ToNowObservable()
-                .SelectMany(frameContainer =>frameContainer.Cast<ViewItem>().Control==null? frameContainer.Cast<ViewItem>().WhenControlCreated().To(frameContainer):frameContainer.Observe())
+        public static IObservable<IFrameContainer> NestedFrameContainers<TView>(this TView view, params Type[] objectTypes ) where TView : CompositeView  
+            => view.GetItems<IFrameContainer>().ToNowObservable().OfType<ViewItem>()
+                .SelectMany(item => item.WhenControlCreated().StartWith(item.Control).WhenNotDefault().Take(1).To(item).Cast<IFrameContainer>())
                 .NestedFrameContainers(view, objectTypes);
         
         public static IObservable<DashboardViewItem> NestedDashboards<TView>(this TView view, params Type[] objectTypes ) where TView : DetailView 
             => view.NestedViewItems<TView,DashboardViewItem>( objectTypes);
 
-        private static IObservable<TFrameContainer> NestedFrameContainers<TView,TFrameContainer>(this IObservable<TFrameContainer> lazyListPropertyEditors, TView view, Type[] objectTypes) where TView : DetailView where TFrameContainer:IFrameContainer{
+        private static IObservable<TFrameContainer> NestedFrameContainers<TView,TFrameContainer>(this IObservable<TFrameContainer> lazyListPropertyEditors, TView view, Type[] objectTypes) where TView : CompositeView where TFrameContainer:IFrameContainer{
             var listFrameContainers = view.GetItems<ViewItem>().OfType<TFrameContainer>().Where(editor => editor.Frame?.View != null)
                 .ToNowObservable().Merge(lazyListPropertyEditors);
-
             var nestedEditors = listFrameContainers.WhenNotDefault(container => container.Frame).SelectMany(frameContainer => {
                 var detailView =frameContainer.Frame.View is ListView listView? listView.EditView:null;
                 return detailView != null ? detailView.NestedFrameContainers(objectTypes).OfType<TFrameContainer>() : Observable.Never<TFrameContainer>();

@@ -24,6 +24,7 @@ using Fasterflect;
 using Xpand.Extensions.EventArgExtensions;
 using Xpand.Extensions.ExpressionExtensions;
 using Xpand.Extensions.LinqExtensions;
+using Xpand.Extensions.Numeric;
 using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Conditional;
@@ -148,17 +149,13 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<Window> WhenWindowCreated(this XafApplication application,bool isMain=false,bool emitIfMainExists=true) {
             var windowCreated = application.WhenFrameCreated().Select(frame => frame).OfType<Window>();
             return isMain ? emitIfMainExists && application.MainWindow != null ? application.MainWindow.Observe().ObserveOn(SynchronizationContext.Current!)
-                    : application.WhenMainWindowAvailable(windowCreated) : windowCreated.TraceRX(window => window.Context);
+                : windowCreated.WhenMainWindowAvailable() : windowCreated;
         }
 
-        private static IObservable<Window> WhenMainWindowAvailable(this XafApplication application, IObservable<Window> windowCreated) 
-            => windowCreated.When(TemplateContext.ApplicationWindow).TemplateChanged()
-                .SelectMany(_ => Observable.Interval(TimeSpan.FromMilliseconds(300))
-                    .ObserveOnWindows(SynchronizationContext.Current)
-                    .Select(_ => application.MainWindow))
-                .WhenNotDefault()
-                .Select(window => window).Publish().RefCount().Take(1)
-                .TraceRX(window => window.Context);
+        private static IObservable<Window> WhenMainWindowAvailable(this IObservable<Window> windowCreated) 
+            => windowCreated.When(TemplateContext.ApplicationWindow).TemplateChanged().Cast<Window>()
+                .SelectMany(window => window.WhenEvent("Showing").To(window))
+                .Select(window => window).Take(1);
         
         public static IObservable<Window> WhenPopupWindowCreated(this XafApplication application) 
             => application.WhenFrameCreated(TemplateContext.PopupWindow).Where(_ => _.Application==application).Cast<Window>();
@@ -239,7 +236,9 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static IObjectSpace CreateAuthenticatedObjectSpace(this XafApplication application, string userName)  
             => application.ServiceProvider.CreateAuthenticatedObjectSpace(application.Security.UserType,userName);
-        
+
+        public static IObservable<(IObjectSpace objectSpace, CancelEventArgs e)> WhenCommiting(this XafApplication  application)
+            => application.WhenObjectSpaceCreated().SelectMany(objectSpace => objectSpace.WhenCommiting().Select(e => (objectSpace,e)));        
         public static IObservable<IObjectSpace> WhenObjectSpaceCreated(this XafApplication application,bool includeNonPersistent=true,bool includeNested=false) 
             => application.WhenEvent<ObjectSpaceCreatedEventArgs>(nameof(XafApplication.ObjectSpaceCreated)).InversePair(application)
                 .Where(t => (includeNonPersistent || t.source.ObjectSpace is not NonPersistentObjectSpace)&&
@@ -271,61 +270,6 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 	            .Where(frame => nesting==Nesting.Any|| frame is NestedFrame&&nesting==Nesting.Nested||!(frame is NestedFrame)&&nesting==Nesting.Root)
                 .SelectMany(window => (window.View.Observe().When(objectType, viewType, nesting)).To(window))
                 .TraceRX(window => window.View.Id);
-
-        public static IEnumerable<Frame> WhenFrame<T>(this IEnumerable<T> source, Type objectType = null,
-            ViewType viewType = ViewType.Any, Nesting nesting = Nesting.Any) where T:Frame
-            => source.ToObservable(Transform.ImmediateScheduler).WhenFrame(objectType,viewType,nesting).ToEnumerable();
-        
-        public static IEnumerable<Frame> WhenFrame<T>(this IEnumerable<T> source, params string[] viewIds) where T:Frame 
-            => source.ToObservable(Transform.ImmediateScheduler).Where(arg => viewIds.Contains(arg.View.Id)).ToEnumerable();
-
-        public static IObservable<T> WhenFrame<T>(this IObservable<T> source, params Type[] objectTypes) where T:Frame 
-            => source.Where(frame => frame.Is(objectTypes));
-        public static IObservable<T> WhenFrame<T>(this IObservable<T> source, params string[] viewIds) where T:Frame 
-            => source.Where(frame => frame.Is(viewIds));
-        
-        public static IObservable<T> WhenFrame<T>(this IObservable<T> source, params Nesting[] nesting) where T:Frame 
-            => source.Where(frame => frame.Is(nesting));
-
-        public static IObservable<View> ToView<T>(this IObservable<T> source) where T : Frame
-            => source.Select(frame => frame.View);
-        public static IObservable<DetailView> ToDetailView<T>(this IObservable<T> source) where T : Frame
-            => source.Select(frame => frame.View.AsDetailView());
-        public static IObservable<ListView> ToListView<T>(this IObservable<T> source) where T : Frame
-            => source.Select(frame => frame.View.AsListView());
-        
-        public static IObservable<T> WhenFrame<T>(this IObservable<T> source, params ViewType[] viewTypes) where T : Frame
-            => source.Where(frame => frame.Is(viewTypes));
-
-        public static IObservable<View> WhenView<TFrame>(this IObservable<TFrame> source, Type objectType = null,
-            ViewType viewType = ViewType.Any, Nesting nesting = Nesting.Any) where TFrame : Frame
-            => source.WhenFrame(objectType, viewType, nesting).ToView();
-
-        public static IObservable<View> WhenDetailView<TFrame>(this IObservable<TFrame> source, params Type[] objectTypes) where TFrame : Frame
-            => source.WhenFrame(objectTypes).WhenFrame(ViewType.DetailView).ToView();
-        
-        public static IObservable<View> WhenDetailView<TFrame>(this IObservable<TFrame> source, Type objectType = null, Nesting nesting = Nesting.Any) where TFrame : Frame
-            => source.WhenFrame(objectType,ViewType.DetailView, nesting).ToView();
-        
-        public static IObservable<View> WhenListView<TFrame>(this IObservable<TFrame> source, Type objectType = null, Nesting nesting = Nesting.Any) where TFrame : Frame
-            => source.WhenFrame(objectType,ViewType.ListView, nesting).ToView();
-        
-        public static IObservable<T> WhenDetailView<T,TObject>(this IObservable<T> source, Func<TObject,bool> criteria) where T:Frame
-            => source.WhenFrame(typeof(TObject),ViewType.DetailView).Where(frame => criteria(frame.View.CurrentObject.As<TObject>()));
-        
-        public static IObservable<T> WhenFrame<T>(this IObservable<T> source, Type objectType = null,
-            ViewType viewType = ViewType.Any, Nesting nesting = Nesting.Any) where T:Frame
-            => source.Where(frame => frame.Is(nesting))
-                .SelectMany(frame => frame.WhenFrame(viewType, objectType));
-        public static IObservable<T> WhenFrame<T>(this IObservable<T> source, Func<Frame,Type> objectType = null,
-            Func<Frame,ViewType> viewType = null, Nesting nesting = Nesting.Any) where T:Frame
-            => source.Where(frame => frame.Is(nesting))
-                .SelectMany(frame => frame.WhenFrame(viewType?.Invoke(frame)??ViewType.Any, objectType?.Invoke(frame)));
-
-        private static IObservable<T> WhenFrame<T>(this T frame,ViewType viewType, Type types) where T : Frame 
-            => frame.View != null
-                ? frame.Is(viewType) && frame.Is(types) ? frame.Observe() : Observable.Empty<T>()
-                : frame.WhenViewChanged().Where(t => t.frame.Is(viewType) && t.frame.Is(types)).To(frame);
 
         public static IObservable<Frame> WhenFrame(this XafApplication application)
             => application.WhenFrameViewChanged();
@@ -893,8 +837,48 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             Func<(Frame source,Frame target),IObservable<object>> whenSourceViewSelectionChanged=null) 
             => application.WhenNestedListViewsSelectionChanged(typeof(TSource), typeof(TTarget),
                 (sourceObject, targetObject) => match((TSource)sourceObject, (TTarget)targetObject), sourceSelector,
-                targetSelector,sourceObject =>sourceSortSelector((TSource)sourceObject)  , targetObject => targetSortSelector((TTarget)targetObject), whenSourceViewSelectionChanged)
+                targetSelector,sourceObject =>sourceSortSelector!((TSource)sourceObject)  , targetObject => targetSortSelector!((TTarget)targetObject), whenSourceViewSelectionChanged)
                 .Select(t => (t.sourceFrame,t.targetframe,(TSource)t.sourceObject,(TTarget)t.targetObject,t.targetIndex));
+        
+        public static IObservable<View> RootView(this XafApplication application,Type objectType,params ViewType[] viewTypes) 
+            => application.RootFrame(objectType,viewTypes).Select(frame => frame.View);
+        
+        public static IObservable<Frame> RootFrame(this XafApplication application,Type objectType,params ViewType[] viewTypes) 
+            => application.WhenFrame(objectType,viewTypes).When(TemplateContext.View);
+
+        public static IObservable<Unit> SaveNewObject(this XafApplication application)
+            => application.NewObjectRootFrame()
+                .SelectMany(frame => frame.View.ToDetailView().CloneRequiredMembers().ToNowObservable()
+                    .ConcatToUnit(frame.GetController<ModificationsController>().SaveAction.Observe().Do(action => action.DoExecute())
+                        .Select(action => action)));
+        
+        public static IObservable<bool> DeleteCurrentObject(this XafApplication application)
+            => application.NewObjectRootFrame().SelectMany(frame => frame.View.ObjectSpace.WhenCommitted<object>(ObjectModification.New)
+                .WaitUntilInactive(1.Seconds()).ObserveOnContext()
+                .Select(_ => {
+                    var keyValue = frame.View.ObjectSpace.GetKeyValue(frame.View.CurrentObject);
+                    var type = frame.View.ObjectTypeInfo.Type;
+                    var deleteObjectsViewController = frame.GetController<DeleteObjectsViewController>();
+                    deleteObjectsViewController.DeleteAction.ConfirmationMessage = null;
+                    deleteObjectsViewController.DeleteAction.DoExecute();
+                    return application.CreateObjectSpace(type).GetObjectByKey(type, keyValue)==null;
+                }).WhenNotDefault());
+
+
+        public static IObservable<DetailView> ExistingObjectRootDetailView(this XafApplication application,Type objectType=null)
+            => application.RootDetailView(objectType).Where(detailView => !detailView.IsNewObject());
+
+        public static IObservable<DetailView> RootDetailView(this XafApplication application, Type objectType=null) 
+            => application.RootFrame(objectType,ViewType.DetailView).Select(frame => frame.View).Cast<DetailView>();
+        
+        public static IObservable<Frame> RootFrame(this XafApplication application, Type objectType=null) 
+            => application.RootFrame(objectType,ViewType.DetailView).WhenNotDefault(frame => frame.View.CurrentObject);
+
+        public static IObservable<DetailView> NewObjectRootDetailView(this XafApplication application,Type objectType)
+            => application.NewObjectRootFrame(objectType).Select(frame => frame.View.ToDetailView());
+        
+        public static IObservable<Frame> NewObjectRootFrame(this XafApplication application,Type objectType=null)
+            => application.RootFrame(objectType).Where(frame => frame.View.ToCompositeView().IsNewObject());
         
         public static IObservable<SimpleActionExecuteEventArgs> WhenListViewProcessSelectedItem<T>(this XafApplication application,Nesting nesting=Nesting.Any,bool handled=true)  
             => application.WhenFrame(typeof(T),ViewType.ListView,nesting)
@@ -944,15 +928,18 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => application.WhenFrame(objectType,viewType).Publish(frames => application.Navigate(application.FindViewId(viewType, objectType), frames));
         
         public static IObservable<Frame> Navigate(this XafApplication application,string viewId, IObservable<Frame> afterNavigation) 
-            => application.Defer(() => {
-                var controller = application.MainWindow.GetController<ShowNavigationItemController>();
-                controller.ShowNavigationItemAction.SelectedItem= controller.FindNavigationItemByViewShortcut(new ViewShortcut(viewId, null));
-                return controller.ShowNavigationItemAction.Trigger(afterNavigation);
-            });
+            => afterNavigation.Publish(source => application.MainWindow == null ? application.WhenWindowCreated(true)
+                    .SelectMany(window => window.Navigate(viewId, source))
+                : application.MainWindow.Navigate(viewId, source));
 
-
-        public static IObservable<Frame> Navigate(this XafApplication application,string viewId) 
-            => application.Navigate(viewId,application.WhenFrame(viewId));
+        private static IObservable<Frame> Navigate(this Window window,string viewId, IObservable<Frame> afterNavigation){
+            var controller = window.GetController<ShowNavigationItemController>();
+            return controller.ShowNavigationItemAction.Trigger(afterNavigation,
+                () => controller.FindNavigationItemByViewShortcut(new ViewShortcut(viewId, null)));
+        }
+        
+        public static IObservable<Window> Navigate(this XafApplication application,string viewId) 
+            => application.Navigate(viewId,application.WhenFrame(viewId)).Cast<Window>();
 
         private static IObservable<T[]> Commit<T>(this IObjectSpace objectSpace,Func<IObjectSpace, IObservable<T>> commit, string caller, IObserver<T[]> observer,bool validate) 
             => commit(objectSpace).BufferUntilCompleted()

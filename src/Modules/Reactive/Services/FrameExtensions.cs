@@ -9,6 +9,7 @@ using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.SystemModule;
+using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Numeric;
 using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Filter;
@@ -16,6 +17,7 @@ using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.ActionExtensions;
 using Xpand.Extensions.XAF.Attributes;
+using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.Extensions.XAF.TypesInfoExtensions;
 using Xpand.Extensions.XAF.ViewExtensions;
@@ -57,6 +59,11 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                     return true;
                 });
 
+        public static IObservable<View> CreateNewObject(this Window window)
+            => window.DashboardViewItems(ViewType.ListView).Select(item => item.Frame).ToNowObservable()
+                .ToController<NewObjectViewController>().SelectMany(controller => controller.NewObjectAction.Trigger(window.Application
+                    .RootView(controller.Frame.View.ObjectTypeInfo.Type, ViewType.DetailView)
+                    .Select(detailView => detailView)));
         public static IObservable<TFrame> WhenViewRefreshExecuted<TFrame>(this TFrame source,
             Action<SimpleActionExecuteEventArgs> retriedExecution) where TFrame : Frame
             => source.GetController<RefreshController>().RefreshAction.WhenExecuted(retriedExecution).To(source);
@@ -77,7 +84,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         
         public static IObservable<(TFrame frame, Frame source)> WhenViewChanged<TFrame>(this TFrame item) where TFrame : Frame 
             => item.WhenEvent<ViewChangedEventArgs>(nameof(Frame.ViewChanged))
-                .TakeUntil(item.WhenDisposingFrame()).Select(e => e.SourceFrame).InversePair(item);
+                .TakeUntil(item.WhenDisposedFrame()).Select(e => e.SourceFrame).InversePair(item);
 
         public static IObservable<T> TemplateChanged<T>(this IObservable<T> source) where T : Frame 
             => source.SelectMany(item => item.Template != null ? item.Observe() : item.WhenTemplateChanged().Select(_ => item));
@@ -112,6 +119,10 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             Func<TFrame, IObservable<T>> selector) where TFrame : View
             => source.SelectMany(view => selector(view).TakeUntil(view.WhenClosed()));
         
+        public static IObservable<Window> CloseWindow<TFrame>(this IObservable<TFrame> source) where TFrame:Frame 
+            => source.SelectMany(frame => frame.View.WhenActivated().To(frame).WaitUntilInactive(1.Seconds()).ObserveOnContext())
+                .Cast<Window>().Do(frame => frame.Close());
+        
         public static IObservable<T> SelectUntilViewClosed<T,TFrame>(this IObservable<TFrame> source, Func<TFrame, IObservable<T>> selector) where TFrame:Frame 
             => source.SelectMany(frame => selector(frame).TakeUntilViewClosed(frame));
         
@@ -137,6 +148,65 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<ListPropertyEditor> NestedListViews(this Frame frame, params Type[] objectTypes ) 
             => frame.View.ToDetailView().NestedListViews(objectTypes);
 
+        public static IEnumerable<Frame> WhenFrame<T>(this IEnumerable<T> source, Type objectType = null,
+            ViewType viewType = ViewType.Any, Nesting nesting = Nesting.Any) where T:Frame
+            => source.ToObservable(Transform.ImmediateScheduler).WhenFrame(objectType,viewType,nesting).ToEnumerable();
+        
+        public static IEnumerable<Frame> WhenFrame<T>(this IEnumerable<T> source, params string[] viewIds) where T:Frame 
+            => source.ToObservable(Transform.ImmediateScheduler).Where(arg => viewIds.Contains(arg.View.Id)).ToEnumerable();
+
+        public static IObservable<T> WhenFrame<T>(this IObservable<T> source, params Type[] objectTypes) where T:Frame 
+            => source.Where(frame => frame.When(objectTypes));
+        public static IObservable<T> WhenFrame<T>(this IObservable<T> source, params string[] viewIds) where T:Frame 
+            => source.Where(frame => frame.When(viewIds));
+        
+        public static IObservable<T> WhenFrame<T>(this IObservable<T> source, params Nesting[] nesting) where T:Frame 
+            => source.Where(frame => frame.When(nesting));
+
+        public static IObservable<View> ToView<T>(this IObservable<T> source) where T : Frame
+            => source.Select(frame => frame.View);
+        
+        public static IObservable<Frame> OfView<TView>(this IObservable<Frame> source)
+            => source.Where(item => item.View is TView);
+        
+        public static IObservable<DetailView> ToDetailView<T>(this IObservable<T> source) where T : Frame
+            => source.Select(frame => frame.View.ToDetailView());
+        
+        public static IObservable<ListView> ToListView<T>(this IObservable<T> source) where T : Frame
+            => source.Select(frame => frame.View.ToListView());
+        
+        public static IObservable<T> WhenFrame<T>(this IObservable<T> source, params ViewType[] viewTypes) where T : Frame
+            => source.Where(frame => frame.When(viewTypes));
+
+        public static IObservable<View> WhenView<TFrame>(this IObservable<TFrame> source, Type objectType = null,
+            ViewType viewType = ViewType.Any, Nesting nesting = Nesting.Any) where TFrame : Frame
+            => source.WhenFrame(objectType, viewType, nesting).ToView();
+
+        public static IObservable<View> WhenDetailView<TFrame>(this IObservable<TFrame> source, params Type[] objectTypes) where TFrame : Frame
+            => source.WhenFrame(objectTypes).WhenFrame(ViewType.DetailView).ToView();
+        
+        public static IObservable<View> WhenDetailView<TFrame>(this IObservable<TFrame> source, Type objectType = null, Nesting nesting = Nesting.Any) where TFrame : Frame
+            => source.WhenFrame(objectType,ViewType.DetailView, nesting).ToView();
+        
+        public static IObservable<View> WhenListView<TFrame>(this IObservable<TFrame> source, Type objectType = null, Nesting nesting = Nesting.Any) where TFrame : Frame
+            => source.WhenFrame(objectType,ViewType.ListView, nesting).ToView();
+        
+        public static IObservable<T> WhenDetailView<T,TObject>(this IObservable<T> source, Func<TObject,bool> criteria) where T:Frame
+            => source.WhenFrame(typeof(TObject),ViewType.DetailView).Where(frame => criteria(frame.View.CurrentObject.As<TObject>()));
+        
+        public static IObservable<T> WhenFrame<T>(this IObservable<T> source, Type objectType = null,
+            ViewType viewType = ViewType.Any, Nesting nesting = Nesting.Any) where T:Frame
+            => source.Where(frame => frame.When(nesting))
+                .SelectMany(frame => frame.WhenFrame(viewType, objectType));
+        public static IObservable<T> WhenFrame<T>(this IObservable<T> source, Func<Frame,Type> objectType = null,
+            Func<Frame,ViewType> viewType = null, Nesting nesting = Nesting.Any) where T:Frame
+            => source.Where(frame => frame.When(nesting))
+                .SelectMany(frame => frame.WhenFrame(viewType?.Invoke(frame)??ViewType.Any, objectType?.Invoke(frame)));
+
+        private static IObservable<T> WhenFrame<T>(this T frame,ViewType viewType, Type types) where T : Frame 
+            => frame.View != null ? frame.When(viewType) && frame.When(types) ? frame.Observe() : Observable.Empty<T>()
+                : frame.WhenViewChanged().Where(t => t.frame.When(viewType) && t.frame.When(types)).To(frame);
+        
         public static IObservable<Frame> ListViewProcessSelectedItem(this IObservable<Frame> source,Action<SimpleActionExecuteEventArgs> executed=null) 
             => source.SelectMany(frame => frame.ListViewProcessSelectedItem(executed).Take(1));
         
@@ -146,10 +216,16 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<Frame> ListViewProcessSelectedItem(this Frame frame,string defaultFocusedItem) 
             => frame.ListViewProcessSelectedItem(e => e.ShowViewParameters.CreatedView.ToDetailView().SetDefaultFocusedItem(defaultFocusedItem));
 
-        public static IObservable<Frame> ListViewProcessSelectedItem(this Frame frame,Action<SimpleActionExecuteEventArgs> executed=null) {
+        public static IObservable<Frame> ListViewProcessSelectedItem(this Frame frame,Action<SimpleActionExecuteEventArgs> executed) 
+            => frame.ListViewProcessSelectedItem(() => frame.View.SelectedObjects.Cast<object>().First() ,executed);
+
+        public static IObservable<Frame> ListViewProcessSelectedItem<T>(this Frame frame, Func<T> selectedObject,Action<SimpleActionExecuteEventArgs> executed=null){
             var action = frame.GetController<ListViewProcessCurrentObjectController>().ProcessCurrentObjectAction;
-            return action.Trigger(action.WhenExecuted().DoWhen(_ => executed!=null,e => executed!(e))
-                .SelectMany(e => frame.Application.WhenFrame(e.ShowViewParameters.CreatedView.ObjectTypeInfo.Type).Take(1)));
+            var invoke = selectedObject.Invoke()??default(T);
+            var afterNavigation = action.WhenExecuted().DoWhen(_ => executed != null, e => executed!(e))
+                .SelectMany(e => frame.Application.WhenFrame(e.ShowViewParameters.CreatedView.ObjectTypeInfo.Type).Take(1));
+            return action.Trigger(afterNavigation,invoke.YieldItem().Cast<object>().ToArray());
         }
+
     }
 }

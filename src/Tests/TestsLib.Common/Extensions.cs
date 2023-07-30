@@ -101,9 +101,6 @@ namespace Xpand.TestsLib.Common{
 	        return application.NewView(modelView,objectSpace);
         }
 
-        public static IObservable<Frame> ListViewProcessSelectedItem(this Frame frame,Func<IObjectSpace,IList> selectedObjectsFactory) 
-            => frame.ListViewProcessSelectedItem();
-
         public static void DoExecute(this ActionBase action,Func<IObjectSpace,IList> selectedObjectsFactory,bool force=false){
             var selectionContextMock = new Mock<ISelectionContext>();
             selectionContextMock.SetupGet(context => context.SelectedObjects).Returns(() => selectedObjectsFactory(action.View().ObjectSpace));

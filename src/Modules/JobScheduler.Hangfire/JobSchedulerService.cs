@@ -194,7 +194,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
                 .AddOrUpdate(job.Id, job.Expression(), () => job.CronExpression?.Expression??Cron.Never());
 
         static IObservable<Unit> ScheduleJobs(this XafApplication application) 
-            => application.WhenCommitted<Job>(ObjectModification.NewOrUpdated).Objects()
+            => application.WhenCommitted<Job>(ObjectModification.NewOrUpdated).ToObjects()
                 .SelectMany(scheduledJob => {
                     var args = new GenericEventArgs<IObservable<Job>>(scheduledJob.Observe());
                     CustomJobScheduleSubject.OnNext(args);

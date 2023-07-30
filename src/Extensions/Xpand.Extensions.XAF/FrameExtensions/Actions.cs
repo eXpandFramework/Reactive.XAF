@@ -1,16 +1,28 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
+using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.SystemModule;
+using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.ObjectExtensions;
+using Xpand.Extensions.XAF.ViewExtensions;
 
 namespace Xpand.Extensions.XAF.FrameExtensions{
     public partial class FrameExtensions {
+        public static IEnumerable<TViewType> DashboardViewItems<TViewType>(this Window frame,params Type[] objectTypes) where TViewType:View
+            => frame.DashboardViewItems(objectTypes).Select(item => item.Frame.View as TViewType).WhereNotDefault();
+        
+        public static IEnumerable<DashboardViewItem> DashboardViewItems(this Window frame,ViewType viewType,params Type[] objectTypes) 
+            => frame.DashboardViewItems(objectTypes).When(viewType);
+        
+        public static IEnumerable<DashboardViewItem> DashboardViewItems(this Window frame,params Type[] objectTypes) 
+            => frame.View.ToCompositeView().GetItems<DashboardViewItem>().Where(item => item.InnerView.Is(objectTypes));
         
         public static void ExecuteRefreshAction(this Frame frame) => frame.GetController<RefreshController>().RefreshAction.DoExecute();
 
-        public static T ParentObject<T>(this Frame frame) => frame.As<NestedFrame>().ViewItem.View.CurrentObject.As<T>(); 
+        public static T ParentObject<T>(this Frame frame) where T : class => frame.As<NestedFrame>()?.ViewItem.View.CurrentObject as T; 
         public static NestedFrame AsNestedFrame(this Frame frame) => frame.As<NestedFrame>(); 
         public static NestedFrame ToNestedFrame(this Frame frame) => frame.Cast<NestedFrame>(); 
         public static ActionBase Action(this Frame frame, string id) 

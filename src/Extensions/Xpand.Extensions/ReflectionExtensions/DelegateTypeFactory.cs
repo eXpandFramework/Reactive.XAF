@@ -2,16 +2,15 @@
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Runtime.ExceptionServices;
 
 namespace Xpand.Extensions.ReflectionExtensions{
     public partial class ReflectionExtensions{
 	    private static readonly ModuleBuilder MModule;
 
-        static ReflectionExtensions(){
-            var assembly = AssemblyBuilder.DefineDynamicAssembly(
-                new AssemblyName("DelegateTypeFactory"), AssemblyBuilderAccess.RunAndCollect);
-            MModule = assembly.DefineDynamicModule("DelegateTypeFactory");
-        }
+        static ReflectionExtensions() 
+            => MModule = AssemblyBuilder.DefineDynamicAssembly(
+                new AssemblyName("DelegateTypeFactory"), AssemblyBuilderAccess.RunAndCollect).DefineDynamicModule("DelegateTypeFactory");
 
         public static Type CreateDelegateType(this MethodInfo method){
             var nameBase = $"{method.DeclaringType?.Name}{method.Name}";
