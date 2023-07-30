@@ -169,6 +169,11 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<Frame> OfView<TView>(this IObservable<Frame> source)
             => source.Where(item => item.View is TView);
         
+        public static IObservable<SingleChoiceAction> ChangeViewVariant(this IObservable<Frame> source,string id) 
+            => source.SelectMany(frame => frame.Actions("ChangeVariant").Cast<SingleChoiceAction>())
+                .Do(action => action.DoExecute(action.Items.First(item => item.Id == id)))
+                .Select(action => action);
+        
         public static IObservable<DetailView> ToDetailView<T>(this IObservable<T> source) where T : Frame
             => source.Select(frame => frame.View.ToDetailView());
         
