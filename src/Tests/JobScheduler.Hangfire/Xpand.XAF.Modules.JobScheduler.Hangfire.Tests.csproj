@@ -21,7 +21,7 @@
     <NoWarn>1701;1702;cs8002 </NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="DevExpress.ExpressApp.Blazor.All" Version="23.1.4" />
+    <PackageReference Include="DevExpress.ExpressApp.Blazor.All" Version="23.1.5" />
     <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.7" />
     <PackageReference Include="hangfire.core" Version="1.7.30" />
     <PackageReference Include="hangfire.aspnetcore" Version="1.7.30" />

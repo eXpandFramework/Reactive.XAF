@@ -6,7 +6,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
-using Xpand.Extensions.Reactive.Utility;
 
 namespace Xpand.Extensions.Reactive.Combine{
     public static partial class Combine{
@@ -41,7 +40,7 @@ namespace Xpand.Extensions.Reactive.Combine{
             => source.Select(source1 => source1 as object).WhenNotDefault().Merge(value.To<TValue>());
 
         public static IObservable<T> MergeIgnored<T,T2>(this IObservable<T> source,Func<T,IObservable<T2>> secondSelector,Func<T,bool> merge=null)
-            => source.DoOnSubscribe().Publish(obs => obs.SelectMany(arg => {
+            => source.Publish(obs => obs.SelectMany(arg => {
                 merge ??= _ => true;
                 var observable = Observable.Empty<T>();
                 if (merge(arg)) {

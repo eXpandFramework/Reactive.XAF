@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.ModelMapper</id>
-    <version>4.231.3.0</version>
+    <version>4.231.3.1</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -12,20 +12,20 @@
     <description>The `ModelMapper` allows to control all XAF components from the application model.</description>
     <releaseNotes>https://github.com/eXpandFramework/Reactive.XAF/releases</releaseNotes>
     <copyright>eXpandFramework.com</copyright>
-    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, ModelMapper, 23.1.4</tags>
+    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, ModelMapper, 23.1.5</tags>
     <dependencies>
       <group targetFramework="netstandard2.0">
-        <dependency id="Xpand.VersionConverter" version="4.231.3.0" />
+        <dependency id="Xpand.VersionConverter" version="4.231.3.1" />
       </group>
       <group targetFramework="net6.0">
-        <dependency id="Xpand.Extensions" version="4.231.3.0" />
-        <dependency id="Xpand.Extensions.Reactive" version="4.231.3.0" />
-        <dependency id="Xpand.Extensions.XAF" version="4.231.3.0" />
-        <dependency id="Xpand.XAF.Modules.Reactive" version="4.231.3.0" />
+        <dependency id="Xpand.Extensions" version="4.231.3.1" />
+        <dependency id="Xpand.Extensions.Reactive" version="4.231.3.1" />
+        <dependency id="Xpand.Extensions.XAF" version="4.231.3.1" />
+        <dependency id="Xpand.XAF.Modules.Reactive" version="4.231.3.1" />
         <dependency id="Enums.NET" version="4.0" />
         <dependency id="Mono.Cecil" version="0.11.4" />
         <dependency id="System.CodeDom" version="6.0" />
-        <dependency id="DevExpress.ExpressApp" version="23.1.4" />
+        <dependency id="DevExpress.ExpressApp" version="23.1.5" />
         <dependency id="System.Reactive" version="5.0" />
         <dependency id="Fasterflect.Xpand" version="2.0.7" />
         <dependency id="Xpand.Collections" version="1.0.4" />
@@ -33,7 +33,7 @@
         <dependency id="System.Text.Json" version="7.0.2" />
         <dependency id="System.Threading.Tasks.Dataflow" version="7.0" />
         <dependency id="Xpand.Patcher" version="3.0.17.0" />
-        <dependency id="Xpand.VersionConverter" version="4.231.3.0" />
+        <dependency id="Xpand.VersionConverter" version="4.231.3.1" />
       </group>
     </dependencies>
   </metadata>
