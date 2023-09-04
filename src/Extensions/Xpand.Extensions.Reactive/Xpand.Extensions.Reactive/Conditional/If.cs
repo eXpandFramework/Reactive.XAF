@@ -18,5 +18,7 @@ namespace Xpand.Extensions.Reactive.Conditional {
         public static IObservable<TResult> If<TSource, TResult>(this IObservable<TSource> source,
             Func<TSource, bool> predicate, Func<IObservable<TResult>> thenSource, Func< IObservable<TResult>> elseSource) 
             => source.If(predicate, _ => thenSource(),_ => elseSource());
+        
+        
     }
 }

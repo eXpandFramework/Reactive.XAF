@@ -312,7 +312,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .Where(t => !objectTypes.Any() || objectTypes.Contains(application.Model.Views[t.source.ViewID].AsObjectView.ModelClass.TypeInfo.Type));
 
         public static IObservable<(XafApplication application, DetailViewCreatedEventArgs e)> WhenDetailViewCreated(this XafApplication application,Type objectType) 
-            => application.WhenDetailViewCreated().Where(_ => objectType.IsAssignableFrom(_.e.View.ObjectTypeInfo.Type));
+            => application.WhenDetailViewCreated().Where(_ => objectType?.IsAssignableFrom(_.e.View.ObjectTypeInfo.Type)??true);
 
         
         public static IObservable<(XafApplication application, ListViewCreatingEventArgs args)> WhenListViewCreating(this IObservable<XafApplication> source,Type objectType=null,bool? isRoot=null) 
@@ -938,8 +938,11 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 () => controller.FindNavigationItemByViewShortcut(new ViewShortcut(viewId, null)));
         }
         
+        public static IObservable<ListPropertyEditor> WhenNestedFrame(this XafApplication application, Type parentObjectType,params Type[] objectTypes)
+            => application.WhenFrame(parentObjectType,ViewType.DetailView).SelectUntilViewClosed(frame => frame.NestedListViews(objectTypes));
+        
         public static IObservable<Window> Navigate(this XafApplication application,string viewId) 
-            => application.Navigate(viewId,application.WhenFrame(viewId)).Cast<Window>();
+            => application.Navigate(viewId,application.WhenFrame(viewId).Take(1)).Cast<Window>();
 
         private static IObservable<T[]> Commit<T>(this IObjectSpace objectSpace,Func<IObjectSpace, IObservable<T>> commit, string caller, IObserver<T[]> observer,bool validate) 
             => commit(objectSpace).BufferUntilCompleted()

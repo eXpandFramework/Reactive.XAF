@@ -27,14 +27,14 @@ namespace Xpand.Extensions.Reactive.Transform {
             if ((eventInfo.info.EventHandlerType?.IsGenericType ?? false)&&eventInfo.info.EventHandlerType.GenericTypeArguments.First()==typeof(TArgs)) {
                 return Observable.FromEventPattern<TArgs>(
                         handler => eventInfo.add.Invoke(source, new object[] { handler }),
-                        handler => eventInfo.remove.Invoke(source, new object[] { handler }))
+                        handler => eventInfo.remove.Invoke(source, new object[] { handler }),ImmediateScheduler)
                     .Select(pattern => new EventPattern<TArgs>(pattern.Sender, pattern.EventArgs))
                     .TakeUntilDisposed(source as IComponent,caller)
                     ;
             }
 
             if (eventInfo.add.IsPublic&&!eventInfo.add.IsStatic) {
-                return Observable.FromEventPattern<TArgs>(source, eventName)
+                return Observable.FromEventPattern<TArgs>(source, eventName,ImmediateScheduler)
                     .TakeUntilDisposed(source as IComponent,caller)
                     ;    
             }
@@ -42,14 +42,14 @@ namespace Xpand.Extensions.Reactive.Transform {
             if (eventInfo.info.EventHandlerType == typeof(EventHandler)) {
                 return Observable.FromEventPattern(
                         handler => eventInfo.add.Invoke(source, new object[] { handler }),
-                        handler => eventInfo.remove.Invoke(source, new object[] { handler }))
+                        handler => eventInfo.remove.Invoke(source, new object[] { handler }),ImmediateScheduler)
                     .Select(pattern => new EventPattern<TArgs>(pattern.Sender, (TArgs)pattern.EventArgs))
                     .TakeUntilDisposed(source as IComponent,caller)
                     ;    
             }
             return Observable.FromEventPattern<TArgs>(
                     handler => eventInfo.add.Invoke(source, new object[] { handler }),
-                    handler => eventInfo.remove.Invoke(source, new object[] { handler }))
+                    handler => eventInfo.remove.Invoke(source, new object[] { handler }),ImmediateScheduler)
                 .Select(pattern => new EventPattern<TArgs>(pattern.Sender, pattern.EventArgs))
                 .TakeUntilDisposed(source as IComponent,caller)
                 ;

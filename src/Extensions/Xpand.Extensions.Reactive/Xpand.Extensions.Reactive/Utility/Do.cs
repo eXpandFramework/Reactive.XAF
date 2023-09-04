@@ -73,12 +73,16 @@ namespace Xpand.Extensions.Reactive.Utility {
         public static IObservable<TSource> DoOnLast<TSource>(this IObservable<TSource> source, Action<TSource> action)
             => source.TakeLast(1).Do( action);
         
-        public static IObservable<TSource> DoWhen<TSource>(this IObservable<TSource> source, Func<TSource, bool> predicate, Action<TSource> action)
+        public static IObservable<TSource> DoWhen<TSource>(this IObservable<TSource> source, Func<TSource, bool> predicate, Action<TSource> action,Action<TSource> actionElse=null)
             => source.Do(source1 => {
                 if (predicate(source1)) {
                     action(source1);
                 }
+                else{
+                    actionElse?.Invoke(source1);
+                }
             });
+        
         public static IObservable<TSource> DoWhen<TSource>(this IObservable<TSource> source, Func<int,TSource, bool> predicate, Action<TSource> action)
             => source.Select((source1, i) => {
                 if (predicate(i,source1)) {

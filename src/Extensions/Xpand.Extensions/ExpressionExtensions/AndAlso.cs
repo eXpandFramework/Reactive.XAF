@@ -27,11 +27,8 @@ namespace Xpand.Extensions.ExpressionExtensions {
                 _newValue = newValue;
             }
 
-            public override Expression Visit(Expression node) {
-                if (node == _oldValue)
-                    return _newValue;
-                return base.Visit(node);
-            }
+            public override Expression Visit(Expression node) 
+                => node == _oldValue ? _newValue : base.Visit(node);
         }
     }
 }

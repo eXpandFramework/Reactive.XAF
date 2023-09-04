@@ -14,6 +14,9 @@ using Xpand.XAF.Modules.Reactive.Extensions;
 namespace Xpand.XAF.Modules.Reactive.Services{
     public static class CollectionSourceService {
 
+        public static IObservable<CollectionSourceBase> WhenCriteriaApplied(this CollectionSourceBase collectionSourceBase)
+            => collectionSourceBase.WhenEvent(nameof(CollectionSourceBase.CriteriaApplied))
+                .TakeUntil(collectionSourceBase.WhenDisposed()).To(collectionSourceBase);
         public static IObservable<ProxyCollection> WhenProxyCollectionChanged(this CollectionSourceBase collectionSourceBase) 
             => collectionSourceBase.Collection is not ProxyCollection proxyCollection ? Observable.Empty<ProxyCollection>()
                 : proxyCollection.WhenEvent(nameof(ProxyCollection.ListChanged)).TakeUntil(collectionSourceBase.WhenDisposed())

@@ -22,5 +22,10 @@ namespace Xpand.Extensions.XAF.ViewExtensions {
                 .Where(item => item.InnerView is TView && (!objectTypes.Any()||objectTypes.Contains(item.InnerView.ObjectTypeInfo.Type)))
                 .Select(item => item.Frame).Cast<NestedFrame>();
         
+        public static IEnumerable<NestedFrame> NestedFrames(this DashboardView dashboardView,params ViewType[] viewTypes)
+            => dashboardView.GetItems<DashboardViewItem>().Where(item => viewTypes.All(viewType =>item.InnerView.Is(viewType) )).Select(item => item.Frame).Cast<NestedFrame>();
+        
+        public static IEnumerable<DashboardViewItem> Items(this DashboardView dashboardView,params ViewType[] viewTypes)
+            => dashboardView.GetItems<DashboardViewItem>().Where(item => viewTypes.Any(viewType =>item.InnerView.Is(viewType) ));
     }
 }

@@ -1,11 +1,19 @@
 using System;
+using System.Collections.Concurrent;
+using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
 using DevExpress.Persistent.Base;
 
 namespace Xpand.Extensions.XAF.CriteriaOperatorExtensions {
     public static partial class CriteriaOperatorExtensions {
+        static readonly MethodInfo FromLambdaMethod=typeof(CriteriaOperator).GetMethods(BindingFlags.Public|BindingFlags.Static)
+            .First(info => info.Name=="FromLambda"&&info.GetGenericArguments().Length==1);
+
+        static readonly ConcurrentDictionary<Type, MethodInfo> FromLambdaCache = new();
+
         class StringProcessor : CriteriaProcessorBase {  
             protected override void Process(OperandValue theOperand) {  
                 base.Process(theOperand);  
@@ -19,12 +27,20 @@ namespace Xpand.Extensions.XAF.CriteriaOperatorExtensions {
                 }  
             }  
         }
-
+        
         public static string UserFriendlyString(this CriteriaOperator criteriaOperator) {
             new StringProcessor().Process(criteriaOperator);
             return criteriaOperator?.ToString();
         }
+        
+        public static CriteriaOperator Combine(this CriteriaOperator criteriaOperator,string criteria,GroupOperatorType type=GroupOperatorType.And){
+            var @operator = CriteriaOperator.Parse(criteria);
+            return criteriaOperator != null ? new GroupOperator(type, @operator, criteriaOperator) : @operator;
+        }
 
+        public static CriteriaOperator ToCriteria(this LambdaExpression expression,Type objectType)
+            =>(CriteriaOperator)FromLambdaCache.GetOrAdd(objectType, t => FromLambdaMethod!.MakeGenericMethod(t))
+                .Invoke(null, new object[] { expression });
         public static CriteriaOperator ToCriteria<T>(this Expression<Func<T, bool>> expression) 
             => CriteriaOperator.FromLambda(expression);
         

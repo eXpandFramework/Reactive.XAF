@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 
 namespace Xpand.Extensions.LinqExtensions{
     public static partial class LinqExtensions {
+        
         public static TValue GetOrAdd<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, Func<TValue> valueCreator,[CallerMemberName]string caller="") {
             if (!dictionary.TryGetValue(key, out var value)) {
                 value = valueCreator();

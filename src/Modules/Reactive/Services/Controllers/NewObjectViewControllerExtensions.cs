@@ -8,9 +8,20 @@ using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.TypesInfoExtensions;
+using Xpand.XAF.Modules.Reactive.Services.Actions;
 
 namespace Xpand.XAF.Modules.Reactive.Services.Controllers{
     public static partial class ControllerExtensions{
+        public static IObservable<Unit> UseObjectDefaultDetailView(this NewObjectViewController controller) 
+            => controller.WhenObjectCreating().Do(e => e.Cancel = true)
+                .ConcatToUnit(controller.NewObjectAction.WhenExecuted()
+                    .Do(e => {
+                        var objectType = controller.View.ObjectTypeInfo.Type;
+                        var objectSpace = controller.Application.CreateObjectSpace(objectType);
+                        e.ShowViewParameters.CreatedView =
+                            controller.Application.CreateDetailView(objectSpace, objectSpace.CreateObject(objectType));
+                    }));
+
         public static IObservable<Unit> ReplaceTypes<T>(this NewObjectViewController controller,Func<Frame,IObservable<object>> whenFrame) 
             => controller.ReplaceTypes(e => controller.Application.WhenFrame(e.ObjectType).Take(1)
                 .SelectMany(whenFrame),typeof(T)).ToUnit();

@@ -6,13 +6,13 @@ using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Threading;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.SystemModule;
 using DevExpress.ExpressApp.Utils;
 using Fasterflect;
 using Xpand.Extensions.LinqExtensions;
-using Xpand.Extensions.Numeric;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Filter;
@@ -310,6 +310,8 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
         public static IObservable<ActionBaseEventArgs> WhenExecuted<TAction>(this TAction action) where TAction : ActionBase 
             => action.WhenEvent<ActionBaseEventArgs>(nameof(ActionBase.Executed)).TakeUntilDisposed(action);
 
+        public static IObservable<ItemsChangedEventArgs> WhenItemsChanged(this SingleChoiceAction action) 
+            => action.WhenEvent<ItemsChangedEventArgs>(nameof(SingleChoiceAction.ItemsChanged)).TakeUntil(action.WhenDisposed());
         public static IObservable<ActionBaseEventArgs> WhenExecuteCompleted<TAction>(this TAction action) where TAction : ActionBase 
             => action.WhenEvent<ActionBaseEventArgs>(nameof(ActionBase.ExecuteCompleted)).TakeUntilDisposed(action);
         
@@ -487,28 +489,30 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
                     .IgnoreElements().To<DialogController>().StartWith(dialogController));
         }
 
-        public static IObservable<T> Trigger<T>(this SingleChoiceAction action, IObservable<T> afterNavigation,params object[] selection)
-            => action.Trigger(afterNavigation,() => action.SelectedItem,selection);
         
-        public static IObservable<T> Trigger<T>(this SingleChoiceAction action, IObservable<T> afterNavigation,Func<ChoiceActionItem> selectedItem,params object[] selection)
-            => afterNavigation.Trigger(() => action.DoExecute(selectedItem(), selection));
+        public static IObservable<T> Trigger<T>(this SingleChoiceAction action, IObservable<T> afterExecuted,params object[] selection)
+            => action.Trigger(afterExecuted,() => action.SelectedItem,selection);
         
-        public static IObservable<T> Trigger<T>(this SingleChoiceAction action,Func<ChoiceActionItem> selectedItem, IObservable<T> afterNavigation,params object[] selection)
-            => afterNavigation.Trigger(() => action.DoExecute(selectedItem(), selection));
+        public static IObservable<T> Trigger<T>(this SingleChoiceAction action, IObservable<T> afterExecuted,Func<ChoiceActionItem> selectedItem,params object[] selection)
+            => afterExecuted.Trigger(() => action.DoExecute(selectedItem(), selection));
+        
+        public static IObservable<T> Trigger<T>(this SingleChoiceAction action,Func<ChoiceActionItem> selectedItem, IObservable<T> afterExecuted,params object[] selection)
+            => afterExecuted.Trigger(() => action.DoExecute(selectedItem(), selection));
 
         private static IObservable<T> Trigger<T>(this IObservable<T> afterExecuted, Action action)
-            => afterExecuted.Publish(source => source.Take(1)
-                .Merge(Observable.Timer(TimeSpan.Zero).Select(_ => default(T))
-                    .ObserveOnContext().Do(_ => action()).IgnoreElements()));
+            => afterExecuted.Merge(Observable.Defer(() => {
+                action();
+                return Observable.Empty<T>();
+            }),new SynchronizationContextScheduler(SynchronizationContext.Current!));
 
-        public static IObservable<T> Trigger<T>(this ParametrizedAction action, IObservable<T> afterNavigation)
-            => afterNavigation.Trigger(() => action.DoExecute(action.Value));
+        public static IObservable<T> Trigger<T>(this ParametrizedAction action, IObservable<T> afterExecuted)
+            => afterExecuted.Trigger(() => action.DoExecute(action.Value));
         
-        public static IObservable<T> Trigger<T>(this SimpleAction action, IObservable<T> afterNavigation,params object[] selection)
-            => afterNavigation.Trigger(() => action.DoExecute(selection));
+        public static IObservable<T> Trigger<T>(this SimpleAction action, IObservable<T> afterExecuted,params object[] selection)
+            => afterExecuted.Trigger(() => action.DoExecute(selection));
         
         public static IObservable<Unit> Trigger(this SimpleAction action, params object[] selection)
-            => action.Trigger(Observable.Empty<Unit>(),selection);
+            => action.Trigger(action.WhenExecuteCompleted().ToUnit(),selection);
 
     }
 }

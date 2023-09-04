@@ -26,6 +26,8 @@ namespace Xpand.Extensions.Reactive.Transform {
                 merge ??= _ => true;
                 return merge(arg) ? secondSelector(arg).IgnoreElements().ConcatIgnoredValue(arg).Finally(() => {}) : arg.Observe();
             });
+        public static IObservable<T> ConcatIgnored<T, T2>(this IObservable<T> source, IObservable<T2> secondSelector)
+            => source.ConcatIgnored(_ => secondSelector);
         public static IObservable<T> ConcatIgnored<T>(this IObservable<T> source,Action<T> action,Func<T,bool> merge=null)
             => source.SelectMany(arg => {
                 merge ??= _ => true;

@@ -5,11 +5,13 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.SystemModule;
 using DevExpress.Persistent.Validation;
 using Fasterflect;
 using Xpand.Extensions.AppDomainExtensions;
+using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
@@ -27,6 +29,11 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             GridListEditorType = AppDomain.CurrentDomain.GetAssemblyType("DevExpress.ExpressApp.Win.Editors.GridListEditor");
         }
 
+        public static IObservable<object> WhenObjects(this ListView listView) 
+            => listView.Objects().ToNowObservable()
+                .MergeToObject(listView.CollectionSource.WhenCollectionChanged()
+                    .SelectMany(_ => listView.Objects())).Take(1);
+        
         public static IObservable<object> SelectObject(this ListView listView, params object[] objects)
             => listView.SelectObject<object>(objects);
         
@@ -121,6 +128,18 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<T> CurrentObjectChanged<T>(this IObservable<T> source) where T:View 
             => source.SelectMany(item => item.WhenCurrentObjectChanged());
 
+        public static IObservable<object> WhenSelectedObjects(this View view) 
+            => view.WhenSelectionChanged().SelectMany(_ => view.SelectedObjects.Cast<object>())
+                .StartWith(view.SelectedObjects.Cast<object>());
+        
+        public static IObservable<Frame> ToFrame(this IObservable<DashboardViewItem> source)
+            => source.Select(item => item.Frame);
+        
+        public static (ITypeInfo ObjectTypeInfo, object) CurrentObjectInfo(this View view) 
+            => (view.ObjectTypeInfo,view.ObjectSpace.GetKeyValue(view.CurrentObject));
+        
+        public static IObservable<Frame> ToEditFrame(this IObservable<ListView> source) 
+            => source.Select(view => view.EditFrame);
         public static IObservable<T> WhenCurrentObjectChanged<T>(this T view) where T:View 
             => view.WhenViewEvent(nameof(View.CurrentObjectChanged)).To(view);
 

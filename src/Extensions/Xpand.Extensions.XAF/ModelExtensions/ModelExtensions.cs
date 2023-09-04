@@ -11,6 +11,10 @@ namespace Xpand.Extensions.XAF.ModelExtensions {
                 IModelDashboardView => DevExpress.ExpressApp.ViewType.DashboardView,
                 _ => throw new NotImplementedException(view.GetType().FullName)
             };
+            
+        public static bool Is(this IModelView modelView,ViewType viewType) 
+            => viewType == DevExpress.ExpressApp.ViewType.Any || (viewType == DevExpress.ExpressApp.ViewType.DetailView ? modelView is IModelDetailView :
+                viewType == DevExpress.ExpressApp.ViewType.ListView ? modelView is IModelListView : modelView is IModelDashboardView);
 
         public static bool Is(this IModelObjectView view, ViewType viewType) 
             => view is IModelDetailView && viewType == DevExpress.ExpressApp.ViewType.DetailView ||

@@ -561,7 +561,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => objectSpace.WhenEvent(nameof(IObjectSpace.Disposed)).ToUnit();
 
         public static IObservable<IObjectSpace> WhenModifyChanged(this IObjectSpace objectSpace) 
-            => objectSpace.WhenEvent(nameof(IObjectSpace.ModifiedChanged)).To(objectSpace);
+            => objectSpace.WhenEvent(nameof(IObjectSpace.ModifiedChanged)).To(objectSpace)
+                .TakeUntil(objectSpace.WhenDisposed());
 
         public static IObservable<IObjectSpace> WhenModifyChanged(this IObservable<IObjectSpace> source) 
             => source.SelectMany(item => item.WhenModifyChanged());
