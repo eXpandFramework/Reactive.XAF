@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.CloneMemberValue</id>
-    <version>4.231.4.1</version>
+    <version>4.231.5.0</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -15,19 +15,19 @@
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, CloneMemberValue, 23.1.5</tags>
     <dependencies>
       <group targetFramework="netstandard2.0">
-        <dependency id="Xpand.VersionConverter" version="4.231.4.1" />
+        <dependency id="Xpand.VersionConverter" version="4.231.5.0" />
       </group>
       <group targetFramework="net6.0">
-        <dependency id="Xpand.Extensions.Reactive" version="4.231.4.1" />
-        <dependency id="Xpand.XAF.Modules.Reactive" version="4.231.4.1" />
-        <dependency id="Xpand.Extensions" version="4.231.4.1" />
+        <dependency id="Xpand.Extensions.Reactive" version="4.231.5.0" />
+        <dependency id="Xpand.XAF.Modules.Reactive" version="4.231.5.0" />
+        <dependency id="Xpand.Extensions" version="4.231.5.0" />
         <dependency id="DevExpress.ExpressApp" version="23.1.5" />
         <dependency id="System.Reactive" version="5.0" />
         <dependency id="Fasterflect.Xpand" version="2.0.7" />
         <dependency id="System.Text.Json" version="7.0.2" />
         <dependency id="System.Threading.Tasks.Dataflow" version="7.0" />
         <dependency id="Xpand.Patcher" version="3.0.17.0" />
-        <dependency id="Xpand.VersionConverter" version="4.231.4.1" />
+        <dependency id="Xpand.VersionConverter" version="4.231.5.0" />
       </group>
     </dependencies>
   </metadata>
