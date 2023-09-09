@@ -60,7 +60,7 @@ namespace Xpand.XAF.Modules.Reactive.Extensions{
 
 
         public static IObservable<T> Handle<T>(this Exception exception, Func<Exception, IObservable<T>> exceptionSelector = null) 
-            => exception is WarningException ? default(T).Observe() : exceptionSelector != null ? exceptionSelector(exception) : Observable.Throw<T>(exception);
+            => exception is WarningException ? default(T).Observe() : exceptionSelector != null ? exceptionSelector(exception) : exception.Throw<T>();
 
         
         public static IObservable<T> HandleException<T>(this IObservable<T> source,Func<Exception,IObservable<T>> exceptionSelector=null) 
@@ -74,7 +74,7 @@ namespace Xpand.XAF.Modules.Reactive.Extensions{
                     });
                 }
                 return result.SelectMany(_ => exception is WarningException ? default(T).Observe() :
-                    exceptionSelector != null ? exceptionSelector(exception) : Observable.Throw<T>(exception));
+                    exceptionSelector != null ? exceptionSelector(exception) : exception.Throw<T>());
             });
 
         public static IObservable<ListChangedEventArgs> WhenListChanged<T>(this BindingListBase<T> listBase) 

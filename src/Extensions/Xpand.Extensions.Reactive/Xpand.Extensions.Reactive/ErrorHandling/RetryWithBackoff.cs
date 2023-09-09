@@ -3,6 +3,7 @@ using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using Xpand.Extensions.Reactive.Filter;
+using Xpand.Extensions.Reactive.Transform;
 
 namespace Xpand.Extensions.Reactive.ErrorHandling {
     public static partial class ErrorHandling {
@@ -56,7 +57,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling {
             var attempt = 0;
             var pipeline = Observable.Defer(() => (attempt++ == 0 ? source : source.DelaySubscription(strategy(attempt - 1), scheduler))
                 .Select(Notification.CreateOnNext)
-                .Catch((Exception ex) => retryOnError(ex) ? Observable.Throw<Notification<T>>(ex) : Observable.Return(Notification.CreateOnError<T>(ex))));
+                .Catch((Exception ex) => retryOnError(ex) ? ex.Throw<Notification<T>>() : Observable.Return(Notification.CreateOnError<T>(ex))));
             pipeline = retryCount.HasValue ? pipeline.Retry(retryCount.Value) : pipeline.Retry();
             return pipeline.Dematerialize();
         }

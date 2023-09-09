@@ -76,8 +76,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => application.GetPlatform()==Platform.Web?Task.Run(execute).Result.Observe():Observable.FromAsync(execute);
         
         public static IObservable<Unit> LogonUser(this XafApplication application,object userKey) 
-            => SecurityExtensions.AuthenticateSubject.Where(_ => _.authentication== application.Security.GetPropertyValue("Authentication"))
-                .Do(_ => _.args.SetInstance(_ => userKey)).SelectMany(_ => application.WhenLoggedOn().Take(1)).ToUnit()
+            => SecurityExtensions.AuthenticateSubject.Where(t => t.authentication== application.Security.GetPropertyValue("Authentication"))
+                .Do(t => t.args.SetInstance(_ => userKey)).SelectMany(_ => application.WhenLoggedOn().Take(1)).ToUnit()
                 .Merge(Unit.Default.Observe().Do(_ => application.Logon()).IgnoreElements());
 
         public static IObservable<TSource> BufferUntilCompatibilityChecked<TSource>(this XafApplication application,IObservable<TSource> source) 
@@ -91,7 +91,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         
         public static IObservable<XafApplication> WhenModule(this IObservable<XafApplication> source, Type moduleType) 
-            => source.Where(_ => _.Modules.FindModule(moduleType)!=null);
+            => source.Where(a => a.Modules.FindModule(moduleType)!=null);
 
         public static IObservable<Frame> WhenFrameCreated(this XafApplication application,TemplateContext templateContext=default)
             => application.WhenEvent<FrameCreatedEventArgs>(nameof(XafApplication.FrameCreated)).Select(e => e.Frame)
@@ -117,17 +117,17 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .Select(controller => controller);
 
         public static IObservable<Controller> ToController(this IObservable<Window> source,params string[] names) 
-            => source.SelectMany(_ => _.Controllers.Cast<Controller>().Where(controller =>
+            => source.SelectMany(window => window.Controllers.Cast<Controller>().Where(controller =>
                 names.Contains(controller.Name))).Select(controller => controller);
 
         
         public static IObservable<ActionBaseEventArgs> WhenActionExecuted<TController,TAction>(
             this XafApplication application, Func<TController, TAction> action) where TController : Controller where TAction:ActionBase
-            => application.WhenFrameCreated().ToController<TController>().SelectMany(_ => action(_).WhenExecuted());
+            => application.WhenFrameCreated().ToController<TController>().SelectMany(controller => action(controller).WhenExecuted());
         
         public static IObservable<SimpleActionExecuteEventArgs> WhenSimpleActionExecuted<TController>(
             this XafApplication application, Func<TController, SimpleAction> action) where TController : Controller 
-            => application.WhenFrameCreated().ToController<TController>().SelectMany(_ => action(_).WhenExecuted());
+            => application.WhenFrameCreated().ToController<TController>().SelectMany(controller => action(controller).WhenExecuted());
 
         public static IObservable<ActionBaseEventArgs> WhenActionExecuted(this XafApplication application,params string[] actions) 
             => application.WhenFrameCreated().SelectMany(window => window.Actions(actions)).WhenExecuted();
@@ -140,11 +140,11 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         
         public static IObservable<(TAction action, CancelEventArgs e)> WhenActionExecuting<TController,TAction>(
             this XafApplication application, Func<TController, TAction> action) where TController : Controller where TAction:ActionBase 
-            => application.WhenFrameCreated().ToController<TController>().SelectMany(_ => action(_).WhenExecuting());
+            => application.WhenFrameCreated().ToController<TController>().SelectMany(controller => action(controller).WhenExecuting());
         
         public static IObservable<ActionBaseEventArgs> WhenActionExecuteCompleted<TController,TAction>(
             this XafApplication application, Func<TController, TAction> action) where TController : Controller where TAction:ActionBase
-            => application.WhenFrameCreated().ToController<TController>().SelectMany(_ => action(_).WhenExecuteCompleted());
+            => application.WhenFrameCreated().ToController<TController>().SelectMany(controller => action(controller).WhenExecuteCompleted());
 
         public static IObservable<Window> WhenWindowCreated(this XafApplication application,bool isMain=false,bool emitIfMainExists=true) {
             var windowCreated = application.WhenFrameCreated().Select(frame => frame).OfType<Window>();
@@ -158,7 +158,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .Select(window => window).Take(1);
         
         public static IObservable<Window> WhenPopupWindowCreated(this XafApplication application) 
-            => application.WhenFrameCreated(TemplateContext.PopupWindow).Where(_ => _.Application==application).Cast<Window>();
+            => application.WhenFrameCreated(TemplateContext.PopupWindow).Where(frame => frame.Application==application).Cast<Window>();
         
         public static void AddObjectSpaceProvider(this XafApplication application, params IObjectSpaceProvider[] objectSpaceProviders) 
             => application.WhenCreateCustomObjectSpaceProvider()
@@ -251,14 +251,14 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         
         public static IObservable<ListView> ToListView(this IObservable<(XafApplication application, ListViewCreatedEventArgs e)> source) 
-            => source.Select(_ => _.e.ListView);
+            => source.Select(t => t.e.ListView);
 
         
         public static IObservable<TView> ToObjectView<TView>(this IObservable<(ObjectView view, EventArgs e)> source) where TView:View 
-            => source.Where(_ => _.view is TView).Select(_ => _.view).Cast<TView>();
+            => source.Where(t => t.view is TView).Select(t => t.view).Cast<TView>();
 
         public static IObservable<DetailView> ToDetailView(this IObservable<(XafApplication application, DetailViewCreatedEventArgs e)> source) 
-            => source.Select(_ => _.e.View);
+            => source.Select(t => t.e.View);
 
         
         public static IObservable<Frame> WhenViewOnFrame(this IObservable<XafApplication> source, Type objectType = null,
@@ -312,7 +312,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .Where(t => !objectTypes.Any() || objectTypes.Contains(application.Model.Views[t.source.ViewID].AsObjectView.ModelClass.TypeInfo.Type));
 
         public static IObservable<(XafApplication application, DetailViewCreatedEventArgs e)> WhenDetailViewCreated(this XafApplication application,Type objectType) 
-            => application.WhenDetailViewCreated().Where(_ => objectType?.IsAssignableFrom(_.e.View.ObjectTypeInfo.Type)??true);
+            => application.WhenDetailViewCreated().Where(t => objectType?.IsAssignableFrom(t.e.View.ObjectTypeInfo.Type)??true);
 
         
         public static IObservable<(XafApplication application, ListViewCreatingEventArgs args)> WhenListViewCreating(this IObservable<XafApplication> source,Type objectType=null,bool? isRoot=null) 
@@ -947,7 +947,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         private static IObservable<T[]> Commit<T>(this IObjectSpace objectSpace,Func<IObjectSpace, IObservable<T>> commit, string caller, IObserver<T[]> observer,bool validate) 
             => commit(objectSpace).BufferUntilCompleted()
                 .Timeout(TimeSpan.FromMinutes(10))
-                .Catch<T[], TimeoutException>(_ => Observable.Throw<T[]>(new TimeoutException(caller)))
+                .Catch<T[], TimeoutException>(_ => new TimeoutException(caller).Throw<T[]>())
                 .Do(arg => {
                     if (validate) {
                         objectSpace.CommitChangesAndValidate();

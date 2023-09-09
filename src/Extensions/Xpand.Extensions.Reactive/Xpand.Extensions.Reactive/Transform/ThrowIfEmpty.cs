@@ -10,6 +10,6 @@ namespace Xpand.Extensions.Reactive.Transform {
     }
     public static partial class Transform {
         public static IObservable<T> ThrowIfEmpty<T>(this IObservable<T> source,[CallerMemberName]string caller="")
-            => source.SwitchIfEmpty(Observable.Defer(() => Observable.Throw<T>(new SequenceIsEmptyException($"source is empty {caller}"))));
+            => source.SwitchIfEmpty(Observable.Defer(() => new SequenceIsEmptyException($"source is empty {caller}").Throw<T>()));
     }
 }

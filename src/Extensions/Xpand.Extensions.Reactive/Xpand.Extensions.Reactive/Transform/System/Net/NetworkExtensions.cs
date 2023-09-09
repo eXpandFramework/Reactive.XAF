@@ -137,14 +137,14 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net {
         public static IObservable<HttpResponseMessage> EnsureSuccessStatusCode(this IObservable<HttpResponseMessage> source) 
             => source.If(message => !message.IsSuccessStatusCode, message => Observable.If(message.IsJsonResponse,message.WhenJsonDocument())
                 .Merge(Observable.If(() => !message.IsJsonResponse(),Observable.FromAsync(() => message.Content.ReadAsStringAsync())
-                    .SelectMany(content => Observable.Throw<(HttpResponseMessage[] objects, JsonDocument document)>(new HttpResponseException($"{message.StatusCode}, {message.ReasonPhrase}, {content}", message)))))
+                    .SelectMany(content => new HttpResponseException($"{message.StatusCode}, {message.ReasonPhrase}, {content}", message).Throw<(HttpResponseMessage[] objects, JsonDocument document)>())))
                 .SelectMany(t => t.objects),message => message.Observe());
 
         private static IObservable<(HttpResponseMessage[] objects, JsonDocument document)> WhenJsonDocument(this HttpResponseMessage message) 
             => Observable.FromAsync(() => message.Content.ReadAsStreamAsync()).WhenJsonDocument(document =>
-                    Observable.Throw<HttpResponseMessage>(new HttpResponseException(document.RootElement.ToString(), message)))
+                    new HttpResponseException(document.RootElement.ToString(), message).Throw<HttpResponseMessage>())
                 .Catch<(HttpResponseMessage[] objects, JsonDocument document),Exception>(exception 
-                    => Observable.Throw<(HttpResponseMessage[] objects, JsonDocument document)>(new HttpResponseException($"{message.StatusCode}, {message.ReasonPhrase}, {exception}", message)));
+                    => new HttpResponseException($"{message.StatusCode}, {message.ReasonPhrase}, {exception}", message).Throw<(HttpResponseMessage[] objects, JsonDocument document)>());
 
 
         public static IObservable<(T[] objects, JsonDocument document)> WhenResponseDocument<T>(this HttpClient client,

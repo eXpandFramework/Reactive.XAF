@@ -2,6 +2,7 @@
 using System.Reactive.Linq;
 using System.Threading;
 using Xpand.Extensions.Reactive.Conditional;
+using Xpand.Extensions.Reactive.Transform;
 
 namespace Xpand.Extensions.Reactive.Utility {
     public static partial class Utility {
@@ -10,7 +11,7 @@ namespace Xpand.Extensions.Reactive.Utility {
 
         public static IObservable<T> ObserveOnContext<T>(this IObservable<T> source, bool throwIfNull) 
             => source.If(_ => throwIfNull && SynchronizationContext.Current == null,
-                () => Observable.Throw<T>(new NullReferenceException(nameof(SynchronizationContext))), () => source);
+                () => new NullReferenceException(nameof(SynchronizationContext)).Throw<T>(), () => source);
 
         public static IObservable<T> ObserveOnContext<T>(this IObservable<T> source) {
             var synchronizationContext = SynchronizationContext.Current;

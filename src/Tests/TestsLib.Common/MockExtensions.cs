@@ -57,8 +57,8 @@ namespace Xpand.TestsLib.Common {
                 if (_mockResponse.Object.StatusCode != HttpStatusCode.OK) {
                     mockRequest.Setup(request => request.GetResponseAsync())
                         .Returns(() => timer.SelectMany(_ =>
-                            Observable.Throw<WebResponse>((new WebException("", null, WebExceptionStatus.ReceiveFailure,
-                                _mockResponse.Object)))).ToTask());    
+                            new WebException("", null, WebExceptionStatus.ReceiveFailure,
+                                _mockResponse.Object).Throw<WebResponse>()).ToTask());    
                 }
                 else {
                     mockRequest.Setup(request => request.GetResponseAsync())
