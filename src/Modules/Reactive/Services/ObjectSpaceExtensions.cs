@@ -152,12 +152,12 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             }
             return objectSpace.WhenObjectChanged()
                 .Where(t => objectType.IsInstanceOfType(t.e.Object) && properties.PropertiesMatch(t))
-                .Select(_ => _.e.Object);
+                .Select(t => t.e.Object);
         }
         public static IObservable<object> WhenModifiedObjects(this IObjectSpace objectSpace, Type[] objectTypes, params string[] properties) 
             => objectSpace.WhenObjectChanged()
                 .Where(t =>  properties.PropertiesMatch(t)&&objectTypes.Any(type => type.IsInstanceOfType(t.e.Object)))
-                .Select(_ => _.e.Object);
+                .Select(t => t.e.Object);
 
         private static bool PropertiesMatch(this string[] properties, (IObjectSpace objectSpace, ObjectChangedEventArgs e) t) 
             => !properties.Any()||(t.e.MemberInfo != null && properties.Contains(t.e.MemberInfo.Name) ||
@@ -322,13 +322,13 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<T> ModifiedExistingObject<T>(this XafApplication application,
             Func<(IObjectSpace objectSpace,ObjectChangedEventArgs e),bool> filter = null){
             filter ??= (_ => true);
-            return application.AllModifiedObjects<T>(_ => filter(_) && !_.objectSpace.IsNewObject(_.e.Object));
+            return application.AllModifiedObjects<T>(t => filter(t) && !t.objectSpace.IsNewObject(t.e.Object));
         }
 
         public static IObservable<T> ModifiedNewObject<T>(this XafApplication application,
             Func<(IObjectSpace objectSpace,ObjectChangedEventArgs e),bool> filter = null){
             filter ??= (_ => true);
-            return application.AllModifiedObjects<T>(_ => filter(_) && _.objectSpace.IsNewObject(_.e.Object));
+            return application.AllModifiedObjects<T>(t => filter(t) && t.objectSpace.IsNewObject(t.e.Object));
         }
 
         public static IObservable<(IObjectSpace objectSpace, T[] objects)> DeletedObjects<T>(this XafApplication application) where T : class 
@@ -400,7 +400,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
 
         public static IObservable<T> WhenObjectCommitted<T>(this IObservable<T> source) where T:IObjectSpaceLink 
-            => source.SelectMany(_ => _.ObjectSpace.WhenCommitted().Take(1).Select(tuple => _));
+            => source.SelectMany(link => link.ObjectSpace.WhenCommitted().Take(1).Select(_ => link));
 
         public static IObservable<object> WhenNewObjectCreated(
             this IObjectSpace objectSpace, Type objectSpaceLinkType = null)

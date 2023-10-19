@@ -9,12 +9,6 @@ namespace Xpand.XAF.Modules.Blazor.Editors {
     public class ComponentAdapter:ComponentAdapterBase {
         
         private readonly Func<RenderFragment> _fragmentFactory;
-
-        protected ComponentAdapter() {
-            ((IComponentModel)DisplayTextModel).Changed += (sender, args) => {
-
-            };
-        }
         
         public ComponentAdapter(Func<RenderFragment> fragmentFactory) => _fragmentFactory = fragmentFactory;
         public override void SetAllowEdit(bool allowEdit) { }

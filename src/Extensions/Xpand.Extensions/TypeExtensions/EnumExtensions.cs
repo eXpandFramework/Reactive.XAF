@@ -65,6 +65,9 @@ namespace Xpand.Extensions.TypeExtensions {
             }
             return stringBuilder.ToString();
         }
+        public static bool HasFlags(this Enum flag,params Enum[] values) 
+            => values.All(flag.HasFlag);
+
         public static IEnumerable<T> GetIndividualValues<T>(this Enum myEnum) where T : struct {
             return myEnum
                 .ToString()

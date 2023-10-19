@@ -7,6 +7,9 @@ using DevExpress.ExpressApp.Layout;
 
 namespace Xpand.Extensions.XAF.ViewExtensions {
     public static partial class ViewExtensions {
+        public static IEnumerable<DashboardViewItem> DashboardViewItems(this CompositeView compositeView,params Type[] objectTypes) 
+            => compositeView.GetItems<DashboardViewItem>().Where(item => item.InnerView.Is(objectTypes));
+        
         public static IEnumerable<TControl> Controls<TControl>(CompositeView compositeView) 
             => compositeView.GetItems<ControlViewItem>().Select(item => item.Control)
                 .OfType<TControl>();

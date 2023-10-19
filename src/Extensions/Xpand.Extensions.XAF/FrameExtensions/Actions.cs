@@ -29,7 +29,7 @@ namespace Xpand.Extensions.XAF.FrameExtensions{
         public static void ExecuteRefreshAction(this Frame frame) => frame.GetController<RefreshController>().RefreshAction.DoExecute();
         public static object ParentObject(this Frame frame) => frame.ParentObject<object>() ;
         public static T ParentObject<T>(this Frame frame) where T : class
-            => frame is NestedFrame nestedFrame ? nestedFrame.View.CurrentObject as T : frame.View.CurrentObject as T;
+            => frame.ToNestedFrame().ViewItem.CurrentObject as T;
         
         public static bool ParentIsNull(this Frame frame)  => frame.ParentObject<object>()==null;
         public static NestedFrame AsNestedFrame(this Frame frame) => frame.As<NestedFrame>(); 

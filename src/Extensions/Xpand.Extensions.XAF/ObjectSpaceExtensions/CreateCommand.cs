@@ -1,5 +1,7 @@
 ﻿using System.Data;
 using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.Security;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Xpand.Extensions.XAF.ObjectSpaceExtensions {
     public static partial class ObjectSpaceExtensions {

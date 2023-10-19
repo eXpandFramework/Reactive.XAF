@@ -28,7 +28,7 @@ using Xpand.XAF.Modules.Reactive.Services.Controllers;
 namespace Xpand.XAF.Modules.Reactive.Services{
     public static class FrameExtensions{
         public static IObservable<TFrame> WhenModule<TFrame>(this IObservable<TFrame> source, Type moduleType) where TFrame : Frame 
-            => source.Where(_ => _.Application.Modules.FindModule(moduleType) != null);
+            => source.Where(frame => frame.Application.Modules.FindModule(moduleType) != null);
 
         public static IObservable<TFrame> MergeViewCurrentObjectChanged<TFrame>(this IObservable<TFrame> source) where TFrame : Frame
             => source.SelectMany(frame => frame.View.WhenCurrentObjectChanged().WhenNotDefault(view => view.CurrentObject)
@@ -51,12 +51,10 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             Type objectType = null, Nesting nesting = Nesting.Any, bool? isPopupLookup = null) where TFrame : Frame 
             => source.SelectMany(frame => frame.View != null ? frame.Observe() : frame.WhenViewChanged().Select(_ => frame))
                 .Where(frame => frame.View.Is(viewType, nesting, objectType))
-                .Where(_ => {
-                    if (isPopupLookup.HasValue){
-                        var popupLookupTemplate = _.Template is ILookupPopupFrameTemplate;
-                        return isPopupLookup.Value ? popupLookupTemplate : !popupLookupTemplate;
-                    }
-                    return true;
+                .Where(frame => {
+                    if (!isPopupLookup.HasValue) return true;
+                    var popupLookupTemplate = frame.Template is ILookupPopupFrameTemplate;
+                    return isPopupLookup.Value ? popupLookupTemplate : !popupLookupTemplate;
                 });
 
         public static IObservable<View> CreateNewObject(this Window window)

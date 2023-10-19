@@ -938,6 +938,15 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 () => controller.FindNavigationItemByViewShortcut(new ViewShortcut(viewId, null)));
         }
         
+        public static IObservable<Frame> NavigateBack(this XafApplication application){
+            var viewNavigationController = application.MainWindow.GetController<ViewNavigationController>();
+            return viewNavigationController.NavigateBackAction
+                .Trigger(application.WhenFrame(Nesting.Root).OfType<Window>()
+                        .SelectMany(window => window.View.WhenControlsCreated().Take(1).To(window)),
+                    () => viewNavigationController.NavigateBackAction.Items.First())
+                .Select(window => window);
+        }
+        
         public static IObservable<ListPropertyEditor> WhenNestedFrame(this XafApplication application, Type parentObjectType,params Type[] objectTypes)
             => application.WhenFrame(parentObjectType,ViewType.DetailView).SelectUntilViewClosed(frame => frame.NestedListViews(objectTypes));
         

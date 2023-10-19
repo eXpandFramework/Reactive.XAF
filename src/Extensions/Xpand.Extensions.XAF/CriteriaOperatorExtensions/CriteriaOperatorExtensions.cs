@@ -6,6 +6,7 @@ using System.Reflection;
 using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
 using DevExpress.Persistent.Base;
+using Xpand.Extensions.ObjectExtensions;
 
 namespace Xpand.Extensions.XAF.CriteriaOperatorExtensions {
     public static partial class CriteriaOperatorExtensions {
@@ -35,7 +36,7 @@ namespace Xpand.Extensions.XAF.CriteriaOperatorExtensions {
         
         public static CriteriaOperator Combine(this CriteriaOperator criteriaOperator,string criteria,GroupOperatorType type=GroupOperatorType.And){
             var @operator = CriteriaOperator.Parse(criteria);
-            return criteriaOperator != null ? new GroupOperator(type, @operator, criteriaOperator) : @operator;
+            return !criteriaOperator.ReferenceEquals(null) ? new GroupOperator(type, @operator, criteriaOperator) : @operator;
         }
 
         public static CriteriaOperator ToCriteria(this LambdaExpression expression,Type objectType)

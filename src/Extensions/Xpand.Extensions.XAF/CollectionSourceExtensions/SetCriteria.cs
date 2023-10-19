@@ -11,6 +11,9 @@ namespace Xpand.Extensions.XAF.CollectionSourceExtensions {
         public static void SetCriteria(this CollectionSourceBase collectionSourceBase, string key, Type type, LambdaExpression lambda) 
             => collectionSourceBase.Criteria[key] = lambda.ToCriteria(type);
 
+        public static void SetCriteria(this CollectionSourceBase collectionSourceBase, LambdaExpression lambda,[CallerMemberName]string caller="") 
+            => collectionSourceBase.SetCriteria(caller,collectionSourceBase.ObjectTypeInfo.Type, lambda);
+        
         public static void SetCriteria(this CollectionSourceBase collectionSourceBase, Type type,LambdaExpression lambda,[CallerMemberName]string caller="") 
             => collectionSourceBase.SetCriteria(caller,type, lambda);
 

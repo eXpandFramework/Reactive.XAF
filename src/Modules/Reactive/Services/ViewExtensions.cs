@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -17,6 +18,7 @@ using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.TypeExtensions;
+using Xpand.Extensions.XAF.CollectionSourceExtensions;
 using Xpand.Extensions.XAF.DetailViewExtensions;
 using Xpand.Extensions.XAF.ObjectSpaceExtensions;
 using Xpand.Extensions.XAF.ViewExtensions;
@@ -32,7 +34,11 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<object> WhenObjects(this ListView listView) 
             => listView.Objects().ToNowObservable()
                 .MergeToObject(listView.CollectionSource.WhenCollectionChanged()
-                    .SelectMany(_ => listView.Objects())).Take(1);
+                    .SelectMany(_ => listView.Objects()))
+                .MergeToObject(listView.CollectionSource.WhenCriteriaApplied().SelectMany(@base => @base.Objects() ))
+                .MergeToObject(listView.Editor.WhenEvent(nameof(listView.Editor.DataSourceChanged)).To(listView.Editor.DataSource)
+                    .StartWith(listView.Editor.DataSource).WhenNotDefault()
+                    .Select(datasource => ((IEnumerable)datasource).Cast<object>()));
         
         public static IObservable<object> SelectObject(this ListView listView, params object[] objects)
             => listView.SelectObject<object>(objects);
@@ -44,6 +50,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         
         static IObservable<T> SelectObject<T>(this IObservable<ListView> source,params T[] objects) where T : class 
             => source.SelectMany(view => {
+                view.Application()
                 if (view.Editor.GetType().InheritsFrom(GridListEditorType)){
                     var gridView = view.Editor.GetPropertyValue("GridView");
                     return objects.Select(obj => {
@@ -186,8 +193,12 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .Merge(nestedEditors);
         }
 
+        
         public static IObservable<TView> When<TView>(this IObservable<TView> source,Type objectType=null,ViewType viewType=ViewType.Any,Nesting nesting=Nesting.Any) where TView:View 
             => source.Where(view =>view.Is(viewType,nesting,objectType ?? typeof(object)));
+        
+        public static IObservable<TView> When<TView>(this IObservable<TView> source,string viewId) where TView:View 
+            => source.Where(view =>view.Id==viewId);
 
         public static IObservable<TSource[]> RefreshObjectSpace<TSource>(this IObservable<TSource> source,View view) 
             => source.BufferUntilCompleted().ObserveOnContext().Do(_ => view.ObjectSpace.Refresh());

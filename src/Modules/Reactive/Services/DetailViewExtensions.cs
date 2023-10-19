@@ -8,10 +8,17 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.SystemModule;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.ObjectExtensions;
+using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
     public static class DetailViewExtensions{
+        public static IObservable<object> WhenViewItemControl<T>(this DetailView detailView) where T:ViewItem 
+            => detailView.GetItems<T>().ToNowObservable()
+                .SelectMany(editor => editor.WhenControlCreated().Select(propertyEditor => propertyEditor.Control).StartWith(editor.Control).WhenNotDefault())
+                .WhenNotDefault();
+        public static IObservable<object> WhenPropertyEditorControl(this DetailView detailView)
+            => detailView.WhenViewItemControl<PropertyEditor>();
         public static bool IsNewObject(this CompositeView compositeView)
             => compositeView.ObjectSpace.IsNewObject(compositeView.CurrentObject);
         public static IObservable<object> WhenTabControl(this DetailView detailView, Func<IModelTabbedGroup, bool> match=null)

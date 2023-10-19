@@ -74,13 +74,13 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
 
 					        return Observable.Never<ITraceEvent>();
 				        }))
-			        .TraceLogger(_ => _.Message)
+			        .TraceLogger(traceEvent => traceEvent.Message)
 			        .ToUnit();
 
         
         public static IObservable<TraceEvent> WhenTraceEvent<TLocation>(this XafApplication application, Expression<Func<TLocation, object>> expression, RXAction rxAction = RXAction.All){
             var name = expression.MemberExpressionName();
-            return application.WhenTraceEvent(typeof(TLocation), rxAction).Where(_ => _.Method == name);
+            return application.WhenTraceEvent(typeof(TLocation), rxAction).Where(traceEvent => traceEvent.Method == name);
         }
 
         
@@ -99,9 +99,9 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
                 .When(location, rxAction,methods);
 
         public static IObservable<ITraceEvent> When(this IObservable<ITraceEvent> source, Type location, RXAction rxAction,params string[] methods) 
-            => source.Where(_ => location == null || _.Location == location.Name)
-		        .Where(_ => !methods.Any() || methods.Contains(_.Method))
-		        .Where(_ => rxAction == RXAction.All || _.RXAction.HasAnyFlag(rxAction));
+            => source.Where(traceEvent => location == null || traceEvent.Location == location.Name)
+		        .Where(traceEvent => !methods.Any() || methods.Contains(traceEvent.Method))
+		        .Where(traceEvent => rxAction == RXAction.All || traceEvent.RXAction.HasAnyFlag(rxAction));
 
         
         public static IObservable<TraceEvent> WhenTraceOnSubscribeEvent(this XafApplication application, params string[] methods) 
@@ -135,10 +135,9 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
 
         private static IObservable<Unit> RegisterListener(this XafApplication application, ReactiveTraceListener reactiveTraceListener) 
             => application.Modules.WhenListChanged().SelectMany(_ => application.Modules.ToTraceSource().ToObservable(Transform.ImmediateScheduler))
-                .Do(_ => {
-                    if (!_.traceSource.Listeners.Contains(reactiveTraceListener)){
-                        _.traceSource.Listeners.Add(reactiveTraceListener);
-                    }
+                .Do(t => {
+                    if (t.traceSource.Listeners.Contains(reactiveTraceListener)) return;
+                    t.traceSource.Listeners.Add(reactiveTraceListener);
                 })
                 .ToUnit()
                 .Merge(application.ApplyModel( reactiveTraceListener));
@@ -227,7 +226,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
 
         public static IObservable<TraceEvent> SaveTraceEvent(this IObjectSpace objectSpace,
             IList<ITraceEvent> traceEventMessages, CriteriaOperator criteria){
-            var lastEvent = objectSpace.GetObjectsQuery<TraceEvent>().OrderByDescending(_ => _.Timestamp).FirstOrDefault();
+            var lastEvent = objectSpace.GetObjectsQuery<TraceEvent>().OrderByDescending(traceEvent => traceEvent.Timestamp).FirstOrDefault();
             foreach (var traceEventMessage in traceEventMessages.Where(e => objectSpace.IsObjectFitForCriteria(criteria,e))){
                 if (lastEvent != null && traceEventMessage.Key() == lastEvent.Key()){
                     lastEvent.Called++;
