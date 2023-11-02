@@ -7,13 +7,6 @@ using Xpand.Extensions.Reactive.Transform;
 namespace Xpand.Extensions.Reactive.Utility {
     public static partial class Utility {
         public static SynchronizationContextScheduler Scheduler(this SynchronizationContext context) => new(context);
-        
-        public static IObservable<T> Do<T>(this T self,Action execute) {
-            execute();
-            return self.Observe();
-        }
-
-        
 
         public static IObservable<T> DoAfter<T>(this T self,TimeSpan delay,Action execute) 
             => self.Observe().Delay(delay);

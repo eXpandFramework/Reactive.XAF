@@ -43,9 +43,9 @@
     <EmbeddedResource Include="Model.DesignedDiffs.xafml" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="23.1.5" />
-    <PackageReference Include="DevExpress.ExpressApp.Win.All" Version="23.1.5" />
-    <PackageReference Include="Xpand.XAF.Win.All" Version="4.231.5.0" />
+    <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="23.1.6" />
+    <PackageReference Include="DevExpress.ExpressApp.Win.All" Version="23.1.6" />
+    <PackageReference Include="Xpand.XAF.Win.All" Version="4.231.5.1" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="TestApplication.Module">

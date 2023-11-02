@@ -50,7 +50,6 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         
         static IObservable<T> SelectObject<T>(this IObservable<ListView> source,params T[] objects) where T : class 
             => source.SelectMany(view => {
-                view.Application()
                 if (view.Editor.GetType().InheritsFrom(GridListEditorType)){
                     var gridView = view.Editor.GetPropertyValue("GridView");
                     return objects.Select(obj => {
@@ -115,8 +114,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<(T view, CancelEventArgs e)> QueryCanChangeCurrentObject<T>(this IObservable<T> source) where T:View 
             => source.Cast<T>().SelectMany(view => view.WhenQueryCanChangeCurrentObject());
 
-        public static IObservable<T> WhenControlsCreated<T>(this T view) where T : View 
-            => view.WhenViewEvent(nameof(View.ControlsCreated));
+        public static IObservable<T> WhenControlsCreated<T>(this T view,bool emitExisting=false) where T : View 
+            =>emitExisting&&view.IsControlCreated?view.Observe(): view.WhenViewEvent(nameof(View.ControlsCreated));
 
         public static IObservable<T> WhenControlsCreated<T>(this IObservable<T> source) where T:View 
             => source.SelectMany(view => view.WhenViewEvent(nameof(View.ControlsCreated)));

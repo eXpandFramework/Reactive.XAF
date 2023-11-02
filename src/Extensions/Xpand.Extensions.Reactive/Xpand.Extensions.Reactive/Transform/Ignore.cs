@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 
 namespace Xpand.Extensions.Reactive.Transform {
     public static partial class Transform {
-        /// <summary>
-        /// Ignores elements having a specific value, until this value has
-        /// been repeated contiguously for a specific duration.
-        /// </summary>
+        
         public static IObservable<T> IgnoreNonEstablishedContiguousValue<T>(
             this IObservable<T> source, T value, TimeSpan dueTimeUntilEstablished,
             IEqualityComparer<T> comparer = default, IScheduler scheduler = default) 
@@ -22,8 +20,5 @@ namespace Xpand.Extensions.Reactive.Transform {
                     })
                     .Where(_ => stopwatch == null || stopwatch.Elapsed >= dueTimeUntilEstablished);
             });
-
-        public static IObservable<T[]> WhenCompleted<T>(this IObservable<T> source) 
-            => source.IgnoreElements().Select(_ => Array.Empty<T>()).Concat(Array.Empty<T>().Observe());
     }
 }

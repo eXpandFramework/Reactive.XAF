@@ -30,6 +30,8 @@ using Xpand.XAF.Modules.Reactive.Services.Controllers;
 namespace Xpand.XAF.Modules.Reactive.Services.Actions{
     
     public static partial class ActionsService {
+        public static IObservable<T> WhenAvailable<T>(this IObservable<T> source) where T:ActionBase 
+            => source.Where(action => action.Available());
 
         public static IObservable<T> SetImage<T,TObject>(this IObservable<T> source, CommonImage startImage,
             CommonImage replaceImage, Expression<Func<TObject, bool>> lambda) where T : ActionBase
@@ -310,8 +312,10 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
         public static IObservable<ActionBaseEventArgs> WhenExecuted<TAction>(this TAction action) where TAction : ActionBase 
             => action.WhenEvent<ActionBaseEventArgs>(nameof(ActionBase.Executed)).TakeUntilDisposed(action);
 
-        public static IObservable<ItemsChangedEventArgs> WhenItemsChanged(this SingleChoiceAction action) 
-            => action.WhenEvent<ItemsChangedEventArgs>(nameof(SingleChoiceAction.ItemsChanged)).TakeUntil(action.WhenDisposed());
+        public static IObservable<ItemsChangedEventArgs> WhenItemsChanged(this SingleChoiceAction action,ChoiceActionItemChangesType? changesType=null) 
+            => action.WhenEvent<ItemsChangedEventArgs>(nameof(SingleChoiceAction.ItemsChanged))
+                .Where(e =>changesType==null||e.ChangedItemsInfo.Any(pair => pair.Value==changesType) ).TakeUntil(action.WhenDisposed());
+        
         public static IObservable<ActionBaseEventArgs> WhenExecuteCompleted<TAction>(this TAction action) where TAction : ActionBase 
             => action.WhenEvent<ActionBaseEventArgs>(nameof(ActionBase.ExecuteCompleted)).TakeUntilDisposed(action);
         

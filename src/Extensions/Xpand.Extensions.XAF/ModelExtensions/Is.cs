@@ -1,6 +1,7 @@
 ﻿using System;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
+using DevExpress.ExpressApp.SystemModule;
 
 namespace Xpand.Extensions.XAF.ModelExtensions {
     public partial class ModelExtensions {

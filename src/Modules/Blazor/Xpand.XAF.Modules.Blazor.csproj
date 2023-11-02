@@ -34,8 +34,8 @@
     <PackageReference Include="System.CodeDom" Version="6.0" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="6.0" />
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
-    <PackageReference Include="DevExpress.ExpressApp.Blazor" Version="23.1.5" />
-    <PackageReference Include="DevExpress.ExpressApp.Validation.Blazor" Version="23.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp.Blazor" Version="23.1.6" />
+    <PackageReference Include="DevExpress.ExpressApp.Validation.Blazor" Version="23.1.6" />
     <PackageReference Include="System.ServiceModel.NetTcp" Version="4.10.2" />
     <PackageReference Include="System.ServiceModel.Http" Version="4.10.2" />
     <PackageReference Include="System.ServiceModel.Security" Version="4.10.2" />

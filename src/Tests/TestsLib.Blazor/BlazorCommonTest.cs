@@ -32,6 +32,7 @@ namespace Xpand.TestsLib.Blazor {
 		}
 
 		protected void CleanBlazorEnvironment() {
+			Await(() => WebHost.StopAsync());
 			WebHost?.Dispose();
 			typeof(ValueManagerContext).Field("storageHolder", Flags.StaticPrivate).SetValue(null,
 				typeof(AsyncLocal<>).MakeGenericType(AppDomain.CurrentDomain.GetAssemblyType(

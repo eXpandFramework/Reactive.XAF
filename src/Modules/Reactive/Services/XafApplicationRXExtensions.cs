@@ -146,6 +146,9 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             this XafApplication application, Func<TController, TAction> action) where TController : Controller where TAction:ActionBase
             => application.WhenFrameCreated().ToController<TController>().SelectMany(controller => action(controller).WhenExecuteCompleted());
 
+        public static IObservable<Window> WhenMainWindowCreated(this XafApplication application,  bool emitIfMainExists = true) 
+            => application.WhenWindowCreated(true, emitIfMainExists);
+        
         public static IObservable<Window> WhenWindowCreated(this XafApplication application,bool isMain=false,bool emitIfMainExists=true) {
             var windowCreated = application.WhenFrameCreated().Select(frame => frame).OfType<Window>();
             return isMain ? emitIfMainExists && application.MainWindow != null ? application.MainWindow.Observe().ObserveOn(SynchronizationContext.Current!)

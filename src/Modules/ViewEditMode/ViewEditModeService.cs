@@ -33,24 +33,24 @@ namespace Xpand.XAF.Modules.ViewEditMode{
                 .ToController("DevExpress.ExpressApp.Web.SystemModule.WebModificationsController")
                 .Activated()
                 .When(ViewType.DetailView)
-                .Where(_ => {
-                    var model = ((IModelDetailViewViewEditMode) _.Frame.View.Model);
+                .Where(controller => {
+                    var model = ((IModelDetailViewViewEditMode) controller.Frame.View.Model);
                     return model.ViewEditMode == DevExpress.ExpressApp.Editors.ViewEditMode.View && model.LockViewEditMode;
                 })
                 .Publish().RefCount();
 
             var editAction = webModificationsController
-                .Select(_ => _.Actions.First(action => action.Id == "SwitchToEditMode")).Cast<SimpleAction>()
+                .Select(controller => controller.Actions.First(action => action.Id == "SwitchToEditMode")).Cast<SimpleAction>()
                 .Publish().RefCount();
             editAction.SelectMany(action => action.Enabled.WhenResultValueChanged()).Subscribe();
-            var unLockEdit = editAction.SelectMany(_ => _.WhenExecuting()).TakeFirst()
-                .Select(_ => {
-                    ((IModelDetailViewViewEditMode) _.action.Controller.Frame.View.Model).LockViewEditMode = false;
+            var unLockEdit = editAction.SelectMany(action => action.WhenExecuting()).TakeFirst()
+                .Select(t => {
+                    ((IModelDetailViewViewEditMode) t.action.Controller.Frame.View.Model).LockViewEditMode = false;
                     return Unit.Default;
                 });
-            var lockEdit = editAction.SelectMany(_ => _.WhenExecuteCompleted()).Select(_ => _.Action).TakeFirst()
-                .Select(_ => {
-                    ((IModelDetailViewViewEditMode) _.Controller.Frame.View.Model).LockViewEditMode = true;
+            var lockEdit = editAction.SelectMany(action => action.WhenExecuteCompleted()).Select(e => e.Action).TakeFirst()
+                .Select(actionBase => {
+                    ((IModelDetailViewViewEditMode) actionBase.Controller.Frame.View.Model).LockViewEditMode = true;
                     return Unit.Default;
                 });
             return unLockEdit.Merge(lockEdit)
@@ -59,8 +59,8 @@ namespace Xpand.XAF.Modules.ViewEditMode{
 
         public static IObservable<DetailView> WhenViewEditModeAssigned(this XafApplication application) =>
             application.WhenDetailViewCreated()
-                .Select(_ => {
-                    var detailView = _.e.View;
+                .Select(t => {
+                    var detailView = t.e.View;
                     var viewEditMode = ((IModelDetailViewViewEditMode) detailView.Model).ViewEditMode;
                     if (viewEditMode != null){
                         detailView.ViewEditMode = viewEditMode.Value;
@@ -74,9 +74,9 @@ namespace Xpand.XAF.Modules.ViewEditMode{
         public static IObservable<DetailView> WhenViewEditModeChanged(this XafApplication application) =>
             application.WhenViewEditModeAssigned()
                 .ViewEditModeChanging()
-                .Select(_ => {
-                    _.e.Cancel = ((IModelDetailViewViewEditMode) _.detailView.Model).LockViewEditMode;
-                    return _.detailView;
+                .Select(t => {
+                    t.e.Cancel = ((IModelDetailViewViewEditMode) t.detailView.Model).LockViewEditMode;
+                    return t.detailView;
                 })
                 .TraceViewEditModeModule(view => view.Id);
     }
