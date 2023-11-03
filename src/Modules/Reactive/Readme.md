@@ -1,6 +1,6 @@
-![](http://185-229-225-45.cloud-xip.com/nuget/v/Xpand.XAF.Modules.Reactive.svg?&style=flat) ![](http://185-229-225-45.cloud-xip.com/nuget/dt/Xpand.XAF.Modules.Reactive.svg?&style=flat)
+![](https://img.shields.io/nuget/v/Xpand.XAF.Modules.Reactive.svg?&style=flat) ![](https://img.shields.io/nuget/dt/Xpand.XAF.Modules.Reactive.svg?&style=flat)
 
-[![GitHub issues](http://185-229-225-45.cloud-xip.com/github/issues/eXpandFramework/expand/Reactive.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AReactive.XAF+label%3AReactive) [![GitHub close issues](http://185-229-225-45.cloud-xip.com/github/issues-closed/eXpandFramework/eXpand/Reactive.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AReactive.XAF+label%3AReactive)
+[![GitHub issues](https://img.shields.io/github/issues/eXpandFramework/expand/Reactive.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AReactive.XAF+label%3AReactive) [![GitHub close issues](https://img.shields.io/github/issues-closed/eXpandFramework/eXpand/Reactive.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AReactive.XAF+label%3AReactive)
 # About 
 
 The `Reactive` module provides a XAF DSL API for functional/stateless implementations. 
@@ -271,10 +271,10 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |**DevExpress.ExpressApp**|**Any**
  |**DevExpress.Persistent.Base**|**Any**
  |**DevExpress.ExpressApp.Security.Xpo**|**Any**
-|[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.231.5
- |Xpand.Extensions|4.231.5
- |Xpand.Extensions.Reactive|4.231.5
- |Xpand.Extensions.XAF|4.231.5
+|[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.231.6
+ |Xpand.Extensions|4.231.6
+ |Xpand.Extensions.Reactive|4.231.6
+ |Xpand.Extensions.XAF|4.231.6
  |System.Interactive|5.0.0
  |System.Reactive|5.0.0
  |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
@@ -284,7 +284,7 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |Enums.Net|4.0.0
  |System.Threading.Tasks.Dataflow|7.0.0
  |Serialize.Linq|2.0.0
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.231.5
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.231.6
 
 ## Issues-Debugging-Troubleshooting
 

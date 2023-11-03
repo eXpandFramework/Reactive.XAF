@@ -1,6 +1,6 @@
-![](http://185-229-225-45.cloud-xip.com/nuget/v/Xpand.XAF.Modules.Reactive.Rest.svg?&style=flat) ![](http://185-229-225-45.cloud-xip.com/nuget/dt/Xpand.XAF.Modules.Reactive.Rest.svg?&style=flat)
+![](https://img.shields.io/nuget/v/Xpand.XAF.Modules.Reactive.Rest.svg?&style=flat) ![](https://img.shields.io/nuget/dt/Xpand.XAF.Modules.Reactive.Rest.svg?&style=flat)
 
-[![GitHub issues](http://185-229-225-45.cloud-xip.com/github/issues/eXpandFramework/expand/Reactive.Rest.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AReactive.XAF+label%3AReactive.Rest) [![GitHub close issues](http://185-229-225-45.cloud-xip.com/github/issues-closed/eXpandFramework/eXpand/Reactive.Rest.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AReactive.XAF+label%3AReactive.Rest)
+[![GitHub issues](https://img.shields.io/github/issues/eXpandFramework/expand/Reactive.Rest.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AReactive.XAF+label%3AReactive.Rest) [![GitHub close issues](https://img.shields.io/github/issues-closed/eXpandFramework/eXpand/Reactive.Rest.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AReactive.XAF+label%3AReactive.Rest)
 # About 
 
 The `Reactive.Rest` integrates with any REST Service using a simple declarative process.
@@ -189,18 +189,18 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |<!-- -->|<!-- -->
 |----|----
 |**DevExpress.ExpressApp**|**Any**
-|[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.231.5
- |Xpand.Extensions|4.231.5
- |Xpand.Extensions.Reactive|4.231.5
- |Xpand.Extensions.XAF|4.231.5
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.231.5
+|[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.231.6
+ |Xpand.Extensions|4.231.6
+ |Xpand.Extensions.Reactive|4.231.6
+ |Xpand.Extensions.XAF|4.231.6
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.231.6
  |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
  |Xpand.Patcher|3.0.17
  |Microsoft.CSharp|4.7.0
  |System.Reactive|5.0.0
  |System.Text.Json|7.0.2
  |System.Threading.Tasks.Dataflow|7.0.0
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.231.5
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.231.6
 
 ## Issues-Debugging-Troubleshooting
 
