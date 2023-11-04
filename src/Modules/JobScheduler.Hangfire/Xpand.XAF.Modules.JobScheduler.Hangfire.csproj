@@ -66,6 +66,7 @@
     <PackageReference Include="DevExpress.ExpressApp.Validation.Blazor" Version="23.1.6" />
     <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="23.1.6" />
     <PackageReference Include="DevExpress.Persistent.Base" Version="23.1.6" />
+    <PackageReference Include="System.Text.Json" Version="7.0.2" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Model.DesignedDiffs.xafml" />

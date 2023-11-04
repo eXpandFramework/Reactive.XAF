@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.Extensions.Mono.Cecil</id>
-    <version>4.231.6.0</version>
+    <version>4.231.6.1</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -19,7 +19,7 @@
         <dependency id="Mono.Cecil" version="0.11.4" />
         <dependency id="System.CodeDom" version="6.0" />
         <dependency id="System.ValueTuple" version="4.3" />
-        <dependency id="Xpand.Patcher" version="3.0.17.0" />
+        <dependency id="Xpand.Patcher" version="3.0.22.0" />
       </group>
     </dependencies>
   </metadata>
