@@ -155,7 +155,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager,Type sequenceStorageType=null){
             sequenceStorageType ??= typeof(SequenceStorage);
             Guard.TypeArgumentIs(typeof(ISequenceStorage),sequenceStorageType,nameof(sequenceStorageType));
-            return manager.WhenApplication(application => application.WhenCompatibilityChecked().TakeFirst()
+            return manager.WhenApplication(application => application.Observe()
                 .Select(xafApplication => xafApplication.ObjectSpaceProvider)
                 .Where(provider => !provider.IsMiddleTier())
                 .SelectMany(provider => provider.SequenceGeneratorDatalayer()
