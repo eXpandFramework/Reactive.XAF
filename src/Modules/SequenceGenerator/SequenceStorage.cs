@@ -100,15 +100,15 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
 
         [Browsable(false)]
         public List<ObjectType> Types=>CaptionHelper.ApplicationModel.BOModel
-            .Where(_ => typeof(IXPObject).IsAssignableFrom(_.TypeInfo.Type)&&_.TypeInfo.IsPersistent)
-            .Select(_ => new ObjectType(_.TypeInfo.Type){Name = _.Caption})
+            .Where(modelClass => typeof(IXPObject).IsAssignableFrom(modelClass.TypeInfo.Type)&&modelClass.TypeInfo.IsPersistent)
+            .Select(modelClass => new ObjectType(modelClass.TypeInfo.Type){Name = modelClass.Caption})
             .ToList();
 
         [Browsable(false)]
         public List<ObjectType> CustomTypes=>CaptionHelper.ApplicationModel.BOModel
-            .Where(_ =>Type!=null&&_.TypeInfo.Type!=Type.Type&& _.TypeInfo.Type.IsAssignableFrom(Type.Type))
-            .Where(_ => typeof(IXPObject).IsAssignableFrom(_.TypeInfo.Type))
-            .Select(_ => new ObjectType(_.TypeInfo.Type){Name = _.Caption}).ToList();
+            .Where(modelClass =>Type!=null&&modelClass.TypeInfo.Type!=Type.Type&& modelClass.TypeInfo.Type.IsAssignableFrom(Type.Type))
+            .Where(modelClass => typeof(IXPObject).IsAssignableFrom(modelClass.TypeInfo.Type))
+            .Select(modelClass => new ObjectType(modelClass.TypeInfo.Type){Name = modelClass.Caption}).ToList();
 
         public override string ToString() => $"{Name}";
 
