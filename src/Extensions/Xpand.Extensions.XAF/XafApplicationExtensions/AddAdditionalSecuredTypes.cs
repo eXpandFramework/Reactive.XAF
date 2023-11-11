@@ -5,6 +5,7 @@ using System.Linq.Expressions;
 using DevExpress.ExpressApp;
 using Fasterflect;
 using HarmonyLib;
+using Microsoft.Extensions.DependencyInjection;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.XAF.Harmony;
 

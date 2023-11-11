@@ -13,6 +13,7 @@ using Shouldly;
 using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
+using Xpand.Extensions.Threading;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.TestsLib;
 using Xpand.TestsLib.Common;
@@ -103,7 +104,7 @@ namespace Xpand.XAF.Modules.OneView.Tests{
 		        .TakeFirst().SubscribeReplay();
 	        testWinApplication.WhenWin().WhenCustomHandleException().Subscribe(args => { args.handledEventArgs.Handled = true; });
 	        testWinApplication.Start();
-	        Await(async () => {
+	        this.Await(async () => {
                 await editModel;
                 await showViewAfterModelEdit;
                 await whenViewOneFrame;

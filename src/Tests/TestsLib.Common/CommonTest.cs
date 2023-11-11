@@ -5,9 +5,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
-using System.Reactive.Threading.Tasks;
 using System.Reflection;
-using System.Threading.Tasks;
 using DevExpress.ExpressApp;
 using Microsoft.Reactive.Testing;
 using NUnit.Framework;
@@ -15,7 +13,6 @@ using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.FileExtensions;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.StringExtensions;
-using Xpand.Extensions.Threading;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Logger;
@@ -24,8 +21,8 @@ using IDisposable = System.IDisposable;
 using TestScheduler = akarnokd.reactive_extensions.TestScheduler;
 
 namespace Xpand.TestsLib.Common{
-    public abstract class CommonTest:ReactiveTest, IDisposable{
-        
+    public abstract class CommonTest:ReactiveTest, IDisposable {
+        public const int MaxTries = 3;
         public readonly TestScheduler TestScheduler=new();
         public const int LongTimeout = 900000;
         
@@ -105,7 +102,7 @@ namespace Xpand.TestsLib.Common{
                 })
                 .Select(s => {
                     var assembly = Assembly.LoadFile(s);
-                    return assembly.GetCustomAttributes<AssemblyMetadataAttribute>().First(_ => _.Key == "Platform")
+                    return assembly.GetCustomAttributes<AssemblyMetadataAttribute>().First(attribute => attribute.Key == "Platform")
                         .Value == platform ? assembly.GetTypes().First(type =>
                             !type.IsAbstract && typeof(ModuleBase).IsAssignableFrom(type)) : null;
                 })
@@ -148,12 +145,6 @@ namespace Xpand.TestsLib.Common{
         [TearDown]
         public virtual void Dispose() {
             ResetXAF();
-
-            // var typesInfo = ((TypesInfo) XafTypesInfo.Instance);
-            // var entityStores = ((IList<IEntityStore>) typesInfo.GetFieldValue("entityStores"));
-            // entityStores.Remove(store => !(store is NonPersistentTypeInfoSource));
-            
-
             try{
                 LogPaths.ForEach(path => {
                     if (File.Exists(path)) {
@@ -175,16 +166,7 @@ namespace Xpand.TestsLib.Common{
             lock (Locker) {
                 XafTypesInfo.HardReset();
             }
-            // XpoTypesInfoHelper.Reset();
         }
-
-        protected void Await(Func<Task> invoker) {
-            SingleThreadedSynchronizationContext.Await(invoker);
-        }
-        protected void Await(Func<IObservable<object>> invoker) {
-            SingleThreadedSynchronizationContext.Await(() => invoker().ToTask());
-        }
-        
     }
 
 }

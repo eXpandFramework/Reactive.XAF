@@ -8,6 +8,7 @@ using DevExpress.XtraRichEdit;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.Threading;
 using Xpand.Extensions.XAF.CollectionSourceExtensions;
 using Xpand.Extensions.XAF.DetailViewExtensions;
 using Xpand.Extensions.XAF.ViewExtensions;
@@ -25,7 +26,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManag
             using var xafApplication=DocumentStyleManagerModule().Application;
             xafApplication.MockListEditor((view, application, _) => view.Id.Contains(nameof(BusinessObjects.DocumentStyleManager.AllStyles))
                 ? application.ListEditorMock(view).Object : new GridListEditor(view));
-            var serverObserver = xafApplication.WhenDetailViewCreated().SelectMany(_ => _.e.View.WhenRichEditDocumentServer<BusinessObjects.DocumentStyleManager>(manager => manager.Content)).Test();
+            var serverObserver = xafApplication.WhenDetailViewCreated().SelectMany(t => t.e.View.WhenRichEditDocumentServer<BusinessObjects.DocumentStyleManager>(manager => manager.Content)).Test();
             var tuple = xafApplication.SetDocumentStyleManagerDetailView(Document);
             var documentStyleManager = tuple.documentStyleManager;
             var server = serverObserver.Items.First();
@@ -60,15 +61,15 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManag
             var tuple = xafApplication.SetDocumentStyleManagerDetailView(Document);
 
             var managerDetailView = tuple.window.View.AsDetailView();
-            var allStylesView = managerDetailView.GetListPropertyEditor<BusinessObjects.DocumentStyleManager>(_ => _.AllStyles).Frame.View.AsListView();
+            var allStylesView = managerDetailView.GetListPropertyEditor<BusinessObjects.DocumentStyleManager>(documentStyleManager => documentStyleManager.AllStyles).Frame.View.AsListView();
             tuple.window.View.AsDetailView().AllStylesListView().Editor.GetMock()
 	            .Setup(editor => editor.GetSelectedObjects())
 	            .Returns(() => ((BusinessObjects.DocumentStyleManager) managerDetailView.CurrentObject).AllStyles
-	            .Where(_ => _.DocumentStyleType == DocumentStyleType.Paragraph).WhenNotDefaultStyle().Skip(1).Take(selectedStyles)
+	            .Where(documentStyle => documentStyle.DocumentStyleType == DocumentStyleType.Paragraph).WhenNotDefaultStyle().Skip(1).Take(selectedStyles)
 	            .ToArray());
             allStylesView.OnSelectionChanged();
 
-            var replacementStylesView = managerDetailView.GetListPropertyEditor<BusinessObjects.DocumentStyleManager>(_ => _.ReplacementStyles).Frame.View.AsListView();
+            var replacementStylesView = managerDetailView.GetListPropertyEditor<BusinessObjects.DocumentStyleManager>(documentStyleManager => documentStyleManager.ReplacementStyles).Frame.View.AsListView();
             var replacementStyles = replacementStylesView.CollectionSource.Objects<DocumentStyle>().ToArray();
             replacementStyles.Length.ShouldBeGreaterThan(0);
             replacementStyles.All(style => style.DocumentStyleType == DocumentStyleType.Paragraph).ShouldBeTrue();
@@ -77,7 +78,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManag
         [Test][Apartment(ApartmentState.STA)]
         public void Synchronize_styles_when_document_modified(){
             
-            Await(async () => {
+            this.Await(async () => {
                 using var application=DocumentStyleManagerModule().Application;
                 var serverObserver = application.WhenDetailViewCreated(typeof(BusinessObjects.DocumentStyleManager)).ToDetailView()
                     .SelectMany(detailView => detailView.AsDetailView().WhenRichEditDocumentServer<BusinessObjects.DocumentStyleManager>(manager => manager.Content)).Test();

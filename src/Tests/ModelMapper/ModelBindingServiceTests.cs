@@ -36,6 +36,7 @@ using Shouldly;
 using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
+using Xpand.Extensions.Threading;
 using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.Extensions.XAF.TypesInfoExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
@@ -247,8 +248,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             var predefinedMap = predefinedMaps.Last();
 
             using var module = predefinedMaps.Extend();
-            using var application = DefaultModelMapperModule( platform, extraModules.Select(_ => {
-                        var instance = _.CreateInstance();
+            using var application = DefaultModelMapperModule( platform, extraModules.Select(t => {
+                        var instance = t.CreateInstance();
                         if (instance is DashboardsModule dashboardsModule){
                             dashboardsModule.DashboardDataType = typeof(DashboardData);
                         }
@@ -291,8 +292,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
                     var controlType = predefinedMap.TypeToMap();
                     using (var module = predefinedMap.Extend()){
                         using (var application = DefaultModelMapperModule( platform, predefinedMap.Modules()
-                                .Select(_ => {
-                                    var instance = _.CreateInstance();
+                                .Select(type => {
+                                    var instance = type.CreateInstance();
                                     if (instance is DashboardsModule dashboardsModule){
                                         dashboardsModule.DashboardDataType = typeof(DashboardData);
                                     }
@@ -317,7 +318,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
                                 detailView.DelayedItemsInitialization = false;
                                 detailView.CreateControls();
 
-                                Await(async () => await controlBound.Take(1).WithTimeOut(TimeSpan.FromSeconds(10)) );
+                                this.Await(async () => await controlBound.Take(1).WithTimeOut(TimeSpan.FromSeconds(10)) );
                                 application.Dispose();
                             }
                             

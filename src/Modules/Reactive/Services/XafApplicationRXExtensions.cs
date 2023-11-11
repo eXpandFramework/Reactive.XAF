@@ -19,6 +19,7 @@ using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
+using DevExpress.ExpressApp.Security;
 using DevExpress.ExpressApp.SystemModule;
 using Fasterflect;
 using Xpand.Extensions.EventArgExtensions;
@@ -403,6 +404,18 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<(XafApplication application, LogonEventArgs e)> WhenLoggedOn(this XafApplication application) 
             => application.WhenEvent<LogonEventArgs>(nameof(XafApplication.LoggedOn)).InversePair(application);
 
+        public static IObservable<XafApplication> WhenLoggedOn<TParams>(
+            this XafApplication application, string userName, string pass=null) where TParams:IAuthenticationStandardLogonParameters
+            => application.WhenFrame(typeof(TParams), ViewType.DetailView).Take(1)
+                .Do(frame => {
+                    var logonParameters = ((TParams)frame.View.CurrentObject);
+                    logonParameters.UserName = userName;
+                    logonParameters.Password = pass;
+                })
+                .ToController<DialogController>().WhenAcceptTriggered(application.WhenLoggedOn().Select(t => t.application));
+        
+        public static IObservable<XafApplication> WhenLoggedOn(this XafApplication application, string userName, string pass=null) 
+            => application.WhenLoggedOn<AuthenticationStandardLogonParameters>(userName,pass);
         
         public static IObservable<(XafApplication application, LogonEventArgs e)> WhenLoggingOn(this IObservable<XafApplication> source) 
             => source.SelectMany(application => application.WhenLoggingOn());

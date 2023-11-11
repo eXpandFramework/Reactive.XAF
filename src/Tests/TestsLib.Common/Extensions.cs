@@ -9,6 +9,7 @@ using System.Linq.Expressions;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using akarnokd.reactive_extensions;
@@ -33,6 +34,7 @@ using Moq;
 using Moq.Protected;
 using NUnit.Framework;
 using Xpand.Extensions.AppDomainExtensions;
+using Xpand.Extensions.ExceptionExtensions;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Filter;
@@ -55,6 +57,14 @@ using EditorsFactory = DevExpress.ExpressApp.Editors.EditorsFactory;
 namespace Xpand.TestsLib.Common{
     
     public static class Extensions{
+        public static Exception ToTestException(this Exception exception,[CallerMemberName]string caller="") => TestException.New(exception,caller);
+        public static IObservable<Exception> ThrowTestException(this Exception exception,[CallerMemberName]string caller="")
+            => exception.Observe().ThrowTestException(caller);
+        
+        public static IObservable<Exception> ThrowTestException(this IObservable<Exception> source,[CallerMemberName]string caller="") 
+            => source.If(exception => exception is not TestException,exception => exception.ToTestException(caller).Observe(),
+                exception => exception.DeferAction(exception.ThrowCaptured).To<Exception>());
+        
         public static IObservable<Exception> WhenException(this TestTracing tracing) 
             => typeof(Tracing).WhenEvent<CreateCustomTracerEventArgs>(nameof(Tracing.CreateCustomTracer)).TakeFirst()
                 .SelectMany(eventArgs => {
@@ -92,11 +102,11 @@ namespace Xpand.TestsLib.Common{
         public static void OnSelectionChanged(this ObjectView objectView) => objectView.CallMethod(nameof(OnSelectionChanged));
 
         public static CompositeView NewView(this XafApplication application, IModelView modelView,Func<IObjectSpace,IList> selectedObjectsFactory,IObjectSpace objectSpace=null){
-	        application.WhenListViewCreating().Where(_ => _.e.ViewID == modelView.Id).Do(_ => {
-		        var viewMock = new Mock<ListView>(() => new ListView((IModelListView) modelView, _.e.CollectionSource,_.application,_.e.IsRoot)){CallBase = true};
+	        application.WhenListViewCreating().Where(t => t.e.ViewID == modelView.Id).Do(t => {
+		        var viewMock = new Mock<ListView>(() => new ListView((IModelListView) modelView, t.e.CollectionSource,t.application,t.e.IsRoot)){CallBase = true};
 		        viewMock.As<ISelectionContext>().SetupGet(context => context.SelectedObjects)
 			        .Returns(() => selectedObjectsFactory(viewMock.Object.ObjectSpace));
-		        _.e.View = viewMock.Object;
+		        t.e.View = viewMock.Object;
 	        }).TakeFirst().Subscribe();
 	        return application.NewView(modelView,objectSpace);
         }
@@ -168,7 +178,7 @@ namespace Xpand.TestsLib.Common{
             }
 
             foreach (var moduleBase in moduleBases){
-                if (application.Modules.All(_ => moduleBase.GetType() != _.GetType())){
+                if (application.Modules.All(@base => moduleBase.GetType() != @base.GetType())){
                     application.Modules.AddRange(new []{moduleBase});
                 }
             }
@@ -400,14 +410,14 @@ namespace Xpand.TestsLib.Common{
             application.EditorFactory = editorsFactoryMock.Object;
             application.MockListEditor();
 
-            editorsFactoryMock.Setup(_ => _.CreateDetailViewEditor(It.IsAny<bool>(), It.IsAny<IModelViewItem>(), It.IsAny<Type>(), It.IsAny<XafApplication>(), It.IsAny<IObjectSpace>()))
+            editorsFactoryMock.Setup(editorsFactory => editorsFactory.CreateDetailViewEditor(It.IsAny<bool>(), It.IsAny<IModelViewItem>(), It.IsAny<Type>(), It.IsAny<XafApplication>(), It.IsAny<IObjectSpace>()))
                 .Returns((bool needProtectedContent, IModelViewItem modelViewItem, Type objectType, XafApplication _, IObjectSpace objectSpace) 
                     => new EditorsFactory().CreateDetailViewEditor(needProtectedContent, modelViewItem, objectType, application, objectSpace));
             
-            editorsFactoryMock.Setup(_ => _.CreateDetailViewEditor(It.IsAny<bool>(), It.IsAny<IModelMemberViewItem>(), It.IsAny<Type>(), It.IsAny<XafApplication>(), It.IsAny<IObjectSpace>()))
+            editorsFactoryMock.Setup(editorsFactory => editorsFactory.CreateDetailViewEditor(It.IsAny<bool>(), It.IsAny<IModelMemberViewItem>(), It.IsAny<Type>(), It.IsAny<XafApplication>(), It.IsAny<IObjectSpace>()))
                 .Returns((bool needProtectedContent, IModelMemberViewItem modelViewItem, Type objectType, XafApplication _, IObjectSpace objectSpace) 
                     => new EditorsFactory().CreateDetailViewEditor(needProtectedContent, modelViewItem, objectType, application, objectSpace));
-            editorsFactoryMock.Setup(_ => _.CreatePropertyEditorByType(It.IsAny<Type>(),It.IsAny<IModelMemberViewItem>(),It.IsAny<Type>(),It.IsAny<XafApplication>(),It.IsAny<IObjectSpace>()))
+            editorsFactoryMock.Setup(editorsFactory => editorsFactory.CreatePropertyEditorByType(It.IsAny<Type>(),It.IsAny<IModelMemberViewItem>(),It.IsAny<Type>(),It.IsAny<XafApplication>(),It.IsAny<IObjectSpace>()))
                 .Returns((Type editorType, IModelMemberViewItem modelViewItem, Type objectType, XafApplication xafApplication, IObjectSpace objectSpace)
                     =>new EditorsFactory().CreatePropertyEditorByType(editorType, modelViewItem, objectType, xafApplication, objectSpace));
         }
@@ -463,7 +473,7 @@ namespace Xpand.TestsLib.Common{
         public static void MockListEditor(this XafApplication application, Func<IModelListView, XafApplication, CollectionSourceBase, ListEditor> listEditor = null){
 	        listEditor ??= ((view, _, _) => application.ListEditorMock(view).Object);
            var editorsFactoryMock = application.EditorFactory.GetMock();
-           editorsFactoryMock.Setup(_ => _.CreateListEditor(It.IsAny<IModelListView>(), It.IsAny<XafApplication>(), It.IsAny<CollectionSourceBase>()))
+           editorsFactoryMock.Setup(editorsFactory => editorsFactory.CreateListEditor(It.IsAny<IModelListView>(), It.IsAny<XafApplication>(), It.IsAny<CollectionSourceBase>()))
                 .Returns((IModelListView modelListView, XafApplication _, CollectionSourceBase collectionSourceBase) =>
                         listEditor(modelListView, application, collectionSourceBase));
         }
@@ -504,13 +514,13 @@ namespace Xpand.TestsLib.Common{
             var frameTemplateMock = new Mock<IWindowTemplate>();
             frameTemplateMock.Setup(template => template.GetContainers()).Returns(Array.Empty<IActionContainer>);
             application.WhenCreateCustomTemplate()
-                .Do(_ => _.e.Template = frameTemplateMock.Object)
+                .Do(t => t.e.Template = frameTemplateMock.Object)
                 .Subscribe();
         }
 
         public static IObservable<Unit> ClientBroadcast(this ITestApplication application) 
             => Process.GetProcessesByName("Xpand.XAF.Modules.Reactive.Logger.Client.Win").Any()
-                ? TraceEventHub.Trace.TakeFirst(_ => _.Source == application.SUTModule.Name).ToUnit()
+                ? TraceEventHub.Trace.TakeFirst(message => message.Source == application.SUTModule.Name).ToUnit()
                     .SubscribeReplay()
                 : Unit.Default.Observe();
 
@@ -519,6 +529,7 @@ namespace Xpand.TestsLib.Common{
             => Process.GetProcessesByName("Xpand.XAF.Modules.Reactive.Logger.Client.Win").Any()
                 ? TraceEventHub.Connecting.TakeFirst().SubscribeReplay()
                 : Unit.Default.Observe();
+        
     }
 
     public class TestApplicationModule : ModuleBase{

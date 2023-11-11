@@ -4,33 +4,32 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace Xpand.Extensions.Threading {
-    public static class SingleThreadedSynchronizationContextExtenions {
-        public static void AwaitTask(this Task invoker) => SingleThreadedSynchronizationContext.Await(() => invoker);
-    }
-    public sealed class SingleThreadedSynchronizationContext : SynchronizationContext {
-        private readonly BlockingCollection<(SendOrPostCallback d, object state)> _queue = new();
-
-        public override void Post(SendOrPostCallback d, object state) => _queue.Add((d, state));
-
+    public static class SingleThreadedSynchronizationContextExtensions {
         
-
-        public static void Await(Func<Task> invoker) {
-            var originalContext = Current;
+        public static void Await(this object any, Func<Task> invoker) {
+            var originalContext = SynchronizationContext.Current;
             try {
                 var context = new SingleThreadedSynchronizationContext();
-                SetSynchronizationContext(context);
-
+                SynchronizationContext.SetSynchronizationContext(context);
                 var task = invoker.Invoke();
-                task.ContinueWith(_ => context._queue.CompleteAdding());
-
-                while (context._queue.TryTake(out var work, Timeout.Infinite))
+                task.ContinueWith(_ => context.Queue.CompleteAdding());
+                while (context.Queue.TryTake(out var work, Timeout.Infinite))
                     work.d.Invoke(work.state);
-
                 task.GetAwaiter().GetResult();
             }
             finally {
-                SetSynchronizationContext(originalContext);
+                SynchronizationContext.SetSynchronizationContext(originalContext);
             }
         }
+        internal sealed class SingleThreadedSynchronizationContext : SynchronizationContext {
+            public BlockingCollection<(SendOrPostCallback d, object state)> Queue{ get; } = new();
+
+            public override void Post(SendOrPostCallback d, object state){
+                if (!Queue.IsAddingCompleted) {
+                    Queue.Add((d, state));
+                }
+            }
+        }
+
     }
 }

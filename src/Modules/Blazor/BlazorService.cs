@@ -10,7 +10,6 @@ using DevExpress.ExpressApp.Model.Core;
 using Fasterflect;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
-using Microsoft.Extensions.DependencyInjection;
 using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
@@ -40,9 +39,7 @@ namespace Xpand.XAF.Modules.Blazor {
             builder.CloseComponent();
         }
 
-        public static T GetService<T>(this XafApplication application) => application.ToBlazor().ServiceProvider.GetService<T>();
-        public static T GetRequiredService<T>(this XafApplication application) => application.ToBlazor().ServiceProvider.GetRequiredService<T>();
-
+        
         public static BlazorApplication ToBlazor(this XafApplication application) => (BlazorApplication)application;
 
         

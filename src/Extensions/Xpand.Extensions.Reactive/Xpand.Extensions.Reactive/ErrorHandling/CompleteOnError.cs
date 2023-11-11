@@ -4,6 +4,7 @@ using Xpand.Extensions.Reactive.Transform;
 
 namespace Xpand.Extensions.Reactive.ErrorHandling {
 	public static partial class ErrorHandling {
+		
 		public static IObservable<T> CompleteOnError<T>(this IObservable<T> source,Action<Exception> onError=null,Func<Exception,bool> match=null)
 			=> source.Catch<T,Exception>(exception => {
 				if (!(match?.Invoke(exception) ?? true)) return exception.Throw<T>();

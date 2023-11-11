@@ -14,6 +14,7 @@ using Microsoft.Extensions.Hosting;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.Threading;
 using Xpand.TestsLib.Common;
 using Xpand.XAF.Modules.Reactive.Services;
 
@@ -32,7 +33,7 @@ namespace Xpand.TestsLib.Blazor {
 		}
 
 		protected void CleanBlazorEnvironment() {
-			Await(() => WebHost.StopAsync());
+			this.Await(() => WebHost.StopAsync());
 			WebHost?.Dispose();
 			typeof(ValueManagerContext).Field("storageHolder", Flags.StaticPrivate).SetValue(null,
 				typeof(AsyncLocal<>).MakeGenericType(AppDomain.CurrentDomain.GetAssemblyType(

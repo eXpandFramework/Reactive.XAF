@@ -6,6 +6,8 @@ using Xpand.XAF.Modules.Reactive.Services.Actions;
 
 namespace Xpand.XAF.Modules.Reactive.Services.Controllers {
     public static partial class ControllerExtensions {
+        public static IObservable<T> WhenAcceptTriggered<T>(this IObservable<DialogController> source,IObservable<T> afterExecuted,params object[] selection) 
+            => source.SelectMany(controller => controller.AcceptAction.Trigger(afterExecuted,selection).Take(1));
         public static IObservable<Unit> WhenAcceptTriggered(this IObservable<DialogController> source) 
             => source.SelectMany(controller => controller.AcceptAction.Trigger().Take(1));
         

@@ -7,25 +7,16 @@ using DevExpress.ExpressApp;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.JSInterop;
+using Xpand.Extensions.XAF.XafApplicationExtensions;
 
 namespace Xpand.XAF.Modules.Blazor.Services {
     public static class StorageService {
 	    public static IObservable<Unit> SaveCookie(this XafApplication application, string key, string value,int? days =null) 
 		    => new Cookie(application).SetValue(key,value,days);
-
-        // public static void SaveCookie(this XafApplication application, string key, string value,int? days =null) {
-        //     var httpContextResponse = application.ToBlazor().ServiceProvider.GetRequiredService<IHttpContextAccessor>().HttpContext.Response;
-        //     if (days != null) {
-        //         httpContextResponse.Cookies.Append(key, value, new CookieOptions() { Expires = DateTimeOffset.Now.AddDays(days.Value) });
-        //     }
-        //     else
-        //         httpContextResponse.Cookies.Append(key, value);
-        //
-        // }
-
+        
         public static string ReadCookie(this XafApplication application, string key) 
 	        => application.ToBlazor().ServiceProvider.GetRequiredService<IHttpContextAccessor >()
-		        .HttpContext.Request.Cookies[key];
+                .HttpContext!.Request.Cookies[key];
 
         public static IObservable<string> GetClientItem(this XafApplication application, string name)
             => Observable.FromAsync(async () => {
