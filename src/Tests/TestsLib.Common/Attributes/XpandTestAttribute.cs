@@ -20,7 +20,7 @@ namespace Xpand.TestsLib.Common.Attributes{
         private readonly ApartmentState _state;
         private readonly int _timeout;
 
-        public XpandTestAttribute(int timeout = 60000, int tryCount = 2,ApartmentState state=ApartmentState.STA){
+        public XpandTestAttribute(int timeout = 60000, int tryCount = 3,ApartmentState state=ApartmentState.STA){
             _timeout = timeout;
             _tryCount = tryCount;
             _state = state;
@@ -68,21 +68,7 @@ namespace Xpand.TestsLib.Common.Attributes{
                         }
                         else {
                             Polly.Policy.Timeout(TimeSpan.FromMilliseconds(_timeout), TimeoutStrategy.Pessimistic)
-                                .Execute(() => {
-                                    ExecuteTest();
-                                    // return;
-                                    // if (context.CurrentTest.Arguments.Any(o => o == (object) Platform.Web)){
-                                    //     ThreadPool.QueueUserWorkItem(state => {
-                                    //         var tuple = ((TestExecutionContext executionContext, TestCommand command)) state;
-                                    //         tuple.executionContext.CurrentResult = tuple.command.Execute(tuple.executionContext);
-                                    //         resetEvent.Set();
-                                    //     }, (context, innerCommand));
-                                    //     resetEvent.WaitOne();    
-                                    // }
-                                    // else{
-                                    //     Task.Factory.StartTask(Execute, thread => thread.SetApartmentState(GetApartmentState(context))).Wait();   
-                                    // }
-                                });
+                                .Execute(ExecuteTest);
                         }
                     }
                     catch (Exception ex){
@@ -105,14 +91,9 @@ namespace Xpand.TestsLib.Common.Attributes{
                 return context.CurrentResult;
             }
             
-            private static ApartmentState GetApartmentState(TestExecutionContext context, ApartmentState apartmentState) {
-                var apartmentAttribute = context.CurrentTest.Method?.MethodInfo.Attribute<ApartmentAttribute>();
-                return apartmentAttribute != null ? (ApartmentState?) apartmentAttribute.Properties[PropertyNames.ApartmentState]
-                        .OfType<object>().First() ?? apartmentState : apartmentState;
-                // return context.CurrentTest.Arguments.Any(o => $"{o}" == Platform.Win.ToString()) ? ApartmentState.STA : GetDefaultGetApartmentState();
-            }
-
-            
+            private static ApartmentState GetApartmentState(TestExecutionContext context, ApartmentState apartmentState) 
+                => (ApartmentState?)context.CurrentTest.Method?.MethodInfo.Attribute<ApartmentAttribute>()?.Properties[PropertyNames.ApartmentState]
+                    .OfType<object>().First() ?? apartmentState;
         }
     }
 }

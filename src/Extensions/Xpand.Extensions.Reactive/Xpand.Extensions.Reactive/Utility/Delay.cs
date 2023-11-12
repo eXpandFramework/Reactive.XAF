@@ -3,10 +3,24 @@ using System.Collections.Generic;
 using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
+using Xpand.Extensions.Numeric;
+using Xpand.Extensions.Reactive.Combine;
+using Xpand.Extensions.Reactive.Conditional;
+using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 
 namespace Xpand.Extensions.Reactive.Utility {
     public static partial class Utility {
+        public static IObservable<T> DelayOnContext<T>(this IObservable<T> source,int seconds=1,bool delayOnEmpty=false) 
+            => source.DelayOnContext(seconds.Seconds(),delayOnEmpty);
+        public static IObservable<T> DelayOnContext<T>(this IObservable<T> source,TimeSpan? timeSpan,bool delayOnEmpty=false) 
+            => source.If(_ => timeSpan.HasValue,arg => arg.DelayOnContext( (TimeSpan)timeSpan!),arg => arg.Observe())
+                .SwitchIfEmpty(timeSpan.Observe().Where(_ => delayOnEmpty).WhenNotDefault().SelectMany(span => span.DelayOnContext((TimeSpan)span!)
+                    .Select(_ => default(T)).IgnoreElements()));
+
+        private static IObservable<T> DelayOnContext<T>(this T arg,TimeSpan timeSpan) 
+            => arg.Observe()
+                .SelectManySequential( arg1 => Observable.Return(arg1).Delay(timeSpan).ObserveOnContext());
         public static IObservable<T> Defer<T>(this object o, IObservable<T> execute)
             => Observable.Defer(() => execute);
         
