@@ -5,6 +5,7 @@ using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Editors;
+using DevExpress.ExpressApp.Model;
 using Fasterflect;
 using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Transform;
@@ -12,6 +13,11 @@ using Xpand.Extensions.XAF.ViewExtensions;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
     public static class ViewItemExtensions{
+        public static IObservable<TTabbedControl> WhenTabControl<TTabbedControl>(this XafApplication application, Type objectType=null, Func<DetailView, bool> match=null, Func<IModelTabbedGroup, bool> tabMatch=null) 
+            => application.WhenDetailViewCreated(objectType).ToDetailView()
+                .Where(view => match?.Invoke(view)??true)
+                .SelectMany(detailView => detailView.WhenTabControl(tabMatch)).Cast<TTabbedControl>();
+        
         public static IObservable<TTabbedControl> WhenTabControl<TTabbedControl>(this IObservable<DashboardViewItem> source) 
             => source.SelectMany(item => item.Frame.View.ToDetailView().WhenTabControl().Cast<TTabbedControl>());
         
@@ -21,7 +27,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<(T viewItem, NestedFrame nestedFrame)> ToNestedFrames<T>(this IObservable<T> source, params Type[] nestedObjectTypes) where T:ViewItem 
             => source.Cast<IFrameContainer>().Where(container => container.Frame!=null)
                 .Select(container => (viewItem: ((T) container),nestedFrame: ((NestedFrame) container.Frame)))
-                .Where(_ =>!nestedObjectTypes.Any()|| nestedObjectTypes.Any(type => type.IsAssignableFrom(_.nestedFrame.View.ObjectTypeInfo.Type)));
+                .Where(t =>!nestedObjectTypes.Any()|| nestedObjectTypes.Any(type => type.IsAssignableFrom(t.nestedFrame.View.ObjectTypeInfo.Type)));
 
         public static IObservable<T> ControlCreated<T>(this IEnumerable<T> source) where T:ViewItem 
             => source.ToObservable(ImmediateScheduler.Instance).ControlCreated();

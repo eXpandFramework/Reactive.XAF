@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Linq;
+using System.Linq.Expressions;
 using DevExpress.ExpressApp;
 
 namespace Xpand.Extensions.XAF.ObjectSpaceExtensions {
     public static partial class ObjectSpaceExtensions {
-        public static bool Any<T>(this IObjectSpace objectSpace) => objectSpace.GetObjectsQuery<T>().Any();
+        public static bool Any<T>(this IObjectSpace objectSpace,Expression<Func<T,bool>> criteria=null) 
+            =>criteria==null? objectSpace.GetObjectsQuery<T>().Any():objectSpace.GetObjectsQuery<T>().Any(criteria);
 
         public static object NewObject(this IObjectSpace objectSpace,Type type, object key) {
             var o = objectSpace.CreateObject(type);

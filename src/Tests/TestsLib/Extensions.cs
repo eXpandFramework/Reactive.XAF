@@ -44,7 +44,12 @@ namespace Xpand.TestsLib {
             WinApplication.Messaging=mock.Object;
         }
 
-        
+        public static IObservable<Unit> StartWinTest(this IObservable<WinApplication> source, Func<WinApplication,IObservable<Unit>> test,TimeSpan timeout) 
+            => source.SelectMany(application => application
+                    .Use(winApplication => winApplication.StartWinTest(test(winApplication)
+                        .Timeout(timeout), null, LogContext.None)))
+                .FirstAsync();
+
         public static IObservable<T> StartWinTest<T>(this WinApplication application, IObservable<T> test,
             string user=null, LogContext logContext = default) 
             => SynchronizationContext.Current.Observe()
@@ -53,14 +58,11 @@ namespace Xpand.TestsLib {
 
         private static IObservable<T> Start<T>(this WinApplication application, IObservable<T> test,
             SynchronizationContext context, string user = null, LogContext logContext = default) 
-            => Start(application, exit => TestTracing.WhenError().ThrowTestException()
-                    .DoOnError(_ => application.Terminate(context))
-                    .To<T>()
+            => application.Start( exit => TestTracing.WhenError().ThrowTestException()
+                    .DoOnError(_ => application.Terminate(context)).To<T>()
                     .Merge(application.Observe()
-                        .SelectMany(_ => test.Select(arg => arg).Start(application, user,context))
-                        .Select(arg => arg)
-                        .LogError().Select(arg => arg)
-                    ).Buffer(exit).Take(1).SelectMany())
+                        .SelectMany(_ => test.Start(application, user,context))
+                        .LogError()).Buffer(exit).Take(1).SelectMany())
                 .Log(logContext);
         
         private static IObservable<T> Start<T>(this IObservable<T> test,WinApplication application, string user, SynchronizationContext context) 

@@ -8,7 +8,7 @@ namespace Xpand.XAF.Modules.StoreToDisk{
 		IModelStoreToDisk StoreToDisk{ get; }
 	}
 
-	public static class TenantManagerModelExtensions {
+	public static class StoreToDiskModelExtensions {
 		public static IModelStoreToDisk StoreToDisk(this IModelApplication application) 
 			=> application.ToReactiveModule<IModelReactiveModulesStoreToDisk>().StoreToDisk;
 	}

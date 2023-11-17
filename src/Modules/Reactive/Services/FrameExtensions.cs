@@ -219,7 +219,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<Frame> ListViewProcessSelectedItem(this Frame frame,string defaultFocusedItem) 
             => frame.ListViewProcessSelectedItem(e => e.ShowViewParameters.CreatedView.ToDetailView().SetDefaultFocusedItem(defaultFocusedItem));
 
-        public static IObservable<Frame> ListViewProcessSelectedItem(this Frame frame,Action<SimpleActionExecuteEventArgs> executed) 
+        public static IObservable<Frame> ListViewProcessSelectedItem(this Frame frame,Action<SimpleActionExecuteEventArgs> executed=null) 
             => frame.ListViewProcessSelectedItem(() => frame.View.SelectedObjects.Cast<object>().First() ,executed);
 
         public static IObservable<Frame> ListViewProcessSelectedItem<T>(this Frame frame, Func<T> selectedObject,Action<SimpleActionExecuteEventArgs> executed=null){

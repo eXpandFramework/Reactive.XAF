@@ -6,6 +6,7 @@ using System.IO.Pipes;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using Xpand.Extensions.AppDomainExtensions;
@@ -101,7 +102,14 @@ namespace Xpand.TestsLib.Common{
                     .Catch<Unit,TimeoutException>(_ => Observable.Empty<Unit>()).To(clientStream))
                 .Timeout(logger.ConnectionTimeout).WhenNotDefault(stream => stream.IsConnected).Take(1);
 
+        public static IObservable<T> Log<T>(this IObservable<T> source,Func<T,string> messageFactory,[CallerMemberName]string caller="") 
+            => source.Do(x => $"{caller}: {messageFactory(x)}".LogValue());
         
+        public static T LogValue<T>(this T value){
+            Console.WriteLine(value);
+            return value;
+        }
+
         public static IObservable<T> Log<T>(this IObservable<T> source, LogContext logContext,
             WindowPosition inactiveMonitorLocation = WindowPosition.None, bool alwaysOnTop = false) 
             => source.Publish(obs => logContext.Observe().If(context => context == default, _ => obs,

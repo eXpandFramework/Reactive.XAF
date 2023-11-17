@@ -6,6 +6,11 @@ using Xpand.Extensions.Reactive.Transform;
 
 namespace Xpand.Extensions.Reactive.Utility {
     public static partial class Utility {
+        public static IObservable<T> DoAlways<T>(this IObservable<T> source, Action always) 
+            => source.Publish(obs => obs.DoOnError(_ => always())
+                .Merge(obs.DoOnComplete(always)).Merge(obs.Do(_ => always()))
+                .IgnoreElements().Merge(obs));
+        
         public static SynchronizationContextScheduler Scheduler(this SynchronizationContext context) => new(context);
 
         public static IObservable<T> DoAfter<T>(this T self,TimeSpan delay,Action execute) 

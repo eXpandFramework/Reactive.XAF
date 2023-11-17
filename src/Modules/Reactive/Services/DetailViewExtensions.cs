@@ -10,6 +10,7 @@ using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.XAF.ModelExtensions;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
     public static class DetailViewExtensions{
@@ -22,15 +23,11 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static bool IsNewObject(this CompositeView compositeView)
             => compositeView.ObjectSpace.IsNewObject(compositeView.CurrentObject);
         public static IObservable<object> WhenTabControl(this DetailView detailView, Func<IModelTabbedGroup, bool> match=null)
-            => detailView.WhenTabControl(detailView.LayoutGroupItem(element => element is IModelTabbedGroup group&& (match?.Invoke(group) ?? true)));
+            => detailView.WhenTabControl(detailView.Model.Layout.Flatten().OfType<IModelTabbedGroup>().First(group => match?.Invoke(group)??true));
         
         public static IObservable<object> WhenTabControl(this DetailView detailView, IModelViewLayoutElement element)
             => detailView.LayoutManager.WhenItemCreated().Where(t => t.model == element).Select(t => t.control).Take(1)
                 .SelectMany(tabbedControlGroup => detailView.LayoutManager.WhenLayoutCreated().Take(1).To(tabbedControlGroup));
-        
-        public static IModelLayoutViewItem LayoutGroupItem(this DetailView detailView,Func<IModelLayoutViewItem,bool> match)
-            => detailView.Model.Layout.GetItems<IModelLayoutGroup>(item => item)
-                .SelectMany().OfType<IModelLayoutViewItem>().FirstOrDefault(match);
         
         public static IObservable<(DetailView detailView, CancelEventArgs e)> WhenViewEditModeChanging(this DetailView detailView) 
             => detailView.WhenViewEvent<DetailView,CancelEventArgs>(nameof(DetailView.ViewEditModeChanging));

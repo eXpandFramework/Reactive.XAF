@@ -12,6 +12,7 @@ using DevExpress.ExpressApp.SystemModule;
 using DevExpress.Persistent.Validation;
 using Fasterflect;
 using Xpand.Extensions.AppDomainExtensions;
+using Xpand.Extensions.Numeric;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Filter;
@@ -86,7 +87,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .Do(editor => { editor.MemberInfo.SetValue(compositeView.CurrentObject, editor.MemberInfo.GetValue(existingObject)); });
         }
         public static IObservable<object> WhenObjects(this View view) 
-            => view is ListView listView?listView.CollectionSource.WhenCollectionChanged().SelectMany(_ => listView.Objects())
+            => view is ListView listView?listView.CollectionSource.WhenCollectionChanged()
+                .MergeToUnit(listView.CollectionSource.WhenCriteriaApplied().Select(@base => @base)).SelectMany(_ => listView.Objects())
                 .StartWith(listView.Objects()):view.ToDetailView().WhenCurrentObjectChanged()
                 .Select(detailView => detailView.CurrentObject).StartWith(view.CurrentObject).WhenNotDefault();
         
