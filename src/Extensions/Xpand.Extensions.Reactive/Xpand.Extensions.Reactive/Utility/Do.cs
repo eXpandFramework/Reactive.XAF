@@ -88,6 +88,14 @@ namespace Xpand.Extensions.Reactive.Utility {
                 }
                 return source1;
             });
+
+        
+        public static IObservable<TSource> Do<TSource>(this IObservable<TSource> source, Action<TSource, int> action)
+            => source.Select((source1, i) => {
+                action(source1, i);
+                return source1;
+            });
+        
         public static IObservable<TSource> DoWhen<TSource>(this IObservable<TSource> source, Func<int,TSource, bool> predicate, Action<TSource,int> action)
             => source.Select((source1, i) => {
                 if (predicate(i,source1)) {
@@ -96,11 +104,7 @@ namespace Xpand.Extensions.Reactive.Utility {
                 return source1;
             });
         
-        /// <summary>
-        /// Invokes an action sequentially for each element in the observable sequence,
-        /// on the specified scheduler, skipping and dropping elements that are received
-        /// during the execution of a previous action, except from the latest element.
-        /// </summary>
+        
         public static IObservable<TSource> DroppingDo<TSource>(this IObservable<TSource> source, Action<TSource> action, IScheduler scheduler = null) 
             => Observable.Defer(() => {
                 Tuple<TSource> latest = null;

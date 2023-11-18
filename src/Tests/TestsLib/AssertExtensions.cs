@@ -19,6 +19,6 @@ namespace Xpand.TestsLib {
                         .SelectMany(_ => new Exception(
                             $"{nameof(AssertTabbedGroup)} {objectType?.Name} expected {tabPagesCount} but was {group.TabPages}").ThrowTestException(caller).To<TabbedControlGroup>()),
                     group => group.Observe())
-                .Merge(application.WhenTabControl<TabbedControlGroup>(objectType,match)).Replay().AutoConnect();
+                .Merge(application.WhenTabControl<TabbedControlGroup>(objectType,match,tabMatch)).Replay().AutoConnect();
     }
 }

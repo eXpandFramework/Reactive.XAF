@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using Xpand.Extensions.Numeric;
+using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.ViewExtensions;
@@ -14,13 +15,15 @@ namespace Xpand.TestsLib.Common {
     public static class AssertExtensions {
         public static TimeSpan TimeoutInterval = (Debugger.IsAttached ? 120 : 15).Seconds();
 
-        public static IObservable<Frame> AssertListViewHasObject<TObject>(this XafApplication application, Func<TObject,bool> match=null)  
+        public static IObservable<Frame> AssertListViewHasObject<TObject>(this XafApplication application, Func<TObject,bool> matchObject=null,int count=0,[CallerMemberName]string caller="")  
             => application.WhenFrame(typeof(TObject),ViewType.ListView)
-                .SelectUntilViewClosed(frame => frame.View.WhenControlsCreated(true)
+                .SelectUntilViewClosed(frame => frame.View.WhenControlsCreated(true).Take(1)
                     .SelectMany(view => view.ToListView().WhenObjects<TObject>()
-                        .Where(value => match?.Invoke(value)??true).Take(1)
-                        .SelectMany(value => view.ToListView().SelectObject(value))
-                        .To(frame).Assert()));
+                        .Where(value => matchObject?.Invoke(value)??true)
+                        .SkipOrOriginal(count-1).Take(1)
+                        .SelectMany(value => view.ToListView().SelectObject(value)).To(frame)
+                        .Assert(_ => $"{typeof(TObject).Name}-{view.Id}",caller:caller)))
+                .ReplayFirstTake();
 
         public static IObservable<TTabbedControl> AssertTabControl<TTabbedControl>(this XafApplication application,Type objectType=null,Func<DetailView,bool> match=null,Func<IModelTabbedGroup, bool> tabMatch=null,[CallerMemberName]string caller="") 
             => application.WhenTabControl<TTabbedControl>( objectType, match,tabMatch).Assert(objectType?.Name,caller:$"{caller} - {nameof(AssertTabControl)}");

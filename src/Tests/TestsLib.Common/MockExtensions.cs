@@ -90,9 +90,9 @@ namespace Xpand.TestsLib.Common {
 
         public static void SetupReceive(this Mock<WebSocket> mock, byte[] bytes,Func<Task<WebSocketReceiveResult>> resultSelector=null) {
             mock.Setup(socket => socket.ReceiveAsync(It.IsAny<ArraySegment<byte>>(), It.IsAny<CancellationToken>()))
-                .Returns((ArraySegment<byte> buffer, CancellationToken _) => {
+                .Returns((ArraySegment<byte> buffer, CancellationToken token) => {
                     Array.Copy(bytes,buffer.Array!,bytes.Length);
-                    return resultSelector?.Invoke()??new WebSocketReceiveResult(bytes.Length,WebSocketMessageType.Text, true).Observe().ObserveOnDefault().ToTask(_);
+                    return resultSelector?.Invoke()??new WebSocketReceiveResult(bytes.Length,WebSocketMessageType.Text, true).Observe().ObserveOnDefault().ToTask(token);
                 });
             mock.Setup(socket => socket.State).Returns(WebSocketState.Open);
         }
@@ -107,12 +107,12 @@ namespace Xpand.TestsLib.Common {
         public static IReturnsResult<THandler> SetupSend<THandler>(this Mock<THandler> handlerMock,
             Action<HttpResponseMessage> configure=null, IScheduler scheduler = null) where THandler : HttpMessageHandler 
             => handlerMock.Protected().Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
-                .Returns((HttpRequestMessage requestMessage, CancellationToken _)
+                .Returns((HttpRequestMessage requestMessage, CancellationToken token)
                     =>  new HttpResponseMessage { StatusCode = HttpStatusCode.OK, RequestMessage = requestMessage }.Observe()
                         .Do(message => message.Content=new StringContent("[]"))
                         .Do(message => configure?.Invoke(message))
                         .Delay(Delay,scheduler??=Scheduler.Default)
-                        .ToTask(_, scheduler??=Scheduler.Default));
+                        .ToTask(token, scheduler??=Scheduler.Default));
 
         public static IObservable<HttpResponseMessage> WhenMockedResponse(this XafApplication application,
             Action<HttpClient> configure = null, IScheduler scheduler = null) 

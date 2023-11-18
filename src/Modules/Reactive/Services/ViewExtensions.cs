@@ -53,23 +53,25 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => source.SelectMany(view => {
                 if (view.Editor.GetType().InheritsFrom(GridListEditorType)){
                     var gridView = view.Editor.GetPropertyValue("GridView");
-                    return objects.Select(obj => {
-                            gridView.CallMethod("ClearSelection");
-                            var index = (int)gridView.CallMethod("FindRow", obj);
-                            gridView.CallMethod("SelectRow", index);
-                            return index;
-                        }).ToNowObservable()
-                        .BufferUntilCompleted()
-                        .Select(indexes => {
-                            if (indexes.Length==1){
-                                gridView.SetPropertyValue("FocusedRowHandle", indexes.First()) ;
-                            }
-                            return gridView.GetPropertyValue("FocusedRowObject") as T;
-                        });
+                    return objects.ToNowObservable().SelectManySequential(arg => gridView.WhenSelectRow(arg).To(arg));
                 }
                 throw new NotImplementedException(nameof(view.Editor));
             });
         
+        static IObservable<int> WhenSelectRow<T>(this object gridView, T row) where T : class 
+            => gridView.Defer(() => {
+                var rowHandle = (int)gridView.CallMethod("FindRow",row);
+                return Observable.While(() => {
+                        gridView.CallMethod("MakeRowVisible",rowHandle);
+                        gridView.SetPropertyValue("FocusedRowHandle", rowHandle);
+                        return gridView.CallMethod("IsRowVisible", rowHandle).ToString() == "Hidden";
+                    }, Observable.Timer(1.Seconds()).Select(l => l.Change<int>()).ObserveOnContext().IgnoreElements())
+                    .ConcatDefer(() => rowHandle.Observe().Do(_ => {
+                        gridView.CallMethod("SelectRow", rowHandle);
+                        gridView.SetPropertyValue("FocusedRowHandle", rowHandle);
+                    }));
+            });
+
         public static IObservable<CustomizeShowViewParametersEventArgs> WhenNestedListViewProcessCustomizeShowViewParameters(
             this DetailView detailView, params Type[] objectTypes) 
             => detailView.FrameContainers(objectTypes).ToNowObservable()

@@ -57,13 +57,13 @@ namespace Xpand.TestsLib {
                 .SelectMany(_ => application.Start(test, SynchronizationContext.Current,user,logContext)).FirstOrDefaultAsync();
 
         private static IObservable<T> Start<T>(this WinApplication application, IObservable<T> test,
-            SynchronizationContext context, string user = null, LogContext logContext = default) 
+            SynchronizationContext context, string user = null, LogContext logContext = default,WindowPosition logContextLocation=WindowPosition.BottomRight) 
             => application.Start( exit => TestTracing.WhenError().ThrowTestException()
                     .DoOnError(_ => application.Terminate(context)).To<T>()
                     .Merge(application.Observe()
                         .SelectMany(_ => test.Start(application, user,context))
                         .LogError()).Buffer(exit).Take(1).SelectMany())
-                .Log(logContext);
+                .Log(logContext,logContextLocation,true);
         
         private static IObservable<T> Start<T>(this IObservable<T> test,WinApplication application, string user, SynchronizationContext context) 
             => (user==null?application.WhenLoggedOn().ToFirst(): application.WhenLoggedOn(user)).Take(1).IgnoreElements().To<T>()

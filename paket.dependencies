@@ -23,8 +23,9 @@ nuget DevExpress.Win.SpellChecker 23.1.6
 nuget ZString 2.5.0
 nuget System.CodeDom == 6.0.0
 nuget System.Text.Json == 7.0.2
-nuget System.Security.Cryptography.Xml 7.0.1
-nuget System.Security.Cryptography.ProtectedData 7.0.1
+nuget System.Security.Cryptography.Pkcs == 8.0.0
+nuget System.Security.Cryptography.Xml == 8.0.0
+nuget System.Security.Cryptography.ProtectedData == 8.0.0
 nuget System.ServiceModel.NetTcp 4.10.2
 nuget System.ServiceModel.Security 4.10.2
 nuget System.ServiceModel.Http 4.10.2

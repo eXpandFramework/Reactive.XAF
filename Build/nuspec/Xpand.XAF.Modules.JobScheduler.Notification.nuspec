@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.JobScheduler.Notification</id>
-    <version>4.231.6.1</version>
+    <version>4.231.6.7</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -15,19 +15,19 @@
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, JobScheduler.Notification, 23.1.6</tags>
     <dependencies>
       <group targetFramework="netstandard2.0">
-        <dependency id="Xpand.VersionConverter" version="4.231.6.1" />
+        <dependency id="Xpand.VersionConverter" version="4.231.6.7" />
       </group>
       <group targetFramework="net6.0">
-        <dependency id="Xpand.Extensions.Blazor" version="4.231.6.1" />
-        <dependency id="Xpand.Extensions.Reactive" version="4.231.6.1" />
-        <dependency id="Xpand.Extensions.XAF" version="4.231.6.1" />
-        <dependency id="Xpand.Extensions" version="4.231.6.1" />
-        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.231.6.1" />
-        <dependency id="Xpand.XAF.Modules.Blazor" version="4.231.6.1" />
-        <dependency id="Xpand.XAF.Modules.Reactive" version="4.231.6.1" />
+        <dependency id="Xpand.Extensions.Blazor" version="4.231.6.7" />
+        <dependency id="Xpand.Extensions.Reactive" version="4.231.6.7" />
+        <dependency id="Xpand.Extensions.XAF" version="4.231.6.7" />
+        <dependency id="Xpand.Extensions" version="4.231.6.7" />
+        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.231.6.7" />
+        <dependency id="Xpand.XAF.Modules.Blazor" version="4.231.6.7" />
+        <dependency id="Xpand.XAF.Modules.Reactive" version="4.231.6.7" />
         <dependency id="DevExpress.ExpressApp.ConditionalAppearance" version="23.1.6" />
         <dependency id="Fasterflect.Xpand" version="2.0.7" />
-        <dependency id="System.Reactive" version="5.0" />
+        <dependency id="System.Reactive" version="6.0" />
         <dependency id="Hangfire.AspNetCore" version="1.7.34" />
         <dependency id="Xpand.Patcher" version="3.0.22" />
         <dependency id="System.Threading.Tasks.Dataflow" version="7.0" />
@@ -36,7 +36,7 @@
         <dependency id="DevExpress.ExpressApp.Validation.Blazor" version="23.1.6" />
         <dependency id="DevExpress.ExpressApp.Xpo" version="23.1.6" />
         <dependency id="Xpand.Patcher" version="3.0.22.0" />
-        <dependency id="Xpand.VersionConverter" version="4.231.6.1" />
+        <dependency id="Xpand.VersionConverter" version="4.231.6.7" />
       </group>
     </dependencies>
   </metadata>

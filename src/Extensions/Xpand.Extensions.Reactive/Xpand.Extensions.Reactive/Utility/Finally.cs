@@ -1,17 +1,32 @@
 ﻿using System;
+using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
 using System.Runtime.CompilerServices;
 
 namespace Xpand.Extensions.Reactive.Utility {
     public static partial class Utility {
-        /// <summary>
-        /// Invokes a specified action after the source observable sequence terminates
-        /// successfully or exceptionally. The action is invoked before the propagation
-        /// of the source's completion, and any exception thrown by the action is
-        /// propagated to the observer. The action is also invoked if the observer
-        /// is unsubscribed before the termination of the source sequence.
-        /// </summary>
+        public static IObservable<T> AsyncFinally<T>(this IObservable<T> source, Func<IObservable<object>> action)
+            => source.AsyncFinally(async () => await action().ToTask());
+
+        public static IObservable<T> AsyncFinally<T>(this IObservable<T> source, Func<System.Threading.Tasks.Task> action) 
+            => source
+                .Materialize()
+                .SelectMany(async n => {
+                    switch (n.Kind){
+                        case NotificationKind.OnCompleted:
+                        case NotificationKind.OnError:
+                            await action();
+                            return n;
+                        case NotificationKind.OnNext:
+                            return n;
+                        default:
+                            throw new NotImplementedException();
+                    }
+                })
+                .Dematerialize();
+        
         public static IObservable<T> FinallySafe<T>(this IObservable<T> source, Action finallyAction,[CallerMemberName]string caller="" ) 
             => Observable.Create<T>(observer => {
                 var finallyOnce = Disposable.Create(finallyAction);
