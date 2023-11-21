@@ -1,0 +1,5 @@
+<Project >
+    <PropertyGroup>
+      <NuGetAudit>disable</NuGetAudit>
+    </PropertyGroup>
+</Project>

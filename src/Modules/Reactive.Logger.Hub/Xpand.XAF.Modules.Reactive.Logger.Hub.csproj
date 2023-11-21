@@ -17,6 +17,13 @@
     <DebugType>full</DebugType>
     <CopyLocalLockFileAssemblie>true</CopyLocalLockFileAssemblie>
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
+    <NuGetAudit>disable</NuGetAudit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <NoWarn>1701;1702;NU1701;CS8002;CS0618;NU1902</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <NoWarn>1701;1702;NU1701;CS8002;CS0618;NU1902</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Model.DesignedDiffs.xafml" />
