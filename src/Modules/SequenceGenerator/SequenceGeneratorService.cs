@@ -232,7 +232,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
                                 .Merge(objectSpace.WhenRollingBack().ToUnit()))
                             .Finally(() => {
                                 unitOfWorks.TryRemove(objectSpace, out explicitUnitOfWork);
-                                explicitUnitOfWork.Close();
+                                explicitUnitOfWork?.Close();
                             });
                     }
                     return Observable.Empty<(ObjectManipulationEventArgs e, ExplicitUnitOfWork explicitUnitOfWork)>();
