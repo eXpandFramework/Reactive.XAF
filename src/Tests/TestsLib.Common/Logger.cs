@@ -91,9 +91,7 @@ namespace Xpand.TestsLib.Common{
         public static IObservable<StreamWriter> Writer(this IObservable<NamedPipeClientStream> source) 
             => source.Select(client => client.Writer());
 
-        public static StreamWriter Writer(this NamedPipeClientStream client){
-            return new StreamWriter(client){AutoFlush = true};
-        }
+        public static StreamWriter Writer(this NamedPipeClientStream client) => new(client){AutoFlush = true};
 
         private static IObservable<NamedPipeClientStream> Connect(this Logger logger) 
             => Observable.Interval(100.Milliseconds())
@@ -102,10 +100,14 @@ namespace Xpand.TestsLib.Common{
                     .Catch<Unit,TimeoutException>(_ => Observable.Empty<Unit>()).To(clientStream))
                 .Timeout(logger.ConnectionTimeout).WhenNotDefault(stream => stream.IsConnected).Take(1);
 
-        public static IObservable<T> Log<T>(this IObservable<T> source,Func<T,string> messageFactory,[CallerMemberName]string caller="") 
-            => source.Do(x => $"{caller}: {messageFactory(x)}".LogValue());
+        public static IObservable<T> Log<T>(this IObservable<T> source,Func<T,string> messageFactory,TextWriter textWriter=null,[CallerMemberName]string caller="") 
+            => source.Do(x => $"{caller}: {messageFactory(x)}".LogValue(textWriter));
         
-        public static T LogValue<T>(this T value){
+        public static IObservable<T> Log<T>(this IObservable<T> source,Func<T,string> messageFactory,[CallerMemberName]string caller="") 
+            => source.Log(messageFactory,null,caller);
+        
+        public static T LogValue<T>(this T value,TextWriter textWriter=null){
+            textWriter?.WriteLine(value);
             Console.WriteLine(value);
             return value;
         }
@@ -151,19 +153,13 @@ namespace Xpand.TestsLib.Common{
 
         public bool Equals(LogContext other) => CustomValue == other.CustomValue;
 
-        public static bool operator ==(LogContext x, LogContext y){
-            return x.Equals(y);
-        }
+        public static bool operator ==(LogContext x, LogContext y) => x.Equals(y);
 
-        public static bool operator !=(LogContext x, LogContext y){
-            return !x.Equals(y);
-        }
+        public static bool operator !=(LogContext x, LogContext y) => !x.Equals(y);
 
         public string CustomValue{ get; }
 
-        public static implicit operator LogContext(string s){
-            return new LogContext(s);
-        }
+        public static implicit operator LogContext(string s) => new(s);
 
         public static implicit operator string(LogContext context) => context.CustomValue switch{
             nameof(All) => ".*",

@@ -21,6 +21,7 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using DevExpress.ExpressApp.Security;
 using DevExpress.ExpressApp.SystemModule;
+using DevExpress.ExpressApp.ViewVariantsModule;
 using Fasterflect;
 using Xpand.Extensions.EventArgExtensions;
 using Xpand.Extensions.ExpressionExtensions;
@@ -966,20 +967,19 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 () => controller.FindNavigationItemByViewShortcut(new ViewShortcut(viewId, null)));
         }
         public static IObservable<Window> Navigate(this XafApplication application,string viewId,Func<Window,IObservable<Unit>> navigate=null) 
-            => application.Navigate(viewId,frame =>frame.WhenFrame(viewId).Select(frame1 => frame1),navigate).Take(1).Cast<Window>();
+            => application.Navigate(viewId,(frame, id) => frame.WhenFrame(id).Merge(application.WhenFrame(id).Take(1)),navigate).Take(1).Cast<Window>();
         
-        public static IObservable<Frame> Navigate(this XafApplication application,string viewId, Func<Frame,IObservable<Frame>> afterNavigation,Func<Window,IObservable<Unit>> navigate=null) 
+        public static IObservable<Frame> Navigate(this XafApplication application,string viewId, Func<Frame,string,IObservable<Frame>> afterNavigation,Func<Window,IObservable<Unit>> navigate=null) 
             => application.Defer(() => application.MainWindow == null ? application.WhenWindowCreated(true)
-                    .SelectMany(window => window.Navigate(viewId,afterNavigation(window),navigate))
-                : application.MainWindow.Navigate(viewId, afterNavigation(application.MainWindow),navigate));
+                    .SelectMany(window => window.Navigate(viewId,id => afterNavigation(window,id),navigate))
+                : application.MainWindow.Navigate(viewId, id => afterNavigation(application.MainWindow,id),navigate));
         
-        public static IObservable<Frame> Navigate(this Window window,string viewId, IObservable<Frame> afterNavigation,Func<Window,IObservable<Unit>> navigate){
+        public static IObservable<Frame> Navigate(this Window window,string viewId, Func<string,IObservable<Frame>> afterNavigation,Func<Window,IObservable<Unit>> navigate){
             navigate ??= _ => Unit.Default.Observe();
-            return navigate(window).SelectMany(_ => {
-                var controller = window.GetController<ShowNavigationItemController>();
-                return controller.ShowNavigationItemAction.Trigger(afterNavigation,
-                    () => controller.FindNavigationItemByViewShortcut(new ViewShortcut(viewId, null)));
-            });
+            var controller = window.GetController<ShowNavigationItemController>();
+            var item = controller.FindNavigationItemByViewShortcut(new ViewShortcut(viewId, null));
+            return navigate(window).SelectMany(_ => controller.ShowNavigationItemAction
+                    .Trigger(afterNavigation(((IModelViewVariants)((IModelNavigationItem)item.Model).View).Variants.Current.View.Id), () => item));
         }
 
         private static IObservable<T[]> Commit<T>(this IObjectSpace objectSpace,Func<IObjectSpace, IObservable<T>> commit, string caller, IObserver<T[]> observer,bool validate) 
@@ -996,12 +996,19 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                     observer.OnNext(arg);
                 });
 
-        public static IObservable<Unit> ReloadDetailViewWhenObjectCommitted<TObject>(this XafApplication application, Type detailViewObjectType) where TObject : class 
-            => application.WhenProviderCommittedDetailed<TObject>(ObjectModification.All).ToObjectsGroup()
-                .Publish(wallets => application.WhenFrame(detailViewObjectType, ViewType.DetailView)
-                    .SelectUntilViewClosed(frame => wallets.ObserveOnContext().Do(_ => frame.View.ObjectSpace.Refresh()))
-                    .Merge(wallets).TakeUntilDisposed(application)).ToUnit();
+        public static IObservable<Unit> RefreshListViewWhenObjectCommitted<TObject>(this XafApplication application) where TObject : class
+            => application.RefreshObjectViewWhenCommitted<TObject>();
+        
+        public static IObservable<Unit> RefreshDetailViewWhenObjectCommitted<TObject>(this XafApplication application, Type detailViewObjectType) where TObject : class 
+            => application.RefreshObjectViewWhenCommitted<TObject>( detailViewObjectType);
 
+        private static IObservable<Unit> RefreshObjectViewWhenCommitted<TObject>(this XafApplication application, Type detailViewObjectType=null) where TObject : class 
+            => application.WhenProviderCommittedDetailed<TObject>(ObjectModification.All).ToObjectsGroup()
+                .Publish(wallets => application.WhenFrame(detailViewObjectType, detailViewObjectType!=null?ViewType.DetailView:ViewType.ListView)
+                    .Where(frame => frame.View.IsRoot)
+                    .SelectUntilViewClosed(frame => wallets.ObserveOnContext()
+                        .DoWhen(_ => frame.View!=null,_ => frame.View.ObjectSpace.Refresh()))
+                    .Merge(wallets).TakeUntilDisposed(application)).ToUnit();
     }
 
 

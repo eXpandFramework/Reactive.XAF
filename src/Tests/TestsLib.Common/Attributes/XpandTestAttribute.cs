@@ -52,14 +52,11 @@ namespace Xpand.TestsLib.Common.Attributes{
                 var count = _tryCount;
                 var version = Version.Parse(XafAssemblyInfo.Version);
                 if ($"{version.Major}.{version.Minor}" == _ignoredXAFMinorVersions){
-                    // context.CurrentTest.MakeInvalid(_ignoredXAFMinorVersions);
                     context.CurrentTest.RunState=RunState.Skipped;
                     return context.CurrentResult;
                 }
                 while (count-- > 0){
                     try{
-                        // ManualResetEvent resetEvent = new ManualResetEvent(false);
-                        
                         void ExecuteTest() => Task.Factory.StartTask(() => context.CurrentResult = innerCommand.Execute(context),
                                 thread => thread.SetApartmentState(GetApartmentState(context,_apartmentState))).Wait();
 
@@ -67,25 +64,33 @@ namespace Xpand.TestsLib.Common.Attributes{
                             ExecuteTest();
                         }
                         else {
-                            Polly.Policy.Timeout(TimeSpan.FromMilliseconds(_timeout), TimeoutStrategy.Pessimistic)
-                                .Execute(ExecuteTest);
+                            Polly.Policy.Timeout(TimeSpan.FromMilliseconds(_timeout), TimeoutStrategy.Pessimistic).Execute(ExecuteTest);
+                            if (count <= 0) continue;
+                            TestContext.Out.WriteLine($"{context.CurrentResult.Message}{Environment.NewLine}Retry {context.CurrentRepeatCount+1} of {_tryCount}");
+                            if (context.CurrentResult.ResultState!=ResultState.Success){
+                                context.CurrentRepeatCount++;
+                            }
+                            else{
+                                break;
+                            }
                         }
                     }
                     catch (Exception ex){
                         context.CurrentResult ??= context.CurrentTest.MakeTestResult();
-                        var message = $"Retry {context.CurrentRepeatCount+1} of {_tryCount}";
+                        var message = $" Timeout ({_timeout})ms, retry {context.CurrentRepeatCount+1} of {_tryCount}";
                         TestContext.Out.WriteLine(message);
                         context.CurrentResult.RecordException(new Exception(message,ex));
+                        if (count > 0){
+                            if (context.CurrentResult.ResultState!=ResultState.Success){
+                                context.CurrentRepeatCount++;
+                            }
+                            else{
+                                break;
+                            }
+                        }
                     }
 
-                    if (count > 0){
-                        if (context.CurrentResult.ResultState!=ResultState.Success){
-                            context.CurrentRepeatCount++;
-                        }
-                        else{
-                            break;
-                        }
-                    }
+                    
                 }
 
                 return context.CurrentResult;
