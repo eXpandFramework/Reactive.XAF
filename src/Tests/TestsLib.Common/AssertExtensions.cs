@@ -1,11 +1,15 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.Model;
+using DevExpress.ExpressApp.ViewVariantsModule;
 using Xpand.Extensions.Numeric;
+using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
@@ -13,6 +17,7 @@ using Xpand.Extensions.XAF.ActionExtensions;
 using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.ViewExtensions;
 using Xpand.XAF.Modules.Reactive.Services;
+using Xpand.XAF.Modules.Reactive.Services.Actions;
 
 namespace Xpand.TestsLib.Common {
     public static class AssertExtensions {
@@ -55,5 +60,24 @@ namespace Xpand.TestsLib.Common {
 
         
         public static string MessageFactory<TSource>(this Func<TSource, string> messageFactory, string caller) => $"{caller}: {messageFactory(default)}";
+        
+        public static IObservable<Unit> AssertNavigation(this XafApplication application,string view, Func<IObservable<Frame>,IObservable<Unit>> assert, IObservable<Unit> canNavigate) 
+            => application.AssertNavigation(view,_ => canNavigate.SwitchIfEmpty(Observable.Throw<Unit>(new CannotNavigateException())).ToUnit())
+                .SelectMany(window => window.Observe().SelectMany(frame => assert(frame.Observe())))
+                .FirstOrDefaultAsync().ReplayFirstTake();
+        
+        public static IObservable<Frame> AssertChangeViewVariant(this IObservable<Frame> source,string id) 
+            => source.ToController<ChangeVariantController>()
+                .SelectMany(controller => {
+                    var choiceActionItem = controller.ChangeVariantAction.Items.First(item => item.Id == id);
+                    var variantInfo = ((VariantInfo)choiceActionItem.Data);
+                    return variantInfo.ViewID != controller.Frame.View.Id ? controller.ChangeVariantAction.Trigger(controller.Application.WhenFrame(variantInfo.ViewID),() => choiceActionItem) : controller.Frame.Observe();
+                });
+        
+        public static IObservable<Window> AssertNavigation(this XafApplication application, string viewId,Func<Window,IObservable<Unit>> navigate=null)
+            => application.Navigate(viewId,window => (navigate?.Invoke(window)?? Observable.Empty<Unit>()).SwitchIfEmpty(Unit.Default.Observe()))
+                .Assert($"{viewId}").Catch<Window,CannotNavigateException>(_ => Observable.Empty<Window>());
+        public class CannotNavigateException:Exception{ }
+
     }
 }

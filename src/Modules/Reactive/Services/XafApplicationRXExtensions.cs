@@ -939,6 +939,18 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             Func<IObjectSpace, IObservable<T>> commit, int retry, string caller,bool validate) 
             => objectSpaceSource(space => !xafApplication.IsDisposed() ? space.Commit(commit, caller, observer,validate) : Observable.Empty<T[]>(), objectType)
                 .RetryWithBackoff(retry).DoOnError(observer.OnError).Select(_ => default(object));
+        
+        public static IObservable<Frame> NavigateBack(this XafApplication application){
+            var viewNavigationController = application.MainWindow.GetController<ViewNavigationController>();
+            return viewNavigationController.NavigateBackAction
+                .Trigger(application.WhenFrame(Nesting.Root).OfType<Window>()
+                        .SelectMany(window => window.View.WhenControlsCreated().Take(1).To(window)),
+                    () => viewNavigationController.NavigateBackAction.Items.First())
+                .Select(window => window);
+        }
+        
+        public static IObservable<ListPropertyEditor> WhenNestedFrame(this XafApplication application, Type parentObjectType,params Type[] objectTypes)
+            => application.WhenFrame(parentObjectType,ViewType.DetailView).SelectUntilViewClosed(frame => frame.NestedListViews(objectTypes));
 
         public static IObservable<Frame> Navigate(this XafApplication application, Type objectType,ViewType viewType)
             => application.WhenFrame(objectType,viewType).Publish(frames => application.Navigate(application.FindViewId(viewType, objectType), frames));
@@ -953,21 +965,22 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             return controller.ShowNavigationItemAction.Trigger(afterNavigation,
                 () => controller.FindNavigationItemByViewShortcut(new ViewShortcut(viewId, null)));
         }
+        public static IObservable<Window> Navigate(this XafApplication application,string viewId,Func<Window,IObservable<Unit>> navigate=null) 
+            => application.Navigate(viewId,frame =>frame.WhenFrame(viewId).Select(frame1 => frame1),navigate).Take(1).Cast<Window>();
         
-        public static IObservable<Frame> NavigateBack(this XafApplication application){
-            var viewNavigationController = application.MainWindow.GetController<ViewNavigationController>();
-            return viewNavigationController.NavigateBackAction
-                .Trigger(application.WhenFrame(Nesting.Root).OfType<Window>()
-                        .SelectMany(window => window.View.WhenControlsCreated().Take(1).To(window)),
-                    () => viewNavigationController.NavigateBackAction.Items.First())
-                .Select(window => window);
+        public static IObservable<Frame> Navigate(this XafApplication application,string viewId, Func<Frame,IObservable<Frame>> afterNavigation,Func<Window,IObservable<Unit>> navigate=null) 
+            => application.Defer(() => application.MainWindow == null ? application.WhenWindowCreated(true)
+                    .SelectMany(window => window.Navigate(viewId,afterNavigation(window),navigate))
+                : application.MainWindow.Navigate(viewId, afterNavigation(application.MainWindow),navigate));
+        
+        public static IObservable<Frame> Navigate(this Window window,string viewId, IObservable<Frame> afterNavigation,Func<Window,IObservable<Unit>> navigate){
+            navigate ??= _ => Unit.Default.Observe();
+            return navigate(window).SelectMany(_ => {
+                var controller = window.GetController<ShowNavigationItemController>();
+                return controller.ShowNavigationItemAction.Trigger(afterNavigation,
+                    () => controller.FindNavigationItemByViewShortcut(new ViewShortcut(viewId, null)));
+            });
         }
-        
-        public static IObservable<ListPropertyEditor> WhenNestedFrame(this XafApplication application, Type parentObjectType,params Type[] objectTypes)
-            => application.WhenFrame(parentObjectType,ViewType.DetailView).SelectUntilViewClosed(frame => frame.NestedListViews(objectTypes));
-        
-        public static IObservable<Window> Navigate(this XafApplication application,string viewId) 
-            => application.Navigate(viewId,application.WhenFrame(viewId).Take(1)).Cast<Window>();
 
         private static IObservable<T[]> Commit<T>(this IObjectSpace objectSpace,Func<IObjectSpace, IObservable<T>> commit, string caller, IObserver<T[]> observer,bool validate) 
             => commit(objectSpace).BufferUntilCompleted()
@@ -984,8 +997,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 });
 
         public static IObservable<Unit> ReloadDetailViewWhenObjectCommitted<TObject>(this XafApplication application, Type detailViewObjectType) where TObject : class 
-            => application.WhenProviderCommittedDetailed<TObject>(ObjectModification.All)
-                .ToObjectsGroup().WaitUntilInactive(1.Seconds())
+            => application.WhenProviderCommittedDetailed<TObject>(ObjectModification.All).ToObjectsGroup()
                 .Publish(wallets => application.WhenFrame(detailViewObjectType, ViewType.DetailView)
                     .SelectUntilViewClosed(frame => wallets.ObserveOnContext().Do(_ => frame.View.ObjectSpace.Refresh()))
                     .Merge(wallets).TakeUntilDisposed(application)).ToUnit();

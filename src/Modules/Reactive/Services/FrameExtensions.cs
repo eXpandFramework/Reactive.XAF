@@ -205,7 +205,9 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             Func<Frame,ViewType> viewType = null, Nesting nesting = Nesting.Any) where T:Frame
             => source.Where(frame => frame.When(nesting))
                 .SelectMany(frame => frame.WhenFrame(viewType?.Invoke(frame)??ViewType.Any, objectType?.Invoke(frame)));
-
+        
+        public static IObservable<T> WhenFrame<T>(this T frame, params string[] viewIds) where T : Frame 
+            => frame.WhenViewChanged().To(frame).Where(_ => viewIds.Contains(frame.View.Id));
         private static IObservable<T> WhenFrame<T>(this T frame,ViewType viewType, Type types) where T : Frame 
             => frame.View != null ? frame.When(viewType) && frame.When(types) ? frame.Observe() : Observable.Empty<T>()
                 : frame.WhenViewChanged().Where(t => t.frame.When(viewType) && t.frame.When(types)).To(frame);

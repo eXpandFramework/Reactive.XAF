@@ -53,8 +53,8 @@
     <PackageReference Include="DevExpress.Persistent.Base" Version="23.1.6" />
     <PackageReference Include="DevExpress.Persistent.BaseImpl.Xpo" Version="23.1.6" />
     <PackageReference Include="Microsoft.CodeAnalysis" Version="4.2.0.0" />
-    <PackageReference Include="System.Security.Cryptography.Xml" Version="7.0.1" />
-    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="7.0.1" />
+    <PackageReference Include="System.Security.Cryptography.Xml" Version="8.0.0" />
+    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="8.0.0" />
     <PackageReference Include="System.Text.Json" Version="7.0.2" />
     <PackageReference Include="System.ServiceModel.NetTcp" Version="4.10.2" />
     <PackageReference Include="System.ServiceModel.Security" Version="4.10.2" />
