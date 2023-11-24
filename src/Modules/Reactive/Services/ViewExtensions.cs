@@ -28,9 +28,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
     public static class ViewExtensions{
         private static readonly Type GridListEditorType;
 
-        static ViewExtensions() {
-            GridListEditorType = AppDomain.CurrentDomain.GetAssemblyType("DevExpress.ExpressApp.Win.Editors.GridListEditor");
-        }
+        static ViewExtensions() => GridListEditorType = AppDomain.CurrentDomain.GetAssemblyType("DevExpress.ExpressApp.Win.Editors.GridListEditor");
 
         public static IObservable<object> WhenObjects(this ListView listView) 
             => listView.Objects().ToNowObservable()
@@ -49,11 +47,18 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .SelectMany(editor => editor.Control.WhenEvent("DataSourceChanged")).To(listView)
                 .SelectObject(objects);
         
+        
         static IObservable<T> SelectObject<T>(this IObservable<ListView> source,params T[] objects) where T : class 
             => source.SelectMany(view => {
                 if (view.Editor.GetType().InheritsFrom(GridListEditorType)){
                     var gridView = view.Editor.GetPropertyValue("GridView");
-                    return objects.ToNowObservable().SelectManySequential(arg => gridView.WhenSelectRow(arg).To(arg));
+                    gridView.CallMethod("ClearSelection");
+                    var focus = gridView.GetPropertyValue("FocusedRowHandle");
+                    return objects.ToNowObservable().SelectManySequential(arg => gridView.WhenSelectRow(arg).To(arg))
+                        .BufferUntilCompleted().SelectMany(arg => {
+                            gridView.CallMethod("UnselectRow", focus);
+                            return arg;
+                        });
                 }
                 throw new NotImplementedException(nameof(view.Editor));
             });
@@ -61,6 +66,9 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         static IObservable<int> WhenSelectRow<T>(this object gridView, T row) where T : class 
             => gridView.Defer(() => {
                 var rowHandle = (int)gridView.CallMethod("FindRow",row);
+                if ((int)gridView.GetPropertyValue("FocusedRowHandle") == rowHandle) {
+                    return rowHandle.Observe();
+                }
                 return Observable.While(() => {
                         gridView.CallMethod("MakeRowVisible",rowHandle);
                         gridView.SetPropertyValue("FocusedRowHandle", rowHandle);
@@ -90,7 +98,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         }
         public static IObservable<object> WhenObjects(this View view) 
             => view is ListView listView?listView.CollectionSource.WhenCollectionChanged()
-                .MergeToUnit(listView.CollectionSource.WhenCriteriaApplied().Select(@base => @base)).SelectMany(_ => listView.Objects())
+                .MergeToUnit(listView.CollectionSource.WhenCriteriaApplied()).SelectMany(_ => listView.Objects())
                 .StartWith(listView.Objects()):view.ToDetailView().WhenCurrentObjectChanged()
                 .Select(detailView => detailView.CurrentObject).StartWith(view.CurrentObject).WhenNotDefault();
         

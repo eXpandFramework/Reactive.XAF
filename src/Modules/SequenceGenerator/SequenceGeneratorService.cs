@@ -23,6 +23,7 @@ using Fasterflect;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Conditional;
+using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.Tracing;
@@ -293,9 +294,10 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
             });
         
         internal static IObservable<IDataLayer> SequenceGeneratorDatalayer(this  IObjectSpaceProvider objectSpaceProvider) 
-            => Observable.Defer(() => XpoDefault.GetDataLayer(objectSpaceProvider.GetConnectionString(),
-                ((TypesInfo) objectSpaceProvider.TypesInfo).EntityStores.OfType<XpoTypeInfoSource>().First().XPDictionary, AutoCreateOption.None
-            ).Observe().Where(layer => layer!=null)).SubscribeReplay()
-                .TraceSequenceGeneratorModule();
+            => objectSpaceProvider.Observe().WhenNotDefault()
+                .Select(_ => XpoDefault.GetDataLayer(objectSpaceProvider.GetConnectionString(),
+                    ((TypesInfo)objectSpaceProvider.TypesInfo).EntityStores.OfType<XpoTypeInfoSource>().First()
+                    .XPDictionary, AutoCreateOption.None)).WhenNotDefault()
+                .ReplayFirstTake();
     }
 }

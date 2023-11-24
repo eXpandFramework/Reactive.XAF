@@ -3,18 +3,28 @@ using System.Diagnostics;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.Model;
 using Xpand.Extensions.Numeric;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
+using Xpand.Extensions.XAF.ActionExtensions;
+using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.ViewExtensions;
 using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.TestsLib.Common {
     public static class AssertExtensions {
         public static TimeSpan TimeoutInterval = (Debugger.IsAttached ? 120 : 15).Seconds();
+        public static IObservable<SimpleAction> AssertSimpleAction(this IObservable<Frame> source, string actionId,Func<SimpleAction,bool> completeWhenNotAvailable=null,[CallerMemberName]string caller="")
+            => source.SelectMany(frame => frame.AssertSimpleAction(actionId,completeWhenNotAvailable, caller));
 
+        public static IObservable<SimpleAction> AssertSimpleAction(this Frame frame,string actionId,Func<SimpleAction,bool> completeWhenNotAvailable=null,[CallerMemberName]string caller="") 
+            => frame.Actions<SimpleAction>(actionId).ToNowObservable()
+                .SelectMany(action => !action.Available() && (completeWhenNotAvailable?.Invoke(action)??false) ? Observable.Empty<SimpleAction>()
+                    : action.Observe().Assert($"{nameof(AssertSimpleAction)} {frame.View} {actionId}", caller: caller));
+        
         public static IObservable<Frame> AssertListViewHasObject<TObject>(this XafApplication application, Func<TObject,bool> matchObject=null,int count=0,[CallerMemberName]string caller="")  
             => application.WhenFrame(typeof(TObject),ViewType.ListView)
                 .SelectUntilViewClosed(frame => frame.View.WhenControlsCreated(true).Take(1)

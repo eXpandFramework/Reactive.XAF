@@ -982,6 +982,14 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                     }
                     observer.OnNext(arg);
                 });
+
+        public static IObservable<Unit> ReloadDetailViewWhenObjectCommitted<TObject>(this XafApplication application, Type detailViewObjectType) where TObject : class 
+            => application.WhenProviderCommittedDetailed<TObject>(ObjectModification.All)
+                .ToObjectsGroup().WaitUntilInactive(1.Seconds())
+                .Publish(wallets => application.WhenFrame(detailViewObjectType, ViewType.DetailView)
+                    .SelectUntilViewClosed(frame => wallets.ObserveOnContext().Do(_ => frame.View.ObjectSpace.Refresh()))
+                    .Merge(wallets).TakeUntilDisposed(application)).ToUnit();
+
     }
 
 

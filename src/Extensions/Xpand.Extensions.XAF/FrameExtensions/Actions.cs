@@ -29,7 +29,7 @@ namespace Xpand.Extensions.XAF.FrameExtensions{
         public static void ExecuteRefreshAction(this Frame frame) => frame.GetController<RefreshController>().RefreshAction.DoExecute();
         public static object ParentObject(this Frame frame) => frame.ParentObject<object>() ;
         public static T ParentObject<T>(this Frame frame) where T : class
-            => frame.ToNestedFrame().ViewItem.CurrentObject as T;
+            => frame.AsNestedFrame()?.ViewItem.CurrentObject as T;
         
         public static bool ParentIsNull(this Frame frame)  => frame.ParentObject<object>()==null;
         public static NestedFrame AsNestedFrame(this Frame frame) => frame.As<NestedFrame>(); 
@@ -58,6 +58,6 @@ namespace Xpand.Extensions.XAF.FrameExtensions{
 
         public static IEnumerable<T> Actions<T>(this Frame frame,params string[] actionsIds) where T : ActionBase 
             => frame.Controllers.Cast<Controller>().SelectMany(controller => controller.Actions).OfType<T>()
-                .Where(_ => !actionsIds.Any()|| actionsIds.Any(s => s==_.Id));
+                .Where(actionBase => !actionsIds.Any()|| actionsIds.Any(s => s==actionBase.Id));
     }
 }

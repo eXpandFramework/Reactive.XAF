@@ -38,6 +38,8 @@ namespace Xpand.Extensions.XAF.ActionExtensions {
         [Description("Find")]
         Find,
         [Description("Actions_Bookmark")]
-        Mark
+        Mark,
+        [Description("UpdateField")]
+        Update
     }
 }
