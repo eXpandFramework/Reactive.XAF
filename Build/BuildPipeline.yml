@@ -13,15 +13,7 @@ jobs:
     - group: keys
   steps:
     - checkout: self
-    # - task: CacheBeta@0
-    #   inputs:
-    #     key: 'nuget | "$(CustomVersion)" | paket.lock'
-    #     restoreKeys: |
-    #       nuget | "$(CustomVersion)"
-    #     path: $(NUGET_PACKAGES)
-    #   displayName: Cache NuGet packages
     - task: AzurePowerShell@5
-      condition: eq(variables['UseLastVersion'], '')
       name: Build
       inputs:
         errorActionPreference: stop
@@ -56,108 +48,126 @@ jobs:
           & '$(System.DefaultWorkingDirectory)\Build\BuildPipeline.ps1' @goArgs
     - task: DotNetCoreCLI@2
       displayName: 'AutoCommit'
+      condition: ne(variables['SkipTests'], 'True')
       inputs:
         command: 'test'
         projects: '**/Xpand.XAF.Modules.AutoCommit.Tests.csproj'
         workingDirectory: '$(System.DefaultWorkingDirectory)'
     - task: DotNetCoreCLI@2
       displayName: 'BulkObjectUpdate'
+      condition: ne(variables['SkipTests'], 'True')
       inputs:
         command: 'test'
         projects: '**/Xpand.XAF.Modules.BulkObjectUpdate.Tests.csproj'
         workingDirectory: '$(System.DefaultWorkingDirectory)'
     - task: DotNetCoreCLI@2
       displayName: 'CloneMemberValue'
+      condition: ne(variables['SkipTests'], 'True')
       inputs:
         command: 'test'
         projects: '**/Xpand.XAF.Modules.CloneMemberValue.Tests.csproj'
         workingDirectory: '$(System.DefaultWorkingDirectory)'
     - task: DotNetCoreCLI@2
       displayName: 'CloneModelView'
+      condition: ne(variables['SkipTests'], 'True')
       inputs:
         command: 'test'
         projects: '**/Xpand.XAF.Modules.CloneModelView.Tests.csproj'
         workingDirectory: '$(System.DefaultWorkingDirectory)'
     - task: DotNetCoreCLI@2
       displayName: 'Email'
+      condition: ne(variables['SkipTests'], 'True')
       inputs:
         command: 'test'
         projects: '**/Xpand.XAF.Modules.Email.Tests.csproj'
         workingDirectory: '$(System.DefaultWorkingDirectory)'
     - task: DotNetCoreCLI@2
       displayName: 'Test: Xpand.Extensions'
+      condition: ne(variables['SkipTests'], 'True')
       inputs:
         command: 'test'
         projects: '**/Xpand.Extensions.Tests.csproj'
         workingDirectory: '$(System.DefaultWorkingDirectory)'
     - task: DotNetCoreCLI@2
       displayName: 'GridListEditor'
+      condition: ne(variables['SkipTests'], 'True')
       inputs:
         command: 'test'
         projects: '**/Xpand.XAF.Modules.GridListEditor.Tests.csproj'
         workingDirectory: '$(System.DefaultWorkingDirectory)'
     - task: DotNetCoreCLI@2
       displayName: 'HideToolBar'
+      condition: ne(variables['SkipTests'], 'True')
       inputs:
         command: 'test'
         projects: '**/Xpand.XAF.Modules.HideToolBar.Tests.csproj'
         workingDirectory: '$(System.DefaultWorkingDirectory)'
     - task: DotNetCoreCLI@2
       displayName: 'JobScheduler.Hangfire'
+      condition: ne(variables['SkipTests'], 'True')
       inputs:
         command: 'test'
         projects: '**/Xpand.XAF.Modules.JobScheduler.Hangfire.Tests.csproj'
         workingDirectory: '$(System.DefaultWorkingDirectory)'
     - task: DotNetCoreCLI@2
       displayName: 'JobScheduler.Notification'
+      condition: ne(variables['SkipTests'], 'True')
       inputs:
         command: 'test'
         projects: '**/Xpand.XAF.Modules.JobScheduler.Notification.Tests.csproj'
         workingDirectory: '$(System.DefaultWorkingDirectory)'
     - task: DotNetCoreCLI@2
       displayName: 'MasterDetail'
+      condition: ne(variables['SkipTests'], 'True')
       inputs:
         command: 'test'
         projects: '**/Xpand.XAF.Modules.MasterDetail.Tests.csproj'
         workingDirectory: '$(System.DefaultWorkingDirectory)'
     - task: DotNetCoreCLI@2
       displayName: 'ModelMapper'
+      condition: ne(variables['SkipTests'], 'True')
       inputs:
         command: 'test'
         projects: '**/Xpand.XAF.Modules.ModelMapper.Tests.csproj'
         workingDirectory: '$(System.DefaultWorkingDirectory)'
     - task: DotNetCoreCLI@2
       displayName: 'ModelViewInheritance'
+      condition: ne(variables['SkipTests'], 'True')
       inputs:
         command: 'test'
         projects: '**/Xpand.XAF.Modules.ModelViewInheritance.Tests.csproj'
         workingDirectory: '$(System.DefaultWorkingDirectory)'
     - task: DotNetCoreCLI@2
       displayName: 'Office.Cloud'
+      condition: ne(variables['SkipTests'], 'True')
       inputs:
         command: 'test'
         projects: '**/Xpand.XAF.Modules.Office.Cloud.Tests.csproj'
         workingDirectory: '$(System.DefaultWorkingDirectory)'
     - task: DotNetCoreCLI@2
       displayName: 'Office.Cloud.Google'
+      condition: ne(variables['SkipTests'], 'True')
       inputs:
         command: 'test'
         projects: '**/Xpand.XAF.Modules.Office.Cloud.Google.Tests.csproj'
         workingDirectory: '$(System.DefaultWorkingDirectory)'
     - task: DotNetCoreCLI@2
       displayName: 'Office.Cloud.Google.Calendar'
+      condition: ne(variables['SkipTests'], 'True')
       inputs:
         command: 'test'
         projects: '**/Xpand.XAF.Modules.Office.Cloud.Google.Calendar.Tests.csproj'
         workingDirectory: '$(System.DefaultWorkingDirectory)'
     - task: DotNetCoreCLI@2
       displayName: 'Office.Cloud.Google.Tasks'
+      condition: ne(variables['SkipTests'], 'True')
       inputs:
         command: 'test'
         projects: '**/Xpand.XAF.Modules.Office.Cloud.Google.Tasks.Tests.csproj'
         workingDirectory: '$(System.DefaultWorkingDirectory)'
     - task: DotNetCoreCLI@2
       displayName: 'Office.DocumentStyleManager'
+      condition: ne(variables['SkipTests'], 'True')
       inputs:
         command: 'test'
         projects: '**/Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.csproj'
