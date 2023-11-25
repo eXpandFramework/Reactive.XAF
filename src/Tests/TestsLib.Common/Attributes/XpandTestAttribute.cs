@@ -57,16 +57,24 @@ namespace Xpand.TestsLib.Common.Attributes{
                 }
                 while (count-- > 0){
                     try{
-                        void ExecuteTest() => Task.Factory.StartTask(() => context.CurrentResult = innerCommand.Execute(context),
-                                thread => thread.SetApartmentState(GetApartmentState(context,_apartmentState))).Wait();
+                        var apartmentState = GetApartmentState(context,_apartmentState);
+                        
+                        void ExecuteTest() {
+                            if (Thread.CurrentThread.GetApartmentState() != apartmentState)
+                                Task.Factory.StartTask(() => context.CurrentResult = innerCommand.Execute(context),
+                                    thread => thread.SetApartmentState(apartmentState)).Wait();
+                            else
+                                innerCommand.Execute(context);
+                        }
 
                         if (Debugger.IsAttached) {
                             ExecuteTest();
                         }
                         else {
-                            Polly.Policy.Timeout(TimeSpan.FromMilliseconds(_timeout), TimeoutStrategy.Pessimistic).Execute(ExecuteTest);
+                            Polly.Policy.Timeout(TimeSpan.FromMilliseconds(_timeout), TimeoutStrategy.Optimistic).Execute(ExecuteTest);
                             if (count <= 0) continue;
-                            TestContext.Out.WriteLine($"{context.CurrentResult.Message}{Environment.NewLine}Retry {context.CurrentRepeatCount+1} of {_tryCount}");
+                            TestContext.Out.WriteWarning($"{context.CurrentResult.Message}");
+                            TestContext.Out.WriteLine($"Retry {context.CurrentRepeatCount+1} of {_tryCount}");
                             if (context.CurrentResult.ResultState!=ResultState.Success){
                                 context.CurrentRepeatCount++;
                             }
@@ -78,7 +86,7 @@ namespace Xpand.TestsLib.Common.Attributes{
                     catch (Exception ex){
                         context.CurrentResult ??= context.CurrentTest.MakeTestResult();
                         var message = $" Timeout ({_timeout})ms, retry {context.CurrentRepeatCount+1} of {_tryCount}";
-                        TestContext.Out.WriteLine(message);
+                        TestContext.Out.WriteWarning(message);
                         context.CurrentResult.RecordException(new Exception(message,ex));
                         if (count > 0){
                             if (context.CurrentResult.ResultState!=ResultState.Success){

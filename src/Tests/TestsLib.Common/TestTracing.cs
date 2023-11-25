@@ -4,6 +4,7 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Runtime.CompilerServices;
 using DevExpress.Persistent.Base;
+using Xpand.Extensions.EventArgExtensions;
 using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
@@ -11,9 +12,24 @@ using Xpand.Extensions.Reactive.Utility;
 namespace Xpand.TestsLib.Common{
     public class TestTracing : Tracing{
         readonly Subject<Exception> _errorSubject = new();
+        static readonly Subject<GenericEventArgs<IObservable<Exception>>> CustomizeErrorSubject = new();
+
+        public static IObservable<T> Handle<T>(Func<T,bool> match=null) where T : Exception
+            => WhenCustomizeError().SelectMany(e => e.Instance.OfType<T>()
+                .Where(exception => match?.Invoke(exception)??true)
+                .Do(_ => e.SetInstance(_ => Observable.Empty<Exception>())));
+        
+        public static IObservable<GenericEventArgs<IObservable<Exception>>> WhenCustomizeError()
+            => CustomizeErrorSubject.AsObservable();
         
         public static IObservable<Exception> WhenError([CallerMemberName]string caller="") 
-            => ((TestTracing)Tracer)._errorSubject.Select(exception => exception.ToTestException(caller)).AsObservable();
+            => ((TestTracing)Tracer)._errorSubject
+                .SelectMany(exception => {
+                    var e = new GenericEventArgs<IObservable<Exception>>(exception.Observe());
+                    CustomizeErrorSubject.OnNext(e);
+                    return e.Instance;
+                })
+                .Select(exception => exception.ToTestException(caller)).AsObservable();
 
         public static IObservable<Tracing> Use() 
             => typeof(Tracing).WhenEvent<CreateCustomTracerEventArgs>(nameof(CreateCustomTracer))

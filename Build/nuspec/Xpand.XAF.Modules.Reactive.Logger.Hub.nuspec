@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.Reactive.Logger.Hub</id>
-    <version>4.231.6.7</version>
+    <version>4.231.6.20</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -15,14 +15,14 @@
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Reactive.Logger.Hub, 23.1.6</tags>
     <dependencies>
       <group targetFramework="netstandard2.0">
-        <dependency id="Xpand.VersionConverter" version="4.231.6.7" />
+        <dependency id="Xpand.VersionConverter" version="4.231.6.20" />
       </group>
       <group targetFramework="net6.0">
-        <dependency id="Xpand.Extensions.Reactive" version="4.231.6.7" />
-        <dependency id="Xpand.Extensions.XAF" version="4.231.6.7" />
-        <dependency id="Xpand.Extensions" version="4.231.6.7" />
-        <dependency id="Xpand.XAF.Modules.Reactive" version="4.231.6.7" />
-        <dependency id="Xpand.XAF.Modules.Reactive.Logger" version="4.231.6.7" />
+        <dependency id="Xpand.Extensions.Reactive" version="4.231.6.20" />
+        <dependency id="Xpand.Extensions.XAF" version="4.231.6.20" />
+        <dependency id="Xpand.Extensions" version="4.231.6.20" />
+        <dependency id="Xpand.XAF.Modules.Reactive" version="4.231.6.20" />
+        <dependency id="Xpand.XAF.Modules.Reactive.Logger" version="4.231.6.20" />
         <dependency id="MagicOnion" version="2.6.3" />
         <dependency id="System.Interactive.Async" version="5.0" />
         <dependency id="DevExpress.ExpressApp" version="23.1.6" />
@@ -36,7 +36,7 @@
         <dependency id="System.Text.Json" version="7.0.2" />
         <dependency id="System.Threading.Tasks.Dataflow" version="7.0" />
         <dependency id="Xpand.Patcher" version="3.0.22.0" />
-        <dependency id="Xpand.VersionConverter" version="4.231.6.7" />
+        <dependency id="Xpand.VersionConverter" version="4.231.6.20" />
       </group>
     </dependencies>
   </metadata>

@@ -57,6 +57,32 @@ using EditorsFactory = DevExpress.ExpressApp.Editors.EditorsFactory;
 namespace Xpand.TestsLib.Common{
     
     public static class Extensions{
+        public static void WriteWarning(this TextWriter writer, string text) 
+            => writer.Write(text, "##[warning]");
+        
+        public static void WriteError(this TextWriter writer, string text) 
+            => writer.Write(text, "##[error]");
+
+        public static void WriteSection(this TextWriter writer,string text) 
+            => writer.WriteSection( text, "##[section]");
+
+        private static void WriteSection(this TextWriter writer, string text, string section){
+            var dashCount = text.Length + section.Length + 5;
+            var dashes = new string('-', dashCount);
+            writer.WriteLine($"{Environment.NewLine}{dashes}");
+            writer.WriteLine($"{section}{text}");
+            writer.WriteLine(dashes);
+        }
+
+        public static void WriteSection(this string text) 
+            => Console.Out.WriteSection(text);
+        
+        public static void WriteWarning(this string text) 
+            => Console.Out.WriteWarning(text);
+        
+        public static void WriteError(this string text) 
+            => Console.Out.WriteError(text);
+
         public static Exception ToTestException(this Exception exception,[CallerMemberName]string caller="") => TestException.New(exception,caller);
         public static IObservable<Exception> ThrowTestException(this Exception exception,[CallerMemberName]string caller="")
             => exception.Observe().ThrowTestException(caller);

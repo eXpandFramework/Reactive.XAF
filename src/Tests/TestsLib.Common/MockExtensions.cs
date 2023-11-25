@@ -104,6 +104,20 @@ namespace Xpand.TestsLib.Common {
                 configure?.Invoke(message);
             }, scheduler);
         
+        public static IReturnsResult<THandler> SetupSendArray<THandler>(this Mock<THandler> handlerMock,
+            Action<HttpResponseMessage> configure = null, IScheduler scheduler = null) where THandler : HttpMessageHandler
+            => handlerMock.SetupSend(message => {
+                message.Content = new StringContent(@"[
+    {
+        ""id"": 1,
+        ""name"": ""John Doe"",
+        ""isActive"": true
+    }
+]
+");
+                configure?.Invoke(message);
+            }, scheduler);
+        
         public static IReturnsResult<THandler> SetupSend<THandler>(this Mock<THandler> handlerMock,
             Action<HttpResponseMessage> configure=null, IScheduler scheduler = null) where THandler : HttpMessageHandler 
             => handlerMock.Protected().Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
@@ -113,6 +127,9 @@ namespace Xpand.TestsLib.Common {
                         .Do(message => configure?.Invoke(message))
                         .Delay(Delay,scheduler??=Scheduler.Default)
                         .ToTask(token, scheduler??=Scheduler.Default));
+        
+        public static ISetup<THandler, Task<HttpResponseMessage>> SetupSendAsync<THandler>(this Mock<THandler> handlerMock) where THandler : HttpMessageHandler 
+            => handlerMock.Protected().Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>());
 
         public static IObservable<HttpResponseMessage> WhenMockedResponse(this XafApplication application,
             Action<HttpClient> configure = null, IScheduler scheduler = null) 

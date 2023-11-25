@@ -158,7 +158,7 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net {
             => client.Request<ResponseResult>(httpRequestMessage)
                 .SelectMany(message => message.Content.ReadAsStreamAsync().ToObservable()
                     .SelectMany(stream => stream.WhenJsonDocument()
-                        .Finally(() => { }).Select(document => (document, message))));
+                        .Select(document => (document, message))));
         
         
         public static IObservable<(T[] objects, JsonDocument document)> WhenResponseDocument<T>(this HttpClient client,

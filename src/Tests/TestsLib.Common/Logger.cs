@@ -108,7 +108,9 @@ namespace Xpand.TestsLib.Common{
         
         public static T LogValue<T>(this T value,TextWriter textWriter=null){
             textWriter?.WriteLine(value);
-            Console.WriteLine(value);
+            if (textWriter == null) {
+                Console.WriteLine(value);    
+            }
             return value;
         }
 

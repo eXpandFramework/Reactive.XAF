@@ -617,6 +617,11 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => application.WhenProviderCommittedDetailed(objectType,objectModification,emitUpdatingObjectSpace,Array.Empty<string>(),criteria,caller);
         
         public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)> WhenProviderCommittedDetailed<T>(
+            this XafApplication application,ObjectModification objectModification,bool emitUpdatingObjectSpace,Func<T,bool> criteria=null,[CallerMemberName]string caller="")
+            => application.WhenProviderCommittedDetailed(typeof(T),objectModification,emitUpdatingObjectSpace,o => criteria?.Invoke((T)o)??true,caller)
+                .Select(t => (t.objectSpace,t.details.Select(t1 => ((T)t1.instance,t1.modification)).ToArray()));
+        
+        public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)> WhenProviderCommittedDetailed<T>(
             this XafApplication application,ObjectModification objectModification,string[] modifiedProperties,Func<T,bool> criteria=null,bool emitUpdatingObjectSpace=false,[CallerMemberName]string caller="") where T:class
             => application.WhenProviderObjectSpaceCreated(emitUpdatingObjectSpace)
                 .SelectMany(objectSpace => objectSpace.WhenCommittedDetailed(objectModification,modifiedProperties,criteria,caller:caller));
@@ -722,6 +727,10 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<T> WhenExistingObject<T>(this XafApplication application, CriteriaOperator criteriaExpression =null,
             [CallerMemberName] string caller = "") 
             => application.UseObjectSpace(space => space.GetObjects<T>(criteriaExpression).ToNowObservable(),caller:caller);
+        
+        public static IObservable<object> WhenProviderExistingObject(this XafApplication application,Type objectType, CriteriaOperator criteriaExpression =null,
+            [CallerMemberName] string caller = "") 
+            => application.UseProviderObjectSpace(space => space.GetObjects(objectType,criteriaExpression).Cast<object>().ToNowObservable(),caller:caller,objectType:objectType);
 
         public static IObservable<T> WhenObject<T>(this XafApplication application,ObjectModification objectModification,string[] modifiedProperties ,Expression<Func<T, bool>> criteriaExpression=null,
             [CallerMemberName] string caller = "")where T:class 
@@ -979,7 +988,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             var controller = window.GetController<ShowNavigationItemController>();
             var item = controller.FindNavigationItemByViewShortcut(new ViewShortcut(viewId, null));
             return navigate(window).SelectMany(_ => controller.ShowNavigationItemAction
-                    .Trigger(afterNavigation(((IModelViewVariants)((IModelNavigationItem)item.Model).View).Variants.Current.View.Id), () => item));
+                    .Trigger(afterNavigation(((IModelViewVariants)((IModelNavigationItem)item.Model).View).Variants.Current?.View.Id??viewId), () => item));
         }
 
         private static IObservable<T[]> Commit<T>(this IObjectSpace objectSpace,Func<IObjectSpace, IObservable<T>> commit, string caller, IObserver<T[]> observer,bool validate) 
@@ -1001,7 +1010,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         
         public static IObservable<Unit> RefreshDetailViewWhenObjectCommitted<TObject>(this XafApplication application, Type detailViewObjectType) where TObject : class 
             => application.RefreshObjectViewWhenCommitted<TObject>( detailViewObjectType);
-
+        
         private static IObservable<Unit> RefreshObjectViewWhenCommitted<TObject>(this XafApplication application, Type detailViewObjectType=null) where TObject : class 
             => application.WhenProviderCommittedDetailed<TObject>(ObjectModification.All).ToObjectsGroup()
                 .Publish(wallets => application.WhenFrame(detailViewObjectType, detailViewObjectType!=null?ViewType.DetailView:ViewType.ListView)

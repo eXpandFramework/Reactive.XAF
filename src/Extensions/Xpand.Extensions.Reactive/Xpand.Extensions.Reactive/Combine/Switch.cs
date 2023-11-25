@@ -2,6 +2,7 @@
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 
 namespace Xpand.Extensions.Reactive.Combine{
@@ -11,5 +12,8 @@ namespace Xpand.Extensions.Reactive.Combine{
                 signal.OnNext(Unit.Default); 
                 signal.OnCompleted();
             }).Concat(switchTo.TakeUntil(signal)));
+
+        public static IObservable<T> SwitchIfDefault<T>(this IObservable<T> @this, IObservable<T> switchTo) where T : class 
+            => @this.SelectMany(entry => entry != default(T) ? entry.Observe() : switchTo);
     }
 }

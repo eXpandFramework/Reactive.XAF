@@ -161,8 +161,8 @@ namespace Xpand.Extensions.Reactive.Utility{
 	        typeof(TSource).IsGenericType ? string.Join(",", typeof(TSource).GetGenericArguments().Select(type => type.Name)) : typeof(TSource).Name;
 
         private static object CalculateValue(object v, Func<object, string> messageFactory) =>
-            messageFactory != null ? messageFactory(v) : v.GetType().FromHierarchy(_ => _.BaseType)
-                .Select(_ => Serialization.TryGetValue(_, out var func) ? func(v) : null).FirstOrDefault()?? v;
+            messageFactory != null ? messageFactory(v) : v.GetType().FromHierarchy(type => type.BaseType)
+                .Select(type => Serialization.TryGetValue(type, out var func) ? func(v) : null).FirstOrDefault()?? v;
 
         private static Action<ITraceEvent> TraceError(this Action<ITraceEvent> traceAction, TraceSource traceSource) =>
 	        traceAction ?? (s => {
