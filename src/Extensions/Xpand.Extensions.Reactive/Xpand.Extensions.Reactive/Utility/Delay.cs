@@ -44,8 +44,8 @@ namespace Xpand.Extensions.Reactive.Utility {
         public static IObservable<T> Defer<T>(this object o, Func<IEnumerable<T>> selector)
             => Observable.Defer(() => selector().ToNowObservable());
         
-        public static IObservable<T> DelaySubscription<T>(this IObservable<T> source, TimeSpan delay, IScheduler scheduler = null) 
-            => scheduler == null ? Observable.Timer(delay).SelectMany(_ => source) : Observable.Timer(delay, scheduler).SelectMany(_ => source);
+        // public static IObservable<T> DelaySubscription<T>(this IObservable<T> source, TimeSpan delay, IScheduler scheduler = null) 
+        //     => scheduler == null ? Observable.Timer(delay).SelectMany(_ => source) : Observable.Timer(delay, scheduler).SelectMany(_ => source);
 
         public static IObservable<T> DelayRandomly<T>(this IObservable<T> source, int maxValue, int minValue = 0)
             => source.SelectMany(arg => {

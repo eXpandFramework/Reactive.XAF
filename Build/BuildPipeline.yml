@@ -8,7 +8,7 @@ jobs:
   strategy: 
     parallel: 1
   pool:
-    vmImage: windows-2022
+    name: Self
   variables:
     - group: keys
   steps:
