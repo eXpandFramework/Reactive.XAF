@@ -39,7 +39,7 @@ namespace Xpand.TestsLib.Common {
         public static IObservable<Frame> AssertListViewHasObject<TObject>(this Frame frame,Func<TObject, bool> matchObject=null, int count=0, [CallerMemberName]string caller="") 
             => frame.View.WhenControlsCreated(true).Take(1)
                 .SelectMany(view => view.ToListView().WhenObjects<TObject>().Where(value => matchObject?.Invoke(value)??true)
-                    .SkipOrOriginal(count-1).Take(1)
+                    .SkipOrOriginal(count-1).Take(1).BufferUntilInactive(10.Seconds()).SelectMany()
                     .SelectMany(value => view.ToListView().SelectObject(value)).To(frame)
                     .Assert(_ => $"{typeof(TObject).Name}-{view.Id}",caller:caller));
 

@@ -663,6 +663,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             }, obj.GetType(),caller:caller);
 
         public static IObservable<T> UseProviderObjectSpace<T>(this XafApplication application,Func<IObjectSpace,IObservable<T>> factory,Type objectType=null,[CallerMemberName]string caller="") {
+            if (application.IsDisposed())return Observable.Empty<T>();
             var type =objectType?? typeof(T).RealType();
             return Observable.Using(() => application.CreateObjectSpace(true, type,caller:caller), factory);
         }
@@ -936,7 +937,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             [CallerMemberName] string caller = "") 
             => Observable.Using(() => new BehaviorSubject<T[]>(null), subject => {
                 CommitChangesSubject.OnNext(() => subject.CommitChangesSequential(application,application.ObjectSpaceSource( objectSpaceSource, caller), objectType, commit, retry, caller,validate));
-                return subject.DoNotComplete().WhenNotDefault().Take(1).Select(arg => arg).DoOnComplete(() => {});
+                return subject.DoNotComplete().WhenNotDefault()
+                    .Merge(application.WhenDisposed().Do(_ => subject.Dispose()).To<T[]>()).Take(1);
             });
 
         private static Func<Func<IObjectSpace, IObservable<T[]>>, Type, IObservable<T>> ObjectSpaceSource<T>(this XafApplication application,
@@ -955,8 +957,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             return viewNavigationController.NavigateBackAction
                 .Trigger(application.WhenFrame(Nesting.Root).OfType<Window>()
                         .SelectMany(window => window.View.WhenControlsCreated().Take(1).To(window)),
-                    () => viewNavigationController.NavigateBackAction.Items.First())
-                .Select(window => window);
+                    () => viewNavigationController.NavigateBackAction.Items.First());
         }
         
         public static IObservable<ListPropertyEditor> WhenNestedFrame(this XafApplication application, Type parentObjectType,params Type[] objectTypes)
@@ -993,8 +994,10 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         private static IObservable<T[]> Commit<T>(this IObjectSpace objectSpace,Func<IObjectSpace, IObservable<T>> commit, string caller, IObserver<T[]> observer,bool validate) 
             => commit(objectSpace).BufferUntilCompleted()
+                .TakeUntil(_ => objectSpace.IsDisposed)
                 .Timeout(TimeSpan.FromMinutes(10))
                 .Catch<T[], TimeoutException>(_ => new TimeoutException(caller).Throw<T[]>())
+                
                 .Do(arg => {
                     if (validate) {
                         objectSpace.CommitChangesAndValidate();
@@ -1008,15 +1011,16 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<Unit> RefreshListViewWhenObjectCommitted<TObject>(this XafApplication application) where TObject : class
             => application.RefreshObjectViewWhenCommitted<TObject>();
         
-        public static IObservable<Unit> RefreshDetailViewWhenObjectCommitted<TObject>(this XafApplication application, Type detailViewObjectType) where TObject : class 
-            => application.RefreshObjectViewWhenCommitted<TObject>( detailViewObjectType);
+        public static IObservable<Unit> RefreshDetailViewWhenObjectCommitted<TObject>(this XafApplication application, Type detailViewObjectType,Func<Frame,TObject[],bool> match=null) where TObject : class 
+            => application.RefreshObjectViewWhenCommitted( detailViewObjectType,match);
         
-        private static IObservable<Unit> RefreshObjectViewWhenCommitted<TObject>(this XafApplication application, Type detailViewObjectType=null) where TObject : class 
+        private static IObservable<Unit> RefreshObjectViewWhenCommitted<TObject>(this XafApplication application, Type detailViewObjectType=null,Func<Frame,TObject[],bool> match=null) where TObject : class 
             => application.WhenProviderCommittedDetailed<TObject>(ObjectModification.All).ToObjectsGroup()
                 .Publish(wallets => application.WhenFrame(detailViewObjectType, detailViewObjectType!=null?ViewType.DetailView:ViewType.ListView)
                     .Where(frame => frame.View.IsRoot)
-                    .SelectUntilViewClosed(frame => wallets.ObserveOnContext()
-                        .DoWhen(_ => frame.View!=null,_ => frame.View.ObjectSpace.Refresh()))
+                    .SelectUntilViewClosed(frame => wallets.ObserveOnContext().Where(arg => match?.Invoke(frame,arg)??true)
+                        .DoWhen(_ => frame.View!=null,_ => frame.View.ObjectSpace.Refresh())
+                    )
                     .Merge(wallets).TakeUntilDisposed(application)).ToUnit();
     }
 
