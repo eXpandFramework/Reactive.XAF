@@ -1,16 +1,13 @@
-variables:
-    - group: keys
-    - name: NUGET_PACKAGES
-      value: $(Pipeline.Workspace)\.nuget\packages
+
 trigger: none 
 jobs:
-- job: BuildModules
-  strategy: 
-    parallel: 1
+- job: Build
   pool:
     name: Self
   variables:
     - group: keys
+    - name: NUGET_PACKAGES
+      value: $(Pipeline.Workspace)\.nuget\packages  
   steps:
     - checkout: self
     - task: AzurePowerShell@5
@@ -46,167 +43,133 @@ jobs:
           $env:AzOrganization="eXpandDevops"
           $env:AzProject ="eXpandFramework"
           & '$(System.DefaultWorkingDirectory)\Build\BuildPipeline.ps1' @goArgs
-    - task: DotNetCoreCLI@2
-      displayName: 'AutoCommit'
-      condition: ne(variables['SkipTests'], 'True')
-      inputs:
-        command: 'test'
-        projects: '**/Xpand.XAF.Modules.AutoCommit.Tests.csproj'
-        workingDirectory: '$(System.DefaultWorkingDirectory)'
-    - task: DotNetCoreCLI@2
-      displayName: 'BulkObjectUpdate'
-      condition: ne(variables['SkipTests'], 'True')
-      inputs:
-        command: 'test'
-        projects: '**/Xpand.XAF.Modules.BulkObjectUpdate.Tests.csproj'
-        workingDirectory: '$(System.DefaultWorkingDirectory)'
-    - task: DotNetCoreCLI@2
-      displayName: 'CloneMemberValue'
-      condition: ne(variables['SkipTests'], 'True')
-      inputs:
-        command: 'test'
-        projects: '**/Xpand.XAF.Modules.CloneMemberValue.Tests.csproj'
-        workingDirectory: '$(System.DefaultWorkingDirectory)'
-    - task: DotNetCoreCLI@2
-      displayName: 'CloneModelView'
-      condition: ne(variables['SkipTests'], 'True')
-      inputs:
-        command: 'test'
-        projects: '**/Xpand.XAF.Modules.CloneModelView.Tests.csproj'
-        workingDirectory: '$(System.DefaultWorkingDirectory)'
-    - task: DotNetCoreCLI@2
-      displayName: 'Email'
-      condition: ne(variables['SkipTests'], 'True')
-      inputs:
-        command: 'test'
-        projects: '**/Xpand.XAF.Modules.Email.Tests.csproj'
-        workingDirectory: '$(System.DefaultWorkingDirectory)'
-    - task: DotNetCoreCLI@2
-      displayName: 'Test: Xpand.Extensions'
-      condition: ne(variables['SkipTests'], 'True')
-      inputs:
-        command: 'test'
-        projects: '**/Xpand.Extensions.Tests.csproj'
-        workingDirectory: '$(System.DefaultWorkingDirectory)'
-    - task: DotNetCoreCLI@2
-      displayName: 'GridListEditor'
-      condition: ne(variables['SkipTests'], 'True')
-      inputs:
-        command: 'test'
-        projects: '**/Xpand.XAF.Modules.GridListEditor.Tests.csproj'
-        workingDirectory: '$(System.DefaultWorkingDirectory)'
-    - task: DotNetCoreCLI@2
-      displayName: 'HideToolBar'
-      condition: ne(variables['SkipTests'], 'True')
-      inputs:
-        command: 'test'
-        projects: '**/Xpand.XAF.Modules.HideToolBar.Tests.csproj'
-        workingDirectory: '$(System.DefaultWorkingDirectory)'
-    - task: DotNetCoreCLI@2
-      displayName: 'JobScheduler.Hangfire'
-      condition: ne(variables['SkipTests'], 'True')
-      inputs:
-        command: 'test'
-        projects: '**/Xpand.XAF.Modules.JobScheduler.Hangfire.Tests.csproj'
-        workingDirectory: '$(System.DefaultWorkingDirectory)'
-    - task: DotNetCoreCLI@2
-      displayName: 'JobScheduler.Notification'
-      condition: ne(variables['SkipTests'], 'True')
-      inputs:
-        command: 'test'
-        projects: '**/Xpand.XAF.Modules.JobScheduler.Notification.Tests.csproj'
-        workingDirectory: '$(System.DefaultWorkingDirectory)'
-    - task: DotNetCoreCLI@2
-      displayName: 'MasterDetail'
-      condition: ne(variables['SkipTests'], 'True')
-      inputs:
-        command: 'test'
-        projects: '**/Xpand.XAF.Modules.MasterDetail.Tests.csproj'
-        workingDirectory: '$(System.DefaultWorkingDirectory)'
-    - task: DotNetCoreCLI@2
-      displayName: 'ModelMapper'
-      condition: ne(variables['SkipTests'], 'True')
-      inputs:
-        command: 'test'
-        projects: '**/Xpand.XAF.Modules.ModelMapper.Tests.csproj'
-        workingDirectory: '$(System.DefaultWorkingDirectory)'
-    - task: DotNetCoreCLI@2
-      displayName: 'ModelViewInheritance'
-      condition: ne(variables['SkipTests'], 'True')
-      inputs:
-        command: 'test'
-        projects: '**/Xpand.XAF.Modules.ModelViewInheritance.Tests.csproj'
-        workingDirectory: '$(System.DefaultWorkingDirectory)'
-    - task: DotNetCoreCLI@2
-      displayName: 'Office.Cloud'
-      condition: ne(variables['SkipTests'], 'True')
-      inputs:
-        command: 'test'
-        projects: '**/Xpand.XAF.Modules.Office.Cloud.Tests.csproj'
-        workingDirectory: '$(System.DefaultWorkingDirectory)'
-    - task: DotNetCoreCLI@2
-      displayName: 'Office.Cloud.Google'
-      condition: ne(variables['SkipTests'], 'True')
-      inputs:
-        command: 'test'
-        projects: '**/Xpand.XAF.Modules.Office.Cloud.Google.Tests.csproj'
-        workingDirectory: '$(System.DefaultWorkingDirectory)'
-    - task: DotNetCoreCLI@2
-      displayName: 'Office.Cloud.Google.Calendar'
-      condition: ne(variables['SkipTests'], 'True')
-      inputs:
-        command: 'test'
-        projects: '**/Xpand.XAF.Modules.Office.Cloud.Google.Calendar.Tests.csproj'
-        workingDirectory: '$(System.DefaultWorkingDirectory)'
-    - task: DotNetCoreCLI@2
-      displayName: 'Office.Cloud.Google.Tasks'
-      condition: ne(variables['SkipTests'], 'True')
-      inputs:
-        command: 'test'
-        projects: '**/Xpand.XAF.Modules.Office.Cloud.Google.Tasks.Tests.csproj'
-        workingDirectory: '$(System.DefaultWorkingDirectory)'
-    - task: DotNetCoreCLI@2
-      displayName: 'Office.DocumentStyleManager'
-      condition: ne(variables['SkipTests'], 'True')
-      inputs:
-        command: 'test'
-        projects: '**/Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.csproj'
-        workingDirectory: '$(System.DefaultWorkingDirectory)'
-    - task: PowerShell@2
-      inputs:
-        targetType: 'inline'
-        script: |
-          $ErrorView="NormalView"
-          $ErrorActionPreference="stop"
-          $env:AzureToken='$(AzureToken)'
-          $env:AzProject="eXpandFramework"
-          $env:AzOrganization="eXpandDevOps"
-          & '$(System.DefaultWorkingDirectory)\go.ps1' -InstallModules
-          $xafMinors=Get-XAFLatestMinors -Source '$(DXApiFeed)'
-          $xafMinor=$xafMinors|select-object -first 1
-          $parameters = @{
-            CustomVersion     = "$xafminor"
-            DxPipelineBuildId = '$(Build.BuildId)'
+    - publish: $(System.DefaultWorkingDirectory)\bin
+      artifact: CompiledApp
+- job: WaitForSlowJobToStart
+  dependsOn: Build
+  condition: ne(variables['SkipTests'], 'True')
+  pool:
+    name: Self
+  variables:
+    - group: keys
+  steps:
+    - checkout: none
+    - powershell: |
+        $patToken = "$(AzureToken)"
+        $organization = "$(System.TeamFoundationCollectionUri)"
+        $project = "$(System.TeamProject)"
+        $pipelineId = "$(Build.BuildId)"
+        Write-Host "pipelineId=$pipelineId"
+        $headers = @{
+          Authorization = "Bearer $patToken"
+        }
+        $jobStarted = $false
+        while (-not $jobStarted) {
+          $url = $organization + $project + "/_apis/build/builds/" + $pipelineId + "/timeline?api-version=6.0"
+          Write-Host "url=$url"
+          $response = Invoke-RestMethod -Uri $url -Method Get -Headers $headers
+          $jobStatus = ($response.records|Where-Object{$_.name -eq "RunSlowTests"}).state
+          if ($jobStatus -eq "inProgress") {
+            $jobStarted = $true
+          } else {
+            Write-Host "Wait for RunSlowTests"
+            Start-Sleep -Seconds 1
           }
-          $parameters
-          Add-AzBuild -Definition PublishNugets-Reactive.XAF -Parameters $parameters -Branch $env:Build_SourceBranchName
-          Write-Host "Hello World"
-        failOnStderr: true
-        ignoreLASTEXITCODE: true
-        pwsh: true
-    - task: PublishPipelineArtifact@1
-      name: PublishNugets
+        }
+        Write-Host "Slow tests have started."
+      displayName: 'Signal Slow Tests Start'
+- job: RunSlowTests
+  dependsOn: Build
+  condition: ne(variables['SkipTests'], 'True')
+  strategy:
+    matrix:
+      ModelMapper:
+        TestAssembly: '**/Xpand.XAF.Modules.ModelMapper.Tests.dll'
+      OfficeDocumentStyleManager:
+        TestAssembly: '**/Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.dll'
+  pool:
+    name: Self
+  variables:
+    - group: keys
+  steps:
+    - checkout: none
+    - download: current
+      artifact: CompiledApp
+    - task: VSTest@2
+      displayName: 'Run Tests'
       inputs:
-        targetPath: '$(System.DefaultWorkingDirectory)\bin\Nupkg'
-        artifact: 'Nupkg'
-        publishLocation: 'pipeline'
-    - task: PublishPipelineArtifact@1
-      name: PublishZips
+        minimumExpectedTests: "1"
+        failOnMinTestsNotRun: true
+        testSelector: 'testAssemblies'
+        testAssemblyVer2: |
+          $(TestAssembly)
+          !**\*TestAdapter.dll
+          !**\obj\**
+        searchFolder: '$(Pipeline.Workspace)/CompiledApp'
+- job: RunNormalTests
+  dependsOn: WaitForSlowJobToStart
+  condition: ne(variables['SkipTests'], 'True')
+  strategy:
+    matrix:
+      AutoCommit:
+        TestAssembly: '**/Xpand.XAF.Modules.AutoCommit.Tests.dll'
+      BulkObjectUpdate:
+        TestAssembly: '**/Xpand.XAF.Modules.BulkObjectUpdate.Tests.dll'
+      CloneMemberValue:
+        TestAssembly: '**/Xpand.XAF.Modules.CloneMemberValue.Tests.dll'
+      CloneModelView:
+        TestAssembly: '**/Xpand.XAF.Modules.CloneModelView.Tests.dll'
+      Email:
+        TestAssembly: '**/Xpand.XAF.Modules.Email.Tests.dll'
+      Extensions:
+        TestAssembly: '**/Xpand.Extensions.Tests.dll'
+      GridListEditor:
+        TestAssembly: '**/Xpand.XAF.Modules.GridListEditor.Tests.dll'
+      HideToolBar:
+        TestAssembly: '**/Xpand.XAF.Modules.HideToolBar.Tests.dll'
+      JobSchedulerHangfire:
+        TestAssembly: '**/Xpand.XAF.Modules.JobScheduler.Hangfire.Tests.dll'
+      JobSchedulerNotification:
+        TestAssembly: '**/Xpand.XAF.Modules.JobScheduler.Notification.Tests.dll'
+      MasterDetail:
+        TestAssembly: '**/Xpand.XAF.Modules.MasterDetail.Tests.dll'
+      ModelViewInheritance:
+        TestAssembly: '**/Xpand.XAF.Modules.ModelViewInheritance.Tests.dll'
+      Reactive:
+        TestAssembly: '**/Xpand.XAF.Modules.Reactive.Tests.dll'
+      ReactiveLogger:
+        TestAssembly: '**/Xpand.XAF.Modules.Reactive.Logger.Tests.dll'
+      ReactiveLoggerHub:
+        TestAssembly: '**/Xpand.XAF.Modules.Reactive.Logger.Hub.Tests.dll'
+      ReactiveRest:
+        TestAssembly: '**/Xpand.XAF.Modules.Reactive.Rest.Tests.dll'
+      RefreshView:
+        TestAssembly: '**/Xpand.XAF.Modules.RefreshView.Tests.dll'
+      SuppressConfirmation:
+        TestAssembly: '**/Xpand.XAF.Modules.SuppressConfirmation.Tests.dll'
+      ViewEditMode:
+        TestAssembly: '**/Xpand.XAF.Modules.ViewEditMode.Tests.dll'
+      ViewItemValue:
+        TestAssembly: '**/Xpand.XAF.Modules.ViewItemValue.Tests.dll'
+  pool:
+    name: Self
+  variables:
+    - group: keys
+  steps:
+    - checkout: none
+    - download: current
+      artifact: CompiledApp
+    - task: VSTest@2
+      displayName: 'Run Tests'
       inputs:
-        targetPath: '$(System.DefaultWorkingDirectory)\bin\zip'
-        artifact: 'Zip'
-        publishLocation: 'pipeline'
-    
-    
-    
-    
+        minimumExpectedTests: "1"
+        failOnMinTestsNotRun: true
+        testSelector: 'testAssemblies'
+        testAssemblyVer2: |
+          $(TestAssembly)
+          !**\*TestAdapter.dll
+          !**\obj\**
+        searchFolder: '$(Pipeline.Workspace)/CompiledApp'
+        
+
+
