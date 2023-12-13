@@ -11,3 +11,4 @@ Fasterflect.Xpand
 
 Newtonsoft.Json
 Microsoft.Reactive.Testing
+System.Text.Json

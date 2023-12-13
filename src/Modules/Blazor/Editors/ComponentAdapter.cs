@@ -6,11 +6,7 @@ using DevExpress.ExpressApp.Utils;
 using Microsoft.AspNetCore.Components;
 
 namespace Xpand.XAF.Modules.Blazor.Editors {
-    public class ComponentAdapter:ComponentAdapterBase {
-        
-        private readonly Func<RenderFragment> _fragmentFactory;
-        
-        public ComponentAdapter(Func<RenderFragment> fragmentFactory) => _fragmentFactory = fragmentFactory;
+    public class ComponentAdapter(Func<RenderFragment> fragmentFactory, IComponentModel componentModel) : ComponentAdapterBase {
         public override void SetAllowEdit(bool allowEdit) { }
         public override object GetValue() => null;
         public override void SetValue(object value) => DisplayTextModel.Text = $"{value}";
@@ -23,7 +19,8 @@ namespace Xpand.XAF.Modules.Blazor.Editors {
         public override void SetIsPassword(bool isPassword) { }
         public override void SetMaxLength(int maxLength) { }
         public override void SetNullText(string nullText) { }
-        protected override RenderFragment CreateComponent() => _fragmentFactory();
+        protected override RenderFragment CreateComponent() => fragmentFactory();
+        public override IComponentModel ComponentModel { get; } = componentModel;
         public DxTextBoxModel DisplayTextModel { get; }=new();
     }
     

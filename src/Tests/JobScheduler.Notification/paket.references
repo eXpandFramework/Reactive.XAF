@@ -3,7 +3,7 @@ Shouldly
 NUnit
 NUnit3TestAdapter
 DevExpress.Persistent.BaseImpl.Xpo
-
+System.Text.Json
 Moq
 Fasterflect.Xpand
 Xpand.Patcher

@@ -827,7 +827,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<(NestedFrame sourceframe, NestedFrame targetFrame, object sourceObject, object targetObject, int targetIndex)> WhenNestedListViewsSelectionChanged(
             this XafApplication application,Type sourceType,Type targetType, string targetPropertyName, Func<IObservable<NestedFrame>, IObservable<NestedFrame>> sourceSelector = null,
                 Func<IObservable<NestedFrame>, IObservable<NestedFrame>> targetSelector = null,Func<object, object> sourceSortSelector=null,Func<object, object> targetSortSelector=null,
-            Func<(Frame source,Frame target),IObservable<object>> whenSourceViewSelectionChanged=null) 
+            Func<(Frame source,Frame target),IObservable<object>> whenSourceViewSelectionChanged=null,[CallerMemberName]string caller="") 
             => application.WhenNestedListViewsSelectionChanged( sourceType, targetType, (sourceObject, targetObject) => targetObject.GetTypeInfo().FindMember(targetPropertyName).GetValue(targetObject)
                 .Equals(sourceObject), sourceSelector, targetSelector, sourceSortSelector, targetSortSelector, whenSourceViewSelectionChanged);
 

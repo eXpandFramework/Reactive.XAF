@@ -42,7 +42,7 @@ namespace Xpand.Extensions.JsonExtensions {
          public static T GetPropertyValue<T>(this JsonElement element, ReadOnlySpan<char> currentProperty,
              ReadOnlySpan<char> remainingProperties = default,Func<T> defaultValue=default,[CallerMemberName]string caller="") 
              => element.GetPropertyValue(currentProperty,defaultValue,remainingProperties,caller);
-                
+         
          public static ReadOnlySpan<char> GetPropertyValueAsSpan(this JsonElement element, ReadOnlySpan<char> propertyName) 
              => element.TryGetProperty(propertyName, out JsonElement property) &&
                 property.ValueKind == JsonValueKind.String ? property.GetString().AsSpan() : ReadOnlySpan<char>.Empty;

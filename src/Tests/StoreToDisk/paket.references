@@ -14,3 +14,4 @@ DevExpress.ExpressApp.Blazor.All
 DevExpress.ExpressApp.Security.Xpo
 Microsoft.Reactive.Testing
 System.Threading.Tasks.Dataflow
+System.Text.Json

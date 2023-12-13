@@ -1,6 +1,6 @@
 DevExpress.ExpressApp.ConditionalAppearance
 Fasterflect.Xpand
-
+System.Text.Json
 System.Reactive
 Hangfire.AspNetCore
 Xpand.Patcher

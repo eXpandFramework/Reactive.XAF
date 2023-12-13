@@ -11,7 +11,6 @@ using DevExpress.ExpressApp.ViewVariantsModule;
 using NUnit.Framework;
 using Xpand.Extensions.Numeric;
 using Xpand.Extensions.Reactive.Combine;
-using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.ActionExtensions;
@@ -31,22 +30,31 @@ namespace Xpand.TestsLib.Common {
                 .SelectMany(action => !action.Available() && (completeWhenNotAvailable?.Invoke(action)??false) ? Observable.Empty<SimpleAction>()
                     : action.Observe().Assert($"{nameof(AssertSimpleAction)} {frame.View} {actionId}", caller: caller));
         
-        public static IObservable<Frame> AssertListViewHasObject<TObject>(this XafApplication application, Func<TObject,bool> matchObject=null,int count=0,[CallerMemberName]string caller="")  
+        public static IObservable<Frame> AssertListViewHasObject<TObject>(this XafApplication application, Func<TObject,bool> matchObject=null,int count=0,TimeSpan? timeout=null,[CallerMemberName]string caller="")  
             => application.WhenFrame(typeof(TObject),ViewType.ListView)
-                .SelectUntilViewClosed(frame => frame.AssertListViewHasObject(matchObject, count, caller))
+                .SelectUntilViewClosed(frame => frame.AssertListViewHasObject(matchObject, count,timeout, caller))
                 .ReplayFirstTake();
+        public static IObservable<Frame> AssertListViewHasObject<TObject>(this XafApplication application,string navigationItemId, Func<TObject,bool> matchObject=null,int count=0,TimeSpan? timeout=null,[CallerMemberName]string caller="")  
+            => application.AssertNavigation(navigationItemId).Zip(application.AssertListViewHasObject(matchObject,count,timeout,caller)).ToSecond().ReplayFirstTake();
 
-        public static IObservable<Frame> AssertListViewHasObject<TObject>(this Frame frame,Func<TObject, bool> matchObject=null, int count=0, [CallerMemberName]string caller="") 
+        public static IObservable<Frame> AssertListViewHasObject<TObject>(this Frame frame,Func<TObject, bool> matchObject=null, int count=0,TimeSpan? timeout=null, [CallerMemberName]string caller="") 
             => frame.View.WhenControlsCreated(true).Take(1)
-                .SelectMany(view => view.ToListView().WhenObjects<TObject>().Where(value => matchObject?.Invoke(value)??true)
-                    .SkipOrOriginal(count-1).Take(1).BufferUntilInactive(10.Seconds()).SelectMany()
-                    .SelectMany(value => view.ToListView().SelectObject(value)).To(frame)
-                    .Assert(_ => $"{typeof(TObject).Name}-{view.Id}",caller:caller));
+                .Select(view => frame is NestedFrame nestedFrame ? nestedFrame.ViewItem.View.WhenCurrentObjectChanged().StartWith(view)
+                        .SelectMany(_ => frame.AssertListViewHasObject(matchObject, count, timeout, caller, view))
+                    : frame.AssertListViewHasObject(matchObject, count, timeout, caller, view)).Switch();
 
-        public static IObservable<TTabbedControl> AssertTabControl<TTabbedControl>(this XafApplication application,Type objectType=null,Func<DetailView,bool> match=null,Func<IModelTabbedGroup, bool> tabMatch=null,[CallerMemberName]string caller="") 
-            => application.WhenTabControl<TTabbedControl>( objectType, match,tabMatch).Assert(objectType?.Name,caller:$"{caller} - {nameof(AssertTabControl)}");
-        public static IObservable<TSource> Assert<TSource>(
-            this IObservable<TSource> source, TimeSpan? timeout = null, [CallerMemberName] string caller = "") 
+        private static IObservable<Frame> AssertListViewHasObject<TObject>(this Frame frame, Func<TObject, bool> matchObject, int count, TimeSpan? timeout, string caller, View view) 
+            => view.ToListView().WhenObjects<TObject>()
+                .Where(objects => count==0||objects.Length==count)
+                .Select(objects => objects.Where(value => matchObject?.Invoke(value)??true).Take(1).ToNowObservable()
+                    .SelectMany(value => view.ToListView().SelectObject(value)))
+                .Switch().Assert(_ => $"{typeof(TObject).Name}-{view.Id}",caller:caller,timeout:timeout)
+                .ReplayFirstTake().To(frame);
+
+        public static IObservable<TTabbedControl> AssertTabControl<TTabbedControl>(this XafApplication application,Type objectType=null,Func<DetailView,bool> match=null,Func<IModelTabbedGroup, bool> tabMatch=null,TimeSpan? timeout=null,[CallerMemberName]string caller="") 
+            => application.WhenTabControl<TTabbedControl>( objectType, match,tabMatch).Assert(objectType?.Name,caller:$"{caller} - {nameof(AssertTabControl)}",timeout:timeout);
+        
+        public static IObservable<TSource> Assert<TSource>(this IObservable<TSource> source, TimeSpan? timeout = null, [CallerMemberName] string caller = "") 
             => source.Assert(_ => "",timeout,caller);
 
         public static IObservable<TSource> Assert<TSource>(this IObservable<TSource> source, string message, TimeSpan? timeout = null,[CallerMemberName]string caller="")
@@ -56,9 +64,8 @@ namespace Xpand.TestsLib.Common {
         public static TimeSpan? DelayOnContextInterval=250.Milliseconds();
         public static IObservable<TSource> Assert<TSource>(this IObservable<TSource> source,Func<TSource,string> messageFactory,TimeSpan? timeout=null,[CallerMemberName]string caller=""){
             var timeoutMessage = messageFactory.MessageFactory(caller);
-            return source.Log(messageFactory,TestContext.Out, caller).ThrowIfEmpty(timeoutMessage).Timeout(timeout ?? TimeoutInterval, timeoutMessage)
-                .DelayOnContext(DelayOnContextInterval)
-                .ReplayFirstTake();
+            return source.ReplayFirstTake().Log(messageFactory,TestContext.Out, caller).ThrowIfEmpty(timeoutMessage).Timeout(timeout ?? TimeoutInterval, timeoutMessage)
+                .DelayOnContext(DelayOnContextInterval);
         }
         
         public static string MessageFactory<TSource>(this Func<TSource, string> messageFactory, string caller) => $"{caller}: {messageFactory(default)}";
@@ -84,7 +91,7 @@ namespace Xpand.TestsLib.Common {
         public static IObservable<Window> AssertNavigation(this XafApplication application, string viewId,Func<Window,IObservable<Unit>> navigate=null)
             => application.Navigate(viewId,window => (navigate?.Invoke(window)?? Observable.Empty<Unit>()).SwitchIfEmpty(Unit.Default.Observe()))
                 .Assert($"{viewId}").Catch<Window,CannotNavigateException>(_ => Observable.Empty<Window>());
-        public class CannotNavigateException:Exception{ }
+        public class CannotNavigateException:Exception;
 
     }
 }

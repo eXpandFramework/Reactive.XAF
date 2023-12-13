@@ -20,6 +20,7 @@ using Moq.Language.Flow;
 using Moq.Protected;
 using NUnit.Framework;
 using NUnit.Framework.Interfaces;
+using Xpand.Extensions.Numeric;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Transform.System.Net;
 using Xpand.Extensions.Reactive.Utility;
@@ -92,7 +93,7 @@ namespace Xpand.TestsLib.Common {
             mock.Setup(socket => socket.ReceiveAsync(It.IsAny<ArraySegment<byte>>(), It.IsAny<CancellationToken>()))
                 .Returns((ArraySegment<byte> buffer, CancellationToken token) => {
                     Array.Copy(bytes,buffer.Array!,bytes.Length);
-                    return resultSelector?.Invoke()??new WebSocketReceiveResult(bytes.Length,WebSocketMessageType.Text, true).Observe().ObserveOnDefault().ToTask(token);
+                    return resultSelector?.Invoke()??new WebSocketReceiveResult(bytes.Length,WebSocketMessageType.Text, true).Observe().Delay(1000.Milliseconds()).ToTask(token);
                 });
             mock.Setup(socket => socket.State).Returns(WebSocketState.Open);
         }

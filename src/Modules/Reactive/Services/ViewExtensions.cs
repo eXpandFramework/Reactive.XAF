@@ -30,14 +30,14 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         static ViewExtensions() => GridListEditorType = AppDomain.CurrentDomain.GetAssemblyType("DevExpress.ExpressApp.Win.Editors.GridListEditor");
 
-        public static IObservable<object> WhenObjects(this ListView listView) 
-            => listView.Objects().ToNowObservable()
-                .MergeToObject(listView.CollectionSource.WhenCollectionChanged()
-                    .SelectMany(_ => listView.Objects()))
-                .MergeToObject(listView.CollectionSource.WhenCriteriaApplied().SelectMany(@base => @base.Objects() ))
-                .MergeToObject(listView.Editor.WhenEvent(nameof(listView.Editor.DataSourceChanged)).To(listView.Editor.DataSource)
-                    .StartWith(listView.Editor.DataSource).WhenNotDefault()
-                    .Select(datasource => ((IEnumerable)datasource).Cast<object>()));
+        // public static IObservable<object> WhenObjects(this ListView listView) 
+        //     => listView.Objects().ToNowObservable()
+        //         .MergeToObject(listView.CollectionSource.WhenCollectionChanged()
+        //             .SelectMany(_ => listView.Objects()))
+        //         .MergeToObject(listView.CollectionSource.WhenCriteriaApplied().SelectMany(@base => @base.Objects() ))
+        //         .MergeToObject(listView.Editor.WhenEvent(nameof(listView.Editor.DataSourceChanged)).To(listView.Editor.DataSource)
+        //             .StartWith(listView.Editor.DataSource).WhenNotDefault()
+        //             .Select(datasource => ((IEnumerable)datasource).Cast<object>()));
         
         public static IObservable<object> SelectObject(this ListView listView, params object[] objects)
             => listView.SelectObject<object>(objects);
@@ -96,14 +96,19 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                     editor.MemberInfo.FindAttributes<RuleRequiredFieldAttribute>().Any())
                 .Do(editor => { editor.MemberInfo.SetValue(compositeView.CurrentObject, editor.MemberInfo.GetValue(existingObject)); });
         }
-        public static IObservable<object> WhenObjects(this View view) 
-            => view is ListView listView?listView.CollectionSource.WhenCollectionChanged()
-                .MergeToUnit(listView.CollectionSource.WhenCriteriaApplied()).SelectMany(_ => listView.Objects())
-                .StartWith(listView.Objects()):view.ToDetailView().WhenCurrentObjectChanged()
-                .Select(detailView => detailView.CurrentObject).StartWith(view.CurrentObject).WhenNotDefault();
-        
-        public static IObservable<T> WhenObjects<T>(this View view) 
-            => view.WhenObjects().Cast<T>();
+        public static IObservable<object[]> WhenObjects(this View view)
+            => view is ListView listView ? listView.CollectionSource.WhenCollectionChanged()
+                    .MergeToUnit(listView.ObjectSpace.WhenReloaded())
+                    .MergeToUnit(listView.Editor.WhenDatasourceChanged())
+                    .MergeToUnit(listView.CollectionSource.WhenCriteriaApplied())
+                    .Select(_ => listView.Objects().ToArray())
+                    .StartWith(new[] { listView.Objects().ToArray() })
+                : view.ToDetailView().WhenCurrentObjectChanged()
+                    .Select(detailView => new[] { detailView.CurrentObject })
+                    .StartWith(new[] { new[] { view.CurrentObject } });
+
+        public static IObservable<T[]> WhenObjects<T>(this View view) 
+            => view.WhenObjects().Select(objects => objects.Cast<T>().ToArray());
         
         public static IObservable<T> WhenActivated<T>(this T view) where T : View 
             => view.WhenViewEvent(nameof(View.Activated));

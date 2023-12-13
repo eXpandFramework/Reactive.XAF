@@ -30,6 +30,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static IObservable<NewObjectAddingEventArgs> WhenNewObjectAdding(this ListEditor editor) 
             => editor.WhenEvent<NewObjectAddingEventArgs>(nameof(editor.NewObjectAdding));
+        public static IObservable<ListEditor> WhenDatasourceChanged(this ListEditor editor) 
+            => editor.WhenEvent(nameof(editor.DataSourceChanged)).To(editor).TakeUntilDisposed();
 
         public static IObservable<ListEditor> WhenProcessSelectedItem(this ListEditor editor) 
             => editor.WhenEvent(nameof(ListEditor.ProcessSelectedItem)).To(editor).TakeUntilDisposed();

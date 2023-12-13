@@ -17,15 +17,15 @@
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DefineConstants>TRACE;DEBUG;XAF231</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;XAF232</DefineConstants>
     <NoWarn>1701;1702;XAF0017</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DefineConstants>TRACE;XAF231</DefineConstants>
+    <DefineConstants>TRACE;XAF232</DefineConstants>
     <NoWarn>1701;1702;XAF0017</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'EasyTest|AnyCPU' ">
-    <DefineConstants>TRACE;DEBUG;EASYTEST;XAF231</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;EASYTEST;XAF232</DefineConstants>
     <NoWarn>1701;1702;XAF0017</NoWarn>
   </PropertyGroup>
   <ItemGroup>
@@ -40,13 +40,13 @@
     <Compile Include="..\CommonFiles\Windows\WinModule.cs" Link="WinModule.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DevExpress.ExpressApp.Win.All" Version="23.1.6" />
+    <PackageReference Include="DevExpress.ExpressApp.Win.All" Version="23.2.3" />
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="7.0" />
     <PackageReference Include="Microsoft.CodeAnalysis" Version="4.2" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="6.0" />
     <PackageReference Include="System.ServiceModel.Security" Version="4.10.2" />
     <PackageReference Include="System.ServiceModel.NetTcp" Version="4.10.2" />
-    <PackageReference Include="Xpand.XAF.Win.All" Version="4.231.6.20" />
+    <PackageReference Include="Xpand.XAF.Win.All" Version="4.231.6.24" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="TestApplication.Module">

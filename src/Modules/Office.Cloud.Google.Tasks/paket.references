@@ -2,6 +2,6 @@ DevExpress.Persistent.Base
 DevExpress.ExpressApp.Xpo
 Fasterflect.Xpand
 System.Reactive
-
+System.Text.Json
 Google.Apis.Tasks.v1
 System.Threading.Tasks.Dataflow

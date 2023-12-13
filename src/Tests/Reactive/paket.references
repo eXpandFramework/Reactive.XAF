@@ -4,7 +4,7 @@ Moq
 Shouldly
 NUnit
 NUnit3TestAdapter
-
+System.Text.Json
 Xpand.Patcher
 FasterFlect.Xpand
 Microsoft.CodeAnalysis

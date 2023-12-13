@@ -15,13 +15,13 @@
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DefineConstants>TRACE;DEBUG;XAF231.2.2XAF231.2.2</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;XAF232.2.2XAF232.2.2</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DefineConstants>TRACE;XAF231.2.2XAF231.2.2</DefineConstants>
+    <DefineConstants>TRACE;XAF232.2.2XAF232.2.2</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'EasyTest|AnyCPU' ">
-    <DefineConstants>TRACE;DEBUG;EASYTEST;XAF231.2.2XAF231.2.2</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;EASYTEST;XAF232.2.2XAF232.2.2</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Model.DesignedDiffs.xafml" />
@@ -43,9 +43,9 @@
     <EmbeddedResource Include="Model.DesignedDiffs.xafml" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="23.1.6" />
-    <PackageReference Include="DevExpress.ExpressApp.Win.All" Version="23.1.6" />
-    <PackageReference Include="Xpand.XAF.Win.All" Version="4.231.6.20" />
+    <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="23.2.3" />
+    <PackageReference Include="DevExpress.ExpressApp.Win.All" Version="23.2.3" />
+    <PackageReference Include="Xpand.XAF.Win.All" Version="4.231.6.24" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="TestApplication.Module">

@@ -13,3 +13,4 @@ DevExpress.ExpressApp.Win.All
 Microsoft.Reactive.Testing
 Xpand.Patcher
 System.Threading.Tasks.Dataflow
+System.Text.Json

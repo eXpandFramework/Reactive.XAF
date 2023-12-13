@@ -12,3 +12,4 @@ akarnokd.reactive_extensions
 Fasterflect.Xpand
 Microsoft.Reactive.Testing
 System.Threading.Tasks.Dataflow
+System.Text.Json

@@ -23,13 +23,16 @@
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DefineConstants>TRACE;XAF231</DefineConstants>
-    <NoWarn>1701;1702;CS8002</NoWarn>
+    <DefineConstants>TRACE;XAF232</DefineConstants>
+    <NoWarn>1701;1702;NU1701;CS8002;CS0618;CA1416</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <NoWarn>1701;1702;NU1701;CS8002;CS0618;CA1416</NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="DevExpress.ExpressApp.EasyTest.BlazorAdapter" Version="23.1.6" />
-    <PackageReference Include="DevExpress.EasyTest" Version="23.1.6" />
-    <PackageReference Include="DevExpress.ExpressApp.Blazor" Version="23.1.6" />
+    <PackageReference Include="DevExpress.ExpressApp.EasyTest.BlazorAdapter" Version="23.2.3" />
+    <PackageReference Include="DevExpress.EasyTest" Version="23.2.3" />
+    <PackageReference Include="DevExpress.ExpressApp.Blazor" Version="23.2.3" />
     <PackageReference Include="Microsoft.AspNetCore" Version="2.2" />
     <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.7" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0" />

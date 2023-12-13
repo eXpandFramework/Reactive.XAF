@@ -13,3 +13,4 @@ Polly
 DevExpress.ExpressApp.Blazor.All
 Microsoft.Reactive.Testing
 System.Threading.Tasks.Dataflow
+System.Text.Json

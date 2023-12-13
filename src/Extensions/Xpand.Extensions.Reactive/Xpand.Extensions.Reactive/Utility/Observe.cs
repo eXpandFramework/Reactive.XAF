@@ -3,7 +3,10 @@ using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Threading;
+using System.Threading.Tasks;
+using akarnokd.reactive_extensions;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Transform;
@@ -36,20 +39,39 @@ namespace Xpand.Extensions.Reactive.Utility {
         
         public static IObservable<TSource> ObserveLatest<TSource>(this IObservable<TSource> source)
             => source.ObserveLatestOn(System.Reactive.Concurrency.Scheduler.CurrentThread);
-        public static IObservable<TSource> ObserveLatestOn<TSource>(this IObservable<TSource> source, IScheduler scheduler) 
-            => Observable.Create<TSource>(observer => {
-                Notification<TSource> pendingNotification = null;
-                var cancelable = new MultipleAssignmentDisposable();
-                var sourceSubscription = source.Materialize()
-                    .Subscribe(notification => {
-                        var previousNotification = Interlocked.Exchange(ref pendingNotification, notification);
-                        if (previousNotification != null) return;
-                        cancelable.Disposable = scheduler.Schedule(() => {
-                            var notificationToSend = Interlocked.Exchange(ref pendingNotification, null);
-                            notificationToSend!.Accept(observer);
-                        });
-                    });
-                return new CompositeDisposable(sourceSubscription, cancelable);
-            });
+        public static IObservable<T> ObserveLatestOn<T>(this IObservable<T> source, IScheduler scheduler)
+        {
+            return Observable.Create<T>(observer =>
+            {
+                var cancellation = new CancellationDisposable();
+                var token = cancellation.Token;
+                Task task = null;
+
+                var subscription = source.Subscribe(
+                    value =>
+                    {
+                        if (task == null || task.IsCompleted)
+                        {
+                            task = Task.Factory.StartNew(() => 
+                            {
+                                try
+                                {
+                                    // action(value, token);
+                                    observer.OnNext(value); // Notify observer
+                                }
+                                catch (Exception ex)
+                                {
+                                    observer.OnError(ex); // Propagate error
+                                }
+                            }, token);
+                        }
+                    },
+                    observer.OnError, // Propagate any errors
+                    observer.OnCompleted // Notify completion
+                );
+
+                return new CompositeDisposable(subscription, cancellation);
+            }).ObserveOn(scheduler);
+        }    
     }
 }

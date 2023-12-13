@@ -1,6 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Drawing;
+using DevExpress.Drawing;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.Persistent.Base;
@@ -14,12 +14,9 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects {
     [DefaultProperty(nameof(Id))]
     [Appearance("State_Failed_Color",AppearanceItemType.ViewItem, nameof(State)+"='"+nameof(WorkerState.Failed)+"'",FontColor = "Red",TargetItems = nameof(State))]
     [Appearance("State_Green_Color",AppearanceItemType.ViewItem, nameof(State)+"='"+nameof(WorkerState.Succeeded)+"'",FontColor = "Green",TargetItems = nameof(State))]
-    [Appearance("State_Proccesing_Color",AppearanceItemType.ViewItem, nameof(State)+"='"+nameof(WorkerState.Processing)+"'",FontStyle = FontStyle.Bold,TargetItems = nameof(State))]
+    [Appearance("State_Proccesing_Color",AppearanceItemType.ViewItem, nameof(State)+"='"+nameof(WorkerState.Processing)+"'",FontStyle = DXFontStyle.Bold,TargetItems = nameof(State))]
     // [ReadOnlyObjectView()]
-    public class JobWorker:XPCustomBaseObject {
-        public JobWorker(Session session) : base(session) {
-        }
-
+    public class JobWorker(Session session) : XPCustomBaseObject(session) {
         string _id;
 
         [Key]

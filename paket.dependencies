@@ -1,4 +1,4 @@
-source C:\Program Files (x86)\DevExpress 23.1\Components\System\Components\Packages
+source C:\Program Files (x86)\DevExpress 23.2\Components\System\Components\Packages
 source https://api.nuget.org/v3/index.json
 source https://xpandnugetserver.azurewebsites.net/nuget
 storage:none
@@ -9,17 +9,17 @@ specific_version : false
 framework:net6.0,net6.0-windows,netstandard2.0
 
 
-nuget DevExpress.ExpressApp.Office 23.1.6
-nuget DevExpress.ExpressApp.Core.All 23.1.6
-nuget DevExpress.ExpressApp.Win.All 23.1.6
-nuget DevExpress.ExpressApp.Web.All 23.1.6
-nuget DevExpress.ExpressApp.Blazor.All 23.1.6
-nuget DevExpress.ExpressApp.Blazor 23.1.6
-nuget DevExpress.ExpressApp.Validation.Blazor 23.1.6
-nuget DevExpress.EasyTest 23.1.6 
-nuget DevExpress.ExpressApp.EasyTest.WinAdapter 23.1.6  
-nuget DevExpress.ExpressApp.Security.Xpo 23.1.6  
-nuget DevExpress.Win.SpellChecker 23.1.6  
+nuget DevExpress.ExpressApp.Office 23.2.3
+nuget DevExpress.ExpressApp.Core.All 23.2.3
+nuget DevExpress.ExpressApp.Win.All 23.2.3
+nuget DevExpress.ExpressApp.Web.All 23.2.3
+nuget DevExpress.ExpressApp.Blazor.All 23.2.3
+nuget DevExpress.ExpressApp.Blazor 23.2.3
+nuget DevExpress.ExpressApp.Validation.Blazor 23.2.3
+nuget DevExpress.EasyTest 23.2.3 
+nuget DevExpress.ExpressApp.EasyTest.WinAdapter 23.2.3  
+nuget DevExpress.ExpressApp.Security.Xpo 23.2.3  
+nuget DevExpress.Win.SpellChecker 23.2.3  
 nuget ZString 2.5.0
 nuget System.CodeDom == 6.0.0
 nuget System.Text.Json == 7.0.2
@@ -31,7 +31,7 @@ nuget System.ServiceModel.Security 4.10.2
 nuget System.ServiceModel.Http 4.10.2
 nuget System.ServiceModel.Duplex 4.10.2
 nuget Microsoft.CognitiveServices.Speech 1.23.0
-nuget System.Configuration.ConfigurationManager 6.0.0
+nuget System.Configuration.ConfigurationManager 6.0.1
 nuget Mono.Cecil 0.11.4
 
 nuget NAudio 2.1.0

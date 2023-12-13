@@ -21,15 +21,15 @@
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DefineConstants>TRACE;DEBUG;Blazor;XAF231</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;Blazor;XAF232</DefineConstants>
     <NoWarn>1701;1702;XAF0017;cs8002</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DefineConstants>TRACE;Blazor;XAF231</DefineConstants>
+    <DefineConstants>TRACE;Blazor;XAF232</DefineConstants>
     <NoWarn>1701;1702;XAF0017;cs8002</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'EasyTest|AnyCPU' ">
-    <DefineConstants>TRACE;DEBUG;EASYTEST;XAF231</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;EASYTEST;XAF232</DefineConstants>
     <NoWarn>1701;1702;XAF0017;cs8002</NoWarn>
   </PropertyGroup>
   <ItemGroup>
@@ -42,8 +42,8 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Google.Apis.People.v1" Version="1.25.0.830" />
-    <PackageReference Include="DevExpress.ExpressApp.Blazor.All" Version="23.1.6" />
-    <PackageReference Include="DevExpress.ExpressApp.Security.Xpo" Version="23.1.6" />
+    <PackageReference Include="DevExpress.ExpressApp.Blazor.All" Version="23.2.3" />
+    <PackageReference Include="DevExpress.ExpressApp.Security.Xpo" Version="23.2.3" />
     <PackageReference Include="Hangfire.MemoryStorage" Version="1.7.0" />
     <PackageReference Include="Hangfire.SqlServer" Version="1.7.34" />
     <PackageReference Include="Hangfire.Core" Version="1.7.34" />
@@ -51,12 +51,12 @@
     <PackageReference Include="RazorLight" Version="2.0.0-rc.3" />
     <PackageReference Include="System.Security.Cryptography.Pkcs" Version="8.0" />
     <PackageReference Include="Xpand.XAF.Core.All">
-      <Version>4.231.6.20</Version>
+      <Version>4.231.6.24</Version>
     </PackageReference>
     <PackageReference Include="Xpand.XAF.Web.All">
-      <Version>4.231.6.20</Version>
+      <Version>4.231.6.24</Version>
     </PackageReference>
-    <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="23.1.6" />
+    <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="23.2.3" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.5" />
     <PackageReference Include="System.Data.OleDb" Version="6.0" />
     <PackageReference Include="System.ServiceModel.Http" Version="4.10.2" />

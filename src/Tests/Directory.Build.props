@@ -1,5 +1,6 @@
 <Project >
     <PropertyGroup>
       <NuGetAudit>disable</NuGetAudit>
+      <NoWarn>CA1416</NoWarn>
     </PropertyGroup>
 </Project>
