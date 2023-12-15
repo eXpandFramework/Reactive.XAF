@@ -4,10 +4,13 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.Editors;
 using Fasterflect;
+using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.TypeExtensions;
 using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.Extensions.XAF.TypesInfoExtensions;
@@ -19,7 +22,12 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static bool IsDisposed(this PropertyEditor editor)
             => (bool)editor.GetPropertyValue("IsDisposed");
-        
+
+        public static IObservable<Unit> ShowPopupWindow(this ListPropertyEditor propertyEditor,PopupWindowShowAction action){
+            var popupWindowShowActionHelperType = AppDomain.CurrentDomain.GetAssemblyType("DevExpress.ExpressApp.Win.PopupWindowShowActionHelper");
+            return propertyEditor.DeferAction(() => popupWindowShowActionHelperType.CreateInstance(action).CallMethod("ShowPopupWindow"));
+        }
+
         public static IObservable<ListPropertyEditor> WhenFrameChanged(this ListPropertyEditor editor) 
             => editor.WhenEvent(nameof(ListPropertyEditor.FrameChanged)).To(editor).TakeUntilDisposed();
 
@@ -36,7 +44,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                     : Observable.Empty<(ObjectView view, IParentViewPropertyEditor editor)>());
 
             var setupParentView = detailViewEditors.Merge(listViewEditors)
-                .Do(_ => _.editor.SetParentView(_.view)).ToUnit();
+                .Do(t => t.editor.SetParentView(t.view)).ToUnit();
             return setupParentView;
         }
 

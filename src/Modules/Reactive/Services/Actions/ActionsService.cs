@@ -240,10 +240,10 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
             => source.SelectMany(frame => frame.View.Observe().When(objectType).Select(_ => frame));
 
         public static IObservable<TAction> When<TAction>(this IObservable<TAction> source, Type objectType) where TAction : ActionBase 
-            => source.Where(_ => objectType.IsAssignableFrom(_.Controller.Frame.View.ObjectTypeInfo.Type));
+            => source.Where(action => objectType.IsAssignableFrom(action.Controller.Frame.View.ObjectTypeInfo.Type));
 
         public static IObservable<IObjectSpace> ToObjectSpace<TAction>(this IObservable<TAction> source) where TAction : ActionBase 
-            => source.Select(_ => _.Controller.Frame.View.ObjectSpace);
+            => source.Select(action => action.Controller.Frame.View.ObjectSpace);
 
         public static IObservable<(TAction action, CancelEventArgs e)> WhenCanceled<TAction>(
             this IObservable<(TAction action, CancelEventArgs e)> source) where TAction : ActionBase
@@ -256,13 +256,13 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
             => action.WhenEvent<CancelEventArgs>(nameof(ActionBase.Executing)).InversePair(action).TakeUntilDisposed(action);
 
         public static  IObservable<(TAction action, Type objectType, View view, Frame frame, IObjectSpace objectSpace, ShowViewParameters showViewParameters)> ToParameter<TAction>(
-                this IObservable<(TAction action, ActionBaseEventArgs e)> source) where TAction : ActionBase => source.Select(_ => {
-		        var frame = _.action.Controller.Frame;
-		        return (_.action, frame.View.ObjectTypeInfo.Type, frame.View, frame, frame.View.ObjectSpace, _.e.ShowViewParameters);
+                this IObservable<(TAction action, ActionBaseEventArgs e)> source) where TAction : ActionBase => source.Select(t => {
+		        var frame = t.action.Controller.Frame;
+		        return (t.action, frame.View.ObjectTypeInfo.Type, frame.View, frame, frame.View.ObjectSpace, t.e.ShowViewParameters);
 	        });
 
         public static IObservable<TAction> ToAction<TAction>(this IObservable<(TAction action, ActionBaseEventArgs e)> source) where TAction : ActionBase 
-            => source.Select(_ => _.action);
+            => source.Select(t => t.action);
 
         public static IObservable<CustomizePopupWindowParamsEventArgs> WhenCustomizePopupWindowParams(this PopupWindowShowAction action) 
             => action.WhenEvent<CustomizePopupWindowParamsEventArgs>(nameof(PopupWindowShowAction.CustomizePopupWindowParams))
@@ -435,10 +435,8 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
             => source.SelectMany(a => a.WhenEnabled());
 
         public static IObservable<TAction> WhenEnabled<TAction>(this TAction simpleAction) where TAction : ActionBase 
-            =>simpleAction
-	        .ResultValueChanged(action => action.Enabled)
-	        .Where(tuple => tuple.action.Enabled.ResultValue)
-	        .Select(_ => _.action);
+            =>simpleAction.ResultValueChanged(action => action.Enabled).Where(tuple => tuple.action.Enabled.ResultValue)
+                .Select(t => t.action);
 
         public static IObservable<Unit> Disposing<TAction>(this IObservable<TAction> source) where TAction : ActionBase 
             => source .SelectMany(item => item.WhenEvent(nameof(ActionBase.Disposing)).ToUnit());
@@ -497,9 +495,15 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
         public static IObservable<T> Trigger<T>(this SingleChoiceAction action, IObservable<T> afterExecuted,params object[] selection)
             => action.Trigger(afterExecuted,() => action.SelectedItem,selection);
         
+        public static IObservable<Unit> Trigger(this SingleChoiceAction action, params object[] selection)
+            => action.Trigger(Observable.Empty<Unit>(),() => action.SelectedItem,selection);
+        
         public static IObservable<T> Trigger<T>(this SingleChoiceAction action, IObservable<T> afterExecuted,Func<ChoiceActionItem> selectedItem,params object[] selection)
             => afterExecuted.Trigger(() => action.DoExecute(selectedItem(), selection));
-        
+        public static IObservable<T> Trigger<T>(this PopupWindowShowAction action, IObservable<T> afterExecuted,Window window) {
+            return afterExecuted.Trigger(() => action.DoExecute(window));
+        }
+
         public static IObservable<T> Trigger<T>(this SingleChoiceAction action,Func<ChoiceActionItem> selectedItem, IObservable<T> afterExecuted,params object[] selection)
             => afterExecuted.Trigger(() => action.DoExecute(selectedItem(), selection));
 

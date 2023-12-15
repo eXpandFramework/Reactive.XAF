@@ -77,8 +77,8 @@ namespace Xpand.XAF.ModelEditor.Module.Win {
                     watcher.EnableRaisingEvents = true;
                     var meSettingsPath = GetMESettingsPath();
                     return watcher.WhenEvent<FileSystemWatcher,FileSystemEventArgs>(nameof(watcher.Created)).Where(t => t.args.FullPath == meSettingsPath)
-                        .SelectMany(_ => Observable.Defer(() => $"{JsonConvert.DeserializeObject<dynamic>(File.ReadAllText(meSettingsPath))?.Solution}".ReturnObservable()).Retry())
-                        .Merge("".ReturnObservable().Do(_ => File.CreateText(GetReadyPath())).IgnoreElements());
+                        .SelectMany(_ => Observable.Defer(() => $"{JsonConvert.DeserializeObject<dynamic>(File.ReadAllText(meSettingsPath))?.Solution}".Observe()).Retry())
+                        .Merge("".Observe().Do(_ => File.CreateText(GetReadyPath())).IgnoreElements());
                 })
                 .ObserveOn(SynchronizationContext.Current!)
                 .TraceModelEditorWindowsFormsModule();
@@ -109,7 +109,7 @@ namespace Xpand.XAF.ModelEditor.Module.Win {
 
             var dxVersion = versionsGroup.First().Key;
             if (new Uri(modelME.DownloadUrl).IsFile) {
-	            return dxVersion.ReturnObservable().DownloadME(xafModel, modelME);
+	            return dxVersion.Observe().DownloadME(xafModel, modelME);
             }
             return dxVersion.RXXafReleaseVersion(modelME.DownloadPreRelease, modelME.NoFoundVersion())
                 .Do( version => application.ShowViewStrategy.ShowMessage($"Latest release is {version} downloading..."))
@@ -131,7 +131,7 @@ namespace Xpand.XAF.ModelEditor.Module.Win {
 				        Directory.CreateDirectory(directory);
 			        }
 
-			        return modelME.DownloadUrl.StringFormat($"{version}", meType).ReturnObservable()
+			        return modelME.DownloadUrl.StringFormat($"{version}", meType).Observe()
 				        .TraceModelEditorWindowsFormsModule(s => $"Download {s}")
 				        .SelectMany(url => MEBytes(url)
 					        .ObserveOn(SynchronizationContext.Current!)
@@ -143,7 +143,7 @@ namespace Xpand.XAF.ModelEditor.Module.Win {
 					        }).To(path));
 		        }
 
-		        return path.ReturnObservable();
+		        return path.Observe();
 	        });
 
         private static IObservable<byte[]> MEBytes(string url) {
@@ -152,20 +152,20 @@ namespace Xpand.XAF.ModelEditor.Module.Win {
 		        url = uri.LocalPath;
 	        }
 	        if (File.Exists(url)) {
-		        return File.ReadAllBytes(url).ReturnObservable();
+		        return File.ReadAllBytes(url).Observe();
 	        }
 	        return HttpClient.GetByteArrayAsync(url).ToObservable();
         }
 
         private static Func<Version, IObservable<Version>> NoFoundVersion(this IModelME modelME) 
             => dxVersion =>modelME.DevVersion==null? Observable.Throw<Version>(new VersionNotFoundException(
-                $"Version {dxVersion} not on GitHub. Consider the ${nameof(IModelME.DownloadPreRelease)}, or the ({nameof(IModelME.DevVersion)}, {nameof(IModelME.DownloadUrl)}) model attributes")):modelME.DevVersion.ReturnObservable();
+                $"Version {dxVersion} not on GitHub. Consider the ${nameof(IModelME.DownloadPreRelease)}, or the ({nameof(IModelME.DevVersion)}, {nameof(IModelME.DownloadUrl)}) model attributes")):modelME.DevVersion.Observe();
 
         private static IObservable<Version> RXXafReleaseVersion(this Version dxVersion, bool preRelease, Func<Version,IObservable<Version>> noFound) 
             => HttpClient.GetStringAsync("https://api.github.com/repos/expandframework/reactive.xaf/tags").ToObservable()
                 .SelectMany(s => JsonConvert.DeserializeObject<JArray>(s)!.Select(token => Version.Parse($"{token["name"]}")))
-                .FirstAsync(version => (version.Revision == 0 && !preRelease)||preRelease)
-                .Where(version => $"{version.Minor}" == $"{dxVersion.Major}{dxVersion.Minor}")
+                .Where(version => (version.Revision == 0 && !preRelease)||preRelease)
+                .Where(version => $"{version.Minor}" == $"{dxVersion.Major}{dxVersion.Minor}").Take(1)
                 .SwitchIfEmpty(noFound(dxVersion))
                 .FirstAsync()
                 .ObserveOn(SynchronizationContext.Current!)

@@ -38,6 +38,8 @@ namespace Xpand.Extensions.XAF.FrameExtensions{
             => frame.Actions(id).FirstOrDefault();
         public static SimpleAction SimpleAction(this Frame frame, string id) 
             => frame.Actions<SimpleAction>(id).FirstOrDefault();
+        public static PopupWindowShowAction PopupWindowShowAction(this Frame frame, string id) 
+            => frame.Actions<PopupWindowShowAction>(id).FirstOrDefault();
         public static SingleChoiceAction SingleChoiceAction(this Frame frame, string id) 
             => frame.Actions<SingleChoiceAction>(id).FirstOrDefault();
         public static ParametrizedAction ParametrizedAction(this Frame frame, string id) 
