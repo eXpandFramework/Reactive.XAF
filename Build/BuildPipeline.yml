@@ -170,6 +170,52 @@ jobs:
           !**\*TestAdapter.dll
           !**\obj\**
         searchFolder: '$(Pipeline.Workspace)/CompiledApp'
-        
+- job: PostTestTasks
+  dependsOn:
+    - RunNormalTests
+  condition: succeeded()
+  pool:
+    name: Self
+  variables:
+    - group: keys
+    - name: NUGET_PACKAGES
+      value: $(Pipeline.Workspace)\.nuget\packages  
+  steps:
+    - task: PowerShell@2
+      inputs:
+        targetType: 'inline'
+        script: |
+          $ErrorView="NormalView"
+          $ErrorActionPreference="stop"
+          $env:AzureToken='$(AzureToken)'
+          $env:AzProject="eXpandFramework"
+          $env:AzOrganization="eXpandDevOps"
+          & '$(System.DefaultWorkingDirectory)\go.ps1' -InstallModules
+          $xafMinors=Get-XAFLatestMinors -Source '$(DXApiFeed)'
+          $xafMinor=$xafMinors|select-object -first 1
+          $parameters = @{
+            CustomVersion     = "$xafminor"
+            DxPipelineBuildId = '$(Build.BuildId)'
+          }
+          $parameters
+          Add-AzBuild -Definition PublishNugets-Reactive.XAF -Parameters $parameters -Branch $env:Build_SourceBranchName
+          Write-Host "Hello World"
+        failOnStderr: true
+        ignoreLASTEXITCODE: true
+        pwsh: true
+
+    - task: PublishPipelineArtifact@1
+      name: PublishNugets
+      inputs:
+        targetPath: '$(System.DefaultWorkingDirectory)\bin\Nupkg'
+        artifact: 'Nupkg'
+        publishLocation: 'pipeline'
+
+    - task: PublishPipelineArtifact@1
+      name: PublishZips
+      inputs:
+        targetPath: '$(System.DefaultWorkingDirectory)\bin\zip'
+        artifact: 'Zip'
+        publishLocation: 'pipeline'          
 
 
