@@ -54,5 +54,8 @@ namespace Xpand.Extensions.Reactive.Transform {
                 return arg.Observe();
 
             });
+
+        public static IObservable<T> Concat<T>(this IObservable<T> source,T value) 
+            => source.Concat(value.Observe());
     }
 }

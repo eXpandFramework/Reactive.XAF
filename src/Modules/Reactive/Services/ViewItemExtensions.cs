@@ -8,6 +8,7 @@ using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
 using Fasterflect;
 using Xpand.Extensions.Reactive.Conditional;
+using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.ViewExtensions;
 

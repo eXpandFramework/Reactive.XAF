@@ -67,7 +67,9 @@ namespace Xpand.XAF.Modules.Reactive.Services {
                                 .SelectMany(e => e.SelectedObjects.Cast<object>())
                                 .Do(value => ((IList)frame.View.ObjectTypeInfo.FindMember(t.attribute.PropertyName)
                                     .GetValue(frame.View.CurrentObject)).Remove(value)))))))
-                .ToUnit();
+                .MergeToUnit(manager.WhenCustomizeTypesInfo()
+                    .SelectMany(e => e.TypesInfo.Members<LinkUnlinkPropertyAttribute>().Where(t => t.info.Owner.FindMember(t.attribute.PropertyName).ListElementType.IsAbstract)
+                        .Do(t => throw new InvalidOperationException($"{nameof(Xpand.Extensions.XAF.Attributes.LinkUnlinkPropertyAttribute)} {t.attribute.PropertyName} on {t.info} is abstract"))));
                 
         static IObservable<Unit> ListViewShowFooterCollection(this ApplicationModulesManager manager)
             => manager.WhenGeneratingModelNodes<IModelViews>()

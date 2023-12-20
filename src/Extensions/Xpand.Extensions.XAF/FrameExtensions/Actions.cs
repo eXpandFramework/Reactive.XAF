@@ -61,5 +61,12 @@ namespace Xpand.Extensions.XAF.FrameExtensions{
         public static IEnumerable<T> Actions<T>(this Frame frame,params string[] actionsIds) where T : ActionBase 
             => frame.Controllers.Cast<Controller>().SelectMany(controller => controller.Actions).OfType<T>()
                 .Where(actionBase => !actionsIds.Any()|| actionsIds.Any(s => s==actionBase.Id));
+
+        public static SingleChoiceAction NewObjectAction(this Frame frame) 
+            => frame.GetController<NewObjectViewController>().NewObjectAction;
+        public static SimpleAction SaveAction(this Frame frame) 
+            => frame.GetController<ModificationsController>().SaveAction;
+        public static SimpleAction SaveAndCloseAction(this Frame frame) 
+            => frame.GetController<ModificationsController>().SaveAndCloseAction;
     }
 }

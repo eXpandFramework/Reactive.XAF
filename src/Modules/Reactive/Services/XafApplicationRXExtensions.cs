@@ -509,6 +509,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static IObservable<T> ToObjects<T>(this IObservable<(IObjectSpace objectSpace, IEnumerable<T> objects)> source)
             => source.SelectMany(t => t.objects);
+        public static IObservable<T[]> ToObjectsGroup<T>(this IObservable<(IObjectSpace objectSpace, IEnumerable<T> objects)> source)
+            => source.Select(t => t.objects.ToArray());
         public static IEnumerable<T> ToObjects<T>(this IEnumerable<(IObjectSpace objectSpace, IEnumerable<T> objects)> source)
             => source.SelectMany(t => t.objects);
         
@@ -1012,16 +1014,18 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => application.RefreshObjectViewWhenCommitted<TObject>();
         
         public static IObservable<Unit> RefreshDetailViewWhenObjectCommitted<TObject>(this XafApplication application, Type detailViewObjectType,Func<Frame,TObject[],bool> match=null) where TObject : class 
-            => application.RefreshObjectViewWhenCommitted( detailViewObjectType,match);
-        
+            => application.RefreshObjectViewWhenCommitted(detailViewObjectType, match);
+
         private static IObservable<Unit> RefreshObjectViewWhenCommitted<TObject>(this XafApplication application, Type detailViewObjectType=null,Func<Frame,TObject[],bool> match=null) where TObject : class 
-            => application.WhenProviderCommittedDetailed<TObject>(ObjectModification.All).ToObjectsGroup()
-                .Publish(wallets => application.WhenFrame(detailViewObjectType, detailViewObjectType!=null?ViewType.DetailView:ViewType.ListView)
-                    .Where(frame => frame.View.IsRoot)
-                    .SelectUntilViewClosed(frame => wallets.ObserveOnContext().Where(arg => match?.Invoke(frame,arg)??true)
-                        .DoWhen(_ => frame.View!=null,_ => frame.View.ObjectSpace.Refresh())
-                    )
-                    .Merge(wallets).TakeUntilDisposed(application)).ToUnit();
+            => application.WhenFrame(detailViewObjectType, detailViewObjectType != null ? ViewType.DetailView : ViewType.ListView).Where(frame => frame.View.IsRoot)
+                .SelectMany(frame => application.WhenProviderCommittedDetailed<TObject>(ObjectModification.All)
+                    .ToObjectsGroup().ObserveLatestOnContext().Where(arg => match?.Invoke(frame, arg) ?? true).Take(1).To(frame.View)
+                    .SelectMany(view => view.ObjectSpace.WhenModifyChanged().To(view).StartWith(view)
+                        .Where(_ => !view.ObjectSpace.IsModified)
+                        .Do(_ => view.ObjectSpace.Refresh()))
+                )
+                .TakeUntilDisposed(application).ToUnit();
+
     }
 
 

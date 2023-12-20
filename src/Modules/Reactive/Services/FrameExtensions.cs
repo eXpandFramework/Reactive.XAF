@@ -12,6 +12,7 @@ using DevExpress.ExpressApp.SystemModule;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Numeric;
 using Xpand.Extensions.ObjectExtensions;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
@@ -142,6 +143,9 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                         }
                         e.ShowViewParameters.CreatedView = e.Application().NewDetailView(space => space.GetObject(currentObject), currentObject.GetType().GetModelClass().DefaultDetailView);
                     });
+
+        public static IObservable<NestedFrame> ToNestedFrame(this IObservable<ListPropertyEditor> source)
+            => source.Select(editor => editor.Frame).Cast<NestedFrame>();
         
         public static IObservable<ListPropertyEditor> NestedListViews(this Frame frame, params Type[] objectTypes ) 
             => frame.View.ToDetailView().NestedListViews(objectTypes);
@@ -232,5 +236,12 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             return action.Trigger(afterNavigation,invoke.YieldItem().Cast<object>().ToArray());
         }
 
+        public static IObservable<Unit> SaveAndCloseObject(this Frame frame)
+            => frame.SaveAndCloseAction().Trigger();
+        
+        public static IObservable<Frame> NewObject(this Frame frame, Type objectType,bool saveAndClose=false,Func<Frame,IObservable<Unit>> detailview=null) 
+            => frame.NewObjectAction().Trigger(frame.Application.WhenFrame(objectType),() => frame.NewObjectAction().Items.First(item => (Type)item.Data==objectType))
+                .ConcatIgnored(frame1 => detailview?.Invoke(frame1)?? Observable.Empty<Unit>())
+                .If(_ => saveAndClose,frame1 => frame1.SaveAndCloseObject().To<Frame>().Concat(frame),frame1 => frame1.Observe());
     }
 }

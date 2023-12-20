@@ -103,9 +103,7 @@ namespace Xpand.Extensions.Reactive.Utility{
         private static void Action<TSource>(this TraceSource traceSource, string m, object v, Action<ITraceEvent> ta,
             Func<TSource, string> messageFactory = null, Func<Exception, string> errorMessageFactory = null,
             string memberName = "", string name="",string sourceFilePath = "", int sourceLineNumber = 0) {
-            if (traceSource?.Switch.Level == SourceLevels.Off){
-                return;
-            }
+            if (traceSource?.Switch.Level == SourceLevels.Off) return;
             string value = null;
             if (v!=null){
                 value = CalculateValue(v, o => messageFactory.GetMessageValue( errorMessageFactory, o)).Change<string>();

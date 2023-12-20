@@ -44,7 +44,8 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) 
             => manager.WhenApplication(application => {
                 application.AddNonSecuredType(typeof(TraceEvent));
-                _listener ??= new ReactiveTraceListener(application.Title);
+                _listener ??= new ReactiveTraceListener();
+                _listener.Title = application.Title;
                 ListenerEvents = _listener.EventTrace.Publish().RefCount();
                 return application.BufferUntilCompatibilityChecked(ListenerEvents).SaveEvent(application).ToUnit()
                         .Merge(application.Notifications())

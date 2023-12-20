@@ -12,13 +12,16 @@ using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.TestsLib {
     public static class AssertExtensions {
+
         public static IObservable<TabbedControlGroup> AssertTabbedGroup(this XafApplication application,
-            Type objectType = null, int tabPagesCount = 0,Func<DetailView,bool> match=null,Func<IModelTabbedGroup, bool> tabMatch=null,TimeSpan? timeout=null,[CallerMemberName]string caller="")
+            Type objectType = null, int tabPagesCount = 0,Func<DetailView,bool> match=null,Func<IModelTabbedGroup, bool> tabMatch=null,TimeSpan? timeout=null,int selectPage=0,[CallerMemberName]string caller="")
             => application.AssertTabControl<TabbedControlGroup>(objectType,match,tabMatch,timeout,caller)
                 .If(group => tabPagesCount > 0 && group.TabPages.Count != tabPagesCount,group => group.Observe().DelayOnContext()
                         .SelectMany(_ => new Exception(
                             $"{nameof(AssertTabbedGroup)} {objectType?.Name} expected {tabPagesCount} but was {group.TabPages}").ThrowTestException(caller).To<TabbedControlGroup>()),
                     group => group.Observe())
-                .Merge(application.WhenTabControl<TabbedControlGroup>(objectType,match,tabMatch)).Replay().AutoConnect();
+                .IgnoreElements()
+                .Merge(application.WhenTabControl<TabbedControlGroup>(objectType,match,tabMatch).DelayOnContext()
+                    .Do(group => group.SelectedTabPageIndex=selectPage)).Replay().AutoConnect();
     }
 }

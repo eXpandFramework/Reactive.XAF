@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -19,7 +18,6 @@ using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.TypeExtensions;
-using Xpand.Extensions.XAF.CollectionSourceExtensions;
 using Xpand.Extensions.XAF.DetailViewExtensions;
 using Xpand.Extensions.XAF.ObjectSpaceExtensions;
 using Xpand.Extensions.XAF.ViewExtensions;
@@ -44,7 +42,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         
         public static IObservable<TO> SelectObject<TO>(this ListView listView,params TO[] objects) where TO : class 
             => listView.Editor.WhenControlsCreated()
-                .SelectMany(editor => editor.Control.WhenEvent("DataSourceChanged")).To(listView)
+                .SelectMany(editor => editor.Control.WhenEvent("DataSourceChanged").To(listView).StartWith(listView)
+                    .WhenNotDefault(_ => editor.Control.GetPropertyValue("DataSource"))).To(listView)
                 .SelectObject(objects);
         
         

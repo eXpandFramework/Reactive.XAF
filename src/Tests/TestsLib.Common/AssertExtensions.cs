@@ -7,8 +7,10 @@ using System.Runtime.CompilerServices;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.Model;
+using DevExpress.ExpressApp.SystemModule;
 using DevExpress.ExpressApp.ViewVariantsModule;
 using NUnit.Framework;
+using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Numeric;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Transform;
@@ -30,6 +32,47 @@ namespace Xpand.TestsLib.Common {
                 .SelectMany(action => !action.Available() && (completeWhenNotAvailable?.Invoke(action)??false) ? Observable.Empty<SimpleAction>()
                     : action.Observe().Assert($"{nameof(AssertSimpleAction)} {frame.View} {actionId}", caller: caller));
         
+        public static IObservable<SingleChoiceAction> AssertSingleChoiceAction(this IObservable<Frame> source,
+            string actionId, Func<SingleChoiceAction,int> itemsCount = null) 
+            => source.AssertSingleChoiceAction(actionId,(action, item) => item==null? itemsCount?.Invoke(action) ?? -1:-1);
+        
+        public static IObservable<SingleChoiceAction> AssertSingleChoiceAction(this IObservable<Frame> source,
+            string actionId, Func<SingleChoiceAction,ChoiceActionItem, int> itemsCount = null) 
+            => source.SelectMany(frame => frame.AssertSingleChoiceAction(actionId, itemsCount))
+                .ReplayFirstTake();
+
+        public static IObservable<SingleChoiceAction> AssertSetFilterAction(this Frame frame,  int count,string triggerId)
+            => frame.AssertSingleChoiceAction("SetFilter", _ => count).ConcatIgnored(action => action.Trigger(() => action.Items.FindItemByID(triggerId)));
+        
+        public static IObservable<SingleChoiceAction> AssertSingleChoiceAction(this Frame frame, string actionId, Func<SingleChoiceAction,  int> itemsCount = null)
+            => frame.AssertSingleChoiceAction(actionId, (action, item) => item!=null?-1:itemsCount?.Invoke(action) ?? -1);
+
+        public static IObservable<SingleChoiceAction> AssertSingleChoiceAction(this Frame frame,string actionId, Func<SingleChoiceAction, ChoiceActionItem, int> itemsCount=null)
+            => frame.Actions<SingleChoiceAction>(actionId)
+                .Where(action => action.Available() || itemsCount != null && itemsCount(action, null) == -1).ToNowObservable()
+                .Assert($"{nameof(AssertSingleChoiceAction)} {actionId}")
+                .SelectMany(action => {
+                    var invoke = itemsCount?.Invoke(action, null) ?? -1;
+                    return action.AssertSingleChoiceActionItems(action.Items.Active().ToArray(),
+                        invoke, item => itemsCount?.Invoke(action, item) ?? -1).IgnoreElements().Concat(action.Observe());
+                }).ReplayFirstTake();
+
+        static IObservable<SingleChoiceAction> AssertSingleChoiceActionItems(
+            this SingleChoiceAction action, ChoiceActionItem[] source, int itemsCount,Func<ChoiceActionItem,int> nestedItemsCountSelector=null,[CallerMemberName]string caller="") 
+            => source.Active().ToArray().Observe().Where(items => items.Length==itemsCount||itemsCount==-1)
+                
+                .Assert($"{action.Id} has {source.Active().ToArray().Length} items ({source.JoinString(", ")}) but should have {itemsCount}",caller:caller)
+                .IgnoreElements().SelectMany()
+                .Concat(source.Active().ToArray().ToNowObservable())
+                .SelectMany(item => {
+                    var count = nestedItemsCountSelector?.Invoke(item) ?? -1;
+                    return count > -1 ? action.AssertSingleChoiceActionItems(item.Items.Active().ToArray(), count) : Observable.Empty<SingleChoiceAction>();
+                })
+                .IgnoreElements();
+        
+        public static IObservable<TObject[]> AssertProviderObjects<TObject>(this XafApplication application, TimeSpan? timeout = null, [CallerMemberName] string caller = "") where TObject : class
+            => application.WhenProviderObjects<TObject>().Assert(timeout: timeout, caller: caller);
+        
         public static IObservable<Frame> AssertListViewHasObject<TObject>(this XafApplication application, Func<TObject,bool> matchObject=null,int count=0,TimeSpan? timeout=null,[CallerMemberName]string caller="")  
             => application.WhenFrame(typeof(TObject),ViewType.ListView)
                 .SelectUntilViewClosed(frame => frame.AssertListViewHasObject(matchObject, count,timeout, caller))
@@ -46,9 +89,9 @@ namespace Xpand.TestsLib.Common {
         private static IObservable<Frame> AssertListViewHasObject<TObject>(this Frame frame, Func<TObject, bool> matchObject, int count, TimeSpan? timeout, string caller, View view) 
             => view.ToListView().WhenObjects<TObject>()
                 .Where(objects => count==0||objects.Length==count)
-                .Select(objects => objects.Where(value => matchObject?.Invoke(value)??true).Take(1).ToNowObservable()
-                    .SelectMany(value => view.ToListView().SelectObject(value)))
-                .Switch().Assert(_ => $"{typeof(TObject).Name}-{view.Id}",caller:caller,timeout:timeout)
+                .SelectMany(objects => objects.Where(value => matchObject?.Invoke(value)??true).ToNowObservable()).Take(1)
+                .SelectMany(value => view.ToListView().SelectObject(value)).Select(o => o)
+                .Assert(_ => $"{typeof(TObject).Name}-{view.Id}",caller:caller,timeout:timeout)
                 .ReplayFirstTake().To(frame);
 
         public static IObservable<TTabbedControl> AssertTabControl<TTabbedControl>(this XafApplication application,Type objectType=null,Func<DetailView,bool> match=null,Func<IModelTabbedGroup, bool> tabMatch=null,TimeSpan? timeout=null,[CallerMemberName]string caller="") 
@@ -91,6 +134,12 @@ namespace Xpand.TestsLib.Common {
         public static IObservable<Window> AssertNavigation(this XafApplication application, string viewId,Func<Window,IObservable<Unit>> navigate=null)
             => application.Navigate(viewId,window => (navigate?.Invoke(window)?? Observable.Empty<Unit>()).SwitchIfEmpty(Unit.Default.Observe()))
                 .Assert($"{viewId}").Catch<Window,CannotNavigateException>(_ => Observable.Empty<Window>());
+        
+        public static IObservable<Frame> AssertLinkObject<TObject>(this Frame frame) where TObject : class
+            => frame.NestedListViews(typeof(TObject)).Take(1)
+                .Select(propertyEditor => propertyEditor.Frame.GetController<LinkUnlinkController>().LinkAction)
+                .SelectMany(linkAction => frame.Application.WhenProviderObject<TObject>().Assert().ObserveOnContext()
+                    .SelectMany(_ => linkAction.LinkObject( ).Assert())).ReplayFirstTake();
         public class CannotNavigateException:Exception;
 
     }

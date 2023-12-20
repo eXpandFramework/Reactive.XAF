@@ -25,16 +25,12 @@ using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Transform.System.Net;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.StringExtensions;
+using WebSocketReceiveResult = System.Net.WebSockets.WebSocketReceiveResult;
 
 namespace Xpand.TestsLib.Common {
-    public class HarmonyTest:Harmony {
-        public HarmonyTest() : base(TestContext.CurrentContext.Test.FullName){
-        }
-    }
+    public class HarmonyTest() : Harmony(TestContext.CurrentContext.Test.FullName);
 
-    public class MockHttpClient:HttpClient {
-        
-    }
+    public class MockHttpClient:HttpClient;
     public static class MockExtensions {
         private static Mock<HttpWebResponse> _mockResponse;
         private static Func<Uri,bool> _matchUri;
@@ -92,12 +88,27 @@ namespace Xpand.TestsLib.Common {
         public static void SetupReceive(this Mock<WebSocket> mock, byte[] bytes,Func<Task<WebSocketReceiveResult>> resultSelector=null) {
             mock.Setup(socket => socket.ReceiveAsync(It.IsAny<ArraySegment<byte>>(), It.IsAny<CancellationToken>()))
                 .Returns((ArraySegment<byte> buffer, CancellationToken token) => {
+                    var task = resultSelector?.Invoke();
+                    if (task != null) {
+                        return task;
+                    }
                     Array.Copy(bytes,buffer.Array!,bytes.Length);
-                    return resultSelector?.Invoke()??new WebSocketReceiveResult(bytes.Length,WebSocketMessageType.Text, true).Observe().Delay(1000.Milliseconds()).ToTask(token);
+                    return new WebSocketReceiveResult(bytes.Length,WebSocketMessageType.Text, true).Observe().Delay(1000.Milliseconds()).ToTask(token);
                 });
             mock.Setup(socket => socket.State).Returns(WebSocketState.Open);
         }
-
+        
+        public static void SetupReceive(this Mock<WebSocket> mock, params byte[][] bytes) {
+            int i = 0;
+            mock.Setup(socket => socket.ReceiveAsync(It.IsAny<ArraySegment<byte>>(), It.IsAny<CancellationToken>()))
+                .Returns((ArraySegment<byte> buffer, CancellationToken token) => {
+                    Array.Copy(bytes[i],buffer.Array!,bytes[i].Length);
+                    return new WebSocketReceiveResult(bytes[i].Length,WebSocketMessageType.Text, true).Observe()
+                        .DoWhen(_ => i<bytes.Length-1,_ => i++).Delay(1000.Milliseconds()).ToTask(token);
+                });
+            mock.Setup(socket => socket.State).Returns(WebSocketState.Open);
+        }
+        
         public static IReturnsResult<THandler> SetupSendEmptyArray<THandler>(this Mock<THandler> handlerMock,
             Action<HttpResponseMessage> configure = null, IScheduler scheduler = null) where THandler : HttpMessageHandler
             => handlerMock.SetupSend(message => {

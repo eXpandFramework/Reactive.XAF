@@ -7,17 +7,17 @@ using Xpand.Extensions.Tracing;
 namespace Xpand.XAF.Modules.Reactive.Logger {
     
     public class ReactiveTraceListener : RollingFileTraceListener,IPush {
-        private readonly string _applicationTitle;
+        
          public static readonly bool DisableFileWriter=true;
          readonly ISubject<ITraceEvent> _eventTraceSubject = Subject.Synchronize(new Subject<ITraceEvent>());
          private bool _isDisposed;
 
-        public ReactiveTraceListener(string applicationTitle)  {
-            _applicationTitle = applicationTitle;
+        public ReactiveTraceListener()  {
             TraceOutputOptions = TraceOptions.DateTime;
             Template = "{DateTime:u} {Message}";
         }
 
+        public string Title { get; internal set; }
         protected override void Dispose(bool disposing) {
             base.Dispose(disposing);
             _isDisposed = true;
@@ -32,7 +32,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger {
         }
 
         public void Push(ITraceEvent message) {
-            message.ApplicationTitle = _applicationTitle;
+            message.ApplicationTitle = Title;
             message.Value = message.Message;
             PushMessage(message);
         }

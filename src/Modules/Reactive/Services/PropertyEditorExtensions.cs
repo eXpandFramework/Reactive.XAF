@@ -23,10 +23,10 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static bool IsDisposed(this PropertyEditor editor)
             => (bool)editor.GetPropertyValue("IsDisposed");
 
-        public static IObservable<Unit> ShowPopupWindow(this ListPropertyEditor propertyEditor,PopupWindowShowAction action){
-            var popupWindowShowActionHelperType = AppDomain.CurrentDomain.GetAssemblyType("DevExpress.ExpressApp.Win.PopupWindowShowActionHelper");
-            return propertyEditor.DeferAction(() => popupWindowShowActionHelperType.CreateInstance(action).CallMethod("ShowPopupWindow"));
-        }
+        static readonly Type PopupWindowShowActionHelperType = AppDomain.CurrentDomain.GetAssemblyType("DevExpress.ExpressApp.Win.PopupWindowShowActionHelper");
+        public static IObservable<Window> ShowPopupWindow(this PopupWindowShowAction action) 
+            => action.Application.WhenFrame().OfType<Window>().Merge(action.DeferAction(()
+                => PopupWindowShowActionHelperType.CreateInstance(action).CallMethod("ShowPopupWindow")).To<Window>());
 
         public static IObservable<ListPropertyEditor> WhenFrameChanged(this ListPropertyEditor editor) 
             => editor.WhenEvent(nameof(ListPropertyEditor.FrameChanged)).To(editor).TakeUntilDisposed();

@@ -9,6 +9,7 @@ using System.Reactive.Subjects;
 using System.Threading;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
+using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.SystemModule;
 using DevExpress.ExpressApp.Utils;
 using Fasterflect;
@@ -497,12 +498,24 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
         
         public static IObservable<Unit> Trigger(this SingleChoiceAction action, params object[] selection)
             => action.Trigger(Observable.Empty<Unit>(),() => action.SelectedItem,selection);
+        public static IObservable<Unit> Trigger(this SingleChoiceAction action, Func<ChoiceActionItem> selectedItem)
+            => action.Trigger(Observable.Empty<Unit>(),selectedItem);
         
         public static IObservable<T> Trigger<T>(this SingleChoiceAction action, IObservable<T> afterExecuted,Func<ChoiceActionItem> selectedItem,params object[] selection)
             => afterExecuted.Trigger(() => action.DoExecute(selectedItem(), selection));
-        public static IObservable<T> Trigger<T>(this PopupWindowShowAction action, IObservable<T> afterExecuted,Window window) {
-            return afterExecuted.Trigger(() => action.DoExecute(window));
-        }
+
+        public static IObservable<CustomizeTemplateEventArgs> WhenCustomizeTemplate(this PopupWindowShowAction action) 
+            => action.WhenEvent<CustomizeTemplateEventArgs>(nameof(action.CustomizeTemplate)).TakeUntilDisposed(action);
+
+        public static IObservable<T> Trigger<T>(this PopupWindowShowAction action, IObservable<T> afterExecuted) 
+            => action.ShowPopupWindow().ToController<DialogController>().DelayOnContext()
+                .SelectMany(controller => controller.AcceptAction.Trigger(afterExecuted));
+
+        public static IObservable<Frame> LinkObject(this PopupWindowShowAction action) 
+            => action.Application.WhenFrame().When(TemplateContext.LookupWindowContextName).Take(1)
+                .If(frame => ((ILookupPopupFrameTemplate)frame.Template).IsSearchEnabled,frame => frame.GetController<FilterController>().FullTextFilterAction
+                    .Trigger(frame.View.WhenObjects().Take(1).To(frame)),frame => frame.View.WhenObjects().Take(1).To(frame) ).IgnoreElements()
+                .Merge(action.Trigger(action.WhenExecuteCompleted().To(action.Frame())));
 
         public static IObservable<T> Trigger<T>(this SingleChoiceAction action,Func<ChoiceActionItem> selectedItem, IObservable<T> afterExecuted,params object[] selection)
             => afterExecuted.Trigger(() => action.DoExecute(selectedItem(), selection));

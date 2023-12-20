@@ -71,11 +71,9 @@ namespace Xpand.Extensions.Tracing {
         /// use "{ApplicationName}-{LocalDateTime:yyyy-MM-dd}.log".
         /// </para>
         /// </remarks>
-        public RollingFileTraceListener(string filePathTemplate) {
-            _rollingTextWriter = string.IsNullOrEmpty(filePathTemplate)
-                ? new RollingTextWriter(DefaultFilePathTemplate)
-                : RollingTextWriter.Create(filePathTemplate);
-        }
+        public RollingFileTraceListener(string filePathTemplate) => _rollingTextWriter = string.IsNullOrEmpty(filePathTemplate)
+            ? new RollingTextWriter(DefaultFilePathTemplate)
+            : RollingTextWriter.Create(filePathTemplate);
 
 
         /// <summary>
@@ -164,9 +162,7 @@ namespace Xpand.Extensions.Tracing {
         /// <summary>
         /// Allowed attributes for this trace listener.
         /// </summary>
-        protected override string[] GetSupportedAttributes() {
-            return SupportedAttributes;
-        }
+        protected override string[] GetSupportedAttributes() => SupportedAttributes;
 
         /// <summary>
         /// Handles trace Write calls - either output directly to console or convert to verbose event
