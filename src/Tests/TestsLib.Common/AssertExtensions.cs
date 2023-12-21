@@ -13,6 +13,7 @@ using NUnit.Framework;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Numeric;
 using Xpand.Extensions.Reactive.Combine;
+using Xpand.Extensions.Reactive.ErrorHandling;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.ActionExtensions;
@@ -140,6 +141,14 @@ namespace Xpand.TestsLib.Common {
                 .Select(propertyEditor => propertyEditor.Frame.GetController<LinkUnlinkController>().LinkAction)
                 .SelectMany(linkAction => frame.Application.WhenProviderObject<TObject>().Assert().ObserveOnContext()
                     .SelectMany(_ => linkAction.LinkObject( ).Assert())).ReplayFirstTake();
+        
+        public static IObservable<TException> AssertException<TException,T>(this IObservable<T> source,Func<IObservable<Unit>> other,Func<TException,bool> match=null) where TException : Exception 
+            => TestTracing.Handle(match).Select(exception => exception)
+                .MergeToUnit(Unit.Default.Observe().SelectMany(_
+                    => other().Select(unit => unit).ThrowOnNext().IgnoreElements().CompleteOnError())).To<TException>()
+                .Merge(source.CompleteOnError().IgnoreElements().Select(_ => default(TException)))
+                .Assert();
+        
         public class CannotNavigateException:Exception;
 
     }

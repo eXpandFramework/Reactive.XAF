@@ -58,7 +58,8 @@ namespace Xpand.TestsLib {
                     .DoOnError(_ => application.Terminate(context)).To<T>()
                     .Merge(application.Observe()
                         .SelectMany(_ => test.Start(application, user,context))
-                        .LogError()).Buffer(exit).Take(1).SelectMany())
+                        .LogError()
+                    ).Buffer(exit).Take(1).SelectMany())
             ;
         
         private static IObservable<T> Start<T>(this IObservable<T> test,WinApplication application, string user, SynchronizationContext context) 

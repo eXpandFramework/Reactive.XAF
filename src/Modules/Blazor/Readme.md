@@ -88,29 +88,29 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |----|----
 |**DevExpress.ExpressApp.Blazor**|**Any**
  |**DevExpress.ExpressApp.Validation.Blazor**|**Any**
-|[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.231.6
- |Xpand.Extensions.Blazor|4.231.6
- |Xpand.Extensions.Reactive|4.231.6
- |Xpand.Extensions.XAF|4.231.6
- |Xpand.Extensions|4.231.6
- |Xpand.Extensions.XAF.Xpo|4.231.6
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.231.6
+|[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.232.1
+ |Xpand.Extensions.Blazor|4.232.1
+ |Xpand.Extensions.Reactive|4.232.1
+ |Xpand.Extensions.XAF|4.232.1
+ |Xpand.Extensions|4.232.1
+ |Xpand.Extensions.XAF.Xpo|4.232.1
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.232.1
  |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
- |System.Reactive|5.0.0
+ |System.Reactive|6.0.0
  |System.Interactive|5.0.0
  |Microsoft.Bcl.AsyncInterfaces|7.0.0
  |Microsoft.CodeAnalysis|4.2.0
  |System.Data.SqlClient|4.8.5
  |System.Text.Json|7.0.2
  |System.Threading.Tasks.Dataflow|7.0.0
- |System.Security.Cryptography.ProtectedData|7.0.1
+ |System.Security.Cryptography.ProtectedData|8.0.0
  |System.CodeDom|6.0.0
- |System.Configuration.ConfigurationManager|6.0.0
+ |System.Configuration.ConfigurationManager|6.0.1
  |System.ServiceModel.NetTcp|4.10.2
  |System.ServiceModel.Http|4.10.2
  |System.ServiceModel.Security|4.10.2
- |Xpand.Patcher|3.0.17
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.231.6
+ |Xpand.Patcher|3.0.22
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.232.1
 
 ## Issues-Debugging-Troubleshooting
 
