@@ -56,10 +56,12 @@ namespace Xpand.TestsLib.Common{
     
     public static class TracingExtensions{
         public static IObservable<T> LogError<T>(this IObservable<T> source) 
-            => source.Take(1).Publish(obs => TestTracing.WhenError().Select(exception => exception).ThrowTestException().To<T>().Merge(obs)
-                    .TakeUntil(obs.Take(1))
-                    .TakeUntilCompleted(obs))
-                // .DoOnError(exception => Tracing.Tracer.LogError(exception))
-            ;
-    }
+            => source.Publish(obs => TestTracing.WhenError().ThrowTestException().To<T>().Merge(obs).TakeUntilCompleted(obs))
+                .DoOnError(exception => Tracing.Tracer.LogError(exception));
+        // public static IObservable<T> LogError<T>(this IObservable<T> source) 
+        //     => source.Take(1).Publish(obs => TestTracing.WhenError().Select(exception => exception).ThrowTestException().To<T>().Merge(obs)
+        //         .TakeUntil(obs.Take(1))
+        //         .TakeUntilCompleted(obs))
+        // // .DoOnError(exception => Tracing.Tracer.LogError(exception))
+     }
 }
