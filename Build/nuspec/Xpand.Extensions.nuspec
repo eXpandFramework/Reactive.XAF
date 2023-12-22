@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.Extensions</id>
-    <version>4.232.1.0</version>
+    <version>4.232.1.1</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -23,14 +23,13 @@
         <dependency id="System.ValueTuple" version="4.3" />
         <dependency id="Microsoft.CodeAnalysis.CSharp" version="4.2" />
         <dependency id="System.Text.Json" version="7.0.2" />
-        <dependency id="Xpand.Patcher" version="3.0.22" />
+        <dependency id="Xpand.Patcher" version="3.0.23" />
         <dependency id="Xpand.Collections" version="1.0.4" />
         <dependency id="System.Security.Cryptography.ProtectedData" version="8.0" />
         <dependency id="Microsoft.AspNetCore.Http.Abstractions" version="2.2" />
         <dependency id="System.Diagnostics.PerformanceCounter" version="6.0" />
         <dependency id="System.Threading.Tasks.Dataflow" version="7.0" />
         <dependency id="System.Interactive" version="5.0" />
-        <dependency id="Xpand.Patcher" version="3.0.22.0" />
       </group>
     </dependencies>
   </metadata>
