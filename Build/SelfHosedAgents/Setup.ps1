@@ -24,15 +24,14 @@ if ($Sysprep ){
 
 $setupBlock = {
     param($newVMName)
-    $VerbosePreference="continue"
     . $using:functionsScriptPath
-    Write-Verbose $newVMName
+    Remove-AgentVM -newVMName $newVMName 
     $cred = New-Object System.Management.Automation.PSCredential($using:user, $(ConvertTo-SecureString $using:pass -AsPlainText -Force))
     Initialize-AgentVM $newVMName $using:newVHDPath $using:vmMemory $using:templateVHDPath $cred $using:vmSwitch $using:proccessor
     Install-AzureAgent $using:downloadUrl $newVMName $cred $using:token $using:organization $using:agentPool 
     Register-Agent $using:organization $using:token $newVMName $using:agentPool $cred $using:user $using:pass
 }
 
-Start-VMSetupJobs -numberOfVMs $numberOfVMs -scriptBlock $setupBlock -vmName $newVMName -Verbose
+Start-VMJobs -numberOfVMs $numberOfVMs -scriptBlock $setupBlock -vmName $newVMName 
 
 

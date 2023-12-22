@@ -26,8 +26,8 @@ $xpandPatcher=(Get-XpandPackages All All|Where-Object{$_.Id -eq "Xpand.Patcher"}
 
 
 
-# $filteredProjects| Invoke-Parallel -StepInterval 500 -VariablesToImport @("allProjects", "root", "Release","dxVersionBuild") -Script {
-$filteredProjects|where{$_.BaseName -eq "Xpand.Extensions"}| foreach {
+$filteredProjects| Invoke-Parallel -StepInterval 500 -VariablesToImport @("allProjects", "root", "Release","dxVersionBuild") -Script {
+# $filteredProjects| foreach {
 # $filteredProjects| foreach {
     $addTargets = {
         param (

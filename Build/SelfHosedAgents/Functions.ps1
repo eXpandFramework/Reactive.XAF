@@ -216,7 +216,7 @@ function Rename-VMComputer{
     } 
 }
 
-function Start-VMSetupJobs {
+function Start-VMJobs {
     param(
         [parameter(Mandatory)]
         $vmName,
@@ -227,9 +227,9 @@ function Start-VMSetupJobs {
     )
 
     $paramSets = 1..$numberOfVMs | ForEach-Object {
-        @{ newVMName = "$vmName$_"; verbose = $Verbose.IsPresent }
+        @{ newVMName = "$vmName$_"; verbose = $VerbosePreference }
     }
-    Remove-AgentVM -newVMName $paramSets.newVMName -newVHDPath
+    
     $jobs = @()
     foreach ($params in $paramSets) {
         $job = Start-Job -ScriptBlock $scriptBlock -ArgumentList $params.newVMName

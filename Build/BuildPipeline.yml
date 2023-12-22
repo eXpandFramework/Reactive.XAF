@@ -173,7 +173,7 @@ jobs:
 - job: PostTestTasks
   dependsOn:
     - RunNormalTests
-  condition: succeeded()
+  condition: or(succeeded(), eq(dependencies.RunNormalTests.result, 'Skipped'))
   pool:
     name: Self
   variables:
