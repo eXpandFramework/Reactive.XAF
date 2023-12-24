@@ -1020,6 +1020,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => application.WhenFrame(detailViewObjectType, detailViewObjectType != null ? ViewType.DetailView : ViewType.ListView).Where(frame => frame.View.IsRoot)
                 .SelectMany(frame => application.WhenProviderCommittedDetailed<TObject>(ObjectModification.All)
                     .ToObjectsGroup().ObserveLatestOnContext().Where(arg => match?.Invoke(frame, arg) ?? true).Take(1).To(frame.View)
+                    .WhenNotDefault(view => view?.ObjectSpace)
                     .SelectMany(view => view.ObjectSpace.WhenModifyChanged().To(view).StartWith(view)
                         .Where(_ => !view.ObjectSpace.IsModified)
                         .Do(_ => view.ObjectSpace.Refresh()))

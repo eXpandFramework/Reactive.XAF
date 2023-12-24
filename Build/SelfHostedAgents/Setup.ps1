@@ -30,6 +30,11 @@ $setupBlock = {
     Initialize-AgentVM $newVMName $using:newVHDPath $using:vmMemory $using:templateVHDPath $cred $using:vmSwitch $using:proccessor
     Install-AzureAgent $using:downloadUrl $newVMName $cred $using:token $using:organization $using:agentPool 
     Register-Agent $using:organization $using:token $newVMName $using:agentPool $cred $using:user $using:pass
+    Invoke-Command -VMName $newVMName -Credential $cred -ScriptBlock {
+        Set-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -Name 'Hidden' -Value 1
+        Set-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -Name 'HideFileExt' -Value 0
+        Get-NetConnectionProfile | Set-NetConnectionProfile -NetworkCategory Private
+    }
 }
 
 Start-VMJobs -numberOfVMs $numberOfVMs -scriptBlock $setupBlock -vmName $newVMName 

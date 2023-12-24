@@ -146,7 +146,7 @@ namespace Xpand.TestsLib.Common {
             => TestTracing.Handle(match).Select(exception => exception)
                 .MergeToUnit(Unit.Default.Observe().SelectMany(_
                     => other().Select(unit => unit).ThrowOnNext().IgnoreElements().CompleteOnError())).To<TException>()
-                .Merge(source.CompleteOnError().IgnoreElements().Select(_ => default(TException))).Skip(1)
+                .Merge(source.CompleteOnError().IgnoreElements().Select(_ => default(TException)))
                 .Assert();
         
         public class CannotNavigateException:Exception;

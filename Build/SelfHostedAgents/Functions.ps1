@@ -146,7 +146,9 @@ function Install-AzureAgent{
         param($downloadUrl)
         $destinationPath = Join-Path $env:TEMP $downloadUrl.Split("/")[-1]
         Invoke-WebRequest -Uri $downloadUrl -OutFile $destinationPath
-        New-Item -ItemType Directory -Name agent -Path c:\
+        if (!(Test-Path c:\agent)){
+            New-Item -ItemType Directory -Name agent -Path c:\ 
+        }
         Set-Location c:\agent
         Add-Type -AssemblyName System.IO.Compression.FileSystem ; [System.IO.Compression.ZipFile]::ExtractToDirectory($destinationPath, "$PWD")
     }
