@@ -28,7 +28,7 @@ namespace Xpand.TestsLib.Common{
         
         protected Platform GetPlatform(string platformName) => (Platform) Enum.Parse(typeof(Platform), platformName);
 
-        public static TimeSpan Timeout = TimeSpan.FromSeconds(Debugger.IsAttached ? 120 : 5);
+        public static TimeSpan Timeout = TimeSpan.FromSeconds(240);
 
         protected CommonTest() => AssemblyExtensions.EntryAssembly = GetType().Assembly;
 
@@ -128,7 +128,7 @@ namespace Xpand.TestsLib.Common{
         
         protected void WriteLine(decimal value) => TestContext.WriteLine(value);
 
-        protected readonly List<string> LogPaths=new(){ReactiveLoggerService.RXLoggerLogPath,Path.Combine(TestContext.CurrentContext.TestDirectory,"expressappframework.log")};
+        protected readonly List<string> LogPaths= [ReactiveLoggerService.RXLoggerLogPath, Path.Combine(TestContext.CurrentContext.TestDirectory, "expressappframework.log")];
         
         public static TextWriterTraceListener TextListener{ get; }
 

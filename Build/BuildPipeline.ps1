@@ -100,7 +100,7 @@ Invoke-Script {
 
     & $SourcePath\go.ps1 @bArgs
 
-    Move-PaketSource 0 "C:\Program Files (x86)\DevExpress $(Get-VersionPart $DXVersion Minor)\Components\System\Components\Packages"
+    Move-PaketSource 0 "c:\DevExpressPackages"
 
 
     if (Test-AzDevops) {

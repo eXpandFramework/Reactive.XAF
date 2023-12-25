@@ -89,7 +89,7 @@ namespace Xpand.TestsLib.Common {
 
         private static IObservable<Frame> AssertListViewHasObject<TObject>(this Frame frame, Func<TObject, bool> matchObject, int count, TimeSpan? timeout, string caller, View view) 
             => view.ToListView().WhenObjects<TObject>()
-                .Where(objects => count==0||objects.Length==count)
+                .Where(objects => count == 0 || objects.Length == count)
                 .SelectMany(objects => objects.Where(value => matchObject?.Invoke(value)??true).ToNowObservable()).Take(1)
                 .SelectMany(value => view.ToListView().SelectObject(value)).Select(o => o)
                 .Assert(_ => $"{typeof(TObject).Name}-{view.Id}",caller:caller,timeout:timeout)
@@ -142,11 +142,14 @@ namespace Xpand.TestsLib.Common {
                 .SelectMany(linkAction => frame.Application.WhenProviderObject<TObject>().Assert().ObserveOnContext()
                     .SelectMany(_ => linkAction.LinkObject( ).Assert())).ReplayFirstTake();
         
+        public static IObservable<TException> AssertException<TException>(this XafApplication application,
+            Func<IObservable<Unit>> other, Func<TException, bool> match = null) where TException : Exception
+            => application.Observe().AssertException(other, match);
+        
         public static IObservable<TException> AssertException<TException,T>(this IObservable<T> source,Func<IObservable<Unit>> other,Func<TException,bool> match=null) where TException : Exception 
-            => TestTracing.Handle(match).Select(exception => exception)
-                .MergeToUnit(Unit.Default.Observe().SelectMany(_
-                    => other().Select(unit => unit).ThrowOnNext().IgnoreElements().CompleteOnError())).To<TException>()
-                .Merge(source.CompleteOnError().IgnoreElements().Select(_ => default(TException)))
+            => TestTracing.Handle(match).MergeToUnit(Unit.Default.Observe().SelectMany(_
+                    => other().ThrowOnNext().IgnoreElements().CompleteOnError())).To<TException>()
+                .Merge(source.CompleteOnError().IgnoreElements().Select(_ => default(TException))).Skip(1)
                 .Assert();
         
         public class CannotNavigateException:Exception;

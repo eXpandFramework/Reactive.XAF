@@ -13,6 +13,7 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using DevExpress.Data.Filtering;
+using DevExpress.Data.Filtering.Helpers;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.DC;
@@ -39,6 +40,7 @@ using Xpand.Extensions.TypeExtensions;
 using Xpand.Extensions.XAF.ApplicationModulesManagerExtensions;
 using Xpand.Extensions.XAF.Attributes;
 using Xpand.Extensions.XAF.CollectionSourceExtensions;
+using Xpand.Extensions.XAF.CriteriaOperatorExtensions;
 using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.ObjectExtensions;
 using Xpand.Extensions.XAF.ObjectSpaceExtensions;
@@ -199,8 +201,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 ? xpoAssembly.GetType("DevExpress.ExpressApp.Xpo.MemoryDataStoreProvider").CreateInstance()
                 : Activator.CreateInstance(xpoAssembly.GetType("DevExpress.ExpressApp.Xpo.ConnectionStringDataStoreProvider")!, application.ConnectionString);
             
-            Type[] parameterTypes = {xpoAssembly.GetType("DevExpress.ExpressApp.Xpo.IXpoDataStoreProvider"), typeof(bool)};
-            object[] parameterValues = {dataStoreProvider, true};
+            Type[] parameterTypes = [xpoAssembly.GetType("DevExpress.ExpressApp.Xpo.IXpoDataStoreProvider"), typeof(bool)];
+            object[] parameterValues = [dataStoreProvider, true];
             if (application.TypesInfo.XAFVersion() > Version.Parse("19.2.0.0")) {
                 parameterTypes = parameterTypes.Concat(typeof(bool).YieldItem()).ToArray();
                 parameterValues = parameterValues.Concat(false.YieldItem().Cast<object>()).ToArray();
@@ -1026,6 +1028,18 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                         .Do(_ => view.ObjectSpace.Refresh()))
                 )
                 .TakeUntilDisposed(application).ToUnit();
+
+        public static IObservable<TObject> LatestProviderObject<TObject, TKey>(this XafApplication application,IObservable<TObject> source,Func<TObject,TKey> key,Expression<Func<TObject,bool>> criteria) where TObject : class 
+            => source.CombineLatestWhenFirstEmits(application.WhenProviderObjects<TObject>()
+                .Select(objects => objects.ToDictionary(key, o => o)).CombineWithPrevious()
+                .Select(t => {
+                    if (t.previous == null) return t.current;
+                    t.current.Select(pair => t.previous[pair.Key] = pair.Value).Enumerate();
+                    return t.previous;
+                }), (o, objects) => {
+                var objectSpaceLink = objects[key(o)];
+                return new ExpressionEvaluator(new EvaluatorContextDescriptorDefault(typeof(TObject)), criteria.ToCriteria(), false).Fit(objectSpaceLink) ? objectSpaceLink : null;
+            }).WhenNotDefault();
 
     }
 
