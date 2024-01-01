@@ -13,7 +13,7 @@ namespace Xpand.Extensions.ExceptionExtensions{
             var messages = exception.FromHierarchy(ex => ex.InnerException).Select(ex => {
                 var s = ex.ToString();
                 if (ex is ReflectionTypeLoadException reflectionTypeLoadException){
-                    s+=$"{Environment.NewLine}{string.Join(Environment.NewLine,reflectionTypeLoadException.LoaderExceptions.Select(_ => _.GetAllInfo()))}";
+                    s+=$"{Environment.NewLine}{string.Join(Environment.NewLine,reflectionTypeLoadException.LoaderExceptions.Select(e => e.GetAllInfo()))}";
                 }
                 return s;
             });

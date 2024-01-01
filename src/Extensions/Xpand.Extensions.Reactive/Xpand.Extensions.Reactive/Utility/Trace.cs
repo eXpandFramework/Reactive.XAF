@@ -8,6 +8,7 @@ using System.Reactive.Linq;
 using System.Threading;
 using EnumsNET;
 using Fasterflect;
+using Xpand.Extensions.ExceptionExtensions;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Tracing;
 using Xpand.Extensions.TypeExtensions;
@@ -105,8 +106,9 @@ namespace Xpand.Extensions.Reactive.Utility{
             string memberName = "", string name="",string sourceFilePath = "", int sourceLineNumber = 0) {
             if (traceSource?.Switch.Level == SourceLevels.Off) return;
             string value = null;
-            if (v!=null){
-                value = CalculateValue(v, o => messageFactory.GetMessageValue( errorMessageFactory, o)).Change<string>();
+            if (v!=null) {
+                var calculateValue = CalculateValue(v, o => messageFactory.GetMessageValue( errorMessageFactory, o));
+                value = calculateValue.Change<string>();
             }
             var mName = memberName;
             if (m == "OnNext"){
@@ -158,9 +160,8 @@ namespace Xpand.Extensions.Reactive.Utility{
         private static string GetSourceName<TSource>() => 
 	        typeof(TSource).IsGenericType ? string.Join(",", typeof(TSource).GetGenericArguments().Select(type => type.Name)) : typeof(TSource).Name;
 
-        private static object CalculateValue(object v, Func<object, string> messageFactory) =>
-            messageFactory != null ? messageFactory(v) : v.GetType().FromHierarchy(type => type.BaseType)
-                .Select(type => Serialization.TryGetValue(type, out var func) ? func(v) : null).FirstOrDefault()?? v;
+        private static object CalculateValue(object v, Func<object, string> messageFactory) 
+            => messageFactory != null ? messageFactory(v) : v is Exception exception?exception.GetAllInfo():v;
 
         private static Action<ITraceEvent> TraceError(this Action<ITraceEvent> traceAction, TraceSource traceSource) =>
 	        traceAction ?? (s => {
@@ -169,7 +170,6 @@ namespace Xpand.Extensions.Reactive.Utility{
 		        }
 		        else{
                     throw new NotImplementedException();
-			        // System.Diagnostics.Trace.TraceError(s);
 		        }
 	        });
 

@@ -8,13 +8,13 @@ using Xpand.Extensions.Tracing;
 namespace Xpand.XAF.Modules.Reactive.Extensions{
     public static class TraceExtensions{
         static TraceExtensions(){
-            Utility.AddTraceSerialization<Frame>(_ =>
-                $"{_.GetType().FullName} - ctx: {_.Context} - id: {_.View?.Id}");
-            Utility.AddTraceSerialization<CollectionSourceBase>(_ =>
-                $"{_.GetType().Name} - {_.ObjectTypeInfo.FullName}");
-            Utility.AddTraceSerialization<ShowViewParameters>(_ =>
-                $"{nameof(ShowViewParameters)} - {_.CreatedView.Id} - {_.Context}");
-            Utility.AddTraceSerialization<ModuleBase>(_ => _.Name);
+            Utility.AddTraceSerialization<Frame>(frame =>
+                $"{frame.GetType().FullName} - ctx: {frame.Context} - id: {frame.View?.Id}");
+            Utility.AddTraceSerialization<CollectionSourceBase>(collectionSourceBase =>
+                $"{collectionSourceBase.GetType().Name} - {collectionSourceBase.ObjectTypeInfo.FullName}");
+            Utility.AddTraceSerialization<ShowViewParameters>(parameters =>
+                $"{nameof(ShowViewParameters)} - {parameters.CreatedView.Id} - {parameters.Context}");
+            Utility.AddTraceSerialization<ModuleBase>(moduleBase => moduleBase.Name);
         }
 
         internal static IObservable<TSource> TraceRX<TSource>(this IObservable<TSource> source,
@@ -34,11 +34,9 @@ namespace Xpand.XAF.Modules.Reactive.Extensions{
             => source.Trace(name, ReactiveModule.TraceSource,messageFactory,errorMessageFactory, traceAction,ObservableTraceStrategy.OnError, memberName,sourceFilePath,sourceLineNumber);
     }
 
-    public class ReactiveTraceSource : TraceSource{
-        static ReactiveTraceSource() {
-            Trace.UseGlobalLock = false;
-        }
-        public ReactiveTraceSource(string name) : base(name){
-        }
+    public class ReactiveTraceSource(string name) : TraceSource(name) {
+        static ReactiveTraceSource() => Trace.UseGlobalLock = false;
+
+        public override string ToString() => Name;
     }
 }

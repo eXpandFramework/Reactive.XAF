@@ -3,12 +3,10 @@ using System.Runtime.CompilerServices;
 using Xpand.Extensions.ExceptionExtensions;
 
 namespace Xpand.TestsLib.Common{
-    public class TestTimeoutException:Exception {
-        
-    }
+    public class TestTimeoutException:Exception;
     public sealed class TestException : Exception{
         private TestException(Exception exception,[CallerMemberName]string caller="") : this(
-            $"{exception.GetType().Name} - {caller} - {exception.Message}{Environment.NewLine}{Environment.NewLine}{ScreenCapture.CaptureActiveWindowAndSave()}.{Environment.NewLine}",
+            $"{exception.GetType().Name} - {caller} - {exception.GetAllInfo()}{Environment.NewLine}{Environment.NewLine}{ScreenCapture.CaptureActiveWindowAndSave()}.{Environment.NewLine}",
             $"{Environment.NewLine}{exception.ReverseStackTrace()}")
             => ExceptionType = exception.GetType();
 

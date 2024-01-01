@@ -125,7 +125,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
         public static IObservable<IPEndPoint> ServerPortsList(this XafApplication application) 
 	        => application.ModelLoggerPorts()
 		        .SelectMany(ports => ports.LoggerPorts.OfType<IModelLoggerServerPort>()
-			        .ToNowObservable().SelectMany(_ => IpEndPoint(_.Host,_.Port)));
+			        .ToNowObservable().SelectMany(port => IpEndPoint(port.Host,port.Port)));
 
         public static IObservable<IModelReactiveLoggerHub> ModelLoggerPorts(this XafApplication application) {
 	        var reactiveModule = application.ToReactiveModule<IModelReactiveModuleLogger>();

@@ -36,7 +36,7 @@ namespace Xpand.Extensions.Tests{
         [Test][XpandTest()][Apartment(ApartmentState.MTA)]
         public async Task WhenErrorDataReceived(){
             var path = CreateScriptFile();
-            File.WriteAllLines(path,new[]{"Write-Error 'Fail'"});
+            File.WriteAllLines(path, ["Write-Error 'Fail'"]);
             var process = new Process(){StartInfo = new ProcessStartInfo(){
                 FileName = "powershell.exe",Arguments = path
             }};
