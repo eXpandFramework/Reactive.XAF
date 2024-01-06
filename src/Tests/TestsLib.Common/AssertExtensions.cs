@@ -89,6 +89,7 @@ namespace Xpand.TestsLib.Common {
 
         private static IObservable<Frame> AssertListViewHasObject<TObject>(this Frame frame, Func<TObject, bool> matchObject, int count, TimeSpan? timeout, string caller, View view) 
             => view.ToListView().WhenObjects<TObject>()
+                .ToConsole(arg => $"{frame.View} - {arg.Length}")
                 .Where(objects => count == 0 || objects.Length == count)
                 .SelectMany(objects => objects.Where(value => matchObject?.Invoke(value)??true).ToNowObservable()).Take(1)
                 .SelectMany(value => view.ToListView().SelectObject(value)).Select(o => o)
@@ -109,7 +110,8 @@ namespace Xpand.TestsLib.Common {
         public static IObservable<TSource> Assert<TSource>(this IObservable<TSource> source,Func<TSource,string> messageFactory,TimeSpan? timeout=null,[CallerMemberName]string caller=""){
             var timeoutMessage = messageFactory.MessageFactory(caller);
             return source.ReplayFirstTake().Log(messageFactory,TestContext.Out, caller).ThrowIfEmpty(timeoutMessage).Timeout(timeout ?? TimeoutInterval, timeoutMessage)
-                .DelayOnContext(DelayOnContextInterval);
+                .DelayOnContext(DelayOnContextInterval)
+                ;
         }
         
         public static string MessageFactory<TSource>(this Func<TSource, string> messageFactory, string caller) => $"{caller}: {messageFactory(default)}";

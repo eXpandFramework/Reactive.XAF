@@ -1011,23 +1011,27 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                     }
                     observer.OnNext(arg);
                 });
-
         public static IObservable<Unit> RefreshListViewWhenObjectCommitted<TObject>(this XafApplication application) where TObject : class
             => application.RefreshObjectViewWhenCommitted<TObject>();
         
         public static IObservable<Unit> RefreshDetailViewWhenObjectCommitted<TObject>(this XafApplication application, Type detailViewObjectType,Func<Frame,TObject[],bool> match=null) where TObject : class 
             => application.RefreshObjectViewWhenCommitted(detailViewObjectType, match);
 
-        private static IObservable<Unit> RefreshObjectViewWhenCommitted<TObject>(this XafApplication application, Type detailViewObjectType=null,Func<Frame,TObject[],bool> match=null) where TObject : class 
-            => application.WhenFrame(detailViewObjectType, detailViewObjectType != null ? ViewType.DetailView : ViewType.ListView).Where(frame => frame.View.IsRoot)
-                .SelectMany(frame => application.WhenProviderCommittedDetailed<TObject>(ObjectModification.All)
-                    .ToObjectsGroup().ObserveLatestOnContext().Where(arg => match?.Invoke(frame, arg) ?? true).Take(1).To(frame.View)
+        private static IObservable<Unit> RefreshObjectViewWhenCommitted<TObject>(this XafApplication application, Type detailViewObjectType=null,Func<Frame,TObject[],bool> match=null) where TObject : class {
+            var commitSignal = new Subject<TObject[]>();
+            return application.WhenFrame(detailViewObjectType, detailViewObjectType != null ? ViewType.DetailView : ViewType.ListView)
+                .Where(frame => frame.View.IsRoot)
+                .SelectMany(frame => commitSignal.Buffer(1.Seconds()).ObserveOnContext().SelectMany()
+                    .Where(arg => match?.Invoke(frame, arg) ?? true).To(frame.View)
                     .WhenNotDefault(view => view?.ObjectSpace)
                     .SelectMany(view => view.ObjectSpace.WhenModifyChanged().To(view).StartWith(view)
                         .Where(_ => !view.ObjectSpace.IsModified)
                         .Do(_ => view.ObjectSpace.Refresh()))
                 )
-                .TakeUntilDisposed(application).ToUnit();
+                .MergeToUnit(application.WhenProviderCommittedDetailed<TObject>(ObjectModification.All).ToObjectsGroup().Do(commitSignal))
+                .TakeUntilDisposed(application).ToUnit()
+                .Finally(() => commitSignal.Dispose());
+        }
 
         public static IObservable<TObject> LatestProviderObject<TObject, TKey>(this XafApplication application,IObservable<TObject> source,Func<TObject,TKey> key,Expression<Func<TObject,bool>> criteria) where TObject : class 
             => source.CombineLatestWhenFirstEmits(application.WhenProviderObjects<TObject>()

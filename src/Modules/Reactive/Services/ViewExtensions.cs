@@ -51,13 +51,15 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => source.SelectMany(view => {
                 if (view.Editor.GetType().InheritsFrom(GridListEditorType)){
                     var gridView = view.Editor.GetPropertyValue("GridView");
-                    gridView.CallMethod("ClearSelection");
+                    // gridView.CallMethod("ClearSelection");
                     var focus = gridView.GetPropertyValue("FocusedRowHandle");
-                    return objects.ToNowObservable().SelectManySequential(arg => gridView.WhenSelectRow(arg).To(arg))
-                        .BufferUntilCompleted().SelectMany(arg => {
-                            gridView.CallMethod("UnselectRow", focus);
-                            return arg;
-                        });
+                    return objects.ToNowObservable().SelectManySequential(arg => gridView.WhenSelectRow(arg)
+                        .BufferUntilCompleted().SelectMany(handles => {
+                            if (handles.First()!=(int)focus) {
+                                gridView.CallMethod("UnselectRow", focus);
+                            }
+                            return handles;
+                        }).To(arg));
                 }
                 throw new NotImplementedException(nameof(view.Editor));
             });
@@ -66,6 +68,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => gridView.Defer(() => {
                 var rowHandle = (int)gridView.CallMethod("FindRow",row);
                 if ((int)gridView.GetPropertyValue("FocusedRowHandle") == rowHandle) {
+                    gridView.CallMethod("SelectRow", rowHandle);
                     return rowHandle.Observe();
                 }
                 return Observable.While(() => {

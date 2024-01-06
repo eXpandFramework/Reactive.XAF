@@ -8,7 +8,6 @@ using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Runtime.CompilerServices;
 using System.Text;
-using System.Threading.Tasks;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Numeric;
@@ -26,8 +25,9 @@ namespace Xpand.TestsLib.Common{
     public class Logger:Process{
         internal static readonly TextWriter OriginalOut = Console.Out;
         internal static readonly List<string> CachedMessages = new();
-        public static async Task<StreamWriter> Writer(LogContext context=default,WindowPosition inactiveMonitorLocation=WindowPosition.None,bool alwaysOnTop=false) 
-            => await new Logger().ConnectClient(context,inactiveMonitorLocation,alwaysOnTop).Writer().ReplayFirstTake();
+        
+        public static IObservable<StreamWriter> Writer(LogContext context=default,WindowPosition inactiveMonitorLocation=WindowPosition.None,bool alwaysOnTop=false) 
+            => new Logger().ConnectClient(context,inactiveMonitorLocation,alwaysOnTop).Writer().ReplayFirstTake();
 
         public  static void Exit(){
             try{
@@ -117,28 +117,20 @@ namespace Xpand.TestsLib.Common{
         public static IObservable<T> Log<T>(this IObservable<T> source, LogContext logContext,
             WindowPosition inactiveMonitorLocation = WindowPosition.None, bool alwaysOnTop = false) 
             => source.Publish(obs => logContext.Observe().If(context => context == default, _ => obs,
-                context => Logger.Writer(context, inactiveMonitorLocation, alwaysOnTop).ToObservable()
+                context => Logger.Writer(context, inactiveMonitorLocation, alwaysOnTop)
                     .Do(writer => Console.SetOut(new InterceptingTextWriter(writer, CachedMessages)))
                     .IgnoreElements().DoNotComplete().To<T>()
                     .TakeUntilCompleted(obs)
                     .Merge(obs.DoOnError(_ => Exit())
                         .DoOnComplete(Exit))));
 
-        class InterceptingTextWriter : TextWriter{
-            private readonly TextWriter _originalWriter;
-            private readonly List<string> _cachedMessages;
-
-            public InterceptingTextWriter(TextWriter originalWriter, List<string> cachedMessages){
-                _originalWriter = originalWriter;
-                _cachedMessages = cachedMessages;
-            }
-
+        class InterceptingTextWriter(TextWriter originalWriter, List<string> cachedMessages) : TextWriter {
             public override void WriteLine(string value){
-                _cachedMessages.Add(value);
-                _originalWriter.WriteLine(value);
+                cachedMessages.Add(value);
+                originalWriter.WriteLine(value);
             }
             
-            public override Encoding Encoding => _originalWriter.Encoding;
+            public override Encoding Encoding => originalWriter.Encoding;
         }
 
     }
