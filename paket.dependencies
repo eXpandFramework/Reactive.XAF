@@ -32,7 +32,7 @@ nuget System.ServiceModel.Http 4.10.2
 nuget System.ServiceModel.Duplex 4.10.2
 nuget Microsoft.CognitiveServices.Speech 1.23.0
 nuget System.Configuration.ConfigurationManager 6.0.1
-nuget Mono.Cecil 0.11.4
+nuget Mono.Cecil 0.11.5
 
 nuget NAudio 2.1.0
 nuget MagicOnion 2.6.3
@@ -62,7 +62,7 @@ nuget System.Reflection.Metadata 5.0.0
 nuget System.Interactive 5.0     
 nuget System.Interactive.Async 5.0
 nuget Unofficial.Microsoft.mshtml 7.0.3300
-nuget Xpand.Patcher 3.0.23
+nuget Xpand.Patcher 3.0.24
 nuget YamlDotNet 11.2.1
 nuget Polly 7.2.2
 nuget TextCopy 6.1.0

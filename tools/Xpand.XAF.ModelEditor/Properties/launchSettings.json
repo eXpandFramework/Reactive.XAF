@@ -2,8 +2,8 @@
   "profiles": {
     "Xpand.XAF.ModelEditor": {
       "commandName": "Project",
-      "commandLineArgs": "False \"C:\\Work\\issues\\DXApplication65\\DXApplication65.Module\\bin\\Debug\\net8.0\\DXApplication65.Module.dll\" \"C:\\Work\\issues\\DXApplication65\\DXApplication65.Module\\Model.DesignedDiffs.xafml\" \"C:\\Work\\issues\\DXApplication65\\DXApplication65.Module\\DXApplication65.Module.csproj\"",
-      "workingDirectory": "C:\\Work\\issues\\DXApplication65\\DXApplication65.Module\\bin\\Debug\\net8.0\\"
+      "commandLineArgs": "False \"C:\\Work\\Crypto\\CryptoManager2\\CryptoCommander.Binance\\bin\\Debug\\net8.0-windows\\CryptoCommander.Binance.dll\" \"C:\\Work\\Crypto\\CryptoManager2\\CryptoCommander.Binance\\Model.DesignedDiffs.xafml\" \"C:\\Work\\Crypto\\CryptoManager2\\CryptoCommander.Binance\\CryptoCommander.Binance.csproj\"",
+      "workingDirectory": "C:\\Work\\Crypto\\CryptoManager2\\CryptoCommander.Binance\\bin\\Debug\\net8.0-windows\\"
     }
   }
 }

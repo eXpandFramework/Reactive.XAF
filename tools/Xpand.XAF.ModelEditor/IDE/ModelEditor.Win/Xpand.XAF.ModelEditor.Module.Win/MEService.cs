@@ -128,12 +128,13 @@ namespace Xpand.XAF.ModelEditor.Module.Win {
 				        Directory.CreateDirectory(directory);
 			        }
 
-			        return modelME.DownloadUrl.StringFormat($"{version}", $"{meType}{Regex.Match(xafModel.Project.TargetFramework,"net(\\d+)\\.\\d+").Groups[1].Value}").Observe()
+			        var name = $"{meType}{Regex.Match(xafModel.Project.TargetFramework,"net(\\d+)\\.\\d+").Groups[1].Value}";
+			        return modelME.DownloadUrl.StringFormat($"{version}", name).Observe()
 				        .TraceModelEditorWindowsFormsModule(s => $"Download {s}")
 				        .SelectMany(url => MEBytes(url)
 					        .ObserveOn(SynchronizationContext.Current!)
 					        .Do(bytes => {
-						        var pathToZip = $"{directory}Xpand.XAF.ModelEditor.{meType}.zip";
+						        var pathToZip = $"{directory}Xpand.XAF.ModelEditor.{name}.zip";
 						        bytes.Save(pathToZip);
 						        using var archive = ZipFile.OpenRead(pathToZip);
 						        archive.ExtractToDirectory(directory,true);
