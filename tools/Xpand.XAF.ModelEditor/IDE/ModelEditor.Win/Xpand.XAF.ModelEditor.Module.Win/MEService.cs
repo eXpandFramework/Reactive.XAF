@@ -11,6 +11,7 @@ using System.Net.Http;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
+using System.Text.RegularExpressions;
 using System.Threading;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
@@ -119,11 +120,7 @@ namespace Xpand.XAF.ModelEditor.Module.Win {
         private static IObservable<string> DownloadME(this IObservable<Version> source, XafModel xafModel, IModelME modelME)
 	        => source.SelectMany(version => {
 		        var meType = "WinDesktop";
-		        if (xafModel.Project.TargetFramework.StartsWith("net4")) {
-			        meType = "Win";
-		        }
-
-		        var directory = $"{MeInstallationPath}\\{meType}\\{version}\\";
+		        var directory = $"{MeInstallationPath}\\{meType}\\{xafModel.Project.TargetFramework}\\{version}\\";
 		        string filename = $"Xpand.XAF.ModelEditor.{meType}.exe";
 		        var path = $"{directory}{filename}";
 		        if (!File.Exists(path)) {
@@ -131,7 +128,7 @@ namespace Xpand.XAF.ModelEditor.Module.Win {
 				        Directory.CreateDirectory(directory);
 			        }
 
-			        return modelME.DownloadUrl.StringFormat($"{version}", meType).Observe()
+			        return modelME.DownloadUrl.StringFormat($"{version}", $"{meType}{Regex.Match(xafModel.Project.TargetFramework,"net(\\d+)\\.\\d+").Groups[1].Value}").Observe()
 				        .TraceModelEditorWindowsFormsModule(s => $"Download {s}")
 				        .SelectMany(url => MEBytes(url)
 					        .ObserveOn(SynchronizationContext.Current!)

@@ -38,33 +38,3 @@ steps:
       artifact: 'PipelineWorkspace'
       publishLocation: 'pipeline'
   
-  # - task: PublishPipelineArtifact@1
-  #   name: 'PublishNetCoreApp31'
-  #   inputs:
-  #     targetPath: '$(System.DefaultworkingDirectory)\bin\netcoreapp3.1'
-  #     artifact: 'netcoreapp3.1'
-  #     publishLocation: 'pipeline'
-  # - task: PublishPipelineArtifact@1
-  #   name: PublishTestWinDesktopApplication
-  #   inputs:
-  #     targetPath: '$(System.DefaultworkingDirectory)\bin\TestWinDesktopApplication'
-  #     artifact: 'TestWinDesktopApplication'
-  #     publishLocation: 'pipeline'
-  # - task: PublishPipelineArtifact@1
-  #   name: PublishAllTestWin
-  #   inputs:
-  #     targetPath: '$(System.DefaultworkingDirectory)\bin\AllTestWin'
-  #     artifact: 'AllTestWin'
-  #     publishLocation: 'pipeline'
-  # - task: PublishPipelineArtifact@1
-  #   name: PublishAllTestWeb
-  #   inputs:
-  #     targetPath: '$(System.DefaultworkingDirectory)\bin\AllTestWin'
-  #     artifact: 'AllTestWeb'
-  #     publishLocation: 'pipeline'
-  # - task: PublishPipelineArtifact@1
-  #   name: PublishNugetPackages
-  #   inputs:
-  #     targetPath: '$(System.DefaultworkingDirectory)\bin\Nupkg'
-  #     artifact: 'Nupkg'
-  #     publishLocation: 'pipeline'

@@ -1,4 +1,4 @@
-source C:\DevExpressPackages
+source c:\DevExpressPackages
 source https://api.nuget.org/v3/index.json
 source https://xpandnugetserver.azurewebsites.net/nuget
 storage:none

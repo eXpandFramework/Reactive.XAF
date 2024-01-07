@@ -45,6 +45,19 @@ jobs:
           & '$(System.DefaultWorkingDirectory)\Build\BuildPipeline.ps1' @goArgs
     - publish: $(System.DefaultWorkingDirectory)\bin
       artifact: CompiledApp
+    - task: PublishPipelineArtifact@1
+      name: PublishNugets
+      inputs:
+        targetPath: '$(System.DefaultWorkingDirectory)\bin\Nupkg'
+        artifact: 'Nupkg'
+        publishLocation: 'pipeline'
+
+    - task: PublishPipelineArtifact@1
+      name: PublishZips
+      inputs:
+        targetPath: '$(System.DefaultWorkingDirectory)\bin\zip'
+        artifact: 'Zip'
+        publishLocation: 'pipeline'       
 - job: WaitForSlowJobToStart
   dependsOn: Build
   condition: ne(variables['SkipTests'], 'True')
@@ -78,6 +91,7 @@ jobs:
         }
         Write-Host "Slow tests have started."
       displayName: 'Signal Slow Tests Start'
+    
 - job: RunSlowTests
   dependsOn: Build
   condition: ne(variables['SkipTests'], 'True')
@@ -204,18 +218,6 @@ jobs:
         ignoreLASTEXITCODE: true
         pwsh: true
 
-    - task: PublishPipelineArtifact@1
-      name: PublishNugets
-      inputs:
-        targetPath: '$(System.DefaultWorkingDirectory)\bin\Nupkg'
-        artifact: 'Nupkg'
-        publishLocation: 'pipeline'
-
-    - task: PublishPipelineArtifact@1
-      name: PublishZips
-      inputs:
-        targetPath: '$(System.DefaultWorkingDirectory)\bin\zip'
-        artifact: 'Zip'
-        publishLocation: 'pipeline'          
+       
 
 

@@ -2,8 +2,8 @@
   "profiles": {
     "Xpand.XAF.ModelEditor": {
       "commandName": "Project",
-      "commandLineArgs": "False \"C:\\Work\\issues\\986\\Test\\Test\\Test.Module\\bin\\Debug\\net6.0\\Test.Module.dll\" \"C:\\Work\\issues\\986\\Test\\Test\\Test.Module\\Model.DesignedDiffs.xafml\" \"C:\\Work\\issues\\986\\Test\\Test\\Test.Module\\Test.Module.csproj\"",
-      "workingDirectory": "C:\\Work\\issues\\986\\Test\\Test\\Test.Module\\bin\\Debug\\net6.0\\"
+      "commandLineArgs": "False \"C:\\Work\\issues\\DXApplication65\\DXApplication65.Module\\bin\\Debug\\net8.0\\DXApplication65.Module.dll\" \"C:\\Work\\issues\\DXApplication65\\DXApplication65.Module\\Model.DesignedDiffs.xafml\" \"C:\\Work\\issues\\DXApplication65\\DXApplication65.Module\\DXApplication65.Module.csproj\"",
+      "workingDirectory": "C:\\Work\\issues\\DXApplication65\\DXApplication65.Module\\bin\\Debug\\net8.0\\"
     }
   }
 }

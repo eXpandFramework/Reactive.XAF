@@ -12,6 +12,7 @@ using NUnit.Framework;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.FileExtensions;
 using Xpand.Extensions.LinqExtensions;
+using Xpand.Extensions.Numeric;
 using Xpand.Extensions.StringExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.Reactive;
@@ -29,6 +30,7 @@ namespace Xpand.TestsLib.Common{
         protected Platform GetPlatform(string platformName) => (Platform) Enum.Parse(typeof(Platform), platformName);
 
         public static TimeSpan Timeout = TimeSpan.FromSeconds(240);
+        public static TimeSpan OneMinute = 60.Seconds();
 
         protected CommonTest() => AssemblyExtensions.EntryAssembly = GetType().Assembly;
 

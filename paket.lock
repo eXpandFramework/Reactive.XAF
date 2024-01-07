@@ -1294,7 +1294,7 @@ NUGET
     ZString (2.5)
       System.Memory (>= 4.5.3) - restriction: || (&& (== net6.0) (< netstandard2.1)) (&& (== net6.0-windows7.0) (< netstandard2.1)) (== netstandard2.0)
       System.Runtime.CompilerServices.Unsafe (>= 6.0) - restriction: || (== net6.0) (== net6.0-windows7.0) (&& (== netstandard2.0) (>= netstandard2.1))
-  remote: C:\DevExpressPackages
+  remote: c:\DevExpressPackages
     DevExpress.AspNetCore.Common (23.2.3) - restriction: || (== net6.0) (== net6.0-windows7.0) (&& (== netstandard2.0) (>= net6.0))
       DevExpress.AspNetCore.Core (23.2.3) - restriction: || (== net6.0) (== net6.0-windows7.0) (&& (== netstandard2.0) (>= net6.0))
       DevExpress.Data (23.2.3) - restriction: || (== net6.0) (== net6.0-windows7.0) (&& (== netstandard2.0) (>= net6.0))

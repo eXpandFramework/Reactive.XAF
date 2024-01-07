@@ -76,7 +76,8 @@ param(
     
     New-VM -Name $newVMName -MemoryStartupBytes "$($vmMemory)MB" -Generation 2 -NoVHD -SwitchName $vmSwitch
     
-    Set-VMMemory -VMName $newVMName -DynamicMemoryEnabled $true -MinimumBytes "$($vmMemory/2)MB" -StartupBytes "$($vmMemory/2)MB" -MaximumBytes "$($vmMemory)MB"
+    # Set-VMMemory -VMName $newVMName -DynamicMemoryEnabled $true -MinimumBytes "$($vmMemory/2)MB" -StartupBytes "$($vmMemory/2)MB" -MaximumBytes "$($vmMemory)MB"
+    Set-VMMemory -VMName $newVMName -StartupBytes "$($vmMemory)MB" 
     Set-VMProcessor -VMName $newVmName -Count $proccessor
     $parentVHDPath = $templateVHDPath
     $differencingDiskPath = [System.IO.Path]::Combine([System.IO.Path]::GetDirectoryName($newVHDPath), $newVMName + "_Diff" + [System.IO.Path]::GetExtension($newVHDPath))

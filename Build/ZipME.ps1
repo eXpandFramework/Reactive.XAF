@@ -9,16 +9,29 @@ param (
 
 Write-HostFormatted "Building Xpand.XAF.ModelEditor.WinDesktop" -Section
 Push-Location "$Root\Tools\Xpand.XAF.ModelEditor\"
-dotnet publish -p:PublishProfile="Folderprofile.pubxml" ".\Xpand.XAF.ModelEditor.WinDesktop.csproj" 
-
-Set-Location ".\bin\Release\net6.0-windows7.0\publish"
-$zip=[System.IO.Path]::GetFullPath("$(Get-Location)\..\Xpand.XAF.ModelEditor.WinDesktop.zip")
-Compress-Files -zipfileName $zip -Force
 if (!(Test-Path "$root\bin\zip")){
     New-Item "$root\bin\zip" -ItemType Directory -Verbose
 }
+for ($i = 6; $i -lt 9; $i++) {
+    [xml]$publishXml = Get-Content "$pwd\Properties\PublishProfiles\FolderProfile.pubxml"
+    $publishXml.Project.PropertyGroup.TargetFramework = "net$i.0-windows7.0"
+    $publishXml.Project.PropertyGroup.PublishDir = "bin\Release\net$i.0-windows7.0\publish\" 
+    $publishXml.Save("$pwd\Properties\PublishProfiles\FolderProfile.pubxml")
 
-Copy-Item $zip "$root\bin\zip\Xpand.XAF.ModelEditor.WinDesktop.zip" -Verbose
+    [xml]$publishXml = Get-Content "$pwd\Xpand.XAF.ModelEditor.WinDesktop.csproj"
+    $publishXml.Project.PropertyGroup|Where-Object{$_.TargetFramework}|ForEach-Object{
+        $_.TargetFramework = "net$i.0-windows7.0"
+        $_.OutputPath = "..\..\bin\net$i.0-windows7.0\"
+    }
+    $publishXml.Save("$pwd\Xpand.XAF.ModelEditor.WinDesktop.csproj")
+
+    dotnet publish -p:PublishProfile="Folderprofile.pubxml" ".\Xpand.XAF.ModelEditor.WinDesktop.csproj" 
+    Push-Location ".\bin\Release\net$i.0-windows7.0\publish"
+    $zip=[System.IO.Path]::GetFullPath("$(Get-Location)\..\Xpand.XAF.ModelEditor.WinDesktop$i.zip")
+    Compress-Files -zipfileName $zip -Force
+    Copy-Item $zip "$root\bin\zip\Xpand.XAF.ModelEditor.WinDesktop$i.zip" -Verbose -Force
+    Pop-Location
+}
 
 if (!(Test-AzDevops) -and !$SkipIDEBuild){
     Write-HostFormatted "Building Xpand.XAF.ModelEditor.Win" -Section
