@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Reactive.Linq;
 using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp.Security;
 using DevExpress.ExpressApp.Security.ClientServer;
@@ -7,6 +8,7 @@ using DevExpress.ExpressApp.Xpo;
 using Moq;
 using NUnit.Framework;
 using Shouldly;
+using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.TestsLib.Common;
 using Xpand.TestsLib.Common.Attributes;
@@ -56,7 +58,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests.ObjectSpaceProvider{
             application.SetupSecurity();
             DefaultReactiveModule(application);
             var securedObjectSpaceProvider = new SecuredObjectSpaceProvider((ISelectDataSecurityProvider)application.Security, new ConnectionStringDataStoreProvider("XpoProvider=InMemoryDataStoreProvider"));
-            using var testObserver = securedObjectSpaceProvider.WhenObjectSpaceCreated().Test();
+            using var testObserver = securedObjectSpaceProvider.WhenObjectSpaceCreated().Take(1).Test();
 
             var objectSpace = securedObjectSpaceProvider.CreateObjectSpace();
 
@@ -67,9 +69,12 @@ namespace Xpand.XAF.Modules.Reactive.Tests.ObjectSpaceProvider{
         public void When_NonSecured_ObjectSpaceCreated(){
             using var application = NewXafApplication();
             application.SetupSecurity();
-            DefaultReactiveModule(application);
             var securedObjectSpaceProvider = new SecuredObjectSpaceProvider((ISelectDataSecurityProvider)application.Security, new ConnectionStringDataStoreProvider("XpoProvider=InMemoryDataStoreProvider"));
-            using var testObserver = securedObjectSpaceProvider.WhenObjectSpaceCreated().Test();
+            application.AddObjectSpaceProvider(securedObjectSpaceProvider);
+            DefaultReactiveModule(application);
+            
+            
+            using var testObserver = securedObjectSpaceProvider.WhenObjectSpaceCreated().Take(1).Test();
 
             var nonsecuredObjectSpace = securedObjectSpaceProvider.CreateNonsecuredObjectSpace();
 

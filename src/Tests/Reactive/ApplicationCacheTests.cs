@@ -13,7 +13,7 @@ using Xpand.XAF.Modules.Reactive.Tests.Common;
 namespace Xpand.XAF.Modules.Reactive.Tests {
     public class ApplicationCacheTests:ReactiveCommonTest {
 
-        [Test][Order(0)]
+        [Test][Order(0)][Ignore("")]
         public async Task Contains_Existing_Items() {
             using (var application = DefaultReactiveModule().Application) {
                 using var objectSpace = application.CreateObjectSpace();

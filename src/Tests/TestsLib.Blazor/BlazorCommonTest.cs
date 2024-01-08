@@ -51,7 +51,8 @@ namespace Xpand.TestsLib.Blazor {
 			WebHost.Start();
 			var containerInitializer = WebHost.Services.GetRequiredService<IValueManagerStorageContainerInitializer>();
 			containerInitializer.Initialize();
-			var newBlazorApplication = WebHost.Services.GetService<IXafApplicationProvider>()?.GetApplication();
+			var serviceScope = WebHost.Services.CreateScope();
+			var newBlazorApplication = serviceScope.ServiceProvider.GetService<IXafApplicationProvider>()?.GetApplication();
 
 			newBlazorApplication.WhenApplicationModulesManager().TakeFirst()
 				.SelectMany(manager => manager.WhenGeneratingModelNodes<IModelViews>().TakeFirst()

@@ -60,7 +60,7 @@ namespace Xpand.TestsLib.Blazor {
 			});
 			AddSecurity(services);
 
-			services.AddSingleton<IXafApplicationProvider, ApplicationProvider>()
+			services.AddScoped<IXafApplicationProvider, ApplicationProvider>()
 				.AddScoped<IExceptionHandlerService, MyClass>();
 			// services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(options => {
 			//  options.LoginPath = "/LoginPage";

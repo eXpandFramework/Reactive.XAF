@@ -8,7 +8,6 @@ using Xpand.Extensions.Blazor;
 using Xpand.Extensions.XAF.TypesInfoExtensions;
 using Xpand.TestsLib.Blazor;
 using Xpand.TestsLib.Common;
-using Xpand.XAF.Modules.Reactive.Rest.Tests.BO;
 
 namespace Xpand.XAF.Modules.Reactive.Rest.Tests.Common {
     public abstract class RestCommonAppTest:BlazorCommonAppTest {
