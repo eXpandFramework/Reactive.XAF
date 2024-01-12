@@ -23,6 +23,8 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Hangfire {
 	        => serviceProvider.RunWithStorage(context.ApplyPaused);
 
         public void OnStateElection(ElectStateContext context) {
+            if (!context.GetJobParameter<bool>("Cancel")) return;
+            context.CandidateState = new SkippedState("Paused");
         }
         
         public virtual void OnStateUnapplied(ApplyStateContext context, IWriteOnlyTransaction transaction) { }
@@ -30,6 +32,8 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Hangfire {
         public void OnPerforming(PerformingContext performingContext) {
             using var serviceScope = provider.CreateScope();
             ApplyPaused(performingContext, serviceScope.ServiceProvider);
+            performingContext.Canceled = true;
+            performingContext.SetJobParameter("Cancel",performingContext.Canceled);
         }
 
         public void OnPerformed(PerformedContext filterContext) {

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Hangfire.States;
 
+namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Hangfire;
 public class SkippedState(string reason = null) : IState {
     public string Name => "Skipped";
     public string Reason { get; } = reason;

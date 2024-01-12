@@ -3,6 +3,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Blazor;
+using DevExpress.ExpressApp.Xpo;
 using Hangfire;
 using Hangfire.MemoryStorage;
 using Microsoft.AspNetCore.Hosting;
@@ -20,6 +21,8 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests.Common {
         
         public override void Setup() {
             base.Setup();
+            XpoTypesInfoHelper.GetXpoTypeInfoSource().Reset();
+            XafTypesInfo.HardReset();
             GlobalConfiguration.Configuration.UseMemoryStorage(new MemoryStorageOptions());
             
         }

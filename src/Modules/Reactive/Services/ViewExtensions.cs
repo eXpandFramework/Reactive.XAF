@@ -21,6 +21,7 @@ using Xpand.Extensions.TypeExtensions;
 using Xpand.Extensions.XAF.DetailViewExtensions;
 using Xpand.Extensions.XAF.ObjectSpaceExtensions;
 using Xpand.Extensions.XAF.ViewExtensions;
+using Xpand.Extensions.XAF.XafApplicationExtensions;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
     public static class ViewExtensions{
@@ -41,12 +42,13 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => listView.SelectObject<object>(objects);
         
         public static IObservable<TO> SelectObject<TO>(this ListView listView,params TO[] objects) where TO : class 
-            => listView.Editor.WhenControlsCreated()
-                .SelectMany(editor => editor.Control.WhenEvent("DataSourceChanged").To(listView).StartWith(listView)
-                    .WhenNotDefault(_ => editor.Control.GetPropertyValue("DataSource"))).To(listView)
-                .SelectObject(objects);
-        
-        
+            => listView.Application().GetPlatform() == Platform.Blazor
+                ? listView.Application().GetRequiredService<IObjectSelector<TO>>().SelectObject(listView, objects)
+                : listView.Editor.WhenControlsCreated()
+                    .SelectMany(editor => editor.Control.WhenEvent("DataSourceChanged").To(listView).StartWith(listView)
+                        .WhenNotDefault(_ => editor.Control.GetPropertyValue("DataSource"))).To(listView)
+                    .SelectObject(objects);
+
         static IObservable<T> SelectObject<T>(this IObservable<ListView> source,params T[] objects) where T : class 
             => source.SelectMany(view => {
                 if (view.Editor.GetType().InheritsFrom(GridListEditorType)){

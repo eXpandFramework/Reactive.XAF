@@ -108,7 +108,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects {
         Failed,
         Awaiting,
         Deleted,
-        // ChainJob
-        Notification
+        Notification,
+        Skipped
     }
 }
