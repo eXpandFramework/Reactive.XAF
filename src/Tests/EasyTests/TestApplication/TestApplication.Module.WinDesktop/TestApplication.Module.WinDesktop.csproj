@@ -15,6 +15,7 @@
     <DebugType>full</DebugType>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
+    <OutputPath>..\..\..\..\..\bin\</OutputPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DefineConstants>TRACE;DEBUG;XAF232</DefineConstants>
@@ -46,7 +47,7 @@
     <PackageReference Include="Microsoft.Extensions.Options" Version="6.0" />
     <PackageReference Include="System.ServiceModel.Security" Version="4.10.2" />
     <PackageReference Include="System.ServiceModel.NetTcp" Version="4.10.2" />
-    <PackageReference Include="Xpand.XAF.Win.All" Version="4.232.1.2" />
+    <PackageReference Include="Xpand.XAF.Win.All" Version="4.232.1.14" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="TestApplication.Module">

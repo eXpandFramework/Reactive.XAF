@@ -15,6 +15,7 @@
     <DebugType>full</DebugType>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
+    <OutputPath>..\..\..\..\..\bin\</OutputPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DefineConstants>TRACE;DEBUG;XAF232</DefineConstants>
@@ -44,7 +45,7 @@
   <ItemGroup>
     <PackageReference Include="DevExpress.ExpressApp.Blazor.All" Version="23.2.3" />
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="7.0" />
-    <PackageReference Include="Xpand.XAF.Web.All" Version="4.232.1.2" />
+    <PackageReference Include="Xpand.XAF.Web.All" Version="4.232.1.14" />
     <PackageReference Include="System.CodeDom" Version="6.0" />
     <PackageReference Include="Microsoft.CodeAnalysis" Version="4.2" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="6.0.1" />

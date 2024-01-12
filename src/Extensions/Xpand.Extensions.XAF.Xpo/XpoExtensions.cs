@@ -64,9 +64,8 @@ namespace Xpand.Extensions.XAF.Xpo {
                                                           string propertyName) 
             => typeInfo.CreateCollection( typeToCreateOn, typeOfCollection, associationName,  propertyName, refreshTypesInfo, false);
 
-        public static XPMemberInfo CreateCollection(this ITypesInfo typeInfo, Type typeToCreateOn, Type typeOfCollection, string associationName,  bool refreshTypesInfo) {
-            return CreateCollection(typeInfo, typeToCreateOn, typeOfCollection, associationName,  refreshTypesInfo, typeOfCollection.Name + "s");
-        }
+        public static XPMemberInfo CreateCollection(this ITypesInfo typeInfo, Type typeToCreateOn, Type typeOfCollection, string associationName,  bool refreshTypesInfo) 
+            => CreateCollection(typeInfo, typeToCreateOn, typeOfCollection, associationName,  refreshTypesInfo, typeOfCollection.Name + "s");
 
         public static XPMemberInfo CreateCollection(this ITypesInfo typeInfo, Type typeToCreateOn, Type typeOfCollection, string associationName,  string collectionName) 
             => typeInfo.CreateCollection( typeToCreateOn, typeOfCollection, associationName,  collectionName, true);
@@ -169,6 +168,7 @@ namespace Xpand.Extensions.XAF.Xpo {
             return infos;
         }
 
+        
         public static XPClassInfo FindDCXPClassInfo(this ITypeInfo typeInfo) {
             var xpoTypeInfoSource = ((XpoTypeInfoSource) ((TypeInfo) typeInfo).Source);
             if (DesignerOnlyCalculator.IsRunTime) {

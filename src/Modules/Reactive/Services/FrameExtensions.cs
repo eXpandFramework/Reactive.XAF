@@ -240,7 +240,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => frame.SaveAndCloseAction().Trigger();
         
         public static IObservable<Frame> NewObject(this Frame frame, Type objectType,bool saveAndClose=false,Func<Frame,IObservable<Unit>> detailview=null) 
-            => frame.NewObjectAction().Trigger(frame.Application.WhenFrame(objectType),() => frame.NewObjectAction().Items.First(item => (Type)item.Data==objectType))
+            => frame.NewObjectAction().Trigger(frame.Application.WhenFrame(objectType,ViewType.DetailView),() => frame.NewObjectAction().Items.First(item => (Type)item.Data==objectType))
                 .ConcatIgnored(frame1 => detailview?.Invoke(frame1)?? Observable.Empty<Unit>())
                 .If(_ => saveAndClose,frame1 => frame1.SaveAndCloseObject().To<Frame>().Concat(frame),frame1 => frame1.Observe());
     }

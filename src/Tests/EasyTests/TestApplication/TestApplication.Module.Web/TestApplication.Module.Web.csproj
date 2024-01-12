@@ -13,6 +13,7 @@
     <DebugType>full</DebugType>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
+    <OutputPath>..\..\..\..\..\bin\</OutputPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DefineConstants>TRACE;DEBUG;XAF232.2.2XAF232.2.2</DefineConstants>
@@ -39,7 +40,7 @@
   <ItemGroup>
     <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="23.2.3" />
     <PackageReference Include="DevExpress.ExpressApp.Web.All" Version="23.2.3" />
-    <PackageReference Include="Xpand.XAF.Web.All" Version="4.232.1.2" />
+    <PackageReference Include="Xpand.XAF.Web.All" Version="4.232.1.14" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="TestApplication.Module">

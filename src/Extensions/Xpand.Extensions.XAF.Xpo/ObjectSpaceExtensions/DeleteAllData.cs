@@ -1,6 +1,8 @@
 ﻿using System.Data;
 using System.Data.SqlClient;
 using DevExpress.ExpressApp;
+using Microsoft.Extensions.Configuration;
+using Xpand.Extensions.XAF.XafApplicationExtensions;
 
 namespace Xpand.Extensions.XAF.Xpo.ObjectSpaceExtensions{
     public static partial class ObjectSpaceExtensions{
@@ -12,7 +14,8 @@ namespace Xpand.Extensions.XAF.Xpo.ObjectSpaceExtensions{
 
         public static void DeleteAllData(this XafApplication application) {
             if (!application.DbExist()) return;
-            using var sqlConnection = new SqlConnection(application.ConnectionString);
+            using var sqlConnection = new SqlConnection(application.GetRequiredService<IConfiguration>()
+                .GetConnectionString("ConnectionString"));
             sqlConnection.DeleteAllData();
         }
 

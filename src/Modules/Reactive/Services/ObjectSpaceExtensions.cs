@@ -428,13 +428,13 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => application.WhenProviderObjectSpaceCreated().SelectMany(objectSpace => objectSpace.WhenCommiting<T>(objectModification));
         
         public static IObservable<(IObjectSpace objectSpace, IEnumerable<T> objects)> WhenProviderCommitted<T>(
-            this XafApplication application, ObjectModification objectModification = ObjectModification.All) {
-            return application.WhenProviderObjectSpaceCreated().WhenCommitted<T>(objectModification);
-        }
+            this XafApplication application, ObjectModification objectModification = ObjectModification.All,bool emitUpdatingObjectSpace=false)
+            => application.WhenProviderObjectSpaceCreated(emitUpdatingObjectSpace).WhenCommitted<T>(objectModification);
+
         public static IObservable<(IObjectSpace objectSpace, IEnumerable<object> objects)> WhenProviderCommitted(
-            this XafApplication application,Type objectType, ObjectModification objectModification = ObjectModification.All) {
-            return application.WhenProviderObjectSpaceCreated().WhenCommitted(objectType,objectModification);
-        }
+            this XafApplication application,Type objectType, ObjectModification objectModification = ObjectModification.All)
+            => application.WhenProviderObjectSpaceCreated().WhenCommitted(objectType,objectModification);
+
         public static IObservable<(IObjectSpace objectSpace, IEnumerable<T> objects)> WhenProviderCommitting<T>(
             this XafApplication application, ObjectModification objectModification = ObjectModification.All) where T : class 
             => application.WhenProviderObjectSpaceCreated().SelectMany(space => space.WhenCommiting<T>(objectModification));
@@ -526,7 +526,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         
         public static IObservable<IObjectSpace> WhenCommitted(this IObjectSpace objectSpace) 
             => objectSpace.WhenEvent(nameof(IObjectSpace.Committed)).To(objectSpace)
-                .TakeUntil(objectSpace.WhenDisposed());
+                // .TakeUntil(objectSpace.WhenDisposed())
+            ;
 
         public static IObservable<CancelEventArgs> WhenCommiting(this IObjectSpace objectSpace) 
             => objectSpace.WhenEvent<CancelEventArgs>(nameof(IObjectSpace.Committing))

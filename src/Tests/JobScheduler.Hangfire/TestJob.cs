@@ -9,6 +9,7 @@ using Hangfire;
 using Hangfire.Server;
 using Microsoft.Extensions.DependencyInjection;
 using Xpand.Extensions.Blazor;
+using Xpand.Extensions.Numeric;
 using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.XAF.Modules.JobScheduler.Hangfire.Tests.BO;
@@ -27,7 +28,11 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests {
         [JobProvider]
         public async Task<bool> CreateObject(PerformContext context) 
             => await Provider.RunWithStorageAsync(application => application.UseObjectSpace(space => Observable.Range(0, 10)
-                .Select(_ => space.CreateObject<JS>()).Commit()))
+                .Select(_ => {
+                    var js = space.CreateObject<JS>();
+                    js.CommitChanges();
+                    return js;
+                })))
                 .ToObservable().To(true);
 
         [JobProvider]
@@ -57,14 +62,14 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests {
         [JobProvider]
         public async Task<bool> TestChainJob(PerformContext context) {
             Context = context;
-            Jobs.OnNext(this);
+            JobsSubject.OnNext(this);
             var returnObservable = await Result.Observe();
             return returnObservable;
         }
         [JobProvider]
         public void TestVoidChainJob(PerformContext context) {
             Context = context;
-            Jobs.OnNext(this);
+            JobsSubject.OnNext(this);
         }
 
         public static bool Result;
@@ -73,7 +78,9 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests {
 
     [JobProvider]
     public class TestJob {
-        public static readonly Subject<TestJob> Jobs=new();
+        protected static readonly ISubject<TestJob> JobsSubject=Subject.Synchronize(new Subject<TestJob>());
+
+        public static IObservable<TestJob> Jobs => JobsSubject.AsObservable().Delay(1.Seconds());
 
         public PerformContext Context { get; protected set; }
 
@@ -90,13 +97,13 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests {
         public void FailMethodRetry() => throw new NotImplementedException();
 
         [JobProvider]
-        public void Test() => Jobs.OnNext(this);
+        public void Test() => JobsSubject.OnNext(this);
 
         [JobProvider]
         public void TestJobId(PerformContext context) {
             Context = context;
             
-            Jobs.OnNext(this);
+            JobsSubject.OnNext(this);
         }
     }
 }

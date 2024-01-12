@@ -13,6 +13,7 @@
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
     <DebugType>full</DebugType>
     <AppendTargetFrameworkToOutputPath>True</AppendTargetFrameworkToOutputPath>
+    <OutputPath>..\..\..\..\bin</OutputPath>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Model.DesignedDiffs.xafml" />

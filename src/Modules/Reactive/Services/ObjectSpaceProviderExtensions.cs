@@ -49,7 +49,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => application.PatchProviderObjectSpaceCreated<IObjectSpaceProvider>( nameof(IObjectSpaceProvider.CreateObjectSpace),_ => true,nameof(CreateObjectSpace));
         
         private static void PatchNonSecuredObjectSpaceCreated(this XafApplication application) 
-            => application.PatchProviderObjectSpaceCreated<INonsecuredObjectSpaceProvider>( nameof(INonsecuredObjectSpaceProvider.CreateNonsecuredObjectSpace),_ => true,nameof(CreateObjectSpace));
+            => application.PatchProviderObjectSpaceCreated<INonsecuredObjectSpaceProvider>( nameof(INonsecuredObjectSpaceProvider.CreateNonsecuredObjectSpace),_ => true,nameof(CreateObjectSpace1));
 
         private static void PatchUpdatingObjectSpaceCreated(this XafApplication application) 
             => application.PatchProviderObjectSpaceCreated<IObjectSpaceProvider>( nameof(IObjectSpaceProvider.CreateUpdatingObjectSpace),info => {
@@ -70,6 +70,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         [SuppressMessage("ReSharper", "InconsistentNaming")]
         private static void CreateObjectSpace(IObjectSpaceProvider __instance,IObjectSpace __result) 
+            => ObjectSpaceCreatedSubject.OnNext((__result, __instance,false));
+        private static void CreateObjectSpace1(IObjectSpaceProvider __instance,IObjectSpace __result) 
             => ObjectSpaceCreatedSubject.OnNext((__result, __instance,false));
         
         [SuppressMessage("ReSharper", "InconsistentNaming")]

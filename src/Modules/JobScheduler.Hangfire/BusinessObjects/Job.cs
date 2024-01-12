@@ -68,7 +68,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects {
 
         [Browsable(false)]
         public IList<ObjectString> JobMethods 
-            => AppDomain.CurrentDomain.JobMethods().Where(info => info.DeclaringType==JobType?.Type)
+            => JobType?.Type==null?new List<ObjectString>(): AppDomain.CurrentDomain.JobMethods().Where(info => info.DeclaringType?.IsAssignableFrom(JobType.Type)??false).Distinct()
                 .Select(info => new ObjectString(info.Name ){Caption = info.Attribute<JobProviderAttribute>()?.DisplayName??info.Name.CompoundName()})
                 .ToArray();
         

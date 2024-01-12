@@ -5,6 +5,7 @@ using System.Reactive.Linq;
 
 namespace Xpand.Extensions.Reactive.Transform.System.Diagnostics{
     public static class ProcessEx{
+        
         public static IObservable<float> PrivateBytes(this Process process,IObservable<Unit> signal) 
             => Observable.Using(() => new PerformanceCounter("Process", "Private Bytes", process.ProcessName),counter => signal
                 .Select(_ => counter.NextValue()).Select(sample => sample));

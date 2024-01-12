@@ -8,7 +8,6 @@ using DevExpress.ExpressApp.Xpo;
 using Moq;
 using NUnit.Framework;
 using Shouldly;
-using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.TestsLib.Common;
 using Xpand.TestsLib.Common.Attributes;
@@ -40,16 +39,17 @@ namespace Xpand.XAF.Modules.Reactive.Tests.ObjectSpaceProvider{
             testObserver.ItemCount.ShouldBe(1);
         }
 
-        [Test]
-        [XpandTest()][Ignore("fail when run all")]
-        public void WhenObjectSpaceCreated(){
+        [TestCase(true,2)]
+        [TestCase(false,1)]
+        [XpandTest()]
+        public void WhenObjectSpaceCreated(bool emitUpdatingOs,int expected){
             using var application = DefaultReactiveModule().Application;
-            using var testObserver = application.ObjectSpaceProvider.WhenObjectSpaceCreated().Test();
+            using var testObserver = application.ObjectSpaceProvider.WhenObjectSpaceCreated(emitUpdatingObjectSpace:emitUpdatingOs).Test();
             
             application.ObjectSpaceProvider.CreateObjectSpace();
             application.CreateNonSecuredObjectSpace(typeof(R));
             
-            testObserver.ItemCount.ShouldBe(1);
+            testObserver.ItemCount.ShouldBe(expected);
         }
         [Test]
         [XpandTest()][Order(-10)]

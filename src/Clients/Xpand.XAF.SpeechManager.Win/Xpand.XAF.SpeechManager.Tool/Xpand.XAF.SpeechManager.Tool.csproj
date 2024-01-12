@@ -20,6 +20,7 @@
     <DebugType>full</DebugType>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <AppendTargetFrameworkToOutputPath>True</AppendTargetFrameworkToOutputPath>
+    <OutputPath>..\..\..\..\bin</OutputPath>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="nupkg\**" />

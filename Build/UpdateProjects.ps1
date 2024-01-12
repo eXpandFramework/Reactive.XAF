@@ -56,11 +56,11 @@ Get-ChildItem -Filter *.csproj -Recurse | ForEach-Object {
         }
     }
     
-    $target = Get-ProjectTargetFramework $projXml -FullName
-    $regex = [regex] '(?<t>.*-windows$)'
-    $result = $regex.Replace($target, '${t}7.0')
-    $projXml.Project.PropertyGroup|Where-Object{$_["TargetFramework"]}|ForEach-Object{
-        $_.TargetFramework=$result
-    }
-    $projXml.Save($fileName)|Out-null
+    # $target = Get-ProjectTargetFramework $projXml -FullName
+    # $regex = [regex] '(?<t>.*-windows$)'
+    # $result = $regex.Replace($target, '${t}7.0')
+    # $projXml.Project.PropertyGroup|Where-Object{$_["TargetFramework"]}|ForEach-Object{
+    #     $_.TargetFramework=$result
+    # }
+    # $projXml.Save($fileName)|Out-null
 } 

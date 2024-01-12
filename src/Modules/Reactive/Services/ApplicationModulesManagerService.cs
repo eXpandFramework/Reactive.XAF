@@ -95,13 +95,9 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 		    public IObservable<ModelNode> Update => _updateSubject;
 		    public IObservable<ModelNode> UpdateCached => _updateCachedSubject;
 
-		    public override void UpdateNode(ModelNode node) {
-			    _updateSubject.OnNext(node);
-		    }
+		    public override void UpdateNode(ModelNode node) => _updateSubject.OnNext(node);
 
-		    public override void UpdateCachedNode(ModelNode node) {
-			    _updateCachedSubject.OnNext(node);
-		    }
+		    public override void UpdateCachedNode(ModelNode node) => _updateCachedSubject.OnNext(node);
 	    }
 
     }

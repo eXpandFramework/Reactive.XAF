@@ -19,6 +19,7 @@ using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.ActionExtensions;
 using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.ViewExtensions;
+using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
 
@@ -74,25 +75,25 @@ namespace Xpand.TestsLib.Common {
         public static IObservable<TObject[]> AssertProviderObjects<TObject>(this XafApplication application, TimeSpan? timeout = null, [CallerMemberName] string caller = "") where TObject : class
             => application.WhenProviderObjects<TObject>().Assert(timeout: timeout, caller: caller);
         
-        public static IObservable<Frame> AssertListViewHasObject<TObject>(this XafApplication application, Func<TObject,bool> matchObject=null,int count=0,TimeSpan? timeout=null,[CallerMemberName]string caller="")  
+        public static IObservable<Frame> AssertListViewHasObject<TObject>(this XafApplication application, Func<TObject,bool> matchObject=null,int count=0,TimeSpan? timeout=null,[CallerMemberName]string caller="") where TObject : class
             => application.WhenFrame(typeof(TObject),ViewType.ListView)
                 .SelectUntilViewClosed(frame => frame.AssertListViewHasObject(matchObject, count,timeout, caller))
                 .ReplayFirstTake();
-        public static IObservable<Frame> AssertListViewHasObject<TObject>(this XafApplication application,string navigationItemId, Func<TObject,bool> matchObject=null,int count=0,TimeSpan? timeout=null,[CallerMemberName]string caller="")  
+        public static IObservable<Frame> AssertListViewHasObject<TObject>(this XafApplication application,Func<string> navigationItemId, Func<TObject,bool> matchObject=null,int count=0,TimeSpan? timeout=null,[CallerMemberName]string caller="") where TObject : class 
             => application.AssertNavigation(navigationItemId).Zip(application.AssertListViewHasObject(matchObject,count,timeout,caller)).ToSecond().ReplayFirstTake();
 
-        public static IObservable<Frame> AssertListViewHasObject<TObject>(this Frame frame,Func<TObject, bool> matchObject=null, int count=0,TimeSpan? timeout=null, [CallerMemberName]string caller="") 
+        public static IObservable<Frame> AssertListViewHasObject<TObject>(this Frame frame,Func<TObject, bool> matchObject=null, int count=0,TimeSpan? timeout=null, [CallerMemberName]string caller="") where TObject : class
             => frame.View.WhenControlsCreated(true).Take(1)
                 .Select(view => frame is NestedFrame nestedFrame ? nestedFrame.ViewItem.View.WhenCurrentObjectChanged().StartWith(view)
                         .SelectMany(_ => frame.AssertListViewHasObject(matchObject, count, timeout, caller, view))
                     : frame.AssertListViewHasObject(matchObject, count, timeout, caller, view)).Switch();
 
-        private static IObservable<Frame> AssertListViewHasObject<TObject>(this Frame frame, Func<TObject, bool> matchObject, int count, TimeSpan? timeout, string caller, View view) 
+        private static IObservable<Frame> AssertListViewHasObject<TObject>(this Frame frame, Func<TObject, bool> matchObject, int count, TimeSpan? timeout, string caller, View view) where TObject : class
             => view.ToListView().WhenObjects<TObject>()
-                .ToConsole(arg => $"{frame.View} - {arg.Length}")
                 .Where(objects => count == 0 || objects.Length == count)
                 .SelectMany(objects => objects.Where(value => matchObject?.Invoke(value)??true).ToNowObservable()).Take(1)
-                .SelectMany(value => view.ToListView().SelectObject(value)).Select(o => o)
+                .SelectMany(value => frame.Application.GetRequiredService<IObjectSelector<TObject>>().SelectObject(view.ToListView(),value))
+                // .SelectMany(value => view.ToListView().SelectObject(value)).Select(o => o)
                 .Assert(_ => $"{typeof(TObject).Name}-{view.Id}",caller:caller,timeout:timeout)
                 .ReplayFirstTake().To(frame);
 
@@ -116,7 +117,7 @@ namespace Xpand.TestsLib.Common {
         
         public static string MessageFactory<TSource>(this Func<TSource, string> messageFactory, string caller) => $"{caller}: {messageFactory(default)}";
         
-        public static IObservable<Unit> AssertNavigation(this XafApplication application,string view, Func<IObservable<Frame>,IObservable<Unit>> assert, IObservable<Unit> canNavigate) 
+        public static IObservable<Unit> AssertNavigation(this XafApplication application,Func<string> view, Func<IObservable<Frame>,IObservable<Unit>> assert, IObservable<Unit> canNavigate) 
             => application.AssertNavigation(view,_ => canNavigate.SwitchIfEmpty(Observable.Throw<Unit>(new CannotNavigateException())).ToUnit())
                 .SelectMany(window => window.Observe().SelectMany(frame => assert(frame.Observe())))
                 .FirstOrDefaultAsync().ReplayFirstTake();
@@ -134,9 +135,12 @@ namespace Xpand.TestsLib.Common {
                         .Assert();
                 }).ReplayFirstTake();
         
-        public static IObservable<Window> AssertNavigation(this XafApplication application, string viewId,Func<Window,IObservable<Unit>> navigate=null)
-            => application.Navigate(viewId,window => (navigate?.Invoke(window)?? Observable.Empty<Unit>()).SwitchIfEmpty(Unit.Default.Observe()))
-                .Assert($"{viewId}").Catch<Window,CannotNavigateException>(_ => Observable.Empty<Window>());
+        public static IObservable<Window> AssertNavigation(this XafApplication application, Func<string> viewId,Func<Window,IObservable<Unit>> navigate=null)
+            => application.WhenMainWindowCreated()
+                .SelectMany(_ => application.Navigate(viewId(),window => (navigate?.Invoke(window)?? Observable.Empty<Unit>()).SwitchIfEmpty(Unit.Default.Observe()))
+                    .Assert($"{viewId}")
+                    .Catch<Window,CannotNavigateException>(_ => Observable.Empty<Window>()))
+            ;
         
         public static IObservable<Frame> AssertLinkObject<TObject>(this Frame frame) where TObject : class
             => frame.NestedListViews(typeof(TObject)).Take(1)

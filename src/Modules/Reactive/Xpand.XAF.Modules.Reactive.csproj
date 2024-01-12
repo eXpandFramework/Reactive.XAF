@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
@@ -8,7 +8,7 @@
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\Xpand.key\xpand.snk</AssemblyOriginatorKeyFile>
     <DebugSymbols>true</DebugSymbols>
-    <OutputPath>..\..\..\bin</OutputPath>
+    <OutputPath>..\..\..\bin\</OutputPath>
     <AssemblyTitle>Xpand.XAF.Modules.Reactive</AssemblyTitle>
     <Product>Xpand.XAF.Modules.Reactive</Product>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>

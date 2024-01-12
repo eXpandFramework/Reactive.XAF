@@ -6,14 +6,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Xpand.Extensions.Blazor;
 
 namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Hangfire {
-    public class HangfireJobFilter:global::Hangfire.Common.JobFilterAttribute, IApplyStateFilter,IServerFilter,IElectStateFilter,IHangfireJobFilter {
-        private readonly IServiceProvider _provider;
-        public HangfireJobFilter(IServiceProvider provider) => _provider = provider;
-
+    public class HangfireJobFilter(IServiceProvider provider) : global::Hangfire.Common.JobFilterAttribute,
+        IApplyStateFilter, IServerFilter, IElectStateFilter, IHangfireJobFilter {
         public virtual void OnStateApplied(ApplyStateContext context, IWriteOnlyTransaction transaction) {
             var recurringJobId = context.Connection.RecurringJobId(context.BackgroundJob.Id);
             if (!string.IsNullOrEmpty(recurringJobId)) {
-	            using var serviceScope = _provider.CreateScope();
+	            using var serviceScope = provider.CreateScope();
                 ApplyJobState(context, serviceScope.ServiceProvider);
             }
         }
@@ -30,7 +28,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Hangfire {
         public virtual void OnStateUnapplied(ApplyStateContext context, IWriteOnlyTransaction transaction) { }
 
         public void OnPerforming(PerformingContext performingContext) {
-            using var serviceScope = _provider.CreateScope();
+            using var serviceScope = provider.CreateScope();
             ApplyPaused(performingContext, serviceScope.ServiceProvider);
         }
 
@@ -39,5 +37,5 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Hangfire {
         }
     }
 
-    public interface IHangfireJobFilter { }
+    public interface IHangfireJobFilter;
 }

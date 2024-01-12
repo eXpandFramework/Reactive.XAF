@@ -16,14 +16,12 @@ using Xpand.Extensions.Harmony;
 using Xpand.TestsLib.Blazor;
 using Xpand.XAF.Modules.JobScheduler.Hangfire.Hangfire;
 
-[assembly: HostingStartup(typeof(HangfireStartup))]
- [assembly: HostingStartup(typeof(HostingStartup))]
- [assembly:HostingStartup(typeof(Xpand.XAF.Modules.Blazor.BlazorStartup))]
+
 namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests.Common {
     public class JobSchedulerStartup : XafHostingStartup<JobSchedulerModule> {
         static JobSchedulerStartup() {
-            new HarmonyMethod(typeof(JobSchedulerStartup),nameof(SetStorage))
-                .PreFix(typeof(ValueManagerContext).Method(nameof(ValueManagerContext.SetStorage),Flags.StaticAnyVisibility));
+            // new HarmonyMethod(typeof(JobSchedulerStartup),nameof(SetStorage))
+                // .PreFix(typeof(ValueManagerContext).Method(nameof(ValueManagerContext.SetStorage),Flags.StaticAnyVisibility));
         }
         [SuppressMessage("ReSharper", "InconsistentNaming")]
         public static bool SetStorage(IValueManagerStorage storage,ref IDisposable __result) {

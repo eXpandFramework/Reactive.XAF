@@ -12,6 +12,7 @@ using DevExpress.DataAccess.Native.ObjectBinding;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.Blazor;
+using DevExpress.ExpressApp.Core;
 using DevExpress.ExpressApp.Model.Core;
 using DevExpress.ExpressApp.Utils;
 using Fasterflect;
@@ -27,6 +28,7 @@ using Microsoft.JSInterop;
 using Newtonsoft.Json;
 using Xpand.Extensions.EventArgExtensions;
 using Xpand.Extensions.ObjectExtensions;
+using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
@@ -79,7 +81,8 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
 
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) 
             => Observable.If(() => DesignerOnlyCalculator.IsRunTime,manager.Defer(() => manager.CheckBlazor(typeof(HangfireStartup).FullName, typeof(JobSchedulerModule).Namespace)))
-                .Merge(manager.WhenApplication(application => application.ScheduleJobs().Merge(application.DeleteJobs()))
+                .Merge(manager.WhenApplication(application => application.ScheduleJobs().Merge(application.DeleteJobs())
+                        .MergeToUnit(application.RefreshDetailViewWhenObjectCommitted<JobWorker>(typeof(Job))))
                     .Merge(manager.TriggerJobsFromAction())
                     .Merge(manager.PauseJobsFromAction())
                     .Merge(manager.ResumeJobsFromAction())
@@ -120,24 +123,22 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
             using var objectSpace = application.CreateNonSecuredObjectSpace(typeof(Job));
             var recurringJobId = context.Connection.RecurringJobId(context.BackgroundJob.Id);
             var scheduledJob = objectSpace.GetObjectsQuery<Job>().FirstOrDefault(job1 => job1.Id==recurringJobId);
-            if (scheduledJob!=null) {
-                var worker = objectSpace.EnsureObjectByKey<JobWorker>(context.BackgroundJob.Id);
-                if (objectSpace.IsNewObject(worker)) {
-                    worker.Job = scheduledJob;
-                }
-                var jobState = objectSpace.CreateObject<JobState>();
-                jobState.Created = DateTime.Now;
-                jobState.State=(WorkerState) Enum.Parse(typeof(WorkerState),context.NewState.Name);
-                
-                jobState.Reason = context.NewState.Reason;
-                if (context.NewState is FailedState failedState) {
-                    jobState.Reason = failedState.Exception.Message;
-                }
-                worker.Executions.Add(jobState);
-                objectSpace.CommitChanges();
-                JobStateSubject.OnNext(jobState);
-                
+            if (scheduledJob == null) return;
+            var worker = objectSpace.EnsureObjectByKey<JobWorker>(context.BackgroundJob.Id);
+            if (objectSpace.IsNewObject(worker)) {
+                worker.Job = scheduledJob;
             }
+            var jobState = objectSpace.CreateObject<JobState>();
+            jobState.Created = DateTime.Now;
+            jobState.State=(WorkerState) Enum.Parse(typeof(WorkerState),context.NewState.Name);
+                
+            jobState.Reason = context.NewState.Reason;
+            if (context.NewState is FailedState failedState) {
+                jobState.Reason = failedState.Exception.Message;
+            }
+            worker.Executions.Add(jobState);
+            objectSpace.CommitChanges();
+            JobStateSubject.OnNext(jobState);
         }
 
         public static Job Pause(this Job job) {
@@ -189,9 +190,10 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
             return job;
         }
 
-        public static void AddOrUpdateHangfire(this Job job,IServiceProvider serviceProvider) 
-            => serviceProvider.GetService<IRecurringJobManager>()
-                .AddOrUpdate(job.Id, job.Expression(), () => job.CronExpression?.Expression??Cron.Never());
+        public static void AddOrUpdateHangfire(this Job job,IServiceProvider serviceProvider) {
+            serviceProvider.GetService<IRecurringJobManager>()
+                .AddOrUpdate(job.Id, job.Expression(), () => job.CronExpression?.Expression ?? Cron.Never());
+        }
 
         static IObservable<Unit> ScheduleJobs(this XafApplication application) 
             => application.WhenCommitted<Job>(ObjectModification.NewOrUpdated).ToObjects()
