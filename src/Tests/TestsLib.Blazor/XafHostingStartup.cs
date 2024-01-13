@@ -124,7 +124,7 @@ namespace Xpand.TestsLib.Blazor {
 			valueManager.Value = !valueManager.Value ? true : throw new InvalidOperationException(message);
 			ValueManager.GetValueManager<string>("ApplicationContextId").Value = Guid.NewGuid().ToString();
 			var application = _applicationFactory.CreateApplication();
-			application.Setup();
+			// application.Setup();
 			return application;
 		}
 

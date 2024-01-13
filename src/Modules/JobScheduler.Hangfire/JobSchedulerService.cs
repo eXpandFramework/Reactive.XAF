@@ -12,7 +12,6 @@ using DevExpress.DataAccess.Native.ObjectBinding;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.Blazor;
-using DevExpress.ExpressApp.Core;
 using DevExpress.ExpressApp.Model.Core;
 using DevExpress.ExpressApp.Utils;
 using Fasterflect;
@@ -82,7 +81,9 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) 
             => Observable.If(() => DesignerOnlyCalculator.IsRunTime,manager.Defer(() => manager.CheckBlazor(typeof(HangfireStartup).FullName, typeof(JobSchedulerModule).Namespace)))
                 .Merge(manager.WhenApplication(application => application.ScheduleJobs().Merge(application.DeleteJobs())
-                        .MergeToUnit(application.RefreshDetailViewWhenObjectCommitted<JobWorker>(typeof(Job))))
+                        .MergeToUnit(application.RefreshDetailViewWhenObjectCommitted<JobWorker>(typeof(Job)))
+                        .MergeToUnit(application.RefreshListViewWhenObjectCommitted<Job>())
+                    )
                     .Merge(manager.TriggerJobsFromAction())
                     .Merge(manager.PauseJobsFromAction())
                     .Merge(manager.ResumeJobsFromAction())
@@ -117,6 +118,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
             var recurringJobId = context.Connection.RecurringJobId(context.BackgroundJob.Id);
             var scheduledJob = objectSpace.GetObjectsQuery<Job>().FirstOrDefault(job1 => job1.Id==recurringJobId);
             context.Canceled= scheduledJob == null || scheduledJob.IsPaused;
+            context.SetJobParameter("Cancel",context.Canceled);
         }
         
         public static void ApplyJobState(this ApplyStateContext context,BlazorApplication application) {
@@ -162,7 +164,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
         
         private static IObservable<Unit> PauseJobsFromAction(this ApplicationModulesManager manager)
             => manager.RegisterViewSimpleAction(nameof(PauseJob), Configure)
-                .WhenExecute()
+                .WhenExecuted()
                 .SelectMany(args => args.SelectedObjects.Cast<Job>())
                 .Do(job => job.Pause())
             .ToUnit();
@@ -185,15 +187,11 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
             return job;
         }
         
-        public static T Trigger<T>(this T job) where T:Job {
-            RecurringJob.Trigger(job.Id);
-            return job;
-        }
+        static void Trigger<T>(this T job) where T:Job => RecurringJob.Trigger(job.Id);
 
-        public static void AddOrUpdateHangfire(this Job job,IServiceProvider serviceProvider) {
-            serviceProvider.GetService<IRecurringJobManager>()
+        public static void AddOrUpdateHangfire(this Job job,IServiceProvider serviceProvider) 
+            => serviceProvider.GetService<IRecurringJobManager>()
                 .AddOrUpdate(job.Id, job.Expression(), () => job.CronExpression?.Expression ?? Cron.Never());
-        }
 
         static IObservable<Unit> ScheduleJobs(this XafApplication application) 
             => application.WhenCommitted<Job>(ObjectModification.NewOrUpdated).ToObjects()

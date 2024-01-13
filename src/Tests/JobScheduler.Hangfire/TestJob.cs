@@ -63,8 +63,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests {
         public async Task<bool> TestChainJob(PerformContext context) {
             Context = context;
             JobsSubject.OnNext(this);
-            var returnObservable = await Result.Observe();
-            return returnObservable;
+            return await Result.Observe();
         }
         [JobProvider]
         public void TestVoidChainJob(PerformContext context) {
@@ -72,7 +71,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests {
             JobsSubject.OnNext(this);
         }
 
-        public static bool Result;
+        public static bool Result=true;
 
     }
 

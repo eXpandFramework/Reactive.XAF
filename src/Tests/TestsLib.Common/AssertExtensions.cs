@@ -139,7 +139,7 @@ namespace Xpand.TestsLib.Common {
             => application.WhenMainWindowCreated()
                 .SelectMany(_ => application.Navigate(viewId(),window => (navigate?.Invoke(window)?? Observable.Empty<Unit>()).SwitchIfEmpty(Unit.Default.Observe()))
                     .Assert($"{viewId}")
-                    .Catch<Window,CannotNavigateException>(_ => Observable.Empty<Window>()))
+                    .Catch<Window,CannotNavigateException>(_ => Observable.Empty<Window>())).ReplayFirstTake()
             ;
         
         public static IObservable<Frame> AssertLinkObject<TObject>(this Frame frame) where TObject : class

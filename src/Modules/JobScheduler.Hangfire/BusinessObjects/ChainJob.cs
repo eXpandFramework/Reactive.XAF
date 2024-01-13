@@ -4,8 +4,7 @@ using DevExpress.Xpo;
 using Xpand.XAF.Persistent.BaseImpl;
 
 namespace Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects {
-    public class ChainJob:CustomBaseObject {
-        public ChainJob(Session session) : base(session) { }
+    public class ChainJob(Session session) : CustomBaseObject(session) {
         int _index;
 
         Job _owner;

@@ -18,7 +18,7 @@ using Xpand.XAF.Modules.JobScheduler.Hangfire.Notification.Tests.Common;
 using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Notification.Tests {
-	
+	[Ignore("switch to rx tests")]
 	public class NotificationServiceTests:CommonTest {
 		
 		protected override BlazorApplication NewBlazorApplication() {

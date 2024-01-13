@@ -56,17 +56,18 @@ namespace Xpand.TestsLib.Blazor {
                 .Observe().SelectMany(host => XafApplicationMonitor.Application.StartTest(host,user,beforeSetup,test)
                     .MergeToUnit(host.Run(url, browser, inactiveWindowBrowserPosition)))
                 .LogError()
-                .Log(logContext, inactiveWindowLogContextPosition, true)
+                // .Log(logContext, inactiveWindowLogContextPosition, true)
             ;
 
             static IObservable<BlazorApplication> StartTest(this IObservable<BlazorApplication> source, IHost host,
                 string user, Func<BlazorApplication, IObservable<Unit>> beforeSetup,Func<BlazorApplication, IObservable<Unit>> test)
                 => source.DoOnFirst(application =>application.DeleteAllData())
-                    .MergeIgnored(application => beforeSetup?.Invoke(application) ?? Observable.Empty<Unit>())
+                    .MergeIgnored(application => beforeSetup?.Invoke(application)
+                        .TakeUntil(host.Services.WhenApplicationStopped())?? Observable.Empty<Unit>())
                     .EnsureMultiTenantMainDatabase().DeleteModelDiffs(user)
                     .TakeUntil(host.Services.WhenApplicationStopped())
                     // .SelectMany(application => test(application).BufferUntilCompleted().To(application))
-                    .MergeIgnored(application => application.WhenLoggedOn(user))
+                    .MergeIgnored(application => application.WhenLoggedOn(user).TakeUntil(host.Services.WhenApplicationStopped()))
                     .SelectMany(application => {
                         
                         // var isAuthenticated = application.GetRequiredService<IPrincipalProvider>().IsAuthenticated();
@@ -76,7 +77,7 @@ namespace Xpand.TestsLib.Blazor {
                         //     .Finally(() => {})
                         //     .SelectMany(blazorApplication => test(blazorApplication).BufferUntilCompleted().WhenNotEmpty().To(blazorApplication));
                         // return selectMany;
-                        return test(application).BufferUntilCompleted().WhenNotEmpty().To(application);
+                        return test(application).TakeUntil(host.Services.WhenApplicationStopped()).BufferUntilCompleted().WhenNotEmpty().To(application);
                     })
                     // .DoAlways(() => {
                     //     host.Services.StopTest();
@@ -84,6 +85,7 @@ namespace Xpand.TestsLib.Blazor {
                     // .ConcatIgnored(application => Observable.FromAsync(() => host.StopAsync()))
                     // .MergeIgnored(application => host.Services.WhenApplicationStopped().DoSafe(unit => application.Dispose()))
                     .DoSafe(application => host.Services.StopTest())
+                    .DoOnError(exception => host.Services.StopTest())
                     .Take(1);
 
         private static IObservable<Unit> Run(this IHost host,string url, string browser,WindowPosition inactiveWindowPosition=WindowPosition.None) 

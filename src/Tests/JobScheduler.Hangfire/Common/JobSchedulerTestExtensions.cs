@@ -17,11 +17,6 @@ using Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects;
 
 namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests.Common {
     public static class JobSchedulerTestExtensions {
-        public static IObservable<Unit> ExecuteAction(this BlazorApplication application,Job job) 
-            => Unit.Default.Observe().Delay(TimeSpan.FromMilliseconds(300))
-                .SelectMany(_ => ((IObservable<Unit>)AppDomain.CurrentDomain.GetAssemblyType("Xpand.XAF.Modules.JobScheduler.Hangfire.ExecuteJobActionExtensions")
-                    .Method("ExecuteAction", new []{typeof(XafApplication),typeof(string)},Flags.StaticPrivate)
-                    .Call(new object[] { application, job.Id })).Select(unit => unit));
 
         public static IObservable<JobState> Executed(this WorkerState lastState,Func<Job,bool> job=null) 
             => JobSchedulerService.JobState.TakeFirst(t => t.Fit(null, WorkerState.Enqueued)).IgnoreElements()
@@ -52,16 +47,6 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests.Common {
         
         public static string ScheduledJobId => $"{TestContext.CurrentContext.Test.MethodName}{TestContext.CurrentContext.Test.ID}";
 
-        public static IObservable<Job> ScheduleImmediate(this
-            IObservable<GenericEventArgs<IObservable<Job>>> source, Expression<Action> expression,IServiceProvider serviceProvider)
-            => source.Handle().SelectMany(args => args.Instance.SelectMany(job => {
-                job.AddOrUpdateHangfire(serviceProvider);
-                if (job.CronExpression.Name != nameof(Cron.Never)) {
-                    return Observable.Start(job.Trigger).To(job);
-                }
-                return job.Observe();
-
-            }));
 
     }
 }

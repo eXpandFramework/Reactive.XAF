@@ -967,7 +967,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<ListPropertyEditor> WhenNestedFrame(this XafApplication application, Type parentObjectType,params Type[] objectTypes)
             => application.WhenFrame(parentObjectType,ViewType.DetailView).SelectUntilViewClosed(frame => frame.NestedListViews(objectTypes));
 
-        public static IObservable<Frame> Navigate(this XafApplication application, Type objectType,ViewType viewType)
+        public static IObservable<Frame> Navigate(this XafApplication application, Type objectType,ViewType viewType=ViewType.ListView)
             => application.WhenFrame(objectType,viewType).Publish(frames => application.Navigate(application.FindViewId(viewType, objectType), frames));
         
         public static IObservable<Frame> Navigate(this XafApplication application,string viewId, IObservable<Frame> afterNavigation) 
@@ -1022,16 +1022,16 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             
             return application.WhenFrame(detailViewObjectType, detailViewObjectType != null ? ViewType.DetailView : ViewType.ListView)
                 .Where(frame => frame.View.IsRoot)
-                .SelectMany(frame => CommitSignal.OfType<TObject[]>().Buffer(1.Seconds())
+                .SelectMany(frame => CommitSignal.OfType<TObject[]>().Buffer(1.Seconds()).WhenNotEmpty()
                     .TakeUntil(frame.View.ObjectSpace.WhenDisposed().Take(1)).ObserveOnContext().SelectMany()
                     .Where(arg => match?.Invoke(frame, arg) ?? true).To(frame.View)
                     .WhenNotDefault(view => view?.ObjectSpace)
-                    .SelectMany(view => view.ObjectSpace.WhenModifyChanged().To(view).StartWith(view)
+                    .Select(view => view.ObjectSpace.WhenModifyChanged().To(view).StartWith(view)
                         .Where(_ => !view.ObjectSpace.IsModified)
-                        .DoSafe(_ => view.ObjectSpace.Refresh()))
+                        .DoSafe(_ => view.ObjectSpace.Refresh())).Switch()
                 )
                 .MergeToUnit(application.WhenProviderCommittedDetailed<TObject>(ObjectModification.All,emitUpdatingObjectSpace:true,_ => true)
-                    .Select(t => t).ToObjectsGroup().Do(CommitSignal.OnNext))
+                    .ToObjectsGroup().Do(CommitSignal.OnNext))
                 .TakeUntilDisposed(application).ToUnit()
                 // .Finally(() => commitSignal.Dispose())
                 ;

@@ -35,7 +35,7 @@ namespace Xpand.TestsLib.Common{
         protected CommonTest() => AssemblyExtensions.EntryAssembly = GetType().Assembly;
 
         private void CleanTempFolder() {
-            if (!Debugger.IsAttached&&new DriveInfo(Path.GetPathRoot(Path.GetTempPath())!).IsDriveFull(95)) {
+            if (!Debugger.IsAttached&&new DriveInfo(Path.GetPathRoot(Path.GetTempPath())!).IsDriveFull(85)) {
                 Array.ForEach(Directory.GetFileSystemEntries(Path.GetTempPath()), entry => {
                     try {
                         if (Directory.Exists(entry)) Directory.Delete(entry, true);

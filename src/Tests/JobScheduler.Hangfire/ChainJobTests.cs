@@ -1,50 +1,49 @@
 ﻿using System.Linq;
+using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using akarnokd.reactive_extensions;
-using Hangfire;
 using NUnit.Framework;
-using Shouldly;
-using Xpand.Extensions.Blazor;
-using Xpand.Extensions.Reactive.Conditional;
+using Xpand.Extensions.Reactive.Combine;
+using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.XAF.FrameExtensions;
+using Xpand.TestsLib.Common;
 using Xpand.TestsLib.Common.Attributes;
+using Xpand.XAF.Modules.Blazor.Services;
 using Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects;
 using Xpand.XAF.Modules.JobScheduler.Hangfire.Tests.Common;
+using Xpand.XAF.Modules.Reactive.Services;
+using Xpand.XAF.Modules.Reactive.Services.Actions;
 
 namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests {
     public class ChainJobTests:JobSchedulerCommonTest {
 
-        [TestCase(true,1,nameof(ChainJob.TestChainJob))]
-        [TestCase(false,0,nameof(ChainJob.TestChainJob))]
-        [TestCase(false,0,nameof(ChainJob.TestVoidChainJob))]
-        [Apartment(ApartmentState.STA)]
-        [XpandTest()][Order(400)]
-        public async Task ChainedJob(bool result,int chainExecCount,string methodName) {
-            ChainJob.Result = result;
-            await using var application = JobSchedulerModule().Application.ToBlazor();
-            using var parentJobObserver = WorkerState.Succeeded.Executed().Test();
 
-            application.CommitNewJob(typeof(ChainJob), methodName, job => {
-                var chainJob = job.ObjectSpace.CreateObject<BusinessObjects.ChainJob>();
-                chainJob.Job = chainJob.ObjectSpace.GetObject(application.CommitNewJob(typeof(ChainJob),nameof(ChainJob.TestChainJob),job1 => {
-                    job1.Id = nameof(ChainJob);
-                    job1.CronExpression = job1.ObjectSpace.GetObjectsQuery<CronExpression>()
-                        .First(expression => expression.Name == nameof(Cron.Never));
-                }));
-                job.ChainJobs.Add(chainJob);
-            }).Trigger(application.ServiceProvider);
+        [XpandTest(state:ApartmentState.MTA)][Test]
+        public async Task ChainedJob() 
+            => await StartJobSchedulerTest(application => application.WhenMainWindowCreated()
+                .SelectMany(_ => application.AssertJobListViewNavigation()
+                    .SelectMany(window => window.CreateJob(typeof(ChainJob), nameof(ChainJob.TestChainJob),false)
+                        .Zip(application.WhenTabControl(typeof(Job),selectedTab:1).Take(1)).ToFirst()
+                        .SelectMany(frame => {
+                            var parentJob = (Job)frame.View.CurrentObject;
+                            var chainJob = frame.View.ObjectSpace.CreateObject<BusinessObjects.ChainJob>();
+                            parentJob.ChainJobs.Add(chainJob);
+                            var childJob = parentJob.ObjectSpace.CreateObject<Job>();
+                            childJob.JobType = childJob.JobTypes.First(type => type.Type == typeof(TestJob));
+                            childJob.JobMethod = childJob.JobMethods.First(s => s.Name == nameof(TestJob.Test));
+                            childJob.Id = nameof(ChainJob);
+                            chainJob.Job = childJob;
 
-            var chainJobObserver = WorkerState.Succeeded.Executed(job => !job.ChainJobs.Any()).TakeFirst().Test();
-            var jobState = parentJobObserver.AwaitDone(Timeout).Items.First();
-
-            chainJobObserver.AwaitDone(Timeout).ItemCount.ShouldBe(chainExecCount);
-            
-            var objectSpace = application.CreateObjectSpace();
-            jobState=objectSpace.GetObjectByKey<JobState>(jobState.Oid);
-            var jobWorker = jobState.JobWorker;
-            jobWorker.State.ShouldBe(WorkerState.Succeeded);
-            await WebHost.StopAsync();
-        }
-
+                            return frame.SaveAction().Trigger(frame.SimpleAction(nameof(JobSchedulerService.TriggerJob)).Trigger()).To(frame)
+                                .IgnoreElements();
+                        })).ToUnit()
+                    .MergeToUnit(application.AssertListViewHasObject<JobWorker>(worker => worker.State==WorkerState.Succeeded)
+                        .SelectMany(_ => application.Navigate(typeof(Job))
+                            .SelectMany(_ => application.AssertListViewHasObject<Job>(job => job.Id==nameof(ChainJob))
+                                .SelectMany(frame2 => frame2.ListViewProcessSelectedItem()
+                                    .Zip(application.WhenTabControl(typeof(Job),selectedTab:1).Take(1))
+                                    .Zip(application.AssertListViewHasObject<JobWorker>(worker => worker.State==WorkerState.Succeeded))))))
+                ).ReplayFirstTake()
+        );
     }
 }

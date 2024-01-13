@@ -12,7 +12,7 @@ using Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
 
-namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests.NewDirectory1 {
+namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests.Common {
     public static class AssertJobScheduler {
         
         public static IObservable<Window> AssertJobListViewNavigation(this BlazorApplication application) 

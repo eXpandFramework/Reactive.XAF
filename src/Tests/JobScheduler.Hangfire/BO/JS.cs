@@ -1,10 +1,12 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using DevExpress.Persistent.Base;
 using DevExpress.Xpo;
 using Xpand.XAF.Persistent.BaseImpl;
 
 namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests.BO{
     
     [SuppressMessage("ReSharper", "InconsistentNaming")]
+    [DefaultClassOptions]
     public class JS:CustomBaseObject{
         public JS(Session session) : base(session){
         }

@@ -32,8 +32,6 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Hangfire {
         public void OnPerforming(PerformingContext performingContext) {
             using var serviceScope = provider.CreateScope();
             ApplyPaused(performingContext, serviceScope.ServiceProvider);
-            performingContext.Canceled = true;
-            performingContext.SetJobParameter("Cancel",performingContext.Canceled);
         }
 
         public void OnPerformed(PerformedContext filterContext) {

@@ -20,7 +20,9 @@ namespace Xpand.TestsLib.Blazor {
 
 	public class TestBlazorApplication : BlazorApplication, ITestApplication {
 		public TestBlazorApplication() {
-			// this.AlwaysUpdateOnDatabaseVersionMismatch().TakeFirst().Subscribe();
+			DatabaseUpdateMode=DatabaseUpdateMode.UpdateDatabaseAlways;
+			CheckCompatibilityType=CheckCompatibilityType.DatabaseSchema;
+			this.AlwaysUpdateOnDatabaseVersionMismatch().TakeFirst().Subscribe();
 		}
 
 		[SuppressMessage("ReSharper", "UnusedParameter.Local")]

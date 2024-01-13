@@ -3,250 +3,206 @@ using System.Linq;
 using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using akarnokd.reactive_extensions;
+using DevExpress.ExpressApp.Xpo;
+using Humanizer;
 using NUnit.Framework;
-using Shouldly;
-using Xpand.Extensions.Blazor;
+using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Conditional;
-using Xpand.Extensions.Reactive.Utility;
-using Xpand.Extensions.XAF.FrameExtensions;
-using Xpand.Extensions.XAF.XafApplicationExtensions;
+using Xpand.Extensions.Reactive.Filter;
+using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.Reactive.Transform.System;
+using Xpand.Extensions.XAF.Attributes;
+using Xpand.Extensions.XAF.NonPersistentObjects;
 using Xpand.TestsLib.Common;
 using Xpand.TestsLib.Common.Attributes;
+using Xpand.XAF.Modules.Blazor.Services;
 using Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects;
 using Xpand.XAF.Modules.JobScheduler.Hangfire.Tests.BO;
 using Xpand.XAF.Modules.JobScheduler.Hangfire.Tests.Common;
 using Xpand.XAF.Modules.Reactive.Services;
+using Xpand.XAF.Modules.Reactive.Services.Actions;
 
-namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests{
-    [NonParallelizable]
-    public class JobSchedulerTests:JobSchedulerCommonTest{
-        public override void Setup() {
-            base.Setup();
-            Timeout=TimeSpan.FromSeconds(15);
-        }
-
-        [TestCase(typeof(TestJob))]
-        // [TestCase(typeof(TestJobDI))]
-        [Test()][Order(0)]
-        public async Task Inject_BlazorApplication_In_JobType_Ctor(Type testJobType) {
-            using var jobs = TestJob.Jobs.TakeFirst().Test();
-            
-            await using var application = JobSchedulerModule().Application.ToBlazor();
-            
-            application.CommitNewJob(testJobType).Trigger(application.ServiceProvider);
-            
-            var testJob =jobs.AwaitDone(Timeout).Items.First();
-            
-            if (testJobType==typeof(TestJobDI)) {
-                testJob.Provider.ShouldNotBeNull();
-            }
-            else {
-                testJob.Provider.ShouldBeNull();
-            }
-            await WebHost.StopAsync();
-        }
+namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests {
+    public class JobSchedulerTests:JobSchedulerCommonTest {
         
-        [Test()]
-        [XpandTest()][Order(0)]
-        public async Task Commit_Objects_NonSecuredProvider() {
-            
-            await using var application = JobSchedulerModule().Application.ToBlazor();
-            using var testObserver = application.WhenProviderObject<JS>().TakeFirst().Test();
-            application.CommitNewJob(typeof(TestJobDI),nameof(TestJobDI.CreateObject)).Trigger(application.ServiceProvider);
-
-            testObserver.AwaitDone(Timeout).ItemCount.ShouldBe(1);
-
-            await WebHost.StopAsync();
-        }
-        [Test()]
-        [XpandTest()][Order(0)]
-        public async Task Commit_Objects_SecuredProvider() {
-            var application = NewBlazorApplication();
-            application.AddSecuredProviderModule<JobSchedulerModule>(typeof(JS));
-
-            using var testObserver = application.WhenProviderCommitted<JobState>().ToObjects()
-                .TakeFirst(worker => worker.State==WorkerState.Failed)
-                .Select(state => state.Reason).Test();
-            application.AddNonSecuredType(typeof(Job));
-            application.CommitNewJob(typeof(TestJobDI),nameof(TestJobDI.CreateObject)).Trigger(application.ServiceProvider);
-            
-
-            testObserver.AwaitDone(Timeout*3).ItemCount.ShouldBe(1);
-            var reason = testObserver.Items.First();
-            reason.ShouldContain("object is prohibited by security");
-
-            await WebHost.StopAsync();
-        }
-
-        [TestCase(nameof(TestJobDI.CreateObjectAnonymous))]
-        [TestCase(nameof(TestJobDI.CreateObjectNonSecured))]
-        [XpandTest()][Order(0)]
-        public async Task Commit_Objects_SecuredProvider_ByPass(string method) {
-            var application = NewBlazorApplication();
-            application.AddSecuredProviderModule<JobSchedulerModule>(typeof(JS));
-            
-            
-            using var testObserver = application.WhenProviderObject<JobState>()
-                .TakeFirst(worker => worker.State==WorkerState.Succeeded)
-                .Test();
-            application.AddNonSecuredType(typeof(Job));
-            application.CommitNewJob(typeof(TestJobDI),method).Trigger(application.ServiceProvider);
-            
-            testObserver.AwaitDone(Timeout).ItemCount.ShouldBe(1);
-
-            await WebHost.StopAsync();
-        }
-
-        [TestCase(false)] 
-        [TestCase(true)]
-        [XpandTest()][Order(100)]
-        public async Task Customize_Job_Schedule(bool newObject) {
-            await using var application = JobSchedulerModule().Application.ToBlazor();
-            var objectSpace = application.CreateObjectSpace();
-            
-            var scheduledJob = objectSpace.CreateObject<Job>();
-            scheduledJob.Id = "test";
-            using var testObserver = JobSchedulerService.CustomJobSchedule.Handle().SelectMany(args => args.Instance).Test();
-            objectSpace.CommitChanges();
-            
-            testObserver.ItemCount.ShouldBe(1);                           
-            testObserver.Items.Last().ShouldBe(scheduledJob);
-            if (!newObject) {
-                scheduledJob.Id = "t";
-                objectSpace.CommitChanges();
-                testObserver.ItemCount.ShouldBe(2);
-                testObserver.Items.Last().ShouldBe(scheduledJob);
-            }
-            
-            await WebHost.StopAsync();
-        }
-
+        [TestCase(typeof(TestJob),false)]
+        [TestCase(typeof(TestJobDI),true)]
+        [XpandTest(state:ApartmentState.MTA)]
+        public async Task Inject_BlazorApplication_In_JobType_Ctor(Type jobType,bool provider) 
+            => await StartJobSchedulerTest(application => application.AssertTriggerJob(jobType,
+                    nameof(TestJob.TestJobId), true).IgnoreElements()
+                .MergeToUnit(TestJob.Jobs.Take(1).If(_ => provider,
+                    job => job.Provider.Observe().WhenNotDefault(),
+                    job => job.Provider.Observe().WhenDefault()).ToUnit()).ReplayFirstTake()
+        );
         
         [Test()][Apartment(ApartmentState.MTA)]
         [XpandTest()][Order(200)]
-        public async Task Inject_PerformContext_In_JobType_Method() {
-            var jobs = TestJob.Jobs.TakeFirst().ReplayConnect();
-            await using var application = JobSchedulerModule().Application.ToBlazor();
-            
-            var job = application.CommitNewJob(typeof(TestJob),nameof(TestJob.TestJobId)).Trigger(application.ServiceProvider);
-
-            var testJob = await jobs.Timeout(Timeout);
+        public async Task Inject_PerformContext_In_JobType_Method()
+            => await StartJobSchedulerTest(application => application.AssertTriggerJob(typeof(TestJob),
+                    nameof(TestJob.TestJobId), true).IgnoreElements()
+                .MergeToUnit(TestJob.Jobs.WhenNotDefault(job => job.Context).Take(1).ToUnit()).ReplayFirstTake());
 
 
-            testJob.Context.ShouldNotBeNull();
-            testJob.Context.JobId().ShouldBe(job.Id);
-            var objectSpace = application.CreateObjectSpace();
-            job = objectSpace.GetObject(job);
-            job.JobMethods.Count.ShouldBeGreaterThan(0);
-            
-            await WebHost.StopAsync();
-        }
+        [Test()]
+        [XpandTest(state:ApartmentState.MTA)]
+        public async Task Commit_Objects_NonSecuredProvider()
+            => await StartJobSchedulerTest(application => application.AssertTriggerJob(typeof(TestJobDI),
+                    nameof(TestJobDI.CreateObject),true).IgnoreElements()
+                .MergeToUnit(application.WhenSetupComplete().SelectMany(_ => application.WhenProviderCommitted<JS>(emitUpdatingObjectSpace:true))
+                    .Select(t => t).Take(1).ToUnit()).ReplayFirstTake()
+                .ToUnit().Select(unit => unit), startupFactory: context => new TestStartup(context.Configuration,startup => startup.AddObjectSpaceProviders));
         
         
-        [Test][Apartment(ApartmentState.STA)]
-        [XpandTest()]
-        [Order(300)]
-        public async Task Schedule_Successful_job() {
-            await using var application = JobSchedulerModule().Application.ToBlazor();
-            var testObserver = WorkerState.Succeeded.Executed().TakeFirst().ReplayConnect();
-            
-            application.CommitNewJob().Trigger(application.ServiceProvider);
-            
-            var jobState = await testObserver.Timeout(Timeout);
-            
-            var objectSpace = application.CreateObjectSpace();
-            jobState=objectSpace.GetObjectByKey<JobState>(jobState.Oid);
-            var jobWorker = jobState.JobWorker;
-            jobWorker.State.ShouldBe(WorkerState.Succeeded);
-            
-            jobWorker.Executions.Count(state => state.State==WorkerState.Processing).ShouldBe(1);
-            jobWorker.Executions.Count(state => state.State==WorkerState.Failed).ShouldBe(0);
-            jobWorker.Executions.Count(state => state.State==WorkerState.Succeeded).ShouldBe(1);
-            await WebHost.StopAsync();
-        }
-
-        [XpandTest()][Test][Order(Int32.MaxValue)]
-        public async Task Pause_Job() {
-            await using var application = JobSchedulerModule().Application.ToBlazor();
-            using var jobsObserver = TestJob.Jobs.TakeFirst().Test();
-            application.CommitNewJob(modify:job => job.SetMemberValue(nameof(Job.IsPaused),true)).Trigger(application.ServiceProvider);
-
-            var itemCount = jobsObserver.AwaitDone(Timeout).ItemCount;
-            itemCount.ShouldBe(0);
-            await WebHost.StopAsync();
-        }
-
-        [XpandTest()][Test][Order(700)]
-        public async Task Resume_Job() {
-            await using var application = JobSchedulerModule().Application.ToBlazor();
-            var jobsCommitObserver = TestJob.Jobs.Timeout(Timeout).TakeFirst().Test();
-
-            application.CommitNewJob( ).Pause().Resume().Trigger(application.ServiceProvider);
-
-            jobsCommitObserver.AwaitDone(Timeout).ItemCount.ShouldBe(1);
-            await WebHost.StopAsync();
-            
-        }
-
-        [XpandTest()][Test][Order(800)]
-        public async Task JobPause_Action() {
-            await using var application = JobSchedulerModule().Application.ToBlazor();
-
-            var job = application.CommitNewJob();
-            var view = application.NewDetailView(job);
-            var viewWindow = application.CreateViewWindow();
-            viewWindow.SetView(view);
-
-            var action = viewWindow.Action<JobSchedulerModule>().PauseJob();
-            action.Active.ResultValue.ShouldBeTrue();
-            action.DoExecute(_ => new[]{job});
-            
-            job.IsPaused.ShouldBeTrue();
-            view.ObjectSpace.Refresh();
-            
-            action.Active.ResultValue.ShouldBeFalse();
-            viewWindow.Action<JobSchedulerModule>().ResumeJob().Active.ResultValue.ShouldBeTrue();
-            await WebHost.StopAsync();
-        }
-
-        [XpandTest()][Test][Order(900)]
-        public void JobResume_Action() {
-            using var application = JobSchedulerModule().Application.ToBlazor();
-
-            var job = application.CommitNewJob();
-            var view = application.NewDetailView(job);
-            var viewWindow = application.CreateViewWindow();
-            viewWindow.SetView(view);
-
-            var action = viewWindow.Action<JobSchedulerModule>().ResumeJob();
-            action.Active.ResultValue.ShouldBeFalse();
-            job.Pause();
-            view.ObjectSpace.Refresh();
-            action.Enabled.ResultValue.ShouldBeTrue();
-            action.DoExecute(_ => new[]{job});
-            
-            job.IsPaused.ShouldBeFalse();
-            view.ObjectSpace.Refresh();
-
-            action.Active.ResultValue.ShouldBeFalse();
-            viewWindow.Action<JobSchedulerModule>().PauseJob().Active.ResultValue.ShouldBeTrue();
-        }
-
+        [Test()]
+        [XpandTest(state:ApartmentState.MTA)]
+        public async Task Commit_Objects_SecuredProvider()
+            => await StartJobSchedulerTest(application =>
+                TestTracing.Handle<UserFriendlyObjectLayerSecurityException>().Take(1).IgnoreElements()
+                    .MergeToUnit(application.AssertTriggerJob(typeof(TestJobDI), nameof(TestJobDI.CreateObject), false).IgnoreElements())
+                    .MergeToUnit(application.WhenTabControl(typeof(Job))
+                        .Do(model => model.ActiveTabIndex = 1).Take(1).IgnoreElements())
+                    .MergeToUnit(application.AssertListViewHasObject<JobWorker>(worker
+                        => worker.State == WorkerState.Failed && worker.LastState.Reason.Contains("object is prohibited by security")))
+                    .ReplayFirstTake()
+        );
         
-        [TestCase(nameof(TestJob.FailMethodRetry),2)]
-        [XpandTest()][Order(1000)]
-        public async Task Schedule_Failed_Recurrent_job(string methodName,int executions) {
-            await using var application = JobSchedulerModule().Application.ToBlazor();
-            var testObserver = JobSchedulerService.JobState.TakeFirst(state => state.State==WorkerState.Failed).ReplayConnect();
-            application.CommitNewJob(methodName:methodName).Trigger(application.ServiceProvider);
+        [TestCase(nameof(TestJobDI.CreateObjectAnonymous))]
+        [TestCase(nameof(TestJobDI.CreateObjectNonSecured))]
+        [XpandTest(state:ApartmentState.MTA)]
+        public async Task Commit_Objects_SecuredProvider_ByPass(string method) 
+            => await StartJobSchedulerTest(application =>
+                application.AssertTriggerJob(typeof(TestJobDI), method, false).IgnoreElements()
+                    .MergeToUnit(application.WhenTabControl(typeof(Job))
+                        .Do(model => model.ActiveTabIndex = 1).Take(1).IgnoreElements())
+                    .MergeToUnit(application.AssertListViewHasObject<JobWorker>(worker
+                        => worker.State == WorkerState.Succeeded))
+                    .ReplayFirstTake()
+        );
 
-            var observer = await testObserver.Timeout(Timeout*3);
-
-            var objectSpace = application.CreateObjectSpace();
-            var jobState = objectSpace.GetObject(observer);
-            jobState.JobWorker.ExecutionsCount.ShouldBe(executions);
-            await WebHost.StopAsync();
+        [Test()] 
+        [XpandTest(state:ApartmentState.MTA)]
+        public async Task Customize_Job_Schedule()
+            => await StartJobSchedulerTest(application => application.AssertJobListViewNavigation()
+                .SelectMany(window => window.CreateJob(typeof(TestJobDI), nameof(TestJobDI.TestJobId))).ToUnit()
+                .Zip(JobSchedulerService.CustomJobSchedule.Handle().SelectMany(args => args.Instance).Take(1)).ToSecond()
+                .ToUnit().ReplayFirstTake());
+        
+        [Test]
+        [XpandTest(state:ApartmentState.MTA)]
+        public async Task Schedule_Successful_job() 
+            => await StartJobSchedulerTest(application => application.AssertTriggerJob(typeof(TestJobDI), nameof(TestJobDI.TestJobId),true).IgnoreElements()
+                .MergeToUnit(WorkerState.Succeeded.Executed().Where(state => state.JobWorker.State==WorkerState.Succeeded)
+                    .Where(jobState => jobState.JobWorker.Executions.DistinctBy(state => state.State).Count() == 3 && jobState.JobWorker.Executions.Select(state => state.State)
+                        .All(state => new[]{WorkerState.Enqueued,WorkerState.Processing, WorkerState.Succeeded}.Contains(state))).Take(1)
+                    .Select(state => state))
+                .ReplayFirstTake());
+        
+        [XpandTest(state:ApartmentState.MTA)]
+        [Test]
+        public async Task Trigger_Paused_Job()
+            => await StartJobSchedulerTest(application
+                => application.WhenMainWindowCreated()
+                    .SelectMany(_ => {
+                        var objectSpace = application.CreateObjectSpace();
+                        var job = objectSpace.CreateObject<Job>();
+                        job.Id = nameof(Trigger_Paused_Job);
+                        job.JobType = new ObjectType(typeof(TestJobDI));
+                        job.JobMethod = new ObjectString(nameof(TestJobDI.TestJobId));
+                        job.IsPaused = true;
+                        job.CommitChanges();
+                        job.Trigger(application.ServiceProvider);
+                        return application.Navigate(typeof(Job))
+                            .SelectMany(frame => frame.AssertListViewHasObject<Job>()
+                                .SelectMany(_ => frame.ListViewProcessSelectedItem()))
+                            .Zip(application.WhenTabControl(typeof(Job))).ToSecond().Do(model => model.ActiveTabIndex=1)
+                            .Zip(application.AssertListViewHasObject<JobWorker>(worker => worker.State==WorkerState.Skipped))
+                            .Assert();
+                    }).ToUnit().ReplayFirstTake());
+        
+        // [XpandTest(state:ApartmentState.MTA)][Test]
+        public async Task Trigger_Resume_Job()
+            => await StartJobSchedulerTest(application
+                => application.WhenMainWindowCreated()
+                    .SelectMany(_ => {
+                        var objectSpace = application.CreateObjectSpace();
+                        var job = objectSpace.CreateObject<Job>();
+                        job.Id = nameof(Trigger_Resume_Job);
+                        job.JobType = new ObjectType(typeof(TestJobDI));
+                        job.JobMethod = new ObjectString(nameof(TestJobDI.TestJobId));
+                        job.IsPaused = true;
+                        job.CommitChanges();
+                        job.IsPaused = false;
+                        job.CommitChanges();
+                        job.Trigger(application.ServiceProvider);
+                        return application.Navigate(typeof(Job))
+                            .SelectMany(frame => frame.AssertListViewHasObject<Job>()
+                                .SelectMany(_ => frame.ListViewProcessSelectedItem()))
+                            .Zip(application.WhenTabControl(typeof(Job))).ToSecond().Do(model => model.ActiveTabIndex = 1)
+                            .Zip(application.AssertListViewHasObject<JobWorker>(worker
+                                => worker.State == WorkerState.Succeeded))
+                            .Assert();
+                    }).ToUnit().ReplayFirstTake());
+        
+        [XpandTest(state:ApartmentState.MTA)]
+        [Test]
+        public async Task JobPause_Action() 
+            => await StartJobSchedulerTest(application
+                => application.WhenMainWindowCreated()
+                    .SelectMany(_ => {
+                        var objectSpace = application.CreateObjectSpace();
+                        var job = objectSpace.CreateObject<Job>();
+                        job.Id = nameof(Trigger_Paused_Job);
+                        job.JobType = new ObjectType(typeof(TestJobDI));
+                        job.JobMethod = new ObjectString(nameof(TestJobDI.TestJobId));
+                        job.CommitChanges();
+                        return application.Navigate(typeof(Job))
+                            .SelectMany(frame => frame.AssertListViewHasObject<Job>()
+                                .SelectMany(_ => frame.AssertSimpleAction(nameof(JobSchedulerService.PauseJob))
+                                    .SelectMany(action => action.Trigger(action.WhenDeactivated().Take(1)
+                                        .Zip(frame.AssertListViewHasObject<Job>(job1 => job1.IsPaused)).Take(1)
+                                        .Select(t => t)))))
+                            .Assert().Select(t => t);
+                    }).ToUnit().ReplayFirstTake());
+        
+        // [XpandTest(state:ApartmentState.MTA)][Test]
+        public async Task JobResume_Action() 
+            => await StartJobSchedulerTest(application
+                => application.WhenMainWindowCreated()
+                    .SelectMany(_ => {
+                        var objectSpace = application.CreateObjectSpace();
+                        var job = objectSpace.CreateObject<Job>();
+                        job.Id = nameof(Trigger_Paused_Job);
+                        job.JobType = new ObjectType(typeof(TestJobDI));
+                        job.JobMethod = new ObjectString(nameof(TestJobDI.TestJobId));
+                        job.IsPaused = true;
+                        job.CommitChanges();
+                        return application.Navigate(typeof(Job))
+                            .SelectMany(frame => frame.AssertListViewHasObject<Job>()
+                                .SelectMany(_ => frame.AssertSimpleAction(nameof(JobSchedulerService.ResumeJob))
+                                    .SelectMany(action => action.Trigger(action.WhenDeactivated().Take(1)
+                                        .Zip(frame.AssertListViewHasObject<Job>(job1 => !job1.IsPaused)).Take(1)
+                                        .Select(t => t)))))
+                            .Assert().Select(t => t);
+                    }).ToUnit().ReplayFirstTake());
+        
+        
+        // [XpandTest(state:ApartmentState.MTA)][Test]
+        public async Task Schedule_Failed_Recurrent_job() {
+            await StartJobSchedulerTest(application
+                => application.WhenMainWindowCreated()
+                    .SelectMany(_ => TestTracing.Handle<NotImplementedException>().Take(1)
+                        .MergeToUnit(application.AssertTriggerJob(typeof(TestJobDI), nameof(TestJobDI.FailMethodRetry), false))
+                        .MergeToUnit(application.WhenTabControl(typeof(Job)).Do(model => model.ActiveTabIndex = 1).Take(1)))
+                    .IgnoreElements()
+                    .MergeToUnit(1.Seconds().Interval().TakeUntilDisposed(application)
+                        .SelectMany(_ => application.WhenProviderObject<JobWorker>(ObjectModification.All)
+                        .Where(worker => worker.ExecutionsCount==2).Take(1)))
+                    .ReplayFirstTake()
+                );
+            
         }
+
     }
+    
 }
