@@ -57,42 +57,8 @@ jobs:
       inputs:
         targetPath: '$(System.DefaultWorkingDirectory)\bin\zip'
         artifact: 'Zip'
-        publishLocation: 'pipeline'       
-- job: WaitForSlowJobToStart
-  dependsOn: Build
-  condition: ne(variables['SkipTests'], 'True')
-  pool:
-    name: Self
-  variables:
-    - group: keys
-  steps:
-    - checkout: none
-    - powershell: |
-        $patToken = "$(AzureToken)"
-        $organization = "$(System.TeamFoundationCollectionUri)"
-        $project = "$(System.TeamProject)"
-        $pipelineId = "$(Build.BuildId)"
-        Write-Host "pipelineId=$pipelineId"
-        $headers = @{
-          Authorization = "Bearer $patToken"
-        }
-        $jobStarted = $false
-        while (-not $jobStarted) {
-          $url = $organization + $project + "/_apis/build/builds/" + $pipelineId + "/timeline?api-version=6.0"
-          Write-Host "url=$url"
-          $response = Invoke-RestMethod -Uri $url -Method Get -Headers $headers
-          $jobStatus = ($response.records|Where-Object{$_.name -eq "RunSlowTests"}).state
-          if ($jobStatus -eq "inProgress") {
-            $jobStarted = $true
-          } else {
-            Write-Host "Wait for RunSlowTests"
-            Start-Sleep -Seconds 1
-          }
-        }
-        Write-Host "Slow tests have started."
-      displayName: 'Signal Slow Tests Start'
-    
-- job: RunSlowTests
+        publishLocation: 'pipeline'           
+- job: Tests
   dependsOn: Build
   condition: ne(variables['SkipTests'], 'True')
   strategy:
@@ -101,30 +67,6 @@ jobs:
         TestAssembly: '**/Xpand.XAF.Modules.ModelMapper.Tests.dll'
       OfficeDocumentStyleManager:
         TestAssembly: '**/Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.dll'
-  pool:
-    name: Self
-  variables:
-    - group: keys
-  steps:
-    - checkout: none
-    - download: current
-      artifact: CompiledApp
-    - task: VSTest@2
-      displayName: 'Run Tests'
-      inputs:
-        minimumExpectedTests: "1"
-        failOnMinTestsNotRun: true
-        testSelector: 'testAssemblies'
-        testAssemblyVer2: |
-          $(TestAssembly)
-          !**\*TestAdapter.dll
-          !**\obj\**
-        searchFolder: '$(Pipeline.Workspace)/CompiledApp'
-- job: RunNormalTests
-  dependsOn: WaitForSlowJobToStart
-  condition: ne(variables['SkipTests'], 'True')
-  strategy:
-    matrix:
       AutoCommit:
         TestAssembly: '**/Xpand.XAF.Modules.AutoCommit.Tests.dll'
       BulkObjectUpdate:
@@ -186,8 +128,8 @@ jobs:
         searchFolder: '$(Pipeline.Workspace)/CompiledApp'
 - job: PostTestTasks
   dependsOn:
-    - RunNormalTests
-  condition: or(succeeded(), eq(dependencies.RunNormalTests.result, 'Skipped'))
+    - Tests
+  condition: or(succeeded(), eq(dependencies.Tests.result, 'Skipped'))
   pool:
     name: Self
   variables:

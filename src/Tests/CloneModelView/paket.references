@@ -9,7 +9,7 @@ Xpand.Patcher
 akarnokd.reactive_extensions
 Microsoft.CodeAnalysis
 Microsoft.NET.Test.Sdk
-DevExpress.ExpressApp.Win
+DevExpress.ExpressApp.Win.All
 Microsoft.Reactive.Testing
 System.Threading.Tasks.Dataflow
 System.Text.Json
