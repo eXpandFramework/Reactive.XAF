@@ -21,15 +21,6 @@
     <NoWarn>1701;1702;cs8002 </NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="hangfire.core" Version="1.7.30" />
-    <PackageReference Include="hangfire.aspnetcore" Version="1.7.30" />
-    <PackageReference Include="hangfire.memorystorage" Version="1.7.0" />
-    <PackageReference Include="DevExpress.ExpressApp.Blazor.All" Version="23.2.3" />
-    <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.7" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
-    <PackageReference Include="Microsoft.Data.SqlClient" Version="4.1.0" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\TestApplication.Blazor.Server\TestApplication.Blazor.Server.csproj" />
     <ProjectReference Include="..\TestsLib.Blazor\Xpand.TestsLib.Blazor.csproj" />
   </ItemGroup>

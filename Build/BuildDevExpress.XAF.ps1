@@ -113,23 +113,29 @@ function SyncrhonizePaketVersion {
     Set-Location $root
     $pakets=Invoke-PaketShowInstalled
     (Get-MSBuildProjects "$root\src\Tests\EasyTests\")+(Get-ChildItem "$root\src\" "*Blazor*.csproj" -Recurse)|ForEach-Object{
-        $_.Fullname
-        [xml]$csproj=Get-XmlContent $_
-        Get-PackageReference $_|Where-Object{$_.Include -notmatch "Xpand|DevExpress"} |ForEach-Object{
-            $id=$_.Include
-            $version=$_.Version
-            $paket=$pakets|Where-Object{$_.Id -eq $id}
-            if ($paket){
-                if ($paket.Version -ne $version){
-                    $package=$csproj.Project.ItemGroup.PackageReference|Where-Object{$_.Include -eq $id}
-                    $package.version=$paket.version
+        $project=$_.Fullname
+        if ($project -notlike "*Tests\TestApplication.Blazor.Server\TestApplication.Blazor.Server.csproj"){
+            [xml]$csproj=Get-XmlContent $_
+            Get-PackageReference $_|Where-Object{$_.Include -notmatch "Xpand|DevExpress"} |ForEach-Object{
+                $id=$_.Include
+                $version=$_.Version
+                $paket=$pakets|Where-Object{$_.Id -eq $id}
+                if ($paket){
+                    if ($paket.Version -ne $version){
+                        $package=$csproj.Project.ItemGroup.PackageReference|Where-Object{$_.Include -eq $id}
+                        $package.version=$paket.version
+                    }
+                }
+                else{
+                    "$Id not found"
                 }
             }
-            else{
-                "$Id not found"
-            }
+            $csproj|Save-Xml $_.Fullname
         }
-        $csproj|Save-Xml $_.Fullname
+        else{
+            $_
+        }
+        
     }
 }
 

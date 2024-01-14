@@ -29,13 +29,10 @@
         <dependency id="Fasterflect.Xpand" version="2.0.7" />
         <dependency id="System.Text.Json" version="7.0.2" />
         <dependency id="System.Reactive" version="6.0" />
-        <dependency id="Hangfire.AspNetCore" version="1.7.34" />
+        <dependency id="Hangfire.AspNetCore" version="1.7.35" />
         <dependency id="Xpand.Patcher" version="3.0.24" />
         <dependency id="System.Threading.Tasks.Dataflow" version="7.0" />
-        <dependency id="DevExpress.ExpressApp.Blazor" version="23.2.3" />
-        <dependency id="DevExpress.ExpressApp.Validation" version="23.2.3" />
-        <dependency id="DevExpress.ExpressApp.Validation.Blazor" version="23.2.3" />
-        <dependency id="DevExpress.ExpressApp.Xpo" version="23.2.3" />
+        <dependency id="DevExpress.ExpressApp.Blazor.All" version="23.2.3" />
         <dependency id="Xpand.VersionConverter" version="4.232.1.14" />
       </group>
     </dependencies>

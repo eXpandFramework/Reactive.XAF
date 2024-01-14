@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <Deterministic>false</Deterministic>
     <AssemblyVersion>1.0.*</AssemblyVersion>
     <FileVersion>1.0.0.0</FileVersion>
@@ -15,7 +15,6 @@
     <DebugType>full</DebugType>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
-    <OutputPath>..\..\..\..\..\bin\</OutputPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DefineConstants>TRACE;DEBUG;XAF232</DefineConstants>
@@ -33,6 +32,9 @@
     <Compile Remove="Office\**" />
     <EmbeddedResource Remove="Office\**" />
     <None Remove="Office\**" />
+    <Compile Remove="JobScheduler\**" />
+    <EmbeddedResource Remove="JobScheduler\**" />
+    <None Remove="JobScheduler\**" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="JobScheduler\JobScheduler.xafml" />

@@ -5,3 +5,4 @@ System.Reactive
 Hangfire.AspNetCore
 Xpand.Patcher
 System.Threading.Tasks.Dataflow
+DevExpress.ExpressApp.Blazor.All

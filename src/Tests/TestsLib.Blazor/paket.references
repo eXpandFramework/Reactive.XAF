@@ -8,3 +8,11 @@ DevExpress.Persistent.BaseImpl.Xpo
 Microsoft.Reactive.Testing
 System.Threading.Tasks.Dataflow
 akarnokd.reactive_extensions
+DevExpress.ExpressApp.EasyTest.BlazorAdapter
+DevExpress.EasyTest
+DevExpress.ExpressApp.Blazor
+Microsoft.AspNetCore
+Microsoft.AspNetCore.Hosting
+Microsoft.Extensions.Hosting
+DevExpress.ExpressApp.Blazor.All
+Microsoft.Data.SqlClient

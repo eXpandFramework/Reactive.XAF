@@ -15,7 +15,6 @@
     <DebugType>full</DebugType>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
-    <OutputPath>..\..\..\..\..\bin\</OutputPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DefineConstants>TRACE;DEBUG;XAF232</DefineConstants>

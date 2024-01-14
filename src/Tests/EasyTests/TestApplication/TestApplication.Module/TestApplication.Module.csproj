@@ -13,7 +13,6 @@
     <DebugType>full</DebugType>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
-    <OutputPath>..\..\..\..\..\bin\</OutputPath>
   </PropertyGroup>
   <PropertyGroup>
     <DefineConstants>TRACE;DEBUG;XAF232</DefineConstants>

@@ -14,7 +14,7 @@
     <copyright>eXpandFramework.com</copyright>
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Xpand.TestsLib.Blazor, 23.2.3</tags>
     <dependencies>
-      <group targetFramework="net6.0">
+      <group targetFramework="net8.0">
         <dependency id="Xpand.Extensions" version="4.232.1.14" />
         <dependency id="Xpand.Extensions.Blazor" version="4.232.1.14" />
         <dependency id="Xpand.Extensions.Reactive" version="4.232.1.14" />
@@ -33,18 +33,21 @@
         <dependency id="DevExpress.Persistent.BaseImpl.Xpo" version="23.2.3" />
         <dependency id="Microsoft.Reactive.Testing" version="5.0" />
         <dependency id="System.Threading.Tasks.Dataflow" version="7.0" />
+        <dependency id="akarnokd.reactive_extensions" version="0.0.27-alpha" />
         <dependency id="DevExpress.ExpressApp.EasyTest.BlazorAdapter" version="23.2.3" />
         <dependency id="DevExpress.EasyTest" version="23.2.3" />
         <dependency id="DevExpress.ExpressApp.Blazor" version="23.2.3" />
         <dependency id="Microsoft.AspNetCore" version="2.2" />
         <dependency id="Microsoft.AspNetCore.Hosting" version="2.2.7" />
         <dependency id="Microsoft.Extensions.Hosting" version="6.0" />
+        <dependency id="DevExpress.ExpressApp.Blazor.All" version="23.2.3" />
+        <dependency id="Microsoft.Data.SqlClient" version="4.1" />
       </group>
     </dependencies>
   </metadata>
   <files>
-    <file src="Xpand.TestsLib.Blazor.dll" target="lib\net6.0\Xpand.TestsLib.Blazor.dll" />
-    <file src="Xpand.TestsLib.Blazor.pdb" target="lib\net6.0\Xpand.TestsLib.Blazor.pdb" />
+    <file src="Xpand.TestsLib.Blazor.dll" target="lib\net8.0\Xpand.TestsLib.Blazor.dll" />
+    <file src="Xpand.TestsLib.Blazor.pdb" target="lib\net8.0\Xpand.TestsLib.Blazor.pdb" />
     <file src="..\build\Targets\CopySymbols.targets" target="build\Xpand.TestsLib.Blazor.targets" />
     <file src="..\build\Targets\CopySymbols.ps1" target="build\CopySymbols.ps1" />
   </files>

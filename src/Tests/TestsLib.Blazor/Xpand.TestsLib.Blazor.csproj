@@ -8,7 +8,7 @@
     <DebugSymbols>true</DebugSymbols>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
-    <OutputPath>..\..\..\bin\net8.0</OutputPath>
+    <OutputPath>..\..\..\bin</OutputPath>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <AppendTargetFrameworkToOutputPath>False</AppendTargetFrameworkToOutputPath>
     <DebugType>full</DebugType>
@@ -31,16 +31,6 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\TestApplication.Blazor.Server\TestApplication.Blazor.Server.csproj" />
-    <PackageReference Include="DevExpress.ExpressApp.EasyTest.BlazorAdapter" Version="23.2.3" />
-    <PackageReference Include="DevExpress.EasyTest" Version="23.2.3" />
-    <PackageReference Include="DevExpress.ExpressApp.Blazor" Version="23.2.3" />
-    <PackageReference Include="Microsoft.AspNetCore" Version="2.2" />
-    <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.7" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0" />
-    <PackageReference Include="DevExpress.ExpressApp.Blazor.All" Version="23.2.3" />
-    <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.7" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
-    <PackageReference Include="Microsoft.Data.SqlClient" Version="4.1.0" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Xpand.Extensions">

@@ -16,3 +16,10 @@ Microsoft.AspNetCore.Http.Features
 DevExpress.ExpressApp.Win
 Microsoft.Reactive.Testing
 System.Threading.Tasks.Dataflow
+hangfire.aspnetcore
+hangfire.core
+hangfire.memorystorage
+DevExpress.ExpressApp.Blazor.All
+Microsoft.AspNetCore.Hosting
+Microsoft.Extensions.Hosting
+Microsoft.Data.SqlClient
