@@ -12,9 +12,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
     public  class ModelMapperType{
         public Type Type{ get; }
         public Type TypeToMap{ get; }
-        public override string ToString(){
-            return $"{ModelName}, {Type.Name}, {TypeToMap.Name}";
-        }
+        public override string ToString() => $"{ModelName}, {Type.Name}, {TypeToMap.Name}";
 
         public ModelMapperType(Type type, Type typeToMap, string modelName, string additionalPropertiesCode){
             AdditionalPropertiesCode = additionalPropertiesCode;
@@ -22,10 +20,11 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             Type = type;
             TypeToMap = typeToMap;
             BaseTypeFullNames=new List<string>();
-            CustomAttributeData = new List<ModelMapperCustomAttributeData>(type.GetCustomAttributesData()
-                .Where(data => data.AttributeType.Attributes<AttributeUsageAttribute>().All(attribute =>
-                    attribute.ValidOn == (AttributeTargets.All | AttributeTargets.Interface)))
-                .ToModelMapperConfigurationData());
+            CustomAttributeData = [..type.GetCustomAttributesData()
+                    .Where(data => data.AttributeType.Attributes<AttributeUsageAttribute>().All(attribute =>
+                        attribute.ValidOn == (AttributeTargets.All | AttributeTargets.Interface)))
+                    .ToModelMapperConfigurationData()
+            ];
         }
 
         public List<ModelMapperCustomAttributeData> CustomAttributeData{ get; }
@@ -36,12 +35,12 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
     }
 
     public sealed class ModelMapperPropertyInfo : PropertyInfo{
-        readonly List<ModelMapperCustomAttributeData> _customAttributeData = new List<ModelMapperCustomAttributeData>();
+        readonly List<ModelMapperCustomAttributeData> _customAttributeData = new();
 
 
         private ModelMapperPropertyInfo(string name, Type propertyType, Type declaringType, bool canRead, bool canWrite){
             Name = name;
-            if (name == "Diagrams"){
+            if (name == "DataBindings"){
 
             }
             PropertyType = propertyType;
@@ -51,19 +50,18 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         }
 
         public ModelMapperPropertyInfo(PropertyInfo propertyInfo) : this(propertyInfo.Name,
-            propertyInfo.PropertyType, propertyInfo.DeclaringType, CustomAttributeDatas(propertyInfo)){
+            propertyInfo.PropertyType, propertyInfo.DeclaringType, CustomAttributeData(propertyInfo)){
         }
 
-        private static IEnumerable<ModelMapperCustomAttributeData> CustomAttributeDatas(PropertyInfo propertyInfo){
-            return propertyInfo is ModelMapperPropertyInfo mapperPropertyInfo
-                ? mapperPropertyInfo._customAttributeData
-                : propertyInfo.GetCustomAttributesData().ToModelMapperConfigurationData();
-        }
+        private static IEnumerable<ModelMapperCustomAttributeData> CustomAttributeData(PropertyInfo propertyInfo) 
+            => propertyInfo is ModelMapperPropertyInfo mapperPropertyInfo
+            ? mapperPropertyInfo._customAttributeData
+            : propertyInfo.GetCustomAttributesData().ToModelMapperConfigurationData();
 
-        public ModelMapperPropertyInfo(string name, Type propertyType,Type declaringType,IEnumerable<ModelMapperCustomAttributeData> customAttributeDatas = null) : this(name,
+        public ModelMapperPropertyInfo(string name, Type propertyType,Type declaringType,IEnumerable<ModelMapperCustomAttributeData> customAttributeData = null) : this(name,
             propertyType, declaringType, true, true){
-            customAttributeDatas ??= Enumerable.Empty<ModelMapperCustomAttributeData>();
-            _customAttributeData.AddRange(customAttributeDatas);
+            customAttributeData ??= Enumerable.Empty<ModelMapperCustomAttributeData>();
+            _customAttributeData.AddRange(customAttributeData);
             if (propertyType != typeof(string)){
                 _customAttributeData.RemoveAll(data => typeof(LocalizableAttribute).IsAssignableFrom(data.AttributeType));
             }
@@ -83,49 +81,29 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
 
         public override Type ReflectedType => throw new NotImplementedException();
 
-        public override string ToString(){
-            return $"{Name}-{DeclaringType}";
-        }
+        public override string ToString() => $"{Name}-{DeclaringType}";
 
-        public override MethodInfo[] GetAccessors(bool nonPublic){
-            throw new NotImplementedException();
-        }
+        public override MethodInfo[] GetAccessors(bool nonPublic) => throw new NotImplementedException();
 
-        public override MethodInfo GetGetMethod(bool nonPublic){
-            throw new NotImplementedException();
-        }
+        public override MethodInfo GetGetMethod(bool nonPublic) => throw new NotImplementedException();
 
-        public new IList<ModelMapperCustomAttributeData> GetCustomAttributesData(){
-            return _customAttributeData;
-        }
+        public new IList<ModelMapperCustomAttributeData> GetCustomAttributesData() => _customAttributeData;
 
-        public override ParameterInfo[] GetIndexParameters(){
-            throw new NotImplementedException();
-        }
+        public override ParameterInfo[] GetIndexParameters() => throw new NotImplementedException();
 
-        public override MethodInfo GetSetMethod(bool nonPublic){
-            throw new NotImplementedException();
-        }
+        public override MethodInfo GetSetMethod(bool nonPublic) => throw new NotImplementedException();
 
-        public override object GetValue(object obj, BindingFlags invokeAttr, Binder binder, object[] index,CultureInfo culture){
-            throw new NotImplementedException();
-        }
+        public override object GetValue(object obj, BindingFlags invokeAttr, Binder binder, object[] index,CultureInfo culture) => throw new NotImplementedException();
 
         public override void SetValue(object obj, object value, BindingFlags invokeAttr, Binder binder, object[] index,CultureInfo culture){
             throw new NotImplementedException();
         }
 
-        public override object[] GetCustomAttributes(Type attributeType, bool inherit){
-            throw new NotImplementedException($"Use the {nameof(GetCustomAttributesData)} method");
-        }
+        public override object[] GetCustomAttributes(Type attributeType, bool inherit) => throw new NotImplementedException($"Use the {nameof(GetCustomAttributesData)} method");
 
-        public override object[] GetCustomAttributes(bool inherit){
-            throw new NotImplementedException();
-        }
+        public override object[] GetCustomAttributes(bool inherit) => throw new NotImplementedException();
 
-        public override bool IsDefined(Type attributeType, bool inherit){
-            throw new NotImplementedException();
-        }
+        public override bool IsDefined(Type attributeType, bool inherit) => throw new NotImplementedException();
 
 
         public void RemoveAttributeData(ModelMapperCustomAttributeData customAttributeData){
@@ -137,22 +115,20 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         }
 
         public void RemoveAttribute(Type type){
-            var attributeData = _customAttributeData.FirstOrDefault(_ => _.AttributeType==type);
+            var attributeData = _customAttributeData.FirstOrDefault(data => data.AttributeType==type);
             _customAttributeData.Remove(attributeData);
         }
     }
 
-    public class ModelMapperCustomAttributeData:CustomAttributeData{
+    public class ModelMapperCustomAttributeData(
+        Type attributeType,
+        params CustomAttributeTypedArgument[] constructorArguments)
+        : CustomAttributeData {
+        public override IList<CustomAttributeTypedArgument> ConstructorArguments{ get; } = new List<CustomAttributeTypedArgument>(constructorArguments);
+        public new Type AttributeType{ get; } = attributeType;
 
-        public ModelMapperCustomAttributeData(Type attributeType, params  CustomAttributeTypedArgument[] constructorArguments){
-            AttributeType = attributeType;
-            ConstructorArguments = new List<CustomAttributeTypedArgument>(constructorArguments);
-        }
-
-        public override IList<CustomAttributeTypedArgument> ConstructorArguments{ get; }
-        public new Type AttributeType{ get; }
         public override string ToString(){
-            return $"{AttributeType.FullName}-({string.Join(",",ConstructorArguments.Select(_ => _.Value))})";
+            return $"{AttributeType.FullName}-({string.Join(",",ConstructorArguments.Select(argument => argument.Value))})";
         }
     }
 }

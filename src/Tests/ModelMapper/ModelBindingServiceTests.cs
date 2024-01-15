@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Windows.Forms;
 using DevExpress.DashboardWin;
 using DevExpress.ExpressApp;
@@ -178,8 +179,10 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             
         }
 
-        [XpandTest(LongTimeout)][Ignore("fail on .NET8")]
+        [XpandTest(LongTimeout)]
+        // [Ignore("fail on .NET8")]
         [TestCase(nameof(Platform.Win),new[]{PredefinedMap.XafLayoutControl },new[]{typeof(XafLayoutControl)},new Type[0],1)]
+        
         public async Task Bind_DetailView_Maps(string platformName,PredefinedMap[] predefinedMaps,Type[] controlTypes,Type[] extraModules,int boundTypes) {
             var platform = GetPlatform(platformName);
             controlTypes.ToObservable().Do(type => Assembly.LoadFile(type.Assembly.Location)).Subscribe();

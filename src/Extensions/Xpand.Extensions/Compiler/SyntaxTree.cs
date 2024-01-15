@@ -9,7 +9,15 @@ namespace Xpand.Extensions.Compiler{
     public static class CodeCompiler {
         public static MemoryStream Compile(this SyntaxTree syntaxTree, params string[] references){
             var assemblies = AppDomain.CurrentDomain.GetAssemblies().Where(assembly =>
-                new[]{"mscorlib", "netstandard", "System.Collections", "System.Runtime","System.Drawing","System.Private.CoreLib"}.Contains(assembly.GetName().Name));
+                new[]{
+                    // "mscorlib",
+                    // "netstandard", 
+                    // "System.Collections", 
+                    "System.Runtime",
+                    // "System.Drawing",
+                    "System.Private.CoreLib"
+                    
+                }.Contains(assembly.GetName().Name));
             var metadataReferences = assemblies.Select(assembly => assembly.Location).Concat(references)
                 .Select(path => MetadataReference.CreateFromFile(path))
                 .ToArray();

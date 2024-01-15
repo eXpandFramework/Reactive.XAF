@@ -11,42 +11,34 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using Xpand.Extensions.EventArgExtensions;
 using Xpand.Extensions.LinqExtensions;
+using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.ReflectionExtensions;
 using Xpand.Extensions.StringExtensions;
 using Xpand.XAF.Modules.ModelMapper.Configuration;
 
 namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
     [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
-    public class ModelMapperServiceAttribute : Attribute{
-        public ModelMapperServiceAttribute( string hashCode){
-            HashCode = hashCode;
-        }
-        public string HashCode{ get; }
+    public class ModelMapperServiceAttribute(string hashCode) : Attribute {
+        public string HashCode{ get; } = hashCode;
     }
 
     [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
-    public class ModelMapperTypeAttribute : Attribute{
-        public ModelMapperTypeAttribute(string mappedType, string mappedAssembly, string assemblyHashCode, string configurationHashCode){
-            MappedAssembly = mappedAssembly;
-            ConfigurationHashCode = configurationHashCode;
-            MappedType = mappedType;
-            AssemblyHashCode = assemblyHashCode;
-        }
+    public class ModelMapperTypeAttribute(
+        string mappedType,
+        string mappedAssembly,
+        string assemblyHashCode,
+        string configurationHashCode)
+        : Attribute {
+        public string MappedAssembly{ get; } = mappedAssembly;
 
-        public string MappedAssembly{ get; }
-
-        public string AssemblyHashCode{ get; }
-        public string MappedType{ get; }
-        public string ConfigurationHashCode{ get; }
+        public string AssemblyHashCode{ get; } = assemblyHashCode;
+        public string MappedType{ get; } = mappedType;
+        public string ConfigurationHashCode{ get; } = configurationHashCode;
     }
 
     [AttributeUsage(AttributeTargets.Interface|AttributeTargets.Class)]
-    public class ModelMapLinkAttribute:Attribute{
-        public ModelMapLinkAttribute(string linkedTypeName){
-            LinkedTypeName = linkedTypeName;
-        }
-
-        public string LinkedTypeName{ get; }
+    public class ModelMapLinkAttribute(string linkedTypeName) : Attribute {
+        public string LinkedTypeName{ get; } = linkedTypeName;
     }
 
     public class Result<T>{
@@ -59,7 +51,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         private static Subject<GenericEventArgs<ModelMapperType>> _customizeTypes;
         
         static ((string key, string code,bool map)[] code, IEnumerable<string> references) ModelCode(this Type type,IModelMapperConfiguration configuration=null){
-            var propertyInfos = type.PropertyInfos().Concat(AdditionalTypesList.Select(_ => _.GetRealType()).SelectMany(_ => _.PropertyInfos())).ToArray();
+            var propertyInfos = type.PropertyInfos().Concat(AdditionalTypesList.Select(t => t.GetRealType()).SelectMany(t => t.PropertyInfos())).ToArray();
             var additionalTypes = propertyInfos.AdditionalTypes(type)
                 .Concat(AdditionalTypesList).Distinct().ToArray();
             var additionalTypesCode = type.AdditionalTypesCode( additionalTypes);
@@ -69,7 +61,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             var modelMappersTypeName = $"IModel{containerName}{ModelMappersNodeName}";
             var modelMappersInterfaceCode = ModelMappersInterfaceCode( modelMappersTypeName);
             var typeCode = type.TypeCode(mapName, modelMappersTypeName, configuration);
-            var code = new []{typeCode,containerCode,modelMappersInterfaceCode}.Concat(additionalTypesCode).Where(_ => _!=default).ToArray();
+            
+            var code = new []{typeCode,containerCode,modelMappersInterfaceCode}.Concat(additionalTypesCode).Where(t => t!=default).ToArray();
             var infos = propertyInfos.Concat(type.PublicProperties()).Distinct().ToArray();
             var references = type.References(infos,additionalTypes);
             return (code,references);
@@ -116,20 +109,20 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
 
         private static (string key,string code,bool map)[] AdditionalTypesCode(this Type type, Type[] additionalTypes){
             var mappedTypes = new HashSet<Type>(new[]{type});
-            var additionalTypesCode = additionalTypes.Where(_ => !mappedTypes.Contains(_))
-                .SelectMany(_ => {
-                    var modelCode = (_,type).ModelCode();
-                    var realType = _.GetRealType();
+            var additionalTypesCode = additionalTypes.Where(t => !mappedTypes.Contains(t))
+                .SelectMany(t => {
+                    var modelCode = (t,type).ModelCode();
+                    var realType = t.GetRealType();
                     (string, string,bool) modelListCode = (null, null,false);
-                    if (realType != _){
+                    if (realType != t){
                         mappedTypes.AddMappedType(realType);
                         if (!realType.IsGenericType||realType.IsNullableType()) {
                             modelListCode = ($"{modelCode.key}s",$"{Environment.NewLine}public interface {(realType,type).ModelName()}s:{typeof(IModelNode).FullName},{typeof(IModelList).FullName}<{modelCode.key}>{{}}",false);
                         }
                     }
                     return new[]{modelCode,modelListCode};
-                }).Where(_ => _!=default);
-            return additionalTypesCode.OrderBy(_ => _.Item1).ToArray();
+                }).Where(t => t!=default);
+            return additionalTypesCode.OrderBy(t => t.Item1).ToArray();
         }
 
         private static void AddMappedType(this HashSet<Type> mappedTypes,Type type){
@@ -211,10 +204,10 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             }
             if (propertiesCode == null){
                 var propertyInfos = typeToCode.PublicProperties()
-                    .Where(_ => mappedTypes == null || !mappedTypes.Contains(_.PropertyType))
-                    .Select(_ => {
-                        mappedTypes?.AddMappedType(_.PropertyType);
-                        return _;
+                    .Where(info => mappedTypes == null || !mappedTypes.Contains(info.PropertyType))
+                    .Select(info => {
+                        mappedTypes?.AddMappedType(info.PropertyType);
+                        return info;
                     })
                     .Where(info => info.PropertyType!=data.rootType)
                     .ToModelMapperPropertyInfo().ToArray();
@@ -254,11 +247,11 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                 : $"IModel{data.typeToCode.Namespace?.Replace(".", "")}_{data.typeToCode.Name}";
 
         private static IObservable<(string code, IEnumerable<string> references)> ModelCode(this IObservable<IModelMapperConfiguration> source) 
-            => source.AssemblyCode().Concat(source.SelectMany(_ => Observable.Start(() => {
-                        var code = _.TypeToMap.ModelCode(_);
-                        return code.code.Select(__ => (code: __, code.references)).ToArray();
+            => source.AssemblyCode().Concat(source.SelectMany(configuration => Observable.Start(() => {
+                        var code = configuration.TypeToMap.ModelCode(configuration);
+                        return code.code.Select(t => (code: t, code.references)).ToArray();
                     },ModelCodeScheduler))
-                    .SelectMany(_ => _)
+                    .SelectMany()
                     .RemoveDuplicates())
                 .Aggregate((acc, cu) => {
                     var code = string.Join(Environment.NewLine, acc.code, cu.code);
@@ -266,20 +259,20 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                 }).TraceModelMapper();
 
         private static IObservable<(string code, IEnumerable<string> references)> AssemblyCode(this IObservable<IModelMapperConfiguration> source) 
-            => source.Select(_ => _.TypeToMap.AssemblyAttributesCode(_))
+            => source.Select(configuration => configuration.TypeToMap.AssemblyAttributesCode(configuration))
                 .Aggregate((acc, curr) => {
                     acc += curr;
                     return acc;
                 })
                 .Concat(Observable.Return(AssemblyVersionCode()))
-                .Select(_=>(code:_,references:new[]{typeof(ModelMapperModule).Assembly.Location}.AsEnumerable()));
+                .Select(s=>(code:s,references:new[]{typeof(ModelMapperModule).Assembly.Location}.AsEnumerable()));
 
         private static IObservable<(string code, IEnumerable<string> references)> RemoveDuplicates(this 
             IObservable<((string key, string code, bool map) code, IEnumerable<string> references)> modelCode) 
             => modelCode.ToEnumerable()
-                .GroupBy(_ => _.code.key).SelectMany(_ => _.OrderByDescending(tuple => tuple.code.map).Take(1))
+                .GroupBy(t => t.code.key).SelectMany(t => t.OrderByDescending(tuple => tuple.code.map).Take(1))
                 .ToObservable(ImmediateScheduler.Instance)
-                .Select(_ => (_.code.code, _.references));
+                .Select(t => (t.code.code, t.references));
 
         public static IScheduler ModelCodeScheduler{ get; set; }=Scheduler.Default;
     }

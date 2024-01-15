@@ -272,9 +272,9 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             using var module = new[]{PredefinedMap.PivotGridControl, PredefinedMap.GridView}.Extend();
             module.ApplicationModulesManager
                 .TakeFirst()
-                .SelectMany(_ => _.manager.ExtendMap(PredefinedMap.GridView))
-                .Subscribe(_ => {
-                    _.extenders.Add(_.targetInterface,typeof(IModelPredefinedMapExtension));
+                .SelectMany(t => t.manager.ExtendMap(PredefinedMap.GridView))
+                .Subscribe(t => {
+                    t.extenders.Add(t.targetInterface,typeof(IModelPredefinedMapExtension));
                 });
             using var application = DefaultModelMapperModule( Platform.Win, module).Application;
             var modelListView = application.Model.Views.OfType<IModelListView>().First();
@@ -293,9 +293,9 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             using var module = new[]{predefinedMap}.Extend();
             module.ApplicationModulesManager
                 .TakeFirst()
-                .SelectMany(_ => _.manager.ExtendMap(predefinedMap))
-                .Subscribe(_ => {
-                    _.extenders.Add(_.targetInterface,typeof(IModelPredefinedMapExtension));
+                .SelectMany(t => t.manager.ExtendMap(predefinedMap))
+                .Subscribe(t => {
+                    t.extenders.Add(t.targetInterface,typeof(IModelPredefinedMapExtension));
                 });
             using var application = DefaultModelMapperModule( platform, module).Application;
             var nodeByPath = application.Model.GetNodeByPath(MMDetailViewTestItemNodePath);

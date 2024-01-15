@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <OutputPath>..\..\..\bin</OutputPath>
-    <TargetFramework>net6.0-windows7.0</TargetFramework>
+    <OutputPath>..\..\..\bin\net8.0</OutputPath>
+    <TargetFramework>net8.0-windows</TargetFramework> 
     <UseWindowsForms>true</UseWindowsForms>
     <AppendTargetFrameworkToOutputPath>False</AppendTargetFrameworkToOutputPath>
     <LangVersion>latest</LangVersion>

@@ -17,6 +17,7 @@ using DevExpress.Persistent.Base;
 using Fasterflect;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.EventArgExtensions;
+using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.ReflectionExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
@@ -89,7 +90,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                 .Concat(new[] {typeof(RepositoryItemBaseMap), typeof(PropertyEditorControlMap)}).ToArray();
 
         private static IObservable<Type> GetMappedTypes() 
-            => Observable.Defer(() => _typesToMap.Distinct(_ => _.TypeToMap).Do(configuration => MappingTypes.OnNext(configuration))
+            => Observable.Defer(() => _typesToMap.Distinct(configuration => configuration.TypeToMap).Do(configuration => MappingTypes.OnNext(configuration))
                     .BufferUntilCompleted()
                     .SelectMany(_ => {
                         var predefinedMaps = PredefinedMaps();
@@ -143,11 +144,11 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         private static void ConfigureReservedProperties(){
             ReservedPropertyNames.Clear();
             new[]{typeof(ModelNode), typeof(IModelNode), typeof(ModelApplicationBase)}
-                .SelectMany(_ => _.Members(MemberTypes.Property | MemberTypes.Method)
+                .SelectMany(type => type.Members(MemberTypes.Property | MemberTypes.Method)
                     .Where(info => info is MethodBase method
                         ? !method.IsPrivate
                         : new []{AccessModifier.Public,AccessModifier.Protected}
-                            .Contains(((PropertyInfo) info).AccessModifier()))).Select(_ => _.Name)
+                            .Contains(((PropertyInfo) info).AccessModifier()))).Select(info => info.Name)
                 .Concat(new[]{"Item", "IsReadOnly", "Remove", "Id", "Nodes", "IsValid"}).Distinct()
                 .ToObservable(Scheduler.Immediate)
                 .Do(name => ReservedPropertyNames.Add(name))
@@ -155,8 +156,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         }
 
         private static ObservableCollection<(string key, Action<(Type declaringType, List<ModelMapperPropertyInfo> propertyInfos)> action)> GetPropertyMappingRules() 
-            => new() {
-                (nameof(DesignerSerializationVisibilityAttribute), DesignerSerializationVisibilityAttribute),
+            => [(nameof(DesignerSerializationVisibilityAttribute), DesignerSerializationVisibilityAttribute),
                 (nameof(GenericTypeArguments), GenericTypeArguments),
                 (nameof(BrowsableRule), BrowsableRule),
                 (nameof(PrivateDescriptionRule), PrivateDescriptionRule),
@@ -164,35 +164,37 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                 (nameof(WithNonPublicAttributeParameters), NonPublicAttributeParameters),
                 (nameof(TypeConverterWithDXDesignTimeType), TypeConverterWithDXDesignTimeType),
                 (nameof(CompilerIsReadOnly), CompilerIsReadOnly),
-                (nameof(GenericTypeRule), GenericTypeRule),
-            };
+                (nameof(GenericTypeRule), GenericTypeRule)
+            ];
 
         private static ObservableCollection<(string key, Action<GenericEventArgs<ModelMapperType>> action)> GetTypeMappingRules() 
-            => new(){
-                (nameof(WithNonPublicAttributeParameters), NonPublicAttributeParameters),
+            => [(nameof(WithNonPublicAttributeParameters), NonPublicAttributeParameters),
                 (nameof(GenericTypeArguments), GenericTypeArguments),
                 (nameof(CompilerIsReadOnly), CompilerIsReadOnly),
                 (nameof(GenericTypeRule), GenericTypeRule)
-            };
+            ];
 
 
         public static IEnumerable<Type> ModelMapperContainerTypes(this Type type) 
             => type.Assembly.GetTypes()
-                .Where(_ => _.Name.EndsWith(DefaultContainerSuffix))
-                .Where(_ => _.GetInterfaces().Contains(typeof(IModelModelMapContainer)));
+                .Where(t => t.Name.EndsWith(DefaultContainerSuffix))
+                .Where(t => t.GetInterfaces().Contains(typeof(IModelModelMapContainer)));
 
         public static ReplaySubject<IModelMapperConfiguration> MappingTypes{ get;private set; }
+        
         public static IObservable<Type> MappedTypes{ get;private set; }
         
 
         public static IEnumerable<ModelMapperPropertyInfo> ToModelMapperPropertyInfo(this IEnumerable<PropertyInfo> source) 
-            => source.Select(_ => _.ToModelMapperPropertyInfo());
+            => source.Select(info => info.ToModelMapperPropertyInfo());
 
         public static ModelMapperPropertyInfo ToModelMapperPropertyInfo(this PropertyInfo propertyInfo) 
             => new(propertyInfo);
 
         public static IEnumerable<ModelMapperCustomAttributeData> ToModelMapperConfigurationData(this IEnumerable<CustomAttributeData> source) 
-            => source.Select(_ => new ModelMapperCustomAttributeData(_.AttributeType, _.ConstructorArguments.ToArray()));
+            => source.Select(data => data.AttributeType.GetCustomAttributes<EditorBrowsableAttribute>()
+                .Any(attribute => attribute.State == EditorBrowsableState.Never) ? null : new ModelMapperCustomAttributeData(data.AttributeType, data.ConstructorArguments.ToArray()))
+                .WhereNotDefault();
 
         public static IObservable<Type> MapToModel(this IModelMapperConfiguration configurations) 
             => new[]{configurations}.ToObservable(Scheduler.Immediate).MapToModel();
@@ -200,12 +202,12 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         public static IObservable<Type> MapToModel<TModelMapperConfiguration>(this IObservable<TModelMapperConfiguration> configurations)
             where TModelMapperConfiguration : IModelMapperConfiguration 
             => configurations
-                .Do(_ => _typesToMap.OnNext(_))
-                .Select(_ => _.TypeToMap)
+                .Do(configuration => _typesToMap.OnNext(configuration))
+                .Select(configuration => configuration.TypeToMap)
                 .TraceModelMapper(type => type.FullName);
 
         public static IObservable<Type> MapToModel(this IObservable<Type> types,Func<Type,IModelMapperConfiguration> configSelector=null) 
-            => types.Select(_ => configSelector?.Invoke(_)?? new ModelMapperConfiguration(_)).MapToModel();
+            => types.Select(t => configSelector?.Invoke(t)?? new ModelMapperConfiguration(t)).MapToModel();
 
         public static IObservable<Type> MapToModel(this Type type,Func<Type,IModelMapperConfiguration> configSelector=null) 
             => new[]{type}.MapToModel(configSelector);
@@ -217,7 +219,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             => new[]{configuration}.ToObservable(Scheduler.Immediate).ModelInterfaces();
 
         internal static IObservable<Type> ModelInterfaces(this IObservable<IModelMapperConfiguration> source) 
-            => source.Select(_ => _.TypeToMap).ModelInterfaces();
+            => source.Select(configuration => configuration.TypeToMap).ModelInterfaces();
 
         internal static IObservable<Type> ModelInterfaces(this IObservable<Type> source) 
             => source.Finally(Start).Select(_ => MappedTypes).Switch().Distinct().TraceModelMapper(type => type.FullName );

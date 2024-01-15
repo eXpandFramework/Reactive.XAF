@@ -126,8 +126,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             }));
 
         static string ModelCode(this IEnumerable<ModelMapperCustomAttributeData> customAttributeData) 
-            => string.Join(Environment.NewLine, customAttributeData.Where(_ => _.AttributeType.IsPublic)
-                .Select(_ => _.AllArgsAreValid() ? $"[{_.AttributeType.FullName}({_.AttributeCtorArguments()})]" : null));
+            => string.Join(Environment.NewLine, customAttributeData.Where(data => data.AttributeType.IsPublic)
+                .Select(data => data.AllArgsAreValid() ? $"[{data.AttributeType.FullName}({data.AttributeCtorArguments()})]" : null));
 
         private static bool AllArgsAreValid(this ModelMapperCustomAttributeData customAttributeData) 
             => customAttributeData.ConstructorArguments
