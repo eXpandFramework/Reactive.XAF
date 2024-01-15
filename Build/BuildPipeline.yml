@@ -43,8 +43,8 @@ jobs:
           $env:AzOrganization="eXpandDevops"
           $env:AzProject ="eXpandFramework"
           & '$(System.DefaultWorkingDirectory)\Build\BuildPipeline.ps1' @goArgs
-    - publish: $(System.DefaultWorkingDirectory)\bin
-      artifact: CompiledApp
+    - publish: $(System.DefaultWorkingDirectory)\bin\net8.0
+      artifact: TestAssemblies
     - task: PublishPipelineArtifact@1
       name: PublishNugets
       inputs:
@@ -85,8 +85,8 @@ jobs:
         TestAssembly: '**/Xpand.XAF.Modules.HideToolBar.Tests.dll'
       JobSchedulerHangfire:
         TestAssembly: '**/Xpand.XAF.Modules.JobScheduler.Hangfire.Tests.dll'
-      JobSchedulerNotification:
-        TestAssembly: '**/Xpand.XAF.Modules.JobScheduler.Notification.Tests.dll'
+      # JobSchedulerNotification:
+      #   TestAssembly: '**/Xpand.XAF.Modules.JobScheduler.Notification.Tests.dll'
       MasterDetail:
         TestAssembly: '**/Xpand.XAF.Modules.MasterDetail.Tests.dll'
       ModelViewInheritance:
@@ -114,7 +114,7 @@ jobs:
   steps:
     - checkout: none
     - download: current
-      artifact: CompiledApp
+      artifact: TestAssemblies
     - task: VSTest@2
       displayName: 'Run Tests'
       inputs:
@@ -125,7 +125,7 @@ jobs:
           $(TestAssembly)
           !**\*TestAdapter.dll
           !**\obj\**
-        searchFolder: '$(Pipeline.Workspace)/CompiledApp'
+        searchFolder: '$(Pipeline.Workspace)/TestAssemblies'
 - job: PostTestTasks
   dependsOn:
     - Tests

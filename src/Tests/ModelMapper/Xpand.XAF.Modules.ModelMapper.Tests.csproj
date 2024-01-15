@@ -20,7 +20,6 @@
     <NoWarn>1701;1702;NU1608</NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    
     <Reference Include="Xpand.Extensions">
       <HintPath>..\..\..\bin\Xpand.Extensions.dll</HintPath>
     </Reference>
