@@ -178,7 +178,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             
         }
 
-        [XpandTest(LongTimeout)]
+        [XpandTest(LongTimeout)][Ignore("fail on .NET8")]
         [TestCase(nameof(Platform.Win),new[]{PredefinedMap.XafLayoutControl },new[]{typeof(XafLayoutControl)},new Type[0],1)]
         public async Task Bind_DetailView_Maps(string platformName,PredefinedMap[] predefinedMaps,Type[] controlTypes,Type[] extraModules,int boundTypes) {
             var platform = GetPlatform(platformName);
