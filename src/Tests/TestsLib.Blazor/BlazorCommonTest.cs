@@ -47,9 +47,14 @@ namespace Xpand.TestsLib.Blazor {
 			=> Host.CreateDefaultBuilder().Observe()
 				.Do(_ => TestContext.CurrentContext.Test.FullName.WriteSection())
 				.StartTest($"http://localhost:{IPGlobalProperties.GetIPGlobalProperties().GetActiveTcpListeners().GetRandomAvailablePort()}",
-					"../../src/Tests/TestApplication.Blazor.Server", user, test,beforeSetup,configureServices,configureWebHostBuilder,startupFactory,
+					TestBlazorAppPath(), user, test,beforeSetup,configureServices,configureWebHostBuilder,startupFactory,
 					Environment.GetEnvironmentVariable("XAFTESTBrowser"), WindowPosition.FullScreen, LogContext.None,WindowPosition.BottomLeft|WindowPosition.Small)
-				.Timeout(600.Seconds());
+				.Timeout(120.Seconds());
+
+		private static string TestBlazorAppPath() {
+			var testBlazorAppPath = Environment.GetEnvironmentVariable("SOURCE_DIRECTORY");
+			return testBlazorAppPath != null ? $"{testBlazorAppPath}/src/Tests/TestApplication.Blazor.Server" : "../../src/Tests/TestApplication.Blazor.Server";
+		}
 
 		public override void Dispose() {
 			base.Dispose();

@@ -27,7 +27,7 @@ namespace Xpand.TestsLib.Common{
             Monitor.MoveActiveWindowToMainMonitor();
             var filename = path??Path.GetTempFileName().Replace(".tmp", ".bmp");
             using var bitmap = CaptureActiveWindow();
-            bitmap.Save(filename);
+            bitmap?.Save(filename);
             return new Uri(filename).AbsoluteUri;
         }
     }

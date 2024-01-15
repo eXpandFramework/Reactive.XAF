@@ -60,10 +60,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests {
             => await StartJobSchedulerTest(application =>
                 TestTracing.Handle<UserFriendlyObjectLayerSecurityException>().Take(1).IgnoreElements()
                     .MergeToUnit(application.AssertTriggerJob(typeof(TestJobDI), nameof(TestJobDI.CreateObject), false).IgnoreElements())
-                    .MergeToUnit(application.WhenTabControl(typeof(Job))
-                        .Do(model => model.ActiveTabIndex = 1).Take(1).IgnoreElements())
-                    .MergeToUnit(application.AssertListViewHasObject<JobWorker>(worker
-                        => worker.State == WorkerState.Failed && worker.LastState.Reason.Contains("object is prohibited by security")))
+                    .MergeToUnit(JobSchedulerService.JobState.Where(worker => worker.State == WorkerState.Failed && worker.Reason.Contains("object is prohibited by security") ))
                     .ReplayFirstTake()
         );
         
@@ -73,10 +70,8 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests {
         public async Task Commit_Objects_SecuredProvider_ByPass(string method) 
             => await StartJobSchedulerTest(application =>
                 application.AssertTriggerJob(typeof(TestJobDI), method, false).IgnoreElements()
-                    .MergeToUnit(application.WhenTabControl(typeof(Job))
-                        .Do(model => model.ActiveTabIndex = 1).Take(1).IgnoreElements())
-                    .MergeToUnit(application.AssertListViewHasObject<JobWorker>(worker
-                        => worker.State == WorkerState.Succeeded))
+                    .MergeToUnit(JobSchedulerService.JobState.Where(state => state.State==WorkerState.Succeeded))
+                    
                     .ReplayFirstTake()
         );
 
@@ -116,9 +111,12 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests {
                             .SelectMany(frame => frame.AssertListViewHasObject<Job>()
                                 .SelectMany(_ => frame.ListViewProcessSelectedItem()))
                             .Zip(application.WhenTabControl(typeof(Job))).ToSecond().Do(model => model.ActiveTabIndex=1)
-                            .Zip(application.AssertListViewHasObject<JobWorker>(worker => worker.State==WorkerState.Skipped))
                             .Assert();
-                    }).ToUnit().ReplayFirstTake());
+                    }).IgnoreElements()
+                    .MergeToUnit(application.WhenSetupComplete().SelectMany(_ => application.WhenProviderCommitted<JobState>(emitUpdatingObjectSpace:true).ToObjects()
+                        .Where(worker => worker.State==WorkerState.Skipped).Take(1)))
+                    .Select(t => t)
+                    .ToUnit().ReplayFirstTake());
         
         // [XpandTest(state:ApartmentState.MTA)][Test]
         public async Task Trigger_Resume_Job()
