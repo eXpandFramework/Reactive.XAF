@@ -9,7 +9,7 @@ namespace Xpand.Extensions.XAF.Xpo.ObjectSpaceExtensions {
     public static partial class ObjectSpaceExtensions {
         public static bool DbExist(this XafApplication application) {
             var builder = new SqlConnectionStringBuilder(application.GetRequiredService<IConfiguration>()
-                .GetConnectionString("ConnectionString"));
+                .GetConnectionString("ConnectionString")??application.ConnectionString);
             var initialCatalog = "Initial catalog";
             var databaseName = builder[initialCatalog].ToString();
             builder.Remove(initialCatalog);

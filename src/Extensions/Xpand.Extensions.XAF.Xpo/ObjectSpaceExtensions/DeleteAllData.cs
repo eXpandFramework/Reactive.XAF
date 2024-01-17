@@ -15,7 +15,7 @@ namespace Xpand.Extensions.XAF.Xpo.ObjectSpaceExtensions{
         public static void DeleteAllData(this XafApplication application) {
             if (!application.DbExist()) return;
             using var sqlConnection = new SqlConnection(application.GetRequiredService<IConfiguration>()
-                .GetConnectionString("ConnectionString"));
+                .GetConnectionString("ConnectionString")??application.ConnectionString);
             sqlConnection.DeleteAllData();
         }
 
