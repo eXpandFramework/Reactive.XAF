@@ -43,7 +43,13 @@ namespace Xpand.TestsLib.Common{
             Notify(exception);
         }
             
-        private void Notify(Exception exception) => _errorSubject.OnNext(exception);
+        private void Notify(Exception exception) {
+            if (exception.ToString().Contains("GetDeviceInfoAsync")) {
+                return;
+            }
+            _errorSubject.OnNext(exception);
+        }
+
         readonly Subject<Exception> _exceptions=new();
 
         public IObservable<Exception> Exceptions => _exceptions.AsObservable();

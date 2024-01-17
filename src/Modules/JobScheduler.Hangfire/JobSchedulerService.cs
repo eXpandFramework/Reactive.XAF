@@ -27,7 +27,6 @@ using Microsoft.JSInterop;
 using Newtonsoft.Json;
 using Xpand.Extensions.EventArgExtensions;
 using Xpand.Extensions.ObjectExtensions;
-using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
@@ -71,8 +70,9 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
         }
 
         private static IObservable<StateHistoryDto> WhenSucceeded(this JobState state)
-            => Observable.Defer(() => JobStorage.Current.GetMonitoringApi().JobDetails(state.JobWorker.Id).History.Where(dto => dto.StateName==SucceededState.StateName)
-                .ToNowObservable()).RepeatWhen(o => o.Delay(TimeSpan.FromSeconds(1))).TakeFirst();
+            => Observable.Defer(() => JobStorage.Current?.GetMonitoringApi().JobDetails(state.JobWorker.Id).History.Where(dto => dto.StateName==SucceededState.StateName)
+                .ToNowObservable()?? Observable.Empty<StateHistoryDto>()).RepeatWhen(o => o.WhenNotDefault(_ => JobStorage.Current).Delay(TimeSpan.FromSeconds(1))).TakeFirst()
+                .Catch<StateHistoryDto,Exception>(exception => JobStorage.Current==null? Observable.Empty<StateHistoryDto>() : exception.Throw<StateHistoryDto>());
 
         
         private static IObservable<bool> WhenNeedTrigger(this IObservable<StateHistoryDto> source) 
@@ -81,8 +81,8 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) 
             => Observable.If(() => DesignerOnlyCalculator.IsRunTime,manager.Defer(() => manager.CheckBlazor(typeof(HangfireStartup).FullName, typeof(JobSchedulerModule).Namespace)))
                 .Merge(manager.WhenApplication(application => application.ScheduleJobs().Merge(application.DeleteJobs())
-                        .MergeToUnit(application.RefreshDetailViewWhenObjectCommitted<JobWorker>(typeof(Job)))
-                        .MergeToUnit(application.RefreshListViewWhenObjectCommitted<Job>())
+                        // .MergeToUnit(application.RefreshDetailViewWhenObjectCommitted<JobWorker>(typeof(Job)))
+                        // .MergeToUnit(application.RefreshListViewWhenObjectCommitted<Job>())
                     )
                     .Merge(manager.TriggerJobsFromAction())
                     .Merge(manager.PauseJobsFromAction())

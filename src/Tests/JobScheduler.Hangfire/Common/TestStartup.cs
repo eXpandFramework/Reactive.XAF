@@ -15,6 +15,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests.Common {
                 IObjectSpaceProviderServiceBasedBuilder<IBlazorApplicationBuilder>>> objectSpaceProviderBuilderSelector)
             : base(configuration, objectSpaceProviderBuilderSelector) { }
 
+        
         protected override void AddModules(IBlazorApplicationBuilder builder) {
             base.AddModules(builder);
             builder.Modules.Add<JobSchedulerModule>();

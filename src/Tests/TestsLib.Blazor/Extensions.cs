@@ -56,6 +56,7 @@ namespace Xpand.TestsLib.Blazor {
                 .Observe().SelectMany(host => XafApplicationMonitor.Application.StartTest(host,user,beforeSetup,test)
                     .MergeToUnit(host.Run(url, browser, inactiveWindowBrowserPosition)))
                 .LogError()
+                
                 // .Log(logContext, inactiveWindowLogContextPosition, true)
             ;
 
@@ -63,37 +64,21 @@ namespace Xpand.TestsLib.Blazor {
                 string user, Func<BlazorApplication, IObservable<Unit>> beforeSetup,Func<BlazorApplication, IObservable<Unit>> test)
                 => source.DoOnFirst(application =>application.DeleteAllData())
                     .MergeIgnored(application => beforeSetup?.Invoke(application)
-                        .TakeUntil(host.Services.WhenApplicationStopped())?? Observable.Empty<Unit>())
+                        .TakeUntil(host.Services.WhenApplicationStopping())?? Observable.Empty<Unit>())
                     .EnsureMultiTenantMainDatabase().DeleteModelDiffs(user)
-                    .TakeUntil(host.Services.WhenApplicationStopped())
-                    // .SelectMany(application => test(application).BufferUntilCompleted().To(application))
-                    .MergeIgnored(application => application.WhenLoggedOn(user).TakeUntil(host.Services.WhenApplicationStopped()))
-                    .SelectMany(application => {
-                        
-                        // var isAuthenticated = application.GetRequiredService<IPrincipalProvider>().IsAuthenticated();
-                        // var selectMany = application.WhenLoggedOn(user).IgnoreElements()
-                        //     .Merge(application.WhenMainWindowCreated().To(application).Select(blazorApplication => blazorApplication)).To(application)
-                        //     .TakeUntil(application.WhenDisposed().Select(blazorApplication => blazorApplication))
-                        //     .Finally(() => {})
-                        //     .SelectMany(blazorApplication => test(blazorApplication).BufferUntilCompleted().WhenNotEmpty().To(blazorApplication));
-                        // return selectMany;
-                        return test(application).TakeUntil(host.Services.WhenApplicationStopped()).BufferUntilCompleted().WhenNotEmpty().To(application);
-                    })
-                    // .DoAlways(() => {
-                    //     host.Services.StopTest();
-                    // })
-                    // .ConcatIgnored(application => Observable.FromAsync(() => host.StopAsync()))
-                    // .MergeIgnored(application => host.Services.WhenApplicationStopped().DoSafe(unit => application.Dispose()))
-                    .DoSafe(application => host.Services.StopTest())
-                    .DoOnError(exception => host.Services.StopTest())
+                    .TakeUntil(host.Services.WhenApplicationStopping())
+                    .MergeIgnored(application => application.WhenLoggedOn(user).TakeUntil(host.Services.WhenApplicationStopping()))
+                    .SelectMany(application => test(application).TakeUntil(host.Services.WhenApplicationStopping()).BufferUntilCompleted().WhenNotEmpty().To(application))
+                    .DoOnError(_ => host.Services.StopTest())
+                    .Finally(() => host.Services.StopTest())
                     .Take(1);
 
         private static IObservable<Unit> Run(this IHost host,string url, string browser,WindowPosition inactiveWindowPosition=WindowPosition.None) 
-            => host.Services.WhenApplicationStopping().Publish(whenHostStop => whenHostStop
+            => host.Services.WhenApplicationStopping().Select(unit => unit).Publish(whenHostStop => whenHostStop
                 .Merge(host.Services.WhenApplicationStarted().SelectMany(_ => new Uri(url).Start(browser)
                         .Do(process => process.MoveToMonitor(inactiveWindowPosition))
                         .SelectMany(process => whenHostStop.Do(_ => AppDomain.CurrentDomain.KillAll(process.ProcessName))))
-                    .MergeToUnit(Observable.Start(() => host.RunAsync().ToObservable().Select(unit => unit)).Merge())));
+                    .MergeToUnit(Observable.Start(() => host.RunAsync().ToObservable()).Merge())));
 
         
         public static (Guid id, string connectionString) GetTenant(this SqlConnection connection, string user){

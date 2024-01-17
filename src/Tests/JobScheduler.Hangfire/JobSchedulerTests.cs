@@ -1,9 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
 using System.Threading;
 using System.Threading.Tasks;
 using DevExpress.ExpressApp.Xpo;
+using Hangfire;
+using Hangfire.Server;
+using Microsoft.Extensions.Hosting;
 using NUnit.Framework;
 using Xpand.Extensions.Numeric;
 using Xpand.Extensions.Reactive.Combine;
@@ -13,6 +18,8 @@ using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Transform.System;
 using Xpand.Extensions.XAF.Attributes;
 using Xpand.Extensions.XAF.NonPersistentObjects;
+using Xpand.Extensions.XAF.ViewExtensions;
+using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.TestsLib.Common;
 using Xpand.TestsLib.Common.Attributes;
 using Xpand.XAF.Modules.Blazor.Services;
@@ -23,6 +30,7 @@ using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
 
 namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests {
+    [Order(0)]
     public class JobSchedulerTests:JobSchedulerCommonTest {
         
         [TestCase(typeof(TestJob),false)]
@@ -158,11 +166,22 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests {
                             .SelectMany(frame => frame.AssertListViewHasObject<Job>()
                                 .SelectMany(_ => frame.AssertSimpleAction(nameof(JobSchedulerService.PauseJob))
                                     .SelectMany(action => action.Trigger(action.WhenDeactivated().Take(1)
-                                        .Zip(frame.AssertListViewHasObject<Job>(job1 => job1.IsPaused)).Take(1)
+                                        .SelectMany(simpleAction => frame.View.ToListView().Objects<Job>().Where(job1 => job1.IsPaused))
+                                        .Take(1)
                                         .Select(t => t)))))
                             .Assert().Select(t => t);
                     }).ToUnit().ReplayFirstTake());
-        
+        [XpandTest(state:ApartmentState.MTA)]
+        // [Test]
+        public async Task JobPause_Action1() {
+            await StartJobSchedulerTest(application
+                => application.ServiceProvider.WhenApplicationStopping()
+                    .SelectMany(unit => application.GetRequiredService<IEnumerable<IHostedService>>().OfType<BackgroundJobServerHostedService>().ToObservable()
+                        .SelectMany(service => service.StopAsync(CancellationToken.None).ToObservable()
+                            .Select(unit1 => unit))).ToUnit().IgnoreElements()
+                    .ReplayFirstTake(), timeOut: 6.Seconds());
+        }
+
         // [XpandTest(state:ApartmentState.MTA)][Test]
         public async Task JobResume_Action() 
             => await StartJobSchedulerTest(application

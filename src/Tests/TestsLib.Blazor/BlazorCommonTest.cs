@@ -36,20 +36,20 @@ namespace Xpand.TestsLib.Blazor {
 		}
 
 		protected IObservable<Unit> StartTest<TStartup>(Func<BlazorApplication, IObservable<Unit>> test, Func<BlazorApplication, IObservable<Unit>> beforeSetup = null,
-			Action<IServiceCollection> configureServices = null, Action<IWebHostBuilder> configureWebHostBuilder = null,Func<WebHostBuilderContext, TStartup> startupFactory=null) where TStartup : class
-			=> StartTest("Admin", test,beforeSetup,configureServices,configureWebHostBuilder,startupFactory);
+			Action<IServiceCollection> configureServices = null, Action<IWebHostBuilder> configureWebHostBuilder = null,Func<WebHostBuilderContext, TStartup> startupFactory=null,TimeSpan? timeOut=null) where TStartup : class
+			=> StartTest("Admin", test,beforeSetup,configureServices,configureWebHostBuilder,startupFactory,timeOut);
 
 		
 		protected IObservable<Unit> StartTest<TStartup>(string user, Func<BlazorApplication, IObservable<Unit>> test,
 			Func<BlazorApplication, IObservable<Unit>> beforeSetup = null, Action<IServiceCollection> configureServices = null, 
-			Action<IWebHostBuilder> configureWebHostBuilder = null,Func<WebHostBuilderContext, TStartup> startupFactory=null)
+			Action<IWebHostBuilder> configureWebHostBuilder = null,Func<WebHostBuilderContext, TStartup> startupFactory=null,TimeSpan? timeOut=null)
 			where TStartup : class
 			=> Host.CreateDefaultBuilder().Observe()
 				.Do(_ => TestContext.CurrentContext.Test.FullName.WriteSection())
 				.StartTest($"http://localhost:{IPGlobalProperties.GetIPGlobalProperties().GetActiveTcpListeners().GetRandomAvailablePort()}",
 					TestBlazorAppPath(), user, test,beforeSetup,configureServices,configureWebHostBuilder,startupFactory,
 					Environment.GetEnvironmentVariable("XAFTESTBrowser"), WindowPosition.FullScreen, LogContext.None,WindowPosition.BottomLeft|WindowPosition.Small)
-				.Timeout(120.Seconds());
+				.Timeout(timeOut??120.Seconds());
 
 		private static string TestBlazorAppPath() {
 			var testBlazorAppPath = Environment.GetEnvironmentVariable("SOURCE_DIRECTORY");

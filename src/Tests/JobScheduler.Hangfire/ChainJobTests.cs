@@ -16,6 +16,7 @@ using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
 
 namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests {
+    [Order(20)]
     public class ChainJobTests:JobSchedulerCommonTest {
 
 

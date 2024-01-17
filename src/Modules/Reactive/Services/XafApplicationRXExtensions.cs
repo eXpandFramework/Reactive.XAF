@@ -1027,6 +1027,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                     .Where(arg => match?.Invoke(frame, arg) ?? true).To(frame.View)
                     .WhenNotDefault(view => view?.ObjectSpace)
                     .Select(view => view.ObjectSpace.WhenModifyChanged().To(view).StartWith(view)
+                        .TakeUntil(view.ObjectSpace.WhenDisposed())
                         .Where(_ => !view.ObjectSpace.IsModified)
                         .DoSafe(_ => view.ObjectSpace.Refresh())).Switch()
                 )

@@ -19,7 +19,7 @@ using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
 
 namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests {
-	[NonParallelizable]
+	[Order(10)]
 	public class ViewActionJobTests:JobSchedulerCommonTest {
 
         private static ActionBase CreateAction((ViewController controller, string id) t, string actionId, Type actionType) 
