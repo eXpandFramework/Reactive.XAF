@@ -13,7 +13,6 @@ using DevExpress.ExpressApp.Blazor.Editors;
 using DevExpress.ExpressApp.Blazor.Services;
 using DevExpress.ExpressApp.EasyTest.BlazorAdapter;
 using DevExpress.ExpressApp.MultiTenancy;
-using DevExpress.ExpressApp.Security;
 using DevExpress.ExpressApp.SystemModule;
 using Fasterflect;
 using Microsoft.AspNetCore.Hosting;
@@ -22,7 +21,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using OpenQA.Selenium;
 using Xpand.Extensions.AppDomainExtensions;
-using Xpand.Extensions.Numeric;
 using Xpand.Extensions.ProcessExtensions;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Filter;
@@ -77,7 +75,7 @@ namespace Xpand.TestsLib.Blazor {
             => host.Services.WhenApplicationStopping().Select(unit => unit).Publish(whenHostStop => whenHostStop
                 .Merge(host.Services.WhenApplicationStarted().SelectMany(_ => new Uri(url).Start(browser)
                         .Do(process => process.MoveToMonitor(inactiveWindowPosition))
-                        .SelectMany(process => whenHostStop.Do(_ => AppDomain.CurrentDomain.KillAll(process.ProcessName))))
+                        .SelectMany(process => whenHostStop.DoSafe(_ => AppDomain.CurrentDomain.KillAll(process.ProcessName))))
                     .MergeToUnit(Observable.Start(() => host.RunAsync().ToObservable()).Merge())));
 
         

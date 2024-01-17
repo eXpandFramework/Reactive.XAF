@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Blazor;
 using DevExpress.ExpressApp.Blazor.Templates;
@@ -10,6 +12,7 @@ using DevExpress.ExpressApp.Model.Core;
 using Fasterflect;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
+using Xpand.Extensions.ExpressionExtensions;
 using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
@@ -57,5 +60,13 @@ namespace Xpand.XAF.Modules.Blazor {
 
         public static IObservable<FrameTemplate> WhenViewChanged(this FrameTemplate frameTemplate) 
             => frameTemplate.WhenEvent(nameof(FrameTemplate.ViewChanged)).To(frameTemplate);
+        
+        public static IObservable<TArgs> WhenCallback<TArgs>(this object source, string callbackName) 
+            => new Subject<TArgs>().Use(subject => {
+                source.SetPropertyValue(callbackName, EventCallback.Factory.Create<TArgs>(source, args => subject.OnNext(args)));
+                return subject.AsObservable().Finally(subject.Dispose);
+            });
+        public static IObservable<TMemberValue> WhenCallback<TObject,TMemberValue>(this TObject source, Expression<Func<TObject, EventCallback<TMemberValue>>> callbackName) 
+            => source.WhenCallback<TMemberValue>(callbackName.MemberExpressionName());
     }
 }
