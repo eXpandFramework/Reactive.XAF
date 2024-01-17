@@ -15,7 +15,7 @@
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
     <DebugType>full</DebugType>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-    <OutputPath>..\..\..\bin</OutputPath>
+    
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Model.xafml" />
@@ -50,14 +50,7 @@
     <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="23.2.3" />
     <PackageReference Include="DevExpress.Persistent.Base" Version="23.2.3" />
     <PackageReference Include="DevExpress.Persistent.BaseImpl.Xpo" Version="23.2.3" />
-    <PackageReference Include="Hangfire.MemoryStorage" Version="1.7.0" />
+    
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\Extensions\Xpand.Extensions.Blazor\Xpand.Extensions.Blazor.csproj" />
-    <ProjectReference Include="..\..\Extensions\Xpand.Extensions.Reactive\Xpand.Extensions.Reactive\Xpand.Extensions.Reactive.csproj" />
-    <ProjectReference Include="..\..\Extensions\Xpand.Extensions.XAF\Xpand.Extensions.XAF.csproj" />
-    <ProjectReference Include="..\..\Modules\Blazor\Xpand.XAF.Modules.Blazor.csproj" />
-    <ProjectReference Include="..\..\Modules\JobScheduler.Hangfire\Xpand.XAF.Modules.JobScheduler.Hangfire.csproj" />
-    <ProjectReference Include="..\..\Modules\Reactive\Xpand.XAF.Modules.Reactive.csproj" />
-  </ItemGroup>
+  
 </Project>

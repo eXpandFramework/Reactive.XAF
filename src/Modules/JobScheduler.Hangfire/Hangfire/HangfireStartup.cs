@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Reactive.Linq;
 using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp.Security;
 using DevExpress.Persistent.Base;
@@ -10,10 +11,14 @@ using HarmonyLib;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Xpand.Extensions.Blazor;
 using Xpand.Extensions.Harmony;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.SecurityExtensions;
+using Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects;
+using Xpand.XAF.Modules.Reactive.Services;
+using Xpand.XAF.Modules.Reactive.Services.Actions;
 using StartupExtensions = DevExpress.ExpressApp.Blazor.Services.StartupExtensions;
 
 namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Hangfire {
@@ -24,9 +29,20 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Hangfire {
 
         public static void UseXaf(IApplicationBuilder builder) => Dashboard?.Invoke(builder);
 
-        public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next) 
-            => next;
-        
+        public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next) {
+            return app => {
+                var serviceProvider = app.ApplicationServices;
+                JobSchedulerService.JobState.TakeUntil(serviceProvider.WhenApplicationStopping())
+                    .Where(state => state.State == WorkerState.Succeeded)
+                    .Where(state => state.JobWorker.Job.ChainJobs.Any())
+                    .SelectMany(state => state.WhenSucceeded().WhenNeedTrigger().TakeUntil(serviceProvider.WhenApplicationStopping())
+                        .SelectMany(_ => state.JobWorker.Job.ChainJobs.ToNowObservable().Do(job => job.Job.Trigger(serviceProvider))))
+                    .Finally(() => {})
+                    .Subscribe();
+                next(app);
+            };
+        }
+
         public static readonly Action<IApplicationBuilder> Dashboard = builder 
             => builder.UseHangfireDashboard(options:new DashboardOptions {
                 Authorization = new[] {new DashboardAuthorization()}
@@ -72,5 +88,24 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Hangfire {
     }
     
 
+    public class CustomStartupFilter : IStartupFilter
+    {
+        public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next)
+        {
+            return app =>
+            {
+                // Access IServiceProvider
+                var serviceProvider = app.ApplicationServices;
+
+                // Retrieve IHostApplicationLifetime
+                var applicationLifetime = serviceProvider.GetService<IHostApplicationLifetime>();
+
+                // Perform your logic here
+
+                // Call the next middleware in the pipeline
+                next(app);
+            };
+        }
+    }
 
 }

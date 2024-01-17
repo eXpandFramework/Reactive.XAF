@@ -61,21 +61,15 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
         static readonly ISubject<GenericEventArgs<IObservable<Job>>> CustomJobScheduleSubject=Subject.Synchronize(new Subject<GenericEventArgs<IObservable<Job>>>());
         public static IObservable<GenericEventArgs<IObservable<Job>>> CustomJobSchedule => CustomJobScheduleSubject.AsObservable();
 
-        static JobSchedulerService() {
-            JobState.Where(state =>state.State==WorkerState.Succeeded)
-                .Where(state => state.JobWorker.Job.ChainJobs.Any())
-                .SelectMany(state => state.WhenSucceeded().WhenNeedTrigger()
-                    .SelectMany(_ => state.JobWorker.Job.ChainJobs.Do(job => job.Job.Trigger())))
-                .Subscribe();
-        }
 
-        private static IObservable<StateHistoryDto> WhenSucceeded(this JobState state)
+        internal static IObservable<StateHistoryDto> WhenSucceeded(this JobState state)
             => Observable.Defer(() => JobStorage.Current?.GetMonitoringApi().JobDetails(state.JobWorker.Id).History.Where(dto => dto.StateName==SucceededState.StateName)
-                .ToNowObservable()?? Observable.Empty<StateHistoryDto>()).RepeatWhen(o => o.WhenNotDefault(_ => JobStorage.Current).Delay(TimeSpan.FromSeconds(1))).TakeFirst()
+                .ToNowObservable()?? Observable.Empty<StateHistoryDto>()).RepeatWhen(o => o.Delay(TimeSpan.FromSeconds(1)).WhenNotDefault(_ => JobStorage.Current))
+                .TakeFirst()
                 .Catch<StateHistoryDto,Exception>(exception => JobStorage.Current==null? Observable.Empty<StateHistoryDto>() : exception.Throw<StateHistoryDto>());
 
-        
-        private static IObservable<bool> WhenNeedTrigger(this IObservable<StateHistoryDto> source) 
+
+        internal static IObservable<bool> WhenNeedTrigger(this IObservable<StateHistoryDto> source) 
             => source.Select(dto => dto.Data.ContainsKey("Result") && dto.Data["Result"] == "true").WhenNotDefault();
 
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) 
@@ -186,8 +180,6 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
             serviceProvider.GetService<IRecurringJobManager>().Trigger(job.Id);
             return job;
         }
-        
-        static void Trigger<T>(this T job) where T:Job => RecurringJob.Trigger(job.Id);
 
         public static void AddOrUpdateHangfire(this Job job,IServiceProvider serviceProvider) 
             => serviceProvider.GetService<IRecurringJobManager>()
