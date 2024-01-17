@@ -2,8 +2,8 @@
   "profiles": {
     "Xpand.XAF.ModelEditor": {
       "commandName": "Project",
-      "commandLineArgs": "False \"C:\\Work\\Crypto\\CryptoManager2\\CryptoCommander.Binance\\bin\\Debug\\net8.0-windows\\CryptoCommander.Binance.dll\" \"C:\\Work\\Crypto\\CryptoManager2\\CryptoCommander.Binance\\Model.DesignedDiffs.xafml\" \"C:\\Work\\Crypto\\CryptoManager2\\CryptoCommander.Binance\\CryptoCommander.Binance.csproj\"",
-      "workingDirectory": "C:\\Work\\Crypto\\CryptoManager2\\CryptoCommander.Binance\\bin\\Debug\\net8.0-windows\\"
+      "commandLineArgs": "True \"C:\\Work\\DX\\OutlookInspired\\CS\\OutlookInspired.Blazor.Server\\bin\\Debug\\net6.0\\OutlookInspired.Blazor.Server.dll\" \"C:\\Work\\DX\\OutlookInspired\\CS\\OutlookInspired.Blazor.Server\\Model.xafml\" \"C:\\Work\\DX\\OutlookInspired\\CS\\OutlookInspired.Blazor.Server\\OutlookInspired.Blazor.Server.csproj\"",
+      "workingDirectory": "C:\\Work\\DX\\OutlookInspired\\CS\\OutlookInspired.Blazor.Server\\bin\\Debug\\net6.0\\"
     }
   }
 }
