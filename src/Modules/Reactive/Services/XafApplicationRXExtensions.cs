@@ -34,6 +34,7 @@ using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.ErrorHandling;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.Reactive.Transform.System;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.StringExtensions;
 using Xpand.Extensions.TypeExtensions;
@@ -154,15 +155,16 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => application.WhenWindowCreated(true, emitIfMainExists);
         
         public static IObservable<Window> WhenWindowCreated(this XafApplication application,bool isMain=false,bool emitIfMainExists=true) {
-            var windowCreated = application.WhenFrameCreated().Select(frame => frame).OfType<Window>();
+            var windowCreated = application.WhenFrameCreated().OfType<Window>();
             return isMain ? emitIfMainExists && application.MainWindow != null ? application.MainWindow.Observe().ObserveOn(SynchronizationContext.Current!)
-                : windowCreated.WhenMainWindowAvailable() : windowCreated;
+                : windowCreated.WhenMainWindowAvailable().Select(window => window) : windowCreated;
         }
 
         private static IObservable<Window> WhenMainWindowAvailable(this IObservable<Window> windowCreated) 
             => windowCreated.When(TemplateContext.ApplicationWindow).TemplateChanged().Cast<Window>()
-                .If(window => window.Application.GetPlatform()==Platform.Win,window => window.WhenEvent("Showing").To(window),window => window.Observe())
-                .Select(window => window).Take(1);
+                .If(window => window.Application.GetPlatform()==Platform.Win,window => window.WhenEvent("Showing")
+                    .SelectMany(_ => 1.Seconds().Interval().TakeUntilDisposed(window.Application).ObserveOnContext().WhenNotDefault(_ => window.Application.MainWindow).Take(1))
+                    .To(window),window => window.Observe()).Take(1);
         
         public static IObservable<Window> WhenPopupWindowCreated(this XafApplication application) 
             => application.WhenFrameCreated(TemplateContext.PopupWindow).Where(frame => frame.Application==application).Cast<Window>();

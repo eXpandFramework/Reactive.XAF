@@ -15,7 +15,6 @@
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
     <DebugType>full</DebugType>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-    
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Model.xafml" />
@@ -50,7 +49,5 @@
     <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="23.2.3" />
     <PackageReference Include="DevExpress.Persistent.Base" Version="23.2.3" />
     <PackageReference Include="DevExpress.Persistent.BaseImpl.Xpo" Version="23.2.3" />
-    
   </ItemGroup>
-  
 </Project>
