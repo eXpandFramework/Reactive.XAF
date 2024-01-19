@@ -10,7 +10,6 @@ using DevExpress.ExpressApp.Blazor;
 using DevExpress.ExpressApp.Xpo;
 using Hangfire;
 using Hangfire.MemoryStorage;
-using Hangfire.Server;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -44,7 +43,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests.Common {
             => StartTest(test,BeforeSetup(),configureWebHostBuilder:ConfigureWebHostBuilder(),startupFactory:context => startupFactory?.Invoke(context),timeOut:timeOut,configureServices:ConfigureServices);
 
         private void ConfigureServices(IServiceCollection services) {
-            // services.AddSingleton<IBackgroundProcessingServer, BackgroundProcessingServer>();
+            
         }
 
         private Action<IWebHostBuilder> ConfigureWebHostBuilder() 
@@ -57,7 +56,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests.Common {
                 .Merge(application.ServiceProvider.WhenApplicationStopping()
                     .SelectMany(unit => application.GetRequiredService<IEnumerable<IHostedService>>().OfType<BackgroundJobServerHostedService>().ToObservable()
                         .SelectMany(service => service.StopAsync(CancellationToken.None).ToObservable()
-                            .Select(unit1 => unit))).ToUnit().IgnoreElements());
+                            .Select(_ => unit))).ToUnit().IgnoreElements());
         
 
 

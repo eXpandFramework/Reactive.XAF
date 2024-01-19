@@ -45,6 +45,8 @@ jobs:
           & '$(System.DefaultWorkingDirectory)\Build\BuildPipeline.ps1' @goArgs
     - publish: $(System.DefaultWorkingDirectory)\bin\net8.0
       artifact: TestAssemblies
+    - publish: $(Pipeline.Workspace)\.nuget
+      artifact: Nuget
     - task: PublishPipelineArtifact@1
       name: PublishNugets
       inputs:
@@ -117,6 +119,19 @@ jobs:
     - checkout: Self
     - download: current
       artifact: TestAssemblies
+    - download: current
+      artifact: Nupkg
+    - download: current
+      artifact: Nuget
+    - task: PowerShell@2
+      displayName: 'Setup Environment'
+      inputs:
+        targetType: 'inline'
+        script: |
+          New-Item -ItemType Directory -Force -Path "$(Build.SourcesDirectory)/bin/nupkg"
+          Copy-Item -Path "$(Pipeline.Workspace)/Nupkg/*.nupkg" -Destination "$(Build.SourcesDirectory)/bin/nupkg"
+          Copy-Item -Path "$(Pipeline.Workspace)\Nuget" -Destination "$(Pipeline.Workspace)\.Nuget" -Recurse -Force
+
     - task: VSTest@2
       displayName: 'Run Tests'
       inputs:

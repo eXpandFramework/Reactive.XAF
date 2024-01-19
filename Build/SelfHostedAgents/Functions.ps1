@@ -1,3 +1,16 @@
+function Approve-Parameters{
+    param(
+        [parameter(Mandatory)]
+        $invocation
+    )
+    foreach ($param in $invocation.MyCommand.Parameters.GetEnumerator()) {
+        if ($param.Value.ParameterType -ne [System.Management.Automation.SwitchParameter]){
+            if (!(Get-Variable -Name $param.Key -ValueOnly)) {
+                throw "Parameter $($param.Key) is required and cannot be null or empty."
+            }
+        }
+    }
+}
 function Wait-VMReadiness {
     param (
         [parameter(Mandatory)]
@@ -78,6 +91,7 @@ param(
     
     # Set-VMMemory -VMName $newVMName -DynamicMemoryEnabled $true -MinimumBytes "$($vmMemory/2)MB" -StartupBytes "$($vmMemory/2)MB" -MaximumBytes "$($vmMemory)MB"
     Set-VMMemory -VMName $newVMName -StartupBytes "$($vmMemory)MB" 
+    
     Set-VMProcessor -VMName $newVmName -Count $proccessor
     $parentVHDPath = $templateVHDPath
     $differencingDiskPath = [System.IO.Path]::Combine([System.IO.Path]::GetDirectoryName($newVHDPath), $newVMName + "_Diff" + [System.IO.Path]::GetExtension($newVHDPath))
