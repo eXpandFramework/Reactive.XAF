@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.Office.DocumentStyleManager</id>
-    <version>4.232.2.3</version>
+    <version>4.232.2.8</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -15,17 +15,17 @@
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Office.DocumentStyleManager, 23.2.3</tags>
     <dependencies>
       <group targetFramework="netstandard2.0">
-        <dependency id="Xpand.VersionConverter" version="4.232.2.3" />
+        <dependency id="Xpand.VersionConverter" version="4.232.2.8" />
       </group>
       <group targetFramework="net6.0">
-        <dependency id="Xpand.Extensions" version="4.232.2.3" />
-        <dependency id="Xpand.XAF.Modules.Reactive" version="4.232.2.3" />
-        <dependency id="Xpand.XAF.Modules.SuppressConfirmation" version="4.232.2.3" />
-        <dependency id="Xpand.XAF.Modules.HideToolBar" version="4.232.2.3" />
-        <dependency id="Xpand.XAF.Modules.ViewItemValue" version="4.232.2.3" />
-        <dependency id="Xpand.Extensions.Reactive" version="4.232.2.3" />
-        <dependency id="Xpand.Extensions.XAF" version="4.232.2.3" />
-        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.232.2.3" />
+        <dependency id="Xpand.Extensions" version="4.232.2.8" />
+        <dependency id="Xpand.XAF.Modules.Reactive" version="4.232.2.8" />
+        <dependency id="Xpand.XAF.Modules.SuppressConfirmation" version="4.232.2.8" />
+        <dependency id="Xpand.XAF.Modules.HideToolBar" version="4.232.2.8" />
+        <dependency id="Xpand.XAF.Modules.ViewItemValue" version="4.232.2.8" />
+        <dependency id="Xpand.Extensions.Reactive" version="4.232.2.8" />
+        <dependency id="Xpand.Extensions.XAF" version="4.232.2.8" />
+        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.232.2.8" />
         <dependency id="Fasterflect.Xpand" version="2.0.7" />
         <dependency id="System.Reactive" version="6.0" />
         <dependency id="System.Text.Json" version="7.0.2" />
@@ -33,7 +33,7 @@
         <dependency id="DevExpress.ExpressApp.Office" version="23.2.3" />
         <dependency id="DevExpress.ExpressApp.ConditionalAppearance" version="23.2.3" />
         <dependency id="System.Threading.Tasks.Dataflow" version="7.0" />
-        <dependency id="Xpand.VersionConverter" version="4.232.2.3" />
+        <dependency id="Xpand.VersionConverter" version="4.232.2.8" />
       </group>
     </dependencies>
   </metadata>

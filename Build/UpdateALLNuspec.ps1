@@ -21,6 +21,9 @@ function UpdateALLNuspec($platform, $allNuspec, $nuspecs,$allModuleNuspecs,$csPr
         $platformMetada = Get-AssemblyMetadata "$root\bin\$filesrc" -key "Platform"
         if ($platformMetada.Value -in $platform){
             $target=Get-ProjectTargetFramework (Get-XmlContent ($csProjects|Where-Object{$_.BaseName -eq $nuspecBaseName }).FullName) -FullName|select-object -Last 1
+            if ($target -eq "net6.0-windows"){
+                $target="net6.0-windows7.0"
+            }
             [PSCustomObject]@{
                 Nuspec = $nuspec
                 File   = $_
@@ -74,6 +77,7 @@ if ($dxVersion -gt "20.2.2"){
     Add-NuspecDependency Xpand.Extensions.Office.Cloud.Google.Blazor $googleBlazorVersion $allNuspec "net6.0-windows7.0"
 }
 function CloneTarget ($source, $target){
+    
     $allNuspec.package.metadata.dependencies.group|Where-Object{$_.targetFramework -eq $source}|ForEach-Object{
         $_.dependency|ForEach-Object{
             Add-NuspecDependency -Id $_.Id -Version $_.version -Nuspec $allNuspec -TargetFramework "$target"

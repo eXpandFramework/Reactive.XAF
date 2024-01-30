@@ -1,1 +1,1 @@
-class AssemblyInfoVersion { 	public const string Version = "4.232.2.4"; }
+class AssemblyInfoVersion { 	public const string Version = "4.232.2.8"; }
