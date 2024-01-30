@@ -67,14 +67,14 @@ In the next screencast we create a `Product RazorView` thats lists `ProductNames
 ## Installation 
 1. First you need the nuget package so issue this command to the `VS Nuget package console` 
 
-   `Install-Package Xpand.XAF.Modules.MasterDetail`.
+   `Install-Package Xpand.XAF.Modules.RazorView`.
 
     The above only references the dependencies and nexts steps are mandatory.
 
 2. [Ways to Register a Module](https://documentation.devexpress.com/eXpressAppFramework/118047/Concepts/Application-Solution-Components/Ways-to-Register-a-Module)
 or simply add the next call to your module constructor
     ```cs
-    RequiredModuleTypes.Add(typeof(Xpand.XAF.Modules.MasterDetailModule));
+    RequiredModuleTypes.Add(typeof(Xpand.XAF.Modules.RazorView.RazorViewModule));
     ```
 ## Versioning
 The module is **not bound** to **DevExpress versioning**, which means you can use the latest version with your old DevExpress projects [Read more](https://github.com/eXpandFramework/XAF/tree/master/tools/Xpand.VersionConverter).
@@ -108,11 +108,11 @@ To `Step in the source code` you need to `enable Source Server support` in your 
 
 If the package is installed in a way that you do not have access to uninstall it, then you can `unload` it with the next call at the constructor of your module.
 ```cs
-Xpand.XAF.Modules.Reactive.ReactiveModuleBase.Unload(typeof(Xpand.XAF.Modules.MasterDetail.MasterDetailModule))
+Xpand.XAF.Modules.Reactive.ReactiveModuleBase.Unload(typeof(Xpand.XAF.Modules.RazorView.RazorViewModule))
 ```
 
 
 ### Tests
-The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/Xpand.XAF.s.MasterDetail.MasterDetail). 
+The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Reactive.XAF/blob/master/src/Tests/RazorView/RazorViewTests.cs). 
 All Tests run as per our [Compatibility Matrix](https://github.com/eXpandFramework/DevExpress.XAF#compatibility-matrix)
 
