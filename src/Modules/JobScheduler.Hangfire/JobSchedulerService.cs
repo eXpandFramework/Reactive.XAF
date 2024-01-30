@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reactive;
-using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Reactive.Threading.Tasks;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using DevExpress.DataAccess.Native.ObjectBinding;
@@ -91,13 +91,12 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
                     action.Caption = action.Caption.Replace("Job", "").Trim();
                 })
                 .WhenExecuted()
-                .SelectMany(args => {
-                    var serviceProvider = Extensions.Blazor.Extensions.ToBlazor(args.Action.Application).ServiceProvider;
-                    var uri = $"{new Uri($"{serviceProvider.GetService<IHttpContextAccessor>()?.HttpContext?.Request.GetDisplayUrl()}").GetLeftPart(UriPartial.Authority)}/hangfire/jobs/details/";
-                    var jsRuntime = serviceProvider.GetService<IJSRuntime>();
-                    return args.SelectedObjects.Cast<JobWorker>().ToObservable(ImmediateScheduler.Instance).SelectMany(
-                            job => jsRuntime?.InvokeAsync<object>("open", new object[] {$"{uri}{job.Id}", "_blank"}).AsTask());
-
+                .SelectMany(e => {
+                    var uri = $"{new Uri($"{e.Action.Application.GetService<IHttpContextAccessor>()?.HttpContext?.Request.GetDisplayUrl()}")
+                        .GetLeftPart(UriPartial.Authority)}/hangfire/jobs/details/";
+                    var jsRuntime = e.Action.Application.GetService<IJSRuntime>();
+                    return e.SelectedObjects.Cast<JobWorker>().ToNowObservable()
+                        .SelectMany(job => jsRuntime?.InvokeVoidAsync("open", [$"{uri}{job.Id}", "_blank"]).AsTask().ToObservable());
                 })
                 .ToUnit();
 
