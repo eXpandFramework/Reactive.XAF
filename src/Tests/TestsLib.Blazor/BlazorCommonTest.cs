@@ -46,6 +46,7 @@ namespace Xpand.TestsLib.Blazor {
 			where TStartup : class
 			=> Host.CreateDefaultBuilder().Observe()
 				.Do(_ => TestContext.CurrentContext.Test.FullName.WriteSection())
+				.Do(_ => Console.Out.WriteSection(TestContext.CurrentContext.Test.FullName))
 				.StartTest($"http://localhost:{IPGlobalProperties.GetIPGlobalProperties().GetActiveTcpListeners().GetRandomAvailablePort()}",
 					TestBlazorAppPath(), user, test,beforeSetup,configureServices,configureWebHostBuilder,startupFactory,
 					Environment.GetEnvironmentVariable("XAFTESTBrowser"), WindowPosition.FullScreen, LogContext.None,WindowPosition.BottomLeft|WindowPosition.Small)

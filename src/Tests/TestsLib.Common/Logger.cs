@@ -34,6 +34,7 @@ namespace Xpand.TestsLib.Common{
                 Console.WriteLine(ExitSignal);
                 Console.SetOut(OriginalOut);
                 CachedMessages.Do(Console.WriteLine).Enumerate();
+                CachedMessages.Clear();
                 
             }
             catch{

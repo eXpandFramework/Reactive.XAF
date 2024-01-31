@@ -110,7 +110,7 @@ namespace Xpand.TestsLib.Common {
         public static TimeSpan? DelayOnContextInterval=250.Milliseconds();
         public static IObservable<TSource> Assert<TSource>(this IObservable<TSource> source,Func<TSource,string> messageFactory,TimeSpan? timeout=null,[CallerMemberName]string caller=""){
             var timeoutMessage = messageFactory.MessageFactory(caller);
-            return source.ReplayFirstTake().Log(messageFactory,TestContext.Out, caller).ThrowIfEmpty(timeoutMessage).Timeout(timeout ?? TimeoutInterval, timeoutMessage)
+            return source.ReplayFirstTake().Log(messageFactory,Console.Out, caller).ThrowIfEmpty(timeoutMessage).Timeout(timeout ?? TimeoutInterval, timeoutMessage)
                 .DelayOnContext(DelayOnContextInterval)
                 ;
         }
