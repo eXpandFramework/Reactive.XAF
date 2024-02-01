@@ -9,8 +9,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Notification.BusinessObjects {
     [DeferredDeletion(false)]
     [DefaultProperty(nameof(ObjectType))]
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "XAF0023:Do not implement IObjectSpaceLink in the XPO types", Justification = "<Pending>")]
-    public class NotificationJobIndex:CustomBaseObject {
-        public NotificationJobIndex(Session session) : base(session) { }
+    public class NotificationJobIndex(Session session) : CustomBaseObject(session) {
         [Association("NotificationJob-NotificationJobIndexs")]
         public ObjectStateNotification ObjectStateNotification {
             get => _objectStateNotification;

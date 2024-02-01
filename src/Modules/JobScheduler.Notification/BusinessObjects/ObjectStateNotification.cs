@@ -14,17 +14,14 @@ using EditorAliases = DevExpress.ExpressApp.Editors.EditorAliases;
 
 namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Notification.BusinessObjects {
 	[System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "XAF0023:Do not implement IObjectSpaceLink in the XPO types", Justification = "<Pending>")]
-    public class ObjectStateNotification : Job {
-        public ObjectStateNotification(Session session) : base(session) {
-        }
-
+    public class ObjectStateNotification(Session session) : Job(session) {
         [Browsable(false)]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "XAF0002:XPO business class properties should not be overriden", Justification = "<Pending>")]
         public override bool UseChainJob => true;
 
         [Association("NotificationJob-NotificationJobIndexs")][Browsable(false)][Aggregated]
         public XPCollection<NotificationJobIndex> NotificationJobIndexs 
-            => GetCollection<NotificationJobIndex>(nameof(NotificationJobIndexs));
+            => GetCollection<NotificationJobIndex>();
 
         string _selectedObjectsCriteria;
         

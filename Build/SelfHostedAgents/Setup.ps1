@@ -67,7 +67,7 @@ This example runs the script with specified template VHD path, new VM name, and 
 param(
     $templateVHDPath = "D:\Hyper-V\Win-Test\Win-Test\Virtual Hard Disks\Win-Test.vhdx", 
     # $templateVHDPath , 
-    $newVMName = "Agent",                                   
+    $newVMName = $env:AgentVmName,                                   
     $newVHDPath = "D:\Hyper-V\AzureDevOpsAgents\$newVMName\$newVMName.vhdx",
     $vmMemory = 4096,
     $proccessor = 2,
@@ -104,8 +104,12 @@ $setupBlock = {
     Invoke-Command -VMName $newVMName -Credential $cred -ScriptBlock {
         Set-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -Name 'Hidden' -Value 1
         Set-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -Name 'HideFileExt' -Value 0
-        Get-NetConnectionProfile | Set-NetConnectionProfile -NetworkCategory Private
+
+        Set-NetConnectionProfile -InterfaceAlias ((Get-NetAdapter).Name) -NetworkCategory Private
+        Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\NetworkList\Profiles" -Name "Category" -Value 1
+
     }
+    Checkpoint-VM -Name $newVMName -SnapshotName "Start"
 }
 
 Start-VMJobs -numberOfVMs $numberOfVMs -scriptBlock $setupBlock -vmName $newVMName 

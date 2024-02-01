@@ -8,3 +8,4 @@ System.Text.Json
 Xpand.Collections
 DevExpress.ExpressApp.Blazor
 System.Threading.Tasks.Dataflow
+Microsoft.AspNetCore.Components
