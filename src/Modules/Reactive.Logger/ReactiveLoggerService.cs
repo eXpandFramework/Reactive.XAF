@@ -31,13 +31,12 @@ using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.Extensions.XAF.ObjectExtensions;
 using Xpand.Extensions.XAF.ObjectSpaceExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
-using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.Reactive.Logger{
     public static class ReactiveLoggerService{
         public static string RXLoggerLogPath{ get; set; }=@$"{AppDomain.CurrentDomain.ApplicationPath()}\{AppDomain.CurrentDomain.ApplicationName()}_RXLogger.log";
-        private static readonly ISubject<ITraceEvent> SavedTraceEventSubject=Subject.Synchronize(new Subject<ITraceEvent>());
+        private static readonly Subject<ITraceEvent> SavedTraceEventSubject=new();
         public static IObservable<ITraceEvent> ListenerEvents{ get; private set; }
         public static IObservable<ITraceEvent> SavedTraceEvent => SavedTraceEventSubject;
         private static ReactiveTraceListener _listener;
@@ -135,7 +134,8 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
 
 
         private static IObservable<Unit> RegisterListener(this XafApplication application, ReactiveTraceListener reactiveTraceListener) 
-            => application.Modules.WhenListChanged().SelectMany(_ => application.Modules.ToTraceSource().ToObservable(Transform.ImmediateScheduler))
+            => application.WhenSetupComplete()
+                .SelectMany(_ => application.Modules.ToTraceSource().ToObservable(Transform.ImmediateScheduler))
                 .Do(t => {
                     if (t.traceSource.Listeners.Contains(reactiveTraceListener)) return;
                     t.traceSource.Listeners.Add(reactiveTraceListener);
@@ -211,19 +211,18 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
                 .Buffer(TimeSpan.FromSeconds(3)).WhenNotEmpty()
                 .SelectMany(ts => application.ObjectSpaceProvider.NewObjectSpace(space => space.SaveTraceEvent(ts.Select(t => t.source).ToArray(),space.ParseCriteria(ts.First().other))));
 
-        private static bool Is(this ITraceEvent e,ObservableTraceStrategy strategy){
-            switch (e.RXAction){
-                case RXAction.OnNext when strategy is ObservableTraceStrategy.OnNext or ObservableTraceStrategy.OnNextOrOnError or ObservableTraceStrategy.All:
-                case RXAction.OnError when strategy is ObservableTraceStrategy.OnError or ObservableTraceStrategy.OnNextOrOnError or ObservableTraceStrategy.All:
-                case RXAction.Dispose when strategy==ObservableTraceStrategy.All :
-                case RXAction.Subscribe when strategy==ObservableTraceStrategy.All :
-                case RXAction.OnCompleted when strategy==ObservableTraceStrategy.All :
-                case RXAction.None when strategy==ObservableTraceStrategy.All :
-                    return true;
-                default:
-                    return false;
-            }
-        }
+        private static bool Is(this ITraceEvent e,ObservableTraceStrategy strategy)
+            => e.RXAction switch {
+                RXAction.OnNext when strategy is ObservableTraceStrategy.OnNext
+                    or ObservableTraceStrategy.OnNextOrOnError or ObservableTraceStrategy.All => true,
+                RXAction.OnError when strategy is ObservableTraceStrategy.OnError
+                    or ObservableTraceStrategy.OnNextOrOnError or ObservableTraceStrategy.All => true,
+                RXAction.Dispose when strategy == ObservableTraceStrategy.All => true,
+                RXAction.Subscribe when strategy == ObservableTraceStrategy.All => true,
+                RXAction.OnCompleted when strategy == ObservableTraceStrategy.All => true,
+                RXAction.None when strategy == ObservableTraceStrategy.All => true,
+                _ => false
+            };
 
         public static IObservable<TraceEvent> SaveTraceEvent(this IObjectSpace objectSpace,
             IList<ITraceEvent> traceEventMessages, CriteriaOperator criteria){

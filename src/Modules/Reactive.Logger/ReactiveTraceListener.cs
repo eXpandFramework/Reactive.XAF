@@ -26,9 +26,8 @@ namespace Xpand.XAF.Modules.Reactive.Logger {
         public IObservable<ITraceEvent> EventTrace => _eventTraceSubject.ObserveOnDefault();
 
         public override void Flush() {
-            if (!_isDisposed&&!DisableFileWriter) {
-                base.Flush();
-            }
+            if (_isDisposed || DisableFileWriter) return;
+            base.Flush();
         }
 
         public void Push(ITraceEvent message) {
@@ -39,9 +38,8 @@ namespace Xpand.XAF.Modules.Reactive.Logger {
         
         private void PushMessage(ITraceEvent traceEventMessage) {
             _eventTraceSubject.OnNext(traceEventMessage);
-            if (!_isDisposed&&!DisableFileWriter) {
-                base.WriteTrace(null, traceEventMessage.Source, traceEventMessage.TraceEventType, 0, traceEventMessage.Message, Guid.Empty,null);
-            }
+            if (_isDisposed || DisableFileWriter) return;
+            base.WriteTrace(null, traceEventMessage.Source, traceEventMessage.TraceEventType, 0, traceEventMessage.Message, Guid.Empty,null);
         }
     }
 

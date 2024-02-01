@@ -8,6 +8,7 @@ using DevExpress.ExpressApp;
 using DevExpress.Utils.Svg;
 using Fasterflect;
 using Xpand.Extensions.AppDomainExtensions;
+using Xpand.Extensions.EventArgExtensions;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
@@ -16,10 +17,19 @@ using Xpand.Extensions.XAF.XafApplicationExtensions;
 namespace Xpand.XAF.Modules.Reactive.Services{
     public static class ShowMessageExtensions {
         private static readonly ISubject<MessageOptions> MessageSubject = Subject.Synchronize(new Subject<MessageOptions>());
+        private static readonly ISubject<GenericEventArgs<IObservable<MessageOptions>>> CustomizeMessageSubject = new Subject<GenericEventArgs<IObservable<MessageOptions>>>();
+
+        public static IObservable<GenericEventArgs<IObservable<MessageOptions>>> WhenCustomizeMessage(this XafApplication application) 
+            => CustomizeMessageSubject.AsObservable();
 
         internal static IObservable<Unit> ShowMessages(this XafApplication application)
             => Observable.If(() => application.GetPlatform()==Platform.Win,MessageSubject.BufferWhen(
-                    application.WhenSynchronizationContext().Select(context => context),source => source.ObserveLatestOnContext())
+                    application.WhenSynchronizationContext(),source => source.ObserveLatestOnContext())
+                .SelectMany(options => {
+                    var e = new GenericEventArgs<IObservable<MessageOptions>>(options.Observe());
+                    CustomizeMessageSubject.OnNext(e);
+                    return e.Instance;
+                })
 	            .Do(options => application.ShowViewStrategy.ShowMessage(options))
 	            .ToUnit());
         

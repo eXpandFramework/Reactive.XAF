@@ -8,10 +8,7 @@ using Xpand.XAF.Persistent.BaseImpl;
 
 namespace Xpand.Extensions.XAF.Xpo.BaseObjects {
     [DefaultProperty(nameof(NotificationMessage))]
-    public class ErrorEvent:CustomBaseObject,ISupportNotifications{
-        public ErrorEvent(Session session) : base(session){
-        }
-
+    public class ErrorEvent(Session session) : CustomBaseObject(session), ISupportNotifications {
         string _notificationMessage;
 
         [Size(SizeAttribute.Unlimited)][XafDisplayName("Msg")]

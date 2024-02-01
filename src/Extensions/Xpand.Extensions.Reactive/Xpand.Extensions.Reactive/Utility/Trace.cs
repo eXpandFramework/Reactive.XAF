@@ -10,6 +10,7 @@ using EnumsNET;
 using Fasterflect;
 using Xpand.Extensions.ExceptionExtensions;
 using Xpand.Extensions.LinqExtensions;
+using Xpand.Extensions.StringExtensions;
 using Xpand.Extensions.Tracing;
 using Xpand.Extensions.TypeExtensions;
 
@@ -111,7 +112,7 @@ namespace Xpand.Extensions.Reactive.Utility{
                 value = calculateValue.Change<string>();
             }
             var mName = memberName;
-            if (m == "OnNext"){
+            if (m.IsEqualIgnoreCase(nameof(RXAction.OnNext))){
                 mName = new[]{memberName," =>",GetSourceName<TSource>()}.JoinString();
             }
 
