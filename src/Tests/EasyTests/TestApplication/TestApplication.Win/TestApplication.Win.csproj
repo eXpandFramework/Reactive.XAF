@@ -107,7 +107,7 @@
     <PackageReference Include="DevExpress.ExpressApp.EasyTest.WinAdapter" Version="23.2.4" />
     <PackageReference Include="DevExpress.EasyTest" Version="23.2.4" />
     <PackageReference Include="Google.Apis.People.v1" Version="1.25.0.830" />
-    <PackageReference Include="Xpand.XAF.Win.All" Version="4.232.2.10" />
+    <PackageReference Include="Xpand.XAF.Win.All" Version="4.232.3.0" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\..\..\..\Common\AssemblyInfoVersion.cs" Link="Properties\AssemblyInfoVersion.cs" />

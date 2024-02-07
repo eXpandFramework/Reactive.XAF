@@ -287,21 +287,21 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |<!-- -->|<!-- -->
 |----|----
 |**DevExpress.ExpressApp.Blazor.All**|**Any**
-|[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.232.2
- |Xpand.Extensions.Blazor|4.232.2
- |Xpand.Extensions.Reactive|4.232.2
- |Xpand.Extensions.XAF|4.232.2
- |Xpand.Extensions|4.232.2
- |Xpand.Extensions.XAF.Xpo|4.232.2
- |[Xpand.XAF.Modules.Blazor](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Blazor)|4.232.2
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.232.2
+|[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.232.3
+ |Xpand.Extensions.Blazor|4.232.3
+ |Xpand.Extensions.Reactive|4.232.3
+ |Xpand.Extensions.XAF|4.232.3
+ |Xpand.Extensions|4.232.3
+ |Xpand.Extensions.XAF.Xpo|4.232.3
+ |[Xpand.XAF.Modules.Blazor](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Blazor)|4.232.3
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.232.3
  |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
  |System.Reactive|6.0.0
  |Xpand.Patcher|3.0.24
  |Hangfire.Core|1.7.35
  |Hangfire.AspNetCore|1.7.35
  |Microsoft.CodeAnalysis|4.2.0
- |System.Data.SqlClient|4.8.5
+ |System.Data.SqlClient|4.8.6
  |System.Threading.Tasks.Dataflow|7.0.0
  |System.Security.Cryptography.ProtectedData|8.0.0
  |System.Configuration.ConfigurationManager|6.0.1
@@ -309,7 +309,7 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |System.ServiceModel.Http|4.10.2
  |System.CodeDom|6.0.0
  |System.Text.Json|7.0.2
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.232.2
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.232.3
 
 ## Issues-Debugging-Troubleshooting
 
