@@ -57,9 +57,9 @@ namespace Xpand.Extensions.Reactive.Utility {
             });
 
         public static IObservable<T> DoOnSubscribe<T>(this IObservable<T> source, Action action) 
-            => Observable.Defer(() => {
+            => Observable.Create<T>(observer => {
                 action();
-                return source;
+                return source.Subscribe(observer);
             });
 
         public static IObservable<T> DoOnComplete<T>(this IObservable<T> source, Action onComplete)
