@@ -1,9 +1,10 @@
 param(
-    $VMName = "Agent",                                   
+    $VMName = $env:AgentVmName,                                   
     $numberOfVMs = $env:AzAgentCount,
     $pass = $env:agentPass,
     $user = $env:AgentUser,
     $packageSource="..\..\bin\nupkg\",
+    $VMNamePackagesPath=$env:AgentPackagesPath,
     [switch]$KeepCache
 )
 $functionsScriptPath = Join-Path -Path $PSScriptRoot -ChildPath "functions.ps1" 
@@ -20,18 +21,20 @@ $setupBlock = {
         $clearCache = !$using:KeepCache.IsPresent
         $cred = New-Object System.Management.Automation.PSCredential($using:user, $(ConvertTo-SecureString $using:pass -AsPlainText -Force))
         $packages = Get-ChildItem $using:packageSource
+        $VMNamePackagesPath=$using:VMNamePackagesPath
         Invoke-Command -VMName $newVMName -Credential $cred -ScriptBlock {
             param($innerClearCache)
-            New-Item -Path 'C:\AgentPackages' -ItemType Directory -ErrorAction SilentlyContinue
-            if (!(dotnet nuget list source | Select-String AgentPackages)){
-                dotnet nuget add source c:\AgentPackages -n AgentPackages
+            New-Item -Path $using:VMNamePackagesPath -ItemType Directory -ErrorAction SilentlyContinue
+            if ((dotnet nuget list source | Select-String AgentPackages)){
+                dotnet nuget remove source "AgentPackages"
             }
+            dotnet nuget add source $using:VMNamePackagesPath -n AgentPackages
             if ($innerClearCache){
                 dotnet nuget locals all --clear
                 Get-ChildItem c:\agent -Filter ".nuget" -Recurse | Remove-Item -Recurse -Force
             }
         } -ArgumentList $clearCache 
-        $packages | Copy-Item -Destination c:\AgentPackages -ToSession (New-PSSession -VMName $newVmname -Credential $cred) -Force    
+        $packages | Copy-Item -Destination $using:VMNamePackagesPath -ToSession (New-PSSession -VMName $newVmname -Credential $cred) -Force    
     }
 }
 

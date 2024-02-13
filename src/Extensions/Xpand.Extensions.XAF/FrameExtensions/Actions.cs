@@ -66,6 +66,9 @@ namespace Xpand.Extensions.XAF.FrameExtensions{
             => frame.GetController<NewObjectViewController>().NewObjectAction;
         public static SimpleAction SaveAction(this Frame frame) 
             => frame.GetController<ModificationsController>().SaveAction;
+        public static SimpleAction RefreshAction(this Frame frame) 
+            => frame.GetController<RefreshController>().RefreshAction;
+        
         public static SimpleAction SaveAndCloseAction(this Frame frame) 
             => frame.GetController<ModificationsController>().SaveAndCloseAction;
     }

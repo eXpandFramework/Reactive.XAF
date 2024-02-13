@@ -45,33 +45,34 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => listView.Application().GetPlatform() == Platform.Blazor
                 ? listView.Application().GetRequiredService<IObjectSelector<TO>>().SelectObject(listView, objects)
                 : listView.Editor.WhenControlsCreated()
-                    .SelectMany(editor => editor.Control.WhenEvent("DataSourceChanged").To(listView).StartWith(listView)
-                        .WhenNotDefault(_ => editor.Control.GetPropertyValue("DataSource"))).To(listView)
+                    .SelectMany(editor => editor.WhenEvent("DataSourceChanged").To(listView).StartWith(listView)
+                        .WhenNotDefault(_ => editor.GetPropertyValue("DataSource"))
+                        .WhenNotDefault(_ => editor.List.Count)
+                    )
+                    .To(listView)
                     .SelectObject(objects);
 
         static IObservable<T> SelectObject<T>(this IObservable<ListView> source,params T[] objects) where T : class 
             => source.SelectMany(view => {
-                if (view.Editor.GetType().InheritsFrom(GridListEditorType)){
-                    var gridView = view.Editor.GetPropertyValue("GridView");
-                    // gridView.CallMethod("ClearSelection");
-                    var focus = gridView.GetPropertyValue("FocusedRowHandle");
-                    return objects.ToNowObservable().SelectManySequential(arg => gridView.WhenSelectRow(arg)
-                        .BufferUntilCompleted().SelectMany(handles => {
-                            if (handles.First()!=(int)focus) {
-                                gridView.CallMethod("UnselectRow", focus);
-                            }
-                            return handles;
-                        }).To(arg));
-                }
-                throw new NotImplementedException(nameof(view.Editor));
+                if (!view.Editor.GetType().InheritsFrom(GridListEditorType))
+                    throw new NotImplementedException(nameof(view.Editor));
+                var gridView = view.Editor.GetPropertyValue("GridView");
+                gridView.CallMethod("Focus");
+                var focus = gridView.GetPropertyValue("FocusedRowHandle");
+                return objects.ToNowObservable().SelectManySequential(arg => gridView.WhenSelectRow(arg)
+                    .BufferUntilCompleted().SelectMany(handles => {
+                        if (handles.First() == (int)focus) return handles;
+                        gridView.CallMethod("UnselectRow", focus);
+                        return handles;
+                    }).To(arg));
             });
         
         static IObservable<int> WhenSelectRow<T>(this object gridView, T row) where T : class 
             => gridView.Defer(() => {
-                var rowHandle = (int)gridView.CallMethod("FindRow",row);
+                var rowHandle = gridView.RowHandle( row);
                 if ((int)gridView.GetPropertyValue("FocusedRowHandle") == rowHandle) {
                     gridView.CallMethod("SelectRow", rowHandle);
-                    return rowHandle.Observe();
+                    return rowHandle.Observe().Where(i =>i>-1 );
                 }
                 return Observable.While(() => {
                         gridView.CallMethod("MakeRowVisible",rowHandle);
@@ -83,6 +84,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                         gridView.SetPropertyValue("FocusedRowHandle", rowHandle);
                     }));
             });
+
+        private static int RowHandle<T>(this object gridView, T row) where T : class => (int)gridView.CallMethod("FindRow",row);
 
         public static IObservable<CustomizeShowViewParametersEventArgs> WhenNestedListViewProcessCustomizeShowViewParameters(
             this DetailView detailView, params Type[] objectTypes) 

@@ -18,7 +18,7 @@ steps:
       targetPath: '$(System.DefaultWorkingDirectory)\bin\Nupkg'
   - task: AzurePowerShell@5
     inputs:
-      azureSubscription: 'Visual Studio Enterprise(b48a609a-17f6-4e48-a317-54ab77fbf822)'
+      azureSubscription: 'Visual Studio Enterprise(1)(b48a609a-17f6-4e48-a317-54ab77fbf822)'
       ScriptType: 'InlineScript'
       Inline: |
         $ErrorView="NormalView"

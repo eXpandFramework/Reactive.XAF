@@ -91,8 +91,9 @@ namespace Xpand.TestsLib.Common {
         private static IObservable<Frame> AssertListViewHasObject<TObject>(this Frame frame, Func<TObject, bool> matchObject, int count, TimeSpan? timeout, string caller, View view) where TObject : class
             => view.ToListView().WhenObjects<TObject>()
                 .Where(objects => count == 0 || objects.Length == count)
-                .SelectMany(objects => objects.Where(value => matchObject?.Invoke(value)??true).ToNowObservable()).Take(1)
-                .SelectMany(value => frame.Application.GetRequiredService<IObjectSelector<TObject>>().SelectObject(view.ToListView(),value))
+                .SelectMany(objects => objects.Where(value => matchObject?.Invoke(value)??true).ToNowObservable()).DelayOnContext()
+                .Select(arg => view.ObjectSpace.GetObject(arg))
+                .Select(value => frame.Application.GetRequiredService<IObjectSelector<TObject>>().SelectObject(view.ToListView(),value)).Switch()
                 // .SelectMany(value => view.ToListView().SelectObject(value)).Select(o => o)
                 .Assert(_ => $"{typeof(TObject).Name}-{view.Id}",caller:caller,timeout:timeout)
                 .ReplayFirstTake().To(frame);

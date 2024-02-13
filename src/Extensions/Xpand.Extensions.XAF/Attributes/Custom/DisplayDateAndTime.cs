@@ -24,17 +24,17 @@ namespace Xpand.Extensions.XAF.Attributes.Custom {
         [Description("mm:ss:fff")]
         mm_ss_fff
     }
-    public class DisplayDateAndTime : Attribute, ICustomAttribute {
-        private readonly string _dateString;
-        private readonly string _timeString;
+    public class DisplayDateAndTime(
+        DisplayDateType displayDateType = DisplayDateType.ddMMyy,
+        DisplayTimeType displayTimeType = DisplayTimeType.hh_mm_ss)
+        : Attribute, ICustomAttribute {
+        private readonly string _dateString = displayDateType.AsString(EnumFormat.Description);
+        private readonly string _timeString = displayTimeType.AsString(EnumFormat.Description);
         public DisplayDateAndTime():this(DisplayDateType.ddMMyy) { }
 
-        public DisplayDateAndTime(DisplayDateType displayDateType = DisplayDateType.ddMMyy,DisplayTimeType displayTimeType=DisplayTimeType.hh_mm_ss) {
-            _dateString = displayDateType.AsString(EnumFormat.Description);
-            _timeString = displayTimeType.AsString(EnumFormat.Description);
-        }
         string ICustomAttribute.Name => "DisplayFormat;EditMask;EditMaskType";
 
-        string ICustomAttribute.Value => $"{{0: {_dateString}{_timeString}}};{_dateString} {_timeString};DateTime";
+        string ICustomAttribute.Value => $"{{0: {_dateString} {_timeString}}};{_dateString} {_timeString};DateTime";
     }
+    
 }
