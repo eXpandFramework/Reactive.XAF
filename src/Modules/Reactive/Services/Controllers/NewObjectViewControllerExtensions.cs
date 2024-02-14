@@ -4,9 +4,11 @@ using System.Reactive;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.SystemModule;
+using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
+using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.TypesInfoExtensions;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
 
@@ -38,25 +40,33 @@ namespace Xpand.XAF.Modules.Reactive.Services.Controllers{
         public static IObservable<CollectTypesEventArgs> WhenCollectDescendantTypes(this NewObjectViewController controller) 
             => controller.WhenEvent<CollectTypesEventArgs>(nameof(NewObjectViewController.CollectDescendantTypes));
 
+        public static IObservable<Unit> ReplaceNewObjectTypes<TParentObject>(this XafApplication application,Type listViewObjectType,params Type[] types)
+            => application.WhenFrame(listViewObjectType,nesting:Nesting.Nested)
+                .SelectUntilViewClosed(frame => frame.ParentObject() is TParentObject ? frame.ReplaceNewObjectTypes(types).ToUnit() : Observable.Empty<Unit>()).ToUnit();
+        
+        public static IObservable<CollectTypesEventArgs> ReplaceNewObjectTypes(this Frame frame, params Type[] objectTypes)
+            => frame.GetController<NewObjectViewController>().ReplaceTypes(objectTypes);
+        
         public static IObservable<CollectTypesEventArgs> ReplaceTypes(this NewObjectViewController controller, params Type[] objectTypes)
             => controller.ReplaceTypes(null, objectTypes);
         
         public static IObservable<CollectTypesEventArgs>  ReplaceTypes(this NewObjectViewController controller,Func<ObjectCreatingEventArgs,IObservable<object>> modifyObject,params Type[] objectTypes)
             =>controller.WhenCollectDescendantTypes().Select(e => {
-                    e.Types.Clear();
-                    objectTypes.ForEach(type => e.Types.Add(type));
+                    e.Types.Except(e.Types.Where(objectTypes.Contains)).ToArray().Do(type => e.Types.Remove(type)).Enumerate();
+                    objectTypes.Except(e.Types).Do(type => e.Types.Add(type)).Enumerate();
                     return e;
                 })
                 .Merge(controller.DeferAction(viewController => viewController.UpdateNewObjectAction()).IgnoreElements().To<CollectTypesEventArgs>())
-                .Merge(controller.WhenObjectCreating().Where(e => objectTypes.Contains(e.ObjectType))
-                    .SelectMany(e => {
-                        e.ObjectSpace = e.ObjectType.ToTypeInfo().IsPersistent ? controller.View.ObjectSpace.CreateNestedObjectSpace()
-                            : controller.Application.CreateObjectSpace(e.ObjectType);
-                        e.ObjectSpace.Cast<CompositeObjectSpace>().PopulateAdditionalObjectSpaces(controller.Application);
-                        e.NewObject = e.ObjectSpace.CreateObject(e.ObjectType);
-                        return modifyObject?.Invoke(e)??Observable.Empty<object>();
-                    })
-                    .IgnoreElements().To<CollectTypesEventArgs>());
+                // .Merge(controller.WhenObjectCreating().Where(e => objectTypes.Contains(e.ObjectType))
+                //     .SelectMany(e => {
+                //         // e.ObjectSpace = e.ObjectType.ToTypeInfo().IsPersistent ? controller.View.ObjectSpace.CreateNestedObjectSpace()
+                //         //     : controller.Application.CreateObjectSpace(e.ObjectType);
+                //         // e.ObjectSpace.Cast<CompositeObjectSpace>().PopulateAdditionalObjectSpaces(controller.Application);
+                //         // e.NewObject = e.ObjectSpace.CreateObject(e.ObjectType);
+                //         return modifyObject?.Invoke(e)??Observable.Empty<object>();
+                //     })
+                //     .IgnoreElements().To<CollectTypesEventArgs>())
+            ;
         
         public static IObservable<ProcessNewObjectEventArgs> WhenAddObjectToCollection(this NewObjectViewController controller) 
             => controller.WhenEvent<ProcessNewObjectEventArgs>(nameof(NewObjectViewController.CustomAddObjectToCollection));

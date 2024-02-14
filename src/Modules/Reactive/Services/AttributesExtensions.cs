@@ -19,6 +19,7 @@ using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.Attributes;
 using Xpand.Extensions.XAF.Attributes.Custom;
+using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.Extensions.XAF.TypesInfoExtensions;
 using Xpand.Extensions.XAF.ViewExtensions;
@@ -49,28 +50,42 @@ namespace Xpand.XAF.Modules.Reactive.Services {
             => manager.WhenApplication(application => application.WhenFrame(typeof(object),ViewType.DetailView)
                 .SelectMany(frame => frame.View.ObjectTypeInfo.AttributedMembers<LinkUnlinkPropertyAttribute>().ToNowObservable()
                     .SelectMany(t => frame.View.AsDetailView().NestedListViews(t.memberInfo.ListElementType)
-                        .Select(editor => editor.Frame.GetController<LinkUnlinkController>())
-                        .SelectMany(controller => controller.LinkAction.WhenExecuteCompleted()
-                            .SelectMany(e => e.PopupWindowViewSelectedObjects.Cast<object>())
-                            .Do(value => {
-                                var memberInfo = frame.View.ObjectTypeInfo.FindMember(t.attribute.PropertyName);
-                                if (memberInfo.ListElementType != t.memberInfo.ListElementType) {
-                                    var target = frame.View.ObjectSpace.CreateObject(memberInfo.ListElementType);
-                                    memberInfo.AssociatedMemberInfo.SetValue(target,frame.View.CurrentObject);
-                                    memberInfo.ListElementTypeInfo.Members.Single(info =>info.IsPublic&& info.MemberType==t.memberInfo.ListElementType)
-                                        .SetValue(target,value);
-                                    value = target;
-                                }
-                                ((IList)memberInfo.GetValue(frame.View.CurrentObject)).Add(value);
-                            })
-                            .MergeToUnit(controller.UnlinkAction.WhenExecuteCompleted()
-                                .SelectMany(e => e.SelectedObjects.Cast<object>())
-                                .Do(value => ((IList)frame.View.ObjectTypeInfo.FindMember(t.attribute.PropertyName)
-                                    .GetValue(frame.View.CurrentObject)).Remove(value)))))))
+                        .SelectMany(editor => editor.WhenLinkUnlinkAction( frame, t)
+                            .Merge(editor.WhenNewObjectAction( frame, t)))
+                        )))
                 .MergeToUnit(manager.WhenCustomizeTypesInfo()
-                    .SelectMany(e => e.TypesInfo.Members<LinkUnlinkPropertyAttribute>().Where(t => t.info.Owner.FindMember(t.attribute.PropertyName).ListElementType.IsAbstract)
-                        .Do(t => throw new InvalidOperationException($"{nameof(Xpand.Extensions.XAF.Attributes.LinkUnlinkPropertyAttribute)} {t.attribute.PropertyName} on {t.info} is abstract"))));
-                
+                    .SelectMany(e => e.TypesInfo.Members<LinkUnlinkPropertyAttribute>().Where(t => t.info.Owner.FindMember(t.attribute.PropertyName).ListElementType.IsAbstract)));
+
+        private static IObservable<Unit> WhenNewObjectAction(this ListPropertyEditor editor, Frame frame, (LinkUnlinkPropertyAttribute attribute, IMemberInfo memberInfo) t) 
+            => editor.Frame.NewObjectAction().WhenExecuteCompleted()
+                .SelectMany(e => e.ShowViewParameters.CreatedView.ObjectSpace.WhenCommitted().Take(1).To(e))
+                .Do(e => {
+                    var memberInfo = frame.View.ObjectTypeInfo.FindMember(t.attribute.PropertyName);
+                    ((IList)memberInfo.GetValue(frame.View.CurrentObject))
+                        .Add(frame.View.ObjectSpace.GetObject(e.ShowViewParameters.CreatedView.CurrentObject) );
+                }).ToUnit();
+
+        private static IObservable<Unit> WhenLinkUnlinkAction(this ListPropertyEditor editor, Frame frame, (LinkUnlinkPropertyAttribute attribute, IMemberInfo memberInfo) t){
+            var controller = editor.Frame.GetController<LinkUnlinkController>();
+            return controller.LinkAction.WhenExecuteCompleted()
+                .SelectMany(e => e.PopupWindowViewSelectedObjects.Cast<object>())
+                .Do(value => {
+                    var memberInfo = frame.View.ObjectTypeInfo.FindMember(t.attribute.PropertyName);
+                    if (!memberInfo.ListElementType.IsAssignableFrom(t.memberInfo.ListElementType)) {
+                        var target = frame.View.ObjectSpace.CreateObject(memberInfo.ListElementType);
+                        memberInfo.AssociatedMemberInfo.SetValue(target,frame.View.CurrentObject);
+                        memberInfo.ListElementTypeInfo.Members.Single(info =>info.IsPublic&& info.MemberType==t.memberInfo.ListElementType)
+                            .SetValue(target,value);
+                        value = target;
+                    }
+                    ((IList)memberInfo.GetValue(frame.View.CurrentObject)).Add(value);
+                })
+                .MergeToUnit(controller.UnlinkAction.WhenExecuteCompleted()
+                    .SelectMany(e => e.SelectedObjects.Cast<object>())
+                    .Do(value => ((IList)frame.View.ObjectTypeInfo.FindMember(t.attribute.PropertyName)
+                        .GetValue(frame.View.CurrentObject)).Remove(value)));
+        }
+        
         static IObservable<Unit> ListViewShowFooterCollection(this ApplicationModulesManager manager)
             => manager.WhenGeneratingModelNodes<IModelViews>()
                 .SelectMany(views => views.OfType<IModelListView>()).Where(view =>
