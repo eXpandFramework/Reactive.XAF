@@ -16,6 +16,7 @@ using Fasterflect;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Combine;
+using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.Attributes;
 using Xpand.Extensions.XAF.Attributes.Custom;
@@ -57,7 +58,7 @@ namespace Xpand.XAF.Modules.Reactive.Services {
                     .SelectMany(e => e.TypesInfo.Members<LinkUnlinkPropertyAttribute>().Where(t => t.info.Owner.FindMember(t.attribute.PropertyName).ListElementType.IsAbstract)));
 
         private static IObservable<Unit> WhenNewObjectAction(this ListPropertyEditor editor, Frame frame, (LinkUnlinkPropertyAttribute attribute, IMemberInfo memberInfo) t) 
-            => editor.Frame.NewObjectAction().WhenExecuteCompleted()
+            => editor.Frame.NewObjectAction().WhenExecuted()
                 .SelectMany(e => e.ShowViewParameters.CreatedView.ObjectSpace.WhenCommitted().Take(1).To(e))
                 .Do(e => {
                     var memberInfo = frame.View.ObjectTypeInfo.FindMember(t.attribute.PropertyName);

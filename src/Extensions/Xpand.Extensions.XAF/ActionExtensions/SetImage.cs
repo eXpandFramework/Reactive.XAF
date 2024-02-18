@@ -37,6 +37,8 @@ namespace Xpand.Extensions.XAF.ActionExtensions {
         Language,
         [Description("Find")]
         Find,
+        [Description("Security_Key")]
+        Key,
         [Description("Actions_Bookmark")]
         Mark,
         [Description("UpdateField")]

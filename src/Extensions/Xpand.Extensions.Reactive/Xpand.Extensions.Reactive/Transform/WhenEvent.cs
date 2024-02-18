@@ -41,15 +41,15 @@ namespace Xpand.Extensions.Reactive.Transform {
 
             if (eventInfo.info.EventHandlerType == typeof(EventHandler)) {
                 return Observable.FromEventPattern(
-                        handler => eventInfo.add.Invoke(source, new object[] { handler }),
-                        handler => eventInfo.remove.Invoke(source, new object[] { handler }),ImmediateScheduler)
+                        handler => eventInfo.add.Invoke(source, [handler]),
+                        handler => eventInfo.remove.Invoke(source, [handler]),ImmediateScheduler)
                     .Select(pattern => new EventPattern<TArgs>(pattern.Sender, (TArgs)pattern.EventArgs))
                     .TakeUntilDisposed(source as IComponent,caller)
                     ;    
             }
             return Observable.FromEventPattern<TArgs>(
-                    handler => eventInfo.add.Invoke(source, new object[] { handler }),
-                    handler => eventInfo.remove.Invoke(source, new object[] { handler }),ImmediateScheduler)
+                    handler => eventInfo.add.Invoke(source, [handler]),
+                    handler => eventInfo.remove.Invoke(source, [handler]),ImmediateScheduler)
                 .Select(pattern => new EventPattern<TArgs>(pattern.Sender, pattern.EventArgs))
                 .TakeUntilDisposed(source as IComponent,caller)
                 ;
