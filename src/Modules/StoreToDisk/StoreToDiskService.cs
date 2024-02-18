@@ -31,11 +31,10 @@ using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.StoreToDisk{
     public static class StoreToDiskService{
-        internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) 
-            => manager.WhenApplication(application => application.WhenSetupComplete()
+        internal static IObservable<Unit> Connect(this XafApplication application) 
+            => application.WhenSetupComplete()
                 .SelectMany(_ =>application.StoreToDisk(application.Model.ToReactiveModule<IModelReactiveModulesStoreToDisk>().StoreToDisk.Folder)
-                    .MergeToUnit(application.DailyBackup()) )
-                .ToUnit());
+                    .MergeToUnit(application.DailyBackup()) );
         
 
         private static IObservable<Unit> DailyBackup(this XafApplication application)
@@ -86,6 +85,7 @@ namespace Xpand.XAF.Modules.StoreToDisk{
                     .SelectMany(committed => committed.details.ToArray()
                         .LoadFromDisk(application, data.keyMember, data.memberInfos, data.typeInfo, data.filePath, data.attribute)
                         .StoreToDisk(committed,data)))
+                
                 .ToUnit();
         
         private static IObservable<JsonObject[]> StoreToDisk(this IObservable<(object[] objects, JsonArray JsonArray)> source,

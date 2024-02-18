@@ -9,18 +9,16 @@ namespace Xpand.XAF.Modules.StoreToDisk {
     public sealed class StoreToDiskModule : ReactiveModuleBase {
         public static ReactiveTraceSource TraceSource { get; set; }
 
-        static StoreToDiskModule() {
-            TraceSource = new ReactiveTraceSource(nameof(StoreToDiskModule));
-        }
+        static StoreToDiskModule() => TraceSource = new ReactiveTraceSource(nameof(StoreToDiskModule));
 
         public StoreToDiskModule() {
             RequiredModuleTypes.Add(typeof(SystemModule));
             RequiredModuleTypes.Add(typeof(ReactiveModule));
         }
-
-        public override void Setup(ApplicationModulesManager moduleManager) {
-            base.Setup(moduleManager);
-            moduleManager.Connect().Finally(() => {}).Subscribe(this);
+        
+        public override void Setup(XafApplication application) {
+            base.Setup(application);
+            application.Connect().Finally(() => {}).Subscribe(this);
         }
 
         public override void ExtendModelInterfaces(ModelInterfaceExtenders extenders) {
