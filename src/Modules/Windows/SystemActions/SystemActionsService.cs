@@ -78,7 +78,7 @@ namespace Xpand.XAF.Modules.Windows.SystemActions {
         }
 
         private static IObservable<(HotKeyManager hotKeyManager, Frame window)> WhenHotKeyManager(this XafApplication application) 
-            => application.WhenFrameCreated(TemplateContext.ApplicationWindow).TemplateChanged()
+            => application.WhenFrame(typeof(object)).Take(1)
                 .Select(window => {
                     var hotKeyManager = new HotKeyManager((IWin32Window)window.Template);
                     CustomizeHotKeyManagerSubject.OnNext(hotKeyManager);

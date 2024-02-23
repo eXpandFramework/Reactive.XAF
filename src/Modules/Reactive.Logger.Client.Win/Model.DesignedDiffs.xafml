@@ -19,14 +19,13 @@
       <TraceSources PersistStrategy="OnNextOrOnError" PersistStrategyCriteria="[ApplicationTitle] &lt;&gt; 'RXLoggerClient'" />
     </ReactiveLogger>
     <Windows>
-      <SystemActions>
-        <SystemAction ActionId="ClearListView" HotKey="Control + LWin + Delete" IsNewNode="True" />
-      </SystemActions>
+      <HotkeyActions>
+        <SystemAction Id="ClearListView" Action="ClearListView" HotKey="Control + LWin + Delete" IsNewNode="True" />
+      </HotkeyActions>
     </Windows>
   </ReactiveModules>
   <SchemaModules>
     <SchemaModule Name="SystemModule" Version="19.1.5.0" IsNewNode="True" />
     <SchemaModule Name="SystemWindowsFormsModule" Version="19.1.5.0" IsNewNode="True" />
   </SchemaModules>
-  
 </Application>

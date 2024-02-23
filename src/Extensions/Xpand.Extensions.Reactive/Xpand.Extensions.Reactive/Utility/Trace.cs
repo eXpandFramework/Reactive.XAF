@@ -115,7 +115,7 @@ namespace Xpand.Extensions.Reactive.Utility{
             if (m.IsEqualIgnoreCase(nameof(RXAction.OnNext))){
                 mName = new[]{memberName," =>",GetSourceName<TSource>()}.JoinString();
             }
-
+ 
             var fullValue = AllValues(name, sourceFilePath, sourceLineNumber, mName, m, value).JoinString();
             var traceEventMessage = new TraceEventMessage() {
                 Action = m, RXAction = RXActions[m], Line = sourceLineNumber, DateTime = DateTime.Now,
@@ -165,23 +165,11 @@ namespace Xpand.Extensions.Reactive.Utility{
             => messageFactory != null ? messageFactory(v) : v is Exception exception?exception.GetAllInfo():v;
 
         private static Action<ITraceEvent> TraceError(this Action<ITraceEvent> traceAction, TraceSource traceSource) =>
-	        traceAction ?? (s => {
-		        if (traceSource != null){
-                    traceSource.Push(s);
-		        }
-		        else{
-                    throw new NotImplementedException();
-		        }
-	        });
+	        traceAction ?? traceSource.Push;
 
 
         private static Action<ITraceEvent> Push(this Action<ITraceEvent> traceAction, TraceSource traceSource) 
-            => traceAction ?? (s => {
-		        if (traceSource != null){
-			        traceSource.Push(s);
-		        }
-		        else{ throw new NotImplementedException(); }
-            });
+            => traceAction ?? traceSource.Push;
     }
     [DebuggerDisplay("{" + nameof(ApplicationTitle) + "}-{" + nameof(Location) + "}-{" + nameof(RXAction) + ("}-{" + nameof(Method) + "}{"+nameof(Value)+"}"))]
     public class TraceEventMessage:ITraceEvent{
@@ -190,6 +178,8 @@ namespace Xpand.Extensions.Reactive.Utility{
         public TraceEventMessage(){
             
         }
+
+        public override string ToString() => $"{{{ApplicationTitle}}}-{{{Location}}}-{{{RXAction}}}-{{{{{Method}}}}} {{{Value}";
 
         public string ApplicationTitle{ get; set; }
         public string Source{ get; set; }
