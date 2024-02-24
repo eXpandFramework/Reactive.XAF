@@ -94,7 +94,13 @@ namespace Xpand.XAF.Modules.Reactive.Services {
                 .Do(view => view.IsFooterVisible = true)
                 .SelectMany(view => view.Columns.SelectMany(column =>
                     column.ModelMember.MemberInfo.FindAttributes<ColumnSummaryAttribute>(true)
-                        .Do(attribute => column.Summary.AddNode<IModelColumnSummaryItem>().SummaryType = attribute.SummaryType)))
+                        .Do(attribute => column.Summary.AddNode<IModelColumnSummaryItem>().SummaryType = attribute.SummaryType)
+                        .ToUnit()
+                        .Concat(column.ModelMember.MemberInfo.FindAttributes<ColumnSortingAttribute>(true)
+                            .Do(attribute => {
+                                column.SortIndex = attribute.SortIndex;
+                                column.SortOrder=attribute.SortOrder;
+                            }).ToUnit())))
                 .ToUnit();
         
         static IObservable<Unit> HiddenActions(this ApplicationModulesManager manager)
