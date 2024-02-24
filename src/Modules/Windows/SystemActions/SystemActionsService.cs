@@ -8,6 +8,7 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Conditional;
+using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.ActionExtensions;
@@ -78,12 +79,13 @@ namespace Xpand.XAF.Modules.Windows.SystemActions {
         }
 
         private static IObservable<(HotKeyManager hotKeyManager, Frame window)> WhenHotKeyManager(this XafApplication application) 
-            => application.WhenFrame(typeof(object)).Take(1)
-                .Select(window => {
-                    var hotKeyManager = new HotKeyManager((IWin32Window)window.Template);
-                    CustomizeHotKeyManagerSubject.OnNext(hotKeyManager);
-                    return (hotKeyManager,window);
-                });
+            => application.WhenFrame(typeof(object)).OfType<Window>().Take(1)
+                .SelectMany(window => window.WhenTemplateChanged().StartWith(window).WhenNotDefault(frame => frame.Template)
+                    .Select(_ => {
+                        var hotKeyManager = new HotKeyManager((IWin32Window)window.Template);
+                        CustomizeHotKeyManagerSubject.OnNext(hotKeyManager);
+                        return (hotKeyManager, (Frame)window);
+                    }));
 
         internal static bool IsModifier(this Keys keys) {
             switch (keys) {
