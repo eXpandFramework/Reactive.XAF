@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Reactive;
@@ -12,6 +13,7 @@ using DevExpress.ExpressApp;
 using Grpc.Core;
 using MagicOnion.Client;
 using MagicOnion.Server;
+using Xpand.Extensions.ProcessExtensions;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Transform.System.Net;
@@ -87,26 +89,35 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
         private static IObservable<Server> StartServer(this  XafApplication application) 
 	        => application is ILoggerHubClientApplication ? Observable.Empty<Server>() : application.ServerPortsList().Take(1)
 			        .Select(modelServerPort => modelServerPort.ToServerPort().StartServer())
-			        .TraceRXLoggerHub(server => string.Join(", ",server.Ports.Select(port => $"{port.Host}, {port.Port}")));
+			        .TraceRXLoggerHub(server => string.Join(", ",server.Ports.Select(port => $"{port.Host}, {port.Port}")))
+	        ;
 
         private static IObservable<ITraceEventHub> ConnectClient(this XafApplication application) 
-	        => !(application is ILoggerHubClientApplication)? Observable.Empty<ITraceEventHub>()
+	        => application is not ILoggerHubClientApplication? Observable.Empty<ITraceEventHub>()
 		        : application.WhenCompatibilityChecked()
-			        .SelectMany(_ => application.DetectServer().ConnectClient())
+			        .SelectMany(_ => application.ClientPortsList()
+				        .Detect()
+				        .ConnectClient())
 			        ;
 
-        public static IObservable<IPEndPoint> DetectServer(this XafApplication application)
-	        => application.ClientPortsList().Select(point => point)
-		        .Listening().Take(1).Select(point => point)
-		        .ShowXafInfoMessage(point => point.ToString())
-		        .TraceRXLoggerHub(point => $"{point.Address}, {point.Port}");
+        
+        public static IObservable<IPEndPoint> Detect(this IObservable<IPEndPoint> source,[CallerMemberName]string caller="")
+	        => source.Select(point => point).Listening()
+		        .Select(point => {
+			        var process = point.Port.ProcessFromPort();
+			        
+			        return process.Id != Process.GetCurrentProcess().Id ? (process, point) : default;
+		        }).WhenNotDefault()
+		        .Select(point => point)
+		        .ShowXafInfoMessage(t => $"{caller} {t.process.ProcessName} {t.point.Address}:{t.point.Port}")
+		        .TraceRXLoggerHub(t => $"{t.point.Address}, {t.point.Port}").ToSecond();
 
+        
         public static IObservable<ITraceEventHub> ConnectClient(this IObservable<IPEndPoint> source) 
 	        => source.SelectMany(point => {
 			        var newClient = point.ToServerPort().NewClient(Receiver);
 			        return newClient.ConnectAsync().ToObservable()
-				        .Merge(Unit.Default.Observe()).To(newClient)
-				        .Select(hub => hub);
+				        .Merge(Unit.Default.Observe()).To(newClient);
 		        })
 		        .TraceRXLoggerHub()
 		        .Retry();

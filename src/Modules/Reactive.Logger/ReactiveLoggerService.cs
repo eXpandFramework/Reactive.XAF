@@ -46,7 +46,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
                 _listener ??= new ReactiveTraceListener();
                 _listener.Title = application.Title;
                 ListenerEvents = _listener.EventTrace.Publish().RefCount();
-                return application.BufferUntilCompatibilityChecked(ListenerEvents).SaveEvent(application).ToUnit()
+                return application.BufferUntilCompatibilityChecked(ListenerEvents.Select(Exception => Exception)).SaveEvent(application).ToUnit()
                         .Merge(application.Notifications())
                         .Merge(ListenerEvents.RefreshViewDataSource(application))
                         .Merge(application.RegisterListener(_listener))
