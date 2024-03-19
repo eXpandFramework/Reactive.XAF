@@ -64,12 +64,12 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |----|----
 |**DevExpress.ExpressApp**|**Any**
  |**DevExpress.Xpo**|**Any**
-|[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.232.3
- |Xpand.Extensions.Reactive|4.232.3
- |Xpand.Extensions.XAF|4.232.3
- |Xpand.Extensions|4.232.3
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.232.3
- |[Xpand.XAF.Modules.Reactive.Logger](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive.Logger)|4.232.3
+|[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.232.3.1
+ |Xpand.Extensions.Reactive|4.232.3.1
+ |Xpand.Extensions.XAF|4.232.3.1
+ |Xpand.Extensions|4.232.3.1
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.232.3.1
+ |[Xpand.XAF.Modules.Reactive.Logger](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive.Logger)|4.232.3.1
  |MagicOnion|2.6.3
  |System.Interactive.Async|5.0.0
  |System.Reactive|6.0.0
@@ -80,7 +80,7 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |System.CodeDom|6.0.0
  |System.Text.Json|7.0.2
  |System.Threading.Tasks.Dataflow|7.0.0
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.232.3
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.232.3.1
 
 ## Issues-Debugging-Troubleshooting
 

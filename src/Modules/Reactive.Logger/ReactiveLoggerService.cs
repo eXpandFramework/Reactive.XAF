@@ -119,13 +119,13 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
             => SavedTraceEvent.When(location, rxAction,methods).Cast<TraceEvent>();
 
         internal static IObservable<TSource> TraceLogger<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<ITraceEvent> traceAction = null,
-	        Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.OnNextOrOnError,
+	        Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.OnNextOrOnError,Func<string> allMessageFactory = null,
 	        [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) 
-            => source.Trace(name, ReactiveLoggerModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
+            => source.Trace(name, ReactiveLoggerModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy,allMessageFactory, memberName,sourceFilePath,sourceLineNumber);
         
-        internal static IObservable<TSource> TraceErrorLogger<TSource>(this IObservable<TSource> source, Func<Exception,string> errorMessageFactory=null,
+        internal static IObservable<TSource> TraceErrorLogger<TSource>(this IObservable<TSource> source, Func<Exception,string> errorMessageFactory=null,Func<string> allMessageFactory = null,
 	        [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) 
-            => source.Trace(null, ReactiveLoggerModule.TraceSource,null,errorMessageFactory, null,ObservableTraceStrategy.OnError, memberName,sourceFilePath,sourceLineNumber);
+            => source.Trace(null, ReactiveLoggerModule.TraceSource,null,errorMessageFactory, null,ObservableTraceStrategy.OnError,allMessageFactory, memberName,sourceFilePath,sourceLineNumber);
 
         public static IEnumerable<(ModuleBase module, TraceSource traceSource)> ToTraceSource(this IEnumerable<ModuleBase> moduleList) 
             => moduleList.SelectMany(m => m.GetType().GetProperties(BindingFlags.Static | BindingFlags.Public)

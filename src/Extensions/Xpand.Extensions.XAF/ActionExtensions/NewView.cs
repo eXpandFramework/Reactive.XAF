@@ -7,25 +7,25 @@ using Xpand.Extensions.XAF.XafApplicationExtensions;
 
 namespace Xpand.Extensions.XAF.ActionExtensions {
     public static partial class ActionExtensions {
-        public static View NewDetailView(this ActionBaseEventArgs e, Type type,
+        public static DetailView NewDetailView(this ActionBaseEventArgs e, Type type,
             TargetWindow targetWindow = TargetWindow.Default, bool isRoot = false)
             => e.NewDetailView(e.Application().FindDetailViewId(type), targetWindow, isRoot);
         public static View NewDetailView(this ActionBaseEventArgs e, object currentObject,
             TargetWindow targetWindow = TargetWindow.Default, bool isRoot = false)
             => e.NewDetailView(e.Application().FindDetailViewId(currentObject.GetType()),currentObject, targetWindow, isRoot);
 
-        public static View NewDetailView(this ActionBaseEventArgs e,string viewId,TargetWindow targetWindow=TargetWindow.Default,bool isRoot=false){
+        public static DetailView NewDetailView(this ActionBaseEventArgs e,string viewId,TargetWindow targetWindow=TargetWindow.Default,bool isRoot=false){
             var detailView = e.ShowViewParameters.CreatedView = e.Application().NewDetailView(
                 e.Action.View().SelectedObjects.Cast<object>().First(),
                 (IModelDetailView)e.Application().FindModelView(viewId),isRoot);
             e.ShowViewParameters.TargetWindow = targetWindow;
-            return detailView;
+            return (DetailView)detailView;
         }
-        public static View NewDetailView(this ActionBaseEventArgs e,string viewId,object current,TargetWindow targetWindow=TargetWindow.Default,bool isRoot=false){
+        public static DetailView NewDetailView(this ActionBaseEventArgs e,string viewId,object current,TargetWindow targetWindow=TargetWindow.Default,bool isRoot=false){
             var detailView = e.ShowViewParameters.CreatedView = e.Application().NewDetailView(current,
                 (IModelDetailView)e.Application().FindModelView(viewId),isRoot);
             e.ShowViewParameters.TargetWindow = targetWindow;
-            return detailView;
+            return (DetailView)detailView;
         }
     }
 }

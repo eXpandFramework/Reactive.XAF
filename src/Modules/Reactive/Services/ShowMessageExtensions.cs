@@ -55,11 +55,11 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => source.ShowXafMessage(messageSelector,_ => InformationType.Success,displayInterval,position,onOk,onCancel,imageSelector,memberName);
 
         public static IObservable<Unit> ShowXafInfoMessage<T>(this Func<IObservable<T>> showSignal,Func<T, string> messageSelector,Func<T,SvgImage> imageSelector=null,[CallerMemberName]string caller="") 
-            => Unit.Default.Observe().ShowXafInfoMessage(_ => showSignal(),messageSelector,imageSelector,caller ).ToUnit();
+            => Unit.Default.Observe().ShowXafInfoMessage(_ => showSignal(),messageSelector,imageSelector,caller:caller ).ToUnit();
         
         public static IObservable<T> ShowXafInfoMessage<T,T2>(this IObservable<T> source, 
-            Func<T, IObservable<T2>> showSignal, Func<T2, string> messageSelector,Func<T2,SvgImage> imageSelector=null, [CallerMemberName] string caller = "") 
-            => source.MergeIgnored(arg => showSignal(arg).ShowXafInfoMessage(messageSelector,imageSelector:imageSelector,memberName:caller));
+            Func<T, IObservable<T2>> showSignal, Func<T2, string> messageSelector,Func<T2,SvgImage> imageSelector=null,Func<T2, int> displayInterval = null, [CallerMemberName] string caller = "") 
+            => source.MergeIgnored(arg => showSignal(arg).ShowXafInfoMessage(messageSelector,displayInterval:displayInterval,imageSelector:imageSelector,memberName:caller));
 
         public static IObservable<T> ShowXafInfoMessage<T>(this IObservable<T> source,
             Func<T, string> messageSelector = null, Func<T, int> displayInterval = null,

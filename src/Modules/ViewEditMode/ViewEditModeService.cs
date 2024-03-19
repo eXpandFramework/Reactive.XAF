@@ -18,9 +18,9 @@ using Xpand.XAF.Modules.Reactive.Services.Controllers;
 namespace Xpand.XAF.Modules.ViewEditMode{
     public static class ViewEditModeService{
         internal static IObservable<TSource> TraceViewEditModeModule<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<ITraceEvent> traceAction = null,
-            Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.OnNextOrOnError,
+            Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.OnNextOrOnError,Func<string> allMessageFactory = null,
             [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) =>
-            source.Trace(name, ViewEditModeModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
+            source.Trace(name, ViewEditModeModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy,allMessageFactory, memberName,sourceFilePath,sourceLineNumber);
 
 
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) =>

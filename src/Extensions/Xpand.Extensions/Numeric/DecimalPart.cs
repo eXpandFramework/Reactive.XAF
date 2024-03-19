@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.Linq;
 
 namespace Xpand.Extensions.Numeric {
     public static partial class NumericExtensions {
@@ -10,6 +11,7 @@ namespace Xpand.Extensions.Numeric {
         }
 
         public static int DecimalPartLength(this decimal d)
-            => d.DecimalPart().ToString(CultureInfo.InvariantCulture).Length-2;
+            => d.ToString(CultureInfo.InvariantCulture)
+                .Split('.').Skip(1).SelectMany(s => s.TrimEnd('0')).Count();
     }
 }

@@ -81,38 +81,32 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
 		        }).ToEnumerable().ToArray());
 
         internal static IObservable<TSource> TraceRXLoggerHub<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<ITraceEvent> traceAction = null,
-	        Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.OnNextOrOnError,
+	        Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.OnNextOrOnError,Func<string> allMessageFactory = null,
 	        [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) 
-	        => source.Trace(name, ReactiveLoggerHubModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
+	        => source.Trace(name, ReactiveLoggerHubModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy,allMessageFactory, memberName,sourceFilePath,sourceLineNumber);
 
 
         private static IObservable<Server> StartServer(this  XafApplication application) 
 	        => application is ILoggerHubClientApplication ? Observable.Empty<Server>() : application.ServerPortsList().Take(1)
 			        .Select(modelServerPort => modelServerPort.ToServerPort().StartServer())
-			        .TraceRXLoggerHub(server => string.Join(", ",server.Ports.Select(port => $"{port.Host}, {port.Port}")))
-	        ;
+			        .TraceRXLoggerHub(server => string.Join(", ",server.Ports.Select(port => $"{port.Host}, {port.Port}")));
 
         private static IObservable<ITraceEventHub> ConnectClient(this XafApplication application) 
 	        => application is not ILoggerHubClientApplication? Observable.Empty<ITraceEventHub>()
 		        : application.WhenCompatibilityChecked()
 			        .SelectMany(_ => application.ClientPortsList()
 				        .Detect()
-				        .ConnectClient())
-			        ;
-
+				        .ConnectClient());
         
         public static IObservable<IPEndPoint> Detect(this IObservable<IPEndPoint> source,[CallerMemberName]string caller="")
-	        => source.Select(point => point).Listening()
-		        .Select(point => {
-			        var process = point.Port.ProcessFromPort();
-			        
-			        return process.Id != Process.GetCurrentProcess().Id ? (process, point) : default;
-		        }).WhenNotDefault()
+	        => source.Select(point => point).Listening().Select(point => (point,process:point.Port.ProcessFromPort()))
+		        .Select(t => DetectionMatch(t.process) ? (t.process, t.point) : default).WhenNotDefault()
 		        .Select(point => point)
 		        .ShowXafInfoMessage(t => $"{caller} {t.process.ProcessName} {t.point.Address}:{t.point.Port}")
 		        .TraceRXLoggerHub(t => $"{t.point.Address}, {t.point.Port}").ToSecond();
-
         
+        public static Func<Process, bool> DetectionMatch { get; set; } = process => process.Id != Process.GetCurrentProcess().Id;
+
         public static IObservable<ITraceEventHub> ConnectClient(this IObservable<IPEndPoint> source) 
 	        => source.SelectMany(point => {
 			        var newClient = point.ToServerPort().NewClient(Receiver);
@@ -146,7 +140,8 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
 
         public static Server StartServer(this ServerPort serverPort){
 	        var options = new MagicOnionOptions{IsReturnExceptionStackTraceInErrorDetail = true};
-            var service = MagicOnionEngine.BuildServerServiceDefinition(new[]{typeof(ReactiveLoggerHubService).GetTypeInfo().Assembly},options);
+            var service = MagicOnionEngine.BuildServerServiceDefinition([typeof(ReactiveLoggerHubService).GetTypeInfo().Assembly
+            ],options);
             _server = new Server{
 	            Services = {service.ServerServiceDefinition},
 	            Ports = {serverPort}

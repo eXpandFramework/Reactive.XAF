@@ -4,6 +4,9 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using DevExpress.Data.Filtering;
+using DevExpress.Data.Helpers;
+using DevExpress.Data.Linq;
+using DevExpress.Data.Linq.Helpers;
 using DevExpress.ExpressApp;
 using DevExpress.Persistent.Base;
 using Xpand.Extensions.ObjectExtensions;
@@ -46,5 +49,11 @@ namespace Xpand.Extensions.XAF.CriteriaOperatorExtensions {
             => CriteriaOperator.FromLambda(expression);
         
         public static CriteriaOperator ToCriteria(this string s) => CriteriaOperator.Parse(s);
+        
+        public static T[] ToArray<T>(this IQueryable<T> source)
+            => source.ApplyToArray(typeof(T)).Cast<T>().ToArray();
+        
+        public static IQueryable<T> Where<T>(this IQueryable<T> source, CriteriaOperator criteria) 
+            => (IQueryable<T>)source.AppendWhere(new CriteriaToExpressionConverter(), criteria);
     }
 }

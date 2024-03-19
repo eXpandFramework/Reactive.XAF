@@ -22,9 +22,9 @@ namespace Xpand.XAF.Modules.CloneMemberValue{
             => modulesManager.WhenApplication(application => application.WhenCloneMemberValues().ToUnit());
 
         internal static IObservable<TSource> TraceCloneMemberValueModule<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<ITraceEvent> traceAction = null,
-            Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.OnNextOrOnError,
+            Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.OnNextOrOnError,Func<string> allMessageFactory = null,
             [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) 
-            => source.Trace(name, CloneMemberValueModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
+            => source.Trace(name, CloneMemberValueModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy,allMessageFactory, memberName,sourceFilePath,sourceLineNumber);
         
         public static IEnumerable<IModelCommonMemberViewItemCloneValue> CloneValueMemberViewItems(this ObjectView objectView) 
             => (objectView is ListView view

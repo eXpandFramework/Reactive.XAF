@@ -54,6 +54,7 @@ namespace Xpand.TestsLib.Blazor {
 
 		private static string TestBlazorAppPath() {
 			var testBlazorAppPath = Environment.GetEnvironmentVariable("SOURCE_DIRECTORY");
+			Console.WriteLine($"SOURCE_DIRECTORY={testBlazorAppPath}");
 			return testBlazorAppPath != null ? $"{testBlazorAppPath}/src/Tests/TestApplication.Blazor.Server" : "../../src/Tests/TestApplication.Blazor.Server";
 		}
 

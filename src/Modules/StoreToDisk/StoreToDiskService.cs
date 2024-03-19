@@ -42,12 +42,15 @@ namespace Xpand.XAF.Modules.StoreToDisk{
                 .Select(_ => application.Model.ToReactiveModule<IModelReactiveModulesStoreToDisk>().StoreToDisk)
                 .Where(storeToDisk => storeToDisk.DailyBackup).ObserveOnDefault()
                 .SelectMany(disk => {
-                    var jsonFles = Directory.GetFiles(disk.Folder, "*.json");
-                    var directoryName = $"{disk.Folder}\\{DateTime.Now:yyyy.MM.dd}";
-                    if (jsonFles.Any() && !Directory.Exists(directoryName)) {
-                        Directory.CreateDirectory(directoryName);
-                        return jsonFles.Execute(file => File.Copy(file, Path.Combine(directoryName,Path.GetFileName(file)))).ToNowObservable();
+                    if (Directory.Exists(disk.Folder)) {
+                        var jsonFles = Directory.GetFiles(disk.Folder, "*.json");
+                        var directoryName = $"{disk.Folder}\\{DateTime.Now:yyyy.MM.dd}";
+                        if (jsonFles.Any() && !Directory.Exists(directoryName)) {
+                            Directory.CreateDirectory(directoryName);
+                            return jsonFles.Execute(file => File.Copy(file, Path.Combine(directoryName,Path.GetFileName(file)))).ToNowObservable();
+                        }    
                     }
+                    
                     return Observable.Empty<string>();
                 })
                 .ToUnit();
@@ -166,9 +169,9 @@ namespace Xpand.XAF.Modules.StoreToDisk{
             => StoreToDiskFileNames.GetOrAdd(type, type1 => type1.FullName.CleanCodeName().JoinString(".json"));
 
         internal static IObservable<TSource> TraceStoreToDisk<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<ITraceEvent> traceAction = null,
-            Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.OnNextOrOnError,
+            Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.OnNextOrOnError,Func<string> allMessageFactory = null,
             [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) 
-            => source.Trace(name, StoreToDiskModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
+            => source.Trace(name, StoreToDiskModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy,allMessageFactory, memberName,sourceFilePath,sourceLineNumber);
 
     }
 }

@@ -43,49 +43,47 @@ namespace Xpand.Extensions.Reactive.Utility{
             .ToDictionary(action => action.AsString(),action => action);
 
         public static IObservable<TSource> Trace<TSource>(this IObservable<TSource> source, string name = null,
-            TraceSource traceSource = null,
-            Func<TSource, string> messageFactory = null, Func<Exception, string> errorMessageFactory = null,
-            Action<ITraceEvent> traceAction = null,
-            ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.OnNextOrOnError, string memberName = "",
+            TraceSource traceSource = null, Func<TSource, string> messageFactory = null, Func<Exception, string> errorMessageFactory = null, Action<ITraceEvent> traceAction = null,
+            ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.OnNextOrOnError,Func<string> allMessageFactory = null, string memberName = "",
             string sourceFilePath = "", int sourceLineNumber = 0)
             => Observable.Create<TSource>(observer => {
-                    if (traceStrategy.Is(ObservableTraceStrategy.All))
-                        traceSource.Action("Subscribe", "", traceAction.Push(traceSource), messageFactory,
-                            errorMessageFactory, memberName, name, sourceFilePath, sourceLineNumber);
-                    var disposable = source.Subscribe(
-                        v => traceSource.OnNext(traceAction, traceStrategy, v, observer, messageFactory,
-                            errorMessageFactory, memberName, name, sourceFilePath, sourceLineNumber),
-                        e => traceSource.OnError(name, messageFactory, errorMessageFactory, traceAction, traceStrategy,
-                            memberName, sourceFilePath, sourceLineNumber, e, observer),
-                        () => traceSource.OnCompleted(name, messageFactory, errorMessageFactory, traceAction, traceStrategy,
-                            memberName, sourceFilePath, sourceLineNumber, observer));
-                    return () => traceSource.Dispose(name, messageFactory, errorMessageFactory, traceAction, traceStrategy,
-                        memberName, sourceFilePath, sourceLineNumber, disposable);
+                if (traceStrategy.Is(ObservableTraceStrategy.All))
+                    traceSource.Action("Subscribe", "", traceAction.Push(traceSource), messageFactory,
+                        allMessageFactory,errorMessageFactory, memberName, name, sourceFilePath, sourceLineNumber);
+                var disposable = source.Subscribe(
+                    v => traceSource.OnNext(traceAction, traceStrategy, v, observer, messageFactory,allMessageFactory, 
+                        errorMessageFactory, memberName, name, sourceFilePath, sourceLineNumber),
+                    e => traceSource.OnError(name, messageFactory,allMessageFactory, errorMessageFactory, traceAction, traceStrategy,
+                        memberName, sourceFilePath, sourceLineNumber, e, observer),
+                    () => traceSource.OnCompleted(name, messageFactory,allMessageFactory, errorMessageFactory, traceAction, traceStrategy,
+                        memberName, sourceFilePath, sourceLineNumber, observer));
+                return () => traceSource.Dispose(name, messageFactory,allMessageFactory, errorMessageFactory, traceAction, traceStrategy,
+                    memberName, sourceFilePath, sourceLineNumber, disposable);
                 });
 
-        private static void Dispose<TSource>(this TraceSource traceSource,string name,  Func<TSource, string> messageFactory,
+        private static void Dispose<TSource>(this TraceSource traceSource,string name,  Func<TSource, string> messageFactory,Func<string> allMessageFactory ,
             Func<Exception, string> errorMessageFactory, Action<ITraceEvent> traceAction, ObservableTraceStrategy traceStrategy, string memberName,
             string sourceFilePath, int sourceLineNumber, IDisposable disposable){
             if (traceStrategy.Is(ObservableTraceStrategy.All))
-                traceSource.Action("Dispose", "", traceAction.Push(traceSource), messageFactory, errorMessageFactory,
+                traceSource.Action("Dispose", "", traceAction.Push(traceSource), messageFactory,allMessageFactory, errorMessageFactory,
                     memberName, name, sourceFilePath, sourceLineNumber);
             disposable.Dispose();
         }
 
-        private static void OnCompleted<TSource>(this TraceSource traceSource,string name,  Func<TSource, string> messageFactory,
+        private static void OnCompleted<TSource>(this TraceSource traceSource,string name,  Func<TSource, string> messageFactory,Func<string> allMessageFactory,
             Func<Exception, string> errorMessageFactory, Action<ITraceEvent> traceAction, ObservableTraceStrategy traceStrategy, string memberName,
             string sourceFilePath, int sourceLineNumber, IObserver<TSource> observer){
             if (traceStrategy.Is(ObservableTraceStrategy.All))
-                traceSource.Action("OnCompleted", "", traceAction.Push(traceSource), messageFactory, errorMessageFactory,
+                traceSource.Action("OnCompleted", "", traceAction.Push(traceSource), messageFactory,allMessageFactory, errorMessageFactory,
                     memberName, name, sourceFilePath, sourceLineNumber);
             observer.OnCompleted();
         }
 
-        private static void OnError<TSource>(this TraceSource traceSource,string name,  Func<TSource, string> messageFactory,
+        private static void OnError<TSource>(this TraceSource traceSource,string name,  Func<TSource, string> messageFactory,Func<string> allMessageFactory ,
             Func<Exception, string> errorMessageFactory, Action<ITraceEvent> traceAction, ObservableTraceStrategy traceStrategy, string memberName,
             string sourceFilePath, int sourceLineNumber, Exception e, IObserver<TSource> observer){
             if (traceStrategy.Is(ObservableTraceStrategy.OnError)){
-                traceSource.Action("OnError", e, traceAction.TraceError(traceSource), messageFactory, errorMessageFactory,
+                traceSource.Action("OnError", e, traceAction.TraceError(traceSource), messageFactory,allMessageFactory, errorMessageFactory,
                     memberName, name, sourceFilePath, sourceLineNumber);
             }
 
@@ -94,22 +92,23 @@ namespace Xpand.Extensions.Reactive.Utility{
 
         private static void OnNext<TSource>(this TraceSource traceSource, Action<ITraceEvent> traceAction,
             ObservableTraceStrategy traceStrategy, TSource v, IObserver<TSource> observer,
-            Func<TSource, string> messageFactory, Func<Exception, string> errorMessageFactory, string memberName,
+            Func<TSource, string> messageFactory,Func<string> allMessageFactory , Func<Exception, string> errorMessageFactory, string memberName,
             string name, string sourceFilePath, int sourceLineNumber){
             if (traceStrategy.Is(ObservableTraceStrategy.OnNext)){
-                traceSource.Action("OnNext", v, traceAction.Push(traceSource),messageFactory,errorMessageFactory,memberName,name,sourceFilePath,sourceLineNumber);
+                traceSource.Action("OnNext", v, traceAction.Push(traceSource),messageFactory,allMessageFactory,errorMessageFactory,memberName,name,sourceFilePath,sourceLineNumber);
             }
             observer.OnNext(v);
         }
 
         private static void Action<TSource>(this TraceSource traceSource, string m, object v, Action<ITraceEvent> ta,
-            Func<TSource, string> messageFactory = null, Func<Exception, string> errorMessageFactory = null,
+            Func<TSource, string> messageFactory = null,Func<string> allMessageFactory = null, Func<Exception, string> errorMessageFactory = null,
             string memberName = "", string name="",string sourceFilePath = "", int sourceLineNumber = 0) {
             if (traceSource?.Switch.Level == SourceLevels.Off) return;
             string value = null;
             if (v!=null) {
-                var calculateValue = CalculateValue(v, o => messageFactory.GetMessageValue( errorMessageFactory, o));
-                value = calculateValue.Change<string>();
+                value = CalculateValue(v, o => messageFactory?.GetMessageValue(errorMessageFactory, o)
+                            .Join(allMessageFactory?.GetMessageValue<TSource>(errorMessageFactory, o)))
+                    .Change<string>();
             }
             var mName = memberName;
             if (m.IsEqualIgnoreCase(nameof(RXAction.OnNext))){
@@ -151,6 +150,18 @@ namespace Xpand.Extensions.Reactive.Utility{
                     TSource t => (messageFactory?.Invoke(t) ?? o).ToString(),
                     Exception e => (errorMessageFactory?.Invoke(e) ?? o).ToString(),
                     _ => o.ToString()
+                };
+            }
+            catch (Exception e){
+                return e.Message;
+            }
+        }
+        private static string GetMessageValue<TSource>(this Func<string> messageFactory, Func<Exception, string> errorMessageFactory, object o){
+            try{
+                return o switch{
+                    TSource => (messageFactory?.Invoke() ?? o).ToString(),
+                    Exception e => (errorMessageFactory?.Invoke(e) ?? o).ToString(),
+                    _ => messageFactory?.Invoke()
                 };
             }
             catch (Exception e){

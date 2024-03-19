@@ -15,9 +15,9 @@ using Xpand.XAF.Modules.Reactive.Services;
 namespace Xpand.XAF.Modules.RefreshView{
     public static class RefreshViewService{
         internal static IObservable<TSource> TraceRefreshView<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<ITraceEvent> traceAction = null,
-            Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.OnNextOrOnError,
+            Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.OnNextOrOnError,Func<string> allMessageFactory = null,
             [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) =>
-            source.Trace(name, RefreshViewModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
+            source.Trace(name, RefreshViewModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy,allMessageFactory, memberName,sourceFilePath,sourceLineNumber);
 
         internal static IObservable<Unit> Connect(this  ApplicationModulesManager manager) 
             => manager.WhenApplication(application => application.RefreshView());

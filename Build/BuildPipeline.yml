@@ -135,6 +135,8 @@ jobs:
     - task: VSTest@2
       displayName: 'Run Tests'
       retryCountOnTaskFailure: 2
+      env:
+        SOURCE_DIRECTORY: "../s"
       inputs:
         minimumExpectedTests: "1"
         failOnMinTestsNotRun: true

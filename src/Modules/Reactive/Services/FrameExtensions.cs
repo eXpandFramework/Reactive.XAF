@@ -12,6 +12,7 @@ using DevExpress.ExpressApp.SystemModule;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Numeric;
 using Xpand.Extensions.ObjectExtensions;
+using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
@@ -131,18 +132,22 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<TFrame> TakeUntilViewClosed<TFrame>(this IObservable<TFrame> source,Frame frame)  
             => source.TakeUntil(frame.View.WhenClosing());
         
-        public static IObservable<SimpleActionExecuteEventArgs> ShowInstanceDetailView(this IObservable<Frame> source,params  Type[] objectTypes) 
-            => source.WhenFrame(objectTypes).WhenFrame(ViewType.ListView).ToController<ListViewProcessCurrentObjectController>().CustomProcessSelectedItem(true)
+        public static IObservable<Unit> ShowInstanceDetailView(this IObservable<Frame> source,params  Type[] objectTypes) {
+            return source.WhenFrame(objectTypes).WhenFrame(ViewType.ListView).Where(frame => frame.View.Model.ToListView().MasterDetailMode==MasterDetailMode.ListViewOnly)
+                .ToController<ListViewProcessCurrentObjectController>().CustomProcessSelectedItem(true)
                 .DoWhen(e => e.View().ObjectTypeInfo.Type.IsInstanceOfType(e.View().CurrentObject),
-                    e => {
-                        var currentObject = e.Action.View().CurrentObject;
-                        var typeInfo = currentObject.GetType().ToTypeInfo();
-                        var property = typeInfo.FindAttribute<ShowInstanceDetailViewAttribute>().Property;
-                        if (property != null) {
-                            currentObject = typeInfo.FindMember(property).GetValue(currentObject);
-                        }
-                        e.ShowViewParameters.CreatedView = e.Application().NewDetailView(space => space.GetObject(currentObject), currentObject.GetType().GetModelClass().DefaultDetailView);
-                    });
+                    e => e.ShowViewParameters.CreatedView = NewDetailView(e.Action.View().CurrentObject, e.Application()))
+                .MergeToUnit(source.WhenFrame(objectTypes).WhenFrame(ViewType.ListView).Where(frame => frame.View.Model.ToListView().MasterDetailMode==MasterDetailMode.ListViewAndDetailView)
+                    .SelectMany(frame => frame.View.ToListView().WhenCreateCustomCurrentObjectDetailView()
+                        .DoWhen(e =>e.CurrentDetailView.ObjectTypeInfo.Type.IsInstanceOfType(e.CurrentDetailView.CurrentObject) ,
+                            e => e.DetailView=NewDetailView(e.ListViewCurrentObject,frame.Application))));
+
+            DetailView NewDetailView(object o, XafApplication xafApplication) {
+                o = o.GetType().ToTypeInfo().FindAttribute<ShowInstanceDetailViewAttribute>().Property is { } prop
+                    ? o.GetType().ToTypeInfo().FindMember(prop).GetValue(o) : o;
+                return xafApplication.NewDetailView(space => space.GetObject(o), o.GetType().GetModelClass().DefaultDetailView);
+            }
+        }
 
         public static IObservable<NestedFrame> ToNestedFrame(this IObservable<ListPropertyEditor> source)
             => source.Select(editor => editor.Frame).Cast<NestedFrame>();

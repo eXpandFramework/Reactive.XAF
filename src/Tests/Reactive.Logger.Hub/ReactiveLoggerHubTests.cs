@@ -28,7 +28,9 @@ using Task = System.Threading.Tasks.Task;
 namespace Xpand.XAF.Modules.Reactive.Logger.Hub.Tests{
     [NonParallelizable]
     public class ReactiveLoggerHubTests : BaseTest{
-        
+        static ReactiveLoggerHubTests() {
+            ReactiveLoggerHubService.DetectionMatch = _ => true;
+        }
         [Test]
         [XpandTest]
         [Apartment(ApartmentState.STA)][Order(0)]
@@ -94,10 +96,11 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub.Tests{
             application.CreateObjectSpace();
                 
             await startServer.Timeout(Timeout);
-            var receive = TraceEventReceiver.TraceEvent.TakeFirst(_ => _.Method==nameof(XafApplicationRxExtensions.WhenDetailViewCreated)).SubscribeReplay();
-            var broadcast = TraceEventHub.Trace.TakeFirst(_ => _.Method==nameof(XafApplicationRxExtensions.WhenDetailViewCreated))
+            var receive = TraceEventReceiver.TraceEvent.TakeFirst(traceEvent => traceEvent.Method==nameof(XafApplicationRxExtensions.WhenDetailViewCreated)).SubscribeReplay();
+            var broadcast = TraceEventHub.Trace.TakeFirst(message => message.Method==nameof(XafApplicationRxExtensions.WhenDetailViewCreated))
                 .SubscribeReplay();
-            using var clientWinApp = new ClientWinApp {EditorFactory = new EditorsFactory()};
+            using var clientWinApp = new ClientWinApp();
+            clientWinApp.EditorFactory = new EditorsFactory();
             clientWinApp.AddModule<ReactiveLoggerHubModule>();
             clientWinApp.Model.BOModel.GetClass(typeof(TraceEvent)).DefaultListView.UseServerMode = false;
             clientWinApp.Logon();
@@ -122,8 +125,8 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub.Tests{
             await detailViewCreated.Timeout(Timeout);
             await collectionReloaded;
             var events = listView.CollectionSource.Objects<TraceEvent>().ToArray();
-            events.FirstOrDefault(_ => _.Method==nameof(XafApplicationRxExtensions.WhenDetailViewCreated)).ShouldNotBeNull();
-            events.FirstOrDefault(_ => _.Location==nameof(ReactiveLoggerHubService)).ShouldNotBeNull();
+            events.FirstOrDefault(traceEvent => traceEvent.Method==nameof(XafApplicationRxExtensions.WhenDetailViewCreated)).ShouldNotBeNull();
+            events.FirstOrDefault(traceEvent => traceEvent.Location==nameof(ReactiveLoggerHubService)).ShouldNotBeNull();
         }
 
         // [Test]
@@ -131,7 +134,8 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub.Tests{
         [Apartment(ApartmentState.STA)][Order(200)]
         public async Task Display_TraceEvent_On_Running_Client(){
             XpoTypesInfoHelper.GetXpoTypeInfoSource().XPDictionary.CollectClassInfos(GetType().Assembly);
-            using var clientWinApp = new ClientWinApp {EditorFactory = new EditorsFactory()};
+            using var clientWinApp = new ClientWinApp();
+            clientWinApp.EditorFactory = new EditorsFactory();
             clientWinApp.AddModule<ReactiveLoggerHubModule>();
             clientWinApp.Model.BOModel.GetClass(typeof(TraceEvent)).DefaultListView.UseServerMode = false;
             clientWinApp.Logon();
@@ -160,8 +164,8 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub.Tests{
             await listView.CollectionSource.WhenCollectionReloaded().TakeFirst();
             await whenDetailViewCreated;
             var events = listView.CollectionSource.Objects<TraceEvent>().ToArray();
-            events.FirstOrDefault(_ => _.Method==nameof(XafApplicationRxExtensions.WhenDetailViewCreated)).ShouldNotBeNull();
-            events.FirstOrDefault(_ => _.Location==nameof(ReactiveLoggerHubService)).ShouldNotBeNull();
+            events.FirstOrDefault(traceEvent => traceEvent.Method==nameof(XafApplicationRxExtensions.WhenDetailViewCreated)).ShouldNotBeNull();
+            events.FirstOrDefault(traceEvent => traceEvent.Location==nameof(ReactiveLoggerHubService)).ShouldNotBeNull();
         }
 
         internal ReactiveLoggerHubModule HubModule(params ModuleBase[] modules){

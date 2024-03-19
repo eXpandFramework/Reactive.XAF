@@ -129,11 +129,24 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<ActionBaseEventArgs> WhenActionExecuted<TController,TAction>(
             this XafApplication application, Func<TController, TAction> action) where TController : Controller where TAction:ActionBase
             => application.WhenFrameCreated().ToController<TController>().SelectMany(controller => action(controller).WhenExecuted());
-        
-        public static IObservable<SimpleActionExecuteEventArgs> WhenSimpleActionExecuted<TController>(
-            this XafApplication application, Func<TController, SimpleAction> action) where TController : Controller 
-            => application.WhenFrameCreated().ToController<TController>().SelectMany(controller => action(controller).WhenExecuted());
 
+        public static IObservable<Unit> WhenCancelableActionExecuted(this XafApplication application,
+            Func<(ActionBaseEventArgs e,IObservable<Unit> cancelSignal), IObservable<Unit>> executeSelector, params string[] actions)
+            => application.WhenCancelableActionExecuted<ActionBaseEventArgs>(executeSelector, actions);
+        
+        public static IObservable<Unit> WhenCancelableActionExecuted<T>(this XafApplication application,
+            Func<(T e,IObservable<Unit> cancelSignal), IObservable<Unit>> executeSelector, params string[] actions) where T : ActionBaseEventArgs
+            => application.WhenActionExecuted<T>(actions).Where(e => e.Action.Caption!="Cancel")
+                .SelectManySequential(e => {
+                    var actionCaption = e.Action.Caption;
+                    e.Action.Caption = "Cancel";
+                    return executeSelector((e,e.Action.WhenExecuted().Where(_ => e.Action.Caption=="Cancel").ToUnit()))
+                        .TakeUntil(e.Action.WhenExecuted().Where(_ => e.Action.Caption=="Cancel"))
+                        .WhenCompleted().ObserveOnContext().Do(_ => e.Action.Caption=actionCaption);
+                }).ToUnit();
+
+        public static IObservable<T> WhenActionExecuted<T>(this XafApplication application, params string[] actions) where T : ActionBaseEventArgs
+            => application.WhenActionExecuted(actions).Cast<T>();
         public static IObservable<ActionBaseEventArgs> WhenActionExecuted(this XafApplication application,params string[] actions) 
             => application.WhenFrameCreated().SelectMany(window => window.Actions(actions)).WhenExecuted();
 
@@ -1018,13 +1031,12 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         static readonly ISubject<object[]> CommitSignal = Subject.Synchronize(new Subject<object[]>());
         private static IObservable<View> RefreshObjectViewWhenCommitted<TObject>(this XafApplication application, Type detailViewObjectType=null,Func<Frame,TObject[],bool> match=null) where TObject : class {
-            
             return application.WhenFrame(detailViewObjectType, detailViewObjectType != null ? ViewType.DetailView : ViewType.ListView)
                 .Where(frame => frame.View.IsRoot)
-                .SelectMany(frame => CommitSignal.OfType<TObject[]>().Buffer(1.Seconds()).WhenNotEmpty()
-                    .TakeUntil(frame.View.ObjectSpace.WhenDisposed().Take(1)).ObserveOnContext().SelectMany()
+                .SelectMany(frame => CommitSignal.OfType<TObject[]>().BufferUntilInactive(2.Seconds()).WhenNotEmpty()
+                    .TakeUntil(frame.View.ObjectSpace.WhenDisposed().Take(1)).ObserveOnContext().SelectMany().TakeLast(1)
                     .Where(arg => match?.Invoke(frame, arg) ?? true).To(frame.View)
-                    .WhenNotDefault(view => view?.ObjectSpace).ObserveLatestOnContext()
+                    .WhenNotDefault(view => view?.ObjectSpace).ObserveOnContext()
                     .Select(view => view.ObjectSpace.WhenModifyChanged().To(view).StartWith(view)
                         .TakeUntil(view.ObjectSpace.WhenDisposed())
                         .Where(_ => !view.ObjectSpace.IsModified)

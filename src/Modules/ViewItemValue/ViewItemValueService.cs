@@ -10,6 +10,8 @@ using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Templates;
 using Xpand.Extensions.Reactive.Combine;
+using Xpand.Extensions.Reactive.Conditional;
+using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.Tracing;
@@ -32,13 +34,15 @@ namespace Xpand.XAF.Modules.ViewItemValue{
                 .Merge(registerAction.SaveViewItemValue())
                 .MergeToUnit(manager.WhenViewItemValueItem()
                     .Publish(source => source.Select(t => t.model.AssignViewItemValue( t.frame.View.ToDetailView()))
-                        .MergeToUnit(source.SaveViewItemValueOnCommit())))
+                        .MergeToUnit(source.SaveViewItemValue())))
                 .ToUnit();
         }
 
-        private static IObservable<Unit> SaveViewItemValueOnCommit(this IObservable<(IModelViewItemValueObjectViewItem model, Frame frame)> source) 
-            => source.Where(t => t.model.SaveViewItemValueStrategy==SaveViewItemValueStrategy.OnCommit).SelectMany(t => t.frame.View.ObjectSpace.WhenCommitted()
-                    .Do(_ => t.frame.SingleChoiceAction(nameof(ViewItemValue)).DoExecute(t.model)))
+        private static IObservable<Unit> SaveViewItemValue(this IObservable<(IModelViewItemValueObjectViewItem model, Frame frame)> source) 
+            => source
+                .If(t => t.model.SaveViewItemValueStrategy==SaveViewItemValueStrategy.OnCommit,t => t.frame.View.ObjectSpace.WhenCommitted().To(t)
+                    ,t => t.frame.View.ObjectSpace.WhenObjectChanged(t.frame.View.ObjectTypeInfo.Type,t.model.MemberViewItem.ModelMember.Name).To(t)) 
+                .Do(t => t.frame.SingleChoiceAction(nameof(ViewItemValue)).DoExecute(t.model))
                 .ToUnit();
 
         private static IObservable<(IModelViewItemValueObjectViewItem model, Frame frame)> WhenViewItemValueItem(this ApplicationModulesManager manager) 
@@ -137,9 +141,9 @@ namespace Xpand.XAF.Modules.ViewItemValue{
             => applicationModel.ModelViewItemValue().Items.Any(item => item.ObjectViewId==viewID);
 
         internal static IObservable<TSource> TraceDefaultObjectValue<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<ITraceEvent> traceAction = null,
-            Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.OnNextOrOnError,
+            Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.OnNextOrOnError,Func<string> allMessageFactory = null,
             [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) =>
-            source.Trace(name, ViewItemValueModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
+            source.Trace(name, ViewItemValueModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy,allMessageFactory, memberName,sourceFilePath,sourceLineNumber);
 
     }
 }

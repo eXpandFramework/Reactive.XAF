@@ -17,6 +17,7 @@ using Xpand.Extensions.BytesExtensions;
 using Xpand.Extensions.JsonExtensions;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Network;
+using Xpand.Extensions.Numeric;
 using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Transform.System.Text.Json;
@@ -52,12 +53,13 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net {
         public static HttpClient HttpClient { get; set; }=new();
         
         public static TimeSpan RetryAfter(this HttpResponseMessage responseMessage){
-            var dateTime = !responseMessage.Headers.Contains("Date") ? DateTime.Now
-                : DateTimeOffset.Parse(responseMessage.Headers.GetValues("Date").First()).LocalDateTime;
+            // var dateTime = !responseMessage.Headers.Contains("Date") ? DateTime.Now
+                // : DateTimeOffset.Parse(responseMessage.Headers.GetValues("Date").First()).LocalDateTime;
+            var dateTime = DateTime.Now;
             var retryAfterDelta = responseMessage.Headers.RetryAfter?.Delta;
             DateTime? delay = null;
             if (retryAfterDelta.HasValue){
-                delay = dateTime.Add(retryAfterDelta.Value);    
+                delay = dateTime.Add(retryAfterDelta.Value.Add(10.Seconds()));    
             }
             return (responseMessage.StatusCode switch{
                 WafLimit =>delay?? dateTime.AddMinutes(5),

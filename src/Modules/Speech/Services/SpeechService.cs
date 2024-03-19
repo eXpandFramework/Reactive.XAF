@@ -176,9 +176,9 @@ namespace Xpand.XAF.Modules.Speech.Services{
 
 
 		internal static IObservable<TSource> TraceSpeechManager<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<ITraceEvent> traceAction = null,
-	        Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.OnNextOrOnError,
+	        Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.OnNextOrOnError,Func<string> allMessageFactory = null,
 	        [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) 
-	        => source.Trace(name, SpeechModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
+	        => source.Trace(name, SpeechModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy,allMessageFactory, memberName,sourceFilePath,sourceLineNumber);
 		
 		public static IObservable<T> WhenSpeechApplication<T>(this ApplicationModulesManager manager, Func<XafApplication, IObservable<T>> selector,[CallerMemberName]string memberName="")
 			=> manager.WhenApplication(application => selector(application).TraceSpeechError(memberName:memberName).CompleteOnError());
@@ -197,10 +197,10 @@ namespace Xpand.XAF.Modules.Speech.Services{
 		
 		public static IObservable<TSource> TraceSpeechError<TSource>(this IObservable<TSource> source,
 			Func<TSource, string> messageFactory = null, string name = null, Action<ITraceEvent> traceAction = null,
-			Func<Exception, string> errorMessageFactory = null, [CallerMemberName] string memberName = "",
+			Func<Exception, string> errorMessageFactory = null,Func<string> allMessageFactory = null, [CallerMemberName] string memberName = "",
 			[CallerFilePath] string sourceFilePath = "",
 			[CallerLineNumber] int sourceLineNumber = 0)
-			=> source.Trace(name, SpeechModule.TraceSource,messageFactory,errorMessageFactory, traceAction, ObservableTraceStrategy.OnError, memberName,sourceFilePath,sourceLineNumber);
+			=> source.Trace(name, SpeechModule.TraceSource,messageFactory,errorMessageFactory, traceAction, ObservableTraceStrategy.OnError,allMessageFactory, memberName,sourceFilePath,sourceLineNumber);
     }
 
 }

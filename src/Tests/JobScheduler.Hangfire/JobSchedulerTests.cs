@@ -166,7 +166,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests {
                             .SelectMany(frame => frame.AssertListViewHasObject<Job>()
                                 .SelectMany(_ => frame.AssertSimpleAction(nameof(JobSchedulerService.PauseJob))
                                     .SelectMany(action => action.Trigger(action.WhenDeactivated().Take(1)
-                                        .SelectMany(simpleAction => frame.View.ToListView().Objects<Job>().Where(job1 => job1.IsPaused))
+                                        .SelectMany(_ => frame.View.ToListView().Objects<Job>().Where(job1 => job1.IsPaused))
                                         .Take(1)
                                         .Select(t => t)))))
                             .Assert().Select(t => t);
@@ -178,7 +178,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests {
                 => application.ServiceProvider.WhenApplicationStopping()
                     .SelectMany(unit => application.GetRequiredService<IEnumerable<IHostedService>>().OfType<BackgroundJobServerHostedService>().ToObservable()
                         .SelectMany(service => service.StopAsync(CancellationToken.None).ToObservable()
-                            .Select(unit1 => unit))).ToUnit().IgnoreElements()
+                            .Select(_ => unit))).ToUnit().IgnoreElements()
                     .ReplayFirstTake(), timeOut: 6.Seconds());
         }
 

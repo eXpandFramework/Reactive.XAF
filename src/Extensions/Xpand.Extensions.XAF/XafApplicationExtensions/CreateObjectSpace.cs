@@ -3,6 +3,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Security;
+using Xpand.Extensions.XAF.TypesInfoExtensions;
 
 namespace Xpand.Extensions.XAF.XafApplicationExtensions {
     public static partial class XafApplicationExtensions {
@@ -22,8 +23,8 @@ namespace Xpand.Extensions.XAF.XafApplicationExtensions {
                 if (type.IsArray) {
                     type = type.GetElementType();
                 }
-                if (!XafTypesInfo.Instance.FindTypeInfo(type).IsPersistent) {
-                    throw new InvalidOperationException($"{caller} {type?.FullName} is not a persistent object");
+                if (!type.ToTypeInfo().IsDomainComponent) {
+                    throw new InvalidOperationException($"{caller} {type?.FullName} is not a domain compoenent");
                 }
             }
             if (!useObjectSpaceProvider)

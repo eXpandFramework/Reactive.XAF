@@ -3,9 +3,9 @@ using Xpand.Extensions.XAF.ModelExtensions;
 
 namespace Xpand.Extensions.XAF.XafApplicationExtensions {
     public static partial class XafApplicationExtensions {
-        public static void CreateCollectionSource(this XafApplication application, string viewId) {
+        public static CollectionSourceBase CreateCollectionSource(this XafApplication application, string viewId) {
             var objectType = application.Model.Views[viewId].ToListView().ModelClass.TypeInfo.Type;
-            application.CreateCollectionSource(application.CreateObjectSpace(objectType), objectType, viewId);
+            return application.CreateCollectionSource(application.CreateObjectSpace(objectType), objectType, viewId);
         }
     }
 }

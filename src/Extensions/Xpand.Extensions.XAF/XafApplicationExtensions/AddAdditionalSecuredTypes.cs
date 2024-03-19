@@ -7,6 +7,7 @@ using Fasterflect;
 using HarmonyLib;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.XAF.Harmony;
+using Xpand.Extensions.XAF.ModelExtensions;
 
 namespace Xpand.Extensions.XAF.XafApplicationExtensions{
     public static partial class XafApplicationExtensions{

@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.TestsLib.Common</id>
-    <version>4.232.3.0</version>
+    <version>4.232.3.15</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -12,16 +12,16 @@
     <description>Xpand.TestsLib.Common</description>
     <releaseNotes>https://github.com/eXpandFramework/Reactive.XAF/releases</releaseNotes>
     <copyright>eXpandFramework.com</copyright>
-    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Xpand.TestsLib.Common, 23.2.4</tags>
+    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Xpand.TestsLib.Common, 23.2.5</tags>
     <dependencies>
       <group targetFramework="net6.0">
-        <dependency id="Xpand.Extensions" version="4.232.3.0" />
-        <dependency id="Xpand.Extensions.Reactive" version="4.232.3.0" />
-        <dependency id="Xpand.Extensions.XAF" version="4.232.3.0" />
-        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.232.3.0" />
-        <dependency id="Xpand.XAF.Modules.Reactive" version="4.232.3.0" />
-        <dependency id="Xpand.XAF.Modules.Reactive.Logger" version="4.232.3.0" />
-        <dependency id="Xpand.XAF.Modules.Reactive.Logger.Hub" version="4.232.3.0" />
+        <dependency id="Xpand.Extensions" version="4.232.3.15" />
+        <dependency id="Xpand.Extensions.Reactive" version="4.232.3.15" />
+        <dependency id="Xpand.Extensions.XAF" version="4.232.3.15" />
+        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.232.3.15" />
+        <dependency id="Xpand.XAF.Modules.Reactive" version="4.232.3.15" />
+        <dependency id="Xpand.XAF.Modules.Reactive.Logger" version="4.232.3.15" />
+        <dependency id="Xpand.XAF.Modules.Reactive.Logger.Hub" version="4.232.3.15" />
         <dependency id="akarnokd.reactive_extensions" version="0.0.27-alpha" />
         <dependency id="Enums.NET" version="4.0" />
         <dependency id="MagicOnion" version="2.6.3" />
@@ -33,9 +33,9 @@
         <dependency id="Polly" version="7.2.2" />
         <dependency id="nunit" version="3.13.2" />
         <dependency id="Microsoft.CodeAnalysis" version="4.2" />
-        <dependency id="DevExpress.ExpressApp.Security.Xpo" version="23.2.4" />
-        <dependency id="DevExpress.ExpressApp.ViewVariantsModule" version="23.2.4" />
-        <dependency id="DevExpress.Persistent.BaseImpl.Xpo" version="23.2.4" />
+        <dependency id="DevExpress.ExpressApp.Security.Xpo" version="23.2.5" />
+        <dependency id="DevExpress.ExpressApp.ViewVariantsModule" version="23.2.5" />
+        <dependency id="DevExpress.Persistent.BaseImpl.Xpo" version="23.2.5" />
         <dependency id="Microsoft.Reactive.Testing" version="5.0" />
         <dependency id="System.Threading.Tasks.Dataflow" version="7.0" />
         <dependency id="TextCopy" version="4.2.0" />

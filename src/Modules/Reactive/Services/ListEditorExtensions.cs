@@ -15,12 +15,20 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<T> UpdateGridView<T>(this ListEditor editor, Func<IEnumerable<T>> selector)
             => editor.UpdateGridView(() => selector().ToNowObservable());
         
-        public static IObservable<T> UpdateGridView<T>(this ListEditor editor,Func<IObservable<T>> selector) 
+        public static void BeginGridViewDataUpdate(this ListEditor editor)
+            => editor.TryGetPropertyValue("GridView")?.CallMethod("BeginDataUpdate");
+        public static void EndGridViewDataUpdate(this ListEditor editor)
+            => editor.TryGetPropertyValue("GridView")?.CallMethod("EndDataUpdate");
+        
+        public static IObservable<T> UpdateGridView<T>(this ListEditor editor,Func<IObservable<T>> selector,bool endOnNext=false) 
             => editor.Defer(() => {
-                editor.GetPropertyValue("GridView")?.CallMethod("BeginDataUpdate");
-                return selector();
+                editor.BeginGridViewDataUpdate();
+                return selector().DoWhen(_ => endOnNext,_ => editor.EndGridViewDataUpdate());
 
-            }).Finally(() => editor.GetPropertyValue("GridView")?.CallMethod("EndDataUpdate"));
+            }).Finally(() => {
+                if (endOnNext)return;
+                editor.EndGridViewDataUpdate();
+            });
         
         public static IObservable<ListEditor> TakeUntilDisposed(this IObservable<ListEditor> source)
             => source.TakeWhileInclusive(editor => !editor.IsDisposed);

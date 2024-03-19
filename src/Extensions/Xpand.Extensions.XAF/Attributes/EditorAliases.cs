@@ -10,6 +10,7 @@ namespace Xpand.Extensions.XAF.Attributes {
         public const string MarkupContent = "MarkupContent";
         public const string DisplayText = "DisplayText";
         public const string BlazorLookup = "BlazorLookup";
+        public const string LabelPropertyEditor = "Label";
     
     }
 }
