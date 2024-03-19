@@ -9,8 +9,8 @@ param(
 )
 $functionsScriptPath = Join-Path -Path $PSScriptRoot -ChildPath "functions.ps1" 
 . $functionsScriptPath
-$scriptDirectory = Split-Path -Path $MyInvocation.MyCommand.Definition -Parent
-$packageSource = Join-Path -Path $scriptDirectory -ChildPath "..\..\bin\nupkg\"
+# $scriptDirectory = Split-Path -Path $MyInvocation.MyCommand.Definition -Parent
+# $packageSource = Join-Path -Path $scriptDirectory -ChildPath "..\..\bin\nupkg\"
 $packageSource = Resolve-Path -Path $packageSource
 
 $setupBlock = {

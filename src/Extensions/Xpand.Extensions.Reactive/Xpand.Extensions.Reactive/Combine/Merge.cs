@@ -58,5 +58,7 @@ namespace Xpand.Extensions.Reactive.Combine{
                 return merge(arg);
             });
 
+        public static IObservable<T> MergeFollow<T>(this IObservable<T> source, IObservable<T> target,int take=1)
+            => source.Publish(ticker => target.Merge(ticker).Take(take).Concat(ticker));
     }
 }

@@ -18,11 +18,16 @@ namespace Xpand.Extensions.Reactive.Utility {
 
             return source;
         }
+        public static IObservable<T> ToConsole<T>(this IObservable<T> source, Func<T,int, object> msgSelector ,[CallerMemberName]string caller="")
+            => source.Do((obj, i) => obj.Write(arg =>msgSelector?.Invoke(arg, i) ,caller));
+        
         public static IObservable<T> ToConsole<T>(this IObservable<T> source, Func<T, object> msgSelector = null,[CallerMemberName]string caller="")
-            => source.Do(obj => {
-                var value = msgSelector != null ? $"{msgSelector(obj)}" : $"{obj}";
-                if (value == string.Empty) return;
-                WriteLine($"{caller} - {value}");
-            });
+            => source.Do(obj => obj.Write(msgSelector, caller));
+
+        private static void Write<T>(this T obj,Func<T, object> msgSelector, string caller){
+            var value = msgSelector != null ? $"{msgSelector(obj)}" : $"{obj}";
+            if (value == string.Empty) return;
+            WriteLine($"{caller} - {value}");
+        }
     }
 }
