@@ -19,7 +19,7 @@ namespace Xpand.Extensions.ExpressionExtensions {
                             var type = genericArguments.First();
                             var lambdaExpression = _expressions.FirstOrDefault(expression => expression.Parameters.First().Type==type);
                             if (lambdaExpression != null){
-                                return typeof(Enumerable).Call("Any", new[]{ type }, arg, lambdaExpression);    
+                                return typeof(Enumerable).MethodCallExpression("Any", new[]{ type }, arg, lambdaExpression);    
                             }
                         }
                     }
