@@ -446,6 +446,12 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
         public static IObservable<ParametrizedAction> WhenValueChanged(this ParametrizedAction action)
             => action.WhenEvent(nameof(ParametrizedAction.ValueChanged)).TakeUntilDisposed(action).Select(pattern => (ParametrizedAction)pattern.Sender);
         
+        public static IObservable<TAction> TriggerWhenActivated<TAction>(this IObservable<TAction> source) where TAction:ActionBase 
+            => source.MergeIgnored(@base => @base.Observe().WhenControllerActivated(action => action.Trigger()));
+
+        public static IObservable<TAction> ActivateInLookupListView<TAction>(this IObservable<TAction> source) where TAction:ActionBase
+            => source.WhenControllerActivated().Do(action => action.Active[nameof(ActivateInLookupListView)]=action.Frame().Template is ILookupPopupFrameTemplate);
+        
         public static IObservable<TAction> ActivateInUserDetails<TAction>(this IObservable<TAction> registerAction) where TAction:ActionBase 
 	        => registerAction.WhenControllerActivated()
                 .Do(action => {
@@ -498,7 +504,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
             => action.Trigger(afterExecuted,() => action.SelectedItem,selection);
         
         public static IObservable<Unit> Trigger(this SingleChoiceAction action, params object[] selection)
-            => action.Trigger(Observable.Empty<Unit>(),() => action.SelectedItem,selection);
+            => action.Trigger(Observable.Empty<Unit>(),() => action.SelectedItem??action.Items.FirstOrDefault(),selection);
         public static IObservable<Unit> Trigger(this SingleChoiceAction action, Func<ChoiceActionItem> selectedItem)
             => action.Trigger(Observable.Empty<Unit>(),selectedItem);
         
@@ -532,7 +538,11 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
         
         public static IObservable<T> Trigger<T>(this SimpleAction action, IObservable<T> afterExecuted,params object[] selection)
             => afterExecuted.Trigger(() => action.DoExecute(selection));
-        
+
+        public static IObservable<Unit> Trigger(this ActionBase action)
+            => action is SimpleAction simpleAction ? simpleAction.Trigger() : action is SingleChoiceAction singleChoiceAction
+                ? singleChoiceAction.Trigger() : throw new NotImplementedException(action.ToString());
+
         public static IObservable<Unit> Trigger(this SimpleAction action, params object[] selection)
             => action.Trigger(action.WhenExecuteCompleted().ToUnit(),selection);
 

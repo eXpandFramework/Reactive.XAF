@@ -45,7 +45,7 @@ namespace Xpand.Extensions.XAF.ActionExtensions{
             action.DoExecute( () => action.DoExecute(selectedItem), objectSelection);
         }
 
-        public static void DoExecute(this ActionBase action, Action execute, object[] objectSelection){
+        public static void DoExecute(this ActionBase action, Action execute, params object[] objectSelection){
             if (objectSelection.Any()) {
                 var context = action.SelectionContext;
                 action.SelectionContext = new SelectionContext(objectSelection.Single());
@@ -60,9 +60,12 @@ namespace Xpand.Extensions.XAF.ActionExtensions{
         [SuppressMessage("ReSharper", "ArrangeTypeMemberModifiers")]
         [SuppressMessage("ReSharper", "UnusedMember.Local")]
         sealed class SelectionContext:ISelectionContext {
-            public SelectionContext(object currentObject) {
+            public SelectionContext(object currentObject,params object[] selectedObjects) {
                 CurrentObject = currentObject;
-                SelectedObjects = new List<object>(){currentObject};
+                SelectedObjects = selectedObjects;
+                if (!selectedObjects.Any()) {
+                    SelectedObjects = new List<object>(){currentObject};    
+                }
                 OnCurrentObjectChanged();
                 OnSelectionChanged();
             }

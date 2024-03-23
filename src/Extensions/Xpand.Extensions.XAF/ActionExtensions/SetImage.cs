@@ -42,6 +42,10 @@ namespace Xpand.Extensions.XAF.ActionExtensions {
         [Description("Actions_Bookmark")]
         Mark,
         [Description("UpdateField")]
-        Update
+        Update,
+        [Description("RevertDirection")]
+        Direction,
+        [Description("DrillDown")]
+        Change
     }
 }
