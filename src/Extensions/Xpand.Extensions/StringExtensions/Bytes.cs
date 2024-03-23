@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using Xpand.Extensions.LinqExtensions;
 
 namespace Xpand.Extensions.StringExtensions{
     public static partial class StringExtensions{

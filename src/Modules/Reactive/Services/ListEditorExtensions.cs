@@ -16,9 +16,12 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => editor.UpdateGridView(() => selector().ToNowObservable());
         
         public static void BeginGridViewDataUpdate(this ListEditor editor)
-            => editor.TryGetPropertyValue("GridView")?.CallMethod("BeginDataUpdate");
+            => editor.GridView()?.CallMethod("BeginDataUpdate");
+
+        public static object GridView(this ListEditor editor) => editor.TryGetPropertyValue("GridView");
+
         public static void EndGridViewDataUpdate(this ListEditor editor)
-            => editor.TryGetPropertyValue("GridView")?.CallMethod("EndDataUpdate");
+            => editor.GridView()?.CallMethod("EndDataUpdate");
         
         public static IObservable<T> UpdateGridView<T>(this ListEditor editor,Func<IObservable<T>> selector,bool endOnNext=false) 
             => editor.Defer(() => {

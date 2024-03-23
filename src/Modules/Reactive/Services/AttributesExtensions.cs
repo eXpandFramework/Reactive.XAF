@@ -16,7 +16,6 @@ using Fasterflect;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Combine;
-using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.Attributes;
 using Xpand.Extensions.XAF.Attributes.Custom;
@@ -24,6 +23,7 @@ using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.Extensions.XAF.TypesInfoExtensions;
 using Xpand.Extensions.XAF.ViewExtensions;
+using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
 
 namespace Xpand.XAF.Modules.Reactive.Services {
@@ -38,6 +38,8 @@ namespace Xpand.XAF.Modules.Reactive.Services {
                     .VisibleInAllViewsAttribute()
                     .ToUnit())
                 .Merge(manager.ListViewShowFooterCollection())
+                .Merge(manager.ColumnSummary())
+                .Merge(manager.ColumnSorting())
                 .Merge(manager.HiddenActions())
                 .Merge(manager.ReadOnlyCollection())
                 .Merge(manager.ReadOnlyProperty())
@@ -87,20 +89,42 @@ namespace Xpand.XAF.Modules.Reactive.Services {
                         .GetValue(frame.View.CurrentObject)).Remove(value)));
         }
         
+        static IObservable<Unit> ColumnSorting(this ApplicationModulesManager manager)
+            => manager.WhenGeneratingModelNodes<IModelColumns>()
+                .SelectMany(columns => columns.SelectMany(column =>
+                    column.ModelMember.MemberInfo.FindAttributes<ColumnSortingAttribute>(true)
+                        .Do(attribute => {
+                            column.SortIndex = attribute.SortIndex;
+                            column.SortOrder=attribute.SortOrder;
+                        }).ToUnit()))
+                .ToUnit();
+        
+        static IObservable<Unit> ColumnSummary(this ApplicationModulesManager manager)
+            => manager.WhenGeneratingModelNodes<IModelColumns>()
+                .SelectMany(views => views.SelectMany(column =>
+                    column.ModelMember.MemberInfo.FindAttributes<ColumnSummaryAttribute>(true)
+                        .Do(attribute => column.Summary.AddNode<IModelColumnSummaryItem>().SummaryType = attribute.SummaryType)
+                        .ToUnit()))
+                .MergeToUnit(manager.WhenApplication(application => application.WhenSetupComplete().Where(_ => application.GetPlatform()==Platform.Win)
+                    .SelectMany(_ => application.TypesInfo.PersistentTypes.AttributedMembers<ColumnSummaryAttribute>()
+                        .GroupBy(t => t.memberInfo.Owner).ToNowObservable()
+                        .SelectMany(types => application.WhenFrame(types.Key.Type,ViewType.ListView)
+                            .SelectUntilViewClosed(frame => frame.View.WhenControlsCreated(true)
+                                .Select(view => view.ToListView().Editor.GridView())
+                                .SelectMany(gridView => types.SelectMany(t1 => {
+                                    var column = gridView.GetPropertyValue("Columns")
+                                        .CallMethod("ColumnByFieldName", t1.memberInfo.BindingName);
+                                    return column==null?Enumerable.Empty<object>(): ((IEnumerable)column
+                                            .GetPropertyValue("Summary")).Cast<object>()
+                                        .Do(item => item.SetPropertyValue("Mode", t1.attribute.SummaryMode));
+                                })))
+                        ))));
+        
         static IObservable<Unit> ListViewShowFooterCollection(this ApplicationModulesManager manager)
             => manager.WhenGeneratingModelNodes<IModelViews>()
                 .SelectMany(views => views.OfType<IModelListView>()).Where(view =>
                     view.ModelClass.TypeInfo.FindAttributes<ListViewShowFooterAttribute>(true).Any())
                 .Do(view => view.IsFooterVisible = true)
-                .SelectMany(view => view.Columns.SelectMany(column =>
-                    column.ModelMember.MemberInfo.FindAttributes<ColumnSummaryAttribute>(true)
-                        .Do(attribute => column.Summary.AddNode<IModelColumnSummaryItem>().SummaryType = attribute.SummaryType)
-                        .ToUnit()
-                        .Concat(column.ModelMember.MemberInfo.FindAttributes<ColumnSortingAttribute>(true)
-                            .Do(attribute => {
-                                column.SortIndex = attribute.SortIndex;
-                                column.SortOrder=attribute.SortOrder;
-                            }).ToUnit())))
                 .ToUnit();
         
         static IObservable<Unit> HiddenActions(this ApplicationModulesManager manager)

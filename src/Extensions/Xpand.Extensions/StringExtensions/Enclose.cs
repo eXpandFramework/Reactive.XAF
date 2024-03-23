@@ -8,5 +8,7 @@ namespace Xpand.Extensions.StringExtensions {
             end ??= start;
             return input.StartsWith(start) && input.EndsWith(end) ? input : new[] { start, input, end }.Join();
         }
+        
+        public static string EncloseParenthesis(this string input) => input.Enclose("(", ")");
     }
 }
