@@ -15,10 +15,10 @@ namespace Xpand.Extensions.QueryableExtensions {
                     .Lambda<Func<T, bool>>(row));
             });
 
-        private static MethodInfo ContainsMethod(this Type type) => typeof(Enumerable).GetMethods(BindingFlags.Public | BindingFlags.Static)
-            .Where(tmp => tmp.Name == "Contains" && tmp.IsGenericMethodDefinition &&
-                          tmp.GetParameters().Length == 2)
-            .Select(tmp => tmp.MakeGenericMethod(type)).FirstOrDefault();
+        private static MethodInfo ContainsMethod(this Type type)
+            => typeof(Enumerable).GetMethods(BindingFlags.Public | BindingFlags.Static)
+                .Where(tmp => tmp.Name == "Contains" && tmp.IsGenericMethodDefinition && tmp.GetParameters().Length == 2)
+                .Select(tmp => tmp.MakeGenericMethod(type)).FirstOrDefault();
 
         public static IEnumerable<T[]> GetBlocks<T>(
             this IEnumerable<T> source, int blockSize) {
