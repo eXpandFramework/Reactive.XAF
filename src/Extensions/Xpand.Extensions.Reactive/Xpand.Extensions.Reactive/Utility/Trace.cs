@@ -109,7 +109,7 @@ namespace Xpand.Extensions.Reactive.Utility{
                 value = CalculateValue(v, o => new[] {
                             messageFactory?.GetMessageValue(errorMessageFactory, o),
                             allMessageFactory?.GetMessageValue<TSource>(errorMessageFactory, o),
-                            errorMessageFactory.GetMessageValue(errorMessageFactory, o)
+                            errorMessageFactory.GetMessageValue(errorMessageFactory, o as Exception)
                         }.Join()).Change<string>();
             }
             var mName = memberName;
@@ -151,7 +151,7 @@ namespace Xpand.Extensions.Reactive.Utility{
                 return o switch{
                     TSource t => (messageFactory?.Invoke(t) ?? o).ToString(),
                     Exception e => (errorMessageFactory?.Invoke(e) ?? o).ToString(),
-                    _ => o.ToString()
+                    _ => $"{o}"
                 };
             }
             catch (Exception e){

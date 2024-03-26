@@ -54,8 +54,7 @@ namespace Xpand.TestsLib.Blazor {
                 .Observe().SelectMany(host => XafApplicationMonitor.Application.StartTest(host,user,beforeSetup,test)
                     .MergeToUnit(host.Run(url, browser, inactiveWindowBrowserPosition)))
                 .LogError()
-                
-                // .Log(logContext, inactiveWindowLogContextPosition, true)
+                .Log(logContext, inactiveWindowLogContextPosition, true)
             ;
 
             static IObservable<BlazorApplication> StartTest(this IObservable<BlazorApplication> source, IHost host,
@@ -177,7 +176,6 @@ namespace Xpand.TestsLib.Blazor {
                 webBuilder.ConfigureServices(services => {
                     services.AddTransient<XafApplicationMonitor>();
                     services.Decorate<IXafApplicationFactory, XafApplicationMonitor>();
-                    services.AddScoped(typeof(IObjectSelector<>), typeof(ObjectSelector<>));
                     configureServices?.Invoke(services);
                 });
                 
