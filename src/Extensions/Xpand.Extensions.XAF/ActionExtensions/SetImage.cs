@@ -46,6 +46,8 @@ namespace Xpand.Extensions.XAF.ActionExtensions {
         [Description("RevertDirection")]
         Direction,
         [Description("DrillDown")]
-        Change
+        Change,
+        [Description("Filter")]
+        Filter
     }
 }

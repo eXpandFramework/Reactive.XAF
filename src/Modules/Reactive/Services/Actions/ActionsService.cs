@@ -14,6 +14,7 @@ using DevExpress.ExpressApp.SystemModule;
 using DevExpress.ExpressApp.Utils;
 using Fasterflect;
 using Xpand.Extensions.LinqExtensions;
+using Xpand.Extensions.Numeric;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Filter;
@@ -445,6 +446,9 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
 
         public static IObservable<ParametrizedAction> WhenValueChanged(this ParametrizedAction action)
             => action.WhenEvent(nameof(ParametrizedAction.ValueChanged)).TakeUntilDisposed(action).Select(pattern => (ParametrizedAction)pattern.Sender);
+
+        public static IObservable<Unit> Trigger<TAction>(this IObservable<TAction> source) where TAction : ActionBase
+            => source.SelectMany(action => action.Trigger());
         
         public static IObservable<TAction> TriggerWhenActivated<TAction>(this IObservable<TAction> source) where TAction:ActionBase 
             => source.MergeIgnored(@base => @base.Observe().WhenControllerActivated(action => action.Trigger()));
@@ -467,6 +471,8 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
 
         public static IObservable<(TAction action, CustomizeControlEventArgs e)> WhenCustomizeControl<TAction>(this IObservable<TAction> source) where TAction : ActionBase 
             => source.SelectMany(a => a.WhenCustomizeControl().InversePair(a));
+        public static IObservable<TAction> WhenCustomizeControl<TAction>(this IObservable<TAction> source,Func<(TAction action,CustomizeControlEventArgs e),IObservable<Unit>> selector) where TAction : ActionBase 
+            => source.MergeIgnored(a => a.WhenCustomizeControl().InversePair(a).SelectMany(selector));
 
         public static IObservable<CustomizeControlEventArgs> WhenCustomizeControl<TAction>(this TAction action) where TAction:ActionBase 
             => action.WhenEvent<CustomizeControlEventArgs>(nameof(ActionBase.CustomizeControl));
@@ -540,11 +546,25 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
             => afterExecuted.Trigger(() => action.DoExecute(selection));
 
         public static IObservable<Unit> Trigger(this ActionBase action)
-            => action is SimpleAction simpleAction ? simpleAction.Trigger() : action is SingleChoiceAction singleChoiceAction
-                ? singleChoiceAction.Trigger() : throw new NotImplementedException(action.ToString());
+            => action switch{
+                SimpleAction simpleAction => simpleAction.Trigger(),
+                SingleChoiceAction singleChoiceAction => singleChoiceAction.Trigger(),
+                ParametrizedAction parametrizedAction => parametrizedAction.Trigger(Observable.Empty<Unit>()),
+                _ => throw new NotImplementedException(action.ToString())
+            };
 
         public static IObservable<Unit> Trigger(this SimpleAction action, params object[] selection)
             => action.Trigger(action.WhenExecuteCompleted().ToUnit(),selection);
 
+        public static IObservable<ParametrizedAction> WhenValueChangedTrigger(this IObservable<ParametrizedAction> source)
+            => source.WhenValueChangedApplyValue(action => action.Trigger());
+        public static IObservable<ParametrizedAction> WhenValueChangedApplyValue(this IObservable<ParametrizedAction> source,Func<ParametrizedAction,IObservable<Unit>> selector=null)
+            => source.WhenCustomizeControl(t => t.e.Control.Observe()
+                // .Do(spinEdit => spinEdit.Properties.Buttons.First().Visible = false)
+                .SelectMany(spinEdit => spinEdit.WhenEvent("ValueChanged")
+                    .Select(_ => spinEdit.GetPropertyValue("EditValue")).WhenNotDefault()
+                    .Do(value =>t.action.Value=value )
+                    .WaitUntilInactive(1.Seconds()).ObserveOnContext().To(t.action)
+                    .SelectMany(action => selector?.Invoke(action)??Observable.Empty<Unit>())));
     }
 }

@@ -32,6 +32,7 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net {
             HttpStatusCode.GatewayTimeout, 
         };
         public const HttpStatusCode TooManyRequests = HttpStatusCode.TooManyRequests;
+        public const HttpStatusCode Unauthorized = HttpStatusCode.Unauthorized;
         public const HttpStatusCode IpBanned = (HttpStatusCode)418;
         public const HttpStatusCode WafLimit = (HttpStatusCode)403;
         
@@ -65,6 +66,7 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net {
                 WafLimit =>delay?? dateTime.AddMinutes(5),
                 IpBanned => delay??dateTime.AddMinutes(20),
                 TooManyRequests => delay??dateTime.AddSeconds(61),
+                Unauthorized => DateTime.Now.AddSeconds(-1),
                 _ =>responseMessage.WorthRetry()? (delay??dateTime.AddSeconds(61)): DateTime.Now.AddSeconds(-1)
             }).Subtract(DateTime.Now);
         }

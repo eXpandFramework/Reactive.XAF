@@ -29,14 +29,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         static ViewExtensions() => GridListEditorType = AppDomain.CurrentDomain.GetAssemblyType("DevExpress.ExpressApp.Win.Editors.GridListEditor");
 
-        // public static IObservable<object> WhenObjects(this ListView listView) 
-        //     => listView.Objects().ToNowObservable()
-        //         .MergeToObject(listView.CollectionSource.WhenCollectionChanged()
-        //             .SelectMany(_ => listView.Objects()))
-        //         .MergeToObject(listView.CollectionSource.WhenCriteriaApplied().SelectMany(@base => @base.Objects() ))
-        //         .MergeToObject(listView.Editor.WhenEvent(nameof(listView.Editor.DataSourceChanged)).To(listView.Editor.DataSource)
-        //             .StartWith(listView.Editor.DataSource).WhenNotDefault()
-        //             .Select(datasource => ((IEnumerable)datasource).Cast<object>()));
+        public static IObservable<Frame> WhenFrame(this CompositeView view)
+            => view.Application().WhenFrame(view.Id);
         
         public static IObservable<object> SelectObject(this ListView listView, params object[] objects)
             => listView.SelectObject<object>(objects);
@@ -50,7 +44,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                         .WhenNotDefault(_ => editor.List.Count)
                     )
                     .To(listView)
-                    .SelectObject(objects);
+                    .SelectObject(objects)
+                    .Take(objects.Length);
 
         
         static IObservable<T> SelectObject<T>(this IObservable<ListView> source,params T[] objects) where T : class 

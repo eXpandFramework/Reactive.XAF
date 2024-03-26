@@ -143,6 +143,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                             e => e.DetailView=NewDetailView(e.ListViewCurrentObject,frame.Application))));
 
             DetailView NewDetailView(object o, XafApplication xafApplication) {
+                if (o == null) return null;
                 o = o.GetType().ToTypeInfo().FindAttribute<ShowInstanceDetailViewAttribute>().Property is { } prop
                     ? o.GetType().ToTypeInfo().FindMember(prop).GetValue(o) : o;
                 return xafApplication.NewDetailView(space => space.GetObject(o), o.GetType().GetModelClass().DefaultDetailView);

@@ -14,6 +14,6 @@ namespace Xpand.Extensions.XAF.DetailViewExtensions{
 		    => detailView.GetPropertyEditor(memberName.MemberExpressionName()) ;
 
 	    public static PropertyEditor GetPropertyEditor(this DetailView detailView, string memberName) => detailView
-            .GetItems<PropertyEditor>().First(editor => editor.MemberInfo.Name ==memberName);
+            .GetItems<PropertyEditor>().FirstOrDefault(editor => editor.MemberInfo.Name ==memberName);
     }
 }

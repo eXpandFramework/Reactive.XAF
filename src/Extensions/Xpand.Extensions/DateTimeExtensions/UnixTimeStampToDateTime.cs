@@ -6,7 +6,7 @@ namespace Xpand.Extensions.DateTimeExtensions {
             => System.TimeSpan.FromTicks(ticks);
         
         public static DateTime UnixTimeStampToDateTime(this long unixTimeStamp) 
-            => DateTimeOffset.FromUnixTimeMilliseconds(unixTimeStamp).UtcDateTime;
+            => DateTimeOffset.FromUnixTimeMilliseconds(unixTimeStamp).LocalDateTime;
         
         private const decimal TicksPerNanosecond = System.TimeSpan.TicksPerMillisecond / 1000m / 1000;
         public static DateTime UnixNanoSecondsTimeStampToDateTime(this long unixTimeStamp) 
