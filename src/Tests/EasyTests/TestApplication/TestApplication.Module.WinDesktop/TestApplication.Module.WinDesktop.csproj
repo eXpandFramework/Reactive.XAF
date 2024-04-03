@@ -46,7 +46,7 @@
     <PackageReference Include="Microsoft.Extensions.Options" Version="6.0" />
     <PackageReference Include="System.ServiceModel.Security" Version="4.10.2" />
     <PackageReference Include="System.ServiceModel.NetTcp" Version="4.10.2" />
-    <PackageReference Include="Xpand.XAF.Win.All" Version="4.232.4.0" />
+    <PackageReference Include="Xpand.XAF.Win.All" Version="4.232.4.1" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="TestApplication.Module">

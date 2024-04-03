@@ -7,8 +7,8 @@ using Xpand.Extensions.XAF.XafApplicationExtensions;
 
 namespace Xpand.Extensions.XAF.Xpo.ObjectSpaceExtensions {
     public static partial class ObjectSpaceExtensions {
-        public static bool DbExist(this XafApplication application) {
-            var builder = new SqlConnectionStringBuilder(application.GetRequiredService<IConfiguration>()
+        public static bool DbExist(this XafApplication application,string connectionString=null) {
+            var builder = new SqlConnectionStringBuilder(connectionString??application.GetRequiredService<IConfiguration>()
                 .GetConnectionString("ConnectionString")??application.ConnectionString);
             var initialCatalog = "Initial catalog";
             var databaseName = builder[initialCatalog].ToString();

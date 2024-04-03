@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using Xpand.Extensions.LinqExtensions;
 
 namespace Xpand.Extensions.StringExtensions{
     public static partial class StringExtensions{
@@ -14,7 +11,7 @@ namespace Xpand.Extensions.StringExtensions{
                 var aBase64Length = (aBytes.Length + 2) / 3 * 4;
                 var bBase64Length = (bBytes.Length + 2) / 3 * 4;
 
-                char[] delimiterChars = { '|' };
+                char[] delimiterChars = ['|'];
                 var combinedLength = aBase64Length + delimiterChars.Length + bBase64Length;
                 var combinedChars = new char[combinedLength];
 

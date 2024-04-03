@@ -66,7 +66,7 @@ namespace Xpand.XAF.ModelEditor.Module.Win {
 
         private static IObservable<ShowViewParameters> ParseProjects(this IObservable<ShowViewParameters> source, string solutionPath)
             => source.MergeIgnored(parameters => parameters.CreatedView.ObjectSpace.AsNonPersistentObjectSpace()
-                .WhenObjects(t1 => Unit.Default.ReturnObservable()
+                .WhenObjects(t1 => Unit.Default.Observe()
 	                .Do(_ => parameters.CreatedView.AsObjectView().Application().ShowViewStrategy.ShowMessage(nameof(ParseProjects)))
 	                .SelectMany(_ => SolutionFile.Parse(solutionPath).Projects().Models(t1.objectSpace))
                     .TraceModelEditorWindowsFormsModule(model => model.Name))
@@ -99,6 +99,6 @@ namespace Xpand.XAF.ModelEditor.Module.Win {
         internal static IObservable<TSource> TraceModelEditorWindowsFormsModule<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<ITraceEvent> traceAction = null,
             Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.All,
             [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) 
-            => source.Trace(name, ModelEditorWindowsFormsModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName);
+            => source.Trace(name, ModelEditorWindowsFormsModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName:memberName);
     }
 }

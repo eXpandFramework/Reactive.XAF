@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -22,15 +23,16 @@ using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Transform.System.Text.Json;
 using Xpand.Extensions.Reactive.Utility;
+using Xpand.Extensions.StreamExtensions;
 using Xpand.Extensions.StringExtensions;
 
 namespace Xpand.Extensions.Reactive.Transform.System.Net {
     public static class NetworkExtensions {
-        public static readonly HttpStatusCode[] WorthRetryingCodes ={
+        public static readonly HttpStatusCode[] WorthRetryingCodes = [
             HttpStatusCode.TooManyRequests, IpBanned, WafLimit, HttpStatusCode.BadGateway, HttpStatusCode.Forbidden,
             HttpStatusCode.Unauthorized, HttpStatusCode.RequestTimeout,HttpStatusCode.InternalServerError,HttpStatusCode.ServiceUnavailable, 
-            HttpStatusCode.GatewayTimeout, 
-        };
+            HttpStatusCode.GatewayTimeout
+        ];
         public const HttpStatusCode TooManyRequests = HttpStatusCode.TooManyRequests;
         public const HttpStatusCode Unauthorized = HttpStatusCode.Unauthorized;
         public const HttpStatusCode IpBanned = (HttpStatusCode)418;
@@ -123,21 +125,20 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net {
             => client.Request( httpRequestMessage, onResponse, obj)
                 .SendRequest(obj??typeof(T).CreateInstance(), deserializeResponse);
 
-        private static IObservable<HttpResponseMessage> Request<T>(this HttpClient client, HttpRequestMessage httpRequestMessage, Action<HttpResponseMessage> onResponse=null, T obj=default) where T : class,new() 
+        static IObservable<HttpResponseMessage> Request<T>(this HttpClient client, HttpRequestMessage httpRequestMessage, Action<HttpResponseMessage> onResponse=null, T obj=default) where T : class,new() 
             => client.SendAsync(httpRequestMessage,HttpCompletionOption.ResponseHeadersRead)
                 .ToObservable().EnsureSuccessStatusCode()
                 .Do(message => onResponse?.Invoke(message))
                 .Do(message => ResponseSubject.OnNext((message, obj)));
 
         public static IObservable<(HttpResponseMessage message,JsonObject[] objects)> WhenResponseObject(this HttpClient client, HttpRequestMessage httpRequestMessage) 
-            => client.WhenResponse(httpRequestMessage).Select(t => (t.result.Message,t.response.DeserializeJsonNode().ToJsonObjects().ToArray()));
-        
-        static IObservable<(byte[] response, ResponseResult result)> WhenResponse(this HttpClient client, HttpRequestMessage httpRequestMessage) 
-            => client.Request<ResponseResult>(httpRequestMessage).WhenResponseObject(null, httpResponseMessage => new ResponseResult(httpResponseMessage).Observe())
-                .SelectMany(result => Observable.FromAsync(() => result.Message.Content.ReadAsByteArrayAsync()).ObserveOnDefault().Pair(result));
+            => client.WhenResponse(httpRequestMessage).Select(t => (t.message,t.response.Bytes().DeserializeJsonNode().ToJsonObjects().ToArray()));
 
-        // public static IObservable<HttpResponseMessage> EnsureSuccessStatusCode1(this IObservable<HttpResponseMessage> source)
-        //     => source.If(message => !message.IsSuccessStatusCode,)
+        public static IObservable<(Stream response, HttpResponseMessage message)> WhenResponse(this HttpClient client, HttpRequestMessage httpRequestMessage) 
+            => client.Request<HttpResponseMessage>(httpRequestMessage).WhenResponseObject(null, httpResponseMessage => httpResponseMessage.Observe())
+                .SelectMany(result => Observable.FromAsync(() => result.Content.ReadAsStreamAsync()).Pair(result));
+
+        
         public static IObservable<HttpResponseMessage> EnsureSuccessStatusCode(this IObservable<HttpResponseMessage> source) 
             => source.If(message => !message.IsSuccessStatusCode, message => Observable.If(message.IsJsonResponse,message.WhenJsonDocument())
                 .Merge(Observable.If(() => !message.IsJsonResponse(),Observable.FromAsync(() => message.Content.ReadAsStringAsync())
@@ -153,13 +154,13 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net {
 
         public static IObservable<(T[] objects, JsonDocument document)> WhenResponseDocument<T>(this HttpClient client,
             HttpRequestMessage httpRequestMessage, Func<(JsonDocument document, HttpResponseMessage message), IObservable<T>> selector) 
-            => client.Request<ResponseResult>(httpRequestMessage)
+            => client.Request<HttpResponseMessage>(httpRequestMessage)
                 .SelectMany(message => message.Content.ReadAsStreamAsync().ToObservable()
                     .SelectMany(stream => stream.WhenJsonDocument(document => selector((document, message)))));
 
         public static IObservable<(JsonDocument document, HttpResponseMessage message)> WhenResponseDocument(
             this HttpClient client, HttpRequestMessage httpRequestMessage)
-            => client.Request<ResponseResult>(httpRequestMessage)
+            => client.Request<HttpResponseMessage>(httpRequestMessage)
                 .SelectMany(message => message.Content.ReadAsStreamAsync().ToObservable()
                     .SelectMany(stream => stream.WhenJsonDocument()
                         .Select(document => (document, message))));
@@ -190,15 +191,6 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net {
             => source.SelectMany(responseMessage => deserializeResponse.DeserializeResponse()(responseMessage)
                 .DoOnComplete(() => ObjectSentSubject.OnNext((responseMessage,  obj))));
 
-        record ResponseResult {
-            public HttpResponseMessage Message{ get; }
-            
-            public ResponseResult(HttpResponseMessage message) 
-                => Message = message;
-
-            public ResponseResult() {
-            }
-        }
         public static IObservable<T> SendRequest<T>(this HttpClient client, HttpMethod httpMethod,string url, 
             T obj = null, Func<HttpResponseMessage, IObservable<T>> deserializeResponse = null) where T : class,new()
             => client.SendRequest(new HttpRequestMessage(httpMethod, url),obj,deserializeResponse);
@@ -245,10 +237,9 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net {
         
     }
     
-    public class HttpResponseException:HttpRequestException {
-        public HttpResponseMessage HttpResponseMessage{ get; }
-
-        public HttpResponseException(string paramName, HttpResponseMessage httpResponseMessage) : base(paramName) => HttpResponseMessage = httpResponseMessage;
+    public class HttpResponseException(string paramName, HttpResponseMessage httpResponseMessage)
+        : HttpRequestException(paramName) {
+        public HttpResponseMessage HttpResponseMessage{ get; } = httpResponseMessage;
     }
 
     

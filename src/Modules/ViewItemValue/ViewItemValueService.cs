@@ -1,5 +1,4 @@
 ﻿using System;
-using System.ComponentModel;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -11,10 +10,10 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Templates;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Conditional;
-using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.Tracing;
+using Xpand.Extensions.TypeExtensions;
 using Xpand.Extensions.XAF.ActionExtensions;
 using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.ModelExtensions;
@@ -59,14 +58,12 @@ namespace Xpand.XAF.Modules.ViewItemValue{
             if (defaultObject != null) {
                 var memberValue = defaultObject.ViewItemValue;
                 if (memberInfo.MemberTypeInfo.IsDomainComponent) {
-                    var typeConverter = TypeDescriptor.GetConverter(memberInfo.MemberTypeInfo.KeyMember.MemberType);
-                    var value = memberValue != null
-                        ? view.ObjectSpace.GetObjectByKey(memberInfo.MemberType, typeConverter.ConvertFromString(memberValue)) : null;
-                    memberInfo.SetValue(view.CurrentObject, value);
+                    memberInfo.SetValue(view.CurrentObject,
+                        memberValue != null ? view.ObjectSpace.GetObjectByKey(memberInfo.MemberType,
+                                memberInfo.MemberTypeInfo.KeyMember.MemberType.ConvertFromString(memberValue)) : null);
                 }
                 else {
-                    var typeConverter = TypeDescriptor.GetConverter(memberInfo.MemberType);
-                    memberInfo.SetValue(view.CurrentObject, typeConverter.ConvertFromString(memberValue));
+                    memberInfo.SetValue(view.CurrentObject, memberInfo.MemberType.ConvertFromString(memberValue));
                 }
 
                 return item;

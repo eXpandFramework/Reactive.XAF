@@ -131,7 +131,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
         
         public static IObservable<T> WhenConcatExecution<T>(this SimpleAction simpleAction,Func<SimpleActionExecuteEventArgs,IObservable<T>> sourceSelector)
             => simpleAction.WhenExecuted().SelectMany(e => e.WhenConcatExecution(sourceSelector));
-
+        
         private static IObservable<T> WhenConcatExecution<T,TArgs>(this TArgs e,Func<TArgs, IObservable<T>> sourceSelector) where TArgs:ActionBaseEventArgs{
             e.Action.Enabled[nameof(WhenConcatExecution)] = false;
             return sourceSelector(e).TakeUntilDisposed(e.Action).ObserveOnContext()
@@ -379,7 +379,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
             => source.SelectMany(a =>a.Controller.WhenActivated(emitWhenActive).To(a) );
         
         public static IObservable<TAction> WhenControllerActivated<TAction>(this IObservable<TAction> source,Func<TAction,IObservable<Unit>> mergeSelector,bool emitWhenActive=false) where TAction : ActionBase 
-            => source.SelectMany(a =>a.Controller.WhenActivated(emitWhenActive).TakeUntil(a.Controller.WhenDeactivated())
+            => source.MergeIgnored(a =>a.Controller.WhenActivated(emitWhenActive).TakeUntil(a.Controller.WhenDeactivated())
                 .SelectMany(_ => mergeSelector(a)).To(a) );
         
         public static IObservable<TAction> WhenControllerDeActivated<TAction>(this IObservable<TAction> source,bool emitWhenActive=false) where TAction : ActionBase 
