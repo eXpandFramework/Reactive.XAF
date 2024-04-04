@@ -9,12 +9,11 @@ using DevExpress.ExpressApp.Model.Core;
 
 namespace Xpand.Extensions.XAF.ModelExtensions{
     public partial class ModelExtensions{
-        public static ModelNode AddNode<T>(this IModelNode node, string id,bool checkForDuplicates) where T:IModelNode{
-            if (!checkForDuplicates||(((ModelNode) node)[id] == null)) {
-                return (ModelNode) (IModelNode)node.AddNode<T>(id);
-            }
-            throw new DuplicateNameValidationException($"{node}");
-        }
+        public static T EnsureNode<T>(this IModelNode node, string id) where T : class, IModelNode => node.EnsureNodes<T>(id).First();
+
+        public static ModelNode AddNode<T>(this IModelNode node, string id,bool checkForDuplicates) where T:IModelNode 
+            => checkForDuplicates && (((ModelNode)node)[id] != null) ? throw new DuplicateNameValidationException($"{node}")
+                : (ModelNode)(IModelNode)node.AddNode<T>(id);
 
         public static IEnumerable<T> EnsureNodes<T>(this IModelNode node, params string[] ids) where T: class, IModelNode 
             => ids.Select(id => node.GetNode(id) as T ?? node.AddNode<T>());

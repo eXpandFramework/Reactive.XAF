@@ -128,18 +128,18 @@ namespace Xpand.XAF.Modules.Reactive.Services {
                 .ToUnit();
         
         static IObservable<Unit> HiddenActions(this ApplicationModulesManager manager)
-            => manager.WhenGeneratingModelNodes<IModelViews>()
-                .SelectMany(views =>views.OfType<IModelObjectView>()
+            => manager.WhenGeneratingModelNodes<IModelViews>().SelectMany(views =>views.OfType<IModelObjectView>()
                     .SelectMany(view => view.ModelClass.TypeInfo.Attributed<HiddenActionAttribute>()
-                        .SelectMany(t => t.attribute.Actions).Do(action => ((IModelViewHiddenActions)view).HiddenActions.AddNode<IModelActionLink>(action))
-                        .ToUnit()
+                        .SelectMany(t => t.attribute.Actions).Distinct().Do(action => ((IModelViewHiddenActions)view).HiddenActions.EnsureNode<IModelActionLink>(action)).ToUnit()
                         .Concat(view.ModelClass.TypeInfo.AttributedMembers<HiddenActionAttribute>()
                             .SelectMany(t => views.OfType<IModelListView>().Where(listView => listView.ModelClass.TypeInfo.Type==t.memberInfo.ListElementType)
                                 .Where(listView => listView.Id==$"{t.memberInfo.Owner.Name}_{t.memberInfo.Name}_ListView").Distinct()
-                                .SelectMany(listView => t.attribute.Actions.Where(action => ((IModelViewHiddenActions)listView).HiddenActions[action]==null)
-                                    .Do(action => ((IModelViewHiddenActions)listView).HiddenActions.AddNode<IModelActionLink>(action))))
+                                .Select(listView => ((IModelViewHiddenActions)listView).HiddenActions)
+                                .SelectMany(modelHiddenActions => t.attribute.Actions.Where(action => modelHiddenActions[action] == null)
+                                    .Do(action => modelHiddenActions.EnsureNode<IModelActionLink>(action))))
                             .ToUnit())))
                 .ToUnit();
+        
         static IObservable<Unit> ReadOnlyProperty(this ApplicationModulesManager manager)
             => manager.WhenGeneratingModelNodes<IModelBOModelClassMembers>()
                 .SelectMany(members => members.SelectMany(member => member.MemberInfo.FindAttributes<ReadOnlyPropertyAttribute>()
@@ -192,10 +192,10 @@ namespace Xpand.XAF.Modules.Reactive.Services {
                         view.AllowNew = attribute.AllowNew;
                         var modelHiddenActions = ((IModelViewHiddenActions) view).HiddenActions;
                         if (!view.AllowEdit) {
-                            modelHiddenActions.AddNode<IModelActionLink>("Save", true);
+                            modelHiddenActions.EnsureNode<IModelActionLink>("Save");
                         }
                         if (attribute.DisableListViewProcess && view is IModelListView) {
-                            modelHiddenActions.AddNode<IModelActionLink>(ListViewProcessCurrentObjectController.ListViewShowObjectActionId, true);
+                            modelHiddenActions.EnsureNode<IModelActionLink>(ListViewProcessCurrentObjectController.ListViewShowObjectActionId);
                         }
                     }).ToObservable(Transform.ImmediateScheduler))
                 .ToUnit()

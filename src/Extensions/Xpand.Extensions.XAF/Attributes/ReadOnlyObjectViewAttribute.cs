@@ -10,19 +10,17 @@ namespace Xpand.Extensions.XAF.Attributes {
     }
 
     [AttributeUsage(AttributeTargets.Class)]
-    public class ReadOnlyObjectViewAttribute:Attribute, IReadOnlyAttribute {
-        public ViewType ViewType { get; }
-        public bool AllowEdit { get; }
-        public bool AllowDelete { get; }
-        public bool AllowNew { get; }
-        public bool DisableListViewProcess { get; }
-
-        public ReadOnlyObjectViewAttribute(ViewType viewType=ViewType.Any,bool allowEdit=false,bool allowDelete=false,bool allowNew=false,bool disableListViewProcess=false) {
-            ViewType = viewType;
-            AllowEdit = allowEdit;
-            AllowDelete = allowDelete;
-            AllowNew = allowNew;
-            DisableListViewProcess = disableListViewProcess;
-        }
+    public class ReadOnlyObjectViewAttribute(
+        ViewType viewType = ViewType.Any,
+        bool allowEdit = false,
+        bool allowDelete = false,
+        bool allowNew = false,
+        bool disableListViewProcess = false)
+        : Attribute, IReadOnlyAttribute {
+        public ViewType ViewType { get; } = viewType;
+        public bool AllowEdit { get; } = allowEdit;
+        public bool AllowDelete { get; } = allowDelete;
+        public bool AllowNew { get; } = allowNew;
+        public bool DisableListViewProcess { get; } = disableListViewProcess;
     }
 }

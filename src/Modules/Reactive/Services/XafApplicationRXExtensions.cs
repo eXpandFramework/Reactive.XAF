@@ -789,9 +789,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         
         private static IObservable<T[]> WhenObjects<T>(this XafApplication application, ObjectModification objectModification,
             Expression<Func<T, bool>> criteriaExpression, string[] modifiedProperties,IObservable<IObjectSpace> spaceSource, [CallerMemberName] string caller = "")where T:class
-            => application.WhenObjects<T>(objectModification, criteriaExpression.ToCriteria(),
-                modifiedProperties, spaceSource, caller,!typeof(T).IsInterface?typeof(T).YieldItem().ToArray():application.TypesInfo.PersistentTypes
-                    .Where(info => typeof(T).IsAssignableFrom(info.Type) && info.IsPersistent && !info.Base.IsPersistent).Select(info => info.Type).ToArray());
+            => application.WhenObjects<T>(objectModification, criteriaExpression.ToCriteria(), modifiedProperties, spaceSource, caller, !typeof(T).IsInterface ? typeof(T).YieldItem().ToArray()
+                    : application.TypesInfo.PersistentTypes.Where(info => typeof(T).IsAssignableFrom(info.Type) && info.IsPersistent && !info.IsAbstract).Select(info => info.Type).ToArray());
 
         static IObservable<T[]> WhenObjects<T>(this XafApplication application, ObjectModification objectModification,
             CriteriaOperator criteria, string[] modifiedProperties, IObservable<IObjectSpace> spaceSource, string caller,params Type[] types)
