@@ -25,6 +25,7 @@ using Xpand.Extensions.XAF.TypesInfoExtensions;
 using Xpand.Extensions.XAF.ViewExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
+using Xpand.XAF.Modules.Reactive.Services.Controllers;
 
 namespace Xpand.XAF.Modules.Reactive.Services {
     public static class AttributesExtensions {
@@ -40,6 +41,7 @@ namespace Xpand.XAF.Modules.Reactive.Services {
                 .Merge(manager.ListViewShowFooterCollection())
                 .Merge(manager.ColumnSummary())
                 .Merge(manager.ColumnSorting())
+                .Merge(manager.DisableNewObjectAction())
                 .Merge(manager.HiddenActions())
                 .Merge(manager.ReadOnlyCollection())
                 .Merge(manager.ReadOnlyProperty())
@@ -88,6 +90,13 @@ namespace Xpand.XAF.Modules.Reactive.Services {
                     .Do(value => ((IList)frame.View.ObjectTypeInfo.FindMember(t.attribute.PropertyName)
                         .GetValue(frame.View.CurrentObject)).Remove(value)));
         }
+        
+        static IObservable<Unit> DisableNewObjectAction(this ApplicationModulesManager manager)
+            => manager.WhenApplication(application => application.WhenFrameCreated().ToController<NewObjectViewController>()
+                .SelectMany(controller => controller.WhenCollectDescendantTypes()
+                    .SelectMany(e => e.Types.Where(type => type.Attributes<DisableNewObjectActionAttribute>().Any()).ToArray()
+                        .Do(type => e.Types.Remove(type)))))
+                .ToUnit();
         
         static IObservable<Unit> ColumnSorting(this ApplicationModulesManager manager)
             => manager.WhenGeneratingModelNodes<IModelColumns>()

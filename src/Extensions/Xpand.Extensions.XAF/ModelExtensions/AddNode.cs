@@ -16,10 +16,7 @@ namespace Xpand.Extensions.XAF.ModelExtensions{
                 : (ModelNode)(IModelNode)node.AddNode<T>(id);
 
         public static IEnumerable<T> EnsureNodes<T>(this IModelNode node, params string[] ids) where T: class, IModelNode 
-            => ids.Select(id => node.GetNode(id) as T ?? node.AddNode<T>());
-        
-        public static T EnsureNode<T>(this IModelNode node, params string[] ids) where T: class, IModelNode 
-            => node.EnsureNodes<T>().First();
+            => ids.Select(id => node.GetNode(id) as T ?? node.AddNode<T>(id));
         
         public static ModelNode AddNode(this IModelNode node, string id = null) => node.AddNode(node.ModelListType(), id);
 
