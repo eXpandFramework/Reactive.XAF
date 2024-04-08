@@ -5,7 +5,11 @@ using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.StringExtensions;
 
 namespace Xpand.Extensions.Reactive.Filter{
-    public static partial class Filter{
+    public static partial class Filter {
+        public static IObservable<TSource> WhenIncludeNotDefault<TSource, TValue>(this IObservable<TSource> source,
+            TSource value, Func<TSource, TValue> valueSelector)
+            => source.StartWith(value).WhenNotDefault(valueSelector);
+        
 	    public static IObservable<TSource> WhenNotDefault<TSource,TValue>(this IObservable<TSource> source,Func<TSource,TValue> valueSelector) 
             =>source.Where(source1 => !valueSelector(source1).IsDefaultValue());
 

@@ -133,6 +133,9 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<Unit> WhenCancelableActionExecuted(this XafApplication application,
             Func<(ActionBaseEventArgs e,IObservable<Unit> cancelSignal), IObservable<Unit>> executeSelector, params string[] actions)
             => application.WhenCancelableActionExecuted<ActionBaseEventArgs>(executeSelector, actions);
+        public static IObservable<Unit> WhenCancelableSimpleActionExecuted(this XafApplication application,
+            Func<(SimpleActionExecuteEventArgs e,IObservable<Unit> cancelSignal), IObservable<Unit>> executeSelector, params string[] actions)
+            => application.WhenCancelableActionExecuted(executeSelector, actions);
         
         public static IObservable<Unit> WhenCancelableActionExecuted<T>(this XafApplication application,
             Func<(T e,IObservable<Unit> cancelSignal), IObservable<Unit>> executeSelector, params string[] actions) where T : ActionBaseEventArgs
@@ -1046,19 +1049,22 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         private static IObservable<View> RefreshObjectViewWhenCommitted<TObject>(this XafApplication application, Type detailViewObjectType=null,Func<Frame,TObject[],bool> match=null) where TObject : class {
             return application.WhenFrame(detailViewObjectType, detailViewObjectType != null ? ViewType.DetailView : ViewType.ListView)
                 .Where(frame => frame.View.IsRoot)
-                .SelectMany(frame => CommitSignal.OfType<TObject[]>().BufferUntilInactive(2.Seconds()).WhenNotEmpty()
-                    .TakeUntil(frame.View.ObjectSpace.WhenDisposed().Take(1)).ObserveOnContext().SelectMany().TakeLast(1)
+                .SelectMany(frame => CommitSignal.Select(objects => objects).OfType<TObject[]>()
+                    .Select(objects => objects).BufferUntilInactive(2.Seconds())
+                    .Select(objects => objects).WhenNotEmpty()
+                    .TakeUntil(frame.View.ObjectSpace.WhenDisposed().Take(1)).ObserveOnContext().SelectMany()
                     .Where(arg => match?.Invoke(frame, arg) ?? true).To(frame.View)
-                    .WhenNotDefault(view => view?.ObjectSpace).ObserveOnContext()
-                    .Select(view => view.ObjectSpace.WhenModifyChanged().To(view).StartWith(view)
-                        .TakeUntil(view.ObjectSpace.WhenDisposed())
-                        .Where(_ => !view.ObjectSpace.IsModified)
-                        .DoSafe(_ => view.ObjectSpace.Refresh())
-                        .ToConsole(_ => $"{typeof(TObject).Name} - {view}"))
-                    .Switch()
+                    .WhenNotDefault(view => view?.ObjectSpace)
+                    .Take(1)
+                    .RepeatWhen(observable => observable.SelectMany(o => frame.View.ObjectSpace.WhenModifyChanged().To(frame.View).StartWith(frame.View)
+                        .TakeUntil(frame.View.ObjectSpace.WhenDisposed())
+                        .Where(_ => !frame.View.ObjectSpace.IsModified)
+                        .DoSafe(_ => frame.View.ObjectSpace.Refresh())
+                        .ToConsole(_ => $"{typeof(TObject).Name} - {frame.View}")))
+                    
                 )
                 .Merge(application.WhenProviderCommittedDetailed<TObject>(ObjectModification.All,emitUpdatingObjectSpace:true,_ => true)
-                    .ToObjectsGroup().Do(CommitSignal.OnNext).IgnoreElements().To<View>())
+                    .ToObjectsGroup().Select(objects => objects).Do(CommitSignal.OnNext).IgnoreElements().To<View>())
                 .TakeUntilDisposed(application);
         }
 

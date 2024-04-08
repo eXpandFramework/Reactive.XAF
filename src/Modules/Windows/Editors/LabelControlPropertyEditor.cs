@@ -12,7 +12,7 @@ namespace Xpand.XAF.Modules.Windows.Editors;
 public class LabelControlPropertyEditor : StringPropertyEditor{
     public LabelControlPropertyEditor(Type objectType, IModelMemberViewItem model) : base(objectType, model) 
         => AllowEdit[nameof(LabelControlPropertyEditor)] = false;
-
+    
     protected override object CreateControlCore() {
         var controlCore = base.CreateControlCore();
         if (controlCore is LargeStringEdit edit) {

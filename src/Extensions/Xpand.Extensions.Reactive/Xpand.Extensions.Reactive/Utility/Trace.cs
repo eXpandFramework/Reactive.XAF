@@ -106,11 +106,12 @@ namespace Xpand.Extensions.Reactive.Utility{
             if (traceSource?.Switch.Level == SourceLevels.Off) return;
             string value = null;
             if (v!=null) {
-                value = CalculateValue(v, o => new[] {
-                            messageFactory?.GetMessageValue(errorMessageFactory, o),
-                            allMessageFactory?.GetMessageValue<TSource>(errorMessageFactory, o),
-                            errorMessageFactory.GetMessageValue(errorMessageFactory, o as Exception)
-                        }.Join()).Change<string>();
+                value = CalculateValue(v, o => {
+                    var messageValue = messageFactory?.GetMessageValue(errorMessageFactory, o);
+                    var s = allMessageFactory?.GetMessageValue<TSource>(errorMessageFactory, o);
+                    var messageValue1 = errorMessageFactory.GetMessageValue(errorMessageFactory, o as Exception);
+                    return new[] { messageValue, s, messageValue1 }.Join();
+                }).Change<string>();
             }
             var mName = memberName;
             if (m.IsEqualIgnoreCase(nameof(RXAction.OnNext))){

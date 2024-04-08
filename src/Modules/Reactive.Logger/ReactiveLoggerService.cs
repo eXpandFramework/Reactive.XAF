@@ -46,7 +46,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
                 _listener ??= new ReactiveTraceListener();
                 _listener.Title = application.Title;
                 ListenerEvents = _listener.EventTrace.Publish().RefCount();
-                return application.BufferUntilCompatibilityChecked(ListenerEvents.Select(Exception => Exception)).SaveEvent(application).ToUnit()
+                return application.BufferUntilCompatibilityChecked(ListenerEvents).SaveEvent(application).ToUnit()
                         .Merge(application.Notifications())
                         .Merge(ListenerEvents.RefreshViewDataSource(application))
                         .Merge(application.RegisterListener(_listener))
@@ -241,35 +241,36 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
             return traceEvents.ToNowObservable().Do(traceEvent => SavedTraceEventSubject.OnNext(traceEvent));
         }
 
-        private static IObservable<Unit> Notifications(this XafApplication xafApplication) 
-            => xafApplication.WhenSetupComplete().SelectMany(_ => {
+        private static IObservable<Unit> Notifications(this XafApplication application) 
+            => application.WhenSetupComplete().SelectMany(_ => {
                 var moduleType = AppDomain.CurrentDomain.GetAssemblyType("DevExpress.ExpressApp.Notifications.NotificationsModule");
-                var service = (NotificationsService)xafApplication.Modules.FindModule(moduleType)?.GetPropertyValue("NotificationsService");
-                return service != null ? xafApplication.WhenModelChanged().TakeFirst()
-                        .SelectMany(application => {
-                            var notifications = application.ToReactiveModule<IModelReactiveModuleLogger>().ReactiveLogger.Notifications;
-                            var rules = notifications.Select(notification => (notification.ObjectType.TypeInfo.Type, notification.Criteria,notification.ShowXafMessage,notification.XafMessageType,notification.MessageDisplayInterval)).ToArray();
-                            return SavedTraceEvent.Cast<TraceEvent>().SelectMany(traceEvent => rules.Where(t => traceEvent.Match(t.Criteria))
-                                    .Select(rule => {
-                                        var supportNotifications = (ISupportNotifications)traceEvent.ObjectSpace.CreateObject(rule.Type);
-                                        supportNotifications.AlarmTime = DateTime.Now;
-                                        supportNotifications.GetTypeInfo().FindMember(nameof(ISupportNotifications.NotificationMessage))
-                                            .SetValue(supportNotifications, traceEvent.Value);
-                                        traceEvent.ObjectSpace.CommitChanges();
-                                        return (supportNotifications,rule);
-                                    })
-                                    .ToNowObservable()
-                                    .ShowXafMessage(xafApplication, traceEvent))
-                                    .DoSafe(_ => service.Refresh());
-                        }).ToUnit()
+                var service = (NotificationsService)application.Modules.FindModule(moduleType)?.GetPropertyValue("NotificationsService");
+                return service != null ? application.WhenModelChanged().TakeFirst()
+                        .Select(_ => application.Rules()).StartWith(application.Rules())
+                        .SelectMany(rules => SavedTraceEvent.Cast<TraceEvent>().SelectMany(traceEvent => rules.Where(t => traceEvent.Match(t.Criteria))
+                                .Select(rule => {
+                                    var supportNotifications = (ISupportNotifications)traceEvent.ObjectSpace.CreateObject(rule.Type);
+                                    supportNotifications.AlarmTime = DateTime.Now;
+                                    supportNotifications.GetTypeInfo().FindMember(nameof(ISupportNotifications.NotificationMessage))
+                                        .SetValue(supportNotifications, traceEvent.Value);
+                                    traceEvent.ObjectSpace.CommitChanges();
+                                    return (supportNotifications,rule);
+                                })
+                                .ToNowObservable()
+                                .ShowXafMessage(application, traceEvent,memberName:null))
+                            .DoSafe(_ => service.Refresh())).ToUnit()
                     : Observable.Empty<Unit>();
             });
+
+        private static (Type Type, string Criteria, bool ShowXafMessage, InformationType XafMessageType, int MessageDisplayInterval)[] Rules(this XafApplication application) 
+            => application.Model.ToReactiveModule<IModelReactiveModuleLogger>().ReactiveLogger.Notifications
+                .Select(notification => (notification.ObjectType.TypeInfo.Type, notification.Criteria,notification.ShowXafMessage,notification.XafMessageType,notification.MessageDisplayInterval)).ToArray();
 
         public static IObservable<(T supportNotifications, (Type objectType, string criteria, bool
                 showXafMessage, InformationType informationType, int messageDisplayInterval))> 
             ShowXafMessage<T>(this IObservable<(T supportNotifications, (Type objectType, string criteria, bool showXafMessage, InformationType informationType
-                , int messageDisplayInterval) rule)> source, XafApplication application, TraceEvent traceEvent,Action onOk = null, Action onCancel = null, [CallerMemberName] string memberName = "") 
-            => source.Where(t => t.rule.showXafMessage).ShowXafMessage(_ => $"{traceEvent.Location}, {traceEvent.Method}, {traceEvent.Value}",
+                , int messageDisplayInterval) rule)> source, XafApplication application, TraceEvent traceEvent, [CallerMemberName] string memberName = "") 
+            => source.Where(t => t.rule.showXafMessage).ShowXafMessage(_ =>new[]{traceEvent.Location,traceEvent.Method,traceEvent.Value}.WhereNotEmpty().JoinCommaSpace() ,
                 t => t.rule.informationType, t => t.rule.messageDisplayInterval, memberName: memberName,
                 onOk: t => application.ShowViewStrategy.ShowViewInPopupWindow(application.NewDetailView(t.supportNotifications)));
     }

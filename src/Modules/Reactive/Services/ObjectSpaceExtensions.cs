@@ -15,6 +15,7 @@ using DevExpress.ExpressApp;
 using DevExpress.Xpo;
 using Fasterflect;
 using Xpand.Extensions.AppDomainExtensions;
+using Xpand.Extensions.ExpressionExtensions;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Filter;
@@ -142,6 +143,9 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                     .SelectMany(list => list.Cast<object>());
         }
 
+        public static IObservable<T> WhenModifiedObjects<T>(this IObjectSpace objectSpace, Expression<Func<T,object>>[] properties)
+            =>objectSpace.WhenModifiedObjects<T>(properties.Select(expression => expression.MemberExpressionName()).ToArray());
+        
         public static IObservable<T> WhenModifiedObjects<T>(this IObjectSpace objectSpace, params string[] properties) 
             => objectSpace.WhenModifiedObjects(typeof(T),properties).Cast<T>();
 
@@ -164,7 +168,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 t.e.PropertyName != null && properties.Contains(t.e.PropertyName));
 
         public static IObservable<T> WhenModifiedObjects<T>(this IObjectSpace objectSpace,Expression<Func<T,object>> memberSelector) 
-            => objectSpace.WhenModifiedObjects(typeof(T),((MemberExpression) memberSelector.Body).Member.Name).Cast<T>();
+            => objectSpace.WhenModifiedObjects(typeof(T),memberSelector.MemberExpressionName()).Cast<T>();
 
         public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)> WhenModifiedObjectsDetailed<T>(
             this IObjectSpace objectSpace, bool emitAfterCommit) 

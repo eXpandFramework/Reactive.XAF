@@ -9,7 +9,13 @@ using Xpand.Extensions.XAF.CriteriaOperatorExtensions;
 namespace Xpand.Extensions.XAF.CollectionSourceExtensions {
     public static partial class CollectionSourceExtensions {
         public static void SetCriteria(this CollectionSourceBase collectionSourceBase, string key, Type type, LambdaExpression lambda) 
-            => collectionSourceBase.Criteria[key] = lambda.ToCriteria(type);
+            => collectionSourceBase.SetCriteria( key, lambda.ToCriteria(type));
+
+        public static void SetCriteria(this CollectionSourceBase collectionSourceBase, string key, CriteriaOperator criteriaOperator){
+            collectionSourceBase.BeginUpdateCriteria();
+            collectionSourceBase.Criteria[key] = criteriaOperator;
+            collectionSourceBase.EndUpdateCriteria();
+        }
 
         public static void SetCriteria(this CollectionSourceBase collectionSourceBase, LambdaExpression lambda,[CallerMemberName]string caller="") 
             => collectionSourceBase.SetCriteria(caller,collectionSourceBase.ObjectTypeInfo.Type, lambda);

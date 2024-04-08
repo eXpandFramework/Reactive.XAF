@@ -9,6 +9,7 @@ using DevExpress.Utils.Svg;
 using Fasterflect;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.EventArgExtensions;
+using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
@@ -90,7 +91,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             WinMessageType winMessageType = WinMessageType.Alert, Action<T> onOk = null, Action<T> onCancel = null,Func<T,SvgImage> imageSelector=null) {
             if (message != null) {
                 MessageSubject.OnNext(new MessageOptions() {
-                    Duration = displayInterval, Message = $"{memberName}{Environment.NewLine}{message}",
+                    Duration = displayInterval, Message = new[]{memberName,message}.JoinNewLine(),
                     Type = informationType, Win = { Type = winMessageType,ImageOptions = obj.ImageOptions( imageSelector)},Web = { Position = position},
                     OkDelegate = () => onOk?.Invoke(obj),CancelDelegate = () => onCancel?.Invoke(obj)
                 });
