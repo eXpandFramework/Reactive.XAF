@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Threading.Tasks;
@@ -59,6 +60,10 @@ namespace Xpand.Extensions.JsonExtensions {
             return needsFlatten ? JsonSerializer.Deserialize(ref utf8Reader, objectType.MakeArrayType(), options).Cast<IEnumerable<object>>()
                 : JsonSerializer.Deserialize(ref utf8Reader, objectType, options).YieldItem();
         }
+
+        public static string Serialize<T>(this T value, JavaScriptEncoder encoder)
+            => value.Serialize(new JsonSerializerOptions() { Encoder = encoder });
+        
         public static string Serialize<T>(this T value,JsonSerializerOptions options=null)  
             => JsonSerializer.Serialize(value,options);
         public static JsonNode SerializeToNode(this object value,JsonSerializerOptions options=null)  

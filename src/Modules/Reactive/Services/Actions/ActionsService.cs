@@ -499,7 +499,10 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
             parameters.Controllers.Add(dialogController);
             parameters.CreatedView=objectView;
             return dialogController.WhenFrame()
-                .DoWhen(_ => refreshViewAfterObjectSpaceCommit,frame => frame.GetController<ModificationsController>().SetPropertyValue("RefreshViewAfterObjectSpaceCommit",false))
+                .DoWhen(_ => refreshViewAfterObjectSpaceCommit,frame => {
+                    var modificationsController = frame.GetController<ModificationsController>();
+                    modificationsController?.SetPropertyValue("RefreshViewAfterObjectSpaceCommit", false);
+                })
                 .IgnoreElements().To<DialogController>().StartWith(dialogController)
                 .If(_ => closeOnCancel,controller => controller.CancelAction.WhenExecuted(_ => e.ShowViewParameters.CreatedView.Close())
                     .IgnoreElements().To<DialogController>().StartWith(dialogController));

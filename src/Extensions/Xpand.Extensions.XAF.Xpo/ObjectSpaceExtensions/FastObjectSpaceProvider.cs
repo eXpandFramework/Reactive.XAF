@@ -44,13 +44,13 @@ namespace Xpand.Extensions.XAF.Xpo.ObjectSpaceExtensions{
             => TrackPropertiesModifications = true;
 
         public FastUnitOfWork(IDataLayer layer)
-            : this(layer,Array.Empty<IDisposable>()){
+            : this(layer,[]){
         }
         public FastUnitOfWork(IDataLayer layer, IDisposable[] disposeOnDisconnect) : base(layer, disposeOnDisconnect) 
             => TrackPropertiesModifications = true;
 
         public FastUnitOfWork(IObjectLayer layer)
-            : this(layer, Array.Empty<IDisposable>()) {
+            : this(layer, []) {
         }
         
         public FastUnitOfWork(IObjectLayer layer, params IDisposable[] disposeOnDisconnect)
@@ -61,7 +61,7 @@ namespace Xpand.Extensions.XAF.Xpo.ObjectSpaceExtensions{
             var defaultMembers = base.GetPropertiesListForUpdateInsert(theObject, isUpdate, addDelayedReference);
             if (TrackPropertiesModifications && isUpdate){
                 var members = new MemberInfoCollection(GetClassInfo(theObject));
-                foreach (var mi in base.GetPropertiesListForUpdateInsert(theObject, true, addDelayedReference))
+                foreach (var mi in defaultMembers)
                     if (mi is ServiceField || mi.GetModified(theObject))
                         members.Add(mi);
                 return members;

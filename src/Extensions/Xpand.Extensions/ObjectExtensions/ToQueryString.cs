@@ -6,8 +6,8 @@ using Xpand.Extensions.StringExtensions;
 namespace Xpand.Extensions.ObjectExtensions {
     public static partial class ObjectExtensions {
         public static string ToQueryString(this object source) 
-            => LinqExtensions.LinqExtensions.Join((IEnumerable)source.ToPropertyValueDictionary(true)
+            => ((IEnumerable)source.ToPropertyValueDictionary(true)
                 .Select(key => key.Key.JoinString("=",key.Value?.ToString().UrlEncode()))
-                .ToArray(), "&");
+                .ToArray()).Join("&");
     }
 }
