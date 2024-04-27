@@ -11,6 +11,7 @@ namespace Xpand.XAF.ModelEditor.Module.Win {
         [Required]
         [DefaultValue("https://github.com/eXpandFramework/Reactive.XAF/releases/download/{0}/Xpand.XAF.ModelEditor.{1}.Zip")]
         string DownloadUrl { get; set; }
+        string GithubToken { get; set; }
 
         bool DownloadPreRelease { get; set; }
         Version DevVersion { get; set; }

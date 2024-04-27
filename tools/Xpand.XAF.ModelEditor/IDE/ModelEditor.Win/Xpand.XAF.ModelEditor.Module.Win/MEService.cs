@@ -8,6 +8,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Management;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
@@ -35,11 +36,13 @@ namespace Xpand.XAF.ModelEditor.Module.Win {
     public static class MEService {
         static readonly HttpClient HttpClient = new();
 
-        static MEService() => HttpClient.DefaultRequestHeaders.Add("User-Agent",nameof(MEService));
+        static MEService() => HttpClient.DefaultRequestHeaders.Add("User-Agent",$"{nameof(MEService)}-{Environment.MachineName}");
 
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) 
             => manager.WhenApplication(application => Observable.Defer(() => application.DeleteMESettings(true).ShowModelListView().RunME().ToUnit()
-                    .Merge(application.CloseViewWhenNotSettings(MeInstallationPath))))
+                    .Merge(application.CloseViewWhenNotSettings(MeInstallationPath)))
+		            .MergeToUnit(application.WhenModelChanged().Select(modelApplication => ((IModelApplicationME)modelApplication).ModelEditor.GithubToken).WhenNotDefaultOrEmpty()
+			            .Do(token => HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token))))
                 .Merge(manager.WhenExtendingModel().Do(extenders => extenders.Add<IModelApplication,IModelApplicationME>()).ToUnit());
 
         private static IObservable<XafApplication> RunME(this IObservable<XafApplication> source)  
