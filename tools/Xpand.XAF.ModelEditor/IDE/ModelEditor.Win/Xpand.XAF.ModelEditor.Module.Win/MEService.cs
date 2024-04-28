@@ -27,6 +27,8 @@ using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Transform.System.Diagnostics;
+using Xpand.Extensions.Reactive.Transform.System.IO;
+using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.StringExtensions;
 using Xpand.XAF.ModelEditor.Module.Win.BusinessObjects;
 using Xpand.XAF.Modules.Reactive.Services;
@@ -40,10 +42,13 @@ namespace Xpand.XAF.ModelEditor.Module.Win {
 
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) 
             => manager.WhenApplication(application => Observable.Defer(() => application.DeleteMESettings(true).ShowModelListView().RunME().ToUnit()
-                    .Merge(application.CloseViewWhenNotSettings(MeInstallationPath)))
-		            .MergeToUnit(application.WhenModelChanged().Select(modelApplication => ((IModelApplicationME)modelApplication).ModelEditor.GithubToken).WhenNotDefaultOrEmpty()
-			            .Do(token => HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token))))
+                    .Merge(application.CloseViewWhenNotSettings()))
+		            .MergeToUnit(application.AuthenticateRequests()))
                 .Merge(manager.WhenExtendingModel().Do(extenders => extenders.Add<IModelApplication,IModelApplicationME>()).ToUnit());
+
+        private static IObservable<string> AuthenticateRequests(this XafApplication application) 
+	        => application.WhenModelChanged().Select(modelApplication => ((IModelApplicationME)modelApplication).ModelEditor.GithubToken).WhenNotDefaultOrEmpty()
+				.Do(token => HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token));
 
         private static IObservable<XafApplication> RunME(this IObservable<XafApplication> source)  
             => source.MergeIgnored(application => application.WhenViewOnFrame().WhenFrame(ViewType.ListView)
@@ -76,16 +81,26 @@ namespace Xpand.XAF.ModelEditor.Module.Win {
             return application;
         }
 
-        internal static IObservable<string> WhenMESettings() 
-            => Observable.Using(() => new FileSystemWatcher(MeInstallationPath), watcher => {
-                    watcher.EnableRaisingEvents = true;
-                    var meSettingsPath = GetMESettingsPath();
-                    return watcher.WhenEvent<FileSystemWatcher,FileSystemEventArgs>(nameof(watcher.Created)).Where(t => t.args.FullPath == meSettingsPath)
-                        .SelectMany(_ => Observable.Defer(() => $"{JsonConvert.DeserializeObject<dynamic>(File.ReadAllText(meSettingsPath))?.Solution}".Observe()).Retry())
-                        .Merge("".Observe().Do(_ => File.CreateText(GetReadyPath())).IgnoreElements());
-                })
-                .ObserveOn(SynchronizationContext.Current!)
-                .TraceModelEditorWindowsFormsModule();
+        internal static IObservable<string> WhenMESettings(){
+	        return new FileInfo(GetMESettingsPath()).WhenCreated()
+		        .ToConsole().Finally(() => {})
+		        .SelectMany(info => Observable.Defer(()
+			        => $"{JsonConvert.DeserializeObject<dynamic>(File.ReadAllText(info.FullName))?.Solution}"
+				        .Observe()).Retry())
+		        .ObserveOnContext().Finally(() => {});
+	        // return Observable.Using(() => new FileSystemWatcher(MeInstallationPath), watcher => {
+			      //   watcher.EnableRaisingEvents = true;
+			      //   var meSettingsPath = GetMESettingsPath();
+			      //   return watcher.WhenEvent<FileSystemWatcher, FileSystemEventArgs>(nameof(watcher.Created))
+				     //    .Where(t => t.args.FullPath == meSettingsPath)
+				     //    .SelectMany(_ => Observable.Defer(()
+					    //     => $"{JsonConvert.DeserializeObject<dynamic>(File.ReadAllText(meSettingsPath))?.Solution}"
+						   //      .Observe()).Retry())
+				     //    .Merge("".Observe().Do(_ => File.CreateText(GetReadyPath())).IgnoreElements());
+		       //  })
+		       //  .ObserveOn(SynchronizationContext.Current!)
+		       //  .TraceModelEditorWindowsFormsModule();
+        }
 
         internal static string GetReadyPath() => $"{AppDomain.CurrentDomain.ApplicationPath()}\\Ready.txt";
         internal static string GetMESettingsPath() => $"{MeInstallationPath}\\MESettings.json";

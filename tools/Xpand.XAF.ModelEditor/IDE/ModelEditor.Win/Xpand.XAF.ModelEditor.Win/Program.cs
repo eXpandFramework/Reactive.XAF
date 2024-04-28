@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Configuration;
 using System.Windows.Forms;
 using DevExpress.ExpressApp;
 using DevExpress.Persistent.Base;
@@ -10,9 +9,7 @@ namespace Xpand.XAF.ModelEditor.Win {
         [STAThread]
         static void Main() {
 	        FrameworkSettings.DefaultSettingsCompatibilityMode = FrameworkSettingsCompatibilityMode.Latest;
-#if EASYTEST
-            DevExpress.ExpressApp.Win.EasyTest.EasyTestRemotingRegistration.Register();
-#endif
+
             WindowsFormsSettings.LoadApplicationSettings();
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
@@ -22,23 +19,8 @@ namespace Xpand.XAF.ModelEditor.Win {
             }
 
             Tracing.Initialize();
-            ModelEditorWindowsFormsApplication winApplication = new ModelEditorWindowsFormsApplication();
-            if (ConfigurationManager.ConnectionStrings["ConnectionString"] != null) {
-                winApplication.ConnectionString =
-                    ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString;
-            }
-#if EASYTEST
-            if(ConfigurationManager.ConnectionStrings["EasyTestConnectionString"] != null) {
-                winApplication.ConnectionString =
- ConfigurationManager.ConnectionStrings["EasyTestConnectionString"].ConnectionString;
-            }
-#endif
-#if DEBUG
-            if (System.Diagnostics.Debugger.IsAttached &&
-                winApplication.CheckCompatibilityType == CheckCompatibilityType.DatabaseSchema) {
-                winApplication.DatabaseUpdateMode = DatabaseUpdateMode.UpdateDatabaseAlways;
-            }
-#endif
+            var winApplication = new ModelEditorWindowsFormsApplication();
+            
             try {
                 winApplication.Setup();
                 winApplication.Start();

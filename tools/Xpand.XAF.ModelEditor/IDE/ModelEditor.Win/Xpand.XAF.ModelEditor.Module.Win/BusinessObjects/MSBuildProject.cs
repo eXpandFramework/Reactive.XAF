@@ -1,43 +1,75 @@
 ﻿using System.ComponentModel;
-using DevExpress.ExpressApp.DC;
 using DevExpress.Persistent.Base;
-using Xpand.Extensions.XAF.NonPersistentObjects;
+using DevExpress.Xpo;
 
 namespace Xpand.XAF.ModelEditor.Module.Win.BusinessObjects {
-    [DomainComponent][DefaultClassOptions]
-    public class MSBuildProject:NonPersistentBaseObject {
+    [DefaultClassOptions]
+    public class MSBuildProject:XPBaseObject {
+        public MSBuildProject(Session session) : base(session){
+        }
+
+        int _index;
+
+        [Browsable(false)][Key(true)]
+        public int Index{
+            get => _index;
+            set => SetPropertyValue(nameof(Index), ref _index, value);
+        }
         string _path;
-        [Browsable(false)]
+        [Browsable(false)][Size(-1)]
         public string Path {
             get => _path;
-            set => SetPropertyValue(ref _path, value);
+            set => SetPropertyValue(nameof(Path),ref _path, value);
         }
 
         string _targetFramework;
 
-        public string TargetFramework {
+        public string TargetFramework{
             get => _targetFramework;
-            set => SetPropertyValue(ref _targetFramework, value);
+            set => SetPropertyValue(nameof(TargetFramework), ref _targetFramework, value);
         }
 
         bool _appendTargetFramework;
 
-        public bool AppendTargetFramework {
+        public bool AppendTargetFramework{
             get => _appendTargetFramework;
-            set => SetPropertyValue(ref _appendTargetFramework, value);
+            set => SetPropertyValue(nameof(AppendTargetFramework), ref _appendTargetFramework, value);
         }
 
         string _outputPath;
 
-        public string OutputPath {
+        public string OutputPath{
             get => _outputPath;
-            set => SetPropertyValue(ref _outputPath, value);
+            set => SetPropertyValue(nameof(OutputPath), ref _outputPath, value);
         }
 
-        
-        public bool IsApplicationProject { get; set; }
-        public string AssemblyPath { get; set; }
-        public string TargetFileName { get; set; }
-        public string CannotRunMEMessage { get; set; }
+        bool _isApplicationProject;
+
+        public bool IsApplicationProject{
+            get => _isApplicationProject;
+            set => SetPropertyValue(nameof(IsApplicationProject), ref _isApplicationProject, value);
+        }
+
+        string _assemblyPath;
+
+        public string AssemblyPath{
+            get => _assemblyPath;
+            set => SetPropertyValue(nameof(AssemblyPath), ref _assemblyPath, value);
+        }
+
+        string _targetFileName;
+
+        public string TargetFileName{
+            get => _targetFileName;
+            set => SetPropertyValue(nameof(TargetFileName), ref _targetFileName, value);
+        }
+
+        string _cannotRunMEMessage;
+
+        [NonPersistent]
+        public string CannotRunMEMessage{
+            get => _cannotRunMEMessage;
+            set => SetPropertyValue(nameof(CannotRunMEMessage), ref _cannotRunMEMessage, value);
+        }
     }
 }

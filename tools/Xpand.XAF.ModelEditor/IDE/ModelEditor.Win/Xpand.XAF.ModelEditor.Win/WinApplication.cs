@@ -1,10 +1,9 @@
-﻿using System;
-using DevExpress.ExpressApp;
+﻿using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Win;
 using DevExpress.ExpressApp.Xpo;
 using Xpand.XAF.ModelEditor.Module.Win;
 
-// using Xpand.XAF.ModelEditor.Module.Win;
+
 
 namespace Xpand.XAF.ModelEditor.Win {
     public partial class ModelEditorWindowsFormsApplication : WinApplication {
@@ -18,7 +17,7 @@ namespace Xpand.XAF.ModelEditor.Win {
         }
 
         protected override void CreateDefaultObjectSpaceProvider(CreateCustomObjectSpaceProviderEventArgs args) {
-            args.ObjectSpaceProviders.Add(new XPObjectSpaceProvider(XPObjectSpaceProvider.GetDataStoreProvider(InMemoryDataStoreProvider.ConnectionString, args.Connection, true), false));
+            args.ObjectSpaceProviders.Add(new XPObjectSpaceProvider(XPObjectSpaceProvider.GetDataStoreProvider(InMemoryDataStoreProvider.ConnectionString, args.Connection, true), true));
             args.ObjectSpaceProviders.Add(new NonPersistentObjectSpaceProvider(TypesInfo, null));
         }
 

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using DevExpress.ExpressApp;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Xpand.XAF.ModelEditor.Module.Win.BusinessObjects;
@@ -17,21 +18,21 @@ namespace Xpand.XAF.ModelEditor.Module.Win {
             }
         }
 
-        public static IEnumerable<(MSBuildProject msBuildProject,Project project)> Projects(this SolutionFile solution)
+        public static IEnumerable<(MSBuildProject msBuildProject, Project project)> Projects(this SolutionFile solution,
+            IObjectSpace objectSpace)
             => solution.ProjectsInOrder.Where(projectInSolution => projectInSolution.ProjectType == SolutionProjectType.KnownToBeMSBuildFormat)
                 .Select(projectInSolution => {
                     var project = new ProjectCollection(new Dictionary<string, string> {{"Configuration", solution.GetDefaultConfigurationName()}})
                         .LoadProject(projectInSolution.AbsolutePath);
 
                     var evaluatedProperties = project.AllEvaluatedProperties;
-                    var msBuildProject = new MSBuildProject {
-                        TargetFramework = evaluatedProperties.FirstOrDefault(property => property.Name == "TargetFramework"||property.Name == "TargetFrameworkVersion")?.EvaluatedValue,
-                        Path = Path.GetFullPath(projectInSolution.AbsolutePath),
-                        TargetFileName = evaluatedProperties.FirstOrDefault(property => property.Name == "TargetFileName")?.EvaluatedValue
-                    };
+                    var msBuildProject = objectSpace.CreateObject<MSBuildProject>();
+                    msBuildProject.TargetFramework = evaluatedProperties.FirstOrDefault(property => property.Name == "TargetFramework"||property.Name == "TargetFrameworkVersion")?.EvaluatedValue;
+                    msBuildProject.Path = Path.GetFullPath(projectInSolution.AbsolutePath);
+                    msBuildProject.TargetFileName = evaluatedProperties.FirstOrDefault(property => property.Name == "TargetFileName")?.EvaluatedValue;
                     if (string.Equals(evaluatedProperties
-                        .FirstOrDefault(property => property.Name == "AppendTargetFrameworkToOutputPath")
-                        ?.EvaluatedValue, true.ToString(), StringComparison.InvariantCultureIgnoreCase)) {
+                            .FirstOrDefault(property => property.Name == "AppendTargetFrameworkToOutputPath")
+                            ?.EvaluatedValue, true.ToString(), StringComparison.InvariantCultureIgnoreCase)) {
                         msBuildProject.AppendTargetFramework = true;
                     }
                     msBuildProject.OutputPath = project.EvaluateProperty("OutputPath");

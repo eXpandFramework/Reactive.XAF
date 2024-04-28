@@ -6,6 +6,7 @@ using System.Reactive.Threading.Tasks;
 using System.Text.RegularExpressions;
 using Xpand.Extensions.FileExtensions;
 using Xpand.Extensions.Reactive.ErrorHandling;
+using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.StreamExtensions;
 using Xpand.Extensions.StringExtensions;
 
@@ -29,7 +30,8 @@ namespace Xpand.Extensions.Reactive.Transform.System.IO {
         }
 
         public static IObservable<FileInfo> WhenCreated(this FileInfo fileInfo) 
-            => fileInfo.Exists?fileInfo.Observe():Observable.Defer(() => fileInfo.Directory.WhenFileCreated(fileInfo.Name).Take(1));
+            => fileInfo.Directory.WhenFileCreated(fileInfo.Name)
+                .Merge(fileInfo.Exists.Observe().WhenNotDefault().To(fileInfo));
         
         public static IObservable<FileInfo> WhenChanged(this FileInfo fileInfo) 
             => fileInfo.When(nameof(FileSystemWatcher.Changed));
@@ -77,8 +79,8 @@ namespace Xpand.Extensions.Reactive.Transform.System.IO {
 
         public static IObservable<FileInfo> OpenFile(this FileInfo fileInfo,FileMode fileMode=FileMode.Open,FileAccess fileAccess=FileAccess.Read,FileShare fileShare=FileShare.Read) 
             => Observable.Defer(() => Observable.Using(() => File.Open(fileInfo.FullName, fileMode, fileAccess, fileShare),
-                    _ => {
-                        _.Dispose();
+                    fileStream => {
+                        fileStream.Dispose();
                         return fileInfo.Observe();
                     }))
                 .RetryWithBackoff(strategy:_ => TimeSpan.FromMilliseconds(200));
