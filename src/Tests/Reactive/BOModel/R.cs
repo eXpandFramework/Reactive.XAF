@@ -3,11 +3,13 @@ using DevExpress.Xpo;
 using Xpand.XAF.Persistent.BaseImpl;
 
 namespace Xpand.XAF.Modules.Reactive.Tests.BOModel{
-    public class R2:CustomBaseObject {
-        public R2(Session session) : base(session) { }
+    public class R2(Session session) : CustomBaseObject(session), IR;
+
+    public interface IR {
+        
     }
     [DefaultClassOptions][OptimisticLocking(OptimisticLockingBehavior.LockModified)]
-    public class R:CustomBaseObject{
+    public class R:CustomBaseObject,IR{
         public R(Session session) : base(session){
         }
 
@@ -33,12 +35,10 @@ namespace Xpand.XAF.Modules.Reactive.Tests.BOModel{
         }
 
         [Association("R-RChilds")][Aggregated]
-        public XPCollection<RChild> RChilds => GetCollection<RChild>(nameof(RChilds));
+        public XPCollection<RChild> RChilds => GetCollection<RChild>();
     }
 
-    public class RChild:CustomBaseObject {
-        public RChild(Session session) : base(session) { }
-
+    public class RChild(Session session) : CustomBaseObject(session) {
         R _r;
 
         string _name;

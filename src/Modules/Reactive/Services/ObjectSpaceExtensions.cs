@@ -193,19 +193,21 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         
         public static IObservable<(IObjectSpace objectSpace, (object instance, ObjectModification modification)[] details)> WhenCommitingDetailed(
                 this IObjectSpace objectSpace,Type objectType, bool emitAfterCommit, ObjectModification objectModification,Func<object,bool> criteria=null,[CallerMemberName]string caller="") 
-            => objectSpace.WhenCommitingDetailed(objectType, emitAfterCommit, objectModification,Array.Empty<string>(),criteria,caller);
+            => objectSpace.WhenCommiting()
+                .SelectMany(_ => {
+                    var modifiedObjects = objectSpace.ModifiedObjects(objectType, objectModification)
+                        .Where(t => criteria==null|| criteria.Invoke(t.instance)).ToArray();
+                    return modifiedObjects.Any() ? emitAfterCommit ? objectSpace.WhenCommitted().Take(1).Select(space => (space, modifiedObjects))
+                        : (objectSpace, modifiedObjects).Observe() : Observable.Empty<(IObjectSpace, (object instance, ObjectModification modification)[])>();
+                });
+        
         public static IObservable<(IObjectSpace objectSpace, (object instance, ObjectModification modification)[] details)> WhenCommitingDetailed(
                 this IObjectSpace objectSpace,Type objectType, bool emitAfterCommit, ObjectModification objectModification,string[] modifiedProperties,Func<object,bool> criteria=null,[CallerMemberName]string caller="") 
             => objectSpace.WhenModifiedObjects(objectType,modifiedProperties).Take(1)
                 .TakeUntil(objectSpace.WhenDisposed())
-                .SelectMany(_ => objectSpace.WhenCommiting()
-                    .SelectMany(_ => {
-                        var modifiedObjects = objectSpace.ModifiedObjects(objectType, objectModification)
-                            .Where(t => criteria==null|| criteria.Invoke(t.instance)).ToArray();
-                        return modifiedObjects.Any() ? emitAfterCommit ? objectSpace.WhenCommitted().Take(1).Select(space => (space, modifiedObjects))
-                            : (objectSpace, modifiedObjects).Observe() : Observable.Empty<(IObjectSpace, (object instance, ObjectModification modification)[])>();
-                    }))
-                .TraceRX(_ => caller.JoinString(" ->",objectType.Name ));
+                .SelectMany(_ => objectSpace.WhenCommitingDetailed( objectType, emitAfterCommit, objectModification, criteria,caller));
+
+        
 
         public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)>
             WhenCommitingDetailed<T>(this IObjectSpace objectSpace, ObjectModification objectModification, bool emitAfterCommit,Func<T,bool> criteria=null,[CallerMemberName]string caller="") 
@@ -213,7 +215,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         
         public static IObservable<(IObjectSpace objectSpace, (object instance, ObjectModification modification)[] details)>
             WhenCommitingDetailed(this IObjectSpace objectSpace,Type objectType, ObjectModification objectModification, bool emitAfterCommit,Func<object,bool> criteria=null,[CallerMemberName]string caller="") 
-            => objectSpace.WhenCommitingDetailed(objectType, emitAfterCommit, objectModification,Array.Empty<string>(),criteria,caller);
+            => objectSpace.WhenCommitingDetailed(objectType, emitAfterCommit, objectModification,criteria,caller);
         
         public static IObservable<(IObjectSpace objectSpace, (object instance, ObjectModification modification)[] details)>
             WhenCommitingDetailed(this IObjectSpace objectSpace,Type objectType, ObjectModification objectModification, bool emitAfterCommit,string[] modifiedProperties,Func<object,bool> criteria=null,
