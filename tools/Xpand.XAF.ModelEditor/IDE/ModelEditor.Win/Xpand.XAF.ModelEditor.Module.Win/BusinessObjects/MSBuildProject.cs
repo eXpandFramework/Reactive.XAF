@@ -37,7 +37,7 @@ namespace Xpand.XAF.ModelEditor.Module.Win.BusinessObjects {
         }
 
         string _outputPath;
-
+        [Size(-1)]
         public string OutputPath{
             get => _outputPath;
             set => SetPropertyValue(nameof(OutputPath), ref _outputPath, value);
@@ -51,14 +51,14 @@ namespace Xpand.XAF.ModelEditor.Module.Win.BusinessObjects {
         }
 
         string _assemblyPath;
-
+        [Size(-1)]
         public string AssemblyPath{
             get => _assemblyPath;
             set => SetPropertyValue(nameof(AssemblyPath), ref _assemblyPath, value);
         }
 
         string _targetFileName;
-
+        [Size(-1)]
         public string TargetFileName{
             get => _targetFileName;
             set => SetPropertyValue(nameof(TargetFileName), ref _targetFileName, value);

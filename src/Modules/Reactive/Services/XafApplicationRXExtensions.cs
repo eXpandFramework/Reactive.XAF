@@ -180,7 +180,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => windowCreated.When(TemplateContext.ApplicationWindow).TemplateChanged().Cast<Window>()
                 .If(window => window.Application.GetPlatform()==Platform.Win,window => window.WhenEvent("Showing")
                     .SelectMany(_ => 1.Seconds().Interval().TakeUntilDisposed(window.Application).ObserveOnContext().WhenNotDefault(_ => window.Application.MainWindow).Take(1))
-                    .To(window),window => window.Observe()).Take(1);
+                    .To(window),window => (window.Application.MainWindow ?? window).Observe()).Take(1);
         
         public static IObservable<Window> WhenPopupWindowCreated(this XafApplication application) 
             => application.WhenFrameCreated(TemplateContext.PopupWindow).Where(frame => frame.Application==application).Cast<Window>();

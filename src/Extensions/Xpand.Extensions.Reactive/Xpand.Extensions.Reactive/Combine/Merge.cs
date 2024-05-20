@@ -46,7 +46,7 @@ namespace Xpand.Extensions.Reactive.Combine{
                 if (merge(arg)) {
                     observable = secondSelector(arg).IgnoreElements().To(arg);
                 }
-                return observable.Merge(arg.Observe());
+                return arg.Observe().Merge(observable);
             }));
         
         public static IObservable<T> MergeIgnored<T,T2>(this IObservable<T> source,Func<T,bool> merge,Func<T,IObservable<T2>> secondSelector)
