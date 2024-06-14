@@ -31,7 +31,7 @@ namespace Xpand.XAF.ModelEditor.Module.Win.BusinessObjects {
         }
 
         string _path;
-        [Browsable(false)] 
+        [Browsable(false)][Size(-1)] 
         public string Path{
             get => _path;
             set => SetPropertyValue(nameof(Path), ref _path, value);

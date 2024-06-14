@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
+using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model.Core;
 using DevExpress.ExpressApp.Utils;
 using DevExpress.ExpressApp.Win.Core;
@@ -51,6 +52,7 @@ namespace Xpand.XAF.ModelEditor {
                 }
 
                 DesignerOnlyCalculator.IsRunFromDesigner = true;
+                ModuleHelper.IsDesignMode = true;
                 splashScreen = new SplashScreen();
                 splashScreen.Start();
                 var pathInfo = new PathInfo(strings);

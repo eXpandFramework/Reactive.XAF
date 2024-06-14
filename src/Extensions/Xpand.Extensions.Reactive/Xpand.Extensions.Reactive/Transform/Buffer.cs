@@ -32,35 +32,34 @@ namespace Xpand.Extensions.Reactive.Transform {
         public static IObservable<IList<T>> BufferUntilInactive<T>(this IObservable<T> source, TimeSpan delay,Func<IObservable<T>,IObservable<IList<T>>> resultSelector,IScheduler scheduler=null)
             => source.Publish(obs => obs.Window(() => obs.Throttle(delay,scheduler??Scheduler.Default)).SelectMany(resultSelector));
         
+        public static IObservable<IList<T>> Quiescent<T>(this IObservable<T> src, TimeSpan minimumInactivityPeriod, IScheduler scheduler=null) {
+            scheduler ??= DefaultScheduler.Instance;
+            var onoffs = src.SelectMany(_
+                => Observable.Return(1, scheduler)
+                    .Concat(Observable.Return(-1, scheduler).Delay(minimumInactivityPeriod,
+                        scheduler)));
+            var outstanding = onoffs.Scan(0, (total, delta) => total + delta);
+            var zeroCrossings = outstanding.Where(total => total == 0);
+            return src.Buffer(zeroCrossings);
+        }
+        
         public static IObservable<TSource[]> BufferUntilCompleted<TSource>(this IObservable<TSource> source,bool skipEmpty=false) 
             => source.Buffer(Observable.Never<Unit>()).Where(sources => !skipEmpty || sources.Any()).Select(list => list.ToArray());
 
         /// <summary>
         /// Returns a connectable observable, that once connected, will start buffering data until the observer subscribes, at which time it will send all buffered data to the observer and then start sending new data.
-        /// Thus the observer may subscribe late to a hot observable yet still see all of the data.  Later observers will not see the buffered events.
+        /// Thus, the observer may subscribe late to a hot observable yet still see all the data.  Later observers will not see the buffered events.
         /// </summary>
         /// <param name="source"></param>
         /// <returns></returns>
-        public static IConnectableObservable<T> BufferUntilSubscribed<T>(this IObservable<T> source) {
-            return new BufferUntilSubscribedObservable<T>(source, ImmediateScheduler);
-        }
+        public static IConnectableObservable<T> BufferUntilSubscribed<T>(this IObservable<T> source) => new BufferUntilSubscribedObservable<T>(source, ImmediateScheduler);
 
-        class BufferUntilSubscribedObservable<T> : IConnectableObservable<T> {
-            private readonly IObservable<T> _source;
-            private readonly IScheduler _scheduler;
-            private readonly Subject<T> _liveEvents;
+        class BufferUntilSubscribedObservable<T>(IObservable<T> source, IScheduler scheduler)
+            : IConnectableObservable<T> {
+            private readonly Subject<T> _liveEvents = new();
             private bool _observationsStarted;
-            private Queue<T> _buffer;
-            private readonly object _gate;
-
-            public BufferUntilSubscribedObservable(IObservable<T> source, IScheduler scheduler) {
-                _source = source;
-                _scheduler = scheduler;
-                _liveEvents = new Subject<T>();
-                _buffer = new Queue<T>();
-                _gate = new object();
-                _observationsStarted = false;
-            }
+            private Queue<T> _buffer = new();
+            private readonly object _gate = new();
 
             public IDisposable Subscribe(IObserver<T> observer) {
                 lock (_gate) {
@@ -78,9 +77,7 @@ namespace Xpand.Extensions.Reactive.Transform {
                 }
             }
 
-            public IDisposable Connect() {
-                return _source.Subscribe(OnNext, _liveEvents.OnError, _liveEvents.OnCompleted);
-            }
+            public IDisposable Connect() => source.Subscribe(OnNext, _liveEvents.OnError, _liveEvents.OnCompleted);
 
             private void RemoveBuffer() {
                 lock (_gate) {
@@ -115,7 +112,7 @@ namespace Xpand.Extensions.Reactive.Transform {
             /// <returns></returns>
             private IEnumerable<IObservable<T>> GetBuffers() {
                 while (GetAndReplaceBuffer() is{ } buffer) {
-                    yield return buffer.ToObservable(_scheduler);
+                    yield return buffer.ToObservable(scheduler);
                 }
             }
 

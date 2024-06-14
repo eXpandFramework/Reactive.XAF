@@ -1043,7 +1043,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         private static IObservable<View> RefreshObjectViewWhenCommitted<TObject>(this XafApplication application, Type detailViewObjectType=null,Func<Frame,TObject[],bool> match=null) where TObject : class
             => application.WhenFrame(detailViewObjectType, detailViewObjectType != null ? ViewType.DetailView : ViewType.ListView).Where(frame => frame.View.IsRoot)
                 .SelectMany(frame => CommitSignal.OfType<TObject[]>().TakeUntil(frame.View.ObjectSpace.WhenDisposed().Take(1))
-                    .BufferUntilInactive(2.Seconds()).WhenNotEmpty()
+                    .Quiescent(2.Seconds()).WhenNotEmpty()
                     .ObserveOnContext().SelectMany().Where(arg => match?.Invoke(frame, arg) ?? true).To(frame.View).WhenNotDefault(view => view?.ObjectSpace).Take(1)
                     .RepeatWhen(observable => observable.WhenNotDefault(_ => frame.View)
                         .SelectMany(_ => frame.View.ObjectSpace.WhenModifyChanged().To(frame.View).StartWith(frame.View)
