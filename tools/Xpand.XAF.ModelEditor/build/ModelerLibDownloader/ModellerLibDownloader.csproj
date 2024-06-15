@@ -11,20 +11,20 @@
     <SignAssembly>true</SignAssembly>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="DevExpress.RichEdit.Export" Version="23.2.6" />
-    <PackageReference Include="DevExpress.Office.Core" Version="23.2.6" />
-    <PackageReference Include="DevExpress.RichEdit.Core" Version="23.2.6" />
-    <PackageReference Include="DevExpress.Printing.Core" Version="23.2.6" />
-    <PackageReference Include="DevExpress.Data" Version="23.2.6" />
-    <PackageReference Include="DevExpress.Utils" Version="23.2.6" />
-    <PackageReference Include="DevExpress.Xpo" Version="23.2.6" />
-    <PackageReference Include="DevExpress.Win.Navigation" Version="23.2.6" />
-    <PackageReference Include="DevExpress.Win.Navigation" Version="23.2.6" />
-    <PackageReference Include="DevExpress.Win.TreeList" Version="23.2.6" />
-    <PackageReference Include="DevExpress.ExpressApp.Win" Version="23.2.6" />
-    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="23.2.6" />
-    <PackageReference Include="DevExpress.ExpressApp" Version="23.2.6" />
-    <PackageReference Include="DevExpress.Persistent.Base" Version="23.2.6" />
+    <PackageReference Include="DevExpress.RichEdit.Export" Version="24.1.3" />
+    <PackageReference Include="DevExpress.Office.Core" Version="24.1.3" />
+    <PackageReference Include="DevExpress.RichEdit.Core" Version="24.1.3" />
+    <PackageReference Include="DevExpress.Printing.Core" Version="24.1.3" />
+    <PackageReference Include="DevExpress.Data" Version="24.1.3" />
+    <PackageReference Include="DevExpress.Utils" Version="24.1.3" />
+    <PackageReference Include="DevExpress.Xpo" Version="24.1.3" />
+    <PackageReference Include="DevExpress.Win.Navigation" Version="24.1.3" />
+    <PackageReference Include="DevExpress.Win.Navigation" Version="24.1.3" />
+    <PackageReference Include="DevExpress.Win.TreeList" Version="24.1.3" />
+    <PackageReference Include="DevExpress.ExpressApp.Win" Version="24.1.3" />
+    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="24.1.3" />
+    <PackageReference Include="DevExpress.ExpressApp" Version="24.1.3" />
+    <PackageReference Include="DevExpress.Persistent.Base" Version="24.1.3" />
   </ItemGroup>
   <Import Project="..\..\..\..\.paket\Paket.Restore.targets" />
 </Project>

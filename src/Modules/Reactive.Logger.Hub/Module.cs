@@ -18,7 +18,8 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub {
         static ReactiveLoggerHubModule(){
             var serializer = new SerializerBuilder().Build();
             Utility.Serializer = o => $"---------{o.GetType().FullName}--------{Environment.NewLine}{serializer.Serialize(o)}";
-            MessagePackSerializer.SetDefaultResolver(ContractlessStandardResolver.Instance);
+            MessagePackSerializer.DefaultOptions.WithResolver(ContractlessStandardResolver.Instance);
+            // MessagePackSerializer.SetDefaultResolver(ContractlessStandardResolver.Instance);
             TraceSource=new ReactiveTraceSource(nameof(ReactiveLoggerHubModule));
         }
         

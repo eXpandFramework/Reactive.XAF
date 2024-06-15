@@ -1,7 +1,7 @@
 variables:
     - group: keys
     - name: NUGET_PACKAGES
-      value: $(Pipeline.Workspace)\.nuget\packages
+      value: $(Pipeline.Workspace)\.nuget\packages\
 trigger: none 
 jobs:
 - job: TestStageBaseOnExecutionTime

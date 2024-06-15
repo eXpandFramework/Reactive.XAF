@@ -7,7 +7,7 @@ jobs:
   variables:
     - group: keys
     - name: NUGET_PACKAGES
-      value: $(Pipeline.Workspace)\.nuget\packages  
+      value: $(Pipeline.Workspace)\.nuget\packages\  
   steps:
     - checkout: self
     - task: AzurePowerShell@5
@@ -156,7 +156,7 @@ jobs:
   variables:
     - group: keys
     - name: NUGET_PACKAGES
-      value: $(Pipeline.Workspace)\.nuget\packages  
+      value: $(Pipeline.Workspace)\.nuget\packages\  
   steps:
     - task: PowerShell@2
       inputs:

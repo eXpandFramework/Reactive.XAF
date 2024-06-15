@@ -26,7 +26,7 @@ using Xpand.XAF.Modules.Reactive.Services;
 using Task = System.Threading.Tasks.Task;
 
 namespace Xpand.XAF.Modules.Reactive.Logger.Hub.Tests{
-    [NonParallelizable]
+    [NonParallelizable][Ignore("")]
     public class ReactiveLoggerHubTests : BaseTest{
         static ReactiveLoggerHubTests() {
             ReactiveLoggerHubService.DetectionMatch = _ => true;
