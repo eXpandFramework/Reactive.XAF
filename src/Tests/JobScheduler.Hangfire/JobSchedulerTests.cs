@@ -7,7 +7,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using DevExpress.ExpressApp.Xpo;
 using Hangfire;
-using Hangfire.Server;
 using Microsoft.Extensions.Hosting;
 using NUnit.Framework;
 using Xpand.Extensions.Numeric;

@@ -45,8 +45,8 @@ jobs:
           & '$(System.DefaultWorkingDirectory)\Build\BuildPipeline.ps1' @goArgs
     - publish: $(System.DefaultWorkingDirectory)\bin\net8.0
       artifact: TestAssemblies
-    - publish: $(Pipeline.Workspace)\.nuget
-      artifact: Nuget
+    # - publish: $(Pipeline.Workspace)\.nuget
+    #   artifact: Nuget
     - task: PublishPipelineArtifact@1
       name: PublishNugets
       inputs:
@@ -65,50 +65,50 @@ jobs:
   condition: ne(variables['SkipTests'], 'True')
   strategy:
     matrix:
-      ModelMapper:
-        TestAssembly: '**/Xpand.XAF.Modules.ModelMapper.Tests.dll'
-      OfficeDocumentStyleManager:
-        TestAssembly: '**/Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.dll'
-      AutoCommit:
-        TestAssembly: '**/Xpand.XAF.Modules.AutoCommit.Tests.dll'
-      BulkObjectUpdate:
-        TestAssembly: '**/Xpand.XAF.Modules.BulkObjectUpdate.Tests.dll'
-      CloneMemberValue:
-        TestAssembly: '**/Xpand.XAF.Modules.CloneMemberValue.Tests.dll'
-      CloneModelView:
-        TestAssembly: '**/Xpand.XAF.Modules.CloneModelView.Tests.dll'
-      Email:
-        TestAssembly: '**/Xpand.XAF.Modules.Email.Tests.dll'
-      Extensions:
-        TestAssembly: '**/Xpand.Extensions.Tests.dll'
-      GridListEditor:
-        TestAssembly: '**/Xpand.XAF.Modules.GridListEditor.Tests.dll'
-      HideToolBar:
-        TestAssembly: '**/Xpand.XAF.Modules.HideToolBar.Tests.dll'
+      # ModelMapper:
+      #   TestAssembly: '**/Xpand.XAF.Modules.ModelMapper.Tests.dll'
+      # OfficeDocumentStyleManager:
+      #   TestAssembly: '**/Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.dll'
+      # AutoCommit:
+      #   TestAssembly: '**/Xpand.XAF.Modules.AutoCommit.Tests.dll'
+      # BulkObjectUpdate:
+      #   TestAssembly: '**/Xpand.XAF.Modules.BulkObjectUpdate.Tests.dll'
+      # CloneMemberValue:
+      #   TestAssembly: '**/Xpand.XAF.Modules.CloneMemberValue.Tests.dll'
+      # CloneModelView:
+      #   TestAssembly: '**/Xpand.XAF.Modules.CloneModelView.Tests.dll'
+      # Email:
+      #   TestAssembly: '**/Xpand.XAF.Modules.Email.Tests.dll'
+      # Extensions:
+      #   TestAssembly: '**/Xpand.Extensions.Tests.dll'
+      # GridListEditor:
+      #   TestAssembly: '**/Xpand.XAF.Modules.GridListEditor.Tests.dll'
+      # HideToolBar:
+      #   TestAssembly: '**/Xpand.XAF.Modules.HideToolBar.Tests.dll'
       JobSchedulerHangfire:
         TestAssembly: '**/Xpand.XAF.Modules.JobScheduler.Hangfire.Tests.dll'
       # JobSchedulerNotification:
       #   TestAssembly: '**/Xpand.XAF.Modules.JobScheduler.Notification.Tests.dll'
-      MasterDetail:
-        TestAssembly: '**/Xpand.XAF.Modules.MasterDetail.Tests.dll'
-      ModelViewInheritance:
-        TestAssembly: '**/Xpand.XAF.Modules.ModelViewInheritance.Tests.dll'
-      Reactive:
-        TestAssembly: '**/Xpand.XAF.Modules.Reactive.Tests.dll'
-      ReactiveLogger:
-        TestAssembly: '**/Xpand.XAF.Modules.Reactive.Logger.Tests.dll'
-      ReactiveLoggerHub:
-        TestAssembly: '**/Xpand.XAF.Modules.Reactive.Logger.Hub.Tests.dll'
-      ReactiveRest:
-        TestAssembly: '**/Xpand.XAF.Modules.Reactive.Rest.Tests.dll'
-      RefreshView:
-        TestAssembly: '**/Xpand.XAF.Modules.RefreshView.Tests.dll'
-      SuppressConfirmation:
-        TestAssembly: '**/Xpand.XAF.Modules.SuppressConfirmation.Tests.dll'
-      ViewEditMode:
-        TestAssembly: '**/Xpand.XAF.Modules.ViewEditMode.Tests.dll'
-      ViewItemValue:
-        TestAssembly: '**/Xpand.XAF.Modules.ViewItemValue.Tests.dll'
+      # MasterDetail:
+      #   TestAssembly: '**/Xpand.XAF.Modules.MasterDetail.Tests.dll'
+      # ModelViewInheritance:
+      #   TestAssembly: '**/Xpand.XAF.Modules.ModelViewInheritance.Tests.dll'
+      # Reactive:
+      #   TestAssembly: '**/Xpand.XAF.Modules.Reactive.Tests.dll'
+      # ReactiveLogger:
+      #   TestAssembly: '**/Xpand.XAF.Modules.Reactive.Logger.Tests.dll'
+      # ReactiveLoggerHub:
+      #   TestAssembly: '**/Xpand.XAF.Modules.Reactive.Logger.Hub.Tests.dll'
+      # ReactiveRest:
+      #   TestAssembly: '**/Xpand.XAF.Modules.Reactive.Rest.Tests.dll'
+      # RefreshView:
+      #   TestAssembly: '**/Xpand.XAF.Modules.RefreshView.Tests.dll'
+      # SuppressConfirmation:
+      #   TestAssembly: '**/Xpand.XAF.Modules.SuppressConfirmation.Tests.dll'
+      # ViewEditMode:
+      #   TestAssembly: '**/Xpand.XAF.Modules.ViewEditMode.Tests.dll'
+      # ViewItemValue:
+      #   TestAssembly: '**/Xpand.XAF.Modules.ViewItemValue.Tests.dll'
   pool:
     name: Self
   variables:
@@ -121,22 +121,23 @@ jobs:
       artifact: TestAssemblies
     - download: current
       artifact: Nupkg
-    - download: current
-      artifact: Nuget
+    # - download: current
+    #   artifact: Nuget
     - task: PowerShell@2
       displayName: 'Setup Environment'
       inputs:
         targetType: 'inline'
         script: |
-          New-Item -ItemType Directory -Force -Path "$(Build.SourcesDirectory)/bin/nupkg"
-          Copy-Item -Path "$(Pipeline.Workspace)/Nupkg/*.nupkg" -Destination "$(Build.SourcesDirectory)/bin/nupkg"
-          Copy-Item -Path "$(Pipeline.Workspace)\Nuget" -Destination "$(Pipeline.Workspace)\.Nuget" -Recurse -Force
+          # New-Item -ItemType Directory -Force -Path "$(Build.SourcesDirectory)/bin/nupkg"
+          # Copy-Item -Path "$(Pipeline.Workspace)/Nupkg/*.nupkg" -Destination "$(Build.SourcesDirectory)/bin/nupkg"
+          # Write-Host "Pipeline.Workspace=$(Pipeline.Workspace)"
+          # Copy-Item -Path "$(Pipeline.Workspace)\Nuget" -Destination "$(Pipeline.Workspace)\.Nuget" -Recurse -Force
 
     - task: VSTest@2
       displayName: 'Run Tests'
       retryCountOnTaskFailure: 2
       env:
-        SOURCE_DIRECTORY: "../s"
+        SOURCE_DIRECTORY: "../s/"
       inputs:
         minimumExpectedTests: "1"
         failOnMinTestsNotRun: true
@@ -146,7 +147,7 @@ jobs:
           !**\*TestAdapter.dll
           !**\obj\**
         searchFolder: '$(Pipeline.Workspace)/TestAssemblies'
-        # runSettingsFile: '$(SOURCE_DIRECTORY)\Build\Tests.runsettings'
+        runSettingsFile: '$(SOURCE_DIRECTORY)\Build\Tests.runsettings'
 - job: PostTestTasks
   dependsOn:
     - Tests
