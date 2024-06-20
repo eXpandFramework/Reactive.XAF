@@ -13,10 +13,15 @@ namespace Xpand.Extensions.AppDomainExtensions{
         [SuppressMessage("ReSharper", "HeapView.CanAvoidClosure")]
         public static string GetOrAdd(this string key) => StringCache.GetOrAdd(key, _ => key);
         public static void KillAll(this AppDomain appDomain,string processName) 
-            => Process.GetProcessesByName(processName)
+            => Process.GetProcessesByName(processName).WhereDefault(process => process.HasExited)
                 .Do(process => {
-                    process.Kill();
-                    process.WaitForExit();
+                    try {
+                        process.Kill();
+                        process.WaitForExit();
+                    }
+                    catch {
+                        // ignored
+                    }
                 }).Enumerate();
 
         public static string ApplicationName(this AppDomain appDomain){

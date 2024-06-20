@@ -54,10 +54,10 @@ namespace Xpand.TestsLib.Blazor {
                 .Observe().SelectMany(host => XafApplicationMonitor.Application.StartTest(host,user,beforeSetup,test)
                     .MergeToUnit(host.Run(url, browser, inactiveWindowBrowserPosition)))
                 .LogError()
-                .Log(logContext, inactiveWindowLogContextPosition, true)
+                // .Log(logContext, inactiveWindowLogContextPosition, true)
             ;
 
-            static IObservable<BlazorApplication> StartTest(this IObservable<BlazorApplication> source, IHost host,
+            static IObservable<Unit> StartTest(this IObservable<BlazorApplication> source, IHost host,
                 string user, Func<BlazorApplication, IObservable<Unit>> beforeSetup,Func<BlazorApplication, IObservable<Unit>> test)
                 => source.DoOnFirst(application =>application.DeleteAllData())
                     .MergeIgnored(application => beforeSetup?.Invoke(application)
@@ -66,16 +66,16 @@ namespace Xpand.TestsLib.Blazor {
                     .TakeUntil(host.Services.WhenApplicationStopping())
                     .MergeIgnored(application => application.WhenLoggedOn(user).TakeUntil(host.Services.WhenApplicationStopping()))
                     .SelectMany(application => test(application).TakeUntil(host.Services.WhenApplicationStopping()).BufferUntilCompleted().WhenNotEmpty().To(application))
-                    .DoOnError(_ => host.Services.StopTest())
-                    .Finally(() => host.Services.StopTest())
-                    .Take(1);
+                    .Catch<BlazorApplication,Exception>(_ => host.Services.StopTest().To<BlazorApplication>())
+                    .Take(1)
+                    .ConcatToUnit(host.Services.StopTest());
 
         private static IObservable<Unit> Run(this IHost host,string url, string browser,WindowPosition inactiveWindowPosition=WindowPosition.None) 
             => host.Services.WhenApplicationStopping().Select(unit => unit).Publish(whenHostStop => whenHostStop
                 .Merge(host.Services.WhenApplicationStarted().SelectMany(_ => new Uri(url).Start(browser)
                         .Do(process => process.MoveToMonitor(inactiveWindowPosition))
                         .SelectMany(process => whenHostStop.DoSafe(_ => AppDomain.CurrentDomain.KillAll(process.ProcessName))))
-                    .MergeToUnit(Observable.Start(() => host.RunAsync().ToObservable()).Merge())));
+                    .MergeToUnit(Observable.FromAsync(() => host.RunAsync()))));
 
         
         public static (Guid id, string connectionString) GetTenant(this SqlConnection connection, string user){
@@ -184,10 +184,15 @@ namespace Xpand.TestsLib.Blazor {
                 configureWebHostBuilder?.Invoke(webBuilder);
             });
 
-        private static void StopTest(this IServiceProvider serviceProvider){
-            serviceProvider.StopApplication();
-            Common.Logger.Exit();
-        }
+        private static IObservable<Unit> StopTest(this IServiceProvider serviceProvider)
+            => serviceProvider.WhenApplicationStopped()
+                .Zip(Observable.Defer(() => {
+                    if (!(bool)serviceProvider.GetFieldValue("_disposed")) {
+                        serviceProvider.StopApplication();
+                        Common.Logger.Exit();
+                    }
+                    return Unit.Default.Observe();
+                })).Take(1).ToUnit();
 
         public class XafApplicationMonitor(IXafApplicationFactory innerFactory) : IXafApplicationFactory {
             private static readonly ISubject<BlazorApplication> ApplicationSubject = Subject.Synchronize(new Subject<BlazorApplication>());

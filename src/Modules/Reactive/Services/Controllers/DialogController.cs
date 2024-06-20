@@ -2,6 +2,7 @@
 using System.Reactive;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp.SystemModule;
+using Xpand.Extensions.Reactive.Utility;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
 
 namespace Xpand.XAF.Modules.Reactive.Services.Controllers {

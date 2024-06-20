@@ -14,6 +14,7 @@ using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Numeric;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.ErrorHandling;
+using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.ActionExtensions;
@@ -92,7 +93,8 @@ namespace Xpand.TestsLib.Common {
             => view.ToListView().WhenObjects<TObject>()
                 .Where(objects => count == 0 || objects.Length == count)
                 .SelectMany(objects => objects.Where(value => matchObject?.Invoke(value)??true).ToNowObservable()).DelayOnContext()
-                .Select(arg => view.ObjectSpace.GetObject(arg))
+                .TakeUntil(o => view.IsDisposed)
+                .Select(arg => view.ObjectSpace?.GetObject(arg)).WhenNotDefault()
                 .Select(value => frame.Application.GetRequiredService<IObjectSelector<TObject>>().SelectObject(view.ToListView(),value)).Switch()
                 // .SelectMany(value => view.ToListView().SelectObject(value)).Select(o => o)
                 .Assert(_ => $"{typeof(TObject).Name}-{view.Id}",caller:caller,timeout:timeout)
