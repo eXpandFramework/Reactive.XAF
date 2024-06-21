@@ -26,8 +26,8 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="..\..\..\..\ModelEditor.Win\Xpand.XAF.ModelEditor.Win\bin\release\net5.0-windows\Xpand.XAF.ModelEditor.Win.4.232.4.1.zip">
-      <Link>Resources\Xpand.XAF.ModelEditor.Win.4.232.4.1.zip</Link>
+    <EmbeddedResource Include="..\..\..\..\ModelEditor.Win\Xpand.XAF.ModelEditor.Win\bin\release\net5.0-windows\Xpand.XAF.ModelEditor.Win.4.241.1.0.zip">
+      <Link>Resources\Xpand.XAF.ModelEditor.Win.4.241.1.0.zip</Link>
     </EmbeddedResource>
   </ItemGroup>
   <!-- WARNING: ReSharper plugins with icons must be compiled using PowerShell scripts -->
@@ -54,3 +54,4 @@
   <!--</ItemGroup>-->
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
 </Project>
+

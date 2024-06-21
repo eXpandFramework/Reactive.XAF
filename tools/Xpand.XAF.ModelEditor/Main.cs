@@ -52,7 +52,7 @@ namespace Xpand.XAF.ModelEditor {
                 }
 
                 DesignerOnlyCalculator.IsRunFromDesigner = true;
-                // ModuleHelper.IsDesignMode = true;
+                ModuleHelper.IsDesignMode = true;
                 splashScreen = new SplashScreen();
                 splashScreen.Start();
                 var pathInfo = new PathInfo(strings);
