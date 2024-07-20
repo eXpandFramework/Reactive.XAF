@@ -2,7 +2,6 @@
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using Fasterflect;
-using Xpand.Extensions.ObjectExtensions;
 
 
 namespace Xpand.Extensions.XAF.XafApplicationExtensions{
@@ -16,7 +15,7 @@ namespace Xpand.Extensions.XAF.XafApplicationExtensions{
             var currentObject = currentObjectFactory(objectSpace);
             modelDetailView ??= application.FindModelDetailView(currentObject.GetType());
             var detailView = application.CreateDetailView(objectSpace, modelDetailView,isRoot);
-            detailView.CurrentObject = objectSpace.GetObject(currentObject);
+            detailView.CurrentObject = currentObject;
             return detailView;
         }
 

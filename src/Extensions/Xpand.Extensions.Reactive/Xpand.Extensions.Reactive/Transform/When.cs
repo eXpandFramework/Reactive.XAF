@@ -18,10 +18,10 @@ namespace Xpand.Extensions.Reactive.Transform {
         public static IObservable<T[]> WhenFinished<T>(this IObservable<T> source) 
             => source.Publish(obs => obs.WhenCompleted().Merge(obs.WhenError().Select(_ => Array.Empty<T>())).Take(1));
         
-        public static IObservable<T> When<T>(this object source)
+        public static IObservable<T> WhenIs<T>(this object source)
             => source.As<T>().Observe().WhenNotDefault();
         
-        public static IObservable<T> When<T>(this T source,string typeName)
+        public static IObservable<T> WhenIs<T>(this T source,string typeName)
             => source.As(typeName).Observe().WhenNotDefault();
     }
 }

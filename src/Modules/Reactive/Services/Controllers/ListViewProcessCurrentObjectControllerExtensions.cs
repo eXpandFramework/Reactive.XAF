@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp.Actions;
@@ -15,6 +16,12 @@ namespace Xpand.XAF.Modules.Reactive.Services.Controllers{
             => controller.WhenEvent<CustomProcessListViewSelectedItemEventArgs>(nameof(ListViewProcessCurrentObjectController.CustomProcessSelectedItem))
                 .DoWhen(_ => handled.HasValue,eventArgs => eventArgs.Handled=handled.Value)
                 .Select(eventArgs => eventArgs.InnerArgs);
+        [SuppressMessage("ReSharper", "PossibleInvalidOperationException")]
+        public static IObservable<HandledEventArgs> WhenCustomHandleProcessSelectedItem(
+            this ListViewProcessCurrentObjectController controller,bool? handled=null) 
+            => controller.WhenEvent<HandledEventArgs>(nameof(ListViewProcessCurrentObjectController.CustomHandleProcessSelectedItem))
+                .DoWhen(_ => handled.HasValue,eventArgs => eventArgs.Handled=handled.Value)
+                .Select(eventArgs => eventArgs);
 
         public static IObservable<SimpleActionExecuteEventArgs> CustomProcessSelectedItem(this IObservable<ListViewProcessCurrentObjectController> source,bool? handled=null) 
             => source.SelectMany(controller => controller.WhenCustomProcessSelectedItem(handled));

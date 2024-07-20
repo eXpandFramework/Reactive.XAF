@@ -439,7 +439,11 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static IObservable<(IObjectSpace objectSpace, IEnumerable<object> objects)> WhenProviderCommitted(
             this XafApplication application,Type objectType, ObjectModification objectModification = ObjectModification.All)
-            => application.WhenProviderObjectSpaceCreated().WhenCommitted(objectType,objectModification);
+            => application.WhenProviderCommitted(objectType,[],objectModification);
+        
+        public static IObservable<(IObjectSpace objectSpace, IEnumerable<object> objects)> WhenProviderCommitted(
+            this XafApplication application,Type objectType,string[] modifiedProperties, ObjectModification objectModification = ObjectModification.All)
+            => application.WhenProviderObjectSpaceCreated().WhenCommitted(objectType,modifiedProperties,objectModification);
 
         public static IObservable<(IObjectSpace objectSpace, IEnumerable<T> objects)> WhenProviderCommitting<T>(
             this XafApplication application, ObjectModification objectModification = ObjectModification.All) where T : class 
@@ -460,7 +464,11 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static IObservable<(IObjectSpace objectSpace, IEnumerable<object> objects)> WhenCommitted(
             this IObservable<IObjectSpace> source,Type objectType, ObjectModification objectModification = ObjectModification.All,[CallerMemberName]string caller="") 
-            => source.SelectMany(objectSpace => objectSpace.WhenCommitingDetailed(objectType, objectModification, true,caller:caller)
+            => source.WhenCommitted(objectType,[],objectModification,caller);
+        
+        public static IObservable<(IObjectSpace objectSpace, IEnumerable<object> objects)> WhenCommitted(
+            this IObservable<IObjectSpace> source,Type objectType,string[] modifiedProperties , ObjectModification objectModification = ObjectModification.All,[CallerMemberName]string caller="") 
+            => source.SelectMany(objectSpace => objectSpace.WhenCommitingDetailed(objectType, objectModification, true,modifiedProperties,caller:caller)
                 .Select(t => (t.objectSpace,t.details.Select(t1 => t1.instance))));
 
         public static IObservable<(IObjectSpace objectSpace, IEnumerable<T> objects)> WhenCommitted<T>(
@@ -642,8 +650,9 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                         })
                     : Observable.Empty<Unit>());
 
-        public static IObservable<T> WhenObjects<T>(this IObjectSpace  objectSpace) 
+        public static IObservable<T> WhenObjects<T>(this IObjectSpace  objectSpace)
             => objectSpace.WhenCommittedDetailed<T>(ObjectModification.New).ToObjects()
-                .Merge(objectSpace.GetObjectsQuery<T>().ToNowObservable().Take(1));
+                .Merge(objectSpace.TypesInfo.PersistentTypes(typeof(T))
+                    .SelectMany(type => objectSpace.GetObjects(type).Cast<T>().ToArray()).ToNowObservable());
     }
 }

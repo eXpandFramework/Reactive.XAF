@@ -103,7 +103,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .Do(editor => { editor.MemberInfo.SetValue(compositeView.CurrentObject, editor.MemberInfo.GetValue(existingObject)); });
         }
         public static IObservable<object[]> WhenObjects(this View view)
-            => view is ListView listView ? listView.CollectionSource.WhenCollectionChanged()
+            => view is ListView listView ? listView.CollectionSource.WhenCollectionChanged().Select(@base => @base)
                     .MergeToUnit(listView.ObjectSpace.WhenReloaded())
                     .MergeToUnit(listView.Editor.WhenDatasourceChanged())
                     .MergeToUnit(listView.CollectionSource.WhenCriteriaApplied())
@@ -142,6 +142,16 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static IObservable<T> WhenControlsCreated<T>(this IObservable<T> source) where T:View 
             => source.SelectMany(view => view.WhenViewEvent(nameof(View.ControlsCreated)));
+
+        public static IObservable<View> WhenSelectedObjectsChanged(this View view) 
+            => view.WhenSelectionChanged().Select(view1 => view1.SelectedObjects.Cast<object>().ToArray()).CombineWithPrevious()
+                .Where(t => {
+                    if (t.previous == null) return true;
+                    var currentObjects = t.current.Select(o => view.ObjectSpace.GetKeyValue(o)).ToArray();
+                    return t.previous.Select(o => view.ObjectSpace.GetKeyValue(o))
+                        .Any(o => !currentObjects.Contains(o));
+                })
+                .To(view);
 
         public static IObservable<T> WhenSelectionChanged<T>(this T view, int waitUntilInactiveSeconds = 0) where T : View
             => view.WhenViewEvent(nameof(View.SelectionChanged)).To(view)

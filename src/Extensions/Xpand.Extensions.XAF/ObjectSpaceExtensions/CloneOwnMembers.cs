@@ -24,12 +24,17 @@ namespace Xpand.Extensions.XAF.ObjectSpaceExtensions {
             => source.GetTypeInfo().Members.Where(info => !info.IsReadOnly && !info.IsService)
                 .Do(info => {
                     var value = info.GetValue(source);
-                    if (info.MemberTypeInfo.IsPersistent) {
-                        value = objectSpace.GetObject(value);
+                    if (value!=null&&info.MemberTypeInfo.IsPersistent) {
+                        value = objectSpace.GetObjectByKey(info.MemberType,objectSpace.GetKeyValue(value));
                     }
 
                     info.SetValue(target, value);
 
+                }).Finally(() => {
+                    var keyMember = source.GetTypeInfo().KeyMember;
+                    if (!keyMember.IsReadOnly&&!keyMember.IsAutoGenerate) {
+                        keyMember.SetValue(target,keyMember.GetValue(source));
+                    }
                 }).Enumerate();
         
         public static void Map<T>(this T source, T target) where T:IObjectSpaceLink 

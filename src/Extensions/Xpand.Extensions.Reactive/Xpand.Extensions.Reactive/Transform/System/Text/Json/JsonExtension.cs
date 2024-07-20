@@ -6,6 +6,7 @@ using System.Text.Json;
 using Xpand.Extensions.JsonExtensions;
 using Xpand.Extensions.Reactive.Transform.System.Net;
 using Xpand.Extensions.Reactive.Utility;
+using Xpand.Extensions.StreamExtensions;
 using Xpand.Extensions.StringExtensions;
 
 namespace Xpand.Extensions.Reactive.Transform.System.Text.Json {
@@ -23,12 +24,15 @@ namespace Xpand.Extensions.Reactive.Transform.System.Text.Json {
                     .FinallySafe(document.Dispose)
             );
         
-        public static IObservable<JsonDocument> WhenJsonDocument(this Stream stream) 
-            => JsonDocument.ParseAsync(stream).ToObservable();
+        public static IObservable<JsonDocument> WhenJsonDocument(this Stream stream,bool throwIfEmpty=true) 
+            => JsonDocument.ParseAsync(stream).ToObservable()
+                .Catch<JsonDocument,Exception>(exception => throwIfEmpty ? exception.Throw<JsonDocument>() :
+                    stream.ReadToEndAsString() == String.Empty ? JsonDocument.Parse("{}").Observe() :
+                    exception.Throw<JsonDocument>());
+        
         public static IObservable<JsonDocument> WhenJsonDocument(this byte[] bytes) 
             => Observable.Using(() => new MemoryStream(bytes),stream => JsonDocument.ParseAsync(stream).ToObservable());
-
-
+        
         public static bool IsDisposed(this JsonElement element) {
             try {
                 var _ = element.YieldJsonElementArray();

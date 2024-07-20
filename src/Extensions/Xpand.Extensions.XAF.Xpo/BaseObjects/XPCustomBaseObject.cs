@@ -15,7 +15,7 @@ namespace Xpand.Extensions.XAF.Xpo.BaseObjects {
 
 	    protected XPCustomBaseObject(Session session, XPClassInfo classInfo) : base(session, classInfo) {
 	    }
-        protected void SetPropertyValue<T>(ref T oldValue, T newValue,[CallerMemberName]string caller=null) 
+        protected bool SetPropertyValue<T>(ref T oldValue, T newValue,[CallerMemberName]string caller=null) 
             => base.SetPropertyValue(caller, ref oldValue, newValue);
 	    protected T GetSafe<T>(Func<T> func) => !IsLoading && !IsSaving ? func() : default;
         protected override void OnSaving() {

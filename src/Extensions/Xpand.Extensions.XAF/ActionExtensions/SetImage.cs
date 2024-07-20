@@ -48,6 +48,8 @@ namespace Xpand.Extensions.XAF.ActionExtensions {
         [Description("DrillDown")]
         Change,
         [Description("Filter")]
-        Filter
+        Filter,
+        [Description("Actions_Send")]
+        Send
     }
 }

@@ -5,7 +5,7 @@ using Xpand.Extensions.AssemblyExtensions;
 using Xpand.Extensions.StreamExtensions;
 
 namespace Xpand.Extensions.XAF.ModuleExtensions{
-    public static partial class ModulebaseExtensions{
+    public static partial class ModuleBaseExtensions{
         public static IEnumerable<(string id,string model)> EmbeddedModels(this ModuleBase module){
             var assembly = module.GetType().Assembly;
             var defaultModelName = $"{ModelStoreBase.ModelDiffDefaultName}.xafml";

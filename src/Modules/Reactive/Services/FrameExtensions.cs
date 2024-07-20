@@ -65,9 +65,11 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                     .RootView(controller.Frame.View.ObjectTypeInfo.Type, ViewType.DetailView)
                     .Select(detailView => detailView)));
         public static IObservable<TFrame> WhenViewRefreshExecuted<TFrame>(this TFrame source,
-            Action<SimpleActionExecuteEventArgs> retriedExecution) where TFrame : Frame
-            => source.GetController<RefreshController>().RefreshAction.WhenExecuted(retriedExecution).To(source);
-        
+            Action<SimpleActionExecuteEventArgs> retriedExecution=null) where TFrame : Frame {
+            var refreshAction = source.GetController<RefreshController>().RefreshAction;
+            return retriedExecution == null ? refreshAction.WhenExecuted().Select(e => e.Frame()).Cast<TFrame>() : refreshAction.WhenExecuted(retriedExecution).To(source);
+        }
+
         public static IObservable<(TFrame frame, ViewChangingEventArgs args)> WhenViewChanging<TFrame>(this TFrame source) where TFrame : Frame 
             => source.WhenEvent<ViewChangingEventArgs>(nameof(Frame.ViewChanging)).InversePair(source);
 
@@ -134,19 +136,22 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         
         public static IObservable<Unit> ShowInstanceDetailView(this IObservable<Frame> source,params  Type[] objectTypes) {
             return source.WhenFrame(objectTypes).WhenFrame(ViewType.ListView).Where(frame => frame.View.Model.ToListView().MasterDetailMode==MasterDetailMode.ListViewOnly)
-                .ToController<ListViewProcessCurrentObjectController>().CustomProcessSelectedItem(true)
-                .DoWhen(e => e.View().ObjectTypeInfo.Type.IsInstanceOfType(e.View().CurrentObject),
-                    e => e.ShowViewParameters.CreatedView = NewDetailView(e.Action.View().CurrentObject, e.Application()))
+                .WhenIsNotOnLookupPopupTemplate()
+                
+                // .ToController<ListViewProcessCurrentObjectController>().CustomProcessSelectedItem(true)
+                // .DoWhen(e => e.View().ObjectTypeInfo.Type.IsInstanceOfType(e.View().CurrentObject),
+                //     e => e.ShowViewParameters.CreatedView = NewDetailView(e.Action.View().CurrentObject, e.Application()))
                 .MergeToUnit(source.WhenFrame(objectTypes).WhenFrame(ViewType.ListView).Where(frame => frame.View.Model.ToListView().MasterDetailMode==MasterDetailMode.ListViewAndDetailView)
                     .SelectMany(frame => frame.View.ToListView().WhenCreateCustomCurrentObjectDetailView()
                         .DoWhen(e =>e.CurrentDetailView.ObjectTypeInfo.Type.IsInstanceOfType(e.CurrentDetailView.CurrentObject) ,
-                            e => e.DetailView=NewDetailView(e.ListViewCurrentObject,frame.Application))));
+                            e => e.DetailView=NewDetailView(e.ListViewCurrentObject,frame.View.ToListView()))));
 
-            DetailView NewDetailView(object o, XafApplication xafApplication) {
+            DetailView NewDetailView(object o, ListView listView) {
                 if (o == null) return null;
                 o = o.GetType().ToTypeInfo().FindAttribute<ShowInstanceDetailViewAttribute>().Property is { } prop
                     ? o.GetType().ToTypeInfo().FindMember(prop).GetValue(o) : o;
-                return xafApplication.NewDetailView(space => space.GetObject(o), o.GetType().GetModelClass().DefaultDetailView);
+                return listView.Application().CreateDetailView(listView.ObjectSpace,
+                    o.GetType().GetModelClass().DefaultDetailView, false, o);
             }
         }
 
@@ -232,7 +237,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => frame.ListViewProcessSelectedItem(e => e.ShowViewParameters.CreatedView.ToDetailView().SetDefaultFocusedItem(defaultFocusedItem));
 
         public static IObservable<Frame> ListViewProcessSelectedItem(this Frame frame,Action<SimpleActionExecuteEventArgs> executed=null) 
-            => frame.ListViewProcessSelectedItem(() => frame.View.SelectedObjects.Cast<object>().First() ,executed);
+            => frame.ListViewProcessSelectedItem(() => frame.View.SelectedObjects.Cast<object>().Take(1) ,executed);
 
         public static IObservable<Frame> ListViewProcessSelectedItem<T>(this Frame frame, Func<T> selectedObject,Action<SimpleActionExecuteEventArgs> executed=null){
             var action = frame.GetController<ListViewProcessCurrentObjectController>().ProcessCurrentObjectAction;

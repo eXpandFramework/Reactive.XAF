@@ -44,7 +44,7 @@ namespace Xpand.Extensions.XAF.CriteriaOperatorExtensions {
 
         public static CriteriaOperator ToCriteria(this LambdaExpression expression,Type objectType)
             =>(CriteriaOperator)FromLambdaCache.GetOrAdd(objectType, t => FromLambdaMethod!.MakeGenericMethod(t))
-                .Invoke(null, new object[] { expression });
+                .Invoke(null, [expression]);
         public static CriteriaOperator ToCriteria<T>(this Expression<Func<T, bool>> expression) 
             => CriteriaOperator.FromLambda(expression);
         

@@ -71,6 +71,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         [SuppressMessage("ReSharper", "InconsistentNaming")]
         private static void CreateObjectSpace(IObjectSpaceProvider __instance,IObjectSpace __result) 
             => ObjectSpaceCreatedSubject.OnNext((__result, __instance,false));
+        [SuppressMessage("ReSharper", "InconsistentNaming")]
         private static void CreateObjectSpace1(IObjectSpaceProvider __instance,IObjectSpace __result) 
             => ObjectSpaceCreatedSubject.OnNext((__result, __instance,false));
         
@@ -114,7 +115,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => EqualityComparer<TExpected>.Default.Equals((TExpected)actual, expected);
 
         public static IObservable<IDataStore> WhenDataStoreCreated<TProvider>(this TProvider provider) where TProvider:IObjectSpaceProvider 
-            => provider.GetPropertyValue("DataStoreProvider").When("DevExpress.ExpressApp.Xpo.ConnectionStringDataStoreProvider")
+            => provider.GetPropertyValue("DataStoreProvider").WhenIs("DevExpress.ExpressApp.Xpo.ConnectionStringDataStoreProvider")
                 .SelectMany(spaceProvider => spaceProvider.WhenEvent("DataStoreCreated").Select(pattern => pattern.EventArgs.GetPropertyValue("DataStore")))
                 .Cast<IDataStore>();
 
