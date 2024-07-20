@@ -5,6 +5,10 @@ using Xpand.Extensions.ObjectExtensions;
 
 namespace Xpand.Extensions.Reactive.Combine {
     public static partial class Combine {
+        public static IObservable<(TSource first, TSource current)> CombineWithFirst<TSource>(this IObservable<TSource> source) 
+            => source.Publish(published => 
+                published.Take(1).CombineLatest(published.Skip(1), (first, current) => (first, current)));
+
         public static IObservable<(TSource previous, TSource current)> CombineWithPrevious<TSource>(this IObservable<TSource> source,bool ensurePrevious=false) 
             => source.Scan((previous: default(TSource), current: default(TSource)), (t, current) => (t.current, current))
                 .Select(t => (t.previous, t.current)).Where(t => !ensurePrevious||!t.previous.IsDefaultValue());
@@ -16,22 +20,33 @@ namespace Xpand.Extensions.Reactive.Combine {
         
         public static IObservable<TSource> ToCurrent<TSource>(this IObservable<(TSource previous, TSource current)> source) 
             => source.Select(t => t.current);
-        public static IObservable<TResult> CombineLatestWhenFirstEmits<TFirst, TSecond, TResult>(
-            this IObservable<TFirst> first, IObservable<TSecond> second, Func<TFirst, TSecond, TResult> resultSelector)
-            => Observable.Create<TResult>(observer => {
-                var isFirstEmitted = false;
-                TSecond lastSecond = default;
-                var gate = new object();
-                return new CompositeDisposable(first.Synchronize(gate).Subscribe(f => {
-                        if (!isFirstEmitted) {
-                            isFirstEmitted = true;
-                        }
-                        if (isFirstEmitted && !Equals(lastSecond, default(TSecond))) {
-                            observer.OnNext(resultSelector(f, lastSecond));
-                        }
+        public static IObservable<TResult> CombineLatestWhenFirstEmits<TFirst, TSecond, TResult>(this IObservable<TFirst> first,
+            IObservable<TSecond> second, Func<TFirst, TSecond, TResult> resultSelector) => 
+            Observable.Create<TResult>(observer => {
+                var firstEmitted = false;
+                var firstValue = default(TFirst);
+                var secondValue = default(TSecond);
+                var firstCompleted = false;
+                var secondCompleted = false;
+
+                var subscription1 = first.Subscribe(x => {
+                        firstValue = x;
+                        firstEmitted = true;
+                        if (secondValue != null)
+                            observer.OnNext(resultSelector(x, secondValue));
                     },
-                    observer.OnError,
-                    observer.OnCompleted), second.Synchronize(gate).Subscribe(s => lastSecond = s));
+                    observer.OnError, () => { firstCompleted = true; if (secondCompleted) observer.OnCompleted(); }
+                );
+
+                var subscription2 = second.Subscribe(y => {
+                        secondValue = y;
+                        if (firstEmitted)
+                            observer.OnNext(resultSelector(firstValue, y));
+                    },
+                    observer.OnError, () => { secondCompleted = true; if (firstCompleted) observer.OnCompleted(); }
+                );
+
+                return new CompositeDisposable(subscription1, subscription2);
             });
 
         public static IObservable<TResult> CombineVeryLatest<TLeft, TRight, TResult>(this IObservable<TLeft> leftSource,

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 
 namespace Xpand.Extensions.Reactive.Filter {
