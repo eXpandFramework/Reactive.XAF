@@ -23,7 +23,6 @@ using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.Extensions.XAF.TypesInfoExtensions;
 using Xpand.Extensions.XAF.ViewExtensions;
-using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
 using Xpand.XAF.Modules.Reactive.Services.Controllers;
 
@@ -137,10 +136,9 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<Unit> ShowInstanceDetailView(this IObservable<Frame> source,params  Type[] objectTypes) {
             return source.WhenFrame(objectTypes).WhenFrame(ViewType.ListView).Where(frame => frame.View.Model.ToListView().MasterDetailMode==MasterDetailMode.ListViewOnly)
                 .WhenIsNotOnLookupPopupTemplate()
-                
-                // .ToController<ListViewProcessCurrentObjectController>().CustomProcessSelectedItem(true)
-                // .DoWhen(e => e.View().ObjectTypeInfo.Type.IsInstanceOfType(e.View().CurrentObject),
-                //     e => e.ShowViewParameters.CreatedView = NewDetailView(e.Action.View().CurrentObject, e.Application()))
+                .ToController<ListViewProcessCurrentObjectController>().CustomProcessSelectedItem(true)
+                .DoWhen(e => e.View().ObjectTypeInfo.Type.IsInstanceOfType(e.View().CurrentObject),
+                    e => e.ShowViewParameters.CreatedView = NewDetailView(e.Action.View().CurrentObject,e.View().ToListView()))
                 .MergeToUnit(source.WhenFrame(objectTypes).WhenFrame(ViewType.ListView).Where(frame => frame.View.Model.ToListView().MasterDetailMode==MasterDetailMode.ListViewAndDetailView)
                     .SelectMany(frame => frame.View.ToListView().WhenCreateCustomCurrentObjectDetailView()
                         .DoWhen(e =>e.CurrentDetailView.ObjectTypeInfo.Type.IsInstanceOfType(e.CurrentDetailView.CurrentObject) ,
@@ -150,8 +148,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 if (o == null) return null;
                 o = o.GetType().ToTypeInfo().FindAttribute<ShowInstanceDetailViewAttribute>().Property is { } prop
                     ? o.GetType().ToTypeInfo().FindMember(prop).GetValue(o) : o;
-                return listView.Application().CreateDetailView(listView.ObjectSpace,
-                    o.GetType().GetModelClass().DefaultDetailView, false, o);
+                return listView.Application().CreateDetailView(listView.ObjectSpace, o.GetType().GetModelClass().DefaultDetailView, false, listView.ObjectSpace.GetObject(o));
             }
         }
 

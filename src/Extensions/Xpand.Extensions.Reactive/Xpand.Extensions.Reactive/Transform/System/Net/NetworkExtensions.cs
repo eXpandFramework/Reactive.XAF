@@ -171,7 +171,7 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net {
             string url, Func<JsonDocument, IObservable<T>> selector) 
             => client.GetStreamAsync(url).ToObservable()
                 .SelectMany(stream => stream.WhenJsonDocument(selector));
-        public static IObservable<(JsonDocument document, HttpResponseMessage message)> WhenResponseDocument(this HttpClient client, string url,HttpMethod? httpMethod=null) 
+        public static IObservable<(JsonDocument document, HttpResponseMessage message)> WhenResponseDocument(this HttpClient client, string url,HttpMethod httpMethod=null) 
             => client.WhenResponseDocument(new HttpRequestMessage(httpMethod??HttpMethod.Get, url));
         
         public static IObservable<T> SelectMany<T>(this IObservable<(T[] objects, JsonDocument document)> source) => source.SelectMany(t => t.objects);

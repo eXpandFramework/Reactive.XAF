@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net.NetworkInformation;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading;
@@ -14,6 +15,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using NUnit.Framework;
 using Xpand.Extensions.AppDomainExtensions;
+using Xpand.Extensions.Network;
 using Xpand.Extensions.Numeric;
 using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Transform;
@@ -45,7 +47,7 @@ namespace Xpand.TestsLib.Blazor {
 			=> Host.CreateDefaultBuilder().Observe()
 				.Do(_ => TestContext.CurrentContext.Test.FullName.WriteSection())
 				.Do(_ => Console.Out.WriteSection(TestContext.CurrentContext.Test.FullName))
-				.StartTest($"http://localhost:{Port}",
+				.StartTest($"http://localhost:{IPGlobalProperties.GetIPGlobalProperties().GetActiveTcpListeners().GetRandomAvailablePort()}",
 					TestBlazorAppPath(), user, test,beforeSetup,configureServices,configureWebHostBuilder,startupFactory,
 					Environment.GetEnvironmentVariable("XAFTESTBrowser"), WindowPosition.FullScreen, LogContext.None,WindowPosition.BottomRight)
 				.Timeout(timeOut??120.Seconds());

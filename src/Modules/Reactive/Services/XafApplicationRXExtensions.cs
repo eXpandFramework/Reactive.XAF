@@ -1084,7 +1084,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                             .DoSafe(_ => {
                                 if (frame.View is DetailView detailView) {
                                     detailView.GetItems<DashboardViewItem>()
-                                        .Do(item => item.InnerView.ObjectSpace.Refresh())
+                                        .Select(item => item.InnerView?.ObjectSpace).WhereNotDefault()
+                                        .Do(objectSpace => objectSpace.Refresh())
                                         .Enumerate();
                                 }
                                 frame.View.ObjectSpace.Refresh();

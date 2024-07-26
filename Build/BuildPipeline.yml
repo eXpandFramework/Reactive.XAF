@@ -131,7 +131,7 @@ jobs:
           New-Item -ItemType Directory -Force -Path "$(Build.SourcesDirectory)/bin/nupkg"
           Copy-Item -Path "$(Pipeline.Workspace)/Nupkg/*.nupkg" -Destination "$(Build.SourcesDirectory)/bin/nupkg"
           Get-ChildItem -Path "$(Pipeline.Workspace)\Nuget" -Recurse | ForEach-Object {
-              $destinationPath = $_.FullName.Replace("$(Pipeline.Workspace)\Nuget", "$(Pipeline.Workspace).Nuget")
+              $destinationPath = $_.FullName.Replace("$(Pipeline.Workspace)\Nuget", "$(Pipeline.Workspace)\.Nuget")
               $destinationDir = [System.IO.Path]::GetDirectoryName($destinationPath)
               if (-not (Test-Path -Path $destinationDir)) {
                   New-Item -ItemType Directory -Path $destinationDir -Force

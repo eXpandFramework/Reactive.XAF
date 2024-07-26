@@ -34,7 +34,7 @@ namespace Xpand.Extensions.Reactive.Transform {
             // => source.BufferUntilInactive(seconds.Seconds(),window => window.ToList(),scheduler);
             // => source.Quiescent(seconds.Seconds(),scheduler);
         
-            public static IObservable<IEnumerable<T>> BufferWithInactivity<T>(this IObservable<T> source, TimeSpan inactivity, TimeSpan? maxBufferTime=null) {
+            public static IObservable<IEnumerable<T>> BufferWithInactivity<T>(this IObservable<T> source, TimeSpan inactivity, TimeSpan? maxBufferTime=null,IScheduler scheduler=null) {
                 if (maxBufferTime.HasValue && maxBufferTime.Value < inactivity)
                     throw new ArgumentException("maxBufferTime must be greater than or equal to inactivity", nameof(maxBufferTime));
                 maxBufferTime ??= inactivity * 3;
@@ -45,8 +45,7 @@ namespace Xpand.Extensions.Reactive.Transform {
                     var inactivityTimer = new SerialDisposable();
                     var maxTimeTimer = new SerialDisposable();
                     var subscription = new SerialDisposable();
-                    var scheduler = Scheduler.ThreadPool;
-
+                    scheduler ??= Scheduler.ThreadPool;
                     void Dump() {
                         if (buffer.Count <= 0) return;
                         var items = buffer.ToArray();
@@ -91,8 +90,8 @@ namespace Xpand.Extensions.Reactive.Transform {
                     return new CompositeDisposable(subscription, inactivityTimer, maxTimeTimer);
                 });
             }
-public static IObservable<IList<T>> BufferUntilInactive<T>(this IObservable<T> source, TimeSpan delay) {
-            return source.BufferWithInactivity(delay).Select(enumerable => enumerable.ToList());
+public static IObservable<IList<T>> BufferUntilInactive<T>(this IObservable<T> source, TimeSpan delay,IScheduler scheduler=null) {
+            return source.BufferWithInactivity(delay,scheduler:scheduler).Select(enumerable => enumerable.ToList());
             // var publish = source.Publish(p => {
             //     var closes = p.Throttle(delay);
             //     if (maxCount != null) {
