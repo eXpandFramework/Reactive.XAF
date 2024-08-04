@@ -6,6 +6,7 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Blazor;
 using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.TestsLib.Common;
 using Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects;
@@ -29,15 +30,17 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests.Common {
 
         public static IObservable<T> AssertTriggerJob<T>(this Frame frame, IObservable<T> afterExecuted)
             => frame.AssertSimpleAction(nameof(JobSchedulerService.TriggerJob))
-                .SelectMany(action => action.Trigger(afterExecuted).ReplayFirstTake());
+                .SelectMany(action => action.Trigger(afterExecuted)).ReplayFirstTake();
 
         public static IObservable<Unit> AssertTriggerJob(this BlazorApplication application,Type jobType,string methodName, bool saveAndClose)
             => application.AssertTriggerJob(jobType, methodName, _ => Observable.Empty<Unit>(),saveAndClose);
         
         public static IObservable<Unit> AssertTriggerJob(this BlazorApplication application,Type jobType,string methodName, Func<Frame,IObservable<Unit>> afterExecuted,bool saveAndClose=true)
             => application.AssertJobListViewNavigation()
-                .SelectMany(window => window.CreateJob(jobType,methodName,saveAndClose))
-                .If(_ =>saveAndClose,frame => application.AssertListViewHasObject<Job>().SelectMany(_ => frame.AssertTriggerJob(afterExecuted(frame))),
+                .SelectMany(window => window.CreateJob(jobType,methodName,saveAndClose)
+                    .ToConsole(frame => "NewJob")
+                )
+                .If(_ =>saveAndClose,frame => application.AssertListViewHasObject<Job>().ToConsole(frame1 => "trigger").SelectMany(_ => frame.AssertTriggerJob(afterExecuted(frame))),
                     frame => frame.SaveAction().Trigger(frame.AssertTriggerJob(afterExecuted(frame)))).ToUnit()
                 .ReplayFirstTake();
     }

@@ -54,7 +54,7 @@ namespace Xpand.TestsLib.Blazor {
                 .Observe().SelectMany(host => XafApplicationMonitor.Application.StartTest(host,user,beforeSetup,test)
                     .MergeToUnit(host.Run(url, browser, inactiveWindowBrowserPosition)))
                 .LogError()
-                // .Log(logContext, inactiveWindowLogContextPosition, true)
+                .Log(logContext, inactiveWindowLogContextPosition, true)
             ;
 
             static IObservable<Unit> StartTest(this IObservable<BlazorApplication> source, IHost host,

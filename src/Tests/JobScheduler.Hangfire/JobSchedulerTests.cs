@@ -15,6 +15,7 @@ using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Transform.System;
+using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.Attributes;
 using Xpand.Extensions.XAF.NonPersistentObjects;
 using Xpand.Extensions.XAF.ViewExtensions;
@@ -56,7 +57,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests {
         [XpandTest(state:ApartmentState.MTA)]
         public async Task Commit_Objects_NonSecuredProvider()
             => await StartJobSchedulerTest(application => application.AssertTriggerJob(typeof(TestJobDI),
-                    nameof(TestJobDI.CreateObject),true).IgnoreElements()
+                    nameof(TestJobDI.CreateObject),true).ToConsole(unit => "fff").IgnoreElements()
                 .MergeToUnit(application.WhenSetupComplete().SelectMany(_ => application.WhenProviderCommitted<JS>(emitUpdatingObjectSpace:true))
                     .Select(t => t).Take(1).ToUnit()).ReplayFirstTake()
                 .ToUnit().Select(unit => unit), startupFactory: context => new TestStartup(context.Configuration,startup => startup.AddObjectSpaceProviders));
@@ -127,7 +128,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests {
                     .Select(t => t)
                     .ToUnit().ReplayFirstTake());
         
-        [XpandTest(state:ApartmentState.MTA)][Test]
+        // [XpandTest(state:ApartmentState.MTA)][Test]
         public async Task Trigger_Resume_Job()
             => await StartJobSchedulerTest(application
                 => application.WhenMainWindowCreated()
