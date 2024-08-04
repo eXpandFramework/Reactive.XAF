@@ -90,11 +90,14 @@ namespace Xpand.TestsLib.Common {
                     : frame.AssertListViewHasObject(matchObject, count, timeout, caller, view)).Switch();
 
         private static IObservable<Frame> AssertListViewHasObject<TObject>(this Frame frame, Func<TObject, bool> matchObject, int count, TimeSpan? timeout, string caller, View view) where TObject : class
-            => view.ToListView().WhenObjects<TObject>()
+            => view.ToListView().WhenObjects<TObject>().ToConsole(arg => "Objects")
                 .Where(objects => count == 0 || objects.Length == count)
-                .SelectMany(objects => objects.Where(value => matchObject?.Invoke(value)??true).ToNowObservable()).DelayOnContext()
+                .SelectMany(objects => objects.Where(value => matchObject?.Invoke(value)??true).ToNowObservable())
+                // .DelayOnContext()
+                .ToConsole(arg => "MatchObjects")
                 .TakeUntil(o => view.IsDisposed)
-                .Select(arg => view.ObjectSpace?.GetObject(arg)).WhenNotDefault()
+                .Select(arg => view.ObjectSpace?.GetObject(arg)).ToConsole(arg => $"GetObject ={arg}").WhenNotDefault()
+                .ToConsole(arg => "GetObject")
                 .Select(value => frame.Application.GetRequiredService<IObjectSelector<TObject>>().SelectObject(view.ToListView(),value)).Switch()
                 // .SelectMany(value => view.ToListView().SelectObject(value)).Select(o => o)
                 .Assert(_ => $"{typeof(TObject).Name}-{view.Id}",caller:caller,timeout:timeout)
