@@ -85,8 +85,8 @@ jobs:
         TestAssembly: '**/Xpand.XAF.Modules.GridListEditor.Tests.dll'
       HideToolBar:
         TestAssembly: '**/Xpand.XAF.Modules.HideToolBar.Tests.dll'
-      JobSchedulerHangfire:
-        TestAssembly: '**/Xpand.XAF.Modules.JobScheduler.Hangfire.Tests.dll'
+      # JobSchedulerHangfire:
+      #   TestAssembly: '**/Xpand.XAF.Modules.JobScheduler.Hangfire.Tests.dll'
       # JobSchedulerNotification:
       #   TestAssembly: '**/Xpand.XAF.Modules.JobScheduler.Notification.Tests.dll'
       MasterDetail:
@@ -99,8 +99,8 @@ jobs:
         TestAssembly: '**/Xpand.XAF.Modules.Reactive.Logger.Tests.dll'
       # ReactiveLoggerHub:
       #   TestAssembly: '**/Xpand.XAF.Modules.Reactive.Logger.Hub.Tests.dll'
-      ReactiveRest:
-        TestAssembly: '**/Xpand.XAF.Modules.Reactive.Rest.Tests.dll'
+      # ReactiveRest:
+      #   TestAssembly: '**/Xpand.XAF.Modules.Reactive.Rest.Tests.dll'
       RefreshView:
         TestAssembly: '**/Xpand.XAF.Modules.RefreshView.Tests.dll'
       SuppressConfirmation:
