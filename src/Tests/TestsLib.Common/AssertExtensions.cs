@@ -9,7 +9,6 @@ using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.SystemModule;
 using DevExpress.ExpressApp.ViewVariantsModule;
-using NUnit.Framework;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Numeric;
 using Xpand.Extensions.Reactive.Combine;
@@ -31,14 +30,11 @@ namespace Xpand.TestsLib.Common {
             => source.SelectMany(frame => frame.AssertSimpleAction(actionId,completeWhenNotAvailable, caller));
 
         public static IObservable<SimpleAction> AssertSimpleAction(this Frame frame,string actionId,Func<SimpleAction,bool> completeWhenNotAvailable=null,[CallerMemberName]string caller="") 
-            => frame.Actions<SimpleAction>(actionId).ToNowObservable().ToConsole(action => actionId)
-                .SelectMany(action => {
-                    if (!action.Available() && (completeWhenNotAvailable?.Invoke(action) ?? false))
-                        return Observable.Empty<SimpleAction>();
-                    else
-                        return action.Observe().Assert($"{caller} {frame.View} {actionId}")
-                            .Select(simpleAction => simpleAction);
-                });
+            => frame.Actions<SimpleAction>(actionId).ToNowObservable()
+                .SelectMany(action => !action.Available() && (completeWhenNotAvailable?.Invoke(action) ?? false)
+                    ? Observable.Empty<SimpleAction>()
+                    : action.Observe().Assert($"{caller} {frame.View} {actionId}")
+                        .Select(simpleAction => simpleAction));
         
         public static IObservable<SingleChoiceAction> AssertSingleChoiceAction(this IObservable<Frame> source,
             string actionId, Func<SingleChoiceAction,int> itemsCount = null) 
@@ -96,20 +92,16 @@ namespace Xpand.TestsLib.Common {
 
         private static IObservable<Frame> AssertListViewHasObject<TObject>(this Frame frame, Func<TObject, bool> matchObject, int count, TimeSpan? timeout, string caller, View view) where TObject : class
             => view.ToListView().WhenObjects<TObject>()
-                // .ToConsole(arg => "Objects")
                 .Where(objects => count == 0 || objects.Length == count)
                 .SelectMany(objects => objects.Where(value => matchObject?.Invoke(value)??true).ToNowObservable())
-                // .DelayOnContext()
-                // .ToConsole(arg => "MatchObjects")
-                .TakeUntil(o => view.IsDisposed)
+                .TakeUntil(_ => view.IsDisposed)
                 .Select(arg => view.ObjectSpace?.GetObject(arg))
-                // .ToConsole(arg => $"GetObject ={arg}")
                 .WhenNotDefault()
                 .SelectMany(value => frame.Application.GetRequiredService<IObjectSelector<TObject>>().SelectObject(view.ToListView(),value))
-                // .ToConsole(arg => $"Select={arg}")
                 // .SelectMany(value => view.ToListView().SelectObject(value)).Select(o => o)
                 .Assert(_ => $"{caller}, {typeof(TObject).Name}-{view.Id}",timeout:timeout)
-                .ReplayFirstTake().To(frame);
+                .ReplayFirstTake().To(frame)
+                .Select(frame1 => frame1);
 
         public static IObservable<TTabbedControl> AssertTabControl<TTabbedControl>(this XafApplication application,Type objectType=null,Func<DetailView,bool> match=null,Func<IModelTabbedGroup, bool> tabMatch=null,TimeSpan? timeout=null,[CallerMemberName]string caller="") 
             => application.WhenTabControl<TTabbedControl>( objectType, match,tabMatch).Assert(objectType?.Name,caller:$"{caller} - {nameof(AssertTabControl)}",timeout:timeout);

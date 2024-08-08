@@ -1089,9 +1089,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                                         .Enumerate();
                                 }
                                 frame.View.ObjectSpace.Refresh();
-                            })
-                            .ToConsole(_ => $"{typeof(TObject).Name} - {frame.View}")))
-                        
+                            })))
                 )
                 .Merge(application.WhenProviderCommittedDetailed<TObject>(ObjectModification.All,emitUpdatingObjectSpace:true,_ => true)
                     .ToObjectsGroup().Select(objects => objects).Do(CommitSignal.OnNext).IgnoreElements().To<View>())
@@ -1109,7 +1107,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                     objects.Select(o => first[key(o)] = o).Enumerate();
                     return first;
                 });
-            return source.CombineLatestWhenFirstEmits(second, (o, objects) => {
+            return source.CombineLatestWhenFirstEmits(second, (_, objects) => {
                 ExpressionEvaluator expressionEvaluator = null;
                 if (criteria != null) {
                     expressionEvaluator = new ExpressionEvaluator(

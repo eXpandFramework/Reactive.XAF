@@ -6,12 +6,10 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.SystemModule;
-using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
-using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 
@@ -30,8 +28,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         
         public static IObservable<object> WhenTabControl(this DetailView detailView, IModelViewLayoutElement element)
             => detailView.LayoutManager.WhenItemCreated().Where(t => t.model == element).Select(t => t.control).Take(1)
-                .If(o => detailView.LayoutManager.Platform()==Platform.Win,tabbedControlGroup => detailView.LayoutManager.WhenLayoutCreated().ToConsole(manager => detailView).Take(1).To(tabbedControlGroup),o => o.Observe())
-                .ToConsole(o => detailView);
+                .If(_ => detailView.LayoutManager.Platform()==Platform.Win,tabbedControlGroup => detailView.LayoutManager.WhenLayoutCreated().Take(1).To(tabbedControlGroup),o => o.Observe());
         
         public static IObservable<(DetailView detailView, CancelEventArgs e)> WhenViewEditModeChanging(this DetailView detailView) 
             => detailView.WhenViewEvent<DetailView,CancelEventArgs>(nameof(DetailView.ViewEditModeChanging));
@@ -50,17 +47,17 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => source.Where(view => typeof(TParentObject).IsAssignableFrom(view.ObjectTypeInfo.Type))
                 .SelectMany(detailView => {
                     var viewItems = detailView.GetItems<ViewItem>().OfType<IFrameContainer>().Cast<ViewItem>().ToObservable();
-                    return detailView.IsRoot ? viewItems.ControlCreated().ToNestedFrames(nestedObjectTypes).Select(_ => (detailView, _.nestedFrame))
-                        : viewItems.ToNestedFrames(nestedObjectTypes).Select(_ => (detailView, _.nestedFrame));
+                    return detailView.IsRoot ? viewItems.ControlCreated().ToNestedFrames(nestedObjectTypes).Select(t => (detailView, t.nestedFrame))
+                        : viewItems.ToNestedFrames(nestedObjectTypes).Select(t => (detailView, t.nestedFrame));
                 });
 
         public static IObservable<(DetailView detailView, NestedFrame nestedFrame)> WhenChildrenCurrentObjectChanged<TParentObject>(this IObservable<DetailView> source,params Type[] nestedObjectTypes) 
             => source.Where(view => typeof(TParentObject).IsAssignableFrom(view.ObjectTypeInfo.Type))
                 .SelectMany(detailView => {
                     var viewItems = detailView.GetItems<ViewItem>().OfType<IFrameContainer>().Cast<ViewItem>().ToObservable();
-                    return detailView.IsRoot ? viewItems.ControlCreated().ToNestedFrames(nestedObjectTypes).Select(_ => (detailView, _.nestedFrame))
+                    return detailView.IsRoot ? viewItems.ControlCreated().ToNestedFrames(nestedObjectTypes).Select(t => (detailView, t.nestedFrame))
                         : detailView.WhenCurrentObjectChanged().SelectMany(_ => viewItems.ToNestedFrames(nestedObjectTypes))
-                            .Select(_ => (detailView, _.nestedFrame));
+                            .Select(t => (detailView, t.nestedFrame));
                 });
 
 

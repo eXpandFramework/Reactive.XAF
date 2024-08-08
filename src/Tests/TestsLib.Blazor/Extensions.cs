@@ -59,12 +59,14 @@ namespace Xpand.TestsLib.Blazor {
 
             static IObservable<Unit> StartTest(this IObservable<BlazorApplication> source, IHost host,
                 string user, Func<BlazorApplication, IObservable<Unit>> beforeSetup,Func<BlazorApplication, IObservable<Unit>> test)
-                => source.DoOnFirst(application =>application.DeleteAllData())
+                => source
+                    .DoOnFirst(application =>application.DeleteAllData())
                     .MergeIgnored(application => beforeSetup?.Invoke(application)
                         .TakeUntil(host.Services.WhenApplicationStopping())?? Observable.Empty<Unit>())
                     .EnsureMultiTenantMainDatabase().DeleteModelDiffs(user)
                     .TakeUntil(host.Services.WhenApplicationStopping())
-                    .MergeIgnored(application => application.WhenLoggedOn(user).TakeUntil(host.Services.WhenApplicationStopping()))
+                    .MergeIgnored(application => application.WhenLoggedOn(user).TakeUntil(host.Services.WhenApplicationStopping())
+                        .Select(xafApplication => xafApplication))
                     .SelectMany(application => test(application).TakeUntil(host.Services.WhenApplicationStopping()).BufferUntilCompleted().WhenNotEmpty().To(application))
                     .Catch<BlazorApplication,Exception>(_ => host.Services.StopTest().To<BlazorApplication>())
                     .Take(1)

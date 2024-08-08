@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.SpellChecker</id>
-    <version>4.241.2.0</version>
+    <version>4.241.2.1</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -15,14 +15,14 @@
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, SpellChecker, 24.1.4</tags>
     <dependencies>
       <group targetFramework="netstandard2.0">
-        <dependency id="Xpand.VersionConverter" version="4.241.2.0" />
+        <dependency id="Xpand.VersionConverter" version="4.241.2.1" />
       </group>
       <group targetFramework="net6.0">
-        <dependency id="Xpand.Extensions.Reactive" version="4.241.2.0" />
-        <dependency id="Xpand.Extensions" version="4.241.2.0" />
-        <dependency id="Xpand.Extensions.XAF" version="4.241.2.0" />
-        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.241.2.0" />
-        <dependency id="Xpand.XAF.Modules.Reactive" version="4.241.2.0" />
+        <dependency id="Xpand.Extensions.Reactive" version="4.241.2.1" />
+        <dependency id="Xpand.Extensions" version="4.241.2.1" />
+        <dependency id="Xpand.Extensions.XAF" version="4.241.2.1" />
+        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.241.2.1" />
+        <dependency id="Xpand.XAF.Modules.Reactive" version="4.241.2.1" />
         <dependency id="Xpand.Patcher" version="3.0.24" />
         <dependency id="System.Reactive" version="6.0" />
         <dependency id="DevExpress.SpellChecker.Core" version="24.1.4" />
@@ -33,7 +33,7 @@
         <dependency id="System.Text.Json" version="8.0.4" />
         <dependency id="Xpand.Collections" version="1.0.4" />
         <dependency id="System.Threading.Tasks.Dataflow" version="7.0" />
-        <dependency id="Xpand.VersionConverter" version="4.241.2.0" />
+        <dependency id="Xpand.VersionConverter" version="4.241.2.1" />
       </group>
     </dependencies>
   </metadata>

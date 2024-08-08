@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
+using System.Threading;
 using Xpand.Extensions.Numeric;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.Reactive.Transform.System;
 
 namespace Xpand.Extensions.Reactive.Utility {
     public static partial class Utility {
@@ -19,8 +21,7 @@ namespace Xpand.Extensions.Reactive.Utility {
                     .Select(_ => default(T)).IgnoreElements()));
 
         private static IObservable<T> DelayOnContext<T>(this T arg,TimeSpan timeSpan) 
-            => arg.Observe()
-                .SelectManySequential( arg1 => Observable.Return(arg1).Delay(timeSpan).ObserveOnContext());
+            => arg.Observe().SelectManySequential( arg1 => timeSpan.Timer(new SynchronizationContextScheduler(SynchronizationContext.Current!)).ObserveOnContext().To(arg1));
         public static IObservable<T> Defer<T>(this object o, IObservable<T> execute)
             => Observable.Defer(() => execute);
         

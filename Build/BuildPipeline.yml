@@ -171,20 +171,33 @@ jobs:
         targetType: 'inline'
         script: |
           $ErrorView="NormalView"
-          $ErrorActionPreference="stop"
-          $env:AzureToken='$(AzureToken)'
-          $env:AzProject="eXpandFramework"
-          $env:AzOrganization="eXpandDevOps"
-          & '$(System.DefaultWorkingDirectory)\go.ps1' -InstallModules
-          $xafMinors=Get-XAFLatestMinors -Source '$(DXApiFeed)'
-          $xafMinor=$xafMinors|select-object -first 1
-          $parameters = @{
-            CustomVersion     = "$xafminor"
-            DxPipelineBuildId = '$(Build.BuildId)'
+          $ErrorActionPreference="Stop"
+          
+          try {
+            $env:AzureToken='$(AzureToken)'
+            $env:AzProject="eXpandFramework"
+            $env:AzOrganization="eXpandDevOps"
+            
+            Write-Host "Environment variables set"
+            
+            & '$(System.DefaultWorkingDirectory)\go.ps1' -InstallModules
+            
+            $xafMinors=Get-XAFLatestMinors -Source '$(DXApiFeed)'
+            $xafMinor=$xafMinors|select-object -first 1
+            $parameters = @{
+              CustomVersion     = "$xafminor"
+              DxPipelineBuildId = '$(Build.BuildId)'
+            }
+            $parameters
+            Add-AzBuild -Definition PublishNugets-Reactive.XAF -Parameters $parameters -Branch $env:Build_SourceBranchName
+            Write-Host "Hello World"
           }
-          $parameters
-          Add-AzBuild -Definition PublishNugets-Reactive.XAF -Parameters $parameters -Branch $env:Build_SourceBranchName
-          Write-Host "Hello World"
+          catch {
+            Write-Host "An error occurred:"
+            Write-Host $_.Exception.Message
+            Write-Host $_.ScriptStackTrace
+            throw
+          }
         failOnStderr: true
         ignoreLASTEXITCODE: true
         pwsh: true

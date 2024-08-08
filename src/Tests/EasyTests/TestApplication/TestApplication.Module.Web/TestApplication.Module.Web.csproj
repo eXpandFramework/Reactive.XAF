@@ -40,7 +40,7 @@
   <ItemGroup>
     <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="24.1.4" />
     <PackageReference Include="DevExpress.ExpressApp.Web.All" Version="24.1.4" />
-    <PackageReference Include="Xpand.XAF.Web.All" Version="4.241.2.0" />
+    <PackageReference Include="Xpand.XAF.Web.All" Version="4.241.2.1" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="TestApplication.Module">

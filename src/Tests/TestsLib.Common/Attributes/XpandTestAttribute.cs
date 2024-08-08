@@ -46,20 +46,15 @@ namespace Xpand.TestsLib.Common.Attributes{
                                 innerCommand.Execute(context);
                         }
 
-                        if (Debugger.IsAttached) {
-                            ExecuteTest();
+                        Polly.Policy.Timeout(TimeSpan.FromMilliseconds(timeout), TimeoutStrategy.Optimistic).Execute(ExecuteTest);
+                        if (count <= 0) continue;
+                        TestContext.Out.WriteWarning($"{context.CurrentResult.Message}");
+                        TestContext.Out.WriteLine($"Retry {context.CurrentRepeatCount+1} of {tryCount}");
+                        if (context.CurrentResult.ResultState!=ResultState.Success){
+                            context.CurrentRepeatCount++;
                         }
-                        else {
-                            Polly.Policy.Timeout(TimeSpan.FromMilliseconds(timeout), TimeoutStrategy.Optimistic).Execute(ExecuteTest);
-                            if (count <= 0) continue;
-                            TestContext.Out.WriteWarning($"{context.CurrentResult.Message}");
-                            TestContext.Out.WriteLine($"Retry {context.CurrentRepeatCount+1} of {tryCount}");
-                            if (context.CurrentResult.ResultState!=ResultState.Success){
-                                context.CurrentRepeatCount++;
-                            }
-                            else{
-                                break;
-                            }
+                        else{
+                            break;
                         }
                     }
                     catch (Exception ex){
