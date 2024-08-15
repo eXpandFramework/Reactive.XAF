@@ -31,6 +31,4 @@ $setupBlock = {
 
 
 
-Start-VMJobs -numberOfVMs $numberOfVMs -scriptBlock $setupBlock -vmName $VMName 
-
-
+Start-VMJobs -numberOfVMs $numberOfVMs -scriptBlock $setupBlock -vmName $VMName

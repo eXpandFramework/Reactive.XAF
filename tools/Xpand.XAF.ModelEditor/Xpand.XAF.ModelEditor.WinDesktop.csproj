@@ -47,11 +47,11 @@
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DevExpress.ExpressApp" Version="24.1.4" />
-    <PackageReference Include="DevExpress.ExpressApp.Win" Version="24.1.4" />
-    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="24.1.4" />
-    <PackageReference Include="DevExpress.Persistent.Base" Version="24.1.4" />
-    <PackageReference Include="DevExpress.Persistent.BaseImpl.Xpo" Version="24.1.4" />
+    <PackageReference Include="DevExpress.ExpressApp" Version="24.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp.Win" Version="24.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="24.1.5" />
+    <PackageReference Include="DevExpress.Persistent.Base" Version="24.1.5" />
+    <PackageReference Include="DevExpress.Persistent.BaseImpl.Xpo" Version="24.1.5" />
     <PackageReference Include="Microsoft.CodeAnalysis" Version="4.2.0.0" />
     <PackageReference Include="System.Security.Cryptography.Xml" Version="8.0.0" />
     <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="8.0.0" />
