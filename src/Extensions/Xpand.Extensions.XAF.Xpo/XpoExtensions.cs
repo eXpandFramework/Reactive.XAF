@@ -30,6 +30,9 @@ namespace Xpand.Extensions.XAF.Xpo {
 
     
     public static class XpoExtensions {
+        public static IDataLayer GetDataLayer(this ITypesInfo typesInfo,string connectionString,AutoCreateOption autoCreateOption=AutoCreateOption.None) 
+            => XpoDefault.GetDataLayer(connectionString, ((TypesInfo)typesInfo).EntityStores.OfType<XpoTypeInfoSource>().First().XPDictionary, autoCreateOption);
+        
         internal static void CustomizeTypesInfo(ITypesInfo typesInfo) {
             CreateXpAttributeValueAttributes();
             RuntimeAssociationAttributes(typesInfo);

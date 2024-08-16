@@ -25,11 +25,8 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
 
     
     [AttributeUsage(AttributeTargets.Class)]
-    public sealed class SequenceStorageKeyNameAttribute:Attribute{
-        public Type Type{ get; }
-
-        public SequenceStorageKeyNameAttribute(Type type) 
-            => Type = type;
+    public sealed class SequenceStorageKeyNameAttribute(Type type) : Attribute {
+        public Type Type{ get; } = type;
 
         public static Type FindConsumer(Type sequenceType) 
             => XafTypesInfo.Instance.PersistentTypes.SelectMany(info => info
@@ -38,12 +35,9 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
     }
     [DeferredDeletion(false)][DefaultProperty(nameof(Name))][ImageName("PageSetup")]
     [SuppressMessage("Design", "XAF0023:Do not implement IObjectSpaceLink in the XPO types")]
-    public class SequenceStorage : XPBaseObject, ISequenceStorage,IObjectSpaceLink{
+    public class SequenceStorage(Session session) : XPBaseObject(session), ISequenceStorage, IObjectSpaceLink {
         private long _nextSequence;
-        public SequenceStorage(Session session)
-            : base(session){
-        }
-        
+
         string _name;
         
         [Size(255)][Key]
@@ -57,16 +51,15 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
 
         protected override void OnLoaded(){
             base.OnLoaded();
-            if (!(Session is ExplicitUnitOfWork) && Name != null){
-                var type = SequenceStorageKeyNameAttribute.FindConsumer(XafTypesInfo.Instance.FindTypeInfo(Name).Type);
-                var modelClass =CaptionHelper.ApplicationModel.BOModel.GetClass(type);
-                _type = new ObjectType(modelClass.TypeInfo.Type){Name = modelClass.Caption};
-                _objectMember=new ObjectString(SequenceMember){Caption = modelClass.GetMemberCaption(SequenceMember)};
-                if (CustomSequence!=null){
-                    modelClass =CaptionHelper.ApplicationModel.BOModel.GetClass(XafTypesInfo.Instance.FindTypeInfo(CustomSequence).Type);
-                    _customType=new ObjectType(modelClass.TypeInfo.Type){Name = modelClass.Caption};
-                }
-            }
+            if (CaptionHelper.ApplicationModel==null)return;
+            if (Session is ExplicitUnitOfWork || Name == null) return;
+            var type = SequenceStorageKeyNameAttribute.FindConsumer(XafTypesInfo.Instance.FindTypeInfo(Name).Type);
+            var modelClass =CaptionHelper.ApplicationModel.BOModel.GetClass(type);
+            _type = new ObjectType(modelClass.TypeInfo.Type){Name = modelClass.Caption};
+            _objectMember=new ObjectString(SequenceMember){Caption = modelClass.GetMemberCaption(SequenceMember)};
+            if (CustomSequence == null) return;
+            modelClass =CaptionHelper.ApplicationModel.BOModel.GetClass(XafTypesInfo.Instance.FindTypeInfo(CustomSequence).Type);
+            _customType=new ObjectType(modelClass.TypeInfo.Type){Name = modelClass.Caption};
         }
 
         [Size(255)][Browsable(false)]

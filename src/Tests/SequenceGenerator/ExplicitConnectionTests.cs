@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Reactive.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using DevExpress.Xpo;
 using NUnit.Framework;
 using Shouldly;
@@ -62,9 +60,9 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
         [Test]
         [XpandTest()]
         [SuppressMessage("ReSharper", "MethodHasAsyncOverload")][Apartment(ApartmentState.MTA)]
-        public async Task UnLocks_current_Record_When_Commit_Changes() {
+        public void UnLocks_current_Record_When_Commit_Changes() {
             using var application = SequenceGeneratorModule().Application;
-            var defaultDataLayer1 = await application.ObjectSpaceProvider.SequenceGeneratorDatalayer();
+            var defaultDataLayer1 =  application.ObjectSpaceProvider.CreateObjectSpace().SequenceGeneratorDataLayer();
                 
             var explicitUnitOfWork = new ExplicitUnitOfWork(defaultDataLayer1);
             

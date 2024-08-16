@@ -14,9 +14,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
         public const string ModelCategory = "Xpand.SequenceGenerator";
         
 
-        static SequenceGeneratorModule(){
-            TraceSource=new ReactiveTraceSource(nameof(SequenceGeneratorModule));
-        }
+        static SequenceGeneratorModule() => TraceSource=new ReactiveTraceSource(nameof(SequenceGeneratorModule));
 
         public SequenceGeneratorModule(){
             RequiredModuleTypes.Add(typeof(ValidationModule));
@@ -35,5 +33,8 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
                 .Subscribe();
         }
 
+        public override void Setup(XafApplication application) {
+            base.Setup(application);
+        }
     }
 }

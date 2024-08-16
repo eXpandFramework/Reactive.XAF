@@ -2,10 +2,9 @@
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
-using Fasterflect;
-
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.Reactive{
@@ -38,12 +37,8 @@ namespace Xpand.XAF.Modules.Reactive{
             return application.ReactiveModule(() => application.Model.ToReactiveModule<TModel>());
         }
 
-        private static IObservable<T> ReactiveModule<T>(this XafApplication application,Func<T> model) {
-            var applicationModel = (bool) application.GetFieldValue("isLoggedOn");
-            return applicationModel
-                ? model().Observe()
-                : application.WhenLoggedOn().Select(_ => model()).WhenNotDefault();
-        }
+        private static IObservable<T> ReactiveModule<T>(this XafApplication application,Func<T> model) 
+            => application.IsLoggedOn() ? model().Observe() : application.WhenLoggedOn().Select(_ => model()).WhenNotDefault();
 
         public static TModel ToReactiveModule<TModel>(this IModelApplication applicationModel) where TModel: class, IModelReactiveModule{
             var modules = applicationModel as IModelApplicationReactiveModules;

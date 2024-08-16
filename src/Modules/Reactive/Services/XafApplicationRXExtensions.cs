@@ -20,10 +20,12 @@ using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
+using DevExpress.ExpressApp.MultiTenancy;
 using DevExpress.ExpressApp.Security;
 using DevExpress.ExpressApp.SystemModule;
 using DevExpress.ExpressApp.Templates;
 using DevExpress.ExpressApp.ViewVariantsModule;
+using DevExpress.Persistent.Base.MultiTenancy;
 using Fasterflect;
 using Xpand.Extensions.EventArgExtensions;
 using Xpand.Extensions.ExpressionExtensions;
@@ -259,13 +261,22 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => application.WhenObjectSpaceCreated().Where(objectSpace => objectSpace is NonPersistentObjectSpace).Select(objectSpace => (application,(NonPersistentObjectSpace)objectSpace));
 
         public static IObservable<IObjectSpace> WhenProviderObjectSpaceCreated(this XafApplication application,Func<IObjectSpaceProvider> provider=null) {
-            var objectSpaceProvider = provider?.Invoke()??application.ObjectSpaceProvider;
-            return application.ObjectSpaceProviders.Where(spaceProvider => spaceProvider == objectSpaceProvider).ToNowObservable()
+            var objectSpaceProvider = provider?.Invoke() ?? application.ObjectSpaceProvider;
+            return application.ObjectSpaceProviders.Where(spaceProvider => spaceProvider == objectSpaceProvider)
+                .ToNowObservable()
                 .SelectMany(spaceProvider => spaceProvider.WhenObjectSpaceCreated());
         }
-        public static IObservable<IObjectSpace> WhenProviderObjectSpaceCreated(this XafApplication application,bool emitUpdatingObjectSpace) 
-            => application.ObjectSpaceProviders.ToNowObservable()
-                .SelectMany(spaceProvider => spaceProvider.WhenObjectSpaceCreated(emitUpdatingObjectSpace));
+
+        public static IObservable<TResult> WhenProviderObjectSpaceCreated<TResult>(this XafApplication application,
+            Func<IObjectSpaceProvider, IObjectSpace, IObservable<TResult>> resultSelector,
+            bool emitUpdatingObjectSpace, Func<IObjectSpaceProvider, bool> match = null)
+            => application.WhenLoggingOn(true).SelectMany(_ => application.ObjectSpaceProviders.ToNowObservable())
+                .Merge(application.ObjectSpaceProviders.ToNowObservable())
+                .Where(provider => match?.Invoke(provider) ?? true)
+                .SelectMany(spaceProvider => spaceProvider.WhenObjectSpaceCreated(emitUpdatingObjectSpace)
+                    .SelectMany(space => resultSelector?.Invoke(spaceProvider, space)));
+        public static IObservable<IObjectSpace> WhenProviderObjectSpaceCreated(this XafApplication application,bool emitUpdatingObjectSpace,Func<IObjectSpaceProvider,bool> match=null) 
+            => application.WhenProviderObjectSpaceCreated((_, objectSpace) => objectSpace.Observe(),emitUpdatingObjectSpace,match);
 
         public static IObjectSpace CreateAuthenticatedObjectSpace(this XafApplication application, string userName)  
             => application.ServiceProvider.CreateAuthenticatedObjectSpace(application.Security.UserType,userName);
@@ -453,8 +464,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<(XafApplication application, LogonEventArgs e)> WhenLoggingOn(this IObservable<XafApplication> source) 
             => source.SelectMany(application => application.WhenLoggingOn());
 
-        public static IObservable<(XafApplication application, LogonEventArgs e)> WhenLoggingOn(this XafApplication application) 
-            => application.WhenEvent<LogonEventArgs>(nameof(XafApplication.LoggingOn)).InversePair(application);
+        public static IObservable<(XafApplication application, LogonEventArgs e)> WhenLoggingOn(this XafApplication application,bool emitIfLoggedIn=false) 
+            =>emitIfLoggedIn&&application.IsLoggedOn()?(application,new LogonEventArgs(null)).Observe(): application.WhenEvent<LogonEventArgs>(nameof(XafApplication.LoggingOn)).InversePair(application);
         
         
         public static IObservable<(XafApplication application, LoggingOffEventArgs e)> WhenLoggingOff(this IObservable<XafApplication> source) 
@@ -816,7 +827,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static Type[] DomainComponents(this XafApplication application,Type type) 
             => !type.IsInterface ? type.YieldItem().ToArray()
                 : application.TypesInfo.PersistentTypes.Where(info => type.IsAssignableFrom(info.Type) && info.IsPersistent && !info.IsAbstract)
-                    .Select(info => info.Type).ToArray();
+                    .Select(info => info.Type).Distinct().ToArray();
 
         static IObservable<T[]> WhenObjects<T>(this XafApplication application, ObjectModification objectModification,
             CriteriaOperator criteria, string[] modifiedProperties, IObservable<IObjectSpace> spaceSource, string caller,params Type[] types)
@@ -1117,6 +1128,14 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 return objects.Values.Where(theObject => expressionEvaluator?.Fit(theObject) ?? true).ToArray();
             });
         }
+        
+        public static IObservable<string> WhenConnectionString(this XafApplication application) 
+            => application.GetService<ITenantProvider>().Observe().WhenNotDefault()
+                .SelectMany(_ => application.WhenSetupComplete().Take(1))
+                .SelectMany(_ => application.WhenObject<ITenantWithConnectionString>(ObjectModification.NewOrUpdated, modifiedProperties:
+                        [nameof(ITenantWithConnectionString.ConnectionString)])
+                    .Select(tenant =>tenant.ConnectionString ))
+                .SwitchIfEmpty(application.Defer(() => application.ObjectSpaceProvider.GetConnectionString().Observe()));
     }
 
 

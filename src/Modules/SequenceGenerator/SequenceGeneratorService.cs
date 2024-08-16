@@ -12,8 +12,6 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Runtime.CompilerServices;
 using DevExpress.ExpressApp;
-using DevExpress.ExpressApp.DC;
-using DevExpress.ExpressApp.DC.Xpo;
 using DevExpress.ExpressApp.Utils;
 using DevExpress.Persistent.Base;
 using DevExpress.Xpo;
@@ -23,13 +21,13 @@ using Fasterflect;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Conditional;
-using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.Tracing;
 using Xpand.Extensions.XAF.ObjectSpaceProviderExtensions;
 using Xpand.Extensions.XAF.SecurityExtensions;
 using Xpand.Extensions.XAF.TypesInfoExtensions;
+using Xpand.Extensions.XAF.Xpo;
 using Xpand.Extensions.XAF.Xpo.ObjectSpaceExtensions;
 using Xpand.Extensions.XAF.Xpo.SessionExtensions;
 using Xpand.XAF.Modules.Reactive.Extensions;
@@ -153,18 +151,24 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
             return attribute != null ? attribute.Type.FullName : objectType.FullName;
         }
 
+        private static readonly ConcurrentDictionary<string, IDataLayer> DataLayers = new(); 
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager,Type sequenceStorageType=null){
             sequenceStorageType ??= typeof(SequenceStorage);
             Guard.TypeArgumentIs(typeof(ISequenceStorage),sequenceStorageType,nameof(sequenceStorageType));
-            return manager.WhenApplication(application => application.Observe()
-                .Select(xafApplication => xafApplication.ObjectSpaceProvider)
-                .Where(provider => !provider.IsMiddleTier())
-                .SelectMany(provider => provider.SequenceGeneratorDatalayer()
-                    .SelectMany(dataLayer => application.WhenProviderObjectSpaceCreated(true).Where(space => space is not NonPersistentObjectSpace)
-                        .GenerateSequences(dataLayer,sequenceStorageType))
-                    .Merge(application.ConfigureDetailViewSequenceStorage()).ToUnit())
+            return manager.WhenApplication(application => application.WhenProviderObjectSpaceCreated((provider, objectSpace) =>(provider, objectSpace).Observe(),true ).WhenSupported()
+                .SelectMany(t => t.GenerateSequences(sequenceStorageType, DataLayers.GetOrAdd(t.Connection().Database, t.SequenceGeneratorDataLayer)))
+                .Merge(application.ConfigureDetailViewSequenceStorage()).ToUnit()
                 .MergeToUnit(application.Security.AddAnonymousType(sequenceStorageType).ToObservable()));
         }
+        
+        private static IObservable<object> GenerateSequences(this IObjectSpace space, Type sequenceStorageType, IDataLayer dataLayer)
+            => Observable.Defer(() => space.GetObjectForSave(dataLayer)
+                .SelectMany(e => e.GenerateSequences(sequenceStorageType))
+                .TakeUntil(space.WhenCommitted()));
+
+
+        internal static IDataLayer SequenceGeneratorDataLayer(this IObjectSpace space) 
+            => space.TypesInfo.GetDataLayer(space.Connection().ConnectionString);
 
         private static IObservable<object> ConfigureDetailViewSequenceStorage(this XafApplication application) 
             => application.WhenViewCreated()
@@ -196,28 +200,21 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
         
         public static IObservable<object> Sequence => SequenceSubject.AsObservable();
 
-        private static IObservable<IObjectSpace> WhenSupported(this IObservable<IObjectSpace> source) 
-            => source.Where(space => {
-                if (space.UnitOfWork()?.DataLayer is not BaseDataLayer dataLayer) return false;
-                var dataStore = dataLayer.ConnectionProvider;
-                if (dataStore is not DataStorePool dataStorePool) return true;
-                dataStore = dataStorePool.AcquireReadProvider();
-                var supported = SupportedDataStoreTypes.Any(type => type.IsInstanceOfType(dataStore));
-                dataStorePool.ReleaseReadProvider(dataStore);
-                return supported;
-            });
+        private static IObservable<IObjectSpace> WhenSupported(this IObservable<(IObjectSpaceProvider provider,IObjectSpace objectSpace)> source) 
+            => source.If(t => t.provider.IsMiddleTier(),_ => new NotSupportedException("MiddleTier not supported").Throw<(IObjectSpaceProvider provider,IObjectSpace objectSpace)>(),t => t.Observe())
+                .Where(t => t.objectSpace.IsSupported()).ToSecond();
+
+        private static bool IsSupported(this IObjectSpace space){
+            if ( space is NonPersistentBaseObject||space.UnitOfWork()?.DataLayer is not BaseDataLayer dataLayer) return false;
+            var dataStore = dataLayer.ConnectionProvider;
+            if (dataStore is not DataStorePool dataStorePool) return true;
+            dataStore = dataStorePool.AcquireReadProvider();
+            var supported = SupportedDataStoreTypes.Any(type => type.IsInstanceOfType(dataStore));
+            dataStorePool.ReleaseReadProvider(dataStore);
+            return supported;
+        }
 
         public static IList<Type> SupportedDataStoreTypes { get; } = new List<Type>(){typeof(MSSqlConnectionProvider), typeof(BaseOracleConnectionProvider), typeof(MySqlConnectionProvider)};
-
-        private static IObservable<object> GenerateSequences(this IObservable<IObjectSpace> source, IDataLayer dataLayer,Type sequenceStorageType=null) 
-            => source.TraceSequenceGeneratorModule(space => $"{space.GetType().Name} {space.GetHashCode()}").WhenSupported()
-                .SelectMany(space => Observable.Defer(() => space.GetObjectForSave(dataLayer)
-                        .SelectMany(e => e.GenerateSequences(sequenceStorageType))
-                        .TakeUntil(space.WhenCommitted().Select(objectSpace => objectSpace)))
-                    .RepeatWhen(observable => observable.Where(_ => !space.IsDisposed))
-                )
-	            .Do(SequenceSubject)
-                .TraceSequenceGeneratorModule();
 
         static IObservable<(ObjectManipulationEventArgs e, ExplicitUnitOfWork explicitUnitOfWork)> GetObjectForSave(this IObjectSpace objectSpace, IDataLayer dataLayer ){
             var unitOfWorks = new ConcurrentDictionary<IObjectSpace, ExplicitUnitOfWork>();
@@ -243,35 +240,31 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
         }
 
         private static IObservable<object> GenerateSequences(this (ObjectManipulationEventArgs e,ExplicitUnitOfWork explicitUnitOfWork) t, Type sequenceStorageType) 
-            => sequenceStorageType.Defer(() => (((UnitOfWork)t.e.Session).WhenAfterCommitTransaction().TakeFirst()
-                        .Do(_ => {
-                            t.explicitUnitOfWork.CommitChanges();
-                            t.explicitUnitOfWork.Close();
-                        }).IgnoreElements().DisposeOnException(t.explicitUnitOfWork)
-                        .Publish(afterCommit => afterCommit.Merge(t.e.Session.WhenTransactionFailed( Scheduler.CurrentThread, t.explicitUnitOfWork),Scheduler.CurrentThread)))
+            => sequenceStorageType.Defer(() => ((UnitOfWork)t.e.Session).WhenAfterCommitTransaction().TakeFirst()
+                    .Do(_ => {
+                        t.explicitUnitOfWork.CommitChanges();
+                        t.explicitUnitOfWork.Close();
+                    }).IgnoreElements().DisposeOnException(t.explicitUnitOfWork)
+                    .Publish(afterCommit => afterCommit.Merge(t.e.Session.WhenTransactionFailed( Scheduler.CurrentThread, t.explicitUnitOfWork),Scheduler.CurrentThread))
                     .Merge(t.explicitUnitOfWork.GenerateSequences(t.e.Object,sequenceStorageType)))
-                .RetryWhen(exceptions => exceptions.Select(exception => exception).RetryException().Do(ExceptionsSubject.OnNext));
-
+                .RetryWhen(exceptions => exceptions.RetryException().Do(ExceptionsSubject.OnNext));
         
-        static readonly object Locker=new();
         private static IObservable<object> GenerateSequences(this ExplicitUnitOfWork explicitUnitOfWork,object theObject,Type sequenceStorageType){
             var classInfoProvider = ((IXPClassInfoProvider) theObject);
-            lock (Locker){
+            lock (explicitUnitOfWork.DataLayer){
                 var sequenceStorage = explicitUnitOfWork.GetSequenceStorage(theObject.GetType(),sequenceStorageType:sequenceStorageType);
-                if (sequenceStorage!=null){
-                    var memberInfo = classInfoProvider.ClassInfo.GetMember(sequenceStorage.SequenceMember);
-                    memberInfo.SetValue(theObject, sequenceStorage.NextSequence);
-                    sequenceStorage.NextSequence++;
-                    try{
-                        explicitUnitOfWork.FlushChanges();
-                    }
-                    catch (Exception){
-                        sequenceStorage.NextSequence--;
-                        throw;
-                    }
-                    return theObject.Observe();
+                if (sequenceStorage == null) return Observable.Empty<object>();
+                var memberInfo = classInfoProvider.ClassInfo.GetMember(sequenceStorage.SequenceMember);
+                memberInfo.SetValue(theObject, sequenceStorage.NextSequence);
+                sequenceStorage.NextSequence++;
+                try{
+                    explicitUnitOfWork.FlushChanges();
                 }
-                return Observable.Empty<object>();
+                catch (Exception){
+                    sequenceStorage.NextSequence--;
+                    throw;
+                }
+                return theObject.Observe();
             }
         }
 
@@ -293,11 +286,5 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
                 return Observable.Throw<T>(exception);
             });
         
-        internal static IObservable<IDataLayer> SequenceGeneratorDatalayer(this  IObjectSpaceProvider objectSpaceProvider) 
-            => objectSpaceProvider.Observe().WhenNotDefault()
-                .Select(_ => XpoDefault.GetDataLayer(objectSpaceProvider.GetConnectionString(),
-                    ((TypesInfo)objectSpaceProvider.TypesInfo).EntityStores.OfType<XpoTypeInfoSource>().First()
-                    .XPDictionary, AutoCreateOption.None)).WhenNotDefault()
-                .ReplayFirstTake();
     }
 }
