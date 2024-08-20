@@ -223,10 +223,11 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
         internal static IEnumerable<MethodInfo> JobMethods(this AppDomain appDomain) 
             => appDomain.GetAssemblies().FromModelSources().SelectMany(assembly => assembly.JobMethods());
 
-        public static IEnumerable<Assembly> FromModelSources(this IEnumerable<Assembly> assemblies) 
-            => assemblies.Where(assembly =>
-                CaptionHelper.ApplicationModel.ToReactiveModule<IModelReactiveModulesJobScheduler>().JobScheduler
-                    .Sources.Select(source => source.AssemblyName).Contains(assembly.GetName().Name));
+        public static IEnumerable<Assembly> FromModelSources(this IEnumerable<Assembly> assemblies) {
+            var names = CaptionHelper.ApplicationModel.ToReactiveModule<IModelReactiveModulesJobScheduler>().JobScheduler
+                .Sources.Select(source => source.AssemblyName).ToArray();
+            return assemblies.Where(assembly => names.Contains(assembly.GetName().Name));
+        }
 
         public static IEnumerable<MethodInfo> JobMethods(this Assembly assembly) 
             => assembly.GetTypes()

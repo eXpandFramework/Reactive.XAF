@@ -42,7 +42,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
         }
 
         public override IEnumerable<ModuleUpdater> GetModuleUpdaters(IObjectSpace objectSpace, Version versionFromDB) 
-            => base.GetModuleUpdaters(objectSpace, versionFromDB).Concat(new []{new CronExpressionModuleUpdater(objectSpace, versionFromDB) });
+            => base.GetModuleUpdaters(objectSpace, versionFromDB).Concat(new []{new CronExpressionModuleUpdater(objectSpace, versionFromDB,Application) });
 
         public override void ExtendModelInterfaces(ModelInterfaceExtenders extenders){
             base.ExtendModelInterfaces(extenders);
