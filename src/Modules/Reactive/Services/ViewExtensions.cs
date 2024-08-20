@@ -127,6 +127,11 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static IObservable<(T view, CancelEventArgs e)> WhenQueryCanClose<T>(this T view) where T : View 
             => view.WhenViewEvent<T,CancelEventArgs>(nameof(View.QueryCanClose));
+        
+        public static IObservable<(T view, ViewItemsChangedEventArgs e)> WhenItemsChanged<T>(this T view,bool emitExisting=false,params ViewItemsChangedType[] changedTypes) where T : View 
+            => view.WhenViewEvent<T, ViewItemsChangedEventArgs>(nameof(CompositeView.ItemsChanged))
+                .StartWith(() => emitExisting,view.ToCompositeView().GetItems<ViewItem>().Select(item => (view,new ViewItemsChangedEventArgs((ViewItemsChangedType)(-1),item))).ToArray())
+                .Where(t => !changedTypes.Any()||changedTypes.Contains(t.Item2.ChangedType));
 
         public static IObservable<(T view, CancelEventArgs e)> QueryCanClose<T>(this IObservable<T> source) where T:View 
             => source.Cast<T>().SelectMany(view => view.WhenQueryCanClose());
@@ -158,7 +163,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .Publish(changed => waitUntilInactiveSeconds > 0 ? changed.WaitUntilInactive(waitUntilInactiveSeconds) : changed);
         
         public static IObservable<T[]> SelectedObjects<T>(this IObservable<ObjectView> source,ObjectView objectView=null) 
-            => source.Select(view => view.SelectedObjects.Cast<T>().ToArray()).StartWith(objectView!=null?objectView.SelectedObjects.Cast<T>().ToArray():Array.Empty<T>());
+            => source.Select(view => view.SelectedObjects.Cast<T>().ToArray()).StartWith(objectView!=null?objectView.SelectedObjects.Cast<T>().ToArray():[]);
 
         public static IObservable<T> SelectionChanged<T>(this IObservable<T> source,int waitUntilInactiveSeconds=0) where T:View 
             => source.SelectMany(item => item.WhenSelectionChanged()).Cast<T>()

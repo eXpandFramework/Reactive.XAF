@@ -31,7 +31,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<TFrame> WhenModule<TFrame>(this IObservable<TFrame> source, Type moduleType) where TFrame : Frame 
             => source.Where(frame => frame.Application.Modules.FindModule(moduleType) != null);
 
-        public static IObservable<TFrame> MergeViewCurrentObjectChanged<TFrame>(this IObservable<TFrame> source) where TFrame : Frame
+        public static IObservable<TFrame> MergeCurrentObjectChanged<TFrame>(this IObservable<TFrame> source) where TFrame : Frame
             => source.SelectMany(frame => frame.View.WhenCurrentObjectChanged().WhenNotDefault(view => view.CurrentObject)
                 .DistinctUntilChanged(view => view.ObjectSpace.GetKeyValue(view.CurrentObject))
                     .WhenNotDefault(view => view.CurrentObject).To(frame).WaitUntilInactive(3.Seconds()).ObserveOnContext());
@@ -95,6 +95,10 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .TakeUntil(item.WhenDisposingFrame())
             ;
 
+        public static IObservable<TFrame> WhenControllersActivated<TFrame>(this TFrame source) where TFrame : Frame
+            => source.WhenEvent(nameof(Frame.ViewControllersActivated)).To(source)
+                .TakeUntil(source.WhenDisposedFrame());
+        
         public static IObservable<TFrame> WhenTemplateViewChanged<TFrame>(this TFrame source) where TFrame : Frame 
             => source.WhenEvent(nameof(Frame.TemplateViewChanged)).To(source)
                 .TakeUntil(source.WhenDisposedFrame());

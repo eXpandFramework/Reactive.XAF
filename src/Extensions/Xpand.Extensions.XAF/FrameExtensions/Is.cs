@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Editors;
+using Fasterflect;
 using Xpand.Extensions.XAF.ViewExtensions;
 
 namespace Xpand.Extensions.XAF.FrameExtensions {

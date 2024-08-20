@@ -101,6 +101,17 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<XafApplication> WhenModule(this IObservable<XafApplication> source, Type moduleType) 
             => source.Where(a => a.Modules.FindModule(moduleType)!=null);
 
+        public static IObservable<(ViewItem item, Frame frame)> WhenViewItemControl(this XafApplication application,Type objectType = null, ViewType viewType = ViewType.Any, Nesting nesting = Nesting.Any)
+            => application.WhenControllersActivated( objectType,viewType,nesting)
+                .SelectMany(frame => frame.View.WhenItemsChanged(true).ToSecond()
+                    .Select(e => e.Item)
+                    .SelectMany(item => item.WhenControlCreated(true).To(item))
+                    .Select(item => (item,frame)));
+
+        public static IObservable<Frame> WhenControllersActivated(this XafApplication application, Type objectType = null, ViewType viewType = ViewType.Any, Nesting nesting = Nesting.Any) 
+            => application.WhenFrameCreated().SelectMany(frame => frame.WhenControllersActivated().To(frame)
+                .Where(frame1 => frame1.When(objectType)&&frame1.When(viewType)&&frame1.When(nesting)));
+        
         public static IObservable<Frame> WhenFrameCreated(this XafApplication application,TemplateContext templateContext=default)
             => application.WhenEvent<FrameCreatedEventArgs>(nameof(XafApplication.FrameCreated)).Select(e => e.Frame)
                 .Where(frame => frame.Application==application&& (templateContext==default ||frame.Context == templateContext));

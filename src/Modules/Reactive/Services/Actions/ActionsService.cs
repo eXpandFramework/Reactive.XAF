@@ -504,7 +504,10 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
                     modificationsController?.SetPropertyValue("RefreshViewAfterObjectSpaceCommit", false);
                 })
                 .IgnoreElements().To<DialogController>().StartWith(dialogController)
-                .If(_ => closeOnCancel,controller => controller.CancelAction.WhenExecuted(_ => e.ShowViewParameters.CreatedView.Close())
+                .If(_ => closeOnCancel,controller => controller.CancelAction.WhenExecuted(_ => {
+                        e.Action.View().ObjectSpace.Rollback(askConfirmation:false);
+                        e.ShowViewParameters.CreatedView.Close();
+                    })
                     .IgnoreElements().To<DialogController>().StartWith(dialogController));
         }
 
