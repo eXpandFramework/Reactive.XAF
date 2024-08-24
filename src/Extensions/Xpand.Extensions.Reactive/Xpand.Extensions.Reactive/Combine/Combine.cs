@@ -20,35 +20,32 @@ namespace Xpand.Extensions.Reactive.Combine {
         
         public static IObservable<TSource> ToCurrent<TSource>(this IObservable<(TSource previous, TSource current)> source) 
             => source.Select(t => t.current);
-        public static IObservable<TResult> CombineLatestWhenFirstEmits<TFirst, TSecond, TResult>(this IObservable<TFirst> first,
-            IObservable<TSecond> second, Func<TFirst, TSecond, TResult> resultSelector) => 
-            Observable.Create<TResult>(observer => {
-                var firstEmitted = false;
-                var firstValue = default(TFirst);
+        
+        public static IObservable<TResult> CombineLatestWhenFirstEmits<TFirst, TSecond, TResult>(
+            this IObservable<TFirst> first, IObservable<TSecond> second, Func<TFirst, TSecond, TResult> resultSelector)
+            => Observable.Create<TResult>(observer => {
+                TFirst firstValue;
                 var secondValue = default(TSecond);
-                var firstCompleted = false;
-                var secondCompleted = false;
+                var secondHasValue = false;
 
                 var subscription1 = first.Subscribe(x => {
                         firstValue = x;
-                        firstEmitted = true;
-                        if (secondValue != null)
-                            observer.OnNext(resultSelector(x, secondValue));
+                        _ = true;
+                        if (secondHasValue) {
+                            observer.OnNext(resultSelector(firstValue, secondValue));
+                        }
                     },
-                    observer.OnError, () => { firstCompleted = true; if (secondCompleted) observer.OnCompleted(); }
-                );
+                    observer.OnError, observer.OnCompleted);
 
-                var subscription2 = second.Subscribe(y => {
-                        secondValue = y;
-                        if (firstEmitted)
-                            observer.OnNext(resultSelector(firstValue, y));
-                    },
-                    observer.OnError, () => { secondCompleted = true; if (firstCompleted) observer.OnCompleted(); }
-                );
+                var subscription2 = second.Subscribe(x => {
+                    secondValue = x;
+                    secondHasValue = true;
+                }, observer.OnError, () => { });
 
                 return new CompositeDisposable(subscription1, subscription2);
             });
-
+    
+        
         public static IObservable<TResult> CombineVeryLatest<TLeft, TRight, TResult>(this IObservable<TLeft> leftSource,
             IObservable<TRight> rightSource, Func<TLeft, TRight, TResult> selector) 
             => Observable.Defer(() => {
