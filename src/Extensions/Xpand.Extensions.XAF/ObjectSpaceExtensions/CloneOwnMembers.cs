@@ -5,13 +5,12 @@ using Xpand.Extensions.XAF.ObjectExtensions;
 
 namespace Xpand.Extensions.XAF.ObjectSpaceExtensions {
     public static partial class ObjectSpaceExtensions {
+        public static TObject[] Map<TObject>(this IObjectSpace source, IObjectSpaceLink target) where TObject : class, IObjectSpaceLink
+            => source.Map<TObject>(target.ObjectSpace);
+        
         public static TObject[] Map<TObject>(this IObjectSpace source,IObjectSpace target) where TObject:class,IObjectSpaceLink 
             => source.GetObjectsQuery<TObject>().ToArray()
-                .Select(arg => {
-                    var objectSpaceLink = target.CreateObject<TObject>();
-                    arg.Map(objectSpaceLink);
-                    return objectSpaceLink;
-                }).ToArray()
+                .Select(arg => target.EnsureObject<TObject>(initialize:arg.Map)).ToArray()
                 ;
 
         public static T Map<T>(this T source) where T : IObjectSpaceLink {
