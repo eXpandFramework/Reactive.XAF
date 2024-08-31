@@ -155,8 +155,9 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager,Type sequenceStorageType=null){
             sequenceStorageType ??= typeof(SequenceStorage);
             Guard.TypeArgumentIs(typeof(ISequenceStorage),sequenceStorageType,nameof(sequenceStorageType));
-            return manager.WhenApplication(application => application.WhenProviderObjectSpaceCreated((provider, objectSpace) =>(provider, objectSpace).Observe(),true ).WhenSupported()
-                .SelectMany(t => t.GenerateSequences(sequenceStorageType, DataLayers.GetOrAdd(t.Connection().Database, t.SequenceGeneratorDataLayer)))
+            return manager.WhenApplication(application => application
+                .WhenProviderObjectSpaceCreated((provider, objectSpace) => (provider, objectSpace).Observe(), true).WhenSupported()
+                .SelectMany(t => t.objectSpace.GenerateSequences(sequenceStorageType, DataLayers.GetOrAdd(t.provider.GetDataBase(), t.objectSpace.SequenceGeneratorDataLayer)))
                 .Merge(application.ConfigureDetailViewSequenceStorage()).ToUnit()
                 .MergeToUnit(application.Security.AddAnonymousType(sequenceStorageType).ToObservable()));
         }
@@ -200,9 +201,9 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
         
         public static IObservable<object> Sequence => SequenceSubject.AsObservable();
 
-        private static IObservable<IObjectSpace> WhenSupported(this IObservable<(IObjectSpaceProvider provider,IObjectSpace objectSpace)> source) 
+        private static IObservable<(IObjectSpaceProvider provider, IObjectSpace objectSpace)> WhenSupported(this IObservable<(IObjectSpaceProvider provider,IObjectSpace objectSpace)> source) 
             => source.If(t => t.provider.IsMiddleTier(),_ => new NotSupportedException("MiddleTier not supported").Throw<(IObjectSpaceProvider provider,IObjectSpace objectSpace)>(),t => t.Observe())
-                .Where(t => t.objectSpace.IsSupported()).ToSecond();
+                .Where(t => t.objectSpace.IsSupported());
 
         private static bool IsSupported(this IObjectSpace space){
             if ( space is NonPersistentBaseObject||space.UnitOfWork()?.DataLayer is not BaseDataLayer dataLayer) return false;

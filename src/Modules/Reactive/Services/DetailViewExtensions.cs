@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Editors;
+using DevExpress.ExpressApp.Layout;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.SystemModule;
 using Xpand.Extensions.ObjectExtensions;
@@ -21,6 +22,10 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .WhenNotDefault();
         public static IObservable<object> WhenPropertyEditorControl(this DetailView detailView)
             => detailView.WhenViewItemControl<PropertyEditor>();
+        
+        public static IObservable<object> WhenControlViewItemControl(this DetailView detailView)
+            => detailView.WhenViewItemControl<ControlViewItem>();
+        
         public static bool IsNewObject(this CompositeView compositeView)
             => compositeView.ObjectSpace.IsNewObject(compositeView.CurrentObject);
         public static IObservable<object> WhenTabControl(this DetailView detailView, Func<IModelTabbedGroup, bool> match=null)

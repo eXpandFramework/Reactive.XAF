@@ -34,7 +34,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<TFrame> MergeCurrentObjectChanged<TFrame>(this IObservable<TFrame> source) where TFrame : Frame
             => source.SelectMany(frame => frame.View.WhenCurrentObjectChanged().WhenNotDefault(view => view.CurrentObject)
                 .DistinctUntilChanged(view => view.ObjectSpace.GetKeyValue(view.CurrentObject))
-                    .WhenNotDefault(view => view.CurrentObject).To(frame).WaitUntilInactive(3.Seconds()).ObserveOnContext());
+                    .WhenNotDefault(view => view.CurrentObject).To(frame).WaitUntilInactive(3.Seconds()).ObserveOnContext().TakeUntil(arg => arg.IsDisposed()));
         
         public static IObservable<TFrame> When<TFrame>(this IObservable<TFrame> source, TemplateContext templateContext) where TFrame : Frame 
             => source.Where(window => window.Context == templateContext);
@@ -135,18 +135,23 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => source.Select(frame => selector(frame).TakeUntilViewClosed(frame)).Switch();
         
         public static IObservable<TFrame> TakeUntilViewClosed<TFrame>(this IObservable<TFrame> source,Frame frame)  
-            => source.TakeUntil(frame.View.WhenClosing());
+            => source.TakeUntil(frame.WhenDisposedFrame());
         
-        public static IObservable<Unit> ShowInstanceDetailView(this IObservable<Frame> source,params  Type[] objectTypes) {
+        public static IObservable<Unit> ShowInstanceDetailView(this IObservable<Frame> source,XafApplication application,params  Type[] objectTypes) {
             return source.WhenFrame(objectTypes).WhenFrame(ViewType.ListView).Where(frame => frame.View.Model.ToListView().MasterDetailMode==MasterDetailMode.ListViewOnly)
                 .WhenIsNotOnLookupPopupTemplate()
-                .ToController<ListViewProcessCurrentObjectController>().CustomProcessSelectedItem(true)
-                .DoWhen(e => e.View().ObjectTypeInfo.Type.IsInstanceOfType(e.View().CurrentObject),
-                    e => e.ShowViewParameters.CreatedView = NewDetailView(e.Action.View().CurrentObject,e.View().ToListView()))
+                .ToController<ListViewProcessCurrentObjectController>().CustomProcessSelectedItem(true).Where(e => e.View().ObjectTypeInfo.Type.IsInstanceOfType(e.View().CurrentObject))
+                .Do(e => e.ShowViewParameters.CreatedView = NewDetailView(e.Action.View().CurrentObject,e.View().ToListView()))
                 .MergeToUnit(source.WhenFrame(objectTypes).WhenFrame(ViewType.ListView).Where(frame => frame.View.Model.ToListView().MasterDetailMode==MasterDetailMode.ListViewAndDetailView)
                     .SelectMany(frame => frame.View.ToListView().WhenCreateCustomCurrentObjectDetailView()
-                        .DoWhen(e =>e.CurrentDetailView.ObjectTypeInfo.Type.IsInstanceOfType(e.CurrentDetailView.CurrentObject) ,
-                            e => e.DetailView=NewDetailView(e.ListViewCurrentObject,frame.View.ToListView()))));
+                        .DoWhen(e => e.CurrentDetailView.ObjectTypeInfo.Type.IsInstanceOfType(e.CurrentDetailView.CurrentObject),e => 
+                            e.DetailView = NewDetailView(e.ListViewCurrentObject, frame.View.ToListView())
+                        )
+                        // .MergeToUnit(frame.View.WhenSelectedObjectsChanged().Take(1).Do(_ => frame.View.ObjectSpace.Refresh()))
+                    ))
+                .MergeToUnit(application.WhenFrameCreated(TemplateContext.View).Select(frame => frame)
+                    .OfView<NestedFrame>()
+                    .Select(frame => frame));
 
             DetailView NewDetailView(object o, ListView listView) {
                 if (o == null) return null;

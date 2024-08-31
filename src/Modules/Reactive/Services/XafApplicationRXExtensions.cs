@@ -392,10 +392,10 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<(ListView listView, XafApplication application)> WhenListViewCreated(this IObservable<XafApplication> source,Type objectType=null) 
             => source.SelectMany(application => application.WhenListViewCreated(objectType).Pair(application));
 
-        public static IObservable<ListView> WhenListViewCreated(this XafApplication application,Type objectType=null) 
+        public static IObservable<ListView> WhenListViewCreated(this XafApplication application,params Type[] objectTypes) 
             => application.WhenEvent<ListViewCreatedEventArgs>(nameof(XafApplication.ListViewCreated))
                 .Select(pattern => pattern.ListView)
-                .Where(view => objectType==null||objectType.IsAssignableFrom(view.ObjectTypeInfo.Type))
+                .Where(view => !objectTypes.Any()||objectTypes.Any(type => type.IsAssignableFrom(view.ObjectTypeInfo.Type)))
                 .TraceRX(view => view.Id);
 
         
@@ -1103,6 +1103,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                             .SelectMany(space => space.WhenDisposed()))
                         .SelectMany(_ => frame.View.ObjectSpace.WhenModifyChanged().To(frame.View).StartWith(frame.View)
                             .TakeUntil(frame.View.ObjectSpace.WhenDisposed()).Where(_ => !frame.View.ObjectSpace.IsModified)
+                            .Delay(100.Milliseconds()).ObserveOnContext()
                             .DoSafe(_ => {
                                 if (frame.View is DetailView detailView) {
                                     detailView.GetItems<DashboardViewItem>()
@@ -1110,6 +1111,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                                         .Do(objectSpace => objectSpace.Refresh())
                                         .Enumerate();
                                 }
+                                if (!frame.View?.IsRoot??true)return;
                                 frame.View.ObjectSpace.Refresh();
                             })))
                 )

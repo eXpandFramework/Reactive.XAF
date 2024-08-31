@@ -115,7 +115,7 @@ namespace Xpand.XAF.Modules.Reactive{
 
 
         private static IObservable<Unit> ShowInstanceDetailView(this XafApplication application)
-            => application.WhenSetupComplete().SelectMany(_ => application.WhenViewOnFrame().ShowInstanceDetailView(application.TypesInfo
+            => application.WhenSetupComplete().SelectMany(_ => application.WhenViewOnFrame().ShowInstanceDetailView(application,application.TypesInfo
                     .PersistentTypes.Attributed<ShowInstanceDetailViewAttribute>().Types().Select(info => info.Type).ToArray())).ToUnit();
         
         private static IObservable<Unit> EnsureNewInstanceOnNonPersistentDetailView(this XafApplication application)
@@ -175,24 +175,24 @@ namespace Xpand.XAF.Modules.Reactive{
         private static IObservable<Unit> MergedExtraEmbeddedModels(this ApplicationModulesManager manager) 
             => manager.WhereApplication().ToObservable()
                 .SelectMany(application => application.WhenCreateCustomUserModelDifferenceStore()
-                    .Do(_ => {
-                        var models = _.application.Modules.SelectMany(m => m.EmbeddedModels().Select(tuple => tuple with { id = $"{m.Name},{tuple.id}" }))
+                    .Do(t => {
+                        var models = t.application.Modules.SelectMany(m => m.EmbeddedModels().Select(tuple => tuple with { id = $"{m.Name},{tuple.id}" }))
                             .Where(tuple => {
                                 var pattern = ConfigurationManager.AppSettings["EmbeddedModels"]??@"(\.MDO)|(\.RDO)";
                                 return !Regex.IsMatch(tuple.id, pattern, RegexOptions.Singleline);
                             })
                             .ToArray();
                         foreach (var model in models){
-                            _.e.AddExtraDiffStore(model.id, new StringModelStore(model.model));
+                            t.e.AddExtraDiffStore(model.id, new StringModelStore(model.model));
                         }
 
                         if (models.Any()){
-                            _.e.AddExtraDiffStore("After Setup", new ModelStoreBase.EmptyModelStore());
+                            t.e.AddExtraDiffStore("After Setup", new ModelStoreBase.EmptyModelStore());
                         }
                     })).ToUnit();
 
         private static IObservable<Unit> SetupPropertyEditorParentView(this ApplicationModulesManager applicationModulesManager) 
-            => applicationModulesManager.WhereApplication().ToObservable().SelectMany(_ => _.SetupPropertyEditorParentView());
+            => applicationModulesManager.WhereApplication().ToObservable().SelectMany(application => application.SetupPropertyEditorParentView());
 
         
         internal static IObservable<ApplicationModulesManager> ApplicationModulesManager => ApplicationModulesManagerSubject.AsObservable();
