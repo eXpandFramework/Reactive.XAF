@@ -13,7 +13,6 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using DevExpress.Data.Filtering;
-using DevExpress.Data.Filtering.Helpers;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.DC;
@@ -41,11 +40,13 @@ using Xpand.Extensions.Reactive.Transform.System;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.StringExtensions;
 using Xpand.Extensions.TypeExtensions;
+using Xpand.Extensions.XAF.ActionExtensions;
 using Xpand.Extensions.XAF.ApplicationModulesManagerExtensions;
 using Xpand.Extensions.XAF.Attributes;
 using Xpand.Extensions.XAF.CollectionSourceExtensions;
 using Xpand.Extensions.XAF.CriteriaOperatorExtensions;
 using Xpand.Extensions.XAF.FrameExtensions;
+using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.Extensions.XAF.ObjectExtensions;
 using Xpand.Extensions.XAF.ObjectSpaceExtensions;
 using Xpand.Extensions.XAF.ObjectSpaceProviderExtensions;
@@ -109,8 +110,26 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                     .Select(item => (item,frame)));
 
         public static IObservable<Frame> WhenControllersActivated(this XafApplication application, Type objectType = null, ViewType viewType = ViewType.Any, Nesting nesting = Nesting.Any) 
-            => application.WhenFrameCreated().SelectMany(frame => frame.WhenControllersActivated().To(frame)
+            => application.WhenFrameCreated().SelectMany(frame => frame.WhenViewControllersActivated().To(frame)
                 .Where(frame1 => frame1.When(objectType)&&frame1.When(viewType)&&frame1.When(nesting)));
+        
+        internal static IObservable<Unit> ShowInstanceDetailView(this XafApplication application,params  Type[] objectTypes) 
+            => application.WhenViewOnFrame().WhenFrame(objectTypes).WhenFrame(ViewType.ListView).Where(frame => frame.View.Model.ToListView().MasterDetailMode==MasterDetailMode.ListViewOnly)
+                .WhenIsNotOnLookupPopupTemplate()
+                .ToController<ListViewProcessCurrentObjectController>().CustomProcessSelectedItem(true).Where(e => e.View().ObjectTypeInfo.Type.IsInstanceOfType(e.View().CurrentObject))
+                .Do(e => e.ShowViewParameters.CreatedView = e.View().ToListView().NewDetailView(e.Action.View().CurrentObject))
+                .MergeToUnit(application.WhenFrameCreated().WhenViewControllersActivated()
+                    .WhenFrame(objectTypes).WhenFrame(ViewType.ListView).Where(frame => frame.View.Model.ToListView().MasterDetailMode==MasterDetailMode.ListViewAndDetailView)
+                    .SelectMany(frame => frame.View.ToListView().WhenCreateCustomCurrentObjectDetailView()
+                        .DoWhen(e => e.CurrentDetailView.ObjectTypeInfo.Type.IsInstanceOfType(e.ListViewCurrentObject),e => 
+                            e.DetailView = frame.View.ToListView().NewDetailView(e.ListViewCurrentObject))));
+
+        static DetailView NewDetailView(this ListView listView,object o) {
+            if (o == null) return null;
+            o = o.GetType().ToTypeInfo().FindAttribute<ShowInstanceDetailViewAttribute>().Property is { } prop
+                ? o.GetType().ToTypeInfo().FindMember(prop).GetValue(o) : o;
+            return listView.Application().CreateDetailView(listView.ObjectSpace, o.GetType().GetModelClass().DefaultDetailView, false, listView.ObjectSpace.GetObject(o));
+        }
         
         public static IObservable<Frame> WhenFrameCreated(this XafApplication application,TemplateContext templateContext=default)
             => application.WhenEvent<FrameCreatedEventArgs>(nameof(XafApplication.FrameCreated)).Select(e => e.Frame)
@@ -1131,15 +1150,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                     objects.Select(o => first[key(o)] = o).Enumerate();
                     return first;
                 });
-            return source.CombineLatestWhenFirstEmits(second, (_, objects) => {
-                ExpressionEvaluator expressionEvaluator = null;
-                if (criteria != null) {
-                    expressionEvaluator = new ExpressionEvaluator(
-                        new EvaluatorContextDescriptorDefault(typeof(TObject)),
-                        criteria.ToCriteria(), false);
-                }
-                return objects.Values.Where(theObject => expressionEvaluator?.Fit(theObject) ?? true).ToArray();
-            });
+            var expressionEvaluator = criteria.ExpressionEvaluator();
+            return source.CombineLatestWhenFirstEmits(second, (_, objects) => objects.Values.Where(theObject => expressionEvaluator?.Fit(theObject) ?? true).ToArray());
         }
         
         public static IObservable<string> WhenConnectionString(this XafApplication application) 

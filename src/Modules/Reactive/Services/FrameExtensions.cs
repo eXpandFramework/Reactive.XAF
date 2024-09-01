@@ -12,19 +12,14 @@ using DevExpress.ExpressApp.SystemModule;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Numeric;
 using Xpand.Extensions.ObjectExtensions;
-using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.ActionExtensions;
-using Xpand.Extensions.XAF.Attributes;
 using Xpand.Extensions.XAF.FrameExtensions;
-using Xpand.Extensions.XAF.ModelExtensions;
-using Xpand.Extensions.XAF.TypesInfoExtensions;
 using Xpand.Extensions.XAF.ViewExtensions;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
-using Xpand.XAF.Modules.Reactive.Services.Controllers;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
     public static class FrameExtensions{
@@ -95,7 +90,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .TakeUntil(item.WhenDisposingFrame())
             ;
 
-        public static IObservable<TFrame> WhenControllersActivated<TFrame>(this TFrame source) where TFrame : Frame
+        public static IObservable<TFrame> WhenViewControllersActivated<TFrame>(this TFrame source) where TFrame : Frame
             => source.WhenEvent(nameof(Frame.ViewControllersActivated)).To(source)
                 .TakeUntil(source.WhenDisposedFrame());
         
@@ -136,33 +131,13 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         
         public static IObservable<TFrame> TakeUntilViewClosed<TFrame>(this IObservable<TFrame> source,Frame frame)  
             => source.TakeUntil(frame.WhenDisposedFrame());
-        
-        public static IObservable<Unit> ShowInstanceDetailView(this IObservable<Frame> source,XafApplication application,params  Type[] objectTypes) {
-            return source.WhenFrame(objectTypes).WhenFrame(ViewType.ListView).Where(frame => frame.View.Model.ToListView().MasterDetailMode==MasterDetailMode.ListViewOnly)
-                .WhenIsNotOnLookupPopupTemplate()
-                .ToController<ListViewProcessCurrentObjectController>().CustomProcessSelectedItem(true).Where(e => e.View().ObjectTypeInfo.Type.IsInstanceOfType(e.View().CurrentObject))
-                .Do(e => e.ShowViewParameters.CreatedView = NewDetailView(e.Action.View().CurrentObject,e.View().ToListView()))
-                .MergeToUnit(source.WhenFrame(objectTypes).WhenFrame(ViewType.ListView).Where(frame => frame.View.Model.ToListView().MasterDetailMode==MasterDetailMode.ListViewAndDetailView)
-                    .SelectMany(frame => frame.View.ToListView().WhenCreateCustomCurrentObjectDetailView()
-                        .DoWhen(e => e.CurrentDetailView.ObjectTypeInfo.Type.IsInstanceOfType(e.CurrentDetailView.CurrentObject),e => 
-                            e.DetailView = NewDetailView(e.ListViewCurrentObject, frame.View.ToListView())
-                        )
-                        // .MergeToUnit(frame.View.WhenSelectedObjectsChanged().Take(1).Do(_ => frame.View.ObjectSpace.Refresh()))
-                    ))
-                .MergeToUnit(application.WhenFrameCreated(TemplateContext.View).Select(frame => frame)
-                    .OfView<NestedFrame>()
-                    .Select(frame => frame));
 
-            DetailView NewDetailView(object o, ListView listView) {
-                if (o == null) return null;
-                o = o.GetType().ToTypeInfo().FindAttribute<ShowInstanceDetailViewAttribute>().Property is { } prop
-                    ? o.GetType().ToTypeInfo().FindMember(prop).GetValue(o) : o;
-                return listView.Application().CreateDetailView(listView.ObjectSpace, o.GetType().GetModelClass().DefaultDetailView, false, listView.ObjectSpace.GetObject(o));
-            }
-        }
 
         public static IObservable<NestedFrame> ToNestedFrame(this IObservable<ListPropertyEditor> source)
             => source.Select(editor => editor.Frame).Cast<NestedFrame>();
+
+        public static IObservable<TFrame> WhenViewControllersActivated<TFrame>(this IObservable<TFrame> source) where TFrame : Frame
+            => source.ConcatIgnored(frame => frame.WhenViewControllersActivated().Take(1));
         
         public static IObservable<ListPropertyEditor> NestedListViews(this Frame frame, params Type[] objectTypes ) 
             => frame.View.ToDetailView().NestedListViews(objectTypes);

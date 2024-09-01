@@ -115,7 +115,7 @@ namespace Xpand.XAF.Modules.Reactive{
 
 
         private static IObservable<Unit> ShowInstanceDetailView(this XafApplication application)
-            => application.WhenSetupComplete().SelectMany(_ => application.WhenViewOnFrame().ShowInstanceDetailView(application,application.TypesInfo
+            => application.WhenSetupComplete().SelectMany(_ => application.ShowInstanceDetailView(application.TypesInfo
                     .PersistentTypes.Attributed<ShowInstanceDetailViewAttribute>().Types().Select(info => info.Type).ToArray())).ToUnit();
         
         private static IObservable<Unit> EnsureNewInstanceOnNonPersistentDetailView(this XafApplication application)

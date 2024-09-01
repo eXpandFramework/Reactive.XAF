@@ -4,6 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using DevExpress.Data.Filtering;
+using DevExpress.Data.Filtering.Helpers;
 using DevExpress.Data.Helpers;
 using DevExpress.Data.Linq;
 using DevExpress.Data.Linq.Helpers;
@@ -31,7 +32,10 @@ namespace Xpand.Extensions.XAF.CriteriaOperatorExtensions {
                 }  
             }  
         }
-        
+
+        public static ExpressionEvaluator ExpressionEvaluator<TObject>(this Expression<Func<TObject, bool>> criteria) where TObject : class 
+            => criteria != null ? new ExpressionEvaluator(new EvaluatorContextDescriptorDefault(typeof(TObject)), criteria.ToCriteria(), false) : null;
+
         public static string UserFriendlyString(this CriteriaOperator criteriaOperator) {
             new StringProcessor().Process(criteriaOperator);
             return criteriaOperator?.ToString();
