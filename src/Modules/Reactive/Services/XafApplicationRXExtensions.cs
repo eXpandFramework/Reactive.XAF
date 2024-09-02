@@ -826,13 +826,22 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static IObservable<T> WhenObjectUpdatedOrDeleted<T>(this XafApplication application, T value,
             Expression<Func<T,bool>> criteriaExpression=null) where T : class
-            => application.WhenObjectUpdated( criteriaExpression)
-                .Merge(application.WhenProviderObject(ObjectModification.Deleted,criteriaExpression).Select(arg => arg))
-                .Where(arg => arg.DCKeyValue().Equals(value.DCKeyValue()));
+            => application.WhenObjectUpdated( value, criteriaExpression)
+                .Merge(application.WhenProviderObject(ObjectModification.Deleted,criteriaExpression).WhenDomainComponent(value));
 
-        public static IObservable<T> WhenObjectUpdated<T>(this XafApplication application, Expression<Func<T, bool>> criteriaExpression) where T : class 
-            => application.WhenProviderObjects(ObjectModification.Updated,criteriaExpression)
-                .Skip(1).SelectMany();
+        private static IObservable<T> WhenObjectUpdated<T>(this XafApplication application, T value, Expression<Func<T, bool>> criteriaExpression=null) where T : class 
+            => application.WhenObjectUpdated( criteriaExpression)
+                .Merge(value.Observe().OfType<IObjectSpaceLink>().Where(link => !link.ObjectSpace.IsDisposed)
+                    .SelectMany(link => link.ObjectSpace.WhenCommitted<T>().ToObjects()).Cast<T>())
+                .WhenDomainComponent(value);
+
+        public static IObservable<T> WhenDomainComponent<T>(this IObservable<T> source,T value) where T : class
+            => source.Where(arg => arg.DCKeyValue().Equals(value.DCKeyValue()));
+
+        public static IObservable<T> WhenObjectUpdated<T>(this XafApplication application, Expression<Func<T, bool>> criteriaExpression=null) where T : class {
+            var criteria = criteriaExpression?.Compile()??(_ =>true) ;
+            return application.WhenProviderCommitted<T>(ObjectModification.Updated).ToObjects().Select(arg => arg).Where(criteria);
+        }
 
         public static IObservable<T> WhenProviderObject<T>(this XafApplication application,ObjectModification objectModification ,Expression<Func<T, bool>> criteriaExpression=null,
             [CallerMemberName] string caller = "")where T:class 
