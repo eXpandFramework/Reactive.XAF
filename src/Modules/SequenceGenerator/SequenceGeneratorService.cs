@@ -169,7 +169,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
 
 
         internal static IDataLayer SequenceGeneratorDataLayer(this IObjectSpace space) 
-            => space.TypesInfo.GetDataLayer(space.Connection().ConnectionString);
+            => space.TypesInfo.GetDataLayer(space.ConnectionString());
 
         private static IObservable<object> ConfigureDetailViewSequenceStorage(this XafApplication application) 
             => application.WhenViewCreated()

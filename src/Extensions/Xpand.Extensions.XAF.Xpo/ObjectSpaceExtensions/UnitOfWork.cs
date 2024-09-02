@@ -4,6 +4,7 @@ using System.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Xpo;
 using DevExpress.Xpo;
+using DevExpress.Xpo.DB.Helpers;
 using Fasterflect;
 using Xpand.Extensions.ObjectExtensions;
 
@@ -25,5 +26,18 @@ namespace Xpand.Extensions.XAF.Xpo.ObjectSpaceExtensions{
 
         [DebuggerStepThrough]
         public static IDbConnection Connection(this IObjectSpace objectSpace) => objectSpace.UnitOfWork().Connection();
+        
+        
+        public static string ConnectionString(this IObjectSpace objectSpace) {
+            var dbConnection = objectSpace.Connection();
+            var options = dbConnection.TryGetPropertyValue("ConnectionOptions");
+            if (options == null) return dbConnection.ConnectionString;
+            var password = options.GetPropertyValue("Password");
+            if (password == null) return dbConnection.ConnectionString;
+            var connectionStringParser = new ConnectionStringParser(dbConnection.ConnectionString);
+            connectionStringParser.AddPart("Password",password.ToString());
+            return connectionStringParser.GetConnectionString();
+
+        }
     }
 }
