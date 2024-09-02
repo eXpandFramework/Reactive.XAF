@@ -89,23 +89,22 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         private static void ShowMessage<T>(this T obj, InformationType informationType,InformationPosition position, int displayInterval, string memberName, string message,
             WinMessageType winMessageType = WinMessageType.Alert, Action<T> onOk = null, Action<T> onCancel = null,Func<T,SvgImage> imageSelector=null) {
-            if (message != null) {
-                MessageSubject.OnNext(new MessageOptions() {
-                    Duration = displayInterval, Message = new[]{memberName,message}.JoinNewLine(),
-                    Type = informationType, Win = { Type = winMessageType,ImageOptions = obj.ImageOptions( imageSelector)},Web = { Position = position},
-                    OkDelegate = () => onOk?.Invoke(obj),CancelDelegate = () => onCancel?.Invoke(obj)
-                });
-            }
+            if (message == null) return;
+            MessageSubject.OnNext(new MessageOptions() {
+                Duration = displayInterval, Message = new[]{memberName,message}.WhereNotNull().JoinNewLine(),
+                Type = informationType, Win = { Type = winMessageType,ImageOptions = obj.ImageOptions( imageSelector)},Web = { Position = position},
+                OkDelegate = () => onOk?.Invoke(obj),CancelDelegate = () => onCancel?.Invoke(obj)
+            });
         }
 
+        private static readonly Type ImageOptionsType =
+            AppDomain.CurrentDomain.GetAssemblyType("DevExpress.Utils.ImageOptions");
         private static object ImageOptions<T>(this T obj, Func<T, SvgImage> imageSelector) {
-            if (imageSelector != null) {
-                var imageOptions = AppDomain.CurrentDomain.GetAssemblyType("DevExpress.Utils.ImageOptions").CreateInstance();
-                imageOptions.SetPropertyValue("SvgImage", imageSelector(obj));
-                imageOptions.SetPropertyValue("SvgImageSize", new Size(50, 50));
-                return imageOptions;
-            }
-            return null;
+            if (imageSelector == null) return null;
+            var imageOptions = ImageOptionsType.CreateInstance();
+            imageOptions.SetPropertyValue("SvgImage", imageSelector(obj));
+            imageOptions.SetPropertyValue("SvgImageSize", new Size(50, 50));
+            return imageOptions;
         }
     }
 }
