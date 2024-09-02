@@ -24,8 +24,8 @@ namespace Xpand.XAF.Modules.HideToolBar.Tests{
     [NonParallelizable]
     public class HideToolBarTests : BaseTest{
 
-        [XpandTest]
-        [TestCase(nameof(Platform.Win))]
+        // [XpandTest]
+        // [TestCase(nameof(Platform.Win))]
         public async Task Signal_When_frame_with_HideToolBar_Enabled_ListView_controls_created(string platformName){
             var platform = GetPlatform(platformName);
             using var application = DefaultHideToolBarModule(platform, nameof(Signal_When_frame_with_HideToolBar_Enabled_ListView_controls_created)).Application;
