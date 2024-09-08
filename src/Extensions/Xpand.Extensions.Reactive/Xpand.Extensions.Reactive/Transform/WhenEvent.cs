@@ -26,8 +26,8 @@ namespace Xpand.Extensions.Reactive.Transform {
             var eventInfo = source.EventInfo(eventName);
             if ((eventInfo.info.EventHandlerType?.IsGenericType ?? false)&&eventInfo.info.EventHandlerType.GenericTypeArguments.First()==typeof(TArgs)) {
                 return Observable.FromEventPattern<TArgs>(
-                        handler => eventInfo.add.Invoke(source, new object[] { handler }),
-                        handler => eventInfo.remove.Invoke(source, new object[] { handler }),ImmediateScheduler)
+                        handler => eventInfo.add.Invoke(source, [handler]),
+                        handler => eventInfo.remove.Invoke(source, [handler]))
                     .Select(pattern => new EventPattern<TArgs>(pattern.Sender, pattern.EventArgs))
                     .TakeUntilDisposed(source as IComponent,caller)
                     ;

@@ -888,11 +888,25 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<T> WhenObject<T>(this XafApplication application,ObjectModification objectModification,bool existing ,Expression<Func<T, bool>> criteriaExpression=null) where T:class 
             => application.WhenObject(objectModification, existing, [], criteriaExpression);
 
-        internal static IObservable<Unit> PopulateAdditionalObjectSpaces(this XafApplication application) 
-            => application.WhenObjectSpaceCreated().OfType<CompositeObjectSpace>()
-                .Where(space => space.Owner is not CompositeObjectSpace)
-                .Do(space => space.PopulateAdditionalObjectSpaces(application)).ToUnit();
+        
+        internal static IObservable<Unit> PopulateAdditionalObjectSpaces(this XafApplication application) {
+            application.ObjectSpaceCreated+=ApplicationOnObjectSpaceCreated;
+            void ApplicationOnObjectSpaceCreated(object sender, ObjectSpaceCreatedEventArgs e) {
+                var app = (XafApplication)sender;
+                app.Disposed+=ApplicationOnDisposed;
+                void ApplicationOnDisposed(object o, EventArgs eventArgs) {
+                    var xafApplication = (XafApplication)o;
+                    xafApplication.ObjectSpaceCreated -= ApplicationOnObjectSpaceCreated;
+                    xafApplication.Disposed-=ApplicationOnDisposed;
+                }
+                if (e.ObjectSpace is not CompositeObjectSpace compositeObjectSpace || e.ObjectSpace.Owner is CompositeObjectSpace) return;
+                compositeObjectSpace.PopulateAdditionalObjectSpaces(app);
+            }
 
+            return Observable.Empty<Unit>();
+        }
+
+        
         public static IObservable<(NestedFrame source, NestedFrame target, T1 sourceObject, T2 targetObject, int targetIndex)> SynchronizeGridListEditorSelection<T1, T2>(
                 this IObservable<(NestedFrame source, NestedFrame target, T1 sourceObject, T2 targetObject, int targetIndex)>  source)
             => source.Do(t => {

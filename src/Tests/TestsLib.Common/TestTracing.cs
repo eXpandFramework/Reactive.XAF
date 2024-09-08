@@ -3,7 +3,6 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Runtime.CompilerServices;
-using DevExpress.ExpressApp;
 using DevExpress.Persistent.Base;
 using Xpand.Extensions.EventArgExtensions;
 using Xpand.Extensions.Reactive.Conditional;
