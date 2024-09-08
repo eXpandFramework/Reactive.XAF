@@ -237,19 +237,22 @@ namespace Xpand.Extensions.XAF.Xpo {
             return null;
         }
 
+        public static string XpoMigrateDatabaseScript(this XafApplication application, IDataStore dataStore=null)
+            => dataStore is not IUpdateSchemaSqlFormatter sqlFormatter || !((ConnectionProviderSql)dataStore).Connection.DbExists() ? null
+                : sqlFormatter.FormatUpdateSchemaScript(((IDataStoreSchemaMigrationProvider)dataStore)
+                    .CompareSchema(new ReflectionDictionary().GetDataStoreSchema(application.TypesInfo.PersistentTypes
+                            .Where(info => info.IsPersistent).Select(info => info.Type).ToArray()),
+                        new SchemaMigrationOptions()));
+
         public static void XpoMigrateDatabase(this XafApplication application, string connectionString=null) {
             var provider = XpoDefault.GetConnectionProvider(connectionString??application.ConnectionString, AutoCreateOption.DatabaseAndSchema);
-            if (provider is IUpdateSchemaSqlFormatter sqlFormatter&&((ConnectionProviderSql)provider).Connection.DbExists()) {
-                var sql = sqlFormatter.FormatUpdateSchemaScript(((IDataStoreSchemaMigrationProvider)provider)
-                    .CompareSchema(new ReflectionDictionary().GetDataStoreSchema(application.TypesInfo.PersistentTypes
-                        .Where(info => info.IsPersistent).Select(info => info.Type).ToArray()), new SchemaMigrationOptions()));
-                if (!sql.IsNullOrEmpty()) {
-                    var command = ((ConnectionProviderSql)provider).Connection.CreateCommand();
-                    command.CommandText = sql;
-                    command.ExecuteNonQuery();
-                }    
-            }
+            var sql = application.XpoMigrateDatabaseScript(provider);
+            if (sql.IsNullOrEmpty()) return;
+            var command = ((ConnectionProviderSql)provider).Connection.CreateCommand();
+            command.CommandText = sql;
+            command.ExecuteNonQuery();
         }
 
+        
     }
 }
