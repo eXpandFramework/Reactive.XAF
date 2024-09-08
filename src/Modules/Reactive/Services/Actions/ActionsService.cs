@@ -102,8 +102,8 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
                 return Observable.Empty<Unit>();
             });
         
-        public static IObservable<T> WhenExecuted<T>(this SimpleAction simpleAction,Func<SimpleActionExecuteEventArgs, IObservable<T>> retriedExecution) 
-            => simpleAction.WhenExecuted().SelectMany(e => retriedExecution(e).Retry(() => simpleAction.Application).TakeUntilDeactivated(simpleAction.Controller));
+        public static IObservable<T> WhenExecuted<T>(this SimpleAction simpleAction,Func<SimpleActionExecuteEventArgs, IObservable<T>> execution) 
+            => simpleAction.WhenExecuted().SelectMany(e => execution(e).TakeUntilDeactivated(simpleAction.Controller));
 
         public static IObservable<T> WhenExecuted<T>(this ParametrizedAction simpleAction, Func<ParametrizedActionExecuteEventArgs, IObservable<T>> retriedExecution)
             => simpleAction.WhenExecuted().SelectMany(e => retriedExecution(e).Retry(() => simpleAction.Application).TakeUntilDeactivated(simpleAction.Controller));

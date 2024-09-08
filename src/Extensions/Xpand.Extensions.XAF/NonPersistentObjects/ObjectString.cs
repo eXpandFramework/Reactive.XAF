@@ -20,14 +20,13 @@ namespace Xpand.Extensions.XAF.NonPersistentObjects {
             
         }
 
-        public ObjectString() {
-            _instance = this;
-        }
+        public ObjectString() => _instance = this;
+
         [Browsable(false)]
         public object Owner { get; set; }
         ObjectString _instance;
         [DataSourceProperty(nameof(DataSource))]
-        [DisplayName("Name")][VisibleInListView(false)][VisibleInLookupListView(false)]
+        [Attributes.DisplayName("Name")][VisibleInListView(false)][VisibleInLookupListView(false)]
         public ObjectString Instance {
             get => _instance;
             set => SetPropertyValue(ref _instance, value);
@@ -44,7 +43,7 @@ namespace Xpand.Extensions.XAF.NonPersistentObjects {
         string _caption;
         
         [VisibleInDetailView(false)]
-        [DisplayName("Name")]
+        [Attributes.DisplayName("Name")]
         public string Caption {
             get => _caption;
             set => SetPropertyValue(ref _caption, value);
@@ -58,9 +57,7 @@ namespace Xpand.Extensions.XAF.NonPersistentObjects {
             }
         }
 
-        public static implicit operator string(ObjectString objectString) {
-            return objectString?.Name;
-        }
+        public static implicit operator string(ObjectString objectString) => objectString?.Name;
 
         public Dictionary<object, string> GetCheckedListBoxItems(string targetMemberName) {
             var args = new CheckListboxItemsProviderArgs(targetMemberName);
@@ -82,15 +79,10 @@ namespace Xpand.Extensions.XAF.NonPersistentObjects {
         // public void SetDatasource(IList objectStrings) => DataSource=objectStrings;
     }
 
-    public class CheckListboxItemsProviderArgs:EventArgs {
-        public string TargetMemberName { get; }
+    public class CheckListboxItemsProviderArgs(string targetMemberName) : EventArgs {
+        public string TargetMemberName { get; } = targetMemberName;
 
-        public CheckListboxItemsProviderArgs(string targetMemberName) {
-            TargetMemberName = targetMemberName;
-            Objects = new Dictionary<object, string>();
-        }
-
-        public Dictionary<object, string> Objects { get;  }
+        public Dictionary<object, string> Objects { get;  } = new();
     }
 
 
