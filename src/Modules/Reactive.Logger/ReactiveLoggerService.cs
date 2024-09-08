@@ -22,7 +22,6 @@ using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.ExpressionExtensions;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.ObjectExtensions;
-using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
@@ -245,9 +244,9 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
             => application.WhenSetupComplete().SelectMany(_ => {
                 var moduleType = AppDomain.CurrentDomain.GetAssemblyType("DevExpress.ExpressApp.Notifications.NotificationsModule");
                 var service = (NotificationsService)application.Modules.FindModule(moduleType)?.GetPropertyValue("NotificationsService");
-                return service != null ? application.WhenModelChanged().TakeFirst()
-                        .Select(_ => application.Rules()).StartWith(application.Rules())
-                        .SelectMany(rules => SavedTraceEvent.Cast<TraceEvent>().SelectMany(traceEvent => rules.Where(t => traceEvent.Match(t.Criteria))
+                return service != null ? application.WhenModelChanged()
+                        .Select(_ => application.Rules()).StartWith(application.Rules()).Where(t => t.Length>0)
+                        .Select(rules => SavedTraceEvent.Cast<TraceEvent>().SelectMany(traceEvent => rules.Where(t => traceEvent.Match(t.Criteria))
                                 .Select(rule => {
                                     var supportNotifications = (ISupportNotifications)traceEvent.ObjectSpace.CreateObject(rule.Type);
                                     supportNotifications.AlarmTime = DateTime.Now;
@@ -258,7 +257,9 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
                                 })
                                 .ToNowObservable()
                                 .ShowXafMessage(application, traceEvent,memberName:null))
-                            .DoSafe(_ => service.Refresh())).ToUnit()
+                            .DoSafe(_ => service.Refresh()))
+                        .Switch()
+                        .ToUnit()
                     : Observable.Empty<Unit>();
             });
 
