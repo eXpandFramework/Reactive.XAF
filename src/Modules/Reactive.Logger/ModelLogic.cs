@@ -42,12 +42,9 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
     }
 
     public static class ModelReactiveLoggerService{
-        public static IEnumerable<IModelTraceSourcedModule> GetEnabledSources(this IModelReactiveLogger logger){
-            return logger.TraceSources.Enabled
-                ? new CalculatedModelNodeList<IModelTraceSourcedModule>( logger.TraceSources.Where(_ => _.Level!=SourceLevels.Off))
+        public static IEnumerable<IModelTraceSourcedModule> GetEnabledSources(this IModelReactiveLogger logger) 
+            => logger.TraceSources.Enabled ? new CalculatedModelNodeList<IModelTraceSourcedModule>( logger.TraceSources.Where(module => module.Level!=SourceLevels.Off))
                 : new CalculatedModelNodeList<IModelTraceSourcedModule>(Enumerable.Empty<IModelTraceSourcedModule>());
-        }
-
     }
     [ModelNodesGenerator(typeof(TraceSourcedModulesNodesGenerator))]
     public interface IModelTraceSourcedModules:IModelNode,IModelList<IModelTraceSourcedModule>{
@@ -68,9 +65,18 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
         public static Type Get_TraceEventType(IModelTraceSourcedModules modules) => typeof(TraceEvent);
     }
     public interface IModelReactiveLoggerNotifications:IModelList<IModelReactiveLoggerNotification>,IModelNode {
-        
+        [Category("Imperative")]
+        bool DisableValidationResults { get; set; }
+        [Category("Imperative")]
+        bool NotifySystemException { get; set; }
+        [Category("Imperative")]
+        bool HandleSystemExceptions { get; set; }
     }
+
+    
+
     public interface IModelReactiveLoggerNotification : IModelNode {
+         
         [CriteriaOptions(nameof(TraceEventObjectType))]
         [Editor("DevExpress.ExpressApp.Win.Core.ModelEditor.CriteriaModelEditorControl, DevExpress.ExpressApp.Win" + XafAssemblyInfo.VersionSuffix + XafAssemblyInfo.AssemblyNamePostfix, DevExpress.Utils.ControlConstants.UITypeEditor)]
         string Criteria { get; set; }
@@ -189,7 +195,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
                 node.AddNode<IModelTraceSourcedModule>(module.Key);
             }
             var modules = TraceEventAppearanceRulesGenerator.Modules
-                .SelectMany(_ => ((IModelSources) node.Application).Modules.Where(m => m.Name==_.Key).ToTraceSource());
+                .SelectMany(pair => ((IModelSources) node.Application).Modules.Where(m => m.Name==pair.Key).ToTraceSource());
             foreach (var valueTuple in modules){
                 var moduleName = valueTuple.module.Name;
                 AddTraceSource(node, moduleName, valueTuple);

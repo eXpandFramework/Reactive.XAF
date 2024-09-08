@@ -83,8 +83,11 @@ namespace Xpand.Extensions.Reactive.Utility{
             Func<Exception, string> errorMessageFactory, Action<ITraceEvent> traceAction, ObservableTraceStrategy traceStrategy, string memberName,
             string sourceFilePath, int sourceLineNumber, Exception e, IObserver<TSource> observer){
             if (traceStrategy.Is(ObservableTraceStrategy.OnError)){
+                var level = traceSource?.Switch.Level;
+                if (level!=null) traceSource.Switch.Level=SourceLevels.Error;
                 traceSource.Action("OnError", e, traceAction.TraceError(traceSource), messageFactory,allMessageFactory, errorMessageFactory,
                     memberName, name, sourceFilePath, sourceLineNumber);
+                if (level != null) traceSource.Switch.Level = level.Value;
             }
 
             observer.OnError(e);
