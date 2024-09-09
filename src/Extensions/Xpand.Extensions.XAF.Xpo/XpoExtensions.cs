@@ -210,8 +210,8 @@ namespace Xpand.Extensions.XAF.Xpo {
             var dataLayer = unitOfWork.DataLayer;
             var connectionProvider = ((BaseDataLayer)dataLayer).ConnectionProvider;
             if (connectionProvider is DataCacheNode){
-                return (IDbConnection)((DataCacheRoot)connectionProvider.GetPropertyValue("Nested"))
-                    .GetPropertyValue("Nested").GetPropertyValue("Connection");
+                return (IDbConnection)connectionProvider.GetPropertyValue("Nested")
+                    .GetFieldValue("Connection");
             }
 
             if (connectionProvider is DataStorePool pool){
