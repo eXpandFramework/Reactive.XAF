@@ -35,10 +35,11 @@ namespace Xpand.Extensions.Reactive.Utility {
                         finallyOnce.Dispose();
                     }
                     catch (Exception ex) {
+                        ex.Source = caller;
                         observer.OnError(ex);
                         return;
                     }
-
+                    error.Source = caller;
                     observer.OnError(error);
                 }, () => {
                     try {

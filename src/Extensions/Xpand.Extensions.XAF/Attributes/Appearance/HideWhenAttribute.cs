@@ -1,7 +1,7 @@
 ﻿using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.ExpressApp.Editors;
 
-namespace Xpand.Extensions.XAF.Attributes{
+namespace Xpand.Extensions.XAF.Attributes.Appearance{
     public class HideWhenAttribute:AppearanceAttribute {
         public HideWhenAttribute(string criteria):base($"{nameof(HideWhenAttribute)}_{criteria}",DevExpress.ExpressApp.ConditionalAppearance.AppearanceItemType.ViewItem, criteria) 
             => Visibility=ViewItemVisibility.Hide;

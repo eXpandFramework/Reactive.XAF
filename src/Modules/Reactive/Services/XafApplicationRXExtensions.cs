@@ -40,7 +40,6 @@ using Xpand.Extensions.Reactive.Transform.System;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.StringExtensions;
 using Xpand.Extensions.TypeExtensions;
-using Xpand.Extensions.XAF.ActionExtensions;
 using Xpand.Extensions.XAF.ApplicationModulesManagerExtensions;
 using Xpand.Extensions.XAF.Attributes;
 using Xpand.Extensions.XAF.CollectionSourceExtensions;
@@ -114,15 +113,12 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .Where(frame1 => frame1.When(objectType)&&frame1.When(viewType)&&frame1.When(nesting)));
         
         internal static IObservable<Unit> ShowInstanceDetailView(this XafApplication application,params  Type[] objectTypes) 
-            => application.WhenViewOnFrame().WhenFrame(objectTypes).WhenFrame(ViewType.ListView).Where(frame => frame.View.Model.ToListView().MasterDetailMode==MasterDetailMode.ListViewOnly)
-                .WhenIsNotOnLookupPopupTemplate()
-                .ToController<ListViewProcessCurrentObjectController>().CustomProcessSelectedItem(true).Where(e => e.View().ObjectTypeInfo.Type.IsInstanceOfType(e.View().CurrentObject))
-                .Do(e => e.ShowViewParameters.CreatedView = e.View().ToListView().NewDetailView(e.Action.View().CurrentObject))
-                .MergeToUnit(application.WhenFrameCreated().WhenViewControllersActivated()
-                    .WhenFrame(objectTypes).WhenFrame(ViewType.ListView).Where(frame => frame.View.Model.ToListView().MasterDetailMode==MasterDetailMode.ListViewAndDetailView)
-                    .SelectMany(frame => frame.View.ToListView().WhenCreateCustomCurrentObjectDetailView()
-                        .DoWhen(e => e.CurrentDetailView.ObjectTypeInfo.Type.IsInstanceOfType(e.ListViewCurrentObject),e => 
-                            e.DetailView = frame.View.ToListView().NewDetailView(e.ListViewCurrentObject))));
+            => application.WhenFrameCreated().WhenViewControllersActivated()
+                .WhenFrame(objectTypes).WhenFrame(ViewType.ListView).Where(frame => frame.View.Model.ToListView().MasterDetailMode==MasterDetailMode.ListViewAndDetailView)
+                .SelectMany(frame => frame.View.ToListView().WhenCreateCustomCurrentObjectDetailView()
+                    .DoWhen(e =>e.ListViewCurrentObject!=null&& e.CurrentDetailView.ObjectTypeInfo.Type!=e.ListViewCurrentObject.GetType(),e => 
+                        e.DetailView = frame.View.ToListView().NewDetailView(e.ListViewCurrentObject)))
+                .ToUnit();
 
         static DetailView NewDetailView(this ListView listView,object o) {
             if (o == null) return null;

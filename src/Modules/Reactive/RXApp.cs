@@ -110,7 +110,8 @@ namespace Xpand.XAF.Modules.Reactive{
                 .Merge(application.FireChanged())
                 .Merge(application.ShowMessages())
                 .Merge(application.EnsureNewInstanceOnNonPersistentDetailView())
-                .Merge(application.ShowInstanceDetailView());
+                .Merge(application.ShowInstanceDetailView())
+                ;
         }
 
 
