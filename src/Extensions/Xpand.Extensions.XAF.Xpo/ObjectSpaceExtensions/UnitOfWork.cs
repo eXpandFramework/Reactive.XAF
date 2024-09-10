@@ -35,7 +35,13 @@ namespace Xpand.Extensions.XAF.Xpo.ObjectSpaceExtensions{
             var password = options.GetPropertyValue("Password");
             if (password == null) return dbConnection.ConnectionString;
             var connectionStringParser = new ConnectionStringParser(dbConnection.ConnectionString);
-            connectionStringParser.AddPart("Password",password.ToString());
+            if (connectionStringParser.PartExists("Password")) {
+                connectionStringParser.UpdatePartByName("Password",password.ToString());
+            }
+            else {
+                connectionStringParser.AddPart("Password",password.ToString());    
+            }
+            
             return connectionStringParser.GetConnectionString();
 
         }
