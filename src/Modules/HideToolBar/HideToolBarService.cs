@@ -34,18 +34,23 @@ namespace Xpand.XAF.Modules.HideToolBar{
             => manager.WhenApplication(application => application.HideToolBarNestedFrames().HideToolBar().ToUnit());
 
         public static IObservable<Frame> HideToolBar(this IObservable<Frame> source) 
-            => source.Select(frame => {
-                if (frame.Application.GetPlatform() == Platform.Win){
-                    var toolbarVisibilityController = frame.GetController("DevExpress.ExpressApp.Win.SystemModule.ToolbarVisibilityController");
-                    if (toolbarVisibilityController != null){
-                        toolbarVisibilityController.Active[HideToolBarModule.CategoryName] = false;
+            => source.SelectMany(frame => frame.View.WhenControlsCreated(true)
+                .Do(_ => {
+                    if (frame.Application.GetPlatform() == Platform.Win) {
+                        var toolbarVisibilityController =
+                            frame.GetController(
+                                "DevExpress.ExpressApp.Win.SystemModule.ToolbarVisibilityController");
+                        if (toolbarVisibilityController != null) {
+                            toolbarVisibilityController.Active[HideToolBarModule.CategoryName] = false;
+                        }
+
+                        var barManager = frame.Template.GetType().Properties().FirstOrDefault(p
+                            => p.Name.Contains("DevExpress.ExpressApp.Win.Controls.IBarManagerHolder.BarManager"));
+                        barManager?.GetValue(frame.Template).GetPropertyValue("Bars").CallMethod("Clear");
                     }
-                    var barManager = frame.Template.GetType().Properties().FirstOrDefault(p => p.Name.Contains("DevExpress.ExpressApp.Win.Controls.IBarManagerHolder.BarManager"));
-                    barManager?.GetValue(frame.Template).GetPropertyValue("Bars").CallMethod("Clear");
-                }
-                var visibility = frame.Template as ISupportActionsToolbarVisibility;
-                visibility?.SetVisible(false);
-                return frame;
-            }).TraceHideToolBarModule(frame => frame.View.Id);
+
+                    var visibility = frame.Template as ISupportActionsToolbarVisibility;
+                    visibility?.SetVisible(false);
+                }).To(frame)).TraceHideToolBarModule(frame => frame.View?.Id);
     }
 }
