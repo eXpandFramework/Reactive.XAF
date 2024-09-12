@@ -25,8 +25,9 @@ namespace Xpand.Extensions.XAF.ModelExtensions{
         }
         
         public static IModelClass GetModelClass(this ITypeInfo typeInfo) 
-            => CaptionHelper.ApplicationModel.GetModelClass(typeInfo.Type);
+            => typeInfo.Type.GetModelClass();
+        
         public static IModelClass GetModelClass(this Type type) 
-            => CaptionHelper.ApplicationModel.GetModelClass(type);
+            => CaptionHelper.ApplicationModel?.GetModelClass(type);
     }
 }
