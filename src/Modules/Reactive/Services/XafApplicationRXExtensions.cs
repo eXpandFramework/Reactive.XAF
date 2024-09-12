@@ -1127,41 +1127,6 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                     objectSpace.CommitChanges(validate);
                     observer.OnNext(arg);
                 });
-        public static IObservable<View> RefreshListViewWhenObjectCommitted<TObject>(this XafApplication application) where TObject : class
-            => application.RefreshObjectViewWhenCommitted<TObject>();
-        
-        public static IObservable<View> RefreshDetailViewWhenObjectCommitted<TObject>(this XafApplication application, Type detailViewObjectType,Func<Frame,TObject[],bool> match=null) where TObject : class 
-            => application.RefreshObjectViewWhenCommitted(detailViewObjectType, match);
-
-        static readonly ISubject<object[]> CommitSignal = Subject.Synchronize(new Subject<object[]>());
-        private static IObservable<View> RefreshObjectViewWhenCommitted<TObject>(this XafApplication application, Type detailViewObjectType=null,Func<Frame,TObject[],bool> match=null) where TObject : class
-            => application.WhenFrame(detailViewObjectType, detailViewObjectType != null ? ViewType.DetailView : ViewType.ListView).Where(frame => frame.View.IsRoot)
-                .SelectMany(frame => Observable.Defer(() => CommitSignal.OfType<TObject[]>().TakeUntil(frame.View.ObjectSpace.WhenDisposed()
-                            .Merge(frame.WhenDisposedFrame()).Take(1))
-                        .Quiescent(2.Seconds()).WhenNotEmpty()
-                        .ObserveOnContext().SelectMany().Where(arg => match?.Invoke(frame, arg) ?? true).To(frame.View).WhenNotDefault(view => view?.ObjectSpace)
-                        .Take(1))
-                    .RepeatWhen(observable => Observable.Defer(() => observable.WhenNotDefault(_ => frame.View)
-                        .TakeUntil(application.WhenNestedObjectSpaceCreated( frame.View.ObjectSpace)))
-                        .RepeatWhen(_ => application.WhenNestedObjectSpaceCreated( frame.View.ObjectSpace)
-                            .SelectMany(space => space.WhenDisposed()))
-                        .SelectMany(_ => frame.View.ObjectSpace.WhenModifyChanged().To(frame.View).StartWith(frame.View)
-                            .TakeUntil(frame.View.ObjectSpace.WhenDisposed()).Where(_ => !frame.View.ObjectSpace.IsModified)
-                            .Delay(100.Milliseconds()).ObserveOnContext()
-                            .DoSafe(_ => {
-                                if (frame.View is DetailView detailView) {
-                                    detailView.GetItems<DashboardViewItem>()
-                                        .Select(item => item.InnerView?.ObjectSpace).WhereNotDefault()
-                                        .Do(objectSpace => objectSpace.Refresh())
-                                        .Enumerate();
-                                }
-                                if (!frame.View?.IsRoot??true)return;
-                                frame.View.ObjectSpace.Refresh();
-                            })))
-                )
-                .Merge(application.WhenProviderCommittedDetailed<TObject>(ObjectModification.All,emitUpdatingObjectSpace:true,_ => true)
-                    .ToObjectsGroup().Select(objects => objects).Do(CommitSignal.OnNext).IgnoreElements().To<View>())
-                .TakeUntilDisposed(application);
         
         public static IObservable<TObject[]> LatestProviderObject<TObject, TKey>(this XafApplication application,
             IObservable<TObject> source, Func<TObject, TKey> key, Expression<Func<TObject, bool>> criteria = null)
