@@ -224,7 +224,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             var action = frame.GetController<ListViewProcessCurrentObjectController>().ProcessCurrentObjectAction;
             var invoke = selectedObject.Invoke()??default(T);
             var afterNavigation = action.WhenExecuted().DoWhen(_ => executed != null, e => executed!(e))
-                .SelectMany(e => frame.Application.WhenFrame(e.ShowViewParameters.CreatedView.ObjectTypeInfo.Type).Take(1));
+                .If(e => e.ShowViewParameters.CreatedView!=null,e => frame.Application.WhenFrame(e.ShowViewParameters.CreatedView.ObjectTypeInfo.Type).Take(1),e => e.Frame().Observe());
             return action.Trigger(afterNavigation,invoke.YieldItem().Cast<object>().ToArray());
         }
 

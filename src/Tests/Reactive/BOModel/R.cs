@@ -9,8 +9,17 @@ namespace Xpand.XAF.Modules.Reactive.Tests.BOModel{
         
     }
     [DefaultClassOptions][OptimisticLocking(OptimisticLockingBehavior.LockModified)]
-    public class R:CustomBaseObject,IR{
-        public R(Session session) : base(session){
+    public class R(Session session) : CustomBaseObject(session), IR {
+        public override void AfterConstruction() {
+            base.AfterConstruction();
+            Active = true;
+        }
+
+        bool _active;
+
+        public bool Active {
+            get => _active;
+            set => SetPropertyValue(nameof(Active), ref _active, value);
         }
 
         string _test;

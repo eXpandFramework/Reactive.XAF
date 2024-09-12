@@ -18,6 +18,7 @@ using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.Attributes;
+using Xpand.Extensions.XAF.Attributes.Appearance;
 using Xpand.Extensions.XAF.Attributes.Custom;
 using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.ModelExtensions;

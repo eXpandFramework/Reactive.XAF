@@ -61,6 +61,19 @@ namespace Xpand.XAF.Modules.Reactive.Tests.ObjectSpace {
             testObserver.Items.All(o1 => o1 is R).ShouldBeTrue();
             testObserver.ItemCount.ShouldBe(2);
         }
+        [Test]
+        public void WhenProviderCommittedDetailedNewModified() {
+            var testObserver = Application.WhenProviderObject<R>(ObjectModification.NewOrUpdated,modifiedProperties:
+                [nameof(R.Active)],criteriaExpression:arg => arg.Active).Test();
+
+            var objectSpace = Application.ObjectSpaceProvider.CreateObjectSpace();
+            var r = objectSpace.CreateObject<R>();
+            // r.Test = "test";
+            objectSpace.CommitChanges();
+
+            
+            testObserver.ItemCount.ShouldBe(1);
+        }
 
     }
 }
