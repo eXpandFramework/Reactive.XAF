@@ -2,9 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reactive;
-using System.Reactive.Concurrency;
 using System.Reactive.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp;
@@ -31,7 +29,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
         
         [Test]
         [XpandTest()]
-        public async Task Cache_DataLayer() {
+        public void Cache_DataLayer() {
          //    using var application = SequenceGeneratorModule().Application;
 	        // var datalayer = application.ObjectSpaceProvider.SequenceGeneratorDatalayer();
          //
@@ -40,7 +38,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
 
         [Test]
         [XpandTest()]
-        public async Task Observe_ObjectSpace_Commiting_On_Sequence_Generator_Thread(){
+        public void Observe_ObjectSpace_Commiting_On_Sequence_Generator_Thread(){
 	        // using var application = SequenceGeneratorModule().Application;
 	        // var eventLoopScheduler = new EventLoopScheduler(start => new Thread(start){IsBackground = true});
 	        // var commiting = application.WhenObjectSpaceCreated()
@@ -241,7 +239,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
 	        objectSpace.CommitChanges();
 
 	        Should.Throw<InvalidOperationException>(() =>
-		        objectSpace.SetSequence<TestObject3>(_ => _.SequentialNumber, typeof(TestObject2)));
+		        objectSpace.SetSequence<TestObject3>(o => o.SequentialNumber, typeof(TestObject2)));
         }
         
         [Test][XpandTest]
@@ -260,7 +258,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
 	        using var application = SequenceGeneratorModule().Application;
 	        SetSequences(application);
 	        using var objectSpace = application.CreateObjectSpace();
-	        objectSpace.SetSequence<TestObject3>(_ => _.SequentialNumber, typeof(TestObject));
+	        objectSpace.SetSequence<TestObject3>(o => o.SequentialNumber, typeof(TestObject));
 	        objectSpace.GetSequenceStorage(typeof(TestObject3),false).CustomSequence.ShouldBe(typeof(TestObject).FullName);
         }
 

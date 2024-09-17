@@ -412,6 +412,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             this IObjectSpace objectSpace, Type objectSpaceLinkType = null)
 #if !XAF192
             => objectSpace.WhenModifiedChanging().Where(t => !t.e.Cancel && t.objectSpace.IsNewObject(t.e.Object) && t.e.MemberInfo == null)
+                .DistinctUntilChanged(t => t.e.Object)
                 .Where(t => objectSpaceLinkType == null || objectSpaceLinkType.IsInstanceOfType(t.e.Object))
                 .Select(t => t.e.Object);
 #else

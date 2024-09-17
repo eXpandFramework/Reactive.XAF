@@ -21,7 +21,6 @@ using Xpand.XAF.Modules.Reactive.Tests.Common;
 
 
 namespace Xpand.XAF.Modules.Reactive.Tests{
-    
     public class ObjectSpaceCreatedTests : ReactiveCommonTest {
         [XpandTest]
         [TestCase(nameof(Platform.Win))]

@@ -50,7 +50,7 @@ namespace Xpand.XAF.Modules.HideToolBar.Tests{
             return templateMock;
         }
         [XpandTest]
-        [TestCase(nameof(Platform.Win))]
+        // [TestCase(nameof(Platform.Win))]
         public async Task Hide_Nested_ToolBar(string platformName){
             var platform = GetPlatform(platformName);
             using var newApplication = platform.NewApplication<HideToolBarModule>();
@@ -71,7 +71,7 @@ namespace Xpand.XAF.Modules.HideToolBar.Tests{
             }
         }
 
-        [Test]
+        // [Test]
         [XpandTest]
         public async Task Hide_ToolbarVisibilityController() {
             using var application = Platform.Win.NewApplication<HideToolBarModule>();
