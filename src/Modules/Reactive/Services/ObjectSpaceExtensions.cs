@@ -346,7 +346,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                     .Where(tuple => filter == null || filter(tuple))
                     .SelectMany(tuple => tuple.objectSpace.ModifiedObjects.OfType<T>()));
 
-        public static void CommitChanges(this IObjectSpaceLink link, [CallerMemberName] string caller = "")
+        public static void CommitChanges(this IObjectSpaceLink link)
             => link.ObjectSpace.CommitChanges();
         
         public static Task CommitChangesAsync(this IObjectSpaceLink link)
@@ -358,7 +358,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         }
         public static IObservable<T> Commit<T>(this IEnumerable<T> source,IObjectSpaceLink objectSpace) where T:IObjectSpaceLink {
             var links = source as T[] ?? source.ToArray();
-            return links.Finally(() => objectSpace.CommitChanges()).ToNowObservable();
+            return links.Finally(objectSpace.CommitChanges).ToNowObservable();
         }
 
         public static IObservable<T> Commit<T>(this T link) where T:IObjectSpaceLink

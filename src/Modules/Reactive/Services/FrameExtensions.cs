@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reactive;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
@@ -27,9 +28,20 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => source.Where(frame => frame.Application.Modules.FindModule(moduleType) != null);
 
         public static IObservable<TFrame> MergeCurrentObjectChanged<TFrame>(this IObservable<TFrame> source) where TFrame : Frame
-            => source.SelectMany(frame => frame.View.WhenCurrentObjectChanged().WhenNotDefault(view => view.CurrentObject)
+            => source.SelectMany(frame => frame.View.WhenCurrentObjectChanged().StartWith(frame.View).WhenNotDefault(view => view.CurrentObject)
                 .DistinctUntilChanged(view => view.ObjectSpace.GetKeyValue(view.CurrentObject))
-                    .WhenNotDefault(view => view.CurrentObject).To(frame).WaitUntilInactive(3.Seconds()).ObserveOnContext().TakeUntil(arg => arg.IsDisposed()));
+                    .WhenNotDefault(view => view.CurrentObject).To(frame)
+                .WaitUntilInactive(2.Seconds()).ObserveOnContext().TakeUntil(arg => arg.IsDisposed()));
+        public static IObservable<TFrame> MergeObjectSpaceReloaded<TFrame>(this IObservable<TFrame> source) where TFrame : Frame
+            => source.SelectMany(frame => frame.View.ObjectSpace.WhenReloaded().To(frame).StartWith(frame)
+                .WaitUntilInactive(2.Seconds()).ObserveOnContext().TakeUntil(arg => arg.IsDisposed()));
+        
+        public static IObservable<Frame> MergeCurrentObjectModified<T>(this IObservable<Frame> source,params Expression<Func<T,object>>[] properties) 
+            => source.SelectMany(frame => frame.View.ObjectSpace.WhenModifiedObjects(properties).To(frame)
+                    .WaitUntilInactive(2.Seconds())
+                    .ObserveOnContext()
+                    .StartWith(frame))
+                .TakeUntil(arg => arg.IsDisposed());
         
         public static IObservable<TFrame> When<TFrame>(this IObservable<TFrame> source, TemplateContext templateContext) where TFrame : Frame 
             => source.Where(window => window.Context == templateContext);

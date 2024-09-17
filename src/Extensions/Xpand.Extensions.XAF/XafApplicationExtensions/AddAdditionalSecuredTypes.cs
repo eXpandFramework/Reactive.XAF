@@ -1,16 +1,15 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
-using System.IO;
 using System.Linq;
 using DevExpress.ExpressApp;
 using Fasterflect;
 using HarmonyLib;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.XAF.Harmony;
-using Xpand.Extensions.XAF.ModelExtensions;
 
 namespace Xpand.Extensions.XAF.XafApplicationExtensions{
     public static partial class XafApplicationExtensions{
+
         public static void AddNonSecuredType(this XafApplication application,params Type[] objectTypes){
             if (application.Security != null && application.Security.GetType().FromHierarchy(type => type.BaseType)
                     .Any(type => type.Name == "SecurityStrategy")){

@@ -32,7 +32,7 @@ namespace Xpand.XAF.Modules.Reactive.Services {
                 .Where(frame => frame.View.IsRoot)
                 .SelectMany(frame => source.ObserveOnContext().TakeUntil(_ => frame.IsDisposed()).Where(list => match?.Invoke(frame,list.ToArray())??true).To(frame.View)
                     .WithLatestFrom(frame.View.ObjectSpace.WhenModifyChanged().StartWith(frame.View.ObjectSpace),(view, space) => (view, space)).Where(t => !t.space.IsModified)
-                    .ToFirst()
+                    .ToFirst().Where(view => !view.IsDisposed)
                     .RefreshView());
             
         // private static IObservable<View> RefreshObjectViewWhenCommitted<TObject>(this XafApplication application, Type detailViewObjectType=null,Func<Frame,TObject[],bool> match=null) where TObject : class

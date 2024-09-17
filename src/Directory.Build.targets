@@ -1,6 +1,6 @@
 <Project>
   <PropertyGroup >
-    <NoWarn>1701;1702;NU1701;CS8002;CS0618</NoWarn>
+    <NoWarn>1701;1702;NU1701;CS8002;CS0618;CA1416;NU1903;NU1902</NoWarn>
 	<NuGetAudit>disable</NuGetAudit>
   </PropertyGroup>
  <Target Name="ReplaceNuget" AfterTargets="PostBuildEvent">

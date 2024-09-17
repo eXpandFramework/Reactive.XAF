@@ -31,6 +31,6 @@ namespace Xpand.Extensions.StringExtensions{
         }
 
         public static byte[] Bytes(this string s, Encoding encoding = null) 
-            => s == null ? Array.Empty<byte>() : (encoding ?? Encoding.UTF8).GetBytes(s);
+            => s == null ? [] : (encoding ?? Encoding.UTF8).GetBytes(s);
     }
 }
