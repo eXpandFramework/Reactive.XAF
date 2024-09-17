@@ -6,6 +6,7 @@ using System.Reactive.Subjects;
 using System.Windows.Forms;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
+using DevExpress.ExpressApp.Model;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Filter;
@@ -40,8 +41,9 @@ namespace Xpand.XAF.Modules.Windows.SystemActions {
                 .MergeToUnit(model.DeferAction(_ => activated.action.DoTheExecute(model)).IgnoreElements()).TakeFirst();
 
         private static IObservable<(ActionBase action, IModelHotkeyAction model)> WhenActionActivated(this XafApplication application, (HotKeyManager manager, Frame window) hotKeyManager) 
-            => hotKeyManager.window.Actions().Where(a => a.Available()).ToNowObservable()
-                .Concat(application.WhenFrameCreated().SelectMany(frame =>frame.Actions())).WhenHotkey()
+            => hotKeyManager.window.Actions().Where(a => a.Available()).ToNowObservable().Select(@base => @base)
+                .Concat(application.WhenFrameCreated().SelectMany(frame =>frame.Actions()))
+                .WhenHotkey(application.Model)
                 .SelectMany(t => t.action.WhenActivated().WhereAvailable().To(t).StartWith(t));
         
 
@@ -79,7 +81,7 @@ namespace Xpand.XAF.Modules.Windows.SystemActions {
         }
 
         private static IObservable<(HotKeyManager hotKeyManager, Frame window)> WhenHotKeyManager(this XafApplication application) 
-            => application.WhenFrame(typeof(object)).OfType<Window>().Take(1)
+            => application.WhenMainWindowCreated()
                 .SelectMany(window => window.WhenTemplateChanged().StartWith(window).WhenNotDefault(frame => frame.Template)
                     .Select(_ => {
                         var hotKeyManager = new HotKeyManager((IWin32Window)window.Template);
@@ -147,8 +149,8 @@ namespace Xpand.XAF.Modules.Windows.SystemActions {
             return  ( modifier, key:(Keys)new KeysConverter().ConvertFrom(result.GetValue(result.Length - 1))! );
         }
 
-        private static IObservable<(ActionBase action, IModelHotkeyAction model)> WhenHotkey(this IObservable<ActionBase> source)
-            => source.SelectMany(action => action.Application.Model.ToReactiveModule<IModelReactiveModuleWindows>().Windows.HotkeyActions
+        private static IObservable<(ActionBase action, IModelHotkeyAction model)> WhenHotkey(this IObservable<ActionBase> source,IModelApplication application)
+            => source.SelectMany(action => application.ToReactiveModule<IModelReactiveModuleWindows>().Windows.HotkeyActions
                 .Where(hotkeyAction => hotkeyAction.Action!=null).Where(modelAction => action.Model.Id==modelAction.Action.Id())
                 .Select(modelSystemAction => (action,modelSystemAction)));
     }
