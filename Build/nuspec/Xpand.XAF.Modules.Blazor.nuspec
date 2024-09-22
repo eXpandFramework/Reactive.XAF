@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.Blazor</id>
-    <version>4.241.3.0</version>
+    <version>4.241.3.7</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -12,18 +12,18 @@
     <description>The `Blazor` package hosts and activates Blazor specific XAF artifacts (Editors, Services, etc).</description>
     <releaseNotes>https://github.com/eXpandFramework/Reactive.XAF/releases</releaseNotes>
     <copyright>eXpandFramework.com</copyright>
-    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Blazor, 24.1.5</tags>
+    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Blazor, 24.1.6</tags>
     <dependencies>
       <group targetFramework="netstandard2.0">
-        <dependency id="Xpand.VersionConverter" version="4.241.3.0" />
+        <dependency id="Xpand.VersionConverter" version="4.241.3.7" />
       </group>
       <group targetFramework="net6.0">
-        <dependency id="Xpand.Extensions.Blazor" version="4.241.3.0" />
-        <dependency id="Xpand.Extensions.Reactive" version="4.241.3.0" />
-        <dependency id="Xpand.Extensions.XAF" version="4.241.3.0" />
-        <dependency id="Xpand.Extensions" version="4.241.3.0" />
-        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.241.3.0" />
-        <dependency id="Xpand.XAF.Modules.Reactive" version="4.241.3.0" />
+        <dependency id="Xpand.Extensions.Blazor" version="4.241.3.7" />
+        <dependency id="Xpand.Extensions.Reactive" version="4.241.3.7" />
+        <dependency id="Xpand.Extensions.XAF" version="4.241.3.7" />
+        <dependency id="Xpand.Extensions" version="4.241.3.7" />
+        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.241.3.7" />
+        <dependency id="Xpand.XAF.Modules.Reactive" version="4.241.3.7" />
         <dependency id="Fasterflect.Xpand" version="2.0.7" />
         <dependency id="System.Reactive" version="6.0" />
         <dependency id="System.Interactive" version="5.0" />
@@ -35,12 +35,12 @@
         <dependency id="System.Security.Cryptography.ProtectedData" version="8.0" />
         <dependency id="System.CodeDom" version="6.0" />
         <dependency id="System.Configuration.ConfigurationManager" version="6.0.1" />
-        <dependency id="DevExpress.ExpressApp.Blazor" version="24.1.5" />
-        <dependency id="DevExpress.ExpressApp.Validation.Blazor" version="24.1.5" />
+        <dependency id="DevExpress.ExpressApp.Blazor" version="24.1.6" />
+        <dependency id="DevExpress.ExpressApp.Validation.Blazor" version="24.1.6" />
         <dependency id="System.ServiceModel.NetTcp" version="6.2" />
         <dependency id="System.ServiceModel.Http" version="6.2" />
         <dependency id="System.ServiceModel.Security" version="4.10.2" />
-        <dependency id="Xpand.VersionConverter" version="4.241.3.0" />
+        <dependency id="Xpand.VersionConverter" version="4.241.3.7" />
       </group>
     </dependencies>
   </metadata>

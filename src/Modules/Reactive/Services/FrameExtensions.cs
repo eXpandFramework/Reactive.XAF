@@ -24,9 +24,6 @@ using Xpand.XAF.Modules.Reactive.Services.Actions;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
     public static class FrameExtensions{
-        public static IObservable<TFrame> WhenModule<TFrame>(this IObservable<TFrame> source, Type moduleType) where TFrame : Frame 
-            => source.SkipWhile(frame => frame.View==null).Where(frame => frame.Application.Modules.FindModule(moduleType) != null);
-
         public static IObservable<TFrame> MergeCurrentObjectChanged<TFrame>(this IObservable<TFrame> source) where TFrame : Frame
             => source.SkipWhile(frame => frame.View==null).SelectMany(frame => frame.View.WhenCurrentObjectChanged().StartWith(frame.View).WhenNotDefault(view => view.CurrentObject)
                 .DistinctUntilChanged(view => view.ObjectSpace.GetKeyValue(view.CurrentObject))

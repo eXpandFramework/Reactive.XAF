@@ -40,13 +40,13 @@
     <Compile Include="..\CommonFiles\Windows\WinModule.cs" Link="WinModule.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DevExpress.ExpressApp.Win.All" Version="24.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp.Win.All" Version="24.1.6" />
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="8.0" />
     <PackageReference Include="Microsoft.CodeAnalysis" Version="4.2" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="6.0" />
     <PackageReference Include="System.ServiceModel.Security" Version="4.10.2" />
     <PackageReference Include="System.ServiceModel.NetTcp" Version="6.2" />
-    <PackageReference Include="Xpand.XAF.Win.All" Version="4.241.3.0" />
+    <PackageReference Include="Xpand.XAF.Win.All" Version="4.241.3.7" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="TestApplication.Module">

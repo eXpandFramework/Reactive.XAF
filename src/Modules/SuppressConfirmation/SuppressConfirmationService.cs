@@ -57,13 +57,15 @@ namespace Xpand.XAF.Modules.SuppressConfirmation{
             return Observable.Empty<Unit>();
         }
 
-        public static IObservable<Frame> WhenSuppressConfirmationWindows(this XafApplication application) =>
-            application.WhenWindowCreated().Cast<Frame>()
+        public static IObservable<Frame> WhenSuppressConfirmationWindows(this XafApplication application) 
+            => application.WhenWindowCreated().Cast<Frame>()
                 .Merge(application.WhenNestedFrameCreated().Cast<Frame>())
-                .WhenModule(typeof(SuppressConfirmationModule))
+                .Select(frame => frame)
+                // .WhenModule(typeof(SuppressConfirmationModule))
+                .Select(frame => frame)  
                 .ViewChanged().Where(frame => frame.View is ObjectView)
                 .Where(frame => ((IModelObjectViewSupressConfirmation) frame.View.Model).SupressConfirmation)
-                .Select(frame => frame)
+                
                 .TraceSuppressConfirmationModule(frame => frame.View.Id);
     }
 }

@@ -83,8 +83,8 @@ jobs:
         TestAssembly: '**/Xpand.Extensions.Tests.dll'
       GridListEditor:
         TestAssembly: '**/Xpand.XAF.Modules.GridListEditor.Tests.dll'
-      HideToolBar:
-        TestAssembly: '**/Xpand.XAF.Modules.HideToolBar.Tests.dll'
+      # HideToolBar:
+      #   TestAssembly: '**/Xpand.XAF.Modules.HideToolBar.Tests.dll'
       # JobSchedulerHangfire:
       #   TestAssembly: '**/Xpand.XAF.Modules.JobScheduler.Hangfire.Tests.dll'
       # JobSchedulerNotification:

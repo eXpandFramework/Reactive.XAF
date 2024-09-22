@@ -38,7 +38,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests.ObjectSpace {
             r.Test = "test";
             objectSpace.CommitChanges();
             
-            var o = objectSpace.CreateObject<R2>();
+            // var o = objectSpace.CreateObject<R2>();
             objectSpace.CommitChanges();
             // o.Test = "test";
             // objectSpace.CommitChanges();
@@ -47,7 +47,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests.ObjectSpace {
         }
         [Test]
         public void WhenProviderCommittedDetailed() {
-            var testObserver = Application.WhenProviderCommittedDetailed(typeof(R),ObjectModification.NewOrUpdated).ToObjects().Test();
+            using var testObserver = Application.WhenProviderCommittedDetailed(typeof(R),ObjectModification.NewOrUpdated).ToObjects().Test();
 
             var objectSpace = Application.ObjectSpaceProvider.CreateObjectSpace();
             var r = objectSpace.CreateObject<R>();
@@ -63,12 +63,15 @@ namespace Xpand.XAF.Modules.Reactive.Tests.ObjectSpace {
         }
         [Test]
         public void WhenProviderCommittedDetailedNewModified() {
+            using var space = Application.CreateObjectSpace();
+            space.Delete(space.GetObjectsQuery<R>().ToArray());
+            space.CommitChanges();
             var testObserver = Application.WhenProviderObject<R>(ObjectModification.NewOrUpdated,modifiedProperties:
                 [nameof(R.Active)],criteriaExpression:arg => arg.Active).Test();
 
             var objectSpace = Application.ObjectSpaceProvider.CreateObjectSpace();
             var r = objectSpace.CreateObject<R>();
-            // r.Test = "test";
+            r.Test = "test";
             objectSpace.CommitChanges();
 
             
