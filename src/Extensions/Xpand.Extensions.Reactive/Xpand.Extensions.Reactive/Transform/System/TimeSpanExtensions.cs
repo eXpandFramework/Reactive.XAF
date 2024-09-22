@@ -15,7 +15,9 @@ namespace Xpand.Extensions.Reactive.Transform.System {
         public static IObservable<long> Timer(this TimeSpan dueTime,IScheduler scheduler=null)
             => Observable.Timer(dueTime,scheduler??Scheduler.Default);
         
-        public static IObservable<long> Interval(this TimeSpan dueTime)
-            => Observable.Interval(dueTime);
+        public static IObservable<long> Interval(this TimeSpan dueTime,bool emitNow=false) {
+            var interval = Observable.Interval(dueTime);
+            return !emitNow ? interval : interval.StartWith(0);
+        }
     }
 }
