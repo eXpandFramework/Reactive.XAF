@@ -26,6 +26,7 @@ namespace Xpand.XAF.Modules.StoreToDisk.Tests.Common {
         }
 
         protected void CreateStorage(string name, bool protect=false) {
+            Application.Modules.FindModule<StoreToDiskModule>().ClearCache();
             var folder = Application.Model.ToReactiveModule<IModelReactiveModulesStoreToDisk>().StoreToDisk.Folder;
             if (Directory.Exists(folder)) {
                 Directory.Delete(folder, true);
