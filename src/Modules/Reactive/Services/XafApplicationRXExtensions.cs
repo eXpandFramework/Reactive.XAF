@@ -117,14 +117,14 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => application.WhenFrameCreated().WhenViewControllersActivated()
                 .WhenFrame(objectTypes).WhenFrame(ViewType.ListView).Where(frame => frame.View.Model.ToListView().MasterDetailMode==MasterDetailMode.ListViewAndDetailView)
                 .SelectMany(frame => frame.View.ToListView().WhenCreateCustomCurrentObjectDetailView()
-                    .DoWhen(e =>e.ListViewCurrentObject!=null,e => 
+                    .DoWhen(e =>e.ListViewCurrentObject!=null&& e.CurrentDetailView.ObjectTypeInfo.Type!=e.ListViewCurrentObject.GetType(),e => 
                         e.DetailView = frame.View.ToListView().NewDetailView(e.ListViewCurrentObject)))
                 .MergeToUnit(application.WhenViewOnFrame().WhenFrame(objectTypes).WhenFrame(ViewType.ListView)
                     .Where(frame =>frame.View.ObjectTypeInfo.FindAttribute<ShowInstanceDetailViewAttribute>().Property!=null&& frame.View.Model.ToListView().MasterDetailMode==MasterDetailMode.ListViewOnly)
                     .WhenIsNotOnLookupPopupTemplate().ToController<ListViewProcessCurrentObjectController>().CustomProcessSelectedItem(true)
                     .Where(e =>e.View().ObjectTypeInfo.Type.IsInstanceOfType(e.View().CurrentObject))
                     .Do(e => e.ShowViewParameters.CreatedView = e.View().ToListView().NewDetailView(e.Action.View().CurrentObject)));
-
+        
         static DetailView NewDetailView(this ListView listView,object o) {
             if (o == null) return null;
             var property = o.GetType().ToTypeInfo().FindAttribute<ShowInstanceDetailViewAttribute>().Property;
