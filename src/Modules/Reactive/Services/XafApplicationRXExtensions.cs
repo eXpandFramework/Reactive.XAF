@@ -117,7 +117,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => application.WhenFrameCreated().WhenViewControllersActivated()
                 .WhenFrame(objectTypes).WhenFrame(ViewType.ListView).Where(frame => frame.View.Model.ToListView().MasterDetailMode==MasterDetailMode.ListViewAndDetailView)
                 .SelectMany(frame => frame.View.ToListView().WhenCreateCustomCurrentObjectDetailView()
-                    .DoWhen(e =>e.ListViewCurrentObject!=null&& e.CurrentDetailView.ObjectTypeInfo.Type!=e.ListViewCurrentObject.GetType(),e => 
+                    .DoWhen(e =>e.ListViewCurrentObject!=null,e => 
                         e.DetailView = frame.View.ToListView().NewDetailView(e.ListViewCurrentObject)))
                 .MergeToUnit(application.WhenViewOnFrame().WhenFrame(objectTypes).WhenFrame(ViewType.ListView)
                     .Where(frame =>frame.View.ObjectTypeInfo.FindAttribute<ShowInstanceDetailViewAttribute>().Property!=null&& frame.View.Model.ToListView().MasterDetailMode==MasterDetailMode.ListViewOnly)
@@ -691,6 +691,10 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             this XafApplication application,Type objectType,ObjectModification objectModification,bool emitUpdatingObjectSpace,string[] modifiedProperties,Func<object,bool> criteria=null,[CallerMemberName]string caller="")
             => application.WhenProviderObjectSpaceCreated(emitUpdatingObjectSpace)
                 .SelectMany(objectSpace => objectSpace.WhenCommittedDetailed(objectType, objectModification, modifiedProperties,criteria,caller));
+        public static IObservable<(IObjectSpace objectSpace, (object instance, ObjectModification modification)[] details)> WhenProviderCommittingDetailed(
+            this XafApplication application,Type objectType,ObjectModification objectModification,bool emitUpdatingObjectSpace,string[] modifiedProperties,Func<object,bool> criteria=null,[CallerMemberName]string caller="")
+            => application.WhenProviderObjectSpaceCreated(emitUpdatingObjectSpace)
+                .SelectMany(objectSpace => objectSpace.WhenCommitingDetailed(objectType,false, objectModification, modifiedProperties,criteria,caller));
         
         public static IObservable<(IObjectSpace objectSpace, (object instance, ObjectModification modification)[] details)> WhenProviderCommittedDetailed(
             this XafApplication application,Type objectType,ObjectModification objectModification,bool emitUpdatingObjectSpace,Func<object,bool> criteria=null,[CallerMemberName]string caller="")

@@ -40,7 +40,9 @@ namespace Xpand.Extensions.Reactive.Utility {
                     if (!action.HasFlag(RXAction.OnCompleted)) return;
                     WriteLine($"{caller} - OnCompleted");
                 });
-        }        public static IObservable<T> ToConsole<T>(this IObservable<T> source, RXAction action, [CallerMemberName] string caller = "") => source.ToConsole(action, null, caller);
+        }        
+        public static IObservable<T> ToConsole<T>(this IObservable<T> source, RXAction action, [CallerMemberName] string caller = "") 
+            => source.ToConsole(action, null, caller);
 
         public static IObservable<T> ToConsole<T>(this IObservable<T> source, Func<T,int, object> msgSelector ,[CallerMemberName]string caller="")
             => source.Do((obj, i) => obj.Write(arg =>msgSelector?.Invoke(arg, i) ,caller));

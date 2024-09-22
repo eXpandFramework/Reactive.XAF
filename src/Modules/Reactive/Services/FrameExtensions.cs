@@ -25,23 +25,27 @@ using Xpand.XAF.Modules.Reactive.Services.Actions;
 namespace Xpand.XAF.Modules.Reactive.Services{
     public static class FrameExtensions{
         public static IObservable<TFrame> WhenModule<TFrame>(this IObservable<TFrame> source, Type moduleType) where TFrame : Frame 
-            => source.Where(frame => frame.Application.Modules.FindModule(moduleType) != null);
+            => source.SkipWhile(frame => frame.View==null).Where(frame => frame.Application.Modules.FindModule(moduleType) != null);
 
         public static IObservable<TFrame> MergeCurrentObjectChanged<TFrame>(this IObservable<TFrame> source) where TFrame : Frame
-            => source.SelectMany(frame => frame.View.WhenCurrentObjectChanged().StartWith(frame.View).WhenNotDefault(view => view.CurrentObject)
+            => source.SkipWhile(frame => frame.View==null).SelectMany(frame => frame.View.WhenCurrentObjectChanged().StartWith(frame.View).WhenNotDefault(view => view.CurrentObject)
                 .DistinctUntilChanged(view => view.ObjectSpace.GetKeyValue(view.CurrentObject))
                     .WhenNotDefault(view => view.CurrentObject).To(frame)
                 .WaitUntilInactive(2.Seconds()).ObserveOnContext().TakeUntil(arg => arg.IsDisposed()));
+        
         public static IObservable<TFrame> MergeObjectSpaceReloaded<TFrame>(this IObservable<TFrame> source) where TFrame : Frame
-            => source.SelectMany(frame => frame.View.ObjectSpace.WhenReloaded().To(frame).StartWith(frame)
+            => source.SkipWhile(frame => frame.View==null).SelectMany(frame => frame.View.ObjectSpace.WhenReloaded().To(frame).StartWith(frame)
                 .WaitUntilInactive(2.Seconds()).ObserveOnContext().TakeUntil(arg => arg.IsDisposed()));
+        public static IObservable<TFrame> MergeObjectSpaceRefresh<TFrame>(this IObservable<TFrame> source) where TFrame : Frame
+            => source.SkipWhile(frame => frame.View==null).SelectMany(frame => frame.View.ObjectSpace.WhenRefreshing().To(frame).StartWith(frame)
+                .WaitUntilInactive(2.Seconds()).ObserveOnContext()
+                .TakeUntil(arg => arg.IsDisposed()));
         
         public static IObservable<Frame> MergeCurrentObjectModified<T>(this IObservable<Frame> source,params Expression<Func<T,object>>[] properties) 
-            => source.SelectMany(frame => frame.View.ObjectSpace.WhenModifiedObjects(properties).To(frame)
+            => source.SkipWhile(frame => frame.View==null).SelectMany(frame => frame.View.ObjectSpace.WhenModifiedObjects(properties).To(frame)
                     .WaitUntilInactive(2.Seconds())
-                    .ObserveOnContext()
-                    .StartWith(frame))
-                .TakeUntil(arg => arg.IsDisposed());
+                    .ObserveOnContext().TakeUntil(arg => arg.IsDisposed())
+                    .StartWith(frame));
         
         public static IObservable<TFrame> When<TFrame>(this IObservable<TFrame> source, TemplateContext templateContext) where TFrame : Frame 
             => source.Where(window => window.Context == templateContext);

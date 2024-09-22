@@ -3,10 +3,8 @@ using DevExpress.Xpo;
 using Xpand.XAF.Persistent.BaseImpl;
 
 namespace Xpand.XAF.Modules.StoreToDisk.Tests.BOModel {
-    [StoreToDisk(nameof(Name),DataProtectionScope.LocalMachine,nameof(Secret),nameof(Number),nameof(Dep),nameof(DefaultValue))]
-    public class STD:CustomBaseObject {
-        public STD(Session session) : base(session) { }
-
+    [StoreToDisk(nameof(Name),nameof(Secret),nameof(Number),nameof(Dep),nameof(DefaultValue))]
+    public class STD(Session session) : CustomBaseObject(session) {
         STDep _dep;
 
         public STDep Dep {
@@ -50,9 +48,7 @@ namespace Xpand.XAF.Modules.StoreToDisk.Tests.BOModel {
         }
     }
 
-    public class STDep : CustomBaseObject {
-        public STDep(Session session) : base(session) { }
-
+    public class STDep(Session session) : CustomBaseObject(session) {
         string _name;
 
         public string Name {

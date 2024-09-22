@@ -7,6 +7,10 @@ using Xpand.TestsLib;
 using Xpand.TestsLib.Common.Attributes;
 
 namespace Xpand.Extensions.Tests {
+    using System;
+    using NUnit.Framework;
+    using Shouldly;
+
     public class AppDomainTests:BaseTest {
         
         [Test][XpandTest()]
