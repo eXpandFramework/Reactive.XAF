@@ -16,8 +16,9 @@ namespace Xpand.XAF.Modules.Reactive.Tests {
         [Test][Order(0)][Ignore("")]
         public async Task Contains_Existing_Items() {
             using (var application = DefaultReactiveModule().Application) {
+                application.Logon();
                 using var objectSpace = application.CreateObjectSpace();
-                objectSpace.CreateObject<R>().CommitChanges();
+                await objectSpace.CreateObject<R>().CommitChangesAsync();
                 var cache = new ConcurrentDictionary<long,R>();
             
                 using var testObserver = application.Cache(cache).Test();
@@ -32,12 +33,13 @@ namespace Xpand.XAF.Modules.Reactive.Tests {
         [Test][Order(1)]
         public async Task Contains_New_Items() {
             using (var application = DefaultReactiveModule().Application) {
+                application.Logon();
                 var cache = new ConcurrentDictionary<long,R>();
                 using var testObserver = application.Cache(cache).WhenNotEmpty().Take(1).Test();
             
                 using var objectSpace = application.CreateObjectSpace();
                 var o = objectSpace.CreateObject<R>();
-                o.CommitChanges();
+                await o.CommitChangesAsync();
                 testObserver.AwaitDone(Timeout).ItemCount.ShouldBe(1);
 
                 cache.ContainsKey(o.Oid).ShouldBeTrue();
@@ -49,6 +51,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests {
         [Test][Order(2)]
         public void Contains_Updated_Items() {
             using var application = DefaultReactiveModule().Application;
+            application.Logon();
             using var objectSpace = application.CreateObjectSpace();
             var o = objectSpace.CreateObject<R>();
             o.CommitChanges();
@@ -66,6 +69,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests {
         [Test][Order(2)]
         public void Not_Contains_Updated_Items() {
             using var application = DefaultReactiveModule().Application;
+            application.Logon();
             using var objectSpace = application.CreateObjectSpace();
             var o = objectSpace.CreateObject<R>();
             o.CommitChanges();
@@ -84,9 +88,10 @@ namespace Xpand.XAF.Modules.Reactive.Tests {
         [Test][Order(3)]
         public async Task Not_Contains_Deleted_Items() {
             using var application = DefaultReactiveModule().Application;
+            application.Logon();
             using var objectSpace = application.CreateObjectSpace();
             var o = objectSpace.CreateObject<R>();
-            o.CommitChanges();
+            await o.CommitChangesAsync();
             var cache = new ConcurrentDictionary<long,R>();
             using var testObserver = application.Cache(cache).Test();
             cache.ContainsKey(o.Oid).ShouldBeTrue();

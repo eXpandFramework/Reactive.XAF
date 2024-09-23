@@ -51,6 +51,21 @@ namespace Xpand.XAF.Modules.Reactive.Tests.ObjectSpaceProvider{
             
             testObserver.ItemCount.ShouldBe(expected);
         }
+        [TestCase(true,2)]
+        [XpandTest()]
+        public void WhenProviderObjectSpaceCreated(bool emitUpdatingOs,int expected){
+            using var application = DefaultReactiveModule().Application;
+            using var testObserver = application.WhenProviderObjectSpaceCreated(emitUpdatingObjectSpace:emitUpdatingOs).Test();
+            using var testObserver1 = application.ObjectSpaceProvider.WhenObjectSpaceCreated(emitUpdatingObjectSpace:emitUpdatingOs).Test();
+            application.Logon();
+            
+            
+            application.ObjectSpaceProvider.CreateObjectSpace();
+            application.CreateNonSecuredObjectSpace(typeof(R));
+            
+            testObserver.Items.Intersect(testObserver1.Items).Count()
+                .ShouldBe((testObserver1.Items.OfType<XPObjectSpace>().Concat(testObserver1.Items.OfType<XPObjectSpace>()).Count())/2);
+        }
         [Test]
         [XpandTest()][Order(-10)]
         public void When_Secured_ObjectSpaceCreated(){

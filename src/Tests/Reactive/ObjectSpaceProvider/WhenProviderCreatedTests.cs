@@ -10,6 +10,7 @@ using Shouldly;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.TestsLib.Common;
 using Xpand.XAF.Modules.Reactive.Services;
+using Xpand.XAF.Modules.Reactive.Services.Security;
 using Xpand.XAF.Modules.Reactive.Tests.BOModel;
 using Xpand.XAF.Modules.Reactive.Tests.Common;
 
@@ -36,8 +37,8 @@ namespace Xpand.XAF.Modules.Reactive.Tests.ObjectSpaceProvider {
                 (ISelectDataSecurityProvider)application.Security, new MemoryDataStoreProvider()));
             application.DatabaseUpdateMode=DatabaseUpdateMode.Never;
             DefaultReactiveModule(application);
-            
-            using var testObserver = application.WhenProviderObjectSpaceCreated(true).OfType<XPObjectSpace>().Test();
+            // application.Logon("Admin");
+            using var testObserver = application.ObjectSpaceProvider.WhenObjectSpaceCreated(true).OfType<XPObjectSpace>().Test();
             
             var objectSpace = application.CreateNonSecuredObjectSpace(typeof(R));
             
@@ -49,7 +50,11 @@ namespace Xpand.XAF.Modules.Reactive.Tests.ObjectSpaceProvider {
     }
 
     public class WhenProviderCreatedTests : ReactiveCommonAppTest {
-        
+        public override void Init() {
+            base.Init();
+            Application.Logon();
+        }
+
         [Test]
         public void ObjectSpaceCreated() {
             var testObserver = Application.WhenProviderObjectSpaceCreated().Test();

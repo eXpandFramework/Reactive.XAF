@@ -117,7 +117,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => application.WhenFrameCreated().WhenViewControllersActivated()
                 .WhenFrame(objectTypes).WhenFrame(ViewType.ListView).Where(frame => frame.View.Model.ToListView().MasterDetailMode==MasterDetailMode.ListViewAndDetailView)
                 .SelectMany(frame => frame.View.ToListView().WhenCreateCustomCurrentObjectDetailView()
-                    .DoWhen(e =>e.ListViewCurrentObject!=null&& e.CurrentDetailView.ObjectTypeInfo.Type!=e.ListViewCurrentObject.GetType(),e => 
+                    .DoWhen(e =>e.ListViewCurrentObject!=null,e => 
                         e.DetailView = frame.View.ToListView().NewDetailView(e.ListViewCurrentObject)))
                 .MergeToUnit(application.WhenViewOnFrame().WhenFrame(objectTypes).WhenFrame(ViewType.ListView)
                     .Where(frame =>frame.View.ObjectTypeInfo.FindAttribute<ShowInstanceDetailViewAttribute>().Property!=null&& frame.View.Model.ToListView().MasterDetailMode==MasterDetailMode.ListViewOnly)
@@ -303,10 +303,10 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             Func<IObjectSpaceProvider, IObjectSpace, IObservable<TResult>> resultSelector,
             bool emitUpdatingObjectSpace, Func<IObjectSpaceProvider, bool> match = null)
             => application.WhenLoggingOn(true).SelectMany(_ => application.ObjectSpaceProviders.ToNowObservable())
-                .Merge(application.ObjectSpaceProviders.ToNowObservable())
                 .Where(provider => match?.Invoke(provider) ?? true)
                 .SelectMany(spaceProvider => spaceProvider.WhenObjectSpaceCreated(emitUpdatingObjectSpace)
                     .SelectMany(space => resultSelector?.Invoke(spaceProvider, space)));
+        
         public static IObservable<IObjectSpace> WhenProviderObjectSpaceCreated(this XafApplication application,bool emitUpdatingObjectSpace,Func<IObjectSpaceProvider,bool> match=null) 
             => application.WhenProviderObjectSpaceCreated((_, objectSpace) => objectSpace.Observe(),emitUpdatingObjectSpace,match);
 

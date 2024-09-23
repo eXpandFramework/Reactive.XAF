@@ -9,6 +9,11 @@ using Xpand.XAF.Modules.Reactive.Tests.Common;
 
 namespace Xpand.XAF.Modules.Reactive.Tests.ObjectSpace {
     public class WhenCommitingTests:ReactiveCommonAppTest {
+        public override void Init() {
+            base.Init();
+            Application.Logon();
+        }
+
         [TestCase(true)]
         [TestCase(false)]
         public void WhenCommiting_Deleted(bool emitAfterCommitted) {

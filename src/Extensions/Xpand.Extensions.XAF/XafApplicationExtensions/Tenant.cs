@@ -1,8 +1,12 @@
 ﻿using System.Data.SqlClient;
 using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.MultiTenancy;
 
 namespace Xpand.Extensions.XAF.XafApplicationExtensions {
     public static partial class XafApplicationExtensions {
+        public static bool IsTenant(this XafApplication application) 
+            => application.GetService<ITenantProvider>() is { TenantId: not null };
+
         public static bool TenantsExist(this XafApplication application, string connectionString = null,
             int recordCount = 2) {
             connectionString ??= application.ConnectionString;
