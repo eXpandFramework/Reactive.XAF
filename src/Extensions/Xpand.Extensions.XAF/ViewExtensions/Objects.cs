@@ -7,7 +7,7 @@ using Xpand.Extensions.XAF.CollectionSourceExtensions;
 namespace Xpand.Extensions.XAF.ViewExtensions {
     public static partial class ViewExtensions {
         public static IEnumerable<T> Objects<T>(this View view) 
-            => view is DetailView ? ((T)view.CurrentObject).YieldItem().ToArray()
+            => view is DetailView ? ((T)view.CurrentObject).YieldItem().WhereNotDefault().ToArray()
             : view.ToListView().CollectionSource.Objects<T>();
         
         
