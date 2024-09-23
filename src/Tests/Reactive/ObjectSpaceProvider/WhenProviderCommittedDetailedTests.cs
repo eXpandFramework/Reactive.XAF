@@ -9,11 +9,6 @@ using Xpand.XAF.Modules.Reactive.Tests.Common;
 
 namespace Xpand.XAF.Modules.Reactive.Tests.ObjectSpaceProvider {
     public class WhenProviderCommittedDetailedTests : ReactiveCommonAppTest {
-        public override void Init() {
-            base.Init();
-            Application.Logon();
-        }
-
         [Test]
         public void WhenProviderCommittedDetailed() {
             var testObserver = Application.WhenProviderCommittedDetailed(typeof(R),ObjectModification.New).Test();

@@ -282,9 +282,16 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             bool emitUpdatingObjectSpace, Func<IObjectSpaceProvider, bool> match = null)
             => application.WhenLoggingOn(true).SelectMany(_ => application.ObjectSpaceProviders.ToNowObservable())
                 .Where(provider => match?.Invoke(provider) ?? true)
-                .SelectMany(spaceProvider => spaceProvider.WhenObjectSpaceCreated(emitUpdatingObjectSpace)
-                    .SelectMany(space => resultSelector?.Invoke(spaceProvider, space)));
-        
+                .Publish(source => source.WhenProviderObjectSpaceCreated(resultSelector,emitUpdatingObjectSpace,application));
+
+        private static IObservable<TResult> WhenProviderObjectSpaceCreated<TResult>(this IObservable<IObjectSpaceProvider> source,Func<IObjectSpaceProvider, IObjectSpace, IObservable<TResult>> resultSelector, bool emitUpdatingObjectSpace,XafApplication application)
+            => application.ObjectSpaceProviders.ToNowObservable()
+                .SelectMany(spaceProvider => spaceProvider.WhenProviderObjectSpaceCreated(resultSelector, emitUpdatingObjectSpace)
+                    .TakeUntil(application.WhenLoggingOn(true)))
+                .Concat(source.SelectMany(spaceProvider => spaceProvider.WhenProviderObjectSpaceCreated(resultSelector, emitUpdatingObjectSpace)));
+        private static IObservable<TResult> WhenProviderObjectSpaceCreated<TResult>(this IObjectSpaceProvider spaceProvider,Func<IObjectSpaceProvider, IObjectSpace, IObservable<TResult>> resultSelector, bool emitUpdatingObjectSpace) 
+            => spaceProvider.WhenObjectSpaceCreated(emitUpdatingObjectSpace).SelectMany(space => resultSelector?.Invoke(spaceProvider, space));
+
         public static IObservable<IObjectSpace> WhenProviderObjectSpaceCreated(this XafApplication application,bool emitUpdatingObjectSpace,Func<IObjectSpaceProvider,bool> match=null) 
             => application.WhenProviderObjectSpaceCreated((_, objectSpace) => objectSpace.Observe(),emitUpdatingObjectSpace,match);
 
