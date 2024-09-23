@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.Reactive.Logger.Client.Win</id>
-    <version>4.241.4.0</version>
+    <version>4.241.5.0</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -15,17 +15,17 @@
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Reactive.Logger.Client.Win, 24.1.6</tags>
     <dependencies>
       <group targetFramework="netstandard2.0">
-        <dependency id="Xpand.VersionConverter" version="4.241.4.0" />
+        <dependency id="Xpand.VersionConverter" version="4.241.5.0" />
       </group>
       <group targetFramework="net6.0">
-        <dependency id="Xpand.XAF.Modules.GridListEditor" version="4.241.4.0" />
-        <dependency id="Xpand.XAF.Modules.OneView" version="4.241.4.0" />
-        <dependency id="Xpand.XAF.Modules.Windows" version="4.241.4.0" />
-        <dependency id="Xpand.XAF.Modules.Reactive" version="4.241.4.0" />
-        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.241.4.0" />
-        <dependency id="Xpand.Extensions.XAF" version="4.241.4.0" />
-        <dependency id="Xpand.XAF.Modules.Reactive.Logger.Hub" version="4.241.4.0" />
-        <dependency id="Xpand.XAF.Modules.Reactive.Logger" version="4.241.4.0" />
+        <dependency id="Xpand.XAF.Modules.GridListEditor" version="4.241.5.0" />
+        <dependency id="Xpand.XAF.Modules.OneView" version="4.241.5.0" />
+        <dependency id="Xpand.XAF.Modules.Windows" version="4.241.5.0" />
+        <dependency id="Xpand.XAF.Modules.Reactive" version="4.241.5.0" />
+        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.241.5.0" />
+        <dependency id="Xpand.Extensions.XAF" version="4.241.5.0" />
+        <dependency id="Xpand.XAF.Modules.Reactive.Logger.Hub" version="4.241.5.0" />
+        <dependency id="Xpand.XAF.Modules.Reactive.Logger" version="4.241.5.0" />
         <dependency id="DevExpress.ExpressApp.ConditionalAppearance" version="24.1.6" />
         <dependency id="DevExpress.ExpressApp.Win" version="24.1.6" />
         <dependency id="DevExpress.ExpressApp.Xpo" version="24.1.6" />
@@ -35,7 +35,7 @@
         <dependency id="System.Text.Json" version="8.0.4" />
         <dependency id="System.Threading.Tasks.Dataflow" version="7.0" />
         <dependency id="Xpand.Patcher" version="3.0.24" />
-        <dependency id="Xpand.VersionConverter" version="4.241.4.0" />
+        <dependency id="Xpand.VersionConverter" version="4.241.5.0" />
       </group>
     </dependencies>
   </metadata>

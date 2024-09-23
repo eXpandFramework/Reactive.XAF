@@ -120,7 +120,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                     .DoWhen(e =>e.ListViewCurrentObject!=null,e => 
                         e.DetailView = frame.View.ToListView().NewDetailView(e.ListViewCurrentObject)))
                 .MergeToUnit(application.WhenViewOnFrame().WhenFrame(objectTypes).WhenFrame(ViewType.ListView)
-                    .Where(frame =>frame.View.ObjectTypeInfo.FindAttribute<ShowInstanceDetailViewAttribute>().Property!=null&& frame.View.Model.ToListView().MasterDetailMode==MasterDetailMode.ListViewOnly)
+                    // .Where(frame => frame.View.ObjectTypeInfo.FindAttribute<ShowInstanceDetailViewAttribute>().Property!=null)
+                    .Where(frame => frame.View.Model.ToListView().MasterDetailMode==MasterDetailMode.ListViewOnly)
                     .WhenIsNotOnLookupPopupTemplate().ToController<ListViewProcessCurrentObjectController>().CustomProcessSelectedItem(true)
                     .Where(e =>e.View().ObjectTypeInfo.Type.IsInstanceOfType(e.View().CurrentObject))
                     .Do(e => e.ShowViewParameters.CreatedView = e.View().ToListView().NewDetailView(e.Action.View().CurrentObject)));
