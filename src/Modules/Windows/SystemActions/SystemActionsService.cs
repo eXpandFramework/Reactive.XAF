@@ -34,7 +34,7 @@ namespace Xpand.XAF.Modules.Windows.SystemActions {
                         .Where(model => activated.model==model)
                         // .TakeUntil(activated.action.WhenDeactivated())
                         // .DoWhen(action => action is IModelSystemAction { Focus: true },_ => SetForegroundWindow(application.MainWindow.Template.To<Form>().Handle))
-                        .SelectAndOmit(model => activated.WaitTheExecute( model)))));
+                        .ExhaustMap(model => activated.WaitTheExecute( model)))));
 
         private static IObservable<Unit> WaitTheExecute(this (ActionBase action, IModelHotkeyAction model) activated, IModelHotkeyAction model) 
             => activated.action.WhenExecuteCompleted().TakeFirst()

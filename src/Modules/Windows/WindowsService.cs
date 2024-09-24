@@ -5,15 +5,19 @@ using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows.Forms;
 using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.SystemModule;
+using Xpand.Extensions.Numeric;
 using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.Reactive.Transform.System;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.Tracing;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Services;
+using Xpand.XAF.Modules.Reactive.Services.Controllers;
 using Xpand.XAF.Modules.Windows.SystemActions;
 
 namespace Xpand.XAF.Modules.Windows{
-    internal static class WindowsService{
+    public static class WindowsService{
         
         internal static IObservable<Unit> Connect(this  ApplicationModulesManager manager) 
 	        => manager.WhenApplication(application => application.WhenWindowTemplate()
@@ -72,10 +76,28 @@ namespace Xpand.XAF.Modules.Windows{
         internal static IModelWindows Model(this Frame frame) 
             => frame.Application.Model();
 
+        public static IObservable<Unit> AddMessages(this IObservable<WindowTemplateController> source,Func<IObservable<string>> messagesSource,int seconds=1) 
+            => source.SelectMany(controller => {
+                    var observeLatestOnContext = messagesSource().ObserveLatestOnContext().Replay(1);
+                    var connect = observeLatestOnContext.Connect();
+                    return seconds.Seconds().Interval().ObserveLatestOnContext()
+                        .ExhaustMap(_ => controller.WhenAddMessage())
+                        .SelectMany(e => observeLatestOnContext.Take(1).Do(s => e.StatusMessages.Add(s)))
+                        .TakeUntil(controller.WhenDisposed().Do(_ => connect.Dispose()));
+                })
+                    
+                .ToUnit();
+
+        private static IObservable<CustomizeWindowStatusMessagesEventArgs> WhenAddMessage(this WindowTemplateController controller) 
+            => controller.WhenCustomizeWindowStatusMessages().Take(1)
+                .Merge(controller.DeferAction(controller.UpdateWindowStatusMessage).To<CustomizeWindowStatusMessagesEventArgs>())
+                .Take(1);
+
         internal static IObservable<TSource> TraceWindows<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<ITraceEvent> traceAction = null,
 	        Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.OnNextOrOnError,Func<string> allMessageFactory = null,
 	        [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) 
 	        => source.Trace(name, WindowsModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy,allMessageFactory, memberName,sourceFilePath,sourceLineNumber);
+        
     }
 
 }

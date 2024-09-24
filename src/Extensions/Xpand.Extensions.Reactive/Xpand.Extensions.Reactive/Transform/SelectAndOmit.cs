@@ -6,13 +6,10 @@ using Xpand.Extensions.Reactive.Utility;
 
 namespace Xpand.Extensions.Reactive.Transform{
     public static partial class Transform {
-        public static IObservable<TResult> SelectAndOmit<T, TResult>(
-            this IObservable<T> source,
-            Func<T, int, IObservable<TResult>> process,
-            SemaphoreSlim semaphoreSlim = null,
-            Action<T> noProcess = null,
-            int maximumConcurrencyCount = 1,
-            [CallerMemberName] string caller = "")
+        [Obsolete(nameof(ExhaustMap),true)]
+        public static IObservable<TResult> SelectAndOmit<T, TResult>(this IObservable<T> source,
+            Func<T, int, IObservable<TResult>> process, SemaphoreSlim semaphoreSlim = null, Action<T> noProcess = null,
+            int maximumConcurrencyCount = 1, [CallerMemberName] string caller = "")
         {
             var dispose = false;
             if (semaphoreSlim == null)
@@ -60,6 +57,7 @@ namespace Xpand.Extensions.Reactive.Transform{
             return result;
         }
 
+        [Obsolete(nameof(ExhaustMap),true)]
         public static IObservable<TResult> SelectAndOmit<T, TResult>(this IObservable<T> source,
             Func<T, IObservable<TResult>> process,SemaphoreSlim semaphoreSlim=null, Action<T> noProcess=null, int maximumConcurrencyCount = 1,[CallerMemberName]string caller="") 
             => source.SelectAndOmit((item, _) => process(item), semaphoreSlim, noProcess, maximumConcurrencyCount,caller);
