@@ -4,7 +4,8 @@ using DevExpress.Xpo.DB;
 using Xpand.Extensions.ObjectExtensions;
 
 namespace Xpand.Extensions.XAF.Xpo.ConnectionProviders {
-    public class CachedDataStoreProvider : ConnectionStringDataStoreProvider, IXpoDataStoreProvider {
+    public class CachedDataStoreProvider(string connectionString)
+        : ConnectionStringDataStoreProvider(connectionString,true), IXpoDataStoreProvider {
         static CachedDataStoreProvider() {
             Factory = () => default;
             CreateStore = () => default;
@@ -22,9 +23,6 @@ namespace Xpand.Extensions.XAF.Xpo.ConnectionProviders {
         private static DataCacheRoot _root;
 
         public static CachedDataStoreProvider Instance => Lazy.Value;
-
-        public CachedDataStoreProvider(string connectionString) : base(connectionString) {
-        }
 
         public static readonly Func<(bool allowUpdateSchema, IDisposable[] rootDisposables, IDataStore dataStore)> CustomCreateUpdatingStore;
 
@@ -59,7 +57,7 @@ namespace Xpand.Extensions.XAF.Xpo.ConnectionProviders {
                 _root = new DataCacheRoot(baseDataStore);
             }
 
-            disposableObjects = Array.Empty<IDisposable>();
+            disposableObjects = [];
             return new DataCacheNode(_root);
         }
 

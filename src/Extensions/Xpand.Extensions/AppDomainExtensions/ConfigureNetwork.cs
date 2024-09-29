@@ -5,10 +5,19 @@ using System.Threading;
 namespace Xpand.Extensions.AppDomainExtensions {
     
     public static partial class AppDomainExtensions {
-        public static void ConfigureNetwork(this AppDomain appDomain, int connectionLimit = 100, int workerThreads = 100, int asyncThreads = 4) {
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls | SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11;
-            ServicePointManager.DefaultConnectionLimit = connectionLimit;
-            ThreadPool.SetMinThreads(workerThreads, asyncThreads);
+        public static void ConfigureNetwork(this AppDomain appDomain,SecurityProtocolType? securityProtocolType=null, int? connectionLimit = null, int? workerThreads = null, int? asyncThreads = null) {
+            if (securityProtocolType.HasValue) {
+                ServicePointManager.SecurityProtocol=securityProtocolType.Value;    
+            }
+
+            if (connectionLimit.HasValue) {
+                ServicePointManager.DefaultConnectionLimit = connectionLimit.Value;    
+            }
+
+            if (workerThreads.HasValue && asyncThreads.HasValue) {
+                ThreadPool.SetMinThreads(workerThreads.Value, asyncThreads.Value);    
+            }
+            
         }
     }
 }

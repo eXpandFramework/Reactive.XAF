@@ -113,8 +113,7 @@ namespace Xpand.XAF.Modules.Reactive{
                 .Merge(application.ShowInstanceDetailView())
                 ;
         }
-
-
+        
         private static IObservable<Unit> ShowInstanceDetailView(this XafApplication application)
             => application.WhenSetupComplete().SelectMany(_ => application.ShowInstanceDetailView(application.TypesInfo
                     .PersistentTypes.Attributed<ShowInstanceDetailViewAttribute>().Types().Select(info => info.Type).ToArray())).ToUnit();

@@ -17,7 +17,9 @@ using Fasterflect;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.ExpressionExtensions;
 using Xpand.Extensions.LinqExtensions;
+using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Conditional;
+using Xpand.Extensions.Reactive.ErrorHandling;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Transform.Collections;
@@ -49,9 +51,13 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             });
 
         public static IObservable<T> RefreshObjectSpace<T>(this IObservable<T> source,Func<IObjectSpace> objectSpaceSelector) 
-            => source.Select(arg => (arg,space:objectSpaceSelector()))
+            => source.Select(arg => (arg,space:objectSpaceSelector())).TakeUntil(t => t.space.IsDisposed)
                 .If(t => !t.space.IsModified,t => t.arg.Observe().Do(_ => t.space.Refresh()),t =>
-                    t.space.WhenCommitted().Take(1).Do(space => space.Refresh()).To(t.arg));
+                    t.space.WhenCommitted()
+                        .TakeUntil(t.space.WhenRollingBack().MergeToUnit(t.space.WhenDisposed())).Take(1)
+                        .TakeUntil(t.space.WhenDisposed())
+                        .Do(space => space.Refresh()).To(t.arg))
+                .CompleteOnError();
         
         public static IEnumerable<T> ShapeData<T>(this IObjectSpace objectSpace,Type objectType,CriteriaOperator criteria=null,IEnumerable<SortProperty> sorting=null,int topReturned=0,params T[] objects) where T:class{
             var filterEvaluator = objectSpace.GetExpressionEvaluator(objectType,criteria);

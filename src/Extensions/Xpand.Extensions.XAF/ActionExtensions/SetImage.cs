@@ -50,6 +50,8 @@ namespace Xpand.Extensions.XAF.ActionExtensions {
         [Description("Filter")]
         Filter,
         [Description("Actions_Send")]
-        Send
+        Send,
+        [Description("Open")]
+        Open
     }
 }

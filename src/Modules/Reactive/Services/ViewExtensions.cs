@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -172,9 +173,11 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<T> CurrentObjectChanged<T>(this IObservable<T> source) where T:View 
             => source.SelectMany(item => item.WhenCurrentObjectChanged());
 
-        public static IObservable<object> WhenSelectedObjects(this View view) 
-            => view.WhenSelectionChanged().SelectMany(_ => view.SelectedObjects.Cast<object>())
-                .StartWith(view.SelectedObjects.Cast<object>());
+        public static IObservable<IList> WhenSelectedObjects(this View view) 
+            => view.WhenSelectionChanged().Select(_ => view.SelectedObjects)
+                .StartWith(view.SelectedObjects);
+        public static IObservable<T[]> WhenSelectedObjects<T>(this View view) 
+            => view.WhenSelectedObjects().Select(list => list.OfType<T>().ToArray());
         
         public static IObservable<Frame> ToFrame(this IObservable<DashboardViewItem> source)
             => source.Select(item => item.Frame);

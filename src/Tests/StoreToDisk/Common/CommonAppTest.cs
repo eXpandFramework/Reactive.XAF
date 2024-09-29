@@ -26,7 +26,7 @@ namespace Xpand.XAF.Modules.StoreToDisk.Tests.Common {
         }
 
         protected void CreateStorage(string name, bool protect=false) {
-            Application.Modules.FindModule<StoreToDiskModule>().ClearCache();
+            // Application.Modules.FindModule<StoreToDiskModule>().ClearCache();
             var folder = Application.Model.ToReactiveModule<IModelReactiveModulesStoreToDisk>().StoreToDisk.Folder;
             if (Directory.Exists(folder)) {
                 Directory.Delete(folder, true);
@@ -36,7 +36,7 @@ namespace Xpand.XAF.Modules.StoreToDisk.Tests.Common {
                 if (protect) {
                     bytes = data.Protect();
                 }
-                bytes.Save($"{folder}\\{typeof(STD).StoreToDiskFileName()}");
+                // bytes.Save($"{folder}\\{typeof(STD).StoreToDiskFileName()}");
             }
         }
         [OneTimeSetUp]

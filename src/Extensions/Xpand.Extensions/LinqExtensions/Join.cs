@@ -24,6 +24,7 @@ namespace Xpand.Extensions.LinqExtensions{
 		public static string JoinNewLine(this IEnumerable source) => source?.Join(Environment.NewLine);
 		public static string JoinSpace(this IEnumerable source) => source?.Join(" ");
 		public static string JoinComma(this IEnumerable source) => source?.Join(",");
+		public static string JoinSlash(this IEnumerable source) => source?.Join("/");
 		public static string JoinDot(this IEnumerable source) => source?.Join(".");
 		public static string JoinCommaSpace(this IEnumerable source) => source?.Join(", ");
 		public static string JoinColonSpace(this IEnumerable source) => source?.Join(": ");

@@ -18,7 +18,7 @@ namespace Xpand.XAF.Modules.StoreToDisk {
         
         public override void Setup(XafApplication application) {
             base.Setup(application);
-            // application.Connect().Finally(() => {}).Subscribe(this);
+            application.Connect().Finally(() => {}).Subscribe(this);
         }
 
         public override void ExtendModelInterfaces(ModelInterfaceExtenders extenders) {

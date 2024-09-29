@@ -17,6 +17,7 @@ using DevExpress.Xpo.Providers;
 using Fasterflect;
 using Swordfish.NET.Collections.Auxiliary;
 using Xpand.Extensions.AppDomainExtensions;
+using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.StringExtensions;
 using Xpand.Extensions.XAF.TypesInfoExtensions;
@@ -30,6 +31,10 @@ namespace Xpand.Extensions.XAF.Xpo {
 
     
     public static class XpoExtensions {
+        public static void UpdateSchema(this XPDictionary xpDictionary, string connectionString) 
+            => XpoDefault.GetConnectionProvider(connectionString, AutoCreateOption.DatabaseAndSchema)
+                .UpdateSchema(false,xpDictionary.Classes.Cast<XPClassInfo>().Select(info => info.Table).WhereNotDefault().ToArray());
+        
         public static IDataLayer GetDataLayer(this ITypesInfo typesInfo,string connectionString,AutoCreateOption autoCreateOption=AutoCreateOption.None) 
             => XpoDefault.GetDataLayer(connectionString, ((TypesInfo)typesInfo).EntityStores.OfType<XpoTypeInfoSource>().First().XPDictionary, autoCreateOption);
         
