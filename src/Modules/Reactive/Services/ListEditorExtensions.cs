@@ -19,6 +19,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => editor.GridView()?.CallMethod("BeginDataUpdate");
 
         public static object GridView(this ListEditor editor) => editor.TryGetPropertyValue("GridView");
+        public static T GridView<T>(this ListEditor editor) => (T)editor.GridView();
 
         public static void EndGridViewDataUpdate(this ListEditor editor)
             => editor.GridView()?.CallMethod("EndDataUpdate");

@@ -1,45 +1,38 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
+using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
-using System.Security.Cryptography;
-using System.Text.Json;
-using System.Text.Json.Nodes;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;
+using DevExpress.Xpo;
+using DevExpress.Xpo.Metadata;
 using HarmonyLib;
-using Swordfish.NET.Collections.Auxiliary;
-using Xpand.Extensions.BytesExtensions;
-using Xpand.Extensions.JsonExtensions;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Combine;
-using Xpand.Extensions.Reactive.Filter;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Transform;
-using Xpand.Extensions.Reactive.Transform.System.IO;
+using Xpand.Extensions.Reactive.Transform.System;
 using Xpand.Extensions.Reactive.Utility;
-using Xpand.Extensions.StringExtensions;
 using Xpand.Extensions.XAF.Attributes;
+using Xpand.Extensions.XAF.ObjectSpaceExtensions;
 using Xpand.Extensions.XAF.TypesInfoExtensions;
+using Xpand.Extensions.XAF.Xpo;
+using Xpand.Extensions.XAF.Xpo.ConnectionProviders;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.StoreToDisk{
     public static class StoreToDiskService{
-        private static readonly ConcurrentDictionary<string, Dictionary<object,JsonNode>> StorageCache = new();
-        private static readonly ConcurrentDictionary<Type, string> StoreToDiskFileNames = new();
-        internal static IObservable<Unit> Connect(this XafApplication application) 
-            => application.WhenSetupComplete()
-                .SelectMany(_ =>application.StoreToDisk(application.Model.ToReactiveModule<IModelReactiveModulesStoreToDisk>().StoreToDisk.Folder)
-                    .MergeToUnit(application.DailyBackup()) );
-
-        public static void ClearCache(this StoreToDiskModule module) {
-            StorageCache.Clear();
-            StoreToDiskFileNames.Clear();
+        internal static IObservable<Unit> Connect(this XafApplication application) {
+            
+            return application.WhenSetupComplete()
+                .SelectMany(_ => application
+                    .StoreToDisk()
+                    .MergeToUnit(application.DailyBackup()));
         }
         
         private static IObservable<Unit> DailyBackup(this XafApplication application)
@@ -56,152 +49,121 @@ namespace Xpand.XAF.Modules.StoreToDisk{
                 })
                 .ToUnit();
 
-        private static IObservable<(object[] objects, Dictionary<object,JsonNode> JsonArray)> LoadFromDisk(this (IObjectSpace objectSpace, (object instance, ObjectModification modification)[] details) source,(IMemberInfo keyMember, IMemberInfo[] memberInfos, ITypeInfo typeInfo, string filePath, StoreToDiskAttribute attribute) data) 
-            => Observable.Defer(() => data.attribute.DeserializeStorage(data)
-                .SelectMany(jsonNodes => {
-                    var newObjects = source.details.Where(details => details.modification == ObjectModification.New).Select(t => t.instance).ToArray();
-                    return newObjects.Length == 0 ? (newObjects, jsonNodes).Observe() : source.details.LoadFromDisk(data.keyMember, data.memberInfos, newObjects, jsonNodes, source.objectSpace);
-                }));
-
-        private static IObservable<(object[] objects, Dictionary<object,JsonNode> JsonArray)> LoadFromDisk(this (object instance, ObjectModification modification)[] source, IMemberInfo keyMember,
-            IMemberInfo[] memberInfos, object[] newObjects, Dictionary<object, JsonNode> jsonArray, IObjectSpace space) 
-            => newObjects.ToNowObservable()
-                .SelectMany(newObject => {
-                    var key = (string)keyMember.GetValue(newObject);
-                    if (key==null||!jsonArray.TryGetValue(key,out var jToken))return Observable.Empty<object>();
-                    return memberInfos.ToNowObservable()
-                        .WhenDefault(info => info.GetValue(newObject))
-                        .Do(info => {
-                            var value = ((JsonValue)jToken[info.Name])?.Deserialize(
-                                !info.MemberTypeInfo.IsPersistent
-                                    ? info.MemberType
-                                    : info.MemberTypeInfo.KeyMember.MemberType);
-                            var change = !info.MemberTypeInfo.IsPersistent ? value :
-                                value == null ? null : space.GetObjectByKey(info.MemberType, value);
-                            info.SetValue(newObject, change);
-                        })
-                        .Select(_ => newObject);
-                })
-                .BufferUntilCompleted()
-                .Select(_ => (source.Where(t => t.modification!=ObjectModification.New)
-                    .Select(t => space.GetObject(t.instance)).Concat(newObjects).ToArray(), JsonArray: jsonArray));
+        private static IObservable<UnitOfWork> LoadFromDisk(
+            this (IObjectSpace objectSpace, (object instance, ObjectModification modification)[] details) source,
+            ((XPClassInfo classInfo, ITypeInfo typeInfo) types, (IMemberInfo keyMember, XPCustomMemberInfo storeToDiskKeyMember) key, Dictionary<string, (IMemberInfo memberInfo, XPCustomMemberInfo xpCustomMemberInfo)> memberInfos, ThreadSafeDataLayer layer, string Criteria) data) 
+            => Observable.Defer(() => {
+                var newObjects = source.details.Where(details => details.modification == ObjectModification.New).Select(t => t.instance)
+                    .Where(o => source.objectSpace.IsObjectFitForCriteria(data.Criteria,o)).ToArray();
+                var unitOfWork = new UnitOfWork(data.layer);
+                newObjects.Execute(newObject => {
+                    var savedObject = unitOfWork.GetObjectByKey(data.types.classInfo, data.key.keyMember.GetValue(newObject));
+                    if (savedObject != null) {
+                        data.memberInfos.Values.Select(t => t.xpCustomMemberInfo).Execute(xpCustomMemberInfo
+                                => {
+                                var memberInfo = data.memberInfos[xpCustomMemberInfo.Name].memberInfo;
+                                var value = xpCustomMemberInfo.GetValue(savedObject);
+                                if (memberInfo.MemberTypeInfo.IsPersistent) {
+                                    value = source.objectSpace.GetObjectByKey(memberInfo.MemberTypeInfo.Type, value);
+                                }
+                                memberInfo.SetValue(newObject, value);
+                            })
+                            .Enumerate();
+                    }
+                }).Enumerate();
+                return (unitOfWork).Observe();
+            });
 
 
-        private static IObservable<Dictionary<object, JsonNode>> DeserializeStorage(this StoreToDiskAttribute attribute,
-            (IMemberInfo keyMember, IMemberInfo[] memberInfos, ITypeInfo typeInfo, string filePath, StoreToDiskAttribute
-                attribute) data) {
-            var key = Path.GetFileNameWithoutExtension(data.filePath);
-            return StorageCache.TryGetValue(key, out var value) ? value.Observe()
-                : new FileInfo(data.filePath).WhenFileReadAsBytes()
-                    .Select(bytes => {
-                        var dictionary = new Dictionary<object, JsonNode>();
-                        if (bytes.Length == 0) {
-                            dictionary.Add(attribute.Key,new JsonArray());
-                        }
-                        else {
-                            attribute.Protection.UnProtect(bytes).DeserializeJsonNode().ToJsonArray()
-                                .Execute(node => {
-                                    var jsonNode = node[attribute.Key].Deserialize(data.keyMember.MemberType)!;
-                                    dictionary.Add(jsonNode, node);
-                                })
-                                .Enumerate();    
-                        }
-                        
-                        return dictionary;
-                        
-                    })
-                    .Where(result => StorageCache.TryAdd(key, result));
-        }
-
-
-        public static IObservable<Unit> StoreToDisk(this XafApplication application, string directory)
-            => application.StoreToDiskData(directory)
-                .SelectMany(data => application.WhenProviderCommittingDetailed(data.typeInfo.Type,ObjectModification.NewOrUpdated,true,[]).Where(details => details.details.Length>0)
+        public static IObservable<Unit> StoreToDisk(this XafApplication application)
+            => application.StoreToDiskData()
+                .SelectMany(data => data.data.ToNowObservable()
+                    // .Where(t => t.types.typeInfo.Type.Name=="Network")
+                    .SelectMany(t => application.WhenProviderCommittingDetailed(t.types.typeInfo.Type,ObjectModification.NewOrUpdated,true,[]).Where(details => details.details.Length>0)
                     .SelectMany(committed => {
-                        var modifiedObjects = committed.objectSpace.ModifiedObjects(ObjectModification.NewOrUpdated).Select(t => t.instance).ToArray();
-                        return committed.LoadFromDisk(data).Zip(committed.objectSpace.WhenCommitted().Take(1)).ToFirst()
+                        var modifiedObjects = committed.objectSpace.ModifiedObjects(ObjectModification.NewOrUpdated)
+                            .Select(t1 => t1.instance).ExactType(t.types.typeInfo.Type).Where(o => t.Criteria==null||committed.objectSpace.IsObjectFitForCriteria(t.Criteria,o))
+                            .ToArray();
+                        return committed.LoadFromDisk((t.types,t.key,t.memberInfos,data.layer,t.Criteria)).Zip(committed.objectSpace.WhenCommitted().Take(1)).ToFirst()
                             .TakeUntil(committed.objectSpace.WhenDisposed().MergeToUnit(committed.objectSpace.WhenRollingBack()))
-                            .StoreToDisk(modifiedObjects, data);
-                    }))
+                            .SelectMany(unitOfWork => unitOfWork.SaveData(modifiedObjects,(t.key,t.memberInfos,t.types)));
+                    })))
                 
                 .ToUnit();
-        
-        private static IObservable<JsonObject[]> StoreToDisk(this IObservable<(object[] objects, Dictionary<object,JsonNode> JsonArray)> source,
-                object[] committed, (IMemberInfo keyMember, IMemberInfo[] memberInfos, ITypeInfo typeInfo, string filePath, StoreToDiskAttribute attribute) data)
-            => source.SelectMany(loadFromDisk => data.ObjectsToStore(committed,  loadFromDisk.objects.WhereNotDefault().ToArray())
-                .StoreToDisk(loadFromDisk.JsonArray, data.keyMember, data.memberInfos, data.filePath, data.attribute));
 
-        private static object[] ObjectsToStore(this (IMemberInfo keyMember, IMemberInfo[] memberInfos, ITypeInfo typeInfo, string filePath, StoreToDiskAttribute attribute) data,
-            object[] committed, object [] loadedObjects) {
-            var loadedKeys = loadedObjects.Select(o => data.keyMember.GetValue(o)).ToHashSet();
-            var valueTuples = committed.Where(details => !loadedKeys.Contains(data.keyMember.GetValue(details))).ToArray();
-            return valueTuples.Select(updated => updated).Concat(loadedObjects).ToArray();
+        private static IObservable<Unit> SaveData(this UnitOfWork unitOfWork, object[] modifiedObjects,
+            ((IMemberInfo keyMember, XPCustomMemberInfo storeToDiskKeyMember) key, Dictionary<string, (IMemberInfo memberInfo, XPCustomMemberInfo xpCustomMemberInfo)> memberInfos, (XPClassInfo classInfo, ITypeInfo typeInfo) types) t)
+            => modifiedObjects.ToNowObservable().SelectMany(modifiedObject => {
+                    var key = t.key.keyMember.GetValue(modifiedObject);
+                    object storedToDiskObject = null;
+                    return t.memberInfos.Values
+                        .Select(members => {
+                            var theValue = members.memberInfo.GetValue(modifiedObject);
+                            if (theValue.IsDefaultValue(members.memberInfo.MemberType)) return Unit.Default;
+                            if ( storedToDiskObject == null) {
+                                storedToDiskObject=unitOfWork.GetObjectByKey(t.types.classInfo,key)?? t.types.classInfo.CreateObject(unitOfWork);
+                                t.key.storeToDiskKeyMember.SetValue(storedToDiskObject,key);
+                            }
+                            members.xpCustomMemberInfo.SetValue(storedToDiskObject, theValue);
+
+                            return Unit.Default;
+                        });
+                })
+                .DoWhen((i, unit) => i%100==0,(unit, i) => unitOfWork.CommitChanges())
+                .FinallySafe(() => {
+                    unitOfWork.CommitChanges();
+                    unitOfWork.Dispose();
+                })
+                .ToUnit();
+
+        private static
+            IObservable<(ThreadSafeDataLayer layer, ((XPClassInfo classInfo, ITypeInfo typeInfo) types,
+                Dictionary<string, (IMemberInfo memberInfo, XPCustomMemberInfo xpCustomMemberInfo)> memberInfos, (
+                IMemberInfo keyMember, XPCustomMemberInfo storeToDiskKeyMember) key, string Criteria)[] data)>
+            StoreToDiskData(this XafApplication application) {
+            var reflectionDictionary = new ReflectionDictionary();
+            return application.TypesInfo.PersistentTypes
+                .Select(info => info).Attributed<StoreToDiskAttribute>().ToNowObservable()
+                .Validate()
+                .Select(t => {
+                    var classInfo = reflectionDictionary.CreateClass(t.typeInfo.Type.Name,new DeferredDeletionAttribute(false),new OptimisticLockingAttribute(OptimisticLockingBehavior.NoLocking));
+                    var memberInfos = t.attribute.Properties.Select(property => t.typeInfo.FindMember(property))
+                        .Select(memberInfo => (memberInfo, xpCustomMemberInfo: classInfo.CreateMember(memberInfo.Name,
+                            memberInfo.MemberTypeInfo.IsPersistent
+                                ? memberInfo.MemberTypeInfo.KeyMember.MemberType
+                                : memberInfo.MemberType, memberInfo.Attributes.ToArray())))
+                        .ToDictionary(t1 => t1.memberInfo.Name, t1 => t1);
+                    var keyMember = t.typeInfo.FindMember(t.attribute.Key);
+                    var storeToDiskKeyMember =
+                        classInfo.CreateMember(keyMember.Name, keyMember.MemberType, keyMember.Attributes.Where(attribute => attribute.GetType()!=typeof(KeyAttribute))
+                            .AddItem(new KeyAttribute()).ToArray());
+                    return ((types:classInfo,t.typeInfo),memberInfos, key: (keyMember, storeToDiskKeyMember), t.attribute.Criteria);
+
+                }).BufferUntilCompleted()
+                .SelectMany(data => reflectionDictionary.DataLayer()
+                    .Select(layer => (layer, data)));
         }
 
-        private static IObservable<(IMemberInfo keyMember, IMemberInfo[] memberInfos, ITypeInfo typeInfo, string filePath, StoreToDiskAttribute attribute)> StoreToDiskData(
-                this XafApplication application, string directory)
-            => application.TypesInfo.PersistentTypes
-                .Select(info => info).Attributed<StoreToDiskAttribute>().ToNowObservable()
-                .Select(t => (keyMember:t.typeInfo.FindMember(t.attribute.Key),memberInfos:t.attribute.Properties.Select(property =>t.typeInfo.FindMember(property)).ToArray(),t.attribute,t.typeInfo))
-                .SelectMany(t => new DirectoryInfo(directory).WhenDirectory().Select(_ => t.typeInfo.EnsureFile(directory))
-                    .Select(filePath => ( t.keyMember, t.memberInfos, t.typeInfo, filePath,t.attribute)));
-        
-        private static IObservable<JsonObject[]> StoreToDisk(this object[] objects, Dictionary<object, JsonNode> jsonArray,
-            IMemberInfo keyMember, IMemberInfo[] memberInfos, string filePath, StoreToDiskAttribute attribute) 
-            => objects.ToNowObservable().SelectMany(instance => {
-                    var jtoken = memberInfos.GetObject(keyMember,   instance);
-                    return jtoken != null ? memberInfos.ToNowObservable()
-                            .Do(memberInfo => {
-                                var memberValue = memberInfo.GetMemberValue(instance);
-                                if (memberValue.IsDefaultValue()) return;
-                                jtoken[memberInfo.Name] = memberValue.ToJsonNode();
-                            })
-                            .ConcatIgnoredValue(jtoken)
-                        : Observable.Empty<JsonObject>();
-                }).BufferUntilCompleted(true)
-                .Do(jsonObjects => {
-                    var removeExisting = objects.RemoveExisting(jsonArray, keyMember);
-                    var array = new JsonArray(jsonObjects.Concat(removeExisting.Keys.Select(key => removeExisting[key])
-                        .Select(node => node is JsonArray { Count: 0 } ? null : node.Deserialize<JsonObject>())).WhereNotDefault().Cast<JsonNode>().ToArray());
-                    array.SaveFile(attribute.Protection, filePath,removeExisting);
+        private static IObservable<(StoreToDiskAttribute attribute, ITypeInfo typeInfo)> Validate(
+            this IObservable<(StoreToDiskAttribute attribute, ITypeInfo typeInfo)> source)
+            => source.If(t => t.typeInfo.IsAbstract, t
+                    => new InvalidOperationException(
+                            $"{nameof(StoreToDiskAttribute)} found on abstract {t.typeInfo.FullName}")
+                        .Throw<(StoreToDiskAttribute attribute, ITypeInfo typeInfo)>(), t => t.Observe())
+                .If(t => !t.typeInfo.IsPersistent,
+                    t => new InvalidOperationException(
+                            $"{nameof(StoreToDiskAttribute)} found on NonPersistent {t.typeInfo.FullName}")
+                        .Throw<(StoreToDiskAttribute attribute, ITypeInfo typeInfo)>(), t => t.Observe());
+        private static IObservable<ThreadSafeDataLayer> DataLayer(this ReflectionDictionary reflectionDictionary)
+            => AppDomain.CurrentDomain.ExecuteOnce()
+                .Select(_ => {
+                    var connectionString = ConfigurationManager.ConnectionStrings["StoreToDisk"].ConnectionString;
+                    reflectionDictionary.UpdateSchema( connectionString);
+                    var cachedDataStoreProvider = new CachedDataStoreProvider(connectionString);
+                    return new ThreadSafeDataLayer(reflectionDictionary, cachedDataStoreProvider
+                        .CreateWorkingStore(out var _));
                 });
 
-        private static Dictionary<object, JsonNode> RemoveExisting(this object[] objects,Dictionary<object, JsonNode> jsonArray  ,IMemberInfo keyMember) {
-            objects.ForEach(o => {
-                var value = keyMember.GetValue(o);
-                if (value==null)return;
-                jsonArray.Remove(value);
-            });
-            return jsonArray;
-        }
-
-        [SuppressMessage("Interoperability", "CA1416:Validate platform compatibility")]
-        private static void SaveFile(this JsonArray json,DataProtectionScope? scope,string filePath,Dictionary<object,JsonNode> dictionary) {
-            StorageCache[Path.GetFileNameWithoutExtension(filePath)] = dictionary;
-            var bytes = json.Utf8Bytes(new JsonSerializerOptions(){WriteIndented = true});
-            (scope != null ? bytes.Protect(scope.Value) : bytes).Save(filePath);
-        }
-
-        private static JsonObject GetObject(this IMemberInfo[] memberInfos,IMemberInfo keyMember,   object instance) {
-            var memberValue = keyMember.GetMemberValue(instance);
-            var properties = memberInfos.Select(info => (info.Name, memberValue:info.GetMemberValue(instance)))
-                .AddItem((keyMember.Name, memberValue)).Where(t => !t.memberValue.IsDefaultValue()).ToArray();
-            return properties.Length > 1 ? properties.ToDictionary().SerializeToNode()!.AsObject() : null;
-        }
         
-        private static string EnsureFile(this  ITypeInfo typeInfo,string directory){
-            var filePath = $"{new DirectoryInfo(directory).FullName}\\{typeInfo.Type.StoreToDiskFileName()}";
-            if (!File.Exists(filePath)){
-                File.CreateText(filePath);
-            }
-            return filePath;
-        }
-
-        
-        public static string StoreToDiskFileName(this Type type) 
-            => StoreToDiskFileNames.GetOrAdd(type, type1 => type1.FullName.CleanCodeName().JoinString(".json"));
-
-        
-
     }
 }

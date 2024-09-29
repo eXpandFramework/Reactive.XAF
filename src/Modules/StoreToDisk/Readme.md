@@ -67,6 +67,11 @@ In the screencast:
 
 --- 
 
+**Update**
+29/09/24
+
+The module now stores the data in a database using the `StoreToDisk` connectionstring entry.
+
 **Possible future improvements:**
 
 1. Any other need you may have.

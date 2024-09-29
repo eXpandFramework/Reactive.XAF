@@ -21,14 +21,15 @@ using Xpand.XAF.Modules.StoreToDisk.Tests.BOModel;
 using Xpand.XAF.Modules.StoreToDisk.Tests.Common;
 
 namespace Xpand.XAF.Modules.StoreToDisk.Tests {
+    
     public class StoreToDiskTests:CommonAppTest {
         [Test][Order(0)]
         public void When_Application_ObjectSpace_Commits_New_Objects() {
             
             var folder = Application.Model.ToReactiveModule<IModelReactiveModulesStoreToDisk>().StoreToDisk.Folder;
             if (Directory.Exists(folder)) {
-                Directory.Delete(folder, true);
-                CreateStorage(nameof(When_Application_ObjectSpace_Commits_New_Objects));
+                // Directory.Delete(folder, true);
+                // CreateStorage(nameof(When_Application_ObjectSpace_Commits_New_Objects));
             }
             var testObserver = new DirectoryInfo(folder!).WhenFileCreated().TakeFirst().Test();
             var objectSpace = Application.CreateObjectSpace();
