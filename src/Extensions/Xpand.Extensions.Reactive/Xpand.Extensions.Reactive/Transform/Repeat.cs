@@ -4,6 +4,7 @@ using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Xpand.Extensions.Fasterflect;
+using Xpand.Extensions.Reactive.Transform.System;
 using Xpand.Extensions.TypeExtensions;
 
 namespace Xpand.Extensions.Reactive.Transform {
@@ -43,6 +44,9 @@ namespace Xpand.Extensions.Reactive.Transform {
                 return disposables;
             });
 
+        public static IObservable<T> RepeatWhen<T>(this IObservable<T> source, TimeSpan timeSpan)
+            => source.RepeatWhen(obs => obs.SelectMany(_ => timeSpan.Timer()));
+        
         public static IObservable<T> RepeatUntilEmpty<T>(this IObservable<T> source) 
             => source.Materialize()
                 .Repeat()
