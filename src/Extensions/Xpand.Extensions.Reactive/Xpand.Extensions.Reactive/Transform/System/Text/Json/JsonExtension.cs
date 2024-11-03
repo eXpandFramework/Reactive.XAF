@@ -25,7 +25,7 @@ namespace Xpand.Extensions.Reactive.Transform.System.Text.Json {
             );
         
         public static IObservable<JsonDocument> WhenJsonDocument(this Stream stream,bool throwIfEmpty=true) 
-            => JsonDocument.ParseAsync(stream).ToObservable()
+            => Observable.FromAsync(() => JsonDocument.ParseAsync(stream))
                 .Catch<JsonDocument,Exception>(exception => throwIfEmpty ? exception.Throw<JsonDocument>() :
                     stream.ReadToEndAsString() == String.Empty ? JsonDocument.Parse("{}").Observe() :
                     exception.Throw<JsonDocument>());
