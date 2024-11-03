@@ -16,9 +16,14 @@ namespace Xpand.Extensions.Reactive.Utility {
             var stopwatch = new Stopwatch();
     
             return source
-                .DoWhen(_ => action.HasFlag(RXAction.Subscribe),_ => {
-                    stopwatch.Start();
-                    WriteLine($"{caller} - Subscribe");                })
+                .DoOnSubscribe(() => {
+                    if (action.HasFlag(RXAction.Subscribe)) {
+                        stopwatch.Start();
+                        var value = $"{caller} - Subscribe";
+                        WriteLine(value); 
+                        Debug.WriteLine(value);
+                    }
+                })
                 .Finally(() => {
                     if (!action.HasFlag(RXAction.Dispose)) return;
                     WriteLine($"{caller} - Dispose");
