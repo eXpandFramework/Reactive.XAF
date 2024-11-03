@@ -6,6 +6,7 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Editors;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Numeric;
+using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.Attributes;
@@ -22,7 +23,7 @@ namespace Xpand.XAF.Modules.Reactive.Services {
         
         private static IObservable<View> RefreshObjectViewWhenCommitted<TObject>(this XafApplication application, Type detailViewObjectType=null,Func<Frame,TObject[],bool> match=null) where TObject : class
             =>application.WhenProviderCommittedDetailed<TObject>(ObjectModification.All,emitUpdatingObjectSpace:true,_ => true).ToObjects()
-                .BufferUntilInactive(2.Seconds()).Publish(source => source.RefreshObjectViewWhenCommitted(application,detailViewObjectType,match));
+                .BufferUntilInactive(2.Seconds()).WhenNotEmpty().Publish(source => source.RefreshObjectViewWhenCommitted(application,detailViewObjectType,match));
 
         private static IObservable<View> RefreshObjectViewWhenCommitted<TObject>(
             this IObservable<IList<TObject>> source, XafApplication application, Type detailViewObjectType = null,

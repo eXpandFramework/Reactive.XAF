@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using TextCopy;
+using Xpand.Extensions.BytesExtensions;
 
 namespace Xpand.Extensions.StringExtensions{
     public static partial class StringExtensions{

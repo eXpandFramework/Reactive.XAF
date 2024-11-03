@@ -109,7 +109,7 @@ namespace Xpand.XAF.Modules.StoreToDisk{
                             return Unit.Default;
                         });
                 })
-                .DoWhen((i, unit) => i%100==0,(unit, i) => unitOfWork.CommitChanges())
+                .DoWhen((i, _) => i%100==0,(_, _) => unitOfWork.CommitChanges())
                 .FinallySafe(() => {
                     unitOfWork.CommitChanges();
                     unitOfWork.Dispose();
@@ -119,8 +119,7 @@ namespace Xpand.XAF.Modules.StoreToDisk{
         private static
             IObservable<(ThreadSafeDataLayer layer, ((XPClassInfo classInfo, ITypeInfo typeInfo) types,
                 Dictionary<string, (IMemberInfo memberInfo, XPCustomMemberInfo xpCustomMemberInfo)> memberInfos, (
-                IMemberInfo keyMember, XPCustomMemberInfo storeToDiskKeyMember) key, string Criteria)[] data)>
-            StoreToDiskData(this XafApplication application) {
+                IMemberInfo keyMember, XPCustomMemberInfo storeToDiskKeyMember) key, string Criteria)[] data)> StoreToDiskData(this XafApplication application) {
             var reflectionDictionary = new ReflectionDictionary();
             return application.TypesInfo.PersistentTypes
                 .Select(info => info).Attributed<StoreToDiskAttribute>().ToNowObservable()
@@ -134,8 +133,7 @@ namespace Xpand.XAF.Modules.StoreToDisk{
                                 : memberInfo.MemberType, memberInfo.Attributes.ToArray())))
                         .ToDictionary(t1 => t1.memberInfo.Name, t1 => t1);
                     var keyMember = t.typeInfo.FindMember(t.attribute.Key);
-                    var storeToDiskKeyMember =
-                        classInfo.CreateMember(keyMember.Name, keyMember.MemberType, keyMember.Attributes.Where(attribute => attribute.GetType()!=typeof(KeyAttribute))
+                    var storeToDiskKeyMember = classInfo.CreateMember(keyMember.Name, keyMember.MemberType, keyMember.Attributes.Where(attribute => attribute.GetType()!=typeof(KeyAttribute))
                             .AddItem(new KeyAttribute()).ToArray());
                     return ((types:classInfo,t.typeInfo),memberInfos, key: (keyMember, storeToDiskKeyMember), t.attribute.Criteria);
 

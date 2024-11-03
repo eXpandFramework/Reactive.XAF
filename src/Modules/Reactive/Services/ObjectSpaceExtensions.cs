@@ -156,9 +156,10 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => objectSpace.WhenModifiedObjects(typeof(T),properties).Cast<T>();
 
         public static IObservable<object> WhenModifiedObjects(this IObjectSpace objectSpace, Type objectType, params string[] properties) {
-            var notExisting = properties.WhereDefault(name => objectType.ToTypeInfo().FindMember(name)).ToArray();
+            var typeInfo = objectType.ToTypeInfo();
+            var notExisting = properties.WhereDefault(name => typeInfo.FindMember(name)).ToArray();
             if (notExisting.Any()) {
-                return new InvalidOperationException($"{objectType.FullName} member ({notExisting.JoinComma()}) not found").Throw<object>();
+                return new InvalidOperationException($"{nameof(WhenModifiedObjects)}: {objectType.FullName} member ({notExisting.JoinComma()}) not found").Throw<object>();
             }
             return objectSpace.WhenObjectChanged()
                 .Where(t => objectType.IsInstanceOfType(t.e.Object) && properties.PropertiesMatch(t))
