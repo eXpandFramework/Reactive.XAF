@@ -16,7 +16,7 @@ namespace Xpand.Extensions.XAF.CollectionSourceExtensions{
 		        return listSource.GetList().Cast<T>();
 	        if (collectionSourceBase is PropertyCollectionSource propertyCollectionSource) {
 		        var masterObject = propertyCollectionSource.MasterObject;
-		        return masterObject != null ? ((IEnumerable)propertyCollectionSource.MemberInfo.GetValue(masterObject)).Cast<T>() : Enumerable.Empty<T>();
+		        return masterObject != null ? ((IEnumerable)propertyCollectionSource.MemberInfo.GetValue(masterObject)).Cast<T>() : [];
 	        }
 	        return collectionSourceBase.Collection is QueryableCollection queryableCollection
 		        ? ((IEnumerable<T>)queryableCollection.Queryable).ToArray() : throw new NotImplementedException($"{collectionSourceBase}");
