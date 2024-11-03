@@ -32,14 +32,14 @@ namespace Xpand.Extensions.XAF.Xpo.ObjectSpaceExtensions{
             var dbConnection = objectSpace.Connection();
             var options = dbConnection.TryGetPropertyValue("ConnectionOptions");
             if (options == null) return dbConnection.ConnectionString;
-            var password = options.GetPropertyValue("Password");
-            if (password == null) return dbConnection.ConnectionString;
+            var password = options.GetPropertyValue("Password") as string;
+            if (string.IsNullOrEmpty(password) ) return dbConnection.ConnectionString;
             var connectionStringParser = new ConnectionStringParser(dbConnection.ConnectionString);
             if (connectionStringParser.PartExists("Password")) {
-                connectionStringParser.UpdatePartByName("Password",password.ToString());
+                connectionStringParser.UpdatePartByName("Password",password);
             }
             else {
-                connectionStringParser.AddPart("Password",password.ToString());    
+                connectionStringParser.AddPart("Password",password);    
             }
             
             return connectionStringParser.GetConnectionString();
