@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.Extensions.Mono.Cecil</id>
-    <version>4.241.6.0</version>
+    <version>4.241.6.3</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -12,7 +12,7 @@
     <description>Xpand.Extensions.Mono.Cecil</description>
     <releaseNotes>https://github.com/eXpandFramework/Reactive.XAF/releases</releaseNotes>
     <copyright>eXpandFramework.com</copyright>
-    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Xpand.Extensions.Mono.Cecil, 24.1.6</tags>
+    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Xpand.Extensions.Mono.Cecil, 24.1.7</tags>
     <dependencies>
       <group targetFramework="net6.0">
         <dependency id="Fasterflect.Xpand" version="2.0.7" />

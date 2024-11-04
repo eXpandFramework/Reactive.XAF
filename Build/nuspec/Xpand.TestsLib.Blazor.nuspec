@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.TestsLib.Blazor</id>
-    <version>4.241.6.0</version>
+    <version>4.241.6.3</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -12,35 +12,35 @@
     <description>Xpand.TestsLib.Blazor</description>
     <releaseNotes>https://github.com/eXpandFramework/Reactive.XAF/releases</releaseNotes>
     <copyright>eXpandFramework.com</copyright>
-    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Xpand.TestsLib.Blazor, 24.1.6</tags>
+    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Xpand.TestsLib.Blazor, 24.1.7</tags>
     <dependencies>
       <group targetFramework="net8.0">
-        <dependency id="Xpand.Extensions" version="4.241.6.0" />
-        <dependency id="Xpand.Extensions.Blazor" version="4.241.6.0" />
-        <dependency id="Xpand.Extensions.Reactive" version="4.241.6.0" />
-        <dependency id="Xpand.Extensions.XAF" version="4.241.6.0" />
-        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.241.6.0" />
-        <dependency id="Xpand.TestsLib.Common" version="4.241.6.0" />
-        <dependency id="Xpand.XAF.Modules.Reactive" version="4.241.6.0" />
-        <dependency id="Xpand.XAF.Modules.Reactive.Logger" version="4.241.6.0" />
-        <dependency id="Xpand.XAF.Modules.Reactive.Logger.Hub" version="4.241.6.0" />
+        <dependency id="Xpand.Extensions" version="4.241.6.3" />
+        <dependency id="Xpand.Extensions.Blazor" version="4.241.6.3" />
+        <dependency id="Xpand.Extensions.Reactive" version="4.241.6.3" />
+        <dependency id="Xpand.Extensions.XAF" version="4.241.6.3" />
+        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.241.6.3" />
+        <dependency id="Xpand.TestsLib.Common" version="4.241.6.3" />
+        <dependency id="Xpand.XAF.Modules.Reactive" version="4.241.6.3" />
+        <dependency id="Xpand.XAF.Modules.Reactive.Logger" version="4.241.6.3" />
+        <dependency id="Xpand.XAF.Modules.Reactive.Logger.Hub" version="4.241.6.3" />
         <dependency id="Fasterflect.Xpand" version="2.0.7" />
         <dependency id="System.Diagnostics.PerformanceCounter" version="6.0" />
         <dependency id="Moq" version="4.16" />
-        <dependency id="System.Text.Json" version="8.0.4" />
+        <dependency id="System.Text.Json" version="8.0.5" />
         <dependency id="Nunit" version="3.13.2" />
-        <dependency id="DevExpress.ExpressApp.Security.Xpo" version="24.1.6" />
-        <dependency id="DevExpress.Persistent.BaseImpl.Xpo" version="24.1.6" />
+        <dependency id="DevExpress.ExpressApp.Security.Xpo" version="24.1.7" />
+        <dependency id="DevExpress.Persistent.BaseImpl.Xpo" version="24.1.7" />
         <dependency id="Microsoft.Reactive.Testing" version="5.0" />
         <dependency id="System.Threading.Tasks.Dataflow" version="7.0" />
         <dependency id="akarnokd.reactive_extensions" version="0.0.27-alpha" />
-        <dependency id="DevExpress.ExpressApp.EasyTest.BlazorAdapter" version="24.1.6" />
-        <dependency id="DevExpress.EasyTest" version="24.1.6" />
-        <dependency id="DevExpress.ExpressApp.Blazor" version="24.1.6" />
+        <dependency id="DevExpress.ExpressApp.EasyTest.BlazorAdapter" version="24.1.7" />
+        <dependency id="DevExpress.EasyTest" version="24.1.7" />
+        <dependency id="DevExpress.ExpressApp.Blazor" version="24.1.7" />
         <dependency id="Microsoft.AspNetCore" version="2.2" />
         <dependency id="Microsoft.AspNetCore.Hosting" version="2.2.7" />
         <dependency id="Microsoft.Extensions.Hosting" version="6.0" />
-        <dependency id="DevExpress.ExpressApp.Blazor.All" version="24.1.6" />
+        <dependency id="DevExpress.ExpressApp.Blazor.All" version="24.1.7" />
         <dependency id="Microsoft.Data.SqlClient" version="4.1" />
       </group>
     </dependencies>
