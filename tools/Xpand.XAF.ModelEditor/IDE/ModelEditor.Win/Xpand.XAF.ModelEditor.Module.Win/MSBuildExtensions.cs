@@ -18,11 +18,12 @@ namespace Xpand.XAF.ModelEditor.Module.Win {
             }
         }
 
+        
         public static IEnumerable<(MSBuildProject msBuildProject, Project project)> Projects(this SolutionFile solution,
-            IObjectSpace objectSpace)
+            IObjectSpace objectSpace, string activeConfiguration)
             => solution.ProjectsInOrder.Where(projectInSolution => projectInSolution.ProjectType == SolutionProjectType.KnownToBeMSBuildFormat)
                 .Select(projectInSolution => {
-                    var project = new ProjectCollection(new Dictionary<string, string> {{"Configuration", solution.GetDefaultConfigurationName()}})
+                    var project = new ProjectCollection(new Dictionary<string, string> {{"Configuration", activeConfiguration}})
                         .LoadProject(projectInSolution.AbsolutePath);
 
                     var evaluatedProperties = project.AllEvaluatedProperties;

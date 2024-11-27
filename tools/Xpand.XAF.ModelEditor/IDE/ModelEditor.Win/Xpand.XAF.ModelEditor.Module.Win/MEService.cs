@@ -113,7 +113,7 @@ namespace Xpand.XAF.ModelEditor.Module.Win {
 
             var versionsGroup = Directory.GetFiles(Path.GetDirectoryName(assemblyPath)!,"DevExpress.ExpressApp*.dll")
 	            .Where(s => {
-		            var fileName = Path.GetFileName(s);
+		            var fileName = Path.GetFileName(s); 
 		            return fileName.StartsWith("DevExpress.ExpressApp")&&!fileName.Contains("CodeAnalysis");
 	            })
                 .GroupBy(s => Version.Parse(FileVersionInfo.GetVersionInfo(s).FileVersion!)).ToArray();
