@@ -1,9 +1,11 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Drawing;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Win.Editors;
@@ -13,6 +15,8 @@ using DevExpress.XtraEditors.Mask;
 using DevExpress.XtraEditors.Repository;
 using DevExpress.XtraGrid.Views.Grid;
 using DevExpress.XtraGrid.Views.Grid.ViewInfo;
+using Xpand.Extensions.XAF.Attributes;
+using Xpand.Extensions.XAF.ViewExtensions;
 using Xpand.XAF.Modules.Reactive.Services;
 using EditorAliases = Xpand.Extensions.XAF.Attributes.EditorAliases;
 using ListView = DevExpress.ExpressApp.ListView;
@@ -42,7 +46,8 @@ namespace Xpand.XAF.Modules.Windows.Editors {
             GridHitInfo hi = gv.CalcHitInfo(new Point(e.X, e.Y));
             if (hi.InRowCell && hi.Column.ColumnEdit is RepositoryItemHyperLinkEdit repositoryItemHyperLinkEdit) {
                 var editor = (HyperLinkEdit)repositoryItemHyperLinkEdit.CreateEditor();
-                editor.ShowBrowser(HyperLinkPropertyEditor.GetResolvedUrl(gv.GetRowCellValue(hi.RowHandle, hi.Column)));
+                var memberInfo = View.ToListView().Model.Columns.FirstOrDefault(column => column.FieldName==hi.Column.FieldName)?.ModelMember.MemberInfo;
+                editor.ShowBrowser(HyperLinkPropertyEditor.GetResolvedUrl(gv.GetRowCellValue(hi.RowHandle, hi.Column),memberInfo,View.SelectedObjects.Cast<object>().First()));
             }
         }
     }
@@ -72,16 +77,19 @@ namespace Xpand.XAF.Modules.Windows.Editors {
             hyperLinkProperties.Mask.EditMask = UrlEmailMask;
         }
 
-        void hyperLinkProperties_OpenLink(object sender, OpenLinkEventArgs e) {
-            e.EditValue = GetResolvedUrl(e.EditValue);
-        }
+        void hyperLinkProperties_OpenLink(object sender, OpenLinkEventArgs e) 
+            => e.EditValue = GetResolvedUrl(e.EditValue,MemberInfo, CurrentObject);
 
         public override void BreakLinksToControl(bool unwireEventsOnly){
             base.BreakLinksToControl(unwireEventsOnly);
             _objectSpace.Committing-=ObjectSpaceOnCommitting;
         }
 
-        public static string GetResolvedUrl(object value) {
+        public static string GetResolvedUrl(object value, IMemberInfo memberInfo,object currentObject) {
+            var editorAttribute = memberInfo.FindAttribute<HyperLinkPropertyEditorAttribute>();
+            if (editorAttribute != null) {
+                value = memberInfo.Owner.FindMember(editorAttribute.Name).GetValue(currentObject);
+            }
             string url = Convert.ToString(value);
             if (!string.IsNullOrEmpty(url)) {
                 if (url.Contains("@") && IsValidUrl(url))
