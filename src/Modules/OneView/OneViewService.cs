@@ -7,12 +7,12 @@ using System.Runtime.CompilerServices;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.SystemModule;
+using DevExpress.ExpressApp.Win.SystemModule;
 using Fasterflect;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.Tracing;
-using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.ViewExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.Reactive;
@@ -26,7 +26,7 @@ namespace Xpand.XAF.Modules.OneView{
 	        => manager.WhenApplication(application => {
 		        var cleanStartupNavigationItem = CleanStartupNavigationItem(application);
 		        var showView = application.ShowView().Publish().RefCount();
-		        return showView.EditModel().ToUnit()
+		        return application.EditModel().ToUnit()
 			        .Merge(showView.ExitApplication(application))
 			        .Merge(application.HideMainWindow())
 			        .Merge(cleanStartupNavigationItem);
@@ -38,7 +38,7 @@ namespace Xpand.XAF.Modules.OneView{
 		        .ToUnit();
 
         private static IObservable<Unit> ExitApplication(this IObservable<ShowViewParameters> showView,XafApplication application){
-            var editingModel = showView.SelectMany(_ =>_.Controllers.OfType<OneViewDialogController>().ToObservable()
+            var editingModel = showView.SelectMany(parameters =>parameters.Controllers.OfType<OneViewDialogController>().ToObservable()
                 .SelectMany(controller => controller.AcceptAction.WhenExecuting()));
             return  Observable.Defer(() => showView.SelectMany(parameters => parameters.CreatedView.WhenClosing()
 			            .SelectMany(_ => parameters.CreatedView.WhenClosed().To(application.MainWindow)))
@@ -47,12 +47,12 @@ namespace Xpand.XAF.Modules.OneView{
                 .ToUnit();
         }
 
-        public static IObservable<ShowViewParameters> EditModel(this IObservable<ShowViewParameters> showView) 
-	        => showView.SelectMany(parameters => parameters.Controllers.OfType<OneViewDialogController>().ToObservable()
-                    .SelectMany(controller => controller.AcceptAction.WhenExecuted()
-                        .Select(e => e.Action.Application.MainWindow.GetController("DevExpress.ExpressApp.Win.SystemModule.EditModelController").GetPropertyValue("EditModelAction"))).Cast<SimpleAction>()
-                    .Do(action => action.DoExecute()).To(parameters)
-                ).TraceOneView();
+        public static IObservable<Unit> EditModel(this XafApplication application) {
+	        return application.WhenFrame()
+		        .ToController<OneViewDialogController>().SelectMany(controller => controller.AcceptAction.WhenExecuted(
+			        e => e.DeferAction(()
+				        => application.MainWindow.GetController<EditModelController>().EditModelAction.DoExecute())));
+        }
 
         private static IObservable<Unit> HideMainWindow(this XafApplication application) 
         

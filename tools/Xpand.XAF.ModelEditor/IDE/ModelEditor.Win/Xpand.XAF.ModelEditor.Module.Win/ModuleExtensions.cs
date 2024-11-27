@@ -48,8 +48,7 @@ namespace Xpand.XAF.ModelEditor.Module.Win {
                 })
                 .ObserveOnDefault()
                 .SelectMany(parameters => application.ParseProjects( synchronizationContext, solutionPath, parameters))
-                .TraceModelEditorWindowsFormsModule(TradeParameters)
-                .EditModel();
+                .TraceModelEditorWindowsFormsModule(TradeParameters);
 
         private static IObservable<ShowViewParameters> ParseProjects(this XafApplication application, SynchronizationContext synchronizationContext, string solutionPath, ShowViewParameters parameters) 
             => application.CreateObjectSpace()
