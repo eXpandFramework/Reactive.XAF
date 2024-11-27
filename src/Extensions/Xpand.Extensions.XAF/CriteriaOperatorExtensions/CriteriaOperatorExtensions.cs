@@ -59,5 +59,10 @@ namespace Xpand.Extensions.XAF.CriteriaOperatorExtensions {
         
         public static IQueryable<T> Where<T>(this IQueryable<T> source, CriteriaOperator criteria) 
             => (IQueryable<T>)source.AppendWhere(new CriteriaToExpressionConverter(), criteria);
+
+        public static IQueryable<T> AppendIsInstanceOfType<T>(this IQueryable<T> serviceAssets,Type serviceType,string parameterName=null) 
+            => serviceAssets.Where( CriteriaOperator.Parse($"IsInstanceOfType({parameterName??"This"}, '{serviceType.FullName}')"));
+        public static IQueryable<T> AppendIsExactType<T>(this IQueryable<T> serviceAssets,Type serviceType,string parameterName=null) 
+            => serviceAssets.Where( CriteriaOperator.Parse($"IsExactType({parameterName??"This"}, '{serviceType.FullName}')"));
     }
 }
