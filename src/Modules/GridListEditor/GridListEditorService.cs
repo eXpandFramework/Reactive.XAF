@@ -4,14 +4,20 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.DC;
+using DevExpress.ExpressApp.Win.Editors;
+using DevExpress.Utils;
 using DevExpress.XtraGrid.Views.Base;
 using DevExpress.XtraGrid.Views.Grid;
 using Fasterflect;
+using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.Tracing;
+using Xpand.Extensions.XAF.Attributes;
+using Xpand.Extensions.XAF.TypesInfoExtensions;
 using Xpand.Extensions.XAF.ViewExtensions;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Services;
@@ -20,11 +26,45 @@ namespace Xpand.XAF.Modules.GridListEditor{
     public static class GridListEditorService {
         
         internal static IObservable<Unit> Connect(this  ApplicationModulesManager manager) 
-            => manager.WhenApplication(application => application.RememberTopRow().Merge(application.FocusRow()));
+            => manager.WhenApplication(application => 
+                application.RememberTopRow()
+                    .Merge(application.FocusRow())
+                    .Merge(application.SortProperties())
+            );
 
         private static IObservable<(Frame frame,TRule rule)> WhenRulesOnView<TRule>(this XafApplication application) where TRule:IModelGridListEditorRule
             => application.WhenViewOnFrame(viewType: ViewType.ListView)
                 .SelectMany(frame => application.ModelRules<TRule>(frame).Select(rule => (frame,rule)));
+
+        static IObservable<Unit> SortProperties(this XafApplication application) 
+            => application.WhenSetupComplete().SelectMany(_ => {
+                var types = application.TypesInfo.PersistentTypes.AttributedMembers<SortPropertyAttribute>()
+                    .Select(t => t.memberInfo.Owner.Type).Distinct().ToArray();
+                return application.WhenFrame(ViewType.ListView)
+                    .SelectMany(frame => {
+                        var listView = frame.View.ToListView();
+                        var attributedMembers = listView.Model.Columns
+                            .Select(column => (attribute:column.ModelMember.MemberInfo.FindAttribute<SortPropertyAttribute>(),column))
+                            .WhereNotDefault(t => t.attribute);
+                        return attributedMembers
+                            .Do(t => {
+                                var xafGridColumnWrappers = ((WinColumnsListEditor)listView.Editor).Columns.OfType<XafGridColumnWrapper>();
+                                var columnWrapper = xafGridColumnWrappers.FirstOrDefault(wrapper => t.column.Id==wrapper.Id);
+                                if (columnWrapper==null)return;
+                                columnWrapper.Column.OptionsColumn.AllowSort=DefaultBoolean.True;
+                                if (listView.ObjectTypeInfo.FindMember(columnWrapper.PropertyName) is MemberPathInfo memberInfo) {
+                                    columnWrapper.Column.FieldNameSortGroup = $"{memberInfo.GetPath().SkipLast(1).Select(info => info.Name).JoinComma()}.{t.attribute.Name}";    
+                                }
+                                else {
+                                    columnWrapper.Column.FieldNameSortGroup = t.attribute.Name;
+                                }
+                                
+                            })
+                            ;
+                    })
+                    .ToUnit();
+
+            });
 
         static IObservable<Unit> FocusRow(this XafApplication application)
             => application.WhenRulesOnView<IModelGridListEditorFocusRow>()
@@ -64,7 +104,8 @@ namespace Xpand.XAF.Modules.GridListEditor{
         public static IObservable<(RowCellCustomDrawEventArgs e, GridView gridView, Frame frame)> WhenCustomDrawGridViewCell(this XafApplication application, Type objectType, Nesting nesting) 
             => application.WhenFrame(objectType,ViewType.ListView,nesting)
                 .SelectMany(frame => frame.View.WhenControlsCreated(true).To(frame))
-                .SelectMany(frame => ((DevExpress.ExpressApp.Win.Editors.GridListEditor)frame.View.ToListView().Editor).GridView.WhenEvent(nameof(DevExpress.XtraGrid.Views.Grid.GridView.CustomDrawCell))
+                .SelectMany(frame => ((DevExpress.ExpressApp.Win.Editors.GridListEditor)frame.View.ToListView().Editor).GridView
+                    .WhenEvent(nameof(DevExpress.XtraGrid.Views.Grid.GridView.CustomDrawCell))
                     .Select(pattern => (e:(RowCellCustomDrawEventArgs)pattern.EventArgs,gridView:(GridView)pattern.Sender,frame)));
 
         public static IObservable<(RowCellCustomDrawEventArgs e, GridView gridView, Frame frame)> WhenCustomDrawGridViewCell(this XafApplication application, Type objectType = null,
