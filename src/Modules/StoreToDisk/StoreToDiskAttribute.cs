@@ -18,6 +18,13 @@ namespace Xpand.XAF.Modules.StoreToDisk{
             Protection=scope;
         }
 
+        public StoreToDiskAttribute(){
+        }
+
         public DataProtectionScope? Protection { get; set; }
+
+        public bool AutoCreate { get; set; }
+
+        public bool Map { get; set; }
     }
 }
