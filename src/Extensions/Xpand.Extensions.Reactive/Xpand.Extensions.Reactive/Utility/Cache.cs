@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using Xpand.Extensions.Reactive.Transform;
 
 namespace Xpand.Extensions.Reactive.Utility {
     public static partial class Utility {
@@ -24,6 +26,16 @@ namespace Xpand.Extensions.Reactive.Utility {
             }
 
             return source.SelectMany(secondSelector);
+        }
+
+
+        public static IObservable<Dictionary<TKey, TValue>> Cache<T, TKey, TValue>(this IObservable<T[]> source,
+            Func<T, TKey> keySelector, Func<T, TValue> valueSelector) {
+            var map = new Dictionary<TKey, TValue>();
+            return source.SelectMany(filters => filters.ToNowObservable()
+                    .Do(obj => map[keySelector(obj)] = valueSelector(obj)).TakeLast(1)
+                    .Select(_ => map))
+                .Finally(() => map.Clear());
         }
     }
 }
