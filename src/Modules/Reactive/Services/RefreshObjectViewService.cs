@@ -33,6 +33,7 @@ namespace Xpand.XAF.Modules.Reactive.Services {
                 .SelectMany(frame => source.ObserveOnContext().TakeUntil(_ => frame.IsDisposed()).Where(list => match?.Invoke(frame,list.ToArray())??true).To(frame.View)
                     .WithLatestFrom(frame.View.ObjectSpace.WhenModifyChanged().StartWith(frame.View.ObjectSpace),(view, space) => (view, space)).Where(t => !t.space.IsModified)
                     .ToFirst().Where(view => !view.IsDisposed)
+                    .TakeUntil(_ => frame.IsDisposed())
                     .RefreshView());
 
         private static IObservable<View> RefreshView(this IObservable<View> source)

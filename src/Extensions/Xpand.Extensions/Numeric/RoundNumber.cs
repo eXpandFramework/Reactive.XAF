@@ -2,6 +2,9 @@
 
 namespace Xpand.Extensions.Numeric {
     public static partial class NumericExtensions {
+        public static decimal SmartRound(this decimal d) 
+            => d.RoundNumber((d.FirstNonZeroDecimalIndex()+2));
+
         public static decimal RoundNumber(this decimal d, int decimals = 0) 
             => Math.Round(d, decimals);
         

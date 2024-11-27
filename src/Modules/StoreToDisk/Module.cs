@@ -1,6 +1,5 @@
 ﻿using System.Reactive.Linq;
 using DevExpress.ExpressApp;
-using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.SystemModule;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
@@ -21,9 +20,5 @@ namespace Xpand.XAF.Modules.StoreToDisk {
             application.Connect().Finally(() => {}).Subscribe(this);
         }
 
-        public override void ExtendModelInterfaces(ModelInterfaceExtenders extenders) {
-            base.ExtendModelInterfaces(extenders);
-            extenders.Add<IModelReactiveModules, IModelReactiveModulesStoreToDisk>();
-        }
     }
 }

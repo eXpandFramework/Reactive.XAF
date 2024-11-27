@@ -77,9 +77,9 @@ namespace Xpand.Extensions.Reactive.Transform {
                         },
                         onError: ex => {
                             lock (gate) {
+                                Dump(); 
                                 observer.OnError(ex);
-                            }
-                        },
+                            }                        },
                         onCompleted: () => {
                             lock (gate) {
                                 Dump();

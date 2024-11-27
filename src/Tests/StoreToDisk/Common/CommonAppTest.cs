@@ -27,17 +27,17 @@ namespace Xpand.XAF.Modules.StoreToDisk.Tests.Common {
 
         protected void CreateStorage(string name, bool protect=false) {
             // Application.Modules.FindModule<StoreToDiskModule>().ClearCache();
-            var folder = Application.Model.ToReactiveModule<IModelReactiveModulesStoreToDisk>().StoreToDisk.Folder;
-            if (Directory.Exists(folder)) {
-                Directory.Delete(folder, true);
-                Directory.CreateDirectory(folder);
-                var data = new[] { new { Secret = $"{name}secret", Name = name,Number=2,Dep=0 } }.Serialize();
-                var bytes = data.Bytes();
-                if (protect) {
-                    bytes = data.Protect();
-                }
-                // bytes.Save($"{folder}\\{typeof(STD).StoreToDiskFileName()}");
-            }
+            // var folder = Application.Model.ToReactiveModule<IModelReactiveModulesStoreToDisk>().StoreToDisk.Folder;
+            // if (Directory.Exists(folder)) {
+            //     Directory.Delete(folder, true);
+            //     Directory.CreateDirectory(folder);
+            //     var data = new[] { new { Secret = $"{name}secret", Name = name,Number=2,Dep=0 } }.Serialize();
+            //     var bytes = data.Bytes();
+            //     if (protect) {
+            //         bytes = data.Protect();
+            //     }
+            //     // bytes.Save($"{folder}\\{typeof(STD).StoreToDiskFileName()}");
+            // }
         }
         [OneTimeSetUp]
         public override void Init() {

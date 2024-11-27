@@ -1,15 +1,9 @@
 ﻿using System;
 
 namespace Xpand.Extensions.XAF.Attributes.Custom {
-    public class DisplayFormatAttribute : Attribute, ICustomAttribute {
-        readonly string _value;
-
-        public DisplayFormatAttribute(string value) {
-            _value = value;
-        }
-
+    public class DisplayFormatAttribute(string value) : Attribute, ICustomAttribute {
         string ICustomAttribute.Name => "DisplayFormat";
 
-        string ICustomAttribute.Value => _value;
+        string ICustomAttribute.Value => value;
     }
 }

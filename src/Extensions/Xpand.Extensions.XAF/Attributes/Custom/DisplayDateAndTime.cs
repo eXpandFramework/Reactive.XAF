@@ -15,11 +15,11 @@ namespace Xpand.Extensions.XAF.Attributes.Custom {
     [SuppressMessage("ReSharper", "IdentifierTypo")]
     [SuppressMessage("ReSharper", "InconsistentNaming")]
     public enum DisplayTimeType {
-        [Description("hh:mm:ss")]
+        [Description("HH:mm:ss")]
         hh_mm_ss,
         [Description("mm:ss")]
         mm_ss,
-        [Description("hh:mm")]
+        [Description("HH:mm")]
         hh_mm,
         [Description("mm:ss:fff")]
         mm_ss_fff

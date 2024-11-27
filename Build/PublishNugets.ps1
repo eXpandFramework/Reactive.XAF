@@ -10,11 +10,11 @@ param(
     $criteria = "Xpand.*"
 
 )
-Get-ChildItem D:\a\1\s\bin\Nupkg -ErrorAction Continue
+# Get-ChildItem D:\a\1\s\bin\Nupkg -ErrorAction Continue
 & "$sourcesRoot\go.ps1" -InstallModules
 
 
-$ErrorActionPreference="stop"
+# $ErrorActionPreference="stop"
 # $VerbosePreference="Continue"
 "localPackageSource=$localPackageSource"
 
