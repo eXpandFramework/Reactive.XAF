@@ -11,6 +11,6 @@ namespace Xpand.Extensions.XAF.Attributes {
         public const string DisplayText = "DisplayText";
         public const string BlazorLookup = "BlazorLookup";
         public const string LabelPropertyEditor = "Label";
-    
+        public const string HyperLinkPropertyEditor = "HyperLinkPropertyEditor";
     }
 }
