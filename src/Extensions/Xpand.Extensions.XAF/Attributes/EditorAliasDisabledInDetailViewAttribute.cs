@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Runtime.InteropServices;
 
 namespace Xpand.Extensions.XAF.Attributes {
@@ -12,5 +13,10 @@ namespace Xpand.Extensions.XAF.Attributes {
         public const string BlazorLookup = "BlazorLookup";
         public const string LabelPropertyEditor = "Label";
         public const string HyperLinkPropertyEditor = "HyperLinkPropertyEditor";
+    }
+
+    [AttributeUsage(AttributeTargets.Property)]
+    public class EditorAliasDisabledInDetailViewAttribute:Attribute {
+        
     }
 }
