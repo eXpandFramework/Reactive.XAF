@@ -261,8 +261,9 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
                 try{
                     explicitUnitOfWork.FlushChanges();
                 }
-                catch (Exception){
+                catch (Exception e){
                     sequenceStorage.NextSequence--;
+                    Tracing.Tracer.LogVerboseError(e);
                     throw;
                 }
                 return theObject.Observe();
