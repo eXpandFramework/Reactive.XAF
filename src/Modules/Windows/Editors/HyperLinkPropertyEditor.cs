@@ -1,9 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Drawing;
-using System.Linq;
 using System.Text.RegularExpressions;
-using System.Windows.Forms;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Editors;
@@ -13,44 +10,12 @@ using DevExpress.XtraEditors;
 using DevExpress.XtraEditors.Controls;
 using DevExpress.XtraEditors.Mask;
 using DevExpress.XtraEditors.Repository;
-using DevExpress.XtraGrid.Views.Grid;
-using DevExpress.XtraGrid.Views.Grid.ViewInfo;
 using Xpand.Extensions.XAF.Attributes;
-using Xpand.Extensions.XAF.ViewExtensions;
-using Xpand.XAF.Modules.Reactive.Services;
 using EditorAliases = Xpand.Extensions.XAF.Attributes.EditorAliases;
 using ListView = DevExpress.ExpressApp.ListView;
 
 namespace Xpand.XAF.Modules.Windows.Editors {
 
-    public class HyperLinkGridListViewController : ViewController {
-        WinColumnsListEditor _gridListEditor;
-
-        public HyperLinkGridListViewController() => TargetViewType = ViewType.ListView;
-
-        protected override void OnViewControlsCreated() {
-            base.OnViewControlsCreated();
-            _gridListEditor = ((ListView)View).Editor as WinColumnsListEditor;
-            var gridView = (GridView)_gridListEditor?.GridView();
-            if (gridView != null) gridView.MouseDown += GridView_MouseDown;
-        }
-
-        protected override void OnDeactivated() {
-            if (_gridListEditor?.GridView() != null)
-                _gridListEditor.GridView<GridView>().MouseDown -= GridView_MouseDown;
-            base.OnDeactivated();
-        }
-
-        void GridView_MouseDown(object sender, MouseEventArgs e) {
-            var gv = (GridView)sender;
-            GridHitInfo hi = gv.CalcHitInfo(new Point(e.X, e.Y));
-            if (hi.InRowCell && hi.Column.ColumnEdit is RepositoryItemHyperLinkEdit repositoryItemHyperLinkEdit) {
-                var editor = (HyperLinkEdit)repositoryItemHyperLinkEdit.CreateEditor();
-                var memberInfo = View.ToListView().Model.Columns.FirstOrDefault(column => column.FieldName==hi.Column.FieldName)?.ModelMember.MemberInfo;
-                editor.ShowBrowser(HyperLinkPropertyEditor.GetResolvedUrl(gv.GetRowCellValue(hi.RowHandle, hi.Column),memberInfo,View.SelectedObjects.Cast<object>().First()));
-            }
-        }
-    }
 
     [PropertyEditor(typeof(object), EditorAliases.HyperLinkPropertyEditor, false)]
     public class HyperLinkPropertyEditor(Type objectType, IModelMemberViewItem info)
@@ -59,12 +24,25 @@ namespace Xpand.XAF.Modules.Windows.Editors {
 
         HyperLinkEdit _hyperlinkEdit;
         private IObjectSpace _objectSpace;
-
+        
+        
         public new HyperLinkEdit Control => _hyperlinkEdit;
 
         protected override RepositoryItem CreateRepositoryItem() => new RepositoryItemHyperLinkEdit();
 
-        protected override object CreateControlCore() => _hyperlinkEdit = new HyperLinkEdit();
+        protected override object CreateControlCore() {
+            var hyperLinkEdit = _hyperlinkEdit = new HyperLinkEdit();
+            hyperLinkEdit.Validating+=HyperLinkEditOnValidating;
+            return hyperLinkEdit;
+        }
+
+        private void HyperLinkEditOnValidating(object sender, CancelEventArgs e) {
+            var attribute = MemberInfo.FindAttribute<HyperLinkPropertyEditorAttribute>();
+            if (attribute==null) return;
+            var value = MemberInfo.Owner.FindMember(attribute.Name).GetValue(CurrentObject);
+            e.Cancel = value != null && !Regex.IsMatch($"{value}", UrlEmailMask);
+            
+        }
 
         protected override void SetupRepositoryItem(RepositoryItem item) {
             base.SetupRepositoryItem(item);
