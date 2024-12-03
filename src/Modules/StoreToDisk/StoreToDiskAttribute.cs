@@ -2,6 +2,10 @@ using System;
 using System.Security.Cryptography;
 
 namespace Xpand.XAF.Modules.StoreToDisk{
+    [AttributeUsage(AttributeTargets.Property)][Obsolete("incomplete testing may work or not")]
+    public class StoreToDiskPropertyAttribute(params string[] properties) : Attribute {
+        public string[] Properties { get; } = properties;
+    }
     [AttributeUsage(AttributeTargets.Class)]
     public class StoreToDiskAttribute:Attribute{
         public string Key{ get; }
