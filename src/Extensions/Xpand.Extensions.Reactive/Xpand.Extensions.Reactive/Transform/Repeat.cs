@@ -3,7 +3,9 @@ using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Runtime.CompilerServices;
 using Xpand.Extensions.Fasterflect;
+using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Transform.System;
 using Xpand.Extensions.TypeExtensions;
 
@@ -67,5 +69,9 @@ namespace Xpand.Extensions.Reactive.Transform {
                 })
                 .Where(it => it != null) // remove the NULL marker
                 .Dematerialize();
+        
+        public static IObservable<T> RepeatWhenEmpty<T>(this IObservable<T> source, int maxRetries=3,[CallerMemberName]string caller="") 
+            => Observable.Defer(() => source.SwitchIfEmpty(Observable.Defer(() => new Exception(caller).Throw<T>())))
+                .Retry(maxRetries).Catch<T,Exception>(exception => exception.Throw<T>());
     }
 }
