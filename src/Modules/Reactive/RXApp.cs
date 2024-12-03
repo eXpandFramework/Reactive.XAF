@@ -110,7 +110,6 @@ namespace Xpand.XAF.Modules.Reactive{
                 .Merge(application.ReloadWhenChanged())
                 .Merge(application.FireChanged())
                 .Merge(application.ShowMessages())
-                .Merge(application.EnsureNewInstanceOnNonPersistentDetailView())
                 .Merge(application.ShowInstanceDetailView())
                 ;
         }
@@ -118,15 +117,6 @@ namespace Xpand.XAF.Modules.Reactive{
         private static IObservable<Unit> ShowInstanceDetailView(this XafApplication application)
             => application.WhenSetupComplete().SelectMany(_ => application.ShowInstanceDetailView(application.TypesInfo
                     .PersistentTypes.Attributed<ShowInstanceDetailViewAttribute>().Types().Select(info => info.Type).ToArray())).ToUnit();
-        
-        private static IObservable<Unit> EnsureNewInstanceOnNonPersistentDetailView(this XafApplication application)
-            => application.WhenSetupComplete().SelectMany(_ => application.WhenFrame(ViewType.DetailView)
-                .Where(frame => frame.View.CurrentObject==null&&!frame.View.ObjectTypeInfo.IsPersistent&&frame.View.ObjectSpace.CanCreateObject(frame.View.ObjectTypeInfo))
-                .Do(frame => {
-                    var currentObject = frame.View.ObjectSpace.CreateObject(frame.View.ObjectTypeInfo.Type);
-                    frame.View.ObjectSpace.CommitChanges();
-                    frame.View.CurrentObject = currentObject;
-                })).ToUnit();
         
         private static IObservable<Unit> FireChanged(this XafApplication application)
             => application.WhenSetupComplete().SelectMany(_ => {
