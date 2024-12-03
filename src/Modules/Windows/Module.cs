@@ -6,13 +6,12 @@ using DevExpress.ExpressApp.Model;
 using Xpand.Extensions.Reactive.Conditional;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
+using Xpand.XAF.Modules.Windows.Editors;
 
 namespace Xpand.XAF.Modules.Windows {
     
     public sealed class WindowsModule : ReactiveModuleBase{
-        static WindowsModule(){
-            TraceSource=new ReactiveTraceSource(nameof(WindowsModule));
-        }
+        static WindowsModule() => TraceSource=new ReactiveTraceSource(nameof(WindowsModule));
         public static ReactiveTraceSource TraceSource{ get; set; }
         public WindowsModule() {
             RequiredModuleTypes.Add(typeof(DevExpress.ExpressApp.SystemModule.SystemModule));
@@ -22,8 +21,9 @@ namespace Xpand.XAF.Modules.Windows {
 
         public override void Setup(ApplicationModulesManager moduleManager){
             base.Setup(moduleManager);
-            moduleManager.Connect()
+            moduleManager.WindowsConnect()
 	            .Merge(moduleManager.ConnectAlertForm())
+	            .Merge(moduleManager.EditorsConnect())
                 .TakeUntilDisposed(this)
                 .Subscribe();
         }

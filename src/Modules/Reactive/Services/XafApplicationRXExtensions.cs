@@ -281,6 +281,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             Func<IObjectSpaceProvider, IObjectSpace, IObservable<TResult>> resultSelector,
             bool emitUpdatingObjectSpace, Func<IObjectSpaceProvider, bool> match = null)
             => application.WhenLoggingOn(true).SelectMany(_ => application.ObjectSpaceProviders.ToNowObservable())
+                .Merge(application.IsLoggedOn().Observe().WhenDefault().SelectMany(_ => application.ObjectSpaceProviders.ToNowObservable()))
                 .Where(provider => match?.Invoke(provider) ?? true)
                 .Publish(source => source.WhenProviderObjectSpaceCreated(resultSelector,emitUpdatingObjectSpace,application));
 
@@ -753,11 +754,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 return Observable.Return(Unit.Default);
             });
         
-        public static IObservable<Unit> UseObjectSpace(this XafApplication application,Type objectType,Action<IObjectSpace> action) 
-            => Observable.Using(() => application.CreateObjectSpace(objectType),space => {
-                action(space);
-                return Observable.Return(Unit.Default);
-            });
+        public static IObservable<Unit> UseObjectSpace(this XafApplication application,Type objectType,Func<IObjectSpace,IObservable<Unit>> selector) 
+            => Observable.Using(() => application.CreateObjectSpace(objectType),selector);
         
         public static IObservable<T> UseObjectSpace<T>(this XafApplication application,Type objectType,Func<IObjectSpace,T> selector) 
             => Observable.Using(() => application.CreateObjectSpace(objectType),space => selector(space).Observe());

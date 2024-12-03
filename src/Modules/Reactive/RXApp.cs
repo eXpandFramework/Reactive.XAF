@@ -74,7 +74,8 @@ namespace Xpand.XAF.Modules.Reactive{
             
             if (DesignerOnlyCalculator.IsRunTime) {
                 new HarmonyMethod(GetMethodInfo(nameof(CreateControllers)))
-                    .Finalize(typeof(ControllersManager).Method(nameof(ControllersManager.CreateControllers),new []{typeof(Type),typeof(IModelApplication),typeof(View)}),true);
+                    .Finalize(typeof(ControllersManager).Method(nameof(ControllersManager.CreateControllers), [typeof(Type),typeof(IModelApplication),typeof(View)
+                    ]),true);
             }
             
         }

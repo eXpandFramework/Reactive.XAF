@@ -19,7 +19,7 @@ using Xpand.XAF.Modules.Windows.SystemActions;
 namespace Xpand.XAF.Modules.Windows{
     public static class WindowsService{
         
-        internal static IObservable<Unit> Connect(this  ApplicationModulesManager manager) 
+        internal static IObservable<Unit> WindowsConnect(this  ApplicationModulesManager manager) 
 	        => manager.WhenApplication(application => application.WhenWindowTemplate()
                 .MultiInstance().Startup().ConfigureForm()
                 .NotifyIcon()

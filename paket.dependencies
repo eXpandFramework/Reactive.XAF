@@ -59,8 +59,9 @@ nuget Microsoft.AspNetCore.Razor.Runtime 2.2
 nuget Microsoft.AspNetCore.Hosting 2.2.7
 nuget Microsoft.IdentityModel.Protocols.OpenIdConnect 6.15.0
 nuget System.Reflection.Metadata 5.0.0
-nuget System.Interactive 5.0     
-nuget System.Interactive.Async 5.0
+nuget System.Interactive 6.0.1
+nuget System.Interactive 6.0.1
+nuget System.Interactive.Async 6.0.1
 nuget Unofficial.Microsoft.mshtml 7.0.3300
 nuget Xpand.Patcher 3.0.24
 nuget YamlDotNet 11.2.1

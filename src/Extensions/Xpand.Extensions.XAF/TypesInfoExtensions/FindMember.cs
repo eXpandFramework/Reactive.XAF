@@ -29,8 +29,9 @@ namespace Xpand.Extensions.XAF.TypesInfoExtensions{
 		public static IEnumerable<IMemberInfo> Members<TAttribute>(this IEnumerable<ITypeInfo> source)   
 			=> source.SelectMany(info => info.AttributedMembers<TAttribute>()).Members();
 
-		public static IEnumerable<(TAttribute attribute,IMemberInfo memberInfo)> AttributedMembers<TAttribute>(this ITypeInfo info)  
-			=> info.Members.SelectMany(memberInfo => memberInfo.FindAttributes<Attribute>().OfType<TAttribute>().Select(attribute => (attribute, memberInfo)));
+		public static IEnumerable<(TAttribute attribute,IMemberInfo memberInfo)> AttributedMembers<TAttribute>(this ITypeInfo info,Func<TAttribute,bool> where=null)  
+			=> info.Members.SelectMany(memberInfo => memberInfo.FindAttributes<Attribute>().OfType<TAttribute>()
+				.Where(arg => where?.Invoke(arg)??true).Select(attribute => (attribute, memberInfo)));
 		
 		public static IEnumerable<(TAttribute attribute,ITypeInfo typeInfo)> Attributed<TAttribute>(this ITypeInfo info,bool includeBaseTypes=false) {
 			var infos = info.YieldItem();

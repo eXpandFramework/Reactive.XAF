@@ -10,6 +10,9 @@ namespace Xpand.Extensions.XAF.CollectionSourceExtensions{
         public static IEnumerable<object> Objects(this CollectionSourceBase collectionSourceBase) => collectionSourceBase.Objects<object>();
 
         public static IEnumerable<T> Objects<T>(this CollectionSourceBase collectionSourceBase) {
+	        if (collectionSourceBase == null) {
+		        return [];
+	        }
 	        if (collectionSourceBase.Collection is IEnumerable collection)
 		        return collection.Cast<T>();
 	        if (collectionSourceBase.Collection is IListSource listSource)

@@ -40,7 +40,9 @@ namespace Xpand.XAF.Modules.Reactive.Services {
                     .VisibleInAllViewsAttribute()
                     .ToUnit())
                 .Merge(manager.ListViewShowFooterCollection())
+                .Merge(manager.VisibleInAllViewsAttribute())
                 .Merge(manager.ColumnSummary())
+                .Merge(manager.EditorAliasDisabledInDetailViewAttribute())
                 .Merge(manager.ColumnSorting())
                 .Merge(manager.DisableNewObjectAction())
                 .Merge(manager.HiddenActions())
@@ -109,6 +111,16 @@ namespace Xpand.XAF.Modules.Reactive.Services {
                         }).ToUnit()))
                 .ToUnit();
         
+        static IObservable<Unit> EditorAliasDisabledInDetailViewAttribute(this ApplicationModulesManager manager)
+            => manager.WhenGeneratingModelNodes<IModelViewItems>()
+                .SelectMany(items => items.OfType<IModelPropertyEditor>().Where(editor => editor.ModelMember.MemberInfo.FindAttribute<EditorAliasAttribute>()!=null)
+                    .Do(editor => {
+                        var attribute = editor.ModelMember.MemberInfo.FindAttribute<EditorAliasDisabledInDetailViewAttribute>();
+                        if (attribute==null)return;
+                        editor.PropertyEditorType = editor.ModelMember.CalculateEditorType();
+                    }))
+                .ToUnit();
+        
         static IObservable<Unit> ColumnSummary(this ApplicationModulesManager manager)
             => manager.WhenGeneratingModelNodes<IModelColumns>()
                 .SelectMany(views => views.SelectMany(column =>
@@ -124,11 +136,18 @@ namespace Xpand.XAF.Modules.Reactive.Services {
                                 .SelectMany(gridView => types.SelectMany(t1 => {
                                     var column = gridView.GetPropertyValue("Columns")
                                         .CallMethod("ColumnByFieldName", t1.memberInfo.BindingName);
-                                    return column==null?Enumerable.Empty<object>(): ((IEnumerable)column
+                                    return column==null?[]: ((IEnumerable)column
                                             .GetPropertyValue("Summary")).Cast<object>()
                                         .Do(item => item.SetPropertyValue("Mode", t1.attribute.SummaryMode));
                                 })))
                         ))));
+        
+        static IObservable<Unit> VisibleInAllViewsAttribute(this ApplicationModulesManager manager)
+            => manager.WhenGeneratingModelNodes<IModelViewItems>()
+                .SelectMany(items => items.GetParent<IModelDetailView>().ModelClass.TypeInfo.AttributedMembers<VisibleInAllViewsAttribute>(attribute => attribute.CreateModelMember)
+                    .Where(t => !items.OfType<IModelPropertyEditor>().Select(editor => editor.ModelMember.MemberInfo).Contains(t.memberInfo)).ToArray()
+                    .Do(t => items.AddNode<IModelPropertyEditor>(t.memberInfo.Name).PropertyName = t.memberInfo.Name))
+                .ToUnit();
         
         static IObservable<Unit> ListViewShowFooterCollection(this ApplicationModulesManager manager)
             => manager.WhenGeneratingModelNodes<IModelViews>()
@@ -220,7 +239,7 @@ namespace Xpand.XAF.Modules.Reactive.Services {
                     .SelectMany(t1 => new Attribute[] { new VisibleInDetailViewAttribute(true), new VisibleInListViewAttribute(true), new VisibleInLookupListViewAttribute(true) }
                         .Execute(attribute => t1.info.AddAttribute(attribute))))
                 .ToUnit();
-
+                
         static IObservable<CustomizeTypesInfoEventArgs> InvisibleInAllViewsAttribute(this IObservable<CustomizeTypesInfoEventArgs> source)
             => source.ConcatIgnored(e => e.TypesInfo.Members<InvisibleInAllViewsAttribute>().ToArray().Observe()
                 .SelectMany(attributes => attributes.AddVisibleViewAttributes()
