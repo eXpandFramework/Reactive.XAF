@@ -30,41 +30,32 @@ namespace Xpand.XAF.Modules.GridListEditor{
                 application.RememberTopRow()
                     .Merge(application.FocusRow())
                     .Merge(application.SortProperties())
-            );
+            )
+            .MergeToUnit(SortProperties(manager));
 
         private static IObservable<(Frame frame,TRule rule)> WhenRulesOnView<TRule>(this XafApplication application) where TRule:IModelGridListEditorRule
             => application.WhenViewOnFrame(viewType: ViewType.ListView)
                 .SelectMany(frame => application.ModelRules<TRule>(frame).Select(rule => (frame,rule)));
 
-        static IObservable<Unit> SortProperties(this XafApplication application) 
-            => application.WhenSetupComplete().SelectMany(_ => {
-                var types = application.TypesInfo.PersistentTypes.AttributedMembers<SortPropertyAttribute>()
-                    .Select(t => t.memberInfo.Owner.Type).Distinct().ToArray();
-                return application.WhenFrame(ViewType.ListView)
-                    .SelectMany(frame => {
-                        var listView = frame.View.ToListView();
-                        var attributedMembers = listView.Model.Columns
-                            .Select(column => (attribute:column.ModelMember.MemberInfo.FindAttribute<SortPropertyAttribute>(),column))
-                            .WhereNotDefault(t => t.attribute);
-                        return attributedMembers
-                            .Do(t => {
-                                var xafGridColumnWrappers = ((WinColumnsListEditor)listView.Editor).Columns.OfType<XafGridColumnWrapper>();
-                                var columnWrapper = xafGridColumnWrappers.FirstOrDefault(wrapper => t.column.Id==wrapper.Id);
-                                if (columnWrapper==null)return;
-                                columnWrapper.Column.OptionsColumn.AllowSort=DefaultBoolean.True;
-                                if (listView.ObjectTypeInfo.FindMember(columnWrapper.PropertyName) is MemberPathInfo memberInfo) {
-                                    columnWrapper.Column.FieldNameSortGroup = $"{memberInfo.GetPath().SkipLast(1).Select(info => info.Name).JoinComma()}.{t.attribute.Name}";    
-                                }
-                                else {
-                                    columnWrapper.Column.FieldNameSortGroup = t.attribute.Name;
-                                }
-                                
-                            })
-                            ;
-                    })
-                    .ToUnit();
+        private static IObservable<Unit> SortProperties(ApplicationModulesManager manager) 
+            => manager.WhenCustomizeTypesInfo().SelectMany(e => e.TypesInfo.PersistentTypes.Attributed<SortPropertyAttribute>())
+                .SelectMany(t => t.typeInfo.Members.Where(info =>info.IsPublic&& info.FindAttribute<SortPropertyAttribute>()==null)
+                    .Do(info => info.AddAttribute(t.attribute)))
+                .ToUnit();
 
-            });
+        static IObservable<Unit> SortProperties(this XafApplication application) 
+            => application.WhenSetupComplete().SelectMany(_ => application.WhenFrame(ViewType.ListView).ToListView().WhenControlsCreated(true)
+                .SelectMany(listView => listView.Model.Columns.Select(column => (attribute: column.ModelMember.MemberInfo.FindAttribute<SortPropertyAttribute>(), column))
+                    .WhereNotDefault(t => t.attribute)
+                    .Do(t => {
+                        var xafGridColumnWrappers = ((WinColumnsListEditor)listView.Editor).Columns.OfType<XafGridColumnWrapper>();
+                        var columnWrapper = xafGridColumnWrappers.FirstOrDefault(wrapper => t.column.Id == wrapper.Id);
+                        if (columnWrapper == null) return;
+                        columnWrapper.Column.OptionsColumn.AllowSort = DefaultBoolean.True;
+                        columnWrapper.Column.FieldNameSortGroup = listView.ObjectTypeInfo.FindMember(columnWrapper.PropertyName) is MemberPathInfo memberInfo
+                            ? $"{memberInfo.GetPath().SkipLast(1).Select(info => info.Name).JoinComma()}.{t.attribute.Name}" : t.attribute.Name;
+                    }))
+                .ToUnit());
 
         static IObservable<Unit> FocusRow(this XafApplication application)
             => application.WhenRulesOnView<IModelGridListEditorFocusRow>()

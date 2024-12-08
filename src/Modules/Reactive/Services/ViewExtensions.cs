@@ -146,8 +146,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<T> WhenControlsCreated<T>(this T view,bool emitExisting=false) where T : View 
             =>emitExisting&&view.IsControlCreated?view.Observe(): view.WhenViewEvent(nameof(View.ControlsCreated));
 
-        public static IObservable<T> WhenControlsCreated<T>(this IObservable<T> source) where T:View 
-            => source.SelectMany(view => view.WhenViewEvent(nameof(View.ControlsCreated)));
+        public static IObservable<T> WhenControlsCreated<T>(this IObservable<T> source,bool emitExisting=false) where T:View 
+            => source.SelectMany(view => view.WhenControlsCreated(emitExisting));
 
         public static IObservable<View> WhenSelectedObjectsChanged(this View view) 
             => view.WhenSelectionChanged().Select(view1 => view1.SelectedObjects.Cast<object>().ToArray()).CombineWithPrevious()

@@ -28,8 +28,8 @@ namespace Xpand.XAF.Modules.Windows.Editors{
                             .MergeToUnit(gridView.HyperLinkPropertyEditorAttribute( frame))
                             .MergeToUnit(listEditor.WhenEvent<CustomizeAppearanceEventArgs>(nameof(GridListEditor.CustomizeAppearance))
                                 .Do(e => {
-                                    if (((GridViewRowCellStyleEventArgsAppearanceAdapter)e.Item).Column.ColumnEdit
-                                        is not RepositoryItemHyperLinkEdit repositoryItem) return;
+                                    var item = e.Item as GridViewRowCellStyleEventArgsAppearanceAdapter;
+                                    if (item?.Column.ColumnEdit is not RepositoryItemHyperLinkEdit repositoryItem) return;
                                     repositoryItem.LinkColor = ((IAppearanceFormat)e.Item).FontColor;
                                 }))
                             ;
