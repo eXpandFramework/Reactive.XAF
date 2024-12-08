@@ -8,6 +8,7 @@ ProjectSection(SolutionItems) = preProject
 	README.md = README.md
 	CHANGELOG.md = CHANGELOG.md
 	src\rider\main\resources\META-INF\plugin.xml = src\rider\main\resources\META-INF\plugin.xml
+	build.gradle.kts = build.gradle.kts
 	gradle.properties = gradle.properties
 EndProjectSection
 EndProject

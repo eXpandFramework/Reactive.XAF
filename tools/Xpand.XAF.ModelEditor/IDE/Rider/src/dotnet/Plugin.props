@@ -1,7 +1,9 @@
 ﻿<Project>
 
   <PropertyGroup>
-    <SdkVersion>2022.3.1</SdkVersion>
+    <!-- See https://www.nuget.org/packages/JetBrains.ReSharper.SDK -->
+    <!-- Keep in sync with ProductVersion in gradle.properties -->
+    <SdkVersion>2024.2.4</SdkVersion>
 
     <Title>Xpand</Title>
     <Description>Description</Description>
@@ -10,9 +12,9 @@
     <Copyright>Copyright $([System.DateTime]::Now.Year) Maintainers of Xpand</Copyright>
     <PackageTags>resharper plugin</PackageTags>
 
-    <PackageProjectUrl>https://github.com/eXpandFramework/Reactive.XAF</PackageProjectUrl>
-    <PackageLicenseUrl>https://raw.githubusercontent.com/eXpandFramework/Reactive.XAF/master/LICENSE</PackageLicenseUrl>
-    <PackageIconUrl>http://sign.expandframework.com</PackageIconUrl>
+    <PackageProjectUrl></PackageProjectUrl>
+    <PackageLicenseUrl></PackageLicenseUrl>
+    <PackageIconUrl></PackageIconUrl>
   </PropertyGroup>
 
 </Project>
