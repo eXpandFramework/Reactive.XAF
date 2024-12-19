@@ -46,7 +46,7 @@ namespace Xpand.XAF.Modules.ViewItemValue{
 
         private static IObservable<(IModelViewItemValueObjectViewItem model, Frame frame)> WhenViewItemValueItem(this ApplicationModulesManager manager) 
             => manager.WhenApplication(application => application.WhenFrame(ViewType.DetailView)
-                .Where(frame => frame.View.Model.Application.IsViewItemValueObjectView(frame.View.Id))
+                .Where(frame => frame.View.Model.Application.IsViewItemValueObjectView(frame.View.Id)&&frame.View.ObjectSpace.IsNewObject(frame.View.CurrentObject))
                 .SelectUntilViewClosed(frame => frame.View.WhenCurrentObjectChanged().To(frame).StartWith(frame)
                     .SelectMany(_ => frame.View.Model.Application.ModelViewItemValue().Items
                         .Where(item => item.ObjectView == frame.View.Model)
