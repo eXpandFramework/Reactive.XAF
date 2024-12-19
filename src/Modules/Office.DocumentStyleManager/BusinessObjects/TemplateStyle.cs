@@ -9,6 +9,7 @@ using DevExpress.XtraRichEdit.Model;
 using Xpand.Extensions.XAF.Xpo.ValueConverters;
 using Xpand.XAF.Persistent.BaseImpl;
 using ParagraphAlignment = DevExpress.XtraRichEdit.API.Native.ParagraphAlignment;
+using ParagraphBorders = DevExpress.XtraRichEdit.API.Native.ParagraphBorders;
 using ParagraphFirstLineIndent = DevExpress.XtraRichEdit.API.Native.ParagraphFirstLineIndent;
 using ParagraphLineSpacing = DevExpress.XtraRichEdit.API.Native.ParagraphLineSpacing;
 using StrikeoutType = DevExpress.XtraRichEdit.API.Native.StrikeoutType;
@@ -16,10 +17,7 @@ using UnderlineType = DevExpress.XtraRichEdit.API.Native.UnderlineType;
 
 namespace Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects{
 	[DefaultProperty(nameof(StyleName))][SuppressMessage("Design", "XAF0023:Do not implement IObjectSpaceLink in the XPO types")]
-	public class TemplateStyle:CustomBaseObject,IDocumentStyle{
-		public TemplateStyle(Session session) : base(session){
-		}
-
+	public class TemplateStyle(Session session) : CustomBaseObject(session), IDocumentStyle {
 		DocumentStyleType _documentStyleType;
 
 		public DocumentStyleType DocumentStyleType{
@@ -298,6 +296,9 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects{
 		}
 
 		public bool? ContextualSpacing{ get; set; }
+		private ParagraphBorders Borders { get; set; }
+
+		ParagraphBorders ParagraphPropertiesBase.Borders => Borders;
 
 		Color? _foreColor;
         [ValueConverter(typeof(ColorValueConverter))]

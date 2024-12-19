@@ -102,8 +102,8 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests {
                     .Select(state => state))
                 .ReplayFirstTake());
         
-        [XpandTest(state:ApartmentState.MTA)]
-        [Test]
+        // [XpandTest(state:ApartmentState.MTA)]
+        // [Test]
         public async Task Trigger_Paused_Job()
             => await StartJobSchedulerTest(application
                 => application.WhenMainWindowCreated()

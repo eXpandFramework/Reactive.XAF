@@ -9,9 +9,11 @@ using DevExpress.XtraEditors;
 using DevExpress.XtraSpellChecker.Native;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
+using System.ComponentModel;
 
 namespace Xpand.XAF.Modules.SpellChecker {
     public sealed class SpellCheckerModule : ReactiveModuleBase {
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public static ReactiveTraceSource TraceSource { get; set; }
 
         static SpellCheckerModule() => TraceSource = new ReactiveTraceSource(nameof(SpellCheckerModule));

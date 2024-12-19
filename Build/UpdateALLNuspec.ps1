@@ -2,7 +2,7 @@ param(
     $root = [System.IO.Path]::GetFullPath("$PSScriptRoot\..\"),
     $Release=$false,
     $Branch="lab",
-    $dxVersion="21.2.3"
+    $dxVersion="24.2.3"
 )
 
 Use-MonoCecil | Out-Null
@@ -21,8 +21,8 @@ function UpdateALLNuspec($platform, $allNuspec, $nuspecs,$allModuleNuspecs,$csPr
         $platformMetada = Get-AssemblyMetadata "$root\bin\$filesrc" -key "Platform"
         if ($platformMetada.Value -in $platform){
             $target=Get-ProjectTargetFramework (Get-XmlContent ($csProjects|Where-Object{$_.BaseName -eq $nuspecBaseName }).FullName) -FullName|select-object -Last 1
-            if ($target -eq "net6.0-windows"){
-                $target="net6.0-windows7.0"
+            if ($target -eq "net9.0-windows"){
+                $target="net9.0-windows7.0"
             }
             [PSCustomObject]@{
                 Nuspec = $nuspec
@@ -73,8 +73,8 @@ $csProjects=Get-MSBuildProjects $root\src
 UpdateALLNuspec "Core" $allNuspec $nuspecs $allModuleNuspecs $csProjects
 $googleBlazorVersion=(Get-XmlContent "$root\Build\nuspec\Xpand.Extensions.Office.Cloud.Google.Blazor.nuspec").package.metadata.version
 if ($dxVersion -gt "20.2.2"){
-    Add-NuspecDependency Xpand.Extensions.Office.Cloud.Google.Blazor $googleBlazorVersion $allNuspec "net6.0"
-    Add-NuspecDependency Xpand.Extensions.Office.Cloud.Google.Blazor $googleBlazorVersion $allNuspec "net6.0-windows7.0"
+    Add-NuspecDependency Xpand.Extensions.Office.Cloud.Google.Blazor $googleBlazorVersion $allNuspec "net9.0"
+    Add-NuspecDependency Xpand.Extensions.Office.Cloud.Google.Blazor $googleBlazorVersion $allNuspec "net9.0-windows7.0"
 }
 function CloneTarget ($source, $target){
     
@@ -86,8 +86,8 @@ function CloneTarget ($source, $target){
     }
     
 }
-CloneTarget "netstandard2.0" "net6.0"
-CloneTarget "netstandard2.0" "net6.0-windows7.0"
+CloneTarget "netstandard2.0" "net9.0"
+CloneTarget "netstandard2.0" "net9.0-windows7.0"
 
 $allNuspec|Save-Xml $allFileName
 
@@ -97,9 +97,9 @@ Write-HostFormatted "Updating Xpand.XAF.Win.All.nuspec" -Section
 [xml]$allNuspec = Get-Content $allFileName
 UpdateALLNuspec @("Core","Win") $allNuspec  $nuspecs $allModuleNuspecs $csProjects
 
-CloneTarget "netstandard2.0" "net6.0"
+CloneTarget "net9.0" "net9.0-windows7.0"
 # CloneTarget "netstandard2.0" "net6.0-windows7.0"
-CloneTarget "net6.0" "net6.0-windows7.0"
+# CloneTarget "net6.0" "net6.0-windows7.0"
 
 $allNuspec|Save-Xml $allFileName
 Get-Content $allFileName -Raw
@@ -119,7 +119,8 @@ $allNuspec.package.metadata.dependencies.group|Where-Object{$_.targetFramework -
     }
     
 }
-CloneTarget "netstandard2.0" "net6.0"
+CloneTarget "net9.0" "net9.0-windows7.0"
+# CloneTarget "netstandard2.0" "net6.0"
 # CloneTarget "netstandard2.0" "net6.0-windows7.0"
 
 $allNuspec|Save-Xml $allFileName

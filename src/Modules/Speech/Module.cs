@@ -1,4 +1,5 @@
-﻿using System.Reactive.Linq;
+﻿using System.ComponentModel;
+using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.ExpressApp.Model;
@@ -25,6 +26,7 @@ namespace Xpand.XAF.Modules.Speech {
         static SpeechModule(){
             TraceSource=new ReactiveTraceSource(nameof(SpeechModule));
         }
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public static ReactiveTraceSource TraceSource{ get; set; }
         public SpeechModule() {
             RequiredModuleTypes.Add(typeof(DevExpress.ExpressApp.SystemModule.SystemModule));

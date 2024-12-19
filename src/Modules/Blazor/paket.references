@@ -1,9 +1,7 @@
 Fasterflect.Xpand
 System.Reactive
 System.Interactive
-Microsoft.Bcl.AsyncInterfaces
-Microsoft.CodeAnalysis
-System.Data.SqlClient
 System.Text.Json
-System.Threading.Tasks.Dataflow
 System.Security.Cryptography.ProtectedData
+DevExpress.ExpressApp.Blazor
+Microsoft.AspNetCore.Components

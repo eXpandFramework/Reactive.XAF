@@ -1,7 +1,4 @@
-﻿using System;
-using akarnokd.reactive_extensions;
-using NUnit.Framework;
-using Shouldly;
+﻿using akarnokd.reactive_extensions;
 using Xpand.Extensions.Reactive.Transform.System;
 using Xpand.TestsLib;
 using Xpand.TestsLib.Common.Attributes;

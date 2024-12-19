@@ -17,7 +17,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests {
         public async Task Contains_Existing_Items() {
             using (var application = DefaultReactiveModule().Application) {
                 using var objectSpace = application.CreateObjectSpace();
-                objectSpace.CreateObject<R>().CommitChanges();
+                await objectSpace.CreateObject<R>().CommitChangesAsync();
                 var cache = new ConcurrentDictionary<long,R>();
             
                 using var testObserver = application.Cache(cache).Test();

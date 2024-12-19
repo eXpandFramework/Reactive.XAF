@@ -1,8 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Application>
-  <NavigationItems StartupNavigationItem="PermissionPolicyUser_ListView">
-    <Items>
-      <Item Id="@bc36135c-8972-405a-b4e8-a17eb9157fe4" ViewId="SequenceStorage_ListView" IsNewNode="True" />
-    </Items>
-  </NavigationItems>
-</Application>

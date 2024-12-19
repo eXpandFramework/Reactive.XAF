@@ -16,6 +16,7 @@ using Xpand.Extensions.StringExtensions;
 using Xpand.Extensions.XAF.AppDomainExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.Reactive.Services;
+using MethodInvoker = Fasterflect.MethodInvoker;
 
 namespace Xpand.XAF.Modules.ProgressBarViewItem{
     public interface IModelProgressBarViewItem : IModelViewItem {

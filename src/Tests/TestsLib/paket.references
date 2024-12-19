@@ -2,14 +2,14 @@ akarnokd.reactive_extensions
 Enums.NET
 MagicOnion
 Moq
-System.Text.Json
 Shouldly
 NUnit
 NUnit3TestAdapter
 Fasterflect.Xpand
 Xpand.Patcher
 Polly
-Microsoft.CodeAnalysis
 DevExpress.ExpressApp.Win
 Microsoft.Reactive.Testing
-System.Threading.Tasks.Dataflow
+Microsoft.CodeAnalysis
+Microsoft.Extensions.DependencyInjection.Abstractions
+Microsoft.Extensions.Configuration.Abstractions

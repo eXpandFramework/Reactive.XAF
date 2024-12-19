@@ -29,13 +29,13 @@ using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.PermissionPolicy;
 using DevExpress.Xpo;
 using Fasterflect;
-using Humanizer;
 using Moq;
 using Moq.Protected;
 using NUnit.Framework;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.ExceptionExtensions;
 using Xpand.Extensions.LinqExtensions;
+using Xpand.Extensions.Numeric;
 using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
@@ -205,7 +205,7 @@ namespace Xpand.TestsLib.Common{
 
             foreach (var moduleBase in moduleBases){
                 if (application.Modules.All(@base => moduleBase.GetType() != @base.GetType())){
-                    application.Modules.AddRange(new []{moduleBase});
+                    application.Modules.AddRange([moduleBase]);
                 }
             }
 
@@ -426,7 +426,7 @@ namespace Xpand.TestsLib.Common{
 		        throw new NotSupportedException(
 			        "if implemented make sure all tests pass with TestExplorer and live testing");
 	        }
-	        application.Title = TestContext.CurrentContext.Test.FullName.CleanCodeName().Truncate(255);
+	        // application.Title = TestContext.CurrentContext.Test.FullName.CleanCodeName().Truncate(255);
             
 	        return application;
         }
@@ -582,8 +582,8 @@ namespace Xpand.TestsLib.Common{
 
     public interface ITestApplication{
         bool TransmitMessage{ get; }
-        IObservable<Unit> TraceClientBroadcast{ get; set; }
-        IObservable<Unit> TraceClientConnected{ get; set; }
+        // IObservable<Unit> TraceClientBroadcast{ get; set; }
+        // IObservable<Unit> TraceClientConnected{ get; set; }
         Type SUTModule{ get; }
     }
 

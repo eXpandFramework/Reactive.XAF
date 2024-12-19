@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Reflection;
 using Fasterflect;
+using MethodInvoker = Fasterflect.MethodInvoker;
 
 namespace Xpand.Extensions.AppDomainExtensions{
 	public static partial class AppDomainExtensions{

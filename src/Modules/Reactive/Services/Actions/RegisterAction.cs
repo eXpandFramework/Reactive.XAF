@@ -85,7 +85,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
 
         private static Func<(TController controller, string id), TAction> NewAction<TAction, TController>(
             this PredefinedCategory category, Action<TAction> configure) where TAction:ActionBase, new() where TController:Controller 
-	        => _ => category.NewAction( configure, _);
+	        => t => category.NewAction( configure, t);
 
         private static TAction NewAction<TAction, TController>(this PredefinedCategory category, Action<TAction> configure,
             (TController controller, string id) _) where TAction : ActionBase, new() where TController : Controller{
@@ -144,8 +144,8 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
 
         public static IObservable<ParametrizedAction> RegisterWindowParametrizedAction(this ApplicationModulesManager manager, string id,Type valueType,
             PredefinedCategory category=PredefinedCategory.Tools,Action<ParametrizedAction> configure=null) 
-	        => manager.RegisterWindowAction(id, _ => {
-		        var parametrizedAction = category.NewAction(configure,_);
+	        => manager.RegisterWindowAction(id, t => {
+		        var parametrizedAction = category.NewAction(configure,t);
 		        parametrizedAction.ValueType=valueType;
 		        return parametrizedAction;
 	        });
@@ -160,13 +160,13 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
 	        var controllerType = type ?? NewControllerType<TController>(id);
 	        if (type == null){
 		        ControllerCtorState
-                    .AddOrUpdate(controllerType, type1 => (id, _ => actionBase(((TController) _.controller, _.id))),(_, tuple) => tuple);
+                    .AddOrUpdate(controllerType, _ => (id, t => actionBase(((TController) t.controller, t.id))),(_, tuple) => tuple);
             }
             var controller = (TController) Controller.Create(controllerType,applicationModulesManager.ControllersManager.ServiceProvider());
             applicationModulesManager.ControllersManager.RegisterController(controller);
             return ((IActionController) controller).WhenCloned
                 .SelectMany(viewController => viewController.Actions).Cast<TAction>()
-                .StartWith(controller.Actions.Cast<TAction>());
+                .StartWith(controller.Actions.Select(@base => @base).Cast<TAction>());
         }
 
         public static IObservable<ActionBase> WhenActionAdded(this ActionList actionList)
@@ -177,7 +177,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
             var actionControllerName = ActionControllerName(id, baseController);
             try {
                 return ActionsModule.GetType(actionControllerName)
-                       ??ActionsModule.DefineType(actionControllerName, TypeAttributes.Public, baseController).CreateTypeInfo()?.AsType();
+                       ??ActionsModule.DefineType(actionControllerName, TypeAttributes.Public, baseController).CreateTypeInfo().AsType();
             }
             catch {
                 return ActionsModule.GetType(actionControllerName);

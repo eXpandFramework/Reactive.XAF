@@ -12,6 +12,7 @@ using DevExpress.XtraRichEdit.Model;
 
 using Xpand.XAF.Modules.Office.DocumentStyleManager.Extensions;
 using ParagraphAlignment = DevExpress.XtraRichEdit.API.Native.ParagraphAlignment;
+using ParagraphBorders = DevExpress.XtraRichEdit.API.Native.ParagraphBorders;
 using ParagraphFirstLineIndent = DevExpress.XtraRichEdit.API.Native.ParagraphFirstLineIndent;
 using ParagraphLineSpacing = DevExpress.XtraRichEdit.API.Native.ParagraphLineSpacing;
 using StrikeoutType = DevExpress.XtraRichEdit.API.Native.StrikeoutType;
@@ -571,6 +572,10 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects{
                 OnPropertyChanged();
             }
         }
+
+        private ParagraphBorders Borders { get; set; }
+
+        ParagraphBorders ParagraphPropertiesBase.Borders => Borders;
 
         [VisibleInListView(false)]
         [VisibleInLookupListView(false)]

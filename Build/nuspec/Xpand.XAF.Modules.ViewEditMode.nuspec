@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.ViewEditMode</id>
-    <version>4.241.7.0</version>
+    <version>4.242.3.1</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -12,28 +12,30 @@
     <description>The `ViewEditMode` module controls the DetailView.ViewEditMode.</description>
     <releaseNotes>https://github.com/eXpandFramework/Reactive.XAF/releases</releaseNotes>
     <copyright>eXpandFramework.com</copyright>
-    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, ViewEditMode, 24.1.7</tags>
+    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, ViewEditMode, 24.2.3</tags>
     <dependencies>
-      <group targetFramework="netstandard2.0">
-        <dependency id="Xpand.VersionConverter" version="4.241.7.0" />
-      </group>
-      <group targetFramework="net6.0">
-        <dependency id="Xpand.Extensions" version="4.241.7.0" />
-        <dependency id="Xpand.Extensions.Reactive" version="4.241.7.0" />
-        <dependency id="Xpand.Extensions.XAF" version="4.241.7.0" />
-        <dependency id="Xpand.XAF.Modules.Reactive" version="4.241.7.0" />
-        <dependency id="DevExpress.ExpressApp" version="24.1.7" />
+      <group targetFramework="net9.0">
+        <dependency id="Xpand.Extensions" version="4.242.3.1" />
+        <dependency id="Xpand.Extensions.Reactive" version="4.242.3.1" />
+        <dependency id="Xpand.Extensions.XAF" version="4.242.3.1" />
+        <dependency id="Xpand.XAF.Modules.Reactive" version="4.242.3.1" />
+        <dependency id="DevExpress.ExpressApp" version="24.2.3" />
         <dependency id="System.Reactive" version="6.0" />
         <dependency id="Fasterflect.Xpand" version="2.0.7" />
-        <dependency id="System.Text.Json" version="8.0.5" />
+        <dependency id="System.Text.Json" version="9.0" />
         <dependency id="System.Threading.Tasks.Dataflow" version="7.0" />
-        <dependency id="Xpand.VersionConverter" version="4.241.7.0" />
+      </group>
+      <group targetFramework="netstandard2.0">
+        <dependency id="Xpand.VersionConverter" version="4.242.3.1" />
+      </group>
+      <group targetFramework="net6.0">
+        <dependency id="Xpand.VersionConverter" version="4.242.3.1" />
       </group>
     </dependencies>
   </metadata>
   <files>
-    <file src="Xpand.XAF.Modules.ViewEditMode.dll" target="lib\net6.0\Xpand.XAF.Modules.ViewEditMode.dll" />
-    <file src="Xpand.XAF.Modules.ViewEditMode.pdb" target="lib\net6.0\Xpand.XAF.Modules.ViewEditMode.pdb" />
+    <file src="Xpand.XAF.Modules.ViewEditMode.dll" target="lib\net9.0\Xpand.XAF.Modules.ViewEditMode.dll" />
+    <file src="Xpand.XAF.Modules.ViewEditMode.pdb" target="lib\net9.0\Xpand.XAF.Modules.ViewEditMode.pdb" />
     <file src="..\build\Targets\CopySymbols.targets" target="build\Xpand.XAF.Modules.ViewEditMode.targets" />
     <file src="..\build\Targets\CopySymbols.ps1" target="build\CopySymbols.ps1" />
   </files>

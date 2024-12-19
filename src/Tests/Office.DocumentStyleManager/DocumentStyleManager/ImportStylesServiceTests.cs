@@ -32,8 +32,8 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManag
         [Test][XpandTest()][Apartment(ApartmentState.STA)]
         public void Action_should_be_inactive_when_ImportStylesListView_is_not_set(){
             using var application=DocumentStyleManagerModule().Application;
-	        ModelSetup(application);
-	        var documentStyleManager = application.Model.DocumentStyleManager();
+            ModelSetup(application);
+            var documentStyleManager = application.Model.DocumentStyleManager();
 	        documentStyleManager.ImportStyles.ClearNodes();
          
             var tuple = application.SetDocumentStyleManagerDetailView(Document);
@@ -52,7 +52,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManag
             var tuple = application.SetDocumentStyleManagerDetailView(Document);
 
             var action = tuple.window.Action<DocumentStyleManagerModule>().ImportStyles();
-            action.WhenExecuted().TakeFirst().Do(_ => _.ShowViewParameters.TargetWindow=TargetWindow.NewWindow).Test();
+            action.WhenExecuted().TakeFirst().Do(e => e.ShowViewParameters.TargetWindow=TargetWindow.NewWindow).Test();
             var testObserver = application.WhenViewOnFrame(typeof(DocumentStyle),ViewType.ListView,Nesting.Root).Select(frame => frame.View).Test();
             action.DoTheExecute();
             
@@ -106,11 +106,11 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManag
             }
             Document.DeleteStyles(documentStyle);
             var richEditServer = application.WhenDetailViewCreated()
-	            .SelectMany(_ => _.e.View.WhenRichEditDocumentServer<BusinessObjects.DocumentStyleManager>(manager => manager.Content)).Test();
+	            .SelectMany(t => t.e.View.WhenRichEditDocumentServer<BusinessObjects.DocumentStyleManager>(manager => manager.Content)).Test();
             var tuple = application.SetDocumentStyleManagerDetailView(Document);
             var listViewFrame = application.WhenViewOnFrame(typeof(DocumentStyle),ViewType.ListView,Nesting.Root).Test();
             var action = tuple.window.Action<DocumentStyleManagerModule>().ImportStyles();
-            action.WhenExecuted().TakeFirst().Do(_ => _.ShowViewParameters.TargetWindow = TargetWindow.NewWindow).Test();
+            action.WhenExecuted().TakeFirst().Do(e => e.ShowViewParameters.TargetWindow = TargetWindow.NewWindow).Test();
             action.DoTheExecute();
 
             var acceptAction = listViewFrame.Items.First().GetController<DialogController>().AcceptAction;
@@ -141,8 +141,8 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManag
         [Test][XpandTest()][Apartment(ApartmentState.STA)]
         public void FilterImportStyles_Items_Should_Contain_Model_ImportStyleItems(){
             using var application=DocumentStyleManagerModule().Application;
-	        ModelSetup(application);
-	        var window = application.CreateViewWindow();
+            ModelSetup(application);
+            var window = application.CreateViewWindow();
 	        window.SetView(application.NewView(ViewType.ListView, typeof(DocumentStyle)));
 	        var filterImportStyles = window.Action<DocumentStyleManagerModule>().FilterImportStyles();
 
@@ -156,8 +156,8 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManag
         [Test][XpandTest()][Apartment(ApartmentState.STA)]
         public void FilterImportStyles_remembers_last_selection(){
             using var application=DocumentStyleManagerModule().Application;
-	        ModelSetup(application);
-	        var modelImportStyles = application.Model.DocumentStyleManager().ImportStyles;
+            ModelSetup(application);
+            var modelImportStyles = application.Model.DocumentStyleManager().ImportStyles;
 	        
 	        var importStylesItem = modelImportStyles.AddNode<IModelImportStylesItem>();
 	        importStylesItem.ModelClass = application.Model.BOModel.GetClass(typeof(DataObjectParent));
@@ -178,7 +178,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManag
 	        ModelSetup(application);
 	        var tuple = application.SetDocumentStyleManagerDetailView(Document);
 	        var action = tuple.window.Action<DocumentStyleManagerModule>().ImportStyles();
-	        using var _=action.WhenExecuted().TakeFirst().Do(_ => _.ShowViewParameters.TargetWindow = TargetWindow.NewWindow).Test();
+	        using var _=action.WhenExecuted().TakeFirst().Do(e => e.ShowViewParameters.TargetWindow = TargetWindow.NewWindow).Test();
 	        using var listViewFrame = application.WhenViewOnFrame(typeof(DocumentStyle),ViewType.ListView,Nesting.Root).Test();
 	        action.DoExecute();
 
@@ -189,8 +189,8 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManag
         [Test][XpandTest()][Apartment(ApartmentState.STA)]
         public void When_FilterImportStyles_Selection_Changed_Update_ImportedStyles_ListView(){
             using var application=DocumentStyleManagerModule().Application;
-	        ModelSetup(application);
-	        var modelImportStyles = application.Model.DocumentStyleManager().ImportStyles;
+            ModelSetup(application);
+            var modelImportStyles = application.Model.DocumentStyleManager().ImportStyles;
 	        modelImportStyles.CurrentItem = null;
 	        var window = application.CreateViewWindow();
 	        window.SetView(application.NewView(ViewType.ListView, typeof(DocumentStyle)));

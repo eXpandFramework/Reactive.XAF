@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reactive;
@@ -36,6 +37,7 @@ namespace Xpand.XAF.Modules.Blazor {
                 .Do(t => t.e.Template=new NestedFrameTemplate()).ToUnit();
 
 
+        [SuppressMessage("Usage", "ASP0006:Do not use non-literal sequence numbers")]
         public static void AddComponent(this RenderTreeBuilder builder, object component,int sequence=0) {
             builder.OpenComponent(sequence,component.GetType());
             builder.AddMultipleAttributes(component);

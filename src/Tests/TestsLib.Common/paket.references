@@ -8,9 +8,7 @@ Fasterflect.Xpand
 Xpand.Patcher
 Polly
 nunit
-Microsoft.CodeAnalysis
 DevExpress.ExpressApp.Security.Xpo
 DevExpress.ExpressApp.ViewVariantsModule
 DevExpress.Persistent.BaseImpl.Xpo
 Microsoft.Reactive.Testing
-System.Threading.Tasks.Dataflow

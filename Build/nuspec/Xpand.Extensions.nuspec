@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.Extensions</id>
-    <version>4.241.7.0</version>
+    <version>4.242.3.1</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -12,30 +12,28 @@
     <description>Xpand.Extensions</description>
     <releaseNotes>https://github.com/eXpandFramework/Reactive.XAF/releases</releaseNotes>
     <copyright>eXpandFramework.com</copyright>
-    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Xpand.Extensions, 24.1.7</tags>
+    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Xpand.Extensions, 24.2.3</tags>
     <dependencies>
-      <group targetFramework="net6.0">
+      <group targetFramework="net9.0">
         <dependency id="TextCopy" version="6.1" />
         <dependency id="Fasterflect.Xpand" version="2.0.7" />
         <dependency id="Microsoft.CSharp" version="4.7" />
-        <dependency id="System.CodeDom" version="6.0" />
+        <dependency id="System.CodeDom" version="9.0" />
         <dependency id="System.Reflection.Emit" version="4.7" />
         <dependency id="System.ValueTuple" version="4.5" />
-        <dependency id="Microsoft.CodeAnalysis.CSharp" version="4.2" />
-        <dependency id="System.Text.Json" version="8.0.5" />
-        <dependency id="Xpand.Patcher" version="3.0.24" />
+        <dependency id="Microsoft.CodeAnalysis.CSharp" version="4.12" />
+        <dependency id="System.Text.Json" version="9.0" />
+        <dependency id="Xpand.Patcher" version="9.0" />
         <dependency id="Xpand.Collections" version="1.0.4" />
-        <dependency id="System.Security.Cryptography.ProtectedData" version="8.0" />
         <dependency id="Microsoft.AspNetCore.Http.Abstractions" version="2.2" />
-        <dependency id="System.Diagnostics.PerformanceCounter" version="6.0" />
-        <dependency id="System.Threading.Tasks.Dataflow" version="7.0" />
-        <dependency id="System.Interactive" version="5.0" />
+        <dependency id="System.Security.Cryptography.ProtectedData" version="9.0" />
+        <dependency id="System.Interactive" version="6.0.1" />
       </group>
     </dependencies>
   </metadata>
   <files>
-    <file src="Xpand.Extensions.dll" target="lib\net6.0\Xpand.Extensions.dll" />
-    <file src="Xpand.Extensions.pdb" target="lib\net6.0\Xpand.Extensions.pdb" />
+    <file src="Xpand.Extensions.dll" target="lib\net9.0\Xpand.Extensions.dll" />
+    <file src="Xpand.Extensions.pdb" target="lib\net9.0\Xpand.Extensions.pdb" />
     <file src="..\build\Targets\CopySymbols.targets" target="build\Xpand.Extensions.targets" />
     <file src="..\build\Targets\CopySymbols.ps1" target="build\CopySymbols.ps1" />
   </files>

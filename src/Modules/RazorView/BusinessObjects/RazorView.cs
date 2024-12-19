@@ -18,7 +18,7 @@ namespace Xpand.XAF.Modules.RazorView.BusinessObjects {
     [Appearance("Color Error",AppearanceItemType.ViewItem, nameof(Error)+"!=''",TargetItems = nameof(Error),FontColor = "Red")]
     [Appearance("Hide Error",AppearanceItemType.ViewItem, nameof(Error)+" Is null",TargetItems = nameof(Error),Visibility = ViewItemVisibility.Hide)]
     [SuppressMessage("Design", "XAF0023:Do not implement IObjectSpaceLink in the XPO types")]
-    public class RazorView:CustomBaseObject {
+    public class  RazorView:CustomBaseObject {
         private ObjectType _modelType;
         public RazorView(Session session) : base(session) { }
 

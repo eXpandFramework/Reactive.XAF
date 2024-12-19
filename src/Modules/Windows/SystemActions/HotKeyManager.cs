@@ -802,8 +802,7 @@ namespace Xpand.XAF.Modules.Windows.SystemActions {
             ChordKey = hotKey;
         }
 
-        protected HotKeyAlreadyRegisteredException(SerializationInfo info, StreamingContext context)
-            : base(info, context) { }
+        
     }
 
     [Serializable]
@@ -819,8 +818,7 @@ namespace Xpand.XAF.Modules.Windows.SystemActions {
             HotKey = hotKey;
         }
 
-        protected HotKeyUnregistrationFailedException(SerializationInfo info, StreamingContext context)
-            : base(info, context) { }
+        
     }
 
     [Serializable]
@@ -836,8 +834,7 @@ namespace Xpand.XAF.Modules.Windows.SystemActions {
             HotKey = hotKey;
         }
 
-        protected HotKeyRegistrationFailedException(SerializationInfo info, StreamingContext context)
-            : base(info, context) { }
+        
     }
 
     [Serializable]
@@ -845,8 +842,7 @@ namespace Xpand.XAF.Modules.Windows.SystemActions {
         public HotKeyInvalidNameException(string message) : base(message) { }
         public HotKeyInvalidNameException(string message, Exception inner) : base(message, inner) { }
 
-        protected HotKeyInvalidNameException(SerializationInfo info, StreamingContext context)
-            : base(info, context) { }
+        
     }
 
     #endregion

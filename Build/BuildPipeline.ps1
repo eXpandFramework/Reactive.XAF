@@ -37,6 +37,7 @@ Invoke-Script {
     Set-Location $SourcePath
     try {
         dotnet nuget add source "https://api.nuget.org/v3/index.json" --name "nuget.org"
+        dotnet nuget add source "$DXApiFeed" --name "DX"
     }
     catch { }
     $LASTEXITCODE=0

@@ -4,6 +4,7 @@ using DevExpress.ExpressApp.Model;
 using Xpand.Extensions.Reactive.Conditional;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
+using System.ComponentModel;
 
 namespace Xpand.XAF.Modules.OneView {
     
@@ -14,6 +15,7 @@ namespace Xpand.XAF.Modules.OneView {
         static OneViewModule(){
             TraceSource=new ReactiveTraceSource(nameof(OneViewModule));
         }
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public static ReactiveTraceSource TraceSource{ get; set; }
         public OneViewModule() {
             RequiredModuleTypes.Add(typeof(DevExpress.ExpressApp.SystemModule.SystemModule));

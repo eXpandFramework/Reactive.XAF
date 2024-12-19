@@ -98,51 +98,51 @@ function FixNet461DXAssembliesTargetFramework {
 function Update-NugetConsumersPackageVersion {
     $localVersion = Get-AssemblyInfoVersion "$root\src\Common\AssemblyInfoVersion.cs"
 
-    Write-HostFormatted "Update Xpand package versions" -ForegroundColor Magenta
-    (Get-ChildItem "$root\src\Tests\EasyTests" *.csproj -Recurse)+(Get-ChildItem "$root\tools\Xpand.XAF.ModelEditor" *.csproj -Recurse) | ForEach-Object {
-        $prefs = Get-PackageReference $_ 
-        $prefs | Where-Object { $_.include -like "Xpand.*" } | ForEach-Object {
-            $_.version = $localVersion
-        }
-        ($prefs | Select-Object -First 1).OwnerDocument.Save($_)
-    }
+    # Write-HostFormatted "Update Xpand package versions" -ForegroundColor Magenta
+    # (Get-ChildItem "$root\src\Tests\EasyTests" *.csproj -Recurse)+(Get-ChildItem "$root\tools\Xpand.XAF.ModelEditor" *.csproj -Recurse) | ForEach-Object {
+    #     $prefs = Get-PackageReference $_ 
+    #     $prefs | Where-Object { $_.include -like "Xpand.*" } | ForEach-Object {
+    #         $_.version = $localVersion
+    #     }
+    #     ($prefs | Select-Object -First 1).OwnerDocument.Save($_)
+    # }
 }
 
 function SyncrhonizePaketVersion {
-    Write-HostFormatted "Synchronize paket versions" -ForegroundColor Magenta
-    Set-Location $root
-    $pakets=Invoke-PaketShowInstalled
-    (Get-MSBuildProjects "$root\src\Tests\EasyTests\")+(Get-ChildItem "$root\src\" "*Blazor*.csproj" -Recurse)|ForEach-Object{
-        $project=$_.Fullname
-        if ($project -notlike "*Tests\TestApplication.Blazor.Server\TestApplication.Blazor.Server.csproj"){
-            [xml]$csproj=Get-XmlContent $_
-            Get-PackageReference $_|Where-Object{$_.Include -notmatch "Xpand|DevExpress"} |ForEach-Object{
-                $id=$_.Include
-                $version=$_.Version
-                $paket=$pakets|Where-Object{$_.Id -eq $id}
-                if ($paket){
-                    if ($paket.Version -ne $version){
-                        $package=$csproj.Project.ItemGroup.PackageReference|Where-Object{$_.Include -eq $id}
-                        $package.version=$paket.version
-                    }
-                }
-                else{
-                    "$Id not found"
-                }
-            }
-            $csproj|Save-Xml $_.Fullname
-        }
-        else{
-            $_
-        }
+    # Write-HostFormatted "Synchronize paket versions" -ForegroundColor Magenta
+    # Set-Location $root
+    # $pakets=Invoke-PaketShowInstalled
+    # (Get-MSBuildProjects "$root\src\Tests\EasyTests\")+(Get-ChildItem "$root\src\" "*Blazor*.csproj" -Recurse)|ForEach-Object{
+    #     $project=$_.Fullname
+    #     if ($project -notlike "*Tests\TestApplication.Blazor.Server\TestApplication.Blazor.Server.csproj"){
+    #         [xml]$csproj=Get-XmlContent $_
+    #         Get-PackageReference $_|Where-Object{$_.Include -notmatch "Xpand|DevExpress"} |ForEach-Object{
+    #             $id=$_.Include
+    #             $version=$_.Version
+    #             $paket=$pakets|Where-Object{$_.Id -eq $id}
+    #             if ($paket){
+    #                 if ($paket.Version -ne $version){
+    #                     $package=$csproj.Project.ItemGroup.PackageReference|Where-Object{$_.Include -eq $id}
+    #                     $package.version=$paket.version
+    #                 }
+    #             }
+    #             else{
+    #                 "$Id not found"
+    #             }
+    #         }
+    #         $csproj|Save-Xml $_.Fullname
+    #     }
+    #     else{
+    #         $_
+    #     }
         
-    }
+    # }
 }
 
 Task CompileNugetConsumers -precondition { return $compile } {
     Invoke-Script {
-        Update-NugetConsumersPackageVersion
-        Start-Build "$Root\src\Tests\\EasyTests\EasyTests.sln"
+        # Update-NugetConsumersPackageVersion
+        # Start-Build "$Root\src\Tests\\EasyTests\EasyTests.sln"
         # FixNet461DXAssembliesTargetFramework
         if ($dxVersion -eq (Get-XAFLatestMinors | Select-Object -First 1)) {
             Invoke-Script {

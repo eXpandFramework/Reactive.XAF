@@ -22,6 +22,7 @@ namespace Xpand.XAF.ModelEditor.Module.Win {
 	        TraceSource=new ReactiveTraceSource(nameof(ModelEditorWindowsFormsModule));
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public static ReactiveTraceSource TraceSource{ get; set; }
 
         public override void Setup(ApplicationModulesManager moduleManager) {

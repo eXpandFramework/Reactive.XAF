@@ -10,6 +10,6 @@ Microsoft.NET.Test.Sdk
 DevExpress.ExpressApp.Win
 Enums.NET
 Microsoft.Reactive.Testing
-System.Threading.Tasks.Dataflow
-System.Text.Json
+Microsoft.Extensions.DependencyInjection.Abstractions
+Microsoft.Extensions.Configuration.Abstractions
 DevExpress.ExpressApp.Win.All

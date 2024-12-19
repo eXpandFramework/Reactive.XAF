@@ -10,7 +10,9 @@ using DevExpress.ExpressApp.Win.Editors;
 using DevExpress.XtraEditors;
 using DevExpress.XtraEditors.Repository;
 using DevExpress.XtraGrid.Views.Grid;
+using Fasterflect;
 using Xpand.Extensions.Reactive.Combine;
+using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.Attributes;
 using Xpand.Extensions.XAF.ViewExtensions;
@@ -22,17 +24,16 @@ namespace Xpand.XAF.Modules.Windows.Editors{
             => manager.WhenApplication(application => application.WhenFrame(ViewType.ListView)
                 .SelectMany(frame => frame.View.WhenControlsCreated(true)
                     .SelectMany(_ => {
-                        var listEditor = (GridListEditor)frame.View.ToListView().Editor;
-                        var gridView = listEditor.GridView<GridView>();
-                        return gridView.OpenLink( frame)
-                            .MergeToUnit(gridView.HyperLinkPropertyEditorAttribute( frame))
+                        var listEditor = frame.View.ToListView().Editor;
+                        var gridView = (GridView)listEditor.Control.GetPropertyValue("MainView");
+                        return gridView.Observe().WhenNotDefault(view => view.OpenLink(frame)
+                            .MergeToUnit(view.HyperLinkPropertyEditorAttribute(frame)))
                             .MergeToUnit(listEditor.WhenEvent<CustomizeAppearanceEventArgs>(nameof(GridListEditor.CustomizeAppearance))
                                 .Do(e => {
                                     var item = e.Item as GridViewRowCellStyleEventArgsAppearanceAdapter;
                                     if (item?.Column.ColumnEdit is not RepositoryItemHyperLinkEdit repositoryItem) return;
                                     repositoryItem.LinkColor = ((IAppearanceFormat)e.Item).FontColor;
-                                }))
-                            ;
+                                }));
 
                     }))).ToUnit();
 

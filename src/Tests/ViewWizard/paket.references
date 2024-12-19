@@ -8,9 +8,9 @@ Fasterflect.Xpand
 Xpand.Patcher
 akarnokd.reactive_extensions
 Microsoft.CodeAnalysis
+Microsoft.Extensions.DependencyInjection.Abstractions
+Microsoft.Extensions.Configuration.Abstractions
 Microsoft.NET.Test.Sdk
 DevExpress.ExpressApp.Win
 Microsoft.Reactive.Testing
-System.Threading.Tasks.Dataflow
-System.Text.Json
 DevExpress.ExpressApp.Win.All

@@ -14,8 +14,6 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Strings.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <None Remove="Resources\Xpand.XAF.ModelEditor.Win.4.241.7.2.zip" />
-    <EmbeddedResource Include="Resources\Xpand.XAF.ModelEditor.Win.4.241.7.2.zip" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="Strings.Designer.cs">
@@ -25,6 +23,8 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Resources\" />
+    <EmbeddedResource Include="..\..\..\..\XVSIX64\Resources\Xpand.XAF.ModelEditor.Win.4.242.3.0.zip">
+      <Link>Resources\Xpand.XAF.ModelEditor.Win.4.242.3.0.zip</Link>
+    </EmbeddedResource>
   </ItemGroup>
 </Project>

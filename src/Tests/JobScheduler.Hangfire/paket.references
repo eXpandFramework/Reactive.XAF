@@ -1,4 +1,3 @@
-System.Text.Json
 DevExpress.ExpressApp.Security.Xpo
 MagicOnion
 Shouldly
@@ -11,8 +10,6 @@ Xpand.Patcher
 akarnokd.reactive_extensions
 Xpand.Collections
 Microsoft.NET.Test.SDK
-Polly
-Microsoft.AspNetCore.Http.Features
 DevExpress.ExpressApp.Win
 Microsoft.Reactive.Testing
 System.Threading.Tasks.Dataflow
@@ -20,6 +17,3 @@ hangfire.aspnetcore
 hangfire.core
 hangfire.memorystorage
 DevExpress.ExpressApp.Blazor.All
-Microsoft.AspNetCore.Hosting
-Microsoft.Extensions.Hosting
-Microsoft.Data.SqlClient

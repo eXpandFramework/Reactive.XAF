@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
@@ -12,6 +13,7 @@ namespace Xpand.XAF.Modules.Windows {
     
     public sealed class WindowsModule : ReactiveModuleBase{
         static WindowsModule() => TraceSource=new ReactiveTraceSource(nameof(WindowsModule));
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public static ReactiveTraceSource TraceSource{ get; set; }
         public WindowsModule() {
             RequiredModuleTypes.Add(typeof(DevExpress.ExpressApp.SystemModule.SystemModule));

@@ -9,7 +9,7 @@ using Fasterflect;
 namespace Xpand.Extensions.XAF.XafApplicationExtensions{
 	public static partial class XafApplicationExtensions{
 		static Controller CreateController(this ControllersManager controllersManager, Type controllerType,IModelApplication modelApplication){
-			var registeredControllers = ((Dictionary<Type, Controller>) controllersManager.GetFieldValue("registeredControllers"));
+			var registeredControllers = ((Dictionary<Type, Controller>) controllersManager.GetFieldValue("sharedControllersManager").GetFieldValue("registeredControllers"));
 			return registeredControllers.TryGetValue(controllerType, out var sourceController)
 				? sourceController.Clone(modelApplication,ServiceProvider(controllersManager)) : (Controller) controllerType.CreateInstance();
 		}

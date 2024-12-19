@@ -13,6 +13,7 @@ using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.SuppressConfirmation;
 using Xpand.XAF.Modules.ViewItemValue;
+using System.ComponentModel;
 
 namespace Xpand.XAF.Modules.Office.DocumentStyleManager{
     
@@ -43,6 +44,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager{
             extenders.Add<IModelOffice, IModelOfficeDocumentStyleManager>();
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public static TraceSource TraceSource{ get; set; }
 
     }

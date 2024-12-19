@@ -4,11 +4,10 @@ Moq
 Shouldly
 NUnit
 NUnit3TestAdapter
-
 Microsoft.CodeAnalysis
 Microsoft.NET.Test.Sdk
 DevExpress.ExpressApp.Win
 Microsoft.Reactive.Testing
-System.Threading.Tasks.Dataflow
-System.Text.Json
+Microsoft.Extensions.DependencyInjection.Abstractions
+Microsoft.Extensions.Configuration.Abstractions
 DevExpress.ExpressApp.Win.All

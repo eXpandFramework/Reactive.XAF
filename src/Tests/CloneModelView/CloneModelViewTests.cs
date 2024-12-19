@@ -125,7 +125,7 @@ namespace Xpand.XAF.Modules.CloneModelView.Tests{
 				.SelectMany(manager => manager.WhenGeneratingModelNodes(modelApplication => modelApplication.Views))
 				.Do(_ => {})
 				.Test();
-			application.AddModule<CloneModelViewModule>();
+			application.AddModule<TestCloneModelViewModule>();
 			application.Model.Views.Count.ShouldBeGreaterThan(0);
 			testObserver.ItemCount.ShouldBe(1);
 		}

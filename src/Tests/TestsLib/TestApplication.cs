@@ -27,8 +27,8 @@ namespace Xpand.TestsLib{
                     throw e.Exception;
                 }
             };
-            TraceClientConnected = this.ClientConnect();
-            TraceClientBroadcast = this.ClientBroadcast();
+            // TraceClientConnected = this.ClientConnect();
+            // TraceClientBroadcast = this.ClientBroadcast();
         }
 
         // protected override string GetModulesVersionInfoFilePath() {
@@ -37,10 +37,10 @@ namespace Xpand.TestsLib{
 
         public bool TransmitMessage => _transmitMessage;
 
-        public IObservable<Unit> TraceClientBroadcast{ get; set; }
+        // public IObservable<Unit> TraceClientBroadcast{ get; set; }
 
 
-        public IObservable<Unit> TraceClientConnected{ get; set; }
+        // public IObservable<Unit> TraceClientConnected{ get; set; }
         
         public Type SUTModule{ get; }
 

@@ -10,6 +10,7 @@ namespace Xpand.XAF.Modules.Windows.SystemActions {
 
     public class HotKeyForm:XtraForm {
         private bool _keyIsSet;
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public TextEdit TextEdit { get; private set; }
 
         public HotKeyForm() => InitComponent();
@@ -80,9 +81,11 @@ namespace Xpand.XAF.Modules.Windows.SystemActions {
                 _keyIsSet = true;
             }
         }
-        
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool Canceled { get; private set; }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public sealed override bool AutoSize {
             get => base.AutoSize;
             set => base.AutoSize = value;

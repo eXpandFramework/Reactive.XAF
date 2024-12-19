@@ -8,8 +8,6 @@ Microsoft.CodeAnalysis.CSharp
 System.Text.Json
 Xpand.Patcher
 Xpand.Collections
-System.Security.Cryptography.ProtectedData
 Microsoft.AspNetCore.Http.Abstractions
-System.Diagnostics.PerformanceCounter
-System.Threading.Tasks.Dataflow
+System.Security.Cryptography.ProtectedData
 System.Interactive

@@ -43,7 +43,7 @@ jobs:
           $env:AzOrganization="eXpandDevops"
           $env:AzProject ="eXpandFramework"
           & '$(System.DefaultWorkingDirectory)\Build\BuildPipeline.ps1' @goArgs
-    - publish: $(System.DefaultWorkingDirectory)\bin\net8.0
+    - publish: $(System.DefaultWorkingDirectory)\bin\net9.0
       artifact: TestAssemblies
     - publish: $(Pipeline.Workspace)\.nuget
       artifact: Nuget

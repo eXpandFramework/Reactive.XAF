@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <FileUpgradeFlags />
     <UpgradeBackupLocation />
     <LangVersion>latest</LangVersion>
@@ -34,7 +34,7 @@
   </ItemGroup>
   <ItemGroup>
     <!-- <PackageReference Include="Lib.Harmony" Version="2.2.2" /> -->
-    <PackageReference Include="DevExpress.ExpressApp.Security.Xpo" Version="24.1.7" />
+    <PackageReference Include="DevExpress.ExpressApp.Security.Xpo" Version="24.2.3" />
     <PackageReference Include="Serialize.Linq" Version="2.0.0" />
   </ItemGroup>
   <ItemGroup>

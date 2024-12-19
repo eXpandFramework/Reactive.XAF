@@ -20,7 +20,7 @@ namespace Xpand.XAF.Modules.Windows.Tests {
     [NonParallelizable]
     public class NotifyIconTests : BaseWindowsTest {
         [Test]
-        [XpandTest]
+        [XpandTest(state:ApartmentState.STA)]
         [Apartment(ApartmentState.STA)]
         public async Task Enable() {
             var updated = NotifyIconService.NotifyIconUpdated.TakeFirst().SubscribeReplay();

@@ -12,5 +12,5 @@ Xpand.Patcher
 DevExpress.ExpressApp.Win
 DevExpress.ExpressApp.Win.All
 Microsoft.Reactive.Testing
-System.Threading.Tasks.Dataflow
-System.Text.Json
+Microsoft.Extensions.DependencyInjection.Abstractions
+Microsoft.Extensions.Configuration.Abstractions
