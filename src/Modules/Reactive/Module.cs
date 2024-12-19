@@ -17,7 +17,9 @@ namespace Xpand.XAF.Modules.Reactive {
 
         static ReactiveModule() => TraceSource=new ReactiveTraceSource(nameof(ReactiveModule));
 
-        public ReactiveModule() => RequiredModuleTypes.Add(typeof(DevExpress.ExpressApp.SystemModule.SystemModule));
+        public ReactiveModule() {
+            RequiredModuleTypes.Add(typeof(DevExpress.ExpressApp.SystemModule.SystemModule));
+        }
 
         public override void ExtendModelInterfaces(ModelInterfaceExtenders extenders){
             base.ExtendModelInterfaces(extenders);
