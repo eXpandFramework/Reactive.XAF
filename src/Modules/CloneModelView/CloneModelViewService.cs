@@ -3,6 +3,7 @@ using System.Linq;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
+using DevExpress.ExpressApp.Model.Core;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.XAF.Modules.Reactive.Services;
@@ -16,7 +17,7 @@ namespace Xpand.XAF.Modules.CloneModelView{
 					.Do(views.GenerateModel));
 
 		private static IModelObjectView NewModelView(this IModelViews modelViews, CloneModelViewAttribute cloneViewAttribute, IModelClass modelClass){
-			if (cloneViewAttribute.ViewType == CloneViewType.ListView){
+			if (cloneViewAttribute.ViewType == CloneViewType.ListView) {
 				var listView = modelViews.AddNode<IModelListView>(cloneViewAttribute.ViewId);
 				listView.ModelClass = modelClass;
 				listView.GenerateNodes();

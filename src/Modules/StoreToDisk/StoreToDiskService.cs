@@ -112,16 +112,9 @@ namespace Xpand.XAF.Modules.StoreToDisk{
             return data.data.Where(t => t.types.autoCreate).ToNowObservable().BufferUntilCompleted()
                 .Select(ts => ts.Select(t => t.types.typeInfo).ToList().SortByDependencies()
                     .Select(info => ts.First(t => t.types.typeInfo==info)))
-                // .ConcatIgnored(_ => application.ObjectSpaceProviders.Where(provider => provider is not NonPersistentObjectSpaceProvider)
-                //     .ToNowObservable().Do(provider => provider.UpdateSchema()))
-                .ConcatIgnored(tuples => application.ObjectSpaceProviders.Where(provider => provider is not NonPersistentObjectSpaceProvider)
+                .ConcatIgnored(_ => application.ObjectSpaceProviders.Where(provider => provider is not NonPersistentObjectSpaceProvider)
                     .ToNowObservable().SelectMany(provider => provider.WhenSchemaUpdated().Take(1)))
-                .SelectMany(ts => {
-                    // var selectMany = application.Modules.OfType<IStoreToDiskAutoCreate>().ToNowObservable()
-                    //     .SelectMany(create => create.WhenObjectsReady().Take(1)).WhenCompleted()
-                    //     .SelectMany(_ => application.AutoCreate(data, ts));
-                    return application.AutoCreate(data, ts);
-                });
+                .SelectMany(ts => application.AutoCreate(data, ts));
         }
 
         private static IObservable<Unit> AutoCreate(this XafApplication application,
@@ -185,9 +178,7 @@ namespace Xpand.XAF.Modules.StoreToDisk{
                     unitOfWork.Dispose();
                 })
                 .ToUnit();
-
-        private static string[] _types = ["LaunchPadProject"];
-        // private static string[] _types = ["Network","ServiceNetwork","Asset","ServiceAsset","LaunchPadProject"];
+        
         private static
             IObservable<(ThreadSafeDataLayer layer, ((XPClassInfo classInfo, ITypeInfo typeInfo,bool autoCreate) types,
                 Dictionary<string, (IMemberInfo memberInfo, XPCustomMemberInfo[] xpCustomMemberInfos)> memberInfos, (
@@ -225,9 +216,13 @@ namespace Xpand.XAF.Modules.StoreToDisk{
                             if (dbColumn==null) return false;
                             var columnType = Type.GetType($"System.{dbColumn.ColumnType}");
                             var memberType = info.MemberType.IsEnum ? typeof(int) : info.MemberType.RealType();
+                            var converterType = info.Attributes.OfType<ValueConverterAttribute>().Select(attribute => (
+                                (ValueConverter)attribute.ConverterType.CreateInstance()).StorageType).FirstOrDefault();
+                            if (converterType!=null) memberType = converterType;
                             if (new[]{typeof(TimeSpan)}.Contains(memberType)) {
                                 memberType = typeof(long);
                             }
+                            
                             return columnType != memberType;
                         });
                         
@@ -235,7 +230,8 @@ namespace Xpand.XAF.Modules.StoreToDisk{
                 }).ToNowObservable().WhenNotEmpty().BufferUntilCompleted().WhenNotEmpty()
                 .SelectMany(t => {
                     var memberInfos = t.SelectMany().Select(t1 => t1.memberInfo).ToArray();
-                    return new SchemaCorrectionNeededException(new Exception($"{memberInfos.Select(info => info.Owner.Name).Distinct().JoinComma().Concat(memberInfos.JoinNewLine())}")).Throw<Unit>();
+                    var enumerable = memberInfos.Select(info => info.Owner.Name).Distinct().JoinComma();
+                    return new SchemaCorrectionNeededException(new Exception($"{enumerable}")).Throw<Unit>();
                 });
         }
 

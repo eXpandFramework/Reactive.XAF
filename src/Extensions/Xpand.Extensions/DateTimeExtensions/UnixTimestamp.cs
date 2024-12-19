@@ -1,4 +1,5 @@
 ﻿using System;
+using Xpand.Extensions.Numeric;
 
 namespace Xpand.Extensions.DateTimeExtensions{
     public static partial class DateTimeExtensions{
@@ -14,6 +15,10 @@ namespace Xpand.Extensions.DateTimeExtensions{
         public static double UnixTimestampFromDateTimeMilliseconds(this DateTime dateTime) {
             var milliseconds = (dateTime - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds;
             return milliseconds<0?0:milliseconds;
+        }
+        public static long UnixTimestampFromDateSeconds(this DateTime dateTime) {
+            var totalSeconds = (dateTime - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalSeconds;
+            return totalSeconds<0?0:(long)totalSeconds.Round();
         }
     }
 }

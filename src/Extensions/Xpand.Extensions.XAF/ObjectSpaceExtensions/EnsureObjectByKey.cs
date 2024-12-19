@@ -14,13 +14,14 @@ namespace Xpand.Extensions.XAF.ObjectSpaceExtensions {
         public static T EnsureObjectByKey<T>(this IObjectSpace objectSpace, object key,bool inTransaction=false)
             => objectSpace.GetObjectByKey<T>(key)??objectSpace.EnsureInTransaction<T>(key,inTransaction) ?? objectSpace.NewObject<T>(key);
         
-        public static T EnsureObject<T>(this IObjectSpace objectSpace, Expression<Func<T, bool>> criteriaExpression=null,Action<T> initialize=null,Action<T> update=null,bool inTransaction=false) where T : class {
+        public static T EnsureObject<T>(this IObjectSpace objectSpace, Expression<Func<T, bool>> criteriaExpression=null,Action<T> initialize=null,Action<T> update=null,bool inTransaction=false,
+            Func<T> createObject=null) where T : class {
             var o = objectSpace.FirstOrDefault(criteriaExpression??(arg =>true) ,inTransaction);
             if (o != null) {
                 update?.Invoke(o);
                 return o;
             }
-            var ensureObject = objectSpace.CreateObject<T>();
+            var ensureObject = createObject?.Invoke()??objectSpace.CreateObject<T>();
             initialize?.Invoke(ensureObject);
             update?.Invoke(ensureObject);
             return ensureObject;

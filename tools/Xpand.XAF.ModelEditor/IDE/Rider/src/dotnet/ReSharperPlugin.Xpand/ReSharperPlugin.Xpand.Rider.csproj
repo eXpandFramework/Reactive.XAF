@@ -1,5 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
     <AssemblyName>ReSharperPlugin.Xpand</AssemblyName>
@@ -7,11 +6,9 @@
     <IsPackable>false</IsPackable>
     <DefineConstants>$(DefineConstants);RIDER</DefineConstants>
   </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="JetBrains.Rider.SDK" Version="$(SdkVersion)" />
   </ItemGroup>
-
   <ItemGroup>
     <EmbeddedResource Update="Strings.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -20,7 +17,6 @@
     <None Remove="Resources\Xpand.XAF.ModelEditor.Win.4.241.7.2.zip" />
     <EmbeddedResource Include="Resources\Xpand.XAF.ModelEditor.Win.4.241.7.2.zip" />
   </ItemGroup>
-
   <ItemGroup>
     <Compile Update="Strings.Designer.cs">
       <DesignTime>True</DesignTime>
@@ -28,9 +24,7 @@
       <DependentUpon>Strings.resx</DependentUpon>
     </Compile>
   </ItemGroup>
-
   <ItemGroup>
     <Folder Include="Resources\" />
   </ItemGroup>
-
 </Project>
