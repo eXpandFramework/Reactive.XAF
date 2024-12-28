@@ -7,5 +7,6 @@ namespace Xpand.Extensions.XAF.Attributes{
     public class ColumnSummaryAttribute(SummaryType summaryType,SummaryMode summaryMode=SummaryMode.Mixed) : Attribute {
         public SummaryType SummaryType{ get; } = summaryType;
         public SummaryMode SummaryMode{ get; } = summaryMode;
+        public bool HideCaption { get; set; } = true;
     }
 }
