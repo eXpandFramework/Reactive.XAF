@@ -8,6 +8,7 @@ using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Templates;
+using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Transform;
@@ -57,6 +58,7 @@ namespace Xpand.XAF.Modules.ViewItemValue{
             var defaultObject = view.ViewItemValueObject(memberInfo);
             if (defaultObject != null) {
                 var memberValue = defaultObject.ViewItemValue;
+                if (!memberInfo.GetValue(view.CurrentObject).IsDefaultValue(memberInfo.MemberType)) return null;
                 if (memberInfo.MemberTypeInfo.IsDomainComponent) {
                     memberInfo.SetValue(view.CurrentObject,
                         memberValue != null ? view.ObjectSpace.GetObjectByKey(memberInfo.MemberType,
