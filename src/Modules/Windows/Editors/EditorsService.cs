@@ -26,8 +26,9 @@ namespace Xpand.XAF.Modules.Windows.Editors{
                     .SelectMany(_ => {
                         var listEditor = frame.View.ToListView().Editor;
                         var gridView = (GridView)listEditor.Control.GetPropertyValue("MainView");
-                        return gridView.Observe().WhenNotDefault(view => view.OpenLink(frame)
-                            .MergeToUnit(view.HyperLinkPropertyEditorAttribute(frame)))
+                        return gridView.Observe().WhenNotDefault()
+                            .SelectMany(view => view.OpenLink(frame)
+                                .MergeToUnit(view.HyperLinkPropertyEditorAttribute(frame)))
                             .MergeToUnit(listEditor.WhenEvent<CustomizeAppearanceEventArgs>(nameof(GridListEditor.CustomizeAppearance))
                                 .Do(e => {
                                     var item = e.Item as GridViewRowCellStyleEventArgsAppearanceAdapter;
@@ -58,6 +59,9 @@ namespace Xpand.XAF.Modules.Windows.Editors{
                     var memberInfo = frame.View.ObjectTypeInfo.FindMember(hi.Column.Name);
                     var currentObject = frame.View.SelectedObjects.Cast<object>().FirstOrDefault();
                     if (currentObject==null) return;
+                    var hyperLinkPropertyEditorAttribute = memberInfo.FindAttribute<HyperLinkPropertyEditorAttribute>();
+                    if (hyperLinkPropertyEditorAttribute is { ControlClickListView: true } &&
+                        !System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.LeftCtrl) && !System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.RightCtrl)) return;
                     editor.ShowBrowser(HyperLinkPropertyEditor.GetResolvedUrl(
                         gridView.GetRowCellValue(hi.RowHandle, hi.Column), memberInfo,
                         currentObject));

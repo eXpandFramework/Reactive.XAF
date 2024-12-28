@@ -1,18 +1,23 @@
 ﻿using System;
+using System.Collections;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
+using DevExpress.Data;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Win.Editors;
 using DevExpress.Utils;
+using DevExpress.XtraGrid;
+using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.Base;
 using DevExpress.XtraGrid.Views.Grid;
 using Fasterflect;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Combine;
+using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.Tracing;
@@ -30,18 +35,72 @@ namespace Xpand.XAF.Modules.GridListEditor{
                 application.RememberTopRow()
                     .Merge(application.FocusRow())
                     .Merge(application.SortProperties())
+                    .Merge(application.ColSummaryDisplay())
+                    .Merge(application.SortPartialGroups())
             )
-            .MergeToUnit(SortProperties(manager));
+            .MergeToUnit(manager.SortProperties());
 
         private static IObservable<(Frame frame,TRule rule)> WhenRulesOnView<TRule>(this XafApplication application) where TRule:IModelGridListEditorRule
             => application.WhenViewOnFrame(viewType: ViewType.ListView)
                 .SelectMany(frame => application.ModelRules<TRule>(frame).Select(rule => (frame,rule)));
 
-        private static IObservable<Unit> SortProperties(ApplicationModulesManager manager) 
+        private static IObservable<Unit> SortProperties(this ApplicationModulesManager manager) 
             => manager.WhenCustomizeTypesInfo().SelectMany(e => e.TypesInfo.PersistentTypes.Attributed<SortPropertyAttribute>())
                 .SelectMany(t => t.typeInfo.Members.Where(info =>info.IsPublic&& info.FindAttribute<SortPropertyAttribute>()==null)
                     .Do(info => info.AddAttribute(t.attribute)))
                 .ToUnit();
+
+        static IObservable<Unit> SortPartialGroups(this XafApplication application)
+            => application.WhenSetupComplete()
+                .SelectMany(_ => application.WhenFrame(ViewType.ListView).ToListView()
+                    .Where(view => view.ObjectTypeInfo.FindAttributes<PartialGroupsAttribute>().Any())
+                    .WhenControlsCreated(true)
+                    .SelectMany(SortPartialGroups)
+                )
+                .ToUnit();
+
+        private static IObservable<Unit> SortPartialGroups(this ListView listView) {
+            var gridView = listView.Editor.GridView<GridView>();
+            gridView.OptionsBehavior.AllowPartialGroups=DefaultBoolean.True;
+            gridView.Columns.Where(column => column.GroupIndex>=0).Do(column => column.SortMode=ColumnSortMode.Custom).Enumerate();
+            var objects = listView.Objects().ToArray();
+            return gridView.WhenEvent<CustomColumnSortEventArgs>(nameof(gridView.CustomColumnSort))
+                .Do(e => {
+                    if (e.Column.GroupIndex<0) return;
+                    e.Column.OptionsColumn.AllowSort = DefaultBoolean.False;
+                    e.Column.SortOrder=ColumnSortOrder.Ascending;
+                    var memberInfo = e.Column.MemberInfo();
+                    var counts = objects.GroupBy(x=>memberInfo.GetValue(x))
+                        .ToDictionary(x=>x.Key, x=>x.Count());
+                    var countValue1 = counts[e.Value1];
+                    var countValue2 = counts[e.Value2];
+                    e.Result = countValue1 == countValue2 ? countValue1 == 1 ? Comparer.Default.Compare(e.Value1, e.Value2) : 0 : -1;
+                    e.Handled = true;
+
+                }).ToUnit();
+        }
+
+        static IObservable<Unit> ColSummaryDisplay(this XafApplication application)
+            => application.WhenSetupComplete().SelectMany(_ => application.WhenFrame(ViewType.ListView).ToListView()
+                .WhenControlsCreated(true)
+                .SelectMany(listView => {
+                    var gridView = listView.Editor.GridView<GridView>();
+                    if (gridView == null)return Observable.Empty<Unit>();
+                    return gridView.DataSource.Observe().WhenNotDefault()
+                        .SwitchIfEmpty(gridView.WhenEvent(nameof(gridView.DataSourceChanged)).Take(1))
+                        .SelectMany(_ => gridView.Columns.Where(column => column.Visible).ToNowObservable().SelectMany(column => {
+                            var memberInfo = column.MemberInfo();
+                            if (memberInfo==null)return Observable.Empty<Unit>();
+                            var columnSummaryAttribute = memberInfo.FindAttribute<ColumnSummaryAttribute>();
+                            return columnSummaryAttribute?.HideCaption??false ? column.Summary
+                                    .Do(item => item.DisplayFormat = item.DisplayFormat.Replace("SUM=", ""))
+                                    .ToNowObservable().ToUnit()
+                                : Observable.Empty<Unit>();
+                        }));
+                }));
+
+        public static IMemberInfo MemberInfo(this GridColumn column) 
+            => ((XafPropertyDescriptor)column.View.DataController.Columns[column.ColumnHandle]?.PropertyDescriptor)?.MemberInfo;
 
         static IObservable<Unit> SortProperties(this XafApplication application) 
             => application.WhenSetupComplete().SelectMany(_ => application.WhenFrame(ViewType.ListView).ToListView().WhenControlsCreated(true)
