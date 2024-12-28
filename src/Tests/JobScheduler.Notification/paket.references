@@ -17,3 +17,4 @@ hangfire.core
 hangfire.sqlserver
 hangfire.aspnetcore
 hangfire.memorystorage
+Microsoft.Extensions.Options

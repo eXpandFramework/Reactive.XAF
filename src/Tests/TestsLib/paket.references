@@ -13,3 +13,4 @@ Microsoft.Reactive.Testing
 Microsoft.CodeAnalysis
 Microsoft.Extensions.DependencyInjection.Abstractions
 Microsoft.Extensions.Configuration.Abstractions
+Microsoft.Extensions.Options

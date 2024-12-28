@@ -62,7 +62,7 @@
     <Compile Include="XVSIX64Package.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\Xpand.XAF.ModelEditor.Win.4.242.3.0.zip" />
+    <EmbeddedResource Include="Resources\Xpand.XAF.ModelEditor.Win.4.242.3.2.zip" />
     <None Include="source.extension.vsixmanifest">
       <SubType>Designer</SubType>
     </None>
@@ -102,3 +102,4 @@
   </Target>
   -->
 </Project>
+

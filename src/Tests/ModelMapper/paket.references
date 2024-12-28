@@ -15,3 +15,4 @@ Xpand.Patcher
 Microsoft.Extensions.DependencyInjection.Abstractions
 Microsoft.Extensions.Configuration.Abstractions
 Microsoft.CodeAnalysis
+Microsoft.Extensions.Options

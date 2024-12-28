@@ -11,3 +11,4 @@ Microsoft.NET.Test.Sdk
 Microsoft.Reactive.Testing
 System.Threading.Tasks.Dataflow
 System.Text.Json
+Microsoft.Extensions.Options

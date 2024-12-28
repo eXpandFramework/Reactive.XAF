@@ -14,3 +14,4 @@ System.Text.Json
 Microsoft.Reactive.Testing
 System.Threading.Tasks.Dataflow
 DevExpress.ExpressApp.Win.All
+Microsoft.Extensions.Options

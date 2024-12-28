@@ -16,3 +16,4 @@ Microsoft.AspNetCore.Hosting
 Microsoft.Extensions.Hosting
 DevExpress.ExpressApp.Blazor.All
 Microsoft.Data.SqlClient
+Microsoft.Extensions.Options

@@ -11,3 +11,4 @@ DevExpress.ExpressApp.Blazor.All
 Microsoft.Reactive.Testing
 NUnit
 NUnit3TestAdapter
+Microsoft.Extensions.Options

@@ -12,3 +12,4 @@ DevExpress.ExpressApp.Security.Xpo
 DevExpress.ExpressApp.ViewVariantsModule
 DevExpress.Persistent.BaseImpl.Xpo
 Microsoft.Reactive.Testing
+Microsoft.Extensions.Options

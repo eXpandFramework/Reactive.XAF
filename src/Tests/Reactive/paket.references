@@ -14,3 +14,4 @@ DevExpress.ExpressApp.Security.Xpo
 DevExpress.ExpressApp.Win.All
 Microsoft.Reactive.Testing
 System.Threading.Tasks.Dataflow
+Microsoft.Extensions.Options

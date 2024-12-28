@@ -11,3 +11,4 @@ Microsoft.NET.Test.Sdk
 Microsoft.Reactive.Testing
 System.Threading.Tasks.Dataflow
 System.Interactive.Async
+Microsoft.Extensions.Options

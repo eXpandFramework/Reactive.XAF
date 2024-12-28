@@ -13,3 +13,4 @@ DevExpress.EasyTest
 DevExpress.ExpressApp.Security.Xpo
 Microsoft.Reactive.Testing
 System.Threading.Tasks.Dataflow
+Microsoft.Extensions.Options

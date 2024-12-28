@@ -15,10 +15,10 @@
     <NoWarn>1701;1702;CA1416;XAF0017</NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.Build" Version="16.10.0" />
-    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="16.10.0" />
+    <PackageReference Include="Microsoft.Build" Version="17.12.6" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="17.12.6" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="System.Management" Version="5.0.0" />
+    <PackageReference Include="System.Management" Version="9.0.0" />
     <PackageReference Include="Xpand.XAF.Modules.OneView" Version="4.242.3" />
     <PackageReference Include="Xpand.XAF.Modules.Windows" Version="4.242.3" />
     <PackageReference Include="Xpand.XAF.Modules.GridListEditor" Version="4.242.3" />

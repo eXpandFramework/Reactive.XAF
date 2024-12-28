@@ -11,3 +11,4 @@ Microsoft.Reactive.Testing
 Microsoft.Extensions.DependencyInjection.Abstractions
 Microsoft.Extensions.Configuration.Abstractions
 DevExpress.ExpressApp.Win.All
+Microsoft.Extensions.Options

@@ -17,3 +17,4 @@ hangfire.aspnetcore
 hangfire.core
 hangfire.memorystorage
 DevExpress.ExpressApp.Blazor.All
+Microsoft.Extensions.Options

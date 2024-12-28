@@ -11,3 +11,4 @@ Microsoft.NET.Test.Sdk
 DevExpress.ExpressApp.Win
 Microsoft.Reactive.Testing
 DevExpress.ExpressApp.Win.All
+Microsoft.Extensions.Options
