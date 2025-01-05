@@ -15,6 +15,8 @@ namespace Xpand.Extensions.StringExtensions {
         public static string Remove(this string s,string stringToRemove) => s.Replace(stringToRemove, null);
         public static string RemoveQuotes(this string s) => s.Replace("\"", null);
 
+        public static string RemoveSymbols(this string s) => Regex.Replace(s, @"[\uD800-\uDBFF][\uDC00-\uDFFF]", "");
+
         public static string RemoveComments(this string s) {
             var blockComments = @"/\*(.*?)\*/";
             var lineComments = @"//(.*?)\r?\n";
