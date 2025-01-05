@@ -2,5 +2,5 @@
 using Xpand.Extensions.XAF.ObjectExtensions;
 
 namespace Xpand.Extensions.XAF.Attributes{
-    public class DisplayName(string displayName) : DisplayNameAttribute(displayName.CompoundName());
+    public class DisplayName(string displayName,bool compound=true) : DisplayNameAttribute(compound?displayName.CompoundName():displayName);
 }
