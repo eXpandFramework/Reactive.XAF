@@ -52,6 +52,8 @@ namespace Xpand.Extensions.XAF.ActionExtensions {
         [Description("Actions_Send")]
         Send,
         [Description("Open")]
-        Open
+        Open,
+        [Description("Actions_Question")]
+        Question
     }
 }

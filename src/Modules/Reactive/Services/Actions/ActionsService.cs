@@ -273,7 +273,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
         public static IObservable<SingleChoiceAction> AddItems(this IObservable<SingleChoiceAction> source,Func<SingleChoiceAction,IObservable<Unit>> addItems,IScheduler scheduler=null)
             => source.MergeIgnored(action => action.Controller.WhenActivated()
                 .SelectMany(_ => action.View().WhenCurrentObjectChanged().StartWith(action.View()).TakeUntilDisposed(action))
-                .WaitUntilInactive(1,scheduler:scheduler).ObserveOnContext()
+                .WaitUntilInactive(1, scheduler: scheduler).ObserveOnContext()
                 .Do(_ => action.Items.Clear()).SelectMany(_ => addItems(action)).TakeUntilDisposed(action));
 
         public static IObservable<TArgs> CreateDetailView<TArgs>(this IObservable<TArgs> source, Type objectType=null, TargetWindow? targetWindow =null) where TArgs:ActionBaseEventArgs
@@ -483,10 +483,10 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
                     .WhenEvent<UpdateActionEventArgs>(nameof(ActionsCriteriaViewController.ActionUpdating)).Where(e => e.Active&&e.NeedUpdateEnabled)
                     .SelectMany(selector));
 
-        public static IObservable<DialogController> CreateDialogController(this ActionBaseEventArgs e,ObjectView objectView,string caption=null,bool refreshViewAfterObjectSpaceCommit=true,bool closeOnCancel=true){
+        public static IObservable<DialogController> CreateDialogController(this ActionBaseEventArgs e,ObjectView objectView,string caption=null,bool refreshViewAfterObjectSpaceCommit=true,bool closeOnCancel=true,TargetWindow targetWindow=TargetWindow.NewModalWindow){
             var application = e.Application();
             var parameters = e.ShowViewParameters;
-            parameters.TargetWindow = TargetWindow.NewModalWindow;
+            parameters.TargetWindow=targetWindow;
             parameters.CreateAllControllers = true;
             var dialogController = application.CreateController<DialogController>();
             if (caption != null) {

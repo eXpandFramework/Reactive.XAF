@@ -14,6 +14,6 @@ namespace Xpand.Extensions.Reactive.Combine{
             }).Concat(switchTo.TakeUntil(signal)));
 
         public static IObservable<T> SwitchIfDefault<T>(this IObservable<T> @this, IObservable<T> switchTo) where T : class 
-            => @this.SelectMany(entry => entry != default(T) ? entry.Observe() : switchTo);
+            => @this.SelectMany(entry => entry != null ? entry.Observe() : switchTo);
     }
 }

@@ -242,7 +242,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => source.Where(view =>view.Id==viewId);
 
         public static IObservable<TSource[]> RefreshObjectSpace<TSource>(this IObservable<TSource> source,View view) 
-            => source.BufferUntilCompleted().ObserveOnContext().Do(_ => view.ObjectSpace.Refresh());
+            => source.BufferUntilCompleted().ObserveOnContext().Do(_ => view.ObjectSpace?.Refresh());
 
 
     }

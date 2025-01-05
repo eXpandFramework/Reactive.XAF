@@ -29,7 +29,7 @@ namespace Xpand.Extensions.Reactive.Transform{
 
         public static IObservable<TResult> ExhaustMapPerKey<TSource, TKey, TResult>(
             this IObservable<TSource> source, Func<TSource, TKey> keySelector,
-            Func<TSource, TKey, IObservable<TResult>> function, int maximumConcurrency, IEqualityComparer<TKey> keyComparer = default) 
+            Func<TSource, TKey, IObservable<TResult>> function, int maximumConcurrency, IEqualityComparer<TKey> keyComparer = null) 
             => Observable.Using(() => new SemaphoreSlim(maximumConcurrency, maximumConcurrency), globalSemaphore => source
                 .GroupBy(keySelector, keyComparer ??= EqualityComparer<TKey>.Default)
                 .SelectMany(group => Observable.Using(() => new SemaphoreSlim(1, 1),

@@ -70,8 +70,8 @@ namespace Xpand.Extensions.Reactive.Transform {
                 .Where(it => it != null) // remove the NULL marker
                 .Dematerialize();
         
-        public static IObservable<T> RepeatWhenEmpty<T>(this IObservable<T> source, int maxRetries=3,[CallerMemberName]string caller="") 
+        public static IObservable<T> RepeatWhenEmpty<T>(this IObservable<T> source, int? maxRetries=null,[CallerMemberName]string caller="") 
             => Observable.Defer(() => source.SwitchIfEmpty(Observable.Defer(() => new Exception(caller).Throw<T>())))
-                .Retry(maxRetries).Catch<T,Exception>(exception => exception.Throw<T>());
+                .Retry(maxRetries??Int32.MaxValue).Catch<T,Exception>(exception => exception.Throw<T>());
     }
 }
