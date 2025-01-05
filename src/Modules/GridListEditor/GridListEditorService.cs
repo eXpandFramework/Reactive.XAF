@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -55,29 +56,37 @@ namespace Xpand.XAF.Modules.GridListEditor{
                 .SelectMany(_ => application.WhenFrame(ViewType.ListView).ToListView()
                     .Where(view => view.ObjectTypeInfo.FindAttributes<PartialGroupsAttribute>().Any())
                     .WhenControlsCreated(true)
-                    .SelectMany(SortPartialGroups)
+                    .SelectMany(view => view.SortPartialGroups())
                 )
                 .ToUnit();
 
         private static IObservable<Unit> SortPartialGroups(this ListView listView) {
             var gridView = listView.Editor.GridView<GridView>();
-            gridView.OptionsBehavior.AllowPartialGroups=DefaultBoolean.True;
-            gridView.Columns.Where(column => column.GroupIndex>=0).Do(column => column.SortMode=ColumnSortMode.Custom).Enumerate();
-            var objects = listView.Objects().ToArray();
-            return gridView.WhenEvent<CustomColumnSortEventArgs>(nameof(gridView.CustomColumnSort))
-                .Do(e => {
-                    if (e.Column.GroupIndex<0) return;
-                    e.Column.OptionsColumn.AllowSort = DefaultBoolean.False;
-                    e.Column.SortOrder=ColumnSortOrder.Ascending;
-                    var memberInfo = e.Column.MemberInfo();
-                    var counts = objects.GroupBy(x=>memberInfo.GetValue(x))
-                        .ToDictionary(x=>x.Key, x=>x.Count());
-                    var countValue1 = counts[e.Value1];
-                    var countValue2 = counts[e.Value2];
-                    e.Result = countValue1 == countValue2 ? countValue1 == 1 ? Comparer.Default.Compare(e.Value1, e.Value2) : 0 : -1;
-                    e.Handled = true;
+            gridView.OptionsBehavior.AllowPartialGroups = DefaultBoolean.True;
+            gridView.Columns.Where(x => x.GroupIndex >= 0).Do(x => x.SortMode = ColumnSortMode.Custom).Enumerate();
+            return gridView.WhenEvent<CustomColumnSortEventArgs>(nameof(gridView.CustomColumnSort)).Do(e => {
+                if (e.Column.GroupIndex < 0) return;
+                var objs = gridView.Objects();
+                e.Column.SortOrder = ColumnSortOrder.Ascending;
+                var mem = e.Column.MemberInfo();
+                var cnts = objs.GroupBy(x => mem.GetValue(x)).ToDictionary(x => x.Key, x => x.Count());
+                if (!cnts.Any()) return;
+                cnts.TryGetValue(e.Value1, out var c1);
+                cnts.TryGetValue(e.Value2, out var c2);
 
-                }).ToUnit();
+                if (c1 == 1 && c2 == 1) e.Result = 0;
+                else if (c1 > 1 && c2 > 1) e.Result = Comparer.Default.Compare(e.Value1, e.Value2);
+                else e.Result = c1.CompareTo(c2);
+                e.Handled = true;
+            }).ToUnit();
+        }
+
+        public static List<object> Objects(this GridView gridView){
+            var objects=new List<object>();
+            for (int i = 0; i < gridView.DataRowCount-1; i++) {
+                objects.Add(gridView.GetRow(i));
+            }
+            return objects;
         }
 
         static IObservable<Unit> ColSummaryDisplay(this XafApplication application)
