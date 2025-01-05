@@ -11,6 +11,7 @@ using DevExpress.ExpressApp.Core;
 using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using HarmonyLib;
+using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 
@@ -165,6 +166,8 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
             var controller = (TController) Controller.Create(controllerType,applicationModulesManager.ControllersManager.ServiceProvider());
             applicationModulesManager.ControllersManager.RegisterController(controller);
             return ((IActionController) controller).WhenCloned
+                .Amb(applicationModulesManager.WhenApplication(application => application.WhenFrameCreated()
+                    .Select(frame => frame.Controllers[controllerType]).WhenNotDefault()))
                 .SelectMany(viewController => viewController.Actions).Cast<TAction>()
                 .StartWith(controller.Actions.Select(@base => @base).Cast<TAction>());
         }
@@ -216,10 +219,16 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
         readonly Subject<ActionViewController> _clonedSubject=new();
         public IObservable<Controller> WhenCloned => _clonedSubject.AsObservable();
 
+        protected override void Dispose(bool disposing) {
+            base.Dispose(disposing);
+            _clonedSubject.Dispose();
+        }
+
         public override Controller Clone(IModelApplication modelApplication, IServiceProvider serviceProvider) {
             var controller = base.Clone(modelApplication,serviceProvider);
             _clonedSubject.OnNext((ActionViewController) controller);
             return controller;
         }
+        
     }
 }
