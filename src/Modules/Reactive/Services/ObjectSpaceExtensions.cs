@@ -245,7 +245,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)>
             WhenCommittedDetailed<T>(this IObjectSpace objectSpace, ObjectModification objectModification, Func<T, bool> criteria ) where T : class
-            => objectSpace.WhenCommitingDetailed(true, objectModification, criteria, Array.Empty<string>());
+            => objectSpace.WhenCommitingDetailed(true, objectModification, criteria, []);
         public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)>
             WhenCommittedDetailed<T>(this IObjectSpace objectSpace, ObjectModification objectModification,string[] modifiedProperties,
                 Func<T, bool> criteria = null,[CallerMemberName]string caller="") where T : class

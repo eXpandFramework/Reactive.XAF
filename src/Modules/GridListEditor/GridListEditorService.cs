@@ -108,8 +108,10 @@ namespace Xpand.XAF.Modules.GridListEditor{
                         }));
                 }));
 
-        public static IMemberInfo MemberInfo(this GridColumn column) 
-            => ((XafPropertyDescriptor)column.View.DataController.Columns[column.ColumnHandle]?.PropertyDescriptor)?.MemberInfo;
+        public static IMemberInfo MemberInfo(this GridColumn column) {
+            var propertyDescriptor = column.View.DataController.Columns[column.ColumnHandle]?.PropertyDescriptor as XafPropertyDescriptor;
+            return propertyDescriptor?.MemberInfo;
+        }
 
         static IObservable<Unit> SortProperties(this XafApplication application) 
             => application.WhenSetupComplete().SelectMany(_ => application.WhenFrame(ViewType.ListView).ToListView().WhenControlsCreated(true)

@@ -38,7 +38,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             o = property is { } prop ? o.GetType().ToTypeInfo().FindMember(prop).GetValue(o) : o;
             var objectSpace = property==null? (listView.MasterDetailMode==MasterDetailMode.ListViewOnly?listView.Application().CreateObjectSpace():listView.ObjectSpace):listView.Application().CreateObjectSpace();
             // var objectSpace = listView.Application().CreateObjectSpace();
-            return listView.Application().CreateDetailView(objectSpace, o.GetType().GetModelClass().DefaultDetailView,property != null || listView.IsRoot, objectSpace.GetObject(o));
+            var modelClass = o.GetType().GetModelClass();
+            return modelClass==null ? null : listView.Application().CreateDetailView(objectSpace, modelClass.DefaultDetailView,property != null || listView.IsRoot, objectSpace.GetObject(o));
         }
     }
 }
