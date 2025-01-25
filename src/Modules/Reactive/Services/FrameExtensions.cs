@@ -91,6 +91,9 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<(TFrame frame, Frame source)> WhenViewChanged<TFrame>(this IObservable<TFrame> source) where TFrame : Frame
             => source.SelectMany(frame => frame.WhenViewChanged());
         
+        public static IObservable<TController> WhenController<TController>(this Frame frame) where TController : Controller
+            => frame.Observe().Select(frame1 => frame1.GetController<TController>()).WhenNotDefault();
+        
         public static IObservable<(TFrame frame, Frame source)> WhenViewChanged<TFrame>(this TFrame item) where TFrame : Frame 
             => item.WhenEvent<ViewChangedEventArgs>(nameof(Frame.ViewChanged))
                 .TakeUntil(item.WhenDisposedFrame()).Select(e => e.SourceFrame).InversePair(item);

@@ -69,16 +69,22 @@ namespace Xpand.XAF.Modules.GridListEditor{
                 var objs = gridView.Objects();
                 e.Column.SortOrder = ColumnSortOrder.Ascending;
                 var mem = e.Column.MemberInfo();
-                var cnts = objs.GroupBy(x => mem.GetValue(x)).ToDictionary(x => x.Key, x => x.Count());
+                var cnts = objs.GroupBy(x => mem.GetValue(x)??"").ToDictionary(x => x.Key, x => x.Count());
                 if (!cnts.Any()) return;
-                cnts.TryGetValue(e.Value1, out var c1);
-                cnts.TryGetValue(e.Value2, out var c2);
-
+                int c1 = 0;
+                if (e.Value1 != null) cnts.TryGetValue(e.Value1, out c1);
+                int c2 = 0;
+                if (e.Value2 != null) cnts.TryGetValue(e.Value2, out c2);
                 if (c1 == 1 && c2 == 1) e.Result = 0;
                 else if (c1 > 1 && c2 > 1) e.Result = Comparer.Default.Compare(e.Value1, e.Value2);
                 else e.Result = c1.CompareTo(c2);
                 e.Handled = true;
             }).ToUnit();
+        }
+        
+        static IMemberInfo MemberInfo(this GridColumn column) {
+            var propertyDescriptor = column.View.DataController.Columns[column.ColumnHandle]?.PropertyDescriptor as XafPropertyDescriptor;
+            return propertyDescriptor?.MemberInfo;
         }
 
         public static List<object> Objects(this GridView gridView){
@@ -108,10 +114,7 @@ namespace Xpand.XAF.Modules.GridListEditor{
                         }));
                 }));
 
-        public static IMemberInfo MemberInfo(this GridColumn column) {
-            var propertyDescriptor = column.View.DataController.Columns[column.ColumnHandle]?.PropertyDescriptor as XafPropertyDescriptor;
-            return propertyDescriptor?.MemberInfo;
-        }
+        
 
         static IObservable<Unit> SortProperties(this XafApplication application) 
             => application.WhenSetupComplete().SelectMany(_ => application.WhenFrame(ViewType.ListView).ToListView().WhenControlsCreated(true)

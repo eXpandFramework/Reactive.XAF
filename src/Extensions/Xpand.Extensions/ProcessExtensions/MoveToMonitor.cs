@@ -6,7 +6,7 @@ using static Xpand.Extensions.Windows.WinInterop;
 
 namespace Xpand.Extensions.ProcessExtensions {
     public static partial class ProcessExtensions {
-        private static void MoveTo<T>(this T process, WindowPosition position, RECT rect) where T : Process{
+        public static void MoveTo<T>(this T process, WindowPosition position, RECT rect) where T : Process{
             for (var i = 0; i < 2; i++){
                 GetWindowRect(process.MainWindowHandle, out var currentRect);
                 var currentWidth = currentRect.Right - currentRect.Left;

@@ -18,6 +18,7 @@ using HarmonyLib;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.ObjectExtensions;
+using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.TypeExtensions;
@@ -26,7 +27,7 @@ using Xpand.Extensions.XAF.Attributes;
 using Xpand.Extensions.XAF.Harmony;
 using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.Extensions.XAF.ModuleExtensions;
-using Xpand.Extensions.XAF.ObjectSpaceExtensions;
+using Xpand.Extensions.XAF.ObjectExtensions;
 using Xpand.Extensions.XAF.TypesInfoExtensions;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Security;
@@ -110,9 +111,31 @@ namespace Xpand.XAF.Modules.Reactive{
                 .Merge(application.ReloadWhenChanged())
                 .Merge(application.FireChanged())
                 .Merge(application.ShowMessages())
+                .Merge(application.ExplicitModificationAttribute())
                 .Merge(application.ShowInstanceDetailView())
                 ;
         }
+        
+        private static IObservable<Unit> ExplicitModificationAttribute(this XafApplication application)
+            => application.WhenSetupComplete()
+                .SelectMany(_ => application.WhenFrame(application.TypesInfo.PersistentTypes.Attributed<ExplicitModificationAttribute>().Types().Select(info => info.Type).ToArray()).WhenFrame(ViewType.DetailView)
+                .Select(frame => {
+                    var propertyName = frame.View.ObjectTypeInfo.Attributed<ExplicitModificationAttribute>().Select(t => t.attribute.PropertyName).First();
+                    var currentObject = ((IObjectSpaceLink)frame.View.CurrentObject);
+                    var memberInfoValueDictionary = currentObject.MemberInfoValueDictionary();
+                    var memberInfo = frame.View.ObjectTypeInfo.FindMember(propertyName);
+                    var properties = $"{memberInfo.GetValue(currentObject)}".Split(',').WhereNotEmpty().ToHashSet();
+                    return frame.View.ObjectSpace.WhenModifiedObjects(frame.View.ObjectTypeInfo.Type, properties.Where(s => s!=propertyName).ToArray())
+                        .SelectMany(_ => currentObject.CompareTypeInfoValue(memberInfoValueDictionary)
+                            .Keys.ToNowObservable().Do(s => properties.Add(s)))
+                        .MergeToUnit(frame.View.ObjectSpace.WhenCommiting<object>(ObjectModification.Updated)
+                            .Do(_ => {
+                                memberInfo.SetValue(currentObject, properties.JoinComma());
+                                properties.Clear();
+                            }));
+                })
+                .Switch()
+                .ToUnit());
         
         private static IObservable<Unit> ShowInstanceDetailView(this XafApplication application)
             => application.WhenSetupComplete().SelectMany(_ => application.ShowInstanceDetailView(application.TypesInfo

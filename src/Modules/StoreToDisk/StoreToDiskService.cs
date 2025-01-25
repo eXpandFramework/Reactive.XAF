@@ -28,6 +28,7 @@ using Xpand.Extensions.XAF.TypesInfoExtensions;
 using Xpand.Extensions.XAF.Xpo;
 using Xpand.Extensions.XAF.Xpo.ConnectionProviders;
 using Xpand.XAF.Modules.Reactive.Services;
+using Xpand.XAF.Modules.StoreToDisk.BusinessObjects;
 
 namespace Xpand.XAF.Modules.StoreToDisk{
     public interface IStoreToDiskAutoCreate {
@@ -120,21 +121,17 @@ namespace Xpand.XAF.Modules.StoreToDisk{
         private static IObservable<Unit> AutoCreate(this XafApplication application,
             (ThreadSafeDataLayer layer, ((XPClassInfo classInfo, ITypeInfo typeInfo, bool autoCreate) types, Dictionary<string, (IMemberInfo memberInfo, XPCustomMemberInfo[] xpCustomMemberInfos)> memberInfos, (IMemberInfo keyMember, XPCustomMemberInfo storeToDiskKeyMember) key, string Criteria)[] data) data,
             IEnumerable<((XPClassInfo classInfo, ITypeInfo typeInfo, bool autoCreate) types, Dictionary<string, (IMemberInfo memberInfo, XPCustomMemberInfo[] xpCustomMemberInfos)> memberInfos, (IMemberInfo keyMember, XPCustomMemberInfo storeToDiskKeyMember) key, string Criteria)> ts) 
-            => ts.ToObservable().SelectMany(t => {
-                var useObjectSpace = application.UseProviderObjectSpace(objectSpace => objectSpace.GetObjectsCount(t.types.typeInfo.Type, null) == 0
+            => ts.ToObservable().SelectMany(t => application.UseProviderObjectSpace(objectSpace => 
+                    objectSpace.Any<StoreToDiskStorage>(storage => storage.TypeName== t.types.typeInfo.FullName )&&objectSpace.GetObjectsCount(t.types.typeInfo.Type, null) == 0
                     ? new UnitOfWork(data.layer)
-                        .Use(unitOfWork => new XPCollection(unitOfWork, t.types.classInfo).Cast<object>()
-                            .ToNowObservable()
-                            .Do(storedObject => objectSpace.EnsureObjectByKey(t.types.typeInfo.Type,
-                                unitOfWork.GetKeyValue(storedObject)))
+                        .Use(unitOfWork => new XPCollection(unitOfWork, t.types.classInfo).Cast<object>().ToNowObservable()
+                            .Do(storedObject => objectSpace.EnsureObjectByKey(t.types.typeInfo.Type, unitOfWork.GetKeyValue(storedObject)))
                             .FinallySafe(() => {
+                                var storeToDiskStorage = objectSpace.CreateObject<StoreToDiskStorage>();
+                                storeToDiskStorage.TypeName=t.types.typeInfo.FullName;
                                 objectSpace.CommitChanges();
-                                objectSpace.CommitChanges();
-                            })).ToUnit()
-                    : Observable.Empty<Unit>(),
-                    t.types.typeInfo.Type);
-                return useObjectSpace;
-            });
+                            })).ToUnit() : Observable.Empty<Unit>(),
+                t.types.typeInfo.Type));
 
 
         private static IObservable<Unit> SaveData(this UnitOfWork unitOfWork, object[] modifiedObjects,
@@ -209,30 +206,27 @@ namespace Xpand.XAF.Modules.StoreToDisk{
             var dataStoreSchemaExplorer = ((IDataStoreSchemaExplorer)XpoDefault.GetConnectionProvider(ConnectionString, AutoCreateOption.None));
             return data.data.Select(t => {
                     var dbTable = dataStoreSchemaExplorer.GetStorageTables(t.Item1.types.TableName).First();
-                    return t.memberInfos.Values.Where(t1 => {
-                        var infos = t1.xpCustomMemberInfos;
-                        return infos.All(info => {
-                            var dbColumn = dbTable.Columns.FirstOrDefault(column => column.Name == info.Name);
-                            if (dbColumn==null) return false;
-                            var columnType = Type.GetType($"System.{dbColumn.ColumnType}");
-                            var memberType = info.MemberType.IsEnum ? typeof(int) : info.MemberType.RealType();
-                            var converterType = info.Attributes.OfType<ValueConverterAttribute>().Select(attribute => (
-                                (ValueConverter)attribute.ConverterType.CreateInstance()).StorageType).FirstOrDefault();
-                            if (converterType!=null) memberType = converterType;
-                            if (new[]{typeof(TimeSpan)}.Contains(memberType)) {
-                                memberType = typeof(long);
-                            }
-                            
-                            return columnType != memberType;
-                        });
-                        
-                    }).ToArray();
+                    return t.memberInfos.Values.Where(t1 => t1.xpCustomMemberInfos.All(info => {
+                        var dbColumn = dbTable.Columns.FirstOrDefault(column => column.Name == info.Name);
+                        return dbColumn != null && Type.GetType($"System.{dbColumn.ColumnType}") != info.MemberType();
+                    })).ToArray();
                 }).ToNowObservable().WhenNotEmpty().BufferUntilCompleted().WhenNotEmpty()
                 .SelectMany(t => {
                     var memberInfos = t.SelectMany().Select(t1 => t1.memberInfo).ToArray();
                     var enumerable = memberInfos.Select(info => info.Owner.Name).Distinct().JoinComma();
                     return new SchemaCorrectionNeededException(new Exception($"{enumerable}")).Throw<Unit>();
                 });
+        }
+
+        private static Type MemberType(this XPCustomMemberInfo info){
+            var memberType = info.MemberType.IsEnum ? typeof(int) : info.MemberType.RealType();
+            var converterType = info.Attributes.OfType<ValueConverterAttribute>().Select(attribute => (
+                (ValueConverter)attribute.ConverterType.CreateInstance()).StorageType).FirstOrDefault();
+            if (converterType!=null) memberType = converterType;
+            if (new[]{typeof(TimeSpan)}.Contains(info.MemberType)) {
+                return typeof(long);
+            }
+            return new[]{typeof(TimeSpan)}.Contains(memberType) ? typeof(double) : memberType;
         }
 
         private static Dictionary<string, (IMemberInfo memberInfo, XPCustomMemberInfo[] xpCustomMemberInfos)> MemberInfos(this (StoreToDiskAttribute attribute, ITypeInfo typeInfo) t, XPClassInfo classInfo){
@@ -253,9 +247,9 @@ namespace Xpand.XAF.Modules.StoreToDisk{
         }
 
         private static XPCustomMemberInfo CreateMember(this XPClassInfo classInfo, IMemberInfo info) 
-            => classInfo.CreateMember(info.Name.Replace(".", "_"), info.MemberTypeInfo.IsPersistent ? info.MemberTypeInfo.KeyMember.MemberType : (
-                    info.MemberType==typeof(TimeSpan)?typeof(long):info.MemberType),
+            => classInfo.CreateMember(info.Name.Replace(".", "_"), info.MemberTypeInfo.IsPersistent ? info.MemberTypeInfo.KeyMember.MemberType : info.MemberType == typeof(TimeSpan) ? typeof(long) : info.MemberType,
                 info.Attributes.Where(attribute => attribute is not IndexedAttribute).ToArray());
+
 
         private static IObservable<((XPClassInfo types, ITypeInfo typeInfo, bool AutoCreate), Dictionary<string, (IMemberInfo memberInfo, XPCustomMemberInfo[] xpCustomMemberInfos)> memberInfos, (
                 IMemberInfo keyMember, XPCustomMemberInfo storeToDiskKeyMember) key, string Criteria)[]> CheckIfCanCreateDependencies(

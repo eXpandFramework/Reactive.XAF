@@ -5,10 +5,12 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Windows.Forms;
 using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Win.Editors;
 using DevExpress.XtraEditors;
 using DevExpress.XtraEditors.Repository;
+using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.Grid;
 using Fasterflect;
 using Xpand.Extensions.Reactive.Combine;
@@ -32,7 +34,7 @@ namespace Xpand.XAF.Modules.Windows.Editors{
                             .MergeToUnit(listEditor.WhenEvent<CustomizeAppearanceEventArgs>(nameof(GridListEditor.CustomizeAppearance))
                                 .Do(e => {
                                     var item = e.Item as GridViewRowCellStyleEventArgsAppearanceAdapter;
-                                    if (item?.Column.ColumnEdit is not RepositoryItemHyperLinkEdit repositoryItem) return;
+                                    if (item?.Column.ColumnEdit is not DevExpress.XtraEditors.Repository.RepositoryItemHyperLinkEdit repositoryItem) return;
                                     repositoryItem.LinkColor = ((IAppearanceFormat)e.Item).FontColor;
                                 }));
 
@@ -41,7 +43,7 @@ namespace Xpand.XAF.Modules.Windows.Editors{
         private static IObservable<CustomRowCellEditEventArgs> HyperLinkPropertyEditorAttribute(this GridView gridView, Frame frame) 
             => gridView.WhenEvent<CustomRowCellEditEventArgs>(nameof(gridView.CustomRowCellEdit))
                 .Do(e => {
-                    if (e.RepositoryItem is not RepositoryItemHyperLinkEdit) return;
+                    if (e.RepositoryItem is not DevExpress.XtraEditors.Repository.RepositoryItemHyperLinkEdit) return;
                     var memberInfo = frame.View.ObjectTypeInfo.FindMember(e.Column.Name);
                     if (frame.View.ToListView().Model.Columns[memberInfo.Name].PropertyEditorType != typeof(HyperLinkPropertyEditor)) return;
                     var hyperLinkPropertyEditorAttribute = memberInfo.FindAttribute<HyperLinkPropertyEditorAttribute>();
@@ -54,8 +56,8 @@ namespace Xpand.XAF.Modules.Windows.Editors{
             => gridView.WhenEvent<MouseEventArgs>(nameof(GridView.MouseDown))
                 .Do(e => {
                     var hi = gridView.CalcHitInfo(new Point(e.X, e.Y));
-                    if (!hi.InRowCell || hi.Column.ColumnEdit is not RepositoryItemHyperLinkEdit repositoryItemHyperLinkEdit) return;
-                    var editor = (HyperLinkEdit)repositoryItemHyperLinkEdit.CreateEditor();
+                    if (!hi.InRowCell || hi.Column.ColumnEdit is not DevExpress.XtraEditors.Repository.RepositoryItemHyperLinkEdit repositoryItemHyperLinkEdit) return;
+                    var editor = (MyHyperLinkEdit)repositoryItemHyperLinkEdit.CreateEditor();
                     var memberInfo = frame.View.ObjectTypeInfo.FindMember(hi.Column.Name);
                     var currentObject = frame.View.SelectedObjects.Cast<object>().FirstOrDefault();
                     if (currentObject==null) return;

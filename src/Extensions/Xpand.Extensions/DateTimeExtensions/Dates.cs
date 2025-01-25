@@ -13,5 +13,12 @@ namespace Xpand.Extensions.DateTimeExtensions {
         public static IEnumerable<DateTime> Dates(int year, int month) 
             => Enumerable.Range(1, DateTime.DaysInMonth(year, month))
                 .Select(day => new DateTime(year, month, day));
+        
+        public static DateTime ToOppositeDirection(this DateTime date) { 
+            if(date <= DateTime.Now) return date;
+            if (date==DateTime.MaxValue)return DateTime.MinValue;
+            var diff = date - DateTime.Now;
+            return DateTime.Now - diff;
+        }
     }
 }

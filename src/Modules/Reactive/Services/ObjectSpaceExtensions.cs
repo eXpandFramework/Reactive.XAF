@@ -358,10 +358,13 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         
         public static Task CommitChangesAsync(this IObjectSpaceLink link)
             => link.ObjectSpace.CommitChangesAsync();
-        
-        public static IObservable<T> Commit<T>(this IEnumerable<T> source,IObjectSpace objectSpace=null) where T:IObjectSpaceLink {
+
+        public static IObservable<T> CommitAndValidate<T>(this IEnumerable<T> source, IObjectSpace objectSpace = null) where T : IObjectSpaceLink 
+            => source.Commit(objectSpace, true);
+
+        public static IObservable<T> Commit<T>(this IEnumerable<T> source,IObjectSpace objectSpace=null,bool validate=false) where T:IObjectSpaceLink {
             var links = source as T[] ?? source.ToArray();
-            return links.Finally((objectSpace??links.First().ObjectSpace).CommitChanges).ToNowObservable();
+            return links.Length == 0 ? Observable.Empty<T>() : links.Finally(() => (objectSpace??links.First().ObjectSpace).CommitChanges(validate)).ToNowObservable();
         }
         public static IObservable<T> Commit<T>(this IEnumerable<T> source,IObjectSpaceLink objectSpace) where T:IObjectSpaceLink {
             var links = source as T[] ?? source.ToArray();
@@ -372,7 +375,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => Observable.If(() => link!=null,link.Defer(() => link.ObjectSpace.CommitChangesAsync().ToObservable().To(link)));
         
         public static IObservable<T> Commit<T>(this IObservable<T> source) where T:IObjectSpaceLink
-            => source.BufferUntilCompleted().SelectMany().Take(1).ThrowIfEmpty().Do(link => link.CommitChanges());
+            => source.BufferUntilCompleted(true).SelectMany().Take(1).Do(link => link.CommitChanges());
         
         public static T CreateObject<T>(this IObjectSpaceLink link)
             => link.ObjectSpace.CreateObject<T>();

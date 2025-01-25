@@ -52,7 +52,11 @@ namespace Xpand.XAF.Modules.Reactive.Services {
                 .Merge(manager.LinkUnlinkPropertyAttribute())
                 .Merge(manager.ReadOnlyObjectViewAttribute())
                 .Merge(manager.DetailCollectionAttribute())
+                .Merge(PreventAggregatedObjectsValidationAttribute(manager))
             ;
+
+        private static IObservable<Unit> PreventAggregatedObjectsValidationAttribute(this ApplicationModulesManager manager) 
+            => manager.WhenApplication(application => application.WhenSetupComplete().SelectMany(_ => application.PreventAggregatedObjectsValidationAttribute()));
 
         static IObservable<Unit> LinkUnlinkPropertyAttribute(this ApplicationModulesManager manager)
             => manager.WhenApplication(application => application.WhenFrame(typeof(object),ViewType.DetailView)

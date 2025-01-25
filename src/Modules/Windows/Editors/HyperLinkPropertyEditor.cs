@@ -1,5 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Text.RegularExpressions;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;
@@ -9,6 +11,7 @@ using DevExpress.ExpressApp.Win.Editors;
 using DevExpress.XtraEditors;
 using DevExpress.XtraEditors.Controls;
 using DevExpress.XtraEditors.Mask;
+using DevExpress.XtraEditors.Registrator;
 using DevExpress.XtraEditors.Repository;
 using Xpand.Extensions.XAF.Attributes;
 using EditorAliases = Xpand.Extensions.XAF.Attributes.EditorAliases;
@@ -22,16 +25,16 @@ namespace Xpand.XAF.Modules.Windows.Editors {
         : StringPropertyEditor(objectType, info), IComplexViewItem {
         public const string UrlEmailMask = @"(((http|https|ftp)\://)?[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,3}(:[a-zA-Z0-9]*)?/?([a-zA-Z0-9\-\._\?\,\'/\\\+&amp;%\$#\=~])*)|([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,100})";
 
-        HyperLinkEdit _hyperlinkEdit;
+        MyHyperLinkEdit _hyperlinkEdit;
         private IObjectSpace _objectSpace;
         
         
-        public new HyperLinkEdit Control => _hyperlinkEdit;
+        public new MyHyperLinkEdit Control => _hyperlinkEdit;
 
         protected override RepositoryItem CreateRepositoryItem() => new RepositoryItemHyperLinkEdit();
 
         protected override object CreateControlCore() {
-            var hyperLinkEdit = _hyperlinkEdit = new HyperLinkEdit();
+            var hyperLinkEdit = _hyperlinkEdit = new MyHyperLinkEdit();
             hyperLinkEdit.Validating+=HyperLinkEditOnValidating;
             return hyperLinkEdit;
         }
@@ -46,7 +49,7 @@ namespace Xpand.XAF.Modules.Windows.Editors {
 
         protected override void SetupRepositoryItem(RepositoryItem item) {
             base.SetupRepositoryItem(item);
-            var hyperLinkProperties = (RepositoryItemHyperLinkEdit)item;
+            var hyperLinkProperties = (DevExpress.XtraEditors.Repository.RepositoryItemHyperLinkEdit)item;
             hyperLinkProperties.SingleClick = View is ListView;
             hyperLinkProperties.TextEditStyle = TextEditStyles.Standard;
             hyperLinkProperties.OpenLink += hyperLinkProperties_OpenLink;
@@ -55,8 +58,12 @@ namespace Xpand.XAF.Modules.Windows.Editors {
             hyperLinkProperties.Mask.EditMask = UrlEmailMask;
         }
 
-        void hyperLinkProperties_OpenLink(object sender, OpenLinkEventArgs e) 
-            => e.EditValue = GetResolvedUrl(e.EditValue,MemberInfo, CurrentObject);
+        void hyperLinkProperties_OpenLink(object sender, OpenLinkEventArgs e) {
+            
+            e.EditValue = GetResolvedUrl(e.EditValue, MemberInfo, CurrentObject);
+            e.Handled = false;
+            
+        }
 
         public override void BreakLinksToControl(bool unwireEventsOnly){
             base.BreakLinksToControl(unwireEventsOnly);
@@ -87,8 +94,55 @@ namespace Xpand.XAF.Modules.Windows.Editors {
             objectSpace.Committing+=ObjectSpaceOnCommitting;
         }
 
-        private void ObjectSpaceOnCommitting(object sender, CancelEventArgs cancelEventArgs){
-            if (_hyperlinkEdit?.MaskBox != null) cancelEventArgs.Cancel = !_hyperlinkEdit.MaskBox.IsMatch;
+        private void ObjectSpaceOnCommitting(object sender, CancelEventArgs cancelEventArgs) {
+            if (_hyperlinkEdit?.MaskBox == null || MemberInfo.FindAttribute<HyperLinkPropertyEditorAttribute>() != null) return;
+            cancelEventArgs.Cancel = !_hyperlinkEdit.MaskBox.IsMatch;
+        }
+        
+    }
+
+    public class RepositoryItemHyperLinkEdit:DevExpress.XtraEditors.Repository.RepositoryItemHyperLinkEdit {
+        private MyHyperLinkEdit _myHyperLinkEdit;
+
+        public static void Register() {
+            EditorRegistrationInfo.Default.Editors.Add(new EditorClassInfo(nameof(MyHyperLinkEdit), typeof(MyHyperLinkEdit),  
+                typeof(RepositoryItemHyperLinkEdit), typeof(DevExpress.XtraEditors.ViewInfo.HyperLinkEditViewInfo),  
+                new DevExpress.XtraEditors.Drawing.HyperLinkEditPainter(), true, null, typeof(DevExpress.Accessibility.TextEditAccessible)));  
+
+        }
+
+        public override BaseEdit CreateEditor() => _myHyperLinkEdit ??= new MyHyperLinkEdit();
+    }
+    public class MyHyperLinkEdit:HyperLinkEdit {
+        static MyHyperLinkEdit() {
+            RepositoryItemHyperLinkEdit.Register(); 
+        }
+        private readonly Subject<CancelEventArgs> _customizeShowBrowserSubject = new();
+        private readonly RepositoryItem _item;
+
+        public MyHyperLinkEdit(){
+        }
+
+        public MyHyperLinkEdit(RepositoryItem item) => _item = item;
+
+        protected override RepositoryItem CreateRepositoryItemCore() {
+            if (_item != null) {
+                return _item;
+            }
+            return base.CreateRepositoryItemCore();
+        }
+
+        public IObservable<CancelEventArgs> CustomizeShowBrowser => _customizeShowBrowserSubject.AsObservable();
+        protected override void Dispose(bool disposing) {
+            _customizeShowBrowserSubject.Dispose();
+            base.Dispose(disposing);
+        }
+
+        public override void ShowBrowser(object linkValue) {
+            
+            var e = new CancelEventArgs();
+            _customizeShowBrowserSubject.OnNext(e);
+            if (!e.Cancel) base.ShowBrowser(linkValue);
         }
     }
 }

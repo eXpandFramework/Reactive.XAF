@@ -5,7 +5,9 @@ using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows.Forms;
 using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.SystemModule;
+using DevExpress.XtraGrid.Columns;
 using Xpand.Extensions.Numeric;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Transform.System;
@@ -98,6 +100,11 @@ namespace Xpand.XAF.Modules.Windows{
 	        [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) 
 	        => source.Trace(name, WindowsModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy,allMessageFactory, memberName,sourceFilePath,sourceLineNumber);
         
+        public static IMemberInfo MemberInfo(this GridColumn column) {
+            var propertyDescriptor = column.View.DataController.Columns[column.ColumnHandle]?.PropertyDescriptor as XafPropertyDescriptor;
+            return propertyDescriptor?.MemberInfo;
+        }
+
     }
 
 }

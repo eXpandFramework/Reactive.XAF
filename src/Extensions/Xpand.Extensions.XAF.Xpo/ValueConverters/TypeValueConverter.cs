@@ -19,8 +19,6 @@ namespace Xpand.Extensions.XAF.Xpo.ValueConverters {
             return null;
         }
 
-        public override object ConvertToStorageType(object value) {
-            return ((Type) value)?.FullName;
-        }
+        public override object ConvertToStorageType(object value) => ((Type) value)?.FullName;
     }
 }

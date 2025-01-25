@@ -12,6 +12,11 @@ namespace Xpand.Extensions.StringExtensions {
                 .Where(c => CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark)
                 .JoinString();
 
+        public static string RemoveUnwantedChars(this string text) {
+            var unwanted = new[] { '\r', '\n', '\t', '\u200B', '\uFEFF' };
+            return unwanted.Aggregate(text, (cur, c) => cur.Replace(c.ToString(), ""));
+        }
+
         public static string Remove(this string s,string stringToRemove) => s.Replace(stringToRemove, null);
         public static string RemoveQuotes(this string s) => s.Replace("\"", null);
 
