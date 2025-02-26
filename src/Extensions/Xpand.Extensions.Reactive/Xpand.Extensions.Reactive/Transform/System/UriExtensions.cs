@@ -23,5 +23,12 @@ namespace Xpand.Extensions.Reactive.Transform.System {
             Directory.CreateDirectory(path);
             return path;
         }
+        
+        public static string WithoutQuery(this Uri uri) {
+            var s = uri.ToString();
+            var i = s.IndexOf('?');
+            return i >= 0 ? s.Substring(0, i) : s;
+        }
+
     }
 }
