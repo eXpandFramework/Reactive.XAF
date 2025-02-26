@@ -18,10 +18,9 @@ using Xpand.TestsLib.Common;
 [assembly: HostingStartup(typeof(HostingStartup))]
 
 namespace Xpand.TestsLib.Blazor {
-	public abstract class XafHostingStartup<TModule> where TModule : ModuleBase, new() {
-		public IConfiguration Configuration { get; }
-
-		protected XafHostingStartup(IConfiguration configuration) => Configuration = configuration;
+	public abstract class XafHostingStartup<TModule>(IConfiguration configuration)
+		where TModule : ModuleBase, new() {
+		public IConfiguration Configuration { get; } = configuration;
 
 		public virtual void Configure(IApplicationBuilder app, IWebHostEnvironment env) {
 			if (env.IsDevelopment()) {
@@ -84,6 +83,8 @@ namespace Xpand.TestsLib.Blazor {
 		public void HandleException(Exception exception) {
 			throw exception;
 		}
+
+		public bool ShouldHandleException(Exception exception) => true;
 	}
 
 	internal class ApplicationProvider : IXafApplicationProvider, IDisposable {

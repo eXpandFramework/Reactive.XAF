@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.ViewItemValue</id>
-    <version>4.242.4.0</version>
+    <version>4.242.4.3</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -12,15 +12,15 @@
     <description>The `ViewItemValue` helps end-users to configure the default values for lookup view items.</description>
     <releaseNotes>https://github.com/eXpandFramework/Reactive.XAF/releases</releaseNotes>
     <copyright>eXpandFramework.com</copyright>
-    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, ViewItemValue, 24.2.3</tags>
+    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, ViewItemValue, 24.2.5</tags>
     <dependencies>
       <group targetFramework="net9.0">
-        <dependency id="Xpand.Extensions.Reactive" version="4.242.4.0" />
-        <dependency id="Xpand.Extensions.XAF" version="4.242.4.0" />
-        <dependency id="Xpand.Extensions" version="4.242.4.0" />
-        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.242.4.0" />
-        <dependency id="Xpand.XAF.Modules.Reactive" version="4.242.4.0" />
-        <dependency id="DevExpress.ExpressApp.Validation" version="24.2.3" />
+        <dependency id="Xpand.Extensions.Reactive" version="4.242.4.3" />
+        <dependency id="Xpand.Extensions.XAF" version="4.242.4.3" />
+        <dependency id="Xpand.Extensions" version="4.242.4.3" />
+        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.242.4.3" />
+        <dependency id="Xpand.XAF.Modules.Reactive" version="4.242.4.3" />
+        <dependency id="DevExpress.ExpressApp.Validation" version="24.2.5" />
         <dependency id="Fasterflect.Xpand" version="2.0.7" />
         <dependency id="System.Reactive" version="6.0" />
         <dependency id="System.Interactive" version="6.0.1" />
@@ -28,10 +28,10 @@
         <dependency id="System.Threading.Tasks.Dataflow" version="7.0" />
       </group>
       <group targetFramework="netstandard2.0">
-        <dependency id="Xpand.VersionConverter" version="4.242.4.0" />
+        <dependency id="Xpand.VersionConverter" version="4.242.4.3" />
       </group>
       <group targetFramework="net6.0">
-        <dependency id="Xpand.VersionConverter" version="4.242.4.0" />
+        <dependency id="Xpand.VersionConverter" version="4.242.4.3" />
       </group>
     </dependencies>
   </metadata>

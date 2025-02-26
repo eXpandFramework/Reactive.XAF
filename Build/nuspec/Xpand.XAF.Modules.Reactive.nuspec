@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.Reactive</id>
-    <version>4.242.4.0</version>
+    <version>4.242.4.3</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -12,15 +12,16 @@
     <description>The `Reactive` module provides a XAF DSL API for functional/stateless implementations.</description>
     <releaseNotes>https://github.com/eXpandFramework/Reactive.XAF/releases</releaseNotes>
     <copyright>eXpandFramework.com</copyright>
-    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Reactive, 24.2.3</tags>
+    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Reactive, 24.2.5</tags>
     <dependencies>
       <group targetFramework="net9.0">
-        <dependency id="Xpand.Extensions" version="4.242.4.0" />
-        <dependency id="Xpand.Extensions.Reactive" version="4.242.4.0" />
-        <dependency id="Xpand.Extensions.XAF" version="4.242.4.0" />
-        <dependency id="DevExpress.ExpressApp" version="24.2.3" />
-        <dependency id="DevExpress.ExpressApp.ViewVariantsModule" version="24.2.3" />
-        <dependency id="DevExpress.Persistent.Base" version="24.2.3" />
+        <dependency id="Xpand.Extensions" version="4.242.4.3" />
+        <dependency id="Xpand.Extensions.Reactive" version="4.242.4.3" />
+        <dependency id="Xpand.Extensions.XAF" version="4.242.4.3" />
+        <dependency id="DevExpress.ExpressApp" version="24.2.5" />
+        <dependency id="DevExpress.ExpressApp.Validation" version="24.2.5" />
+        <dependency id="DevExpress.ExpressApp.ViewVariantsModule" version="24.2.5" />
+        <dependency id="DevExpress.Persistent.Base" version="24.2.5" />
         <dependency id="System.Interactive" version="6.0.1" />
         <dependency id="System.Reactive" version="6.0" />
         <dependency id="Fasterflect.Xpand" version="2.0.7" />
@@ -30,14 +31,14 @@
         <dependency id="Enums.Net" version="4.0" />
         <dependency id="System.Threading.Tasks.Dataflow" version="7.0" />
         <dependency id="Microsoft.Extensions.Hosting" version="6.0" />
-        <dependency id="DevExpress.ExpressApp.Security.Xpo" version="24.2.3" />
+        <dependency id="DevExpress.ExpressApp.Security.Xpo" version="24.2.5" />
         <dependency id="Serialize.Linq" version="2.0.0" />
       </group>
       <group targetFramework="netstandard2.0">
-        <dependency id="Xpand.VersionConverter" version="4.242.4.0" />
+        <dependency id="Xpand.VersionConverter" version="4.242.4.3" />
       </group>
       <group targetFramework="net6.0">
-        <dependency id="Xpand.VersionConverter" version="4.242.4.0" />
+        <dependency id="Xpand.VersionConverter" version="4.242.4.3" />
       </group>
     </dependencies>
   </metadata>
