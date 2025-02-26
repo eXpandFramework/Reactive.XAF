@@ -25,8 +25,16 @@ namespace Xpand.Extensions.XAF.ObjectExtensions {
         public static ConcurrentDictionary<TKey, TLink> ToConcurrentDictionary<TKey,TLink>(this IEnumerable<TLink> source) where TLink : IObjectSpaceLink 
             => source.ToConcurrentDictionary(link => link.KeyValue<TKey>(), link => link);
 
+        public static string AsString(this Dictionary<string, (string oldValue, string newValue)> dictionary)
+            => dictionary.ToDictionary(pair => pair.Key,
+                pair => new { old = pair.Value.oldValue, newVal = pair.Value.newValue }).Serialize();
+        
         public static string AsString(this Dictionary<string, (object oldValue, object newValue)> dictionary)
             => dictionary.ToDictionary(pair => pair.Key, pair => new { old = pair.Value.oldValue, newVal = pair.Value.newValue }).Serialize();
+
+        public static Dictionary<string, (string oldValue, string newValue)> ToStringDictionary(
+            this  Dictionary<string, (object oldValue, object newValue)> values)
+            => values.ToDictionary(pair => pair.Key, pair => ($"{pair.Value.oldValue}", $"{pair.Value.newValue}"));
 
         public static Dictionary<string, (object oldValue, object newValue)> CompareTypeInfoValue(this IObjectSpaceLink instance, Dictionary<string, object> values) {
             var newValues = instance.MemberInfoValueDictionary();
