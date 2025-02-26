@@ -14,12 +14,12 @@ namespace Xpand.Extensions.XAF.CollectionSourceExtensions{
 		        return [];
 	        }
 	        if (collectionSourceBase.Collection is IEnumerable collection)
-		        return collection.Cast<T>();
+		        return collection.OfType<T>();
 	        if (collectionSourceBase.Collection is IListSource listSource)
-		        return listSource.GetList().Cast<T>();
+		        return listSource.GetList().OfType<T>();
 	        if (collectionSourceBase is PropertyCollectionSource propertyCollectionSource) {
 		        var masterObject = propertyCollectionSource.MasterObject;
-		        return masterObject != null ? ((IEnumerable)propertyCollectionSource.MemberInfo.GetValue(masterObject)).Cast<T>() : [];
+		        return masterObject != null ? ((IEnumerable)propertyCollectionSource.MemberInfo.GetValue(masterObject)).OfType<T>() : [];
 	        }
 	        return collectionSourceBase.Collection is QueryableCollection queryableCollection
 		        ? ((IEnumerable<T>)queryableCollection.Queryable).ToArray() : throw new NotImplementedException($"{collectionSourceBase}");

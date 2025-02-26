@@ -1,6 +1,7 @@
 ﻿using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Utils;
+using DevExpress.Persistent.Validation;
 
 namespace Xpand.Extensions.XAF.ObjectExtensions{
     public static partial class ObjectExtensions{
