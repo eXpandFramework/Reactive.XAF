@@ -1,4 +1,5 @@
-﻿using System.Reactive.Linq;
+﻿using System.Configuration;
+using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.SystemModule;
 using Xpand.XAF.Modules.Reactive;
@@ -8,8 +9,12 @@ namespace Xpand.XAF.Modules.StoreToDisk {
     public sealed class StoreToDiskModule : ReactiveModuleBase {
         public static ReactiveTraceSource TraceSource { get; set; }
 
-        static StoreToDiskModule() => TraceSource = new ReactiveTraceSource(nameof(StoreToDiskModule));
+        static StoreToDiskModule() {
+            TraceSource = new ReactiveTraceSource(nameof(StoreToDiskModule));
+            ConnectionString = ConfigurationManager.ConnectionStrings["StoreToDisk"]?.ConnectionString;
+        }
 
+        public static string ConnectionString { get; set; }
         public StoreToDiskModule() {
             RequiredModuleTypes.Add(typeof(SystemModule));
             RequiredModuleTypes.Add(typeof(ReactiveModule));

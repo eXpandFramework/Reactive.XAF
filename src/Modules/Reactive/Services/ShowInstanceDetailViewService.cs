@@ -29,13 +29,18 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                     .Where(e => e.View().ObjectTypeInfo.Type.IsInstanceOfType(e.View().CurrentObject))
                     .Do(e => e.ShowViewParameters.CreatedView = e.View().ToListView().NewDetailView(e.Action.View().CurrentObject)));
 
-        private static bool OverwriteShowInstanceDetailView(SimpleActionExecuteEventArgs e) 
-            => e.View().ObjectTypeInfo.Type!=e.View().CurrentObject.GetType()||e.View().ObjectTypeInfo.FindAttribute<ShowInstanceDetailViewAttribute>().Property!=null;
+        private static bool OverwriteShowInstanceDetailView(SimpleActionExecuteEventArgs e) {
+            var objectTypeInfo = e.View().ObjectTypeInfo;
+            var property = objectTypeInfo.FindAttribute<ShowInstanceDetailViewAttribute>().Property;
+            if (objectTypeInfo.Type != e.View().CurrentObject.GetType()) return property==null||objectTypeInfo.FindMember(property).GetValue(e.Action.View().CurrentObject) != null;
+            return property != null && objectTypeInfo.FindMember(property).GetValue(e.Action.View().CurrentObject) != null;
+        }
 
         static DetailView NewDetailView(this ListView listView,object o) {
             if (o == null) return null;
             var property = o.GetType().ToTypeInfo().FindAttribute<ShowInstanceDetailViewAttribute>().Property;
             o = property is { } prop ? o.GetType().ToTypeInfo().FindMember(prop).GetValue(o) : o;
+            if (o==null) return null;
             var objectSpace = property==null? (listView.MasterDetailMode==MasterDetailMode.ListViewOnly?listView.Application().CreateObjectSpace():listView.ObjectSpace):listView.Application().CreateObjectSpace();
             // var objectSpace = listView.Application().CreateObjectSpace();
             var modelClass = o.GetType().GetModelClass();

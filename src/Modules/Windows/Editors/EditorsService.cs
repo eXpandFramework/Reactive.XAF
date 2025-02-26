@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
 using System.Reactive;
@@ -28,9 +29,18 @@ namespace Xpand.XAF.Modules.Windows.Editors{
                     .SelectMany(_ => {
                         var listEditor = frame.View.ToListView().Editor;
                         var gridView = (GridView)listEditor.Control.GetPropertyValue("MainView");
+                        
                         return gridView.Observe().WhenNotDefault()
                             .SelectMany(view => view.OpenLink(frame)
                                 .MergeToUnit(view.HyperLinkPropertyEditorAttribute(frame)))
+                            .MergeToUnit(gridView.WhenEvent<CancelEventArgs>(nameof(gridView.ShowingEditor))
+                                .Do(e => {
+                                    var memberInfo = gridView.FocusedColumn.MemberInfo();
+                                    if (memberInfo==null)return;
+                                    e.Cancel = !frame.View.ToListView().Model.Columns
+                                        .First(column => column.ModelMember.MemberInfo == memberInfo)
+                                        .AllowEdit;
+                                }))
                             .MergeToUnit(listEditor.WhenEvent<CustomizeAppearanceEventArgs>(nameof(GridListEditor.CustomizeAppearance))
                                 .Do(e => {
                                     var item = e.Item as GridViewRowCellStyleEventArgsAppearanceAdapter;
@@ -64,7 +74,8 @@ namespace Xpand.XAF.Modules.Windows.Editors{
                     var hyperLinkPropertyEditorAttribute = memberInfo.FindAttribute<HyperLinkPropertyEditorAttribute>();
                     if (hyperLinkPropertyEditorAttribute is { ControlClickListView: true } &&
                         !System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.LeftCtrl) && !System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.RightCtrl)) return;
-                    editor.ShowBrowser(HyperLinkPropertyEditor.GetResolvedUrl(
+                    
+                     editor.ShowBrowser(HyperLinkPropertyEditor.GetResolvedUrl(
                         gridView.GetRowCellValue(hi.RowHandle, hi.Column), memberInfo,
                         currentObject));
                 });

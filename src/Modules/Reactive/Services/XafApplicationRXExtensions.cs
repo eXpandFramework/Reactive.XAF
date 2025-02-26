@@ -178,6 +178,9 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<T> WhenActionExecuteConcat<T>(this XafApplication application,Func<SimpleActionExecuteEventArgs,IObservable<T>> selector,params string[] actions)  
             => application.WhenFrameCreated().SelectMany(window => window.Actions(actions).OfType<SimpleAction>().ToObservable()
                 .SelectMany(a => a.WhenConcatExecution(selector)));
+        public static IObservable<T> WhenSingleChoiceActionExecuteConcat<T>(this XafApplication application,Func<SingleChoiceActionExecuteEventArgs,IObservable<T>> selector,params string[] actions)  
+            => application.WhenFrameCreated().SelectMany(window => window.Actions(actions).OfType<SingleChoiceAction>().ToObservable()
+                .SelectMany(a => a.WhenConcatExecution(selector)));
         
         public static IObservable<(TAction action, CancelEventArgs e)> WhenActionExecuting<TController,TAction>(
             this XafApplication application, Func<TController, TAction> action) where TController : Controller where TAction:ActionBase 
@@ -785,14 +788,17 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
          
         public static IObservable<T> WhenExistingObject<T>(this XafApplication application, Expression<Func<T, bool>> criteriaExpression = null, [CallerMemberName] string caller = "") 
-            => application.UseProviderObjectSpace(space => space.GetObjectsQuery<T>().Where(criteriaExpression ?? (arg => true)).ToNowObservable(),caller:caller);
-        
+            => application.TypesInfo.DomainComponents(typeof(T)).ToObservable()
+                .SelectMany(type => application.UseProviderObjectSpace(
+                    space => space.GetObjects(type,(criteriaExpression ?? (arg => true)).ToCriteria()).Cast<T>().ToNowObservable(), type,
+                    caller: caller));
+
         public static IObservable<T[]> WhenExistingObjects<T>(this XafApplication application, Expression<Func<T, bool>> criteriaExpression = null, [CallerMemberName] string caller = "") 
             => application.WhenExistingObject(criteriaExpression,caller).BufferUntilCompleted().WhenNotEmpty();
         
-        public static IObservable<T> WhenExistingObject<T>(this XafApplication application, string criteriaExpression =null,            [CallerMemberName] string caller = "") 
+        public static IObservable<T> WhenExistingObject<T>(this XafApplication application, string criteriaExpression ,            [CallerMemberName] string caller = "") 
             => application.WhenExistingObject<T>(CriteriaOperator.Parse(criteriaExpression),caller);
-        public static IObservable<T> WhenExistingObject<T>(this XafApplication application, CriteriaOperator criteriaExpression =null, [CallerMemberName] string caller = "") 
+        public static IObservable<T> WhenExistingObject<T>(this XafApplication application, CriteriaOperator criteriaExpression , [CallerMemberName] string caller = "") 
             => application.UseObjectSpace(space => space.GetObjects<T>(criteriaExpression).ToNowObservable(),caller:caller);
         
         public static IObservable<object> WhenProviderExistingObject(this XafApplication application,Type objectType, CriteriaOperator criteriaExpression =null, [CallerMemberName] string caller = "") 

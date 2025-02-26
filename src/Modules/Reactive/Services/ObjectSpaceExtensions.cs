@@ -355,6 +355,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static void CommitChanges(this IObjectSpaceLink link)
             => link.ObjectSpace.CommitChanges();
+        public static bool IsModified(this IObjectSpaceLink link)
+            => link.ObjectSpace.ModifiedObjects.Contains(link);
         
         public static Task CommitChangesAsync(this IObjectSpaceLink link)
             => link.ObjectSpace.CommitChangesAsync();

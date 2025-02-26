@@ -36,7 +36,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<TFrame> MergeObjectSpaceRefresh<TFrame>(this IObservable<TFrame> source) where TFrame : Frame
             => source.SkipWhile(frame => frame.View==null).SelectMany(frame => frame.View.ObjectSpace.WhenRefreshing().To(frame).StartWith(frame)
                 .WaitUntilInactive(2.Seconds()).ObserveOnContext()
-                .TakeUntil(arg => arg.IsDisposed()));
+                .TakeUntil(frame1 => frame1.IsDisposed()||frame1.View==null));
         
         public static IObservable<Frame> MergeCurrentObjectModified<T>(this IObservable<Frame> source,params Expression<Func<T,object>>[] properties) 
             => source.SkipWhile(frame => frame.View==null).SelectMany(frame => frame.View.ObjectSpace.WhenModifiedObjects(properties).To(frame)

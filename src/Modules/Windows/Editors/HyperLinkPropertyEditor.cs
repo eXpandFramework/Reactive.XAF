@@ -84,7 +84,9 @@ namespace Xpand.XAF.Modules.Windows.Editors {
                 if (IsValidUrl(url))
                     return url;
             }
+            
             return string.Empty;
+            
         }
 
         static bool IsValidUrl(string url) => Regex.IsMatch(url, UrlEmailMask);

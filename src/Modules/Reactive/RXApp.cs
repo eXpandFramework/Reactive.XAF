@@ -118,10 +118,11 @@ namespace Xpand.XAF.Modules.Reactive{
         
         private static IObservable<Unit> ExplicitModificationAttribute(this XafApplication application)
             => application.WhenSetupComplete()
-                .SelectMany(_ => application.WhenFrame(application.TypesInfo.PersistentTypes.Attributed<ExplicitModificationAttribute>().Types().Select(info => info.Type).ToArray()).WhenFrame(ViewType.DetailView)
+                .SelectMany(_ => application.WhenFrame(application.TypesInfo.PersistentTypes.Attributed<ExplicitModificationAttribute>().Types(true).Select(info => info.Type).ToArray()).WhenFrame(ViewType.DetailView)
                 .Select(frame => {
                     var propertyName = frame.View.ObjectTypeInfo.Attributed<ExplicitModificationAttribute>().Select(t => t.attribute.PropertyName).First();
                     var currentObject = ((IObjectSpaceLink)frame.View.CurrentObject);
+                    if (frame.View.CurrentObject == null) return Observable.Empty<Unit>();
                     var memberInfoValueDictionary = currentObject.MemberInfoValueDictionary();
                     var memberInfo = frame.View.ObjectTypeInfo.FindMember(propertyName);
                     var properties = $"{memberInfo.GetValue(currentObject)}".Split(',').WhereNotEmpty().ToHashSet();
@@ -139,7 +140,7 @@ namespace Xpand.XAF.Modules.Reactive{
         
         private static IObservable<Unit> ShowInstanceDetailView(this XafApplication application)
             => application.WhenSetupComplete().SelectMany(_ => application.ShowInstanceDetailView(application.TypesInfo
-                    .PersistentTypes.Attributed<ShowInstanceDetailViewAttribute>().Types().Select(info => info.Type).ToArray())).ToUnit();
+                    .PersistentTypes.Attributed<ShowInstanceDetailViewAttribute>().Types(true).Select(info => info.Type).ToArray())).ToUnit();
         
         private static IObservable<Unit> FireChanged(this XafApplication application)
             => application.WhenSetupComplete().SelectMany(_ => {

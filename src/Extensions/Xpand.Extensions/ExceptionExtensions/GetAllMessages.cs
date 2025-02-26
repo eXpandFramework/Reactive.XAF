@@ -8,7 +8,7 @@ namespace Xpand.Extensions.ExceptionExtensions{
         public static string GetAllInfo(this Exception exception){
             if (exception is AggregateException aex){
                 var flatten = aex.Flatten();
-                return flatten.ToString();
+                return flatten.ToString().TrimStart($"{typeof(AggregateException).FullName}: ".ToCharArray());
             }
             var messages = exception.FromHierarchy(ex => ex.InnerException).Select(ex => {
                 var s = ex.ToString();

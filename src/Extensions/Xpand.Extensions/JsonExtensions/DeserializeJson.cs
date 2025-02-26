@@ -45,8 +45,8 @@ namespace Xpand.Extensions.JsonExtensions {
             utf8Reader.Read();
             var isArray = utf8Reader.TokenType == JsonTokenType.StartArray;
             utf8Reader = new Utf8JsonReader(bytes);
-            return !isArray ? JsonSerializer.Deserialize<JsonObject>(ref utf8Reader, options)!
-                : new JsonArray(JsonSerializer.Deserialize<JsonObject[]>(ref utf8Reader, options)!.Cast<JsonNode>().ToArray()!);
+            return !isArray ? JsonSerializer.Deserialize<JsonNode>(ref utf8Reader, options)!
+                : new JsonArray(JsonSerializer.Deserialize<JsonNode[]>(ref utf8Reader, options)!.ToArray()!);
         }
 
         public static T Deserialize<T>(this byte[] bytes,JsonSerializerOptions options=null) {

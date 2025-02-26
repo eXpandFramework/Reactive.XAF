@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -29,6 +28,7 @@ using Xpand.Extensions.XAF.Xpo;
 using Xpand.Extensions.XAF.Xpo.ConnectionProviders;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.StoreToDisk.BusinessObjects;
+using static Xpand.XAF.Modules.StoreToDisk.StoreToDiskModule;
 
 namespace Xpand.XAF.Modules.StoreToDisk{
     public interface IStoreToDiskAutoCreate {
@@ -282,6 +282,6 @@ namespace Xpand.XAF.Modules.StoreToDisk{
                         .CreateWorkingStore(out var _));
                 });
 
-        private static string ConnectionString => ConfigurationManager.ConnectionStrings["StoreToDisk"].ConnectionString;
+        
     }
 }

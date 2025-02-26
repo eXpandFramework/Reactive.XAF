@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Linq;
 using System.Reactive;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
+using System.Threading;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Notifications;
 using DevExpress.Persistent.Base.General;
 using Fasterflect;
 using Xpand.Extensions.AppDomainExtensions;
+using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.ErrorHandling;
 using Xpand.Extensions.Reactive.Transform;
@@ -57,12 +60,13 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
                             supportNotifications.AlarmTime = DateTime.Now;
                             supportNotifications.GetTypeInfo()
                                 .FindMember(nameof(ISupportNotifications.NotificationMessage))
-                                .SetValue(supportNotifications, traceEvent.Value);
+                                .SetValue(supportNotifications, new[]{traceEvent.Location,traceEvent.Method,traceEvent.Value}.WhereNotEmpty().JoinCommaSpace());
                             traceEvent.ObjectSpace.CommitChanges();
                             return (supportNotifications, t.rule);
                         })
                         .ToNowObservable()
                         .ShowXafMessage(application, traceEvent, memberName: null))
+                    .ObserveOn(Scheduler.CurrentThread)
                     .DoSafe(_ => service.Refresh()))
                 .Switch()
                 .ToUnit();

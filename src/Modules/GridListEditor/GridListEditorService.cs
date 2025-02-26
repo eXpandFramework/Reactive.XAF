@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -10,6 +11,8 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Win.Editors;
 using DevExpress.Utils;
+using DevExpress.XtraEditors;
+using DevExpress.XtraEditors.Repository;
 using DevExpress.XtraGrid;
 using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.Base;
@@ -190,5 +193,14 @@ namespace Xpand.XAF.Modules.GridListEditor{
             Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.OnNextOrOnError,Func<string> allMessageFactory = null,
             [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) 
             => source.Trace(name, GridListEditorModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy,allMessageFactory, memberName,sourceFilePath,sourceLineNumber);
+
+        public static IObservable<(TRepositoryItem edit, CancelEventArgs showBrowserrArgs, CustomRowCellEditEventArgs cellEditArgs)> WhenRepositoryItems<TRepositoryItem>(this Frame frame,
+            Func<BaseEdit,IObservable<CancelEventArgs>> customize) where TRepositoryItem:RepositoryItem
+            => frame.View.WhenControlsCreated(true).SelectMany(_ => frame.View.ToListView().Editor.GridView<GridView>().GridControl.RepositoryItems
+                .Cast<RepositoryItem>().OfType<TRepositoryItem>().ToNowObservable()
+                .SelectMany(edit => (customize(edit.CreateEditor())).Select(e => (edit,e)))
+                .CombineLatestWhenFirstEmits(frame.View.ToListView().Editor.GridView<GridView>()
+                    .WhenEvent<CustomRowCellEditEventArgs>(nameof(DevExpress.XtraGrid.Views.Grid.GridView.CustomRowCellEdit)),(t, e) =>(t.edit,showBrowserrArgs:t.e,cellEditArgs:e) )
+                .Where(t => t.edit==t.cellEditArgs.RepositoryItem));
     }
 }

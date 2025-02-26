@@ -80,11 +80,14 @@ namespace Xpand.XAF.Modules.Windows{
 
         public static IObservable<Unit> AddMessages(this IObservable<WindowTemplateController> source,Func<IObservable<string>> messagesSource,int seconds=1) 
             => source.SelectMany(controller => {
-                    var observeLatestOnContext = messagesSource().ObserveLatestOnContext().Replay(1);
+                    var observeLatestOnContext = messagesSource().ObserveOnContext().Replay(1);
                     var connect = observeLatestOnContext.Connect();
-                    return seconds.Seconds().Interval().ObserveLatestOnContext()
-                        .ExhaustMap(_ => controller.WhenAddMessage())
-                        .SelectMany(e => observeLatestOnContext.Take(1).Do(s => e.StatusMessages.Add(s)))
+                    return seconds.Seconds().Interval().ObserveOnContext()
+                        .SelectMany(_ => controller.WhenAddMessage())
+                        .SelectMany(e => observeLatestOnContext.Take(1).Do(s => {
+                            // if (e.StatusMessages.Count>7)return;
+                            e.StatusMessages.Add(s);
+                        }))
                         .TakeUntil(controller.WhenDisposed().Do(_ => connect.Dispose()));
                 })
                     
