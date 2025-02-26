@@ -2,10 +2,16 @@
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Utility;
 
 namespace Xpand.Extensions.Reactive.Transform{
+    
     public static partial class Transform {
+        public static IObservable<string> SelectToString(this IObservable<object> source) {
+            return source.WhenNotDefault().Select(o => o.ToString());
+        }
+
         [Obsolete(nameof(ExhaustMap),true)]
         public static IObservable<TResult> SelectAndOmit<T, TResult>(this IObservable<T> source,
             Func<T, int, IObservable<TResult>> process, SemaphoreSlim semaphoreSlim = null, Action<T> noProcess = null,
