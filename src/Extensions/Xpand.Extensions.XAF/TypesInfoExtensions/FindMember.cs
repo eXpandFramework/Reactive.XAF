@@ -17,8 +17,8 @@ namespace Xpand.Extensions.XAF.TypesInfoExtensions{
 		public static IEnumerable<(TAttribute attribute, IMemberInfo memberInfo)> AttributedMembers<TAttribute>(this IEnumerable<ITypeInfo> source)   
 			=> source.SelectMany(info => info.AttributedMembers<TAttribute>());
 
-		public static IEnumerable<ITypeInfo> Types<TAttribute>(this IEnumerable<(TAttribute attribute, ITypeInfo typeInfo)> source) 
-			=> source.Select(t => t.typeInfo);
+		public static IEnumerable<ITypeInfo> Types<TAttribute>(this IEnumerable<(TAttribute attribute, ITypeInfo typeInfo)> source,bool includeDerivedTypes=false) 
+			=> source.SelectMany(t => includeDerivedTypes?t.typeInfo.Descendants.StartWith(t.typeInfo).Distinct():t.typeInfo.YieldItem());
 		
 		public static IEnumerable<(TAttribute attribute, ITypeInfo typeInfo)> Attributed<TAttribute>(this IEnumerable<ITypeInfo> source)   
 			=> source.SelectMany(info => info.Attributed<TAttribute>());
