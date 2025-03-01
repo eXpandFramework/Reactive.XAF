@@ -215,8 +215,7 @@ namespace Xpand.Extensions.XAF.Xpo {
             var dataLayer = unitOfWork.DataLayer;
             var connectionProvider = ((BaseDataLayer)dataLayer).ConnectionProvider;
             if (connectionProvider is DataCacheNode){
-                return (IDbConnection)connectionProvider.GetPropertyValue("Nested")
-                    .GetFieldValue("Connection");
+                return (IDbConnection)connectionProvider.GetPropertyValue("Nested").GetFieldValue("Connection");
             }
 
             if (connectionProvider is DataStorePool pool){
@@ -226,8 +225,8 @@ namespace Xpand.Extensions.XAF.Xpo {
                 return dbConnection;
             }
 
-            return connectionProvider is not STASafeDataStore ? connectionProvider is ConnectionProviderSql provider ? provider.Connection : null
-                : connectionProvider.GetFieldValue("DataStore").Cast<ConnectionProviderSql>().Connection;
+            return connectionProvider is not STASafeDataStore ? connectionProvider is ConnectionProviderSql provider ? provider.Connection :
+                connectionProvider is ISqlDataStore dataStore ? dataStore.Connection : null : connectionProvider.GetFieldValue("DataStore").Cast<ConnectionProviderSql>().Connection;
         }
         
         public static SqlConnection NewSQLConnection(this XafApplication application,Type objectType=null) {
