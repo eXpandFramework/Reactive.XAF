@@ -2,7 +2,6 @@
 using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
-using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 
 namespace Xpand.Extensions.Reactive.ErrorHandling {
@@ -53,7 +52,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling {
             Func<Exception, bool> retryOnError = null, IScheduler scheduler = null) {
             strategy ??= SecondsBackoffStrategy;
             scheduler ??= DefaultScheduler.Instance;
-            retryOnError ??= (_ => true);
+            retryOnError ??= _ => true;
             var attempt = 0;
             var pipeline = Observable.Defer(() => (attempt++ == 0 ? source : source.DelaySubscription(strategy(attempt - 1), scheduler))
                 .Select(Notification.CreateOnNext)

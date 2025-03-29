@@ -23,7 +23,7 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net{
                 .Concat(endPoint.Observe());
             var notInUse = Observable.While(endPoint.Listening, Observable.Empty<IPEndPoint>().Delay(timeSpan))
                 .Concat(endPoint.Observe());
-            return repeatWhenOffline ? inUsed.RepeatWhen(_ => _.SelectMany(_ => notInUse)) : inUsed;
+            return repeatWhenOffline ? inUsed.RepeatWhen(obs => obs.SelectMany(_ => notInUse)) : inUsed;
         }
 
         public static IObservable<(IPAddress address,int port)> Ping(this IPAddress address, int port) 
@@ -39,5 +39,7 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net{
 
         public static bool Listening(this IPEndPoint endPoint) => IPGlobalProperties.GetIPGlobalProperties().GetActiveTcpListeners().Contains(endPoint);
         public static bool IsFree(this IPEndPoint endPoint) => !endPoint.Listening();
+        
+
     }
 }

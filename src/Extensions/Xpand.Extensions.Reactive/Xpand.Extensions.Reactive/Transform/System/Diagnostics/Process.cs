@@ -17,8 +17,8 @@ namespace Xpand.Extensions.Reactive.Transform.System.Diagnostics{
                 process.StartInfo.UseShellExecute = false;
                 process.StartInfo.CreateNoWindow = createNoWindow;
             }
-            var start = process.Start();
             process.EnableRaisingEvents = enableRaisingEvents;
+            var start = process.Start();
             if (start&&outputDataReceived){
                 process.BeginOutputReadLine();    
             }

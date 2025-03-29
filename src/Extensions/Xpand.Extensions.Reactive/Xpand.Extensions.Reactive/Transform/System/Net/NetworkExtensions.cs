@@ -125,7 +125,7 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net {
             => client.Request( httpRequestMessage, onResponse, obj)
                 .SendRequest(obj??typeof(T).CreateInstance(), deserializeResponse);
 
-        static IObservable<HttpResponseMessage> Request<T>(this HttpClient client, HttpRequestMessage httpRequestMessage, Action<HttpResponseMessage> onResponse=null, T obj=default) where T : class,new() 
+        static IObservable<HttpResponseMessage> Request<T>(this HttpClient client, HttpRequestMessage httpRequestMessage, Action<HttpResponseMessage> onResponse=null, T obj=null) where T : class,new() 
             => client.SendAsync(httpRequestMessage,HttpCompletionOption.ResponseHeadersRead)
                 .ToObservable().EnsureSuccessStatusCode()
                 .Do(message => onResponse?.Invoke(message))
@@ -243,6 +243,10 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net {
     public class HttpResponseException(string paramName, HttpResponseMessage httpResponseMessage)
         : HttpRequestException(paramName) {
         public HttpResponseMessage HttpResponseMessage{ get; } = httpResponseMessage;
+
+        public override string ToString() {
+            return new[]{base.ToString(),HttpResponseMessage.RequestMessage?.RequestUri?.ToString()}.JoinNewLine();
+        }
     }
 
     
