@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.SuppressConfirmation</id>
-    <version>4.242.5.0</version>
+    <version>4.242.6.2</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -12,24 +12,24 @@
     <description>The `SuppressConfirmation` suppresses ObjectViews modification confirmations.</description>
     <releaseNotes>https://github.com/eXpandFramework/Reactive.XAF/releases</releaseNotes>
     <copyright>eXpandFramework.com</copyright>
-    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, SuppressConfirmation, 24.2.5</tags>
+    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, SuppressConfirmation, 24.2.6</tags>
     <dependencies>
       <group targetFramework="net9.0">
-        <dependency id="Xpand.Extensions" version="4.242.5.0" />
-        <dependency id="Xpand.Extensions.Reactive" version="4.242.5.0" />
-        <dependency id="Xpand.Extensions.XAF" version="4.242.5.0" />
-        <dependency id="Xpand.XAF.Modules.Reactive" version="4.242.5.0" />
+        <dependency id="Xpand.Extensions" version="4.242.6.2" />
+        <dependency id="Xpand.Extensions.Reactive" version="4.242.6.2" />
+        <dependency id="Xpand.Extensions.XAF" version="4.242.6.2" />
+        <dependency id="Xpand.XAF.Modules.Reactive" version="4.242.6.2" />
         <dependency id="System.Reactive" version="6.0" />
-        <dependency id="DevExpress.ExpressApp" version="24.2.5" />
+        <dependency id="DevExpress.ExpressApp" version="24.2.6" />
         <dependency id="Fasterflect.Xpand" version="2.0.7" />
         <dependency id="System.Text.Json" version="9.0" />
         <dependency id="System.Threading.Tasks.Dataflow" version="7.0" />
       </group>
       <group targetFramework="netstandard2.0">
-        <dependency id="Xpand.VersionConverter" version="4.242.5.0" />
+        <dependency id="Xpand.VersionConverter" version="4.242.6.2" />
       </group>
       <group targetFramework="net6.0">
-        <dependency id="Xpand.VersionConverter" version="4.242.5.0" />
+        <dependency id="Xpand.VersionConverter" version="4.242.6.2" />
       </group>
     </dependencies>
   </metadata>
