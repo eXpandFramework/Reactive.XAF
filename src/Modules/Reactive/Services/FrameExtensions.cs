@@ -10,6 +10,7 @@ using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.SystemModule;
+using Xpand.Extensions.ExpressionExtensions;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Numeric;
 using Xpand.Extensions.ObjectExtensions;
@@ -28,21 +29,26 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => source.SkipWhile(frame => frame.View==null).SelectMany(frame => frame.View.WhenCurrentObjectChanged().StartWith(frame.View).WhenNotDefault(view => view.CurrentObject)
                 .DistinctUntilChanged(view => view.ObjectSpace.GetKeyValue(view.CurrentObject))
                     .WhenNotDefault(view => view.CurrentObject).To(frame)
-                .WaitUntilInactive(2.Seconds()).ObserveOnContext().TakeUntil(arg => arg.IsDisposed()));
+                .WaitUntilInactive(2.Seconds()).ObserveOnContext().If(frame1 => !(frame1.IsDisposed() || frame1.View == null),frame1 => frame1.Observe()));
         
         public static IObservable<TFrame> MergeObjectSpaceReloaded<TFrame>(this IObservable<TFrame> source) where TFrame : Frame
             => source.SkipWhile(frame => frame.View==null).SelectMany(frame => frame.View.ObjectSpace.WhenReloaded().To(frame).StartWith(frame)
-                .WaitUntilInactive(2.Seconds()).ObserveOnContext().TakeUntil(arg => arg.IsDisposed()));
+                .WaitUntilInactive(2.Seconds()).ObserveOnContext().If(frame1 => !(frame1.IsDisposed() || frame1.View == null),frame1 => frame1.Observe()));
         public static IObservable<TFrame> MergeObjectSpaceRefresh<TFrame>(this IObservable<TFrame> source) where TFrame : Frame
             => source.SkipWhile(frame => frame.View==null).SelectMany(frame => frame.View.ObjectSpace.WhenRefreshing().To(frame).StartWith(frame)
                 .WaitUntilInactive(2.Seconds()).ObserveOnContext()
-                .TakeUntil(frame1 => frame1.IsDisposed()||frame1.View==null));
+                .If(frame1 => !(frame1.IsDisposed() || frame1.View == null),frame1 => frame1.Observe()));
+
+        public static IObservable<Frame> MergeCurrentObjectModified<T>(this IObservable<Frame> source, params string[] properties)
+            => source.SkipWhile(frame => frame.View == null).SelectMany(frame => frame.View.ObjectSpace
+                .WhenModifiedObjects<T>(properties).To(frame)
+                .WaitUntilInactive(2.Seconds()).ObserveOnContext()
+                .If(frame1 => !(frame1.IsDisposed() || frame1.View == null),frame1 => frame1.Observe())
+                .Finally(() => {})
+                .StartWith(frame));
         
         public static IObservable<Frame> MergeCurrentObjectModified<T>(this IObservable<Frame> source,params Expression<Func<T,object>>[] properties) 
-            => source.SkipWhile(frame => frame.View==null).SelectMany(frame => frame.View.ObjectSpace.WhenModifiedObjects(properties).To(frame)
-                    .WaitUntilInactive(2.Seconds())
-                    .ObserveOnContext().TakeUntil(arg => arg.IsDisposed())
-                    .StartWith(frame));
+            => source.MergeCurrentObjectModified<T>(properties.Select(expression => expression.MemberExpressionName()).ToArray());
         
         public static IObservable<TFrame> When<TFrame>(this IObservable<TFrame> source, TemplateContext templateContext) where TFrame : Frame 
             => source.Where(window => window.Context == templateContext);
