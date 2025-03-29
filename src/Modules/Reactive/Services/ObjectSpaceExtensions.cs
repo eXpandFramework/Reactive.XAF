@@ -157,7 +157,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static IObservable<object> WhenModifiedObjects(this IObjectSpace objectSpace, Type objectType, params string[] properties) {
             var typeInfo = objectType.ToTypeInfo();
-            var notExisting = properties.WhereDefault(name => typeInfo.FindMember(name)).ToArray();
+            var notExisting = properties.Select(s => s.TrimStart('*').TrimStart('!')).WhereNotNullOrEmpty().WhereDefault(name => typeInfo.FindMember(name)).ToArray();
             if (notExisting.Any()) {
                 return new InvalidOperationException($"{nameof(WhenModifiedObjects)}: {objectType.FullName} member ({notExisting.JoinComma()}) not found").Throw<object>();
             }
@@ -170,9 +170,15 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .Where(t =>  properties.PropertiesMatch(t)&&objectTypes.Any(type => type.IsInstanceOfType(t.e.Object)))
                 .Select(t => t.e.Object);
 
-        private static bool PropertiesMatch(this string[] properties, (IObjectSpace objectSpace, ObjectChangedEventArgs e) t) 
-            => !properties.Any()||(t.e.MemberInfo != null && properties.Contains(t.e.MemberInfo.Name) ||
-                t.e.PropertyName != null && properties.Contains(t.e.PropertyName));
+        private static bool PropertiesMatch(this string[] properties, (IObjectSpace objectSpace, ObjectChangedEventArgs e) t) {
+            if (!properties.Any()) return true;
+            var name = t.e.MemberInfo?.Name ?? t.e.PropertyName;
+            if (string.IsNullOrEmpty(name)) return properties.Contains("*");
+            var isWildcard = properties.Contains("*");
+            var isExcluded = properties.Contains("!" + name);
+            var isExplicitlyIncluded = properties.Contains(name);
+            return isWildcard && !isExcluded || isExplicitlyIncluded;
+        }
 
         public static IObservable<T> WhenModifiedObjects<T>(this IObjectSpace objectSpace,Expression<Func<T,object>> memberSelector) 
             => objectSpace.WhenModifiedObjects(typeof(T),memberSelector.MemberExpressionName()).Cast<T>();

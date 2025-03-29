@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace Xpand.Extensions.ObjectExtensions {
     public static partial class ObjectExtensions {

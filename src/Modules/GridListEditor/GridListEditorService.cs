@@ -92,7 +92,7 @@ namespace Xpand.XAF.Modules.GridListEditor{
 
         public static List<object> Objects(this GridView gridView){
             var objects=new List<object>();
-            for (int i = 0; i < gridView.DataRowCount-1; i++) {
+            for (int i = 0; i < gridView.DataRowCount; i++) {
                 objects.Add(gridView.GetRow(i));
             }
             return objects;

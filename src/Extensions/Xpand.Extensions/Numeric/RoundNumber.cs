@@ -10,6 +10,8 @@ namespace Xpand.Extensions.Numeric {
 
         public static decimal RoundNumber(this decimal d, int decimals = 0) 
             => Math.Round(d, decimals);
+        public static double RoundNumber(this double d, int decimals = 0) 
+            => Math.Round(d, decimals);
         
         public static decimal RoundDown(this decimal number, int decimalPlaces) => Math.Floor(number * (decimal)Math.Pow(10, decimalPlaces)) / (decimal)Math.Pow(10, decimalPlaces);
 

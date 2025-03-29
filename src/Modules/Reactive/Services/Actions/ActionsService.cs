@@ -271,8 +271,8 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
                 .TakeUntilDisposed(action);
 
         public static IObservable<SingleChoiceAction> AddItems(this IObservable<SingleChoiceAction> source,Func<SingleChoiceAction,IObservable<Unit>> addItems,IScheduler scheduler=null)
-            => source.MergeIgnored(action => action.Controller.WhenActivated()
-                .SelectMany(_ => action.View().WhenCurrentObjectChanged().StartWith(action.View()).TakeUntilDisposed(action))
+            => source.MergeIgnored(action => action.Controller.WhenActivated(emitWhenActive:true).SelectMany(_
+                    => action.View().WhenCurrentObjectChanged().StartWith(action.View()).TakeUntilDisposed(action))
                 .WaitUntilInactive(1, scheduler: scheduler).ObserveOnContext()
                 .Do(_ => action.Items.Clear()).SelectMany(_ => addItems(action)).TakeUntilDisposed(action));
 
@@ -377,6 +377,10 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
 
         public static IObservable<TAction> WhenControllerActivated<TAction>(this IObservable<TAction> source,bool emitWhenActive=false) where TAction : ActionBase 
             => source.SelectMany(a =>a.Controller.WhenActivated(emitWhenActive).To(a) );
+        
+        public static IObservable<TAction> ActivateFor<TAction>(this IObservable<TAction> source,TemplateContext context) where TAction : ActionBase
+            => source.WhenControllerActivated(action => action.Observe()
+                .Do(simpleAction => action.Active[$"{nameof(ActivateFor)} {context}"]=simpleAction.Controller.Frame.Context==context).ToUnit());
         
         public static IObservable<TAction> WhenControllerActivated<TAction>(this IObservable<TAction> source,Func<TAction,IObservable<Unit>> mergeSelector,bool emitWhenActive=false) where TAction : ActionBase 
             => source.MergeIgnored(a =>a.Controller.WhenActivated(emitWhenActive).TakeUntil(a.Controller.WhenDeactivated())

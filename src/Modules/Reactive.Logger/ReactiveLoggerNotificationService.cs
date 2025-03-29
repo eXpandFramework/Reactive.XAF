@@ -3,7 +3,6 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
-using System.Threading;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Notifications;
 using DevExpress.Persistent.Base.General;
@@ -22,12 +21,14 @@ using static Xpand.XAF.Modules.Reactive.Logger.ReactiveLoggerService;
 namespace Xpand.XAF.Modules.Reactive.Logger{
     static class ReactiveLoggerNotificationService {
         internal static IObservable<Unit> Notifications(this XafApplication application) 
-            => application.WhenSetupComplete().SelectMany(_ => {
-                var service = application.NotificationsService();
-                return service==null ? Observable.Empty<Unit>() : application.NotifyRules(service)
-                    .Merge(application.NotifySystemExceptions())
-                    ;
-            });
+            => application.WhenSynchronizationContext()
+                .SelectMany(context => {
+                    var service = application.NotificationsService();
+                    return service == null ? Observable.Empty<Unit>() : application.NotifyRules()
+                        .ObserveOnContext(context)
+                        .Do(_ => service.Refresh())
+                        .Merge(application.NotifySystemExceptions());
+                });
 
         private static IObservable<Unit> NotifySystemExceptions(this XafApplication application) 
             => application.WhenModelChanged().Take(1)
@@ -50,7 +51,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
                     AppDomain.CurrentDomain.GetAssemblyType("DevExpress.ExpressApp.Notifications.NotificationsModule"))
                 ?.GetPropertyValue("NotificationsService");
 
-        public static IObservable<Unit> NotifyRules(this XafApplication application, NotificationsService service) 
+        public static IObservable<Unit> NotifyRules(this XafApplication application) 
             => application.WhenModelChanged()
                 .Select(_ => application.Rules()).StartWith(application.Rules()).Where(t => t.Length > 0)
                 .Select(rules => SavedTraceEvent.Cast<TraceEvent>().SelectMany(traceEvent => rules
@@ -66,8 +67,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
                         })
                         .ToNowObservable()
                         .ShowXafMessage(application, traceEvent, memberName: null))
-                    .ObserveOn(Scheduler.CurrentThread)
-                    .DoSafe(_ => service.Refresh()))
+                    .ObserveOn(Scheduler.CurrentThread))
                 .Switch()
                 .ToUnit();
 
