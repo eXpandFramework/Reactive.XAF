@@ -24,6 +24,7 @@ using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Transform.Collections;
 using Xpand.Extensions.Reactive.Utility;
+using Xpand.Extensions.Tracing;
 using Xpand.Extensions.TypeExtensions;
 using Xpand.Extensions.XAF.Attributes;
 using Xpand.Extensions.XAF.CollectionSourceExtensions;
@@ -382,9 +383,19 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<T> Commit<T>(this T link) where T:IObjectSpaceLink
             => Observable.If(() => link!=null,link.Defer(() => link.ObjectSpace.CommitChangesAsync().ToObservable().To(link)));
         
-        public static IObservable<T> Commit<T>(this IObservable<T> source) where T:IObjectSpaceLink
-            => source.BufferUntilCompleted(true).SelectMany().Take(1).Do(link => link.CommitChanges());
-        
+        public static IObservable<T> Commit<T>(this IObservable<T> source,RXAction action=RXAction.OnCompleted) where T:IObjectSpaceLink {
+            if (action == RXAction.OnCompleted) {
+                return source.BufferUntilCompleted(true).SelectMany().Take(1).Do(link => link.CommitChanges());    
+            }
+
+            if (action == RXAction.OnNext) {
+                return source.Do(link => link.CommitChanges());
+            }
+
+            throw new NotImplementedException(action.ToString());
+            
+        }
+
         public static T CreateObject<T>(this IObjectSpaceLink link)
             => link.ObjectSpace.CreateObject<T>();
         

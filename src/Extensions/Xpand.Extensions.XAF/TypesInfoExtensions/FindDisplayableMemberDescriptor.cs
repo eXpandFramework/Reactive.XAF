@@ -1,4 +1,5 @@
-﻿using DevExpress.ExpressApp.DC;
+﻿using System.Linq;
+using DevExpress.ExpressApp.DC;
 using DevExpress.Persistent.Base;
 
 namespace Xpand.Extensions.XAF.TypesInfoExtensions {

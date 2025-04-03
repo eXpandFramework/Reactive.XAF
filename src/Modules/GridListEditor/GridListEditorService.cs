@@ -121,7 +121,8 @@ namespace Xpand.XAF.Modules.GridListEditor{
 
         static IObservable<Unit> SortProperties(this XafApplication application) 
             => application.WhenSetupComplete().SelectMany(_ => application.WhenFrame(ViewType.ListView).ToListView().WhenControlsCreated(true)
-                .SelectMany(listView => listView.Model.Columns.Select(column => (attribute: column.ModelMember.MemberInfo.FindAttribute<SortPropertyAttribute>(), column))
+                .SelectMany(listView => listView.Model.Columns.WhereNotDefault(column => column.ModelMember)
+                    .Select(column => (attribute: column.ModelMember.MemberInfo.FindAttribute<SortPropertyAttribute>(), column))
                     .WhereNotDefault(t => t.attribute)
                     .Do(t => {
                         var xafGridColumnWrappers = ((WinColumnsListEditor)listView.Editor).Columns.OfType<XafGridColumnWrapper>();

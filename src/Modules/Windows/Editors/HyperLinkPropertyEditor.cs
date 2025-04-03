@@ -73,7 +73,7 @@ namespace Xpand.XAF.Modules.Windows.Editors {
         public static string GetResolvedUrl(object value, IMemberInfo memberInfo,object currentObject) {
             var editorAttribute = memberInfo.FindAttribute<HyperLinkPropertyEditorAttribute>();
             if (editorAttribute != null) {
-                value = memberInfo.Owner.FindMember(editorAttribute.Name).GetValue(currentObject);
+                value = memberInfo.LastMember.Owner.FindMember(editorAttribute.Name).GetValue(currentObject);
             }
             string url = Convert.ToString(value);
             if (!string.IsNullOrEmpty(url)) {
