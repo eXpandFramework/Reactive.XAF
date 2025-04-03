@@ -45,21 +45,23 @@ The module is **not bound** to **DevExpress versioning**, which means you can us
 
 The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/nuget/reference/package-versioning#version-basics).
 ## Dependencies
-`.NetFramework: net6.0-windows7.0`
+`.NetFramework: net9.0-windows7.0`
 
 |<!-- -->|<!-- -->
 |----|----
 |**DevExpress.ExpressApp.Win**|**Any**
-|[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.232.5
- |Xpand.Extensions|4.232.5
- |Xpand.Extensions.Reactive|4.232.5
- |Xpand.Extensions.XAF|4.232.5
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.232.5
+|Xpand.Extensions|4.242.7
+ |Xpand.Extensions.Reactive|4.242.7
+ |Xpand.Extensions.XAF|4.242.7
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.242.7
  |System.Reactive|6.0.0
  |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
- |System.Text.Json|7.0.2
- |System.Threading.Tasks.Dataflow|7.0.0
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.232.5
+ |Microsoft.CodeAnalysis|4.12.0
+ |Microsoft.Extensions.DependencyInjection.Abstractions|9.0.0
+ |Microsoft.Extensions.Options|9.0.0
+ |Microsoft.Extensions.Configuration.Abstractions|9.0.0
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.242.7
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.242.7
 
 ## Issues-Debugging-Troubleshooting
 

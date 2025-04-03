@@ -264,29 +264,30 @@ The module is **not bound** to **DevExpress versioning**, which means you can us
 
 The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/nuget/reference/package-versioning#version-basics).
 ## Dependencies
-`.NetFramework: net6.0`
+`.NetFramework: net9.0`
 
 |<!-- -->|<!-- -->
 |----|----
 |**DevExpress.ExpressApp**|**Any**
+ |**DevExpress.ExpressApp.Validation**|**Any**
  |**DevExpress.ExpressApp.ViewVariantsModule**|**Any**
  |**DevExpress.Persistent.Base**|**Any**
  |**DevExpress.ExpressApp.Security.Xpo**|**Any**
-|[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.232.5
- |Xpand.Extensions|4.232.5
- |Xpand.Extensions.Reactive|4.232.5
- |Xpand.Extensions.XAF|4.232.5
- |System.Interactive|5.0.0
+|Xpand.Extensions|4.242.7
+ |Xpand.Extensions.Reactive|4.242.7
+ |Xpand.Extensions.XAF|4.242.7
+ |System.Interactive|6.0.1
  |System.Reactive|6.0.0
  |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
- |Xpand.Patcher|3.0.24
+ |Xpand.Patcher|9.0.0
  |Microsoft.CSharp|4.7.0
- |System.Text.Json|7.0.2
+ |System.Text.Json|9.0.0
  |Enums.Net|4.0.0
  |System.Threading.Tasks.Dataflow|7.0.0
  |Microsoft.Extensions.Hosting|6.0.0
  |Serialize.Linq|2.0.0
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.232.5
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.242.7
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.242.7
 
 ## Issues-Debugging-Troubleshooting
 

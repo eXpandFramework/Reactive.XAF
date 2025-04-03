@@ -18,6 +18,7 @@ using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.Attributes;
+using Xpand.Extensions.XAF.TypesInfoExtensions;
 using Xpand.Extensions.XAF.ViewExtensions;
 using Xpand.XAF.Modules.Reactive.Services;
 
@@ -37,9 +38,10 @@ namespace Xpand.XAF.Modules.Windows.Editors{
                                 .Do(e => {
                                     var memberInfo = gridView.FocusedColumn.MemberInfo();
                                     if (memberInfo==null)return;
-                                    e.Cancel = !frame.View.ToListView().Model.Columns
-                                        .First(column => column.ModelMember.MemberInfo == memberInfo)
-                                        .AllowEdit;
+                                    var modelColumn = frame.View.ToListView().Model.Columns
+                                        .FirstOrDefault(column => column.ModelMember.MemberInfo == memberInfo);
+                                    if (modelColumn==null)return;
+                                    e.Cancel = !modelColumn.AllowEdit;
                                 }))
                             .MergeToUnit(listEditor.WhenEvent<CustomizeAppearanceEventArgs>(nameof(GridListEditor.CustomizeAppearance))
                                 .Do(e => {
@@ -58,7 +60,14 @@ namespace Xpand.XAF.Modules.Windows.Editors{
                     if (frame.View.ToListView().Model.Columns[memberInfo.Name].PropertyEditorType != typeof(HyperLinkPropertyEditor)) return;
                     var hyperLinkPropertyEditorAttribute = memberInfo.FindAttribute<HyperLinkPropertyEditorAttribute>();
                     if (hyperLinkPropertyEditorAttribute == null) return;
-                    if ($"{frame.View.ObjectTypeInfo.FindMember(hyperLinkPropertyEditorAttribute.Name).GetValue(gridView.GetRow(e.RowHandle))}" != string.Empty) return;
+                    if (memberInfo.GetPath().Count > 1) {
+                        var value = memberInfo.ParentOrCurrent().GetValue(gridView.GetRow(e.RowHandle));
+                        if ($"{memberInfo.LastMember.Owner.FindMember(hyperLinkPropertyEditorAttribute.Name).GetValue(value)}" != string.Empty) return;
+                    }
+                    else {
+                        if ($"{frame.View.ObjectTypeInfo.FindMember(hyperLinkPropertyEditorAttribute.Name).GetValue(gridView.GetRow(e.RowHandle))}" != string.Empty) return;    
+                    }
+                    
                     e.RepositoryItem = new RepositoryItemTextEdit();
                 });
 
@@ -74,8 +83,12 @@ namespace Xpand.XAF.Modules.Windows.Editors{
                     var hyperLinkPropertyEditorAttribute = memberInfo.FindAttribute<HyperLinkPropertyEditorAttribute>();
                     if (hyperLinkPropertyEditorAttribute is { ControlClickListView: true } &&
                         !System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.LeftCtrl) && !System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.RightCtrl)) return;
-                    
-                     editor.ShowBrowser(HyperLinkPropertyEditor.GetResolvedUrl(
+                    if (memberInfo.GetPath().Count > 1) {
+                        currentObject=memberInfo.ParentOrCurrent().GetValue(currentObject);
+                        memberInfo = memberInfo.LastMember;
+                        
+                    }
+                    editor.ShowBrowser(HyperLinkPropertyEditor.GetResolvedUrl(
                         gridView.GetRowCellValue(hi.RowHandle, hi.Column), memberInfo,
                         currentObject));
                 });

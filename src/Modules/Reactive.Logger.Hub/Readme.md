@@ -58,29 +58,29 @@ The module is **not bound** to **DevExpress versioning**, which means you can us
 
 The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/nuget/reference/package-versioning#version-basics).
 ## Dependencies
-`.NetFramework: net6.0`
+`.NetFramework: net9.0`
 
 |<!-- -->|<!-- -->
 |----|----
 |**DevExpress.ExpressApp**|**Any**
  |**DevExpress.Xpo**|**Any**
-|[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.232.5
- |Xpand.Extensions.Reactive|4.232.5
- |Xpand.Extensions.XAF|4.232.5
- |Xpand.Extensions|4.232.5
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.232.5
- |[Xpand.XAF.Modules.Reactive.Logger](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive.Logger)|4.232.5
+|Xpand.Extensions.Reactive|4.242.7
+ |Xpand.Extensions.XAF|4.242.7
+ |Xpand.Extensions|4.242.7
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.242.7
+ |[Xpand.XAF.Modules.Reactive.Logger](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive.Logger)|4.242.7
  |MagicOnion|2.6.3
- |System.Interactive.Async|5.0.0
+ |System.Interactive.Async|6.0.1
  |System.Reactive|6.0.0
  |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
  |YamlDotNet|11.2.1
- |Xpand.Patcher|3.0.24
+ |Xpand.Patcher|9.0.0
  |Xpand.Collections|1.0.4
- |System.CodeDom|6.0.0
- |System.Text.Json|7.0.2
+ |System.CodeDom|9.0.0
+ |System.Text.Json|9.0.0
  |System.Threading.Tasks.Dataflow|7.0.0
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.232.5
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.242.7
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.242.7
 
 ## Issues-Debugging-Troubleshooting
 

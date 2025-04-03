@@ -7,7 +7,7 @@ using Xpand.XAF.Persistent.BaseImpl;
 namespace Xpand.XAF.Modules.Speech.BusinessObjects {
     [OptimisticLocking(OptimisticLockingBehavior.LockModified)]
     [DeferredDeletion(false)][DefaultProperty(nameof(Name))]
-    [NavigationItem("Speech")][StoreToDisk(nameof(Name),nameof(Text))]
+    [NavigationItem("Speech")]
     public class SpeechKeyword:CustomBaseObject {
         public SpeechKeyword(Session session) : base(session) { }
 

@@ -94,7 +94,7 @@ function AddReadMe {
 }
 
 Write-HostFormatted "Discover XAF XAFModules" -Section
-$packages = & (Get-NugetPath) list -source $nugetBin | ConvertTo-PackageObject | Where-Object { $_.id -notin $toolPackages }
+$packages = & (Get-NugetPath) search -source $nugetBin | ConvertTo-PackageObject -NewFormat | Where-Object { $_.id -notin $toolPackages }
 $modules = Get-MSBuildProjects "$sourceDir\src\Modules\" | ForEach-Object {
     $proj=Get-XmlContent $_.fullname
     $PackageId=$_.BaseName

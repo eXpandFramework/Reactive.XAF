@@ -11,7 +11,8 @@ using Xpand.XAF.ModelEditor.ModelDifference;
 namespace Xpand.XAF.ModelEditor.WinDesktop.ModelDifference {
     public class ResourceModelCollector {
         private const int MaxExpectedEncodingStringLengthInBytes = 512;
-        private static readonly Encoding[] ExpectedEncodings = new[] { Encoding.UTF8, Encoding.ASCII, Encoding.Unicode, Encoding.UTF32, Encoding.BigEndianUnicode };
+        private static readonly Encoding[] ExpectedEncodings =[Encoding.UTF8, Encoding.ASCII, Encoding.Unicode, Encoding.UTF32, Encoding.BigEndianUnicode
+        ];
         private static readonly Encoding DefaultEncoding = Encoding.UTF8;
         public Dictionary<string, ResourceInfo> Collect(IEnumerable<Assembly> assemblies, string prefix) {
             var assemblyResourcesNames = assemblies.SelectMany(assembly => assembly.GetManifestResourceNames().Where(s => s.EndsWith(".xafml")), (assembly1, s) => new { assembly1, s });
@@ -90,7 +91,7 @@ namespace Xpand.XAF.ModelEditor.WinDesktop.ModelDifference {
             long position = stream.Position;
             try {
                 stream.Position = 0;
-                stream.Read(bytes, 0, bytes.Length);
+                stream.ReadExactly(bytes);
             }
             finally {
                 stream.Position = position;
