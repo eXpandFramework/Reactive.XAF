@@ -150,9 +150,10 @@ namespace Xpand.XAF.Modules.Windows.SystemActions {
         }
 
         private static IObservable<(ActionBase action, IModelHotkeyAction model)> WhenHotkey(this IObservable<ActionBase> source,IModelApplication application)
-            => source.SelectMany(action => application.ToReactiveModule<IModelReactiveModuleWindows>().Windows.HotkeyActions
-                .Where(hotkeyAction => hotkeyAction.Action!=null).Where(modelAction => action.Model.Id==modelAction.Action.Id())
-                .Select(modelSystemAction => (action,modelSystemAction)));
+            => source.SelectMany(action => application.ToReactiveModule<IModelReactiveModuleWindows>()?.Windows.HotkeyActions
+                .Where(hotkeyAction => hotkeyAction.Action != null)
+                .Where(modelAction => action.Model.Id == modelAction.Action.Id())
+                .Select(modelSystemAction => (action, modelSystemAction))??[]);
     }
 
     
