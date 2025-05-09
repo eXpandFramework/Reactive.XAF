@@ -14,6 +14,14 @@ namespace Xpand.Extensions.Reactive.Filter{
             =>source.Where(source1 => !valueSelector(source1).IsDefaultValue());
 
         public static IObservable<TSource> WhenNotDefault<TSource>(this IObservable<TSource> source) => source.Where(s => !s.IsDefaultValue());
+        public static IObservable<bool> WhenTrue(this IObservable<bool> source) => source.WhenNotDefault();
+        public static IObservable<bool> WhenFalse(this IObservable<bool> source) => source.WhenDefault();
+        public static IObservable<int> WhenZero(this IObservable<int> source) => source.WhenDefault();
+        public static IObservable<int> WhenNonZero(this IObservable<int> source) => source.WhenDefault();
+        public static IObservable<long> WhenZero(this IObservable<long> source) => source.WhenDefault();
+        public static IObservable<long> WhenNonZero(this IObservable<long> source) => source.WhenDefault();
+        public static IObservable<decimal> WhenZero(this IObservable<decimal> source) => source.WhenDefault();
+        public static IObservable<decimal> WhenNonZero(this IObservable<decimal> source) => source.WhenDefault();
         
         public static IObservable<TSource> WhenNotDefaultOrEmpty<TSource>(this IObservable<TSource> source) where TSource:IEnumerable
             => source.WhenNotDefault().WhenNotEmpty();
