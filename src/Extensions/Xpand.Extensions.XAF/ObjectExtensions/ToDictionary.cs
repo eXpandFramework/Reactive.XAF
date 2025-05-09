@@ -37,7 +37,7 @@ namespace Xpand.Extensions.XAF.ObjectExtensions {
             => values.ToDictionary(pair => pair.Key, pair => ($"{pair.Value.oldValue}", $"{pair.Value.newValue}"));
 
         public static Dictionary<string, (object oldValue, object newValue)> CompareTypeInfoValue(this IObjectSpaceLink instance, Dictionary<string, object> values) {
-            var newValues = instance.MemberInfoValueDictionary();
+            var newValues = values.Select(pair => (pair.Key,instance.GetTypeInfo().FindMember(pair.Key).GetValue(instance))).ToDictionary(t => t.Key,t => t.Item2);
             var changes = new Dictionary<string,(object oldValue,object newValue)>();
             return newValues.Keys.Select(key => {
                 var newValue = newValues[key];
