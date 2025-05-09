@@ -17,7 +17,11 @@ namespace Xpand.Extensions.StringExtensions {
             return unwanted.Aggregate(text, (cur, c) => cur.Replace(c.ToString(), ""));
         }
 
-        public static string Remove(this string s,string stringToRemove) => s.Replace(stringToRemove, null);
+        public static string Remove(this string s,params string[] stringToRemoves) {
+            stringToRemoves.Do(s1 => s = s.Replace(s1, null)).Enumerate();
+            return s;
+        }
+
         public static string RemoveQuotes(this string s) => s.Replace("\"", null);
 
         public static string RemoveSymbols(this string s) => Regex.Replace(s, @"[\uD800-\uDBFF][\uDC00-\uDFFF]", "");
