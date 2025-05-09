@@ -720,7 +720,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         
         public static IObservable<T> UseNonSecuredObjectSpace<T>(this XafApplication application,Func<IObjectSpace,IObservable<T>> factory,bool useObjectSpaceProvider=false,[CallerMemberName]string caller="") 
             => Observable.Using(() => application.CreateNonSecuredObjectSpace(typeof(T)), factory);
-
+        
+        
         public static IObservable<TResult> UseObject<TSource, TResult>(this XafApplication application,
             TSource instance, Func<TSource, IObservable<TResult>> selector, bool useObjectSpaceProvider = false, [CallerMemberName] string caller = "") 
             => Observable.Using(() => application.CreateObjectSpace(useObjectSpaceProvider, typeof(TSource), caller: caller),
