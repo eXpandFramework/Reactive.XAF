@@ -11,12 +11,15 @@ using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.SystemModule;
+using DevExpress.ExpressApp.Templates;
 using DevExpress.Persistent.Base;
 using Fasterflect;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.XAF.ActionExtensions;
+using Xpand.Extensions.XAF.ApplicationModulesManagerExtensions;
 using Xpand.Extensions.XAF.Attributes;
 using Xpand.Extensions.XAF.Attributes.Appearance;
 using Xpand.Extensions.XAF.Attributes.Custom;
@@ -48,12 +51,33 @@ namespace Xpand.XAF.Modules.Reactive.Services {
                 .Merge(manager.HiddenActions())
                 .Merge(manager.ReadOnlyCollection())
                 .Merge(manager.ReadOnlyProperty())
+                .Merge(manager.QuickAccessNavigationItemActions())
                 .Merge(manager.LookupPropertyAttribute())
                 .Merge(manager.LinkUnlinkPropertyAttribute())
                 .Merge(manager.ReadOnlyObjectViewAttribute())
                 .Merge(manager.DetailCollectionAttribute())
                 .Merge(PreventAggregatedObjectsValidationAttribute(manager))
             ;
+
+        private static IObservable<Unit> QuickAccessNavigationItemActions(this ApplicationModulesManager manager) 
+            => manager.ExportedTypes().Attributed<NavigationItemQuickAccessAttribute>().ToNowObservable()
+                .SelectMany(t => manager.RegisterWindowSimpleAction(t.typeInfo.Name,PredefinedCategory.ViewsNavigation,
+                        action => {
+                            action.QuickAccess = true;
+                            action.PaintStyle=ActionItemPaintStyle.Image;
+                            action.ImageName=t.typeInfo.Name;
+                            action.TargetViewNesting=t.attribute.Nesting;
+                            if (t.attribute.Index != null){
+                                action.Model.Index = t.attribute.Index.Value;
+                            }
+                        })
+                    .ActivateFor(TemplateContext.ApplicationWindow)
+                    .WhenExecuted(e => {
+                        var viewId = t.attribute.ViewId;
+                        return viewId != null ? e.Application().Navigate(viewId) : e.Application().Navigate(t.typeInfo.Type);
+                    })
+                )
+                .ToUnit();
 
         private static IObservable<Unit> PreventAggregatedObjectsValidationAttribute(this ApplicationModulesManager manager) 
             => manager.WhenApplication(application => application.WhenSetupComplete().SelectMany(_ => application.PreventAggregatedObjectsValidationAttribute()));
