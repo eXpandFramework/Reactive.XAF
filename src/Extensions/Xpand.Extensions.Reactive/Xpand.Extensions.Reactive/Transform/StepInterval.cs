@@ -12,13 +12,11 @@ namespace Xpand.Extensions.Reactive.Transform{
         public static IObservable<T> StepRandomInterval<T>(this IObservable<T> source, double minDelaySeconds, int maxDelaySeconds, IScheduler scheduler = null)
             => source.StepRandomInterval(minDelaySeconds.Seconds(), maxDelaySeconds.Seconds(), scheduler);
 
-        public static IObservable<T> StepRandomInterval<T>(this IObservable<T> source, TimeSpan minDelay, TimeSpan maxDelay, IScheduler scheduler=null) {
-            var r=new Random();
-            return source.Select(x => {
-                var d=TimeSpan.FromMilliseconds(r.Next((int)minDelay.TotalMilliseconds,(int)maxDelay.TotalMilliseconds));
-                return d.Timer(scheduler??Scheduler.Default).Select(_=>x);
-            }).Concat();
-        }
+        public static IObservable<T> StepRandomInterval<T>(this IObservable<T> source, TimeSpan minDelay, TimeSpan maxDelay, IScheduler scheduler=null) 
+            => source.StepRandomInterval(new Random(), minDelay, maxDelay, scheduler);
 
+        public static IObservable<T> StepRandomInterval<T>(this IObservable<T> source,Random random, TimeSpan minDelay, TimeSpan maxDelay, IScheduler scheduler=null) 
+            => source.Select(x => random.Next((int)minDelay.TotalMilliseconds, (int)maxDelay.TotalMilliseconds)
+                .Milliseconds().Timer(scheduler ?? Scheduler.Default).Select(_ => x)).Concat();
     }
 }
