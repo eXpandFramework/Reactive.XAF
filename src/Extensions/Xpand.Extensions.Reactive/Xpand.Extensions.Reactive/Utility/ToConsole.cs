@@ -54,6 +54,17 @@ namespace Xpand.Extensions.Reactive.Utility {
         
         public static IObservable<T> ToConsole<T>(this IObservable<T> source, Func<T, object> msgSelector = null,[CallerMemberName]string caller="")
             => source.Do(obj => obj.Write(msgSelector, caller));
+        public static IObservable<T> ToConsole<T>(this IObservable<T> source,Action<TimeSpan> onMeasured, Func<T, object> msgSelector = null,[CallerMemberName]string caller="")
+            => source.ToConsole(msgSelector,caller).MeasureCompletionTime(onMeasured);
+        
+        public static IObservable<T> MeasureCompletionTime<T>(this IObservable<T> source, Action<TimeSpan> onMeasured)
+            => Observable.Defer(() => {
+                var sw = Stopwatch.StartNew();
+                return source.Do(onNext: _ => { }, onCompleted: () => {
+                        sw.Stop();
+                        onMeasured(sw.Elapsed);
+                    });
+            });
 
         private static void Write<T>(this T obj,Func<T, object> msgSelector, string caller){
             var value = msgSelector != null ? $"{msgSelector(obj)}" : $"{obj}";
