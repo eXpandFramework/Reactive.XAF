@@ -101,23 +101,17 @@ namespace Xpand.XAF.Modules.GridListEditor{
         static IObservable<Unit> ColSummaryDisplay(this XafApplication application)
             => application.WhenSetupComplete().SelectMany(_ => application.WhenFrame(ViewType.ListView).ToListView()
                 .WhenControlsCreated(true)
-                .SelectMany(listView => {
-                    var gridView = listView.Editor.GridView<GridView>();
-                    if (gridView == null)return Observable.Empty<Unit>();
-                    return gridView.DataSource.Observe().WhenNotDefault()
-                        .SwitchIfEmpty(gridView.WhenEvent(nameof(gridView.DataSourceChanged)).Take(1))
-                        .SelectMany(_ => gridView.Columns.Where(column => column.Visible).ToNowObservable().SelectMany(column => {
-                            var memberInfo = column.MemberInfo();
-                            if (memberInfo==null)return Observable.Empty<Unit>();
-                            var columnSummaryAttribute = memberInfo.FindAttribute<ColumnSummaryAttribute>();
-                            return columnSummaryAttribute?.HideCaption??false ? column.Summary
-                                    .Do(item => item.DisplayFormat = item.DisplayFormat.Replace("SUM=", ""))
-                                    .ToNowObservable().ToUnit()
-                                : Observable.Empty<Unit>();
-                        }));
-                }));
-
-        
+                .Select(listView => listView.Editor).OfType<DevExpress.ExpressApp.Win.Editors.GridListEditor>()
+                .SelectMany(editor => editor.GridView.DataSource.Observe().WhenNotDefault()
+                    .SwitchIfEmpty(editor.GridView.WhenEvent(nameof(editor.GridView.DataSourceChanged)).Take(1))
+                    .SelectMany(_ => editor.GridView.Columns.Where(column => column.Visible).ToNowObservable().SelectMany(column => {
+                        var memberInfo = column.MemberInfo();
+                        if (memberInfo==null)return Observable.Empty<Unit>();
+                        var columnSummaryAttribute = memberInfo.FindAttribute<ColumnSummaryAttribute>();
+                        return columnSummaryAttribute?.HideCaption??false ? column.Summary
+                                .Do(item => item.DisplayFormat = item.DisplayFormat.Replace("SUM=", ""))
+                                .ToNowObservable().ToUnit() : Observable.Empty<Unit>();
+                    }))));
 
         static IObservable<Unit> SortProperties(this XafApplication application) 
             => application.WhenSetupComplete().SelectMany(_ => application.WhenFrame(ViewType.ListView).ToListView().WhenControlsCreated(true)

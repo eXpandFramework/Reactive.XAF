@@ -6,12 +6,9 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Windows.Forms;
 using DevExpress.ExpressApp;
-using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Win.Editors;
-using DevExpress.XtraEditors;
 using DevExpress.XtraEditors.Repository;
-using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.Grid;
 using Fasterflect;
 using Xpand.Extensions.Reactive.Combine;
@@ -28,7 +25,8 @@ namespace Xpand.XAF.Modules.Windows.Editors{
             => manager.WhenApplication(application => application.WhenFrame(ViewType.ListView)
                 .SelectMany(frame => frame.View.WhenControlsCreated(true)
                     .SelectMany(_ => {
-                        var listEditor = frame.View.ToListView().Editor;
+                        var listEditor = frame.View.ToListView().Editor as GridListEditor;
+                        if (listEditor == null) return Observable.Empty<Unit>();
                         var gridView = (GridView)listEditor.Control.GetPropertyValue("MainView");
                         
                         return gridView.Observe().WhenNotDefault()
