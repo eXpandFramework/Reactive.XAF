@@ -33,7 +33,7 @@ namespace Xpand.Extensions.Reactive.Utility {
                 .Select(obj => {
                     if (!action.HasFlag(RXAction.OnNext)) return obj;
                     stopwatch.Stop();
-                    WriteLine($"{caller} - OnNext - {nextSelector.Invoke(stopwatch.Elapsed, obj)}");
+                    WriteLine($"{caller} - OnNext - {nextSelector?.Invoke(stopwatch.Elapsed, obj)??stopwatch.Elapsed}");
                     stopwatch.Restart(); 
                     return obj;
                 })

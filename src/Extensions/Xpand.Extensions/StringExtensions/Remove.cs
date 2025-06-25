@@ -17,10 +17,11 @@ namespace Xpand.Extensions.StringExtensions {
             return unwanted.Aggregate(text, (cur, c) => cur.Replace(c.ToString(), ""));
         }
 
-        public static string Remove(this string s,params string[] stringToRemoves) {
-            stringToRemoves.Do(s1 => s = s.Replace(s1, null)).Enumerate();
-            return s;
-        }
+        public static string Remove(this string s,params string[] stringToRemoves) 
+            => s.Remove(stringToRemoves, StringComparison.OrdinalIgnoreCase);
+
+        public static string Remove(this string s, string[] stringsToRemove, StringComparison comparison) 
+            => stringsToRemove.Aggregate(s, (current, s1) => current.Replace(s1, "",comparison));
 
         public static string RemoveQuotes(this string s) => s.Replace("\"", null);
 

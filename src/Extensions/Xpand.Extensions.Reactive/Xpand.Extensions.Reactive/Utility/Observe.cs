@@ -16,6 +16,8 @@ namespace Xpand.Extensions.Reactive.Utility {
             TaskPoolScheduler.Default.DisableOptimizations(typeof(ISchedulerLongRunning));
             return source.ObserveOn(DefaultScheduler.Instance);
         }
+        public static IObservable<T> ObserveOnCurrent<T>(this IObservable<T> source) 
+            => source.ObserveOn(System.Reactive.Concurrency.Scheduler.CurrentThread);
 
         public static IObservable<T> ObserveOnContext<T>(this IObservable<T> source, SynchronizationContext synchronizationContext) 
             => source.ObserveOn(synchronizationContext);

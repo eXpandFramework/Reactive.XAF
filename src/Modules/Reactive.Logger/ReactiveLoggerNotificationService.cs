@@ -19,7 +19,7 @@ using Xpand.XAF.Modules.Reactive.Services;
 using static Xpand.XAF.Modules.Reactive.Logger.ReactiveLoggerService;
 
 namespace Xpand.XAF.Modules.Reactive.Logger{
-    static class ReactiveLoggerNotificationService {
+    public static class ReactiveLoggerNotificationService {
         internal static IObservable<Unit> Notifications(this XafApplication application) 
             => application.WhenSynchronizationContext()
                 .SelectMany(context => {
@@ -46,7 +46,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
                 })
                 .ToUnit();
 
-        private static NotificationsService NotificationsService(this XafApplication application) 
+        public static NotificationsService NotificationsService(this XafApplication application) 
             => (NotificationsService)application.Modules.FindModule(
                     AppDomain.CurrentDomain.GetAssemblyType("DevExpress.ExpressApp.Notifications.NotificationsModule"))
                 ?.GetPropertyValue("NotificationsService");

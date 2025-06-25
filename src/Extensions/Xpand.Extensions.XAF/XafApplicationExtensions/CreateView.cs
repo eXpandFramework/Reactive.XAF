@@ -31,18 +31,19 @@ namespace Xpand.Extensions.XAF.XafApplicationExtensions{
             return application.CreateDetailView(objectSpace, modelDetailView,true);
         }
 
-        public static TView NewView<TView>(this XafApplication application,  Type objectType) where TView:CompositeView 
-            => (TView)application.NewView(typeof(DetailView).IsAssignableFrom(typeof(TView))?ViewType.DetailView : ViewType.ListView,objectType);
+        public static TView NewView<TView>(this XafApplication application,  Type objectType,string viewId=null) where TView:CompositeView 
+            => (TView)application.NewView(typeof(DetailView).IsAssignableFrom(typeof(TView))?ViewType.DetailView : ViewType.ListView,objectType,viewId);
         
-        public static ListView NewListView(this XafApplication application,  Type objectType)  
-            => application.NewView<ListView>(objectType);
+        public static ListView NewListView(this XafApplication application,  Type objectType,string viewId=null)  
+            => application.NewView<ListView>(objectType,viewId);
         
         public static DetailView NewDetailView(this XafApplication application,  Type objectType)  
             => application.NewView<DetailView>(objectType);
 
-        public static CompositeView NewView(this XafApplication application,ViewType viewType,Type objectType){
+        public static CompositeView NewView(this XafApplication application,ViewType viewType,Type objectType,string viewId=null){
 	        var modelClass = application.Model.BOModel.GetClass(objectType);
-	        return application.NewView((viewType == ViewType.ListView ? modelClass.DefaultListView.Id : modelClass.DefaultDetailView.Id));
+            viewId??=(viewType == ViewType.ListView ? modelClass.DefaultListView.Id : modelClass.DefaultDetailView.Id);
+	        return application.NewView(viewId);
         }
 
         public static CompositeView NewView(this XafApplication application,string viewId) => application.NewView(application.Model.Views[viewId]);

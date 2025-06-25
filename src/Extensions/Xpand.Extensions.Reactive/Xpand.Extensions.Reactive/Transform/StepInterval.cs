@@ -9,7 +9,7 @@ namespace Xpand.Extensions.Reactive.Transform{
         public static IObservable<T> StepInterval<T>(this IObservable<T> source, TimeSpan minDelay, IScheduler scheduler = null) 
             => source.Select(x => minDelay.Timer(scheduler??Scheduler.Default).Select(_ => x)).Concat();
 
-        public static IObservable<T> StepRandomInterval<T>(this IObservable<T> source, double minDelaySeconds, int maxDelaySeconds, IScheduler scheduler = null)
+        public static IObservable<T> StepRandomInterval<T>(this IObservable<T> source, double minDelaySeconds, double maxDelaySeconds, IScheduler scheduler = null)
             => source.StepRandomInterval(minDelaySeconds.Seconds(), maxDelaySeconds.Seconds(), scheduler);
 
         public static IObservable<T> StepRandomInterval<T>(this IObservable<T> source, TimeSpan minDelay, TimeSpan maxDelay, IScheduler scheduler=null) 

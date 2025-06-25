@@ -2,6 +2,7 @@
 using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using Xpand.Extensions.Reactive.Transform;
 
 namespace Xpand.Extensions.Reactive.Utility{
     public static partial class Utility {
@@ -34,5 +35,13 @@ namespace Xpand.Extensions.Reactive.Utility{
             publish.Connect();
             return publish;
         }
+        
+        public static IObservable<T2> SequentialResubscribe<T, T2>(this IObservable<T> source, Func<T, IObservable<T2>> selector) 
+            => source.BufferUntilCompleted()
+                .SelectMany(items => {
+                    var count = 0;
+                    return Observable.Defer(() => source.Skip(count++).Take(1).SelectMany(selector)).Repeat()
+                        .Take(items.Length);
+                });
     }
 }

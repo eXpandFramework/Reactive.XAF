@@ -39,11 +39,11 @@
     <None Remove="Xpand.XAF.ModelEditor.WinDesktop.csproj.paket.references" />
     <None Remove="Xpand.XAF.ModelEditor.WinDesktop.paket.references" />
     <EmbeddedResource Include="ExpressApp.ico" />
-    <PackageReference Include="DevExpress.ExpressApp" Version="24.2.7" />
-    <PackageReference Include="DevExpress.ExpressApp.Win" Version="24.2.7" />
-    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="24.2.7" />
-    <PackageReference Include="DevExpress.Persistent.Base" Version="24.2.7" />
-    <PackageReference Include="DevExpress.Persistent.BaseImpl.Xpo" Version="24.2.7" />
+    <PackageReference Include="DevExpress.ExpressApp" Version="24.2.8" />
+    <PackageReference Include="DevExpress.ExpressApp.Win" Version="24.2.8" />
+    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="24.2.8" />
+    <PackageReference Include="DevExpress.Persistent.Base" Version="24.2.8" />
+    <PackageReference Include="DevExpress.Persistent.BaseImpl.Xpo" Version="24.2.8" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="build\**" />

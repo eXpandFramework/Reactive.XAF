@@ -25,29 +25,29 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DevExpress.Drawing.Skia" Version="24.2.7" />
-    <PackageReference Include="DevExpress.ExpressApp.Blazor" Version="24.2.7" />
-    <PackageReference Include="DevExpress.ExpressApp.Dashboards.Blazor" Version="24.2.7" />
-    <PackageReference Include="DevExpress.ExpressApp.FileAttachment.Blazor" Version="24.2.7" />
-    <PackageReference Include="DevExpress.ExpressApp.Office.Blazor" Version="24.2.7" />
-    <PackageReference Include="DevExpress.ExpressApp.ReportsV2.Blazor" Version="24.2.7" />
-    <PackageReference Include="DevExpress.ExpressApp.Scheduler.Blazor" Version="24.2.7" />
-    <PackageReference Include="DevExpress.ExpressApp.Security.Xpo" Version="24.2.7" />
-    <PackageReference Include="DevExpress.ExpressApp.Validation.Blazor" Version="24.2.7" />
-    <PackageReference Include="DevExpress.ExpressApp" Version="24.2.7" />
-    <PackageReference Include="DevExpress.ExpressApp.AuditTrail.Xpo" Version="24.2.7" />
-    <PackageReference Include="DevExpress.ExpressApp.CloneObject.Xpo" Version="24.2.7" />
-    <PackageReference Include="DevExpress.ExpressApp.ConditionalAppearance" Version="24.2.7" />
-    <PackageReference Include="DevExpress.ExpressApp.Dashboards" Version="24.2.7" />
-    <PackageReference Include="DevExpress.ExpressApp.Objects" Version="24.2.7" />
-    <PackageReference Include="DevExpress.ExpressApp.Office" Version="24.2.7" />
-    <PackageReference Include="DevExpress.ExpressApp.ReportsV2" Version="24.2.7" />
-    <PackageReference Include="DevExpress.ExpressApp.Scheduler" Version="24.2.7" />
-    <PackageReference Include="DevExpress.ExpressApp.StateMachine" Version="24.2.7" />
-    <PackageReference Include="DevExpress.ExpressApp.Validation" Version="24.2.7" />
-    <PackageReference Include="DevExpress.ExpressApp.ViewVariantsModule" Version="24.2.7" />
-    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="24.2.7" />
-    <PackageReference Include="DevExpress.Persistent.Base" Version="24.2.7" />
-    <PackageReference Include="DevExpress.Persistent.BaseImpl.Xpo" Version="24.2.7" />
+    <PackageReference Include="DevExpress.Drawing.Skia" Version="24.2.8" />
+    <PackageReference Include="DevExpress.ExpressApp.Blazor" Version="24.2.8" />
+    <PackageReference Include="DevExpress.ExpressApp.Dashboards.Blazor" Version="24.2.8" />
+    <PackageReference Include="DevExpress.ExpressApp.FileAttachment.Blazor" Version="24.2.8" />
+    <PackageReference Include="DevExpress.ExpressApp.Office.Blazor" Version="24.2.8" />
+    <PackageReference Include="DevExpress.ExpressApp.ReportsV2.Blazor" Version="24.2.8" />
+    <PackageReference Include="DevExpress.ExpressApp.Scheduler.Blazor" Version="24.2.8" />
+    <PackageReference Include="DevExpress.ExpressApp.Security.Xpo" Version="24.2.8" />
+    <PackageReference Include="DevExpress.ExpressApp.Validation.Blazor" Version="24.2.8" />
+    <PackageReference Include="DevExpress.ExpressApp" Version="24.2.8" />
+    <PackageReference Include="DevExpress.ExpressApp.AuditTrail.Xpo" Version="24.2.8" />
+    <PackageReference Include="DevExpress.ExpressApp.CloneObject.Xpo" Version="24.2.8" />
+    <PackageReference Include="DevExpress.ExpressApp.ConditionalAppearance" Version="24.2.8" />
+    <PackageReference Include="DevExpress.ExpressApp.Dashboards" Version="24.2.8" />
+    <PackageReference Include="DevExpress.ExpressApp.Objects" Version="24.2.8" />
+    <PackageReference Include="DevExpress.ExpressApp.Office" Version="24.2.8" />
+    <PackageReference Include="DevExpress.ExpressApp.ReportsV2" Version="24.2.8" />
+    <PackageReference Include="DevExpress.ExpressApp.Scheduler" Version="24.2.8" />
+    <PackageReference Include="DevExpress.ExpressApp.StateMachine" Version="24.2.8" />
+    <PackageReference Include="DevExpress.ExpressApp.Validation" Version="24.2.8" />
+    <PackageReference Include="DevExpress.ExpressApp.ViewVariantsModule" Version="24.2.8" />
+    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="24.2.8" />
+    <PackageReference Include="DevExpress.Persistent.Base" Version="24.2.8" />
+    <PackageReference Include="DevExpress.Persistent.BaseImpl.Xpo" Version="24.2.8" />
   </ItemGroup>
 </Project>

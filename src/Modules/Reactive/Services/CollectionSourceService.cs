@@ -23,7 +23,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                     .Select(pattern => pattern.Sender).Cast<ProxyCollection>().TraceRX(_ => collectionSourceBase.ObjectTypeInfo.Type.FullName);
 
         public static IObservable<T> WhenCollectionReloaded<T>(this T collection) where T:CollectionSourceBase 
-            => collection.WhenEvent(nameof(CollectionSourceBase.CollectionReloaded)).Select(_ => _.Sender).Cast<T>()
+            => collection.WhenEvent(nameof(CollectionSourceBase.CollectionReloaded)).Select(e => e.Sender).Cast<T>()
                 .TakeUntil(collection.WhenDisposed())
                 .TraceRX(c => c.ObjectTypeInfo.Type.FullName);
 
@@ -40,8 +40,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<T> WhenDisposed<T>(this T collectionSourceBase) where T:CollectionSourceBase 
             => collectionSourceBase.WhenEvent(nameof(CollectionSourceBase.Disposed)).To(collectionSourceBase);
 
-        public static NonPersistentPropertyCollectionSource NewSource(this CreateCustomPropertyCollectionSourceEventArgs e) 
-            => new(e.ObjectSpace, e.MasterObjectType, e.MasterObject, e.MemberInfo, e.DataAccessMode,e.Mode);
+        public static NonPersistentPropertyCollectionSource NewSource(this CreateCustomPropertyCollectionSourceEventArgs e,object masterObject=null) 
+            => new(e.ObjectSpace, e.MasterObjectType, masterObject??e.MasterObject, e.MemberInfo, e.DataAccessMode,e.Mode);
     }
     public class NonPersistentPropertyCollectionSource : PropertyCollectionSource{
         readonly Subject<GenericEventArgs<IEnumerable<object>>> _datasourceSubject=new();
@@ -67,10 +67,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
     }
 
 
-    public class ReactiveCollection<T> : DynamicCollection,IList<T> {
-        public ReactiveCollection(IObjectSpace objectSpace) : base(objectSpace, typeof(T), null, null, false) {
-        }
-
+    public class ReactiveCollection<T>(IObjectSpace objectSpace)
+        : DynamicCollection(objectSpace, typeof(T), null, null, false), IList<T> {
         public IEnumerator<T> GetEnumerator() => ((IEnumerable) this).GetEnumerator().Cast<T>();
 
         public void Add(T item) => base.Add(item);

@@ -7,6 +7,7 @@ namespace Xpand.Extensions.Numeric {
         public static TimeSpan ToSeconds(this int seconds) => TimeSpan.FromSeconds(seconds);
         public static TimeSpan Seconds(this int seconds) => TimeSpan.FromSeconds(seconds);
         public static TimeSpan Seconds(this double seconds) => TimeSpan.FromSeconds(seconds);
+        public static TimeSpan ToHours(this int hours) => TimeSpan.FromHours(hours);
         public static TimeSpan Hours(this int hours) => TimeSpan.FromHours(hours);
         public static TimeSpan Days(this int hours) => TimeSpan.FromDays(hours);
     }

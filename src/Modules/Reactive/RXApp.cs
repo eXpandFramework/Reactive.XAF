@@ -103,8 +103,8 @@ namespace Xpand.XAF.Modules.Reactive{
                 new HarmonyMethod(typeof(XafApplicationRxExtensions), nameof(XafApplicationRxExtensions.Exit))
                     .PreFix(typeof(XafApplication).Method(nameof(XafApplication.Exit)),true);
             }
-            return application.WhenNonPersistentPropertyCollectionSource()
-                .Merge(application.PatchAuthentication())
+            return application.PatchAuthentication()
+                .Merge(application.WhenNonPersistentPropertyCollectionSource())
                 .Merge(application.PatchObjectSpaceProvider())
                 .Merge(application.NonPersistentChangesEnabledAttribute())
                 .Merge(application.PopulateAdditionalObjectSpaces())

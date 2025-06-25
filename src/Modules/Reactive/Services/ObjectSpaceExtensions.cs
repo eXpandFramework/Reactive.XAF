@@ -371,9 +371,15 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<T> CommitAndValidate<T>(this IEnumerable<T> source, IObjectSpace objectSpace = null) where T : IObjectSpaceLink 
             => source.Commit(objectSpace, true);
 
-        public static IObservable<T> Commit<T>(this IEnumerable<T> source,IObjectSpace objectSpace=null,bool validate=false) where T:IObjectSpaceLink {
+        public static IObservable<T> Commit<T>(this IEnumerable<T> source,IObjectSpace objectSpace=null,bool validate=false,bool refresh=false) where T:IObjectSpaceLink {
             var links = source as T[] ?? source.ToArray();
-            return links.Length == 0 ? Observable.Empty<T>() : links.Finally(() => (objectSpace??links.First().ObjectSpace).CommitChanges(validate)).ToNowObservable();
+            return links.Length == 0 ? Observable.Empty<T>() : links.Finally(() => {
+                var space = (objectSpace ?? links.First().ObjectSpace);
+                space.CommitChanges(validate);
+                if (refresh) {
+                    space.Refresh();
+                }
+            }).ToNowObservable();
         }
         public static IObservable<T> Commit<T>(this IEnumerable<T> source,IObjectSpaceLink objectSpace) where T:IObjectSpaceLink {
             var links = source as T[] ?? source.ToArray();

@@ -50,7 +50,7 @@ namespace Xpand.Extensions.XAF.CriteriaOperatorExtensions {
             =>(CriteriaOperator)FromLambdaCache.GetOrAdd(objectType, t => FromLambdaMethod!.MakeGenericMethod(t))
                 .Invoke(null, [expression]);
         public static CriteriaOperator ToCriteria<T>(this Expression<Func<T, bool>> expression) 
-            => CriteriaOperator.FromLambda(expression);
+            =>expression==null?null: CriteriaOperator.FromLambda(expression);
         
         public static CriteriaOperator ToCriteria(this string s) => CriteriaOperator.Parse(s);
         

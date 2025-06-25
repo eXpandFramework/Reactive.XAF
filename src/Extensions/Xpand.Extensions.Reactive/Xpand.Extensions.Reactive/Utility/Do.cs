@@ -28,6 +28,13 @@ namespace Xpand.Extensions.Reactive.Utility {
         
         public static IObservable<T> DoOnError<T>(this IObservable<T> source, Action<Exception> onError) 
             => source.Do(_ => { }, onError);
+        public static IObservable<T> DoOnErrorSafe<T>(this IObservable<T> source, Action<Exception> onError) 
+            => source.Do(_ => { }, e => {
+                try { onError(e);}
+                catch (Exception) {
+                    // ignored
+                }
+            });
 
         public static IObservable<T> DoSafe<T>(this IObservable<T> source, Action<T> action)
             => source.Do(obj => {

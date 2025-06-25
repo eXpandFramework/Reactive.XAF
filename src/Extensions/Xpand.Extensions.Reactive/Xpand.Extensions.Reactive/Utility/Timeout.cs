@@ -15,7 +15,7 @@ namespace Xpand.Extensions.Reactive.Utility {
             => source.Timeout(dueTime, exception.Throw<TSource>());
         public static IObservable<TSource> SilentTimeout<TSource>(
             this IObservable<TSource> source, TimeSpan dueTime) 
-            => source.Timeout(dueTime).CompleteOnError();
+            => source.Timeout(dueTime).CompleteOnTimeout();
         
     }
 }

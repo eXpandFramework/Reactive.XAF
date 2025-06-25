@@ -37,9 +37,9 @@ namespace Xpand.XAF.Modules.BulkObjectUpdate{
                 .MergeIgnored(action => action.ShowView().UpdateListViewObjects())
                 .ToUnit();
 
-        static IObservable<Unit> UpdateListViewObjects(this IObservable<(Frame listView, Frame detailView)> source) 
+        static IObservable<Unit> UpdateListViewObjects(this IObservable<(Frame listView, Frame detailView, bool? CommitChanges)> source) 
 	        => source.SelectMany(t => t.detailView.GetController<DialogController>().AcceptAction.WhenExecuted(
-		        _ => t.PropertyEditors().SelectMany(editor => t.listView.View.SelectedObjects.Cast<object>()
+		        _ => t.detailView.View.ToDetailView().PropertyEditors().SelectMany(editor => t.listView.View.SelectedObjects.Cast<object>()
 				        .Do(o => {
 					        var sourceValue = editor.MemberInfo.GetValue(editor.CurrentObject);
 					        if (editor.MemberInfo.MemberTypeInfo.IsPersistent) {
@@ -50,20 +50,21 @@ namespace Xpand.XAF.Modules.BulkObjectUpdate{
 			        .ToNowObservable()
 			        .Finally(() => {
                         t.detailView.View.ObjectSpace.SetIsModified(false);
-				        if (t.listView.Application.GetPlatform() != Platform.Win||t.listView.View.IsRoot) {
+				        if (t.listView.Application.GetPlatform() != Platform.Win||t.listView.View.IsRoot|| (t.CommitChanges.HasValue && t.CommitChanges.Value)) {
 					        t.listView.View.ObjectSpace.CommitChanges();
 				        }
                     }))).ToUnit();
 
-        private static IEnumerable<PropertyEditor> PropertyEditors(this (Frame listView, Frame detailView) t) 
-	        => t.detailView.View.AsDetailView().GetItems<PropertyEditor>()
+        private static IEnumerable<PropertyEditor> PropertyEditors(this DetailView detailView) 
+	        => detailView.GetItems<PropertyEditor>()
                 .Where(editor => ((IAppearanceVisibility)editor).Visibility == ViewItemVisibility.Show&&editor.Model.LayoutItem()!=null);
 
-        static IObservable<(Frame listView, Frame detailView)> ShowView(this SingleChoiceAction action) 
+        static IObservable<(Frame listView, Frame detailView, bool? CommitChanges)> ShowView(this SingleChoiceAction action) 
             => action.WhenExecuted(e => {
                     var showViewParameters = e.ShowViewParameters;
                     var application = e.Action.Application;
-                    var modelDetailView = ((IModelBulkObjectUpdateRule)e.SelectedChoiceActionItem.Data).DetailView;
+                    var rule = ((IModelBulkObjectUpdateRule)e.SelectedChoiceActionItem.Data);
+                    var modelDetailView = rule.DetailView;
                     var objectSpace = application.CreateObjectSpace(modelDetailView.ModelClass.TypeInfo.Type);
                     showViewParameters.CreatedView = application.CreateDetailView(objectSpace, modelDetailView.Id, true,
                         objectSpace.CreateObject(modelDetailView.ModelClass.TypeInfo.Type));
@@ -72,7 +73,7 @@ namespace Xpand.XAF.Modules.BulkObjectUpdate{
                     dialogController.SaveOnAccept = false;
                     showViewParameters.Controllers.Add(dialogController);
                     return application.WhenViewOnFrame(modelDetailView.ModelClass.TypeInfo.Type).WhenFrame(ViewType.DetailView).TakeFirst()
-	                    .Select(frame => (listView:e.Action.Controller.Frame,detailView:frame));
+	                    .Select(frame => (listView:e.Action.Controller.Frame,detailView:frame,rule.CommitChanges));
                 });
 
         private static IObservable<SingleChoiceAction> RegisterAction(this ApplicationModulesManager manager) 

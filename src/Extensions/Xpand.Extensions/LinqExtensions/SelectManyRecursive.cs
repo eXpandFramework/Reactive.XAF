@@ -5,6 +5,7 @@ using System.Linq;
 
 namespace Xpand.Extensions.LinqExtensions{
     public static partial class LinqExtensions{
+
         public static IEnumerable<T> SelectManyRecursive<T>(this IEnumerable<T> source, Func<T, IEnumerable<T>> childrenSelector){
             foreach (var i in source){
                 yield return i;
@@ -18,7 +19,7 @@ namespace Xpand.Extensions.LinqExtensions{
         [Obsolete("use "+nameof(SelectManyRecursive))]
         public static IEnumerable<T> GetItems<T>(this IEnumerable collection, Func<T, IEnumerable> selector, Func<T, object> distinctSelector = null) {
             var hashSet = distinctSelector != null ? new HashSet<object>() : null;
-            var stack = new Stack<IEnumerable<T>>(new[] { collection.OfType<T>() });
+            var stack = new Stack<IEnumerable<T>>([collection.OfType<T>()]);
             while (stack.TryPop(out var items))
                 foreach (var item in items) {
                     var key = distinctSelector?.Invoke(item);

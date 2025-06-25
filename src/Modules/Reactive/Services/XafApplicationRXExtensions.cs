@@ -15,6 +15,7 @@ using System.Threading.Tasks;
 using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
+using DevExpress.ExpressApp.Core;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
@@ -26,6 +27,7 @@ using DevExpress.ExpressApp.Templates;
 using DevExpress.ExpressApp.ViewVariantsModule;
 using DevExpress.Persistent.Base.MultiTenancy;
 using Fasterflect;
+using Microsoft.Extensions.DependencyInjection;
 using Xpand.Extensions.EventArgExtensions;
 using Xpand.Extensions.ExpressionExtensions;
 using Xpand.Extensions.LinqExtensions;
@@ -180,7 +182,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .SelectMany(a => a.WhenConcatExecution(selector)));
         public static IObservable<T> WhenSingleChoiceActionExecuteConcat<T>(this XafApplication application,Func<SingleChoiceActionExecuteEventArgs,IObservable<T>> selector,params string[] actions)  
             => application.WhenFrameCreated().SelectMany(window => window.Actions(actions).OfType<SingleChoiceAction>().ToObservable()
-                .SelectMany(a => a.WhenConcatExecution(selector)));
+                .SelectMany(a => a.WhenConcatExecution(selector,typeof(T).Name)));
         
         public static IObservable<(TAction action, CancelEventArgs e)> WhenActionExecuting<TController,TAction>(
             this XafApplication application, Func<TController, TAction> action) where TController : Controller where TAction:ActionBase 
@@ -892,22 +894,25 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         
         internal static IObservable<Unit> PopulateAdditionalObjectSpaces(this XafApplication application) {
-            application.ObjectSpaceCreated+=ApplicationOnObjectSpaceCreated;
+            var objectSpaceProviderService = application.ServiceProvider?.GetRequiredService<IObjectSpaceProviderService>();
+            var objectSpaceCustomizerService = application.ServiceProvider?.GetRequiredService<IObjectSpaceCustomizerService>();
             void ApplicationOnObjectSpaceCreated(object sender, ObjectSpaceCreatedEventArgs e) {
-                var app = (XafApplication)sender;
-                app.Disposed+=ApplicationOnDisposed;
-                void ApplicationOnDisposed(object o, EventArgs eventArgs) {
-                    var xafApplication = (XafApplication)o;
-                    xafApplication.ObjectSpaceCreated -= ApplicationOnObjectSpaceCreated;
-                    xafApplication.Disposed-=ApplicationOnDisposed;
+                if (e.ObjectSpace is not CompositeObjectSpace { Owner: not CompositeObjectSpace } compositeObjectSpace) return;
+                if (objectSpaceProviderService != null) {
+                    compositeObjectSpace.PopulateAdditionalObjectSpaces(objectSpaceProviderService, objectSpaceCustomizerService);    
                 }
-                if (e.ObjectSpace is not CompositeObjectSpace compositeObjectSpace || e.ObjectSpace.Owner is CompositeObjectSpace) return;
-                compositeObjectSpace.PopulateAdditionalObjectSpaces(app);
+                else {
+                    compositeObjectSpace.PopulateAdditionalObjectSpaces(application);
+                }
             }
-
+            void ApplicationOnDisposed(object sender, EventArgs e) {
+                application.ObjectSpaceCreated -= ApplicationOnObjectSpaceCreated;
+                application.Disposed -= ApplicationOnDisposed;
+            }
+            application.ObjectSpaceCreated += ApplicationOnObjectSpaceCreated;
+            application.Disposed += ApplicationOnDisposed;
             return Observable.Empty<Unit>();
         }
-
         
         public static IObservable<(NestedFrame source, NestedFrame target, T1 sourceObject, T2 targetObject, int targetIndex)> SynchronizeGridListEditorSelection<T1, T2>(
                 this IObservable<(NestedFrame source, NestedFrame target, T1 sourceObject, T2 targetObject, int targetIndex)>  source)

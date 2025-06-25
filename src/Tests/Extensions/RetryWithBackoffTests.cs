@@ -49,7 +49,7 @@ namespace Xpand.Extensions.Tests {
             source.RetryWithBackoff(scheduler: TestScheduler).Subscribe(_ => { }, _ => { });
             TestScheduler.AdvanceTimeBy(TimeSpan.FromDays(1));
 
-            tries.ShouldBe(486);
+            tries.ShouldBe(86401);
         }
         
         

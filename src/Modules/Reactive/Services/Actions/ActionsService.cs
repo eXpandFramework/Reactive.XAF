@@ -6,6 +6,7 @@ using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
@@ -152,13 +153,13 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
         public static IObservable<T> WhenConcatExecution<T>(this ParametrizedAction simpleAction,Func<ParametrizedActionExecuteEventArgs,IObservable<T>> sourceSelector)
             => simpleAction.WhenConcatExecution<T,ParametrizedActionExecuteEventArgs>( sourceSelector);
         
-        public static IObservable<T> WhenConcatExecution<T>(this SingleChoiceAction simpleAction,Func<SingleChoiceActionExecuteEventArgs,IObservable<T>> sourceSelector)
-            => simpleAction.WhenConcatExecution<T,SingleChoiceActionExecuteEventArgs>( sourceSelector);
+        public static IObservable<T> WhenConcatExecution<T>(this SingleChoiceAction simpleAction,Func<SingleChoiceActionExecuteEventArgs,IObservable<T>> sourceSelector,[CallerMemberName]string caller="")
+            => simpleAction.WhenConcatExecution<T,SingleChoiceActionExecuteEventArgs>( sourceSelector,caller);
         
-        private static IObservable<T> WhenConcatExecution<T,TArgs>(this ActionBase action, Func<TArgs, IObservable<T>> sourceSelector)  where TArgs:ActionBaseEventArgs 
-            => action.WhenExecuted().Do(_ => action.Update(_ => action.Enabled[nameof(WhenConcatExecution)] = false)).Cast<TArgs>()
+        private static IObservable<T> WhenConcatExecution<T,TArgs>(this ActionBase action, Func<TArgs, IObservable<T>> sourceSelector,[CallerMemberName]string caller="")  where TArgs:ActionBaseEventArgs 
+            => action.WhenExecuted().Do(_ => action.Update(_ => action.Enabled[caller] = false)).Cast<TArgs>()
                 .SelectManySequential(e => sourceSelector(e).ObserveOnContext()
-                    .Finally(() => action.Update(_ => action.Enabled[nameof(WhenConcatExecution)] = true)));
+                    .Finally(() => action.Update(_ => action.Enabled[caller] = true)));
 
         public static IObservable<T> WhenExecuted<T>(this SingleChoiceAction simpleAction,Func<SingleChoiceActionExecuteEventArgs, IObservable<T>> retriedExecution) 
             => simpleAction.WhenExecuted().SelectMany(retriedExecution).Retry(() => simpleAction.Application).TakeUntilDeactivated(simpleAction.Controller);
@@ -381,6 +382,12 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
         public static IObservable<TAction> ActivateFor<TAction>(this IObservable<TAction> source,TemplateContext context) where TAction : ActionBase
             => source.WhenControllerActivated(action => action.Observe()
                 .Do(simpleAction => action.Active[$"{nameof(ActivateFor)} {context}"]=simpleAction.Controller.Frame.Context==context).ToUnit());
+        public static IObservable<TAction> ActivateFor<TAction>(this IObservable<TAction> source,Func<TAction,bool> condition) where TAction : ActionBase
+            => source.WhenControllerActivated(action => action.Observe()
+                .Do(simpleAction => simpleAction.Active[$"{nameof(ActivateFor)}"]=condition(simpleAction)).ToUnit());
+        public static IObservable<TAction> EnableFor<TAction>(this IObservable<TAction> source,Func<TAction,bool> condition) where TAction : ActionBase
+            => source.WhenControllerActivated(action => action.View().WhenSelectedObjectsChanged().To(action).StartWith(action)
+                .Do(simpleAction => simpleAction.Enabled[$"{nameof(EnableFor)}"]=condition(simpleAction)).ToUnit());
         
         public static IObservable<TAction> WhenControllerActivated<TAction>(this IObservable<TAction> source,Func<TAction,IObservable<Unit>> mergeSelector,bool emitWhenActive=false) where TAction : ActionBase 
             => source.MergeIgnored(a =>a.Controller.WhenActivated(emitWhenActive).TakeUntil(a.Controller.WhenDeactivated())
