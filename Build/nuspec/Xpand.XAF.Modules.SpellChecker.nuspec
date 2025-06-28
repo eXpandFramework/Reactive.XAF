@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.SpellChecker</id>
-    <version>4.242.8.0</version>
+    <version>4.242.9.0</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -12,30 +12,30 @@
     <description>The `StoreToDisk` package provides partial and secured serialization for your Business Object</description>
     <releaseNotes>https://github.com/eXpandFramework/Reactive.XAF/releases</releaseNotes>
     <copyright>eXpandFramework.com</copyright>
-    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, SpellChecker, 24.2.7</tags>
+    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, SpellChecker, 24.2.8</tags>
     <dependencies>
       <group targetFramework="net9.0">
-        <dependency id="Xpand.Extensions.Reactive" version="4.242.8.0" />
-        <dependency id="Xpand.Extensions" version="4.242.8.0" />
-        <dependency id="Xpand.Extensions.XAF" version="4.242.8.0" />
-        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.242.8.0" />
-        <dependency id="Xpand.XAF.Modules.Reactive" version="4.242.8.0" />
+        <dependency id="Xpand.Extensions.Reactive" version="4.242.9.0" />
+        <dependency id="Xpand.Extensions" version="4.242.9.0" />
+        <dependency id="Xpand.Extensions.XAF" version="4.242.9.0" />
+        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.242.9.0" />
+        <dependency id="Xpand.XAF.Modules.Reactive" version="4.242.9.0" />
         <dependency id="Xpand.Patcher" version="9.0" />
         <dependency id="System.Reactive" version="6.0" />
-        <dependency id="DevExpress.SpellChecker.Core" version="24.2.7" />
-        <dependency id="DevExpress.Win.SpellChecker" version="24.2.7" />
-        <dependency id="DevExpress.Persistent.Base" version="24.2.7" />
-        <dependency id="DevExpress.ExpressApp.Win" version="24.2.7" />
+        <dependency id="DevExpress.SpellChecker.Core" version="24.2.8" />
+        <dependency id="DevExpress.Win.SpellChecker" version="24.2.8" />
+        <dependency id="DevExpress.Persistent.Base" version="24.2.8" />
+        <dependency id="DevExpress.ExpressApp.Win" version="24.2.8" />
         <dependency id="Fasterflect.Xpand" version="2.0.7" />
         <dependency id="System.Text.Json" version="9.0" />
         <dependency id="Xpand.Collections" version="1.0.4" />
         <dependency id="System.Threading.Tasks.Dataflow" version="7.0" />
       </group>
       <group targetFramework="netstandard2.0">
-        <dependency id="Xpand.VersionConverter" version="4.242.8.0" />
+        <dependency id="Xpand.VersionConverter" version="4.242.9.0" />
       </group>
       <group targetFramework="net6.0">
-        <dependency id="Xpand.VersionConverter" version="4.242.8.0" />
+        <dependency id="Xpand.VersionConverter" version="4.242.9.0" />
       </group>
     </dependencies>
   </metadata>

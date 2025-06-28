@@ -101,20 +101,20 @@ The module follows the Nuget [Version Basics](https://docs.Google.com/en-us/nuge
 |----|----
 |**DevExpress.Persistent.Base**|**Any**
  |**DevExpress.ExpressApp.Xpo**|**Any**
-|Xpand.Extensions|4.242.8
- |Xpand.Extensions.Office.Cloud|4.242.8
- |Xpand.Extensions.Reactive|4.242.8
- |Xpand.Extensions.XAF|4.242.8
- |Xpand.Extensions.XAF.Xpo|4.242.8
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.242.8
- |[Xpand.XAF.Modules.Office.Cloud.Google](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Office.Cloud.Google)|4.242.8
+|Xpand.Extensions|4.242.9
+ |Xpand.Extensions.Office.Cloud|4.242.9
+ |Xpand.Extensions.Reactive|4.242.9
+ |Xpand.Extensions.XAF|4.242.9
+ |Xpand.Extensions.XAF.Xpo|4.242.9
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.242.9
+ |[Xpand.XAF.Modules.Office.Cloud.Google](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Office.Cloud.Google)|4.242.9
  |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
  |System.Reactive|6.0.0
  |System.Text.Json|9.0.0
  |Google.Apis.Calendar.v3|1.55.0.2410
  |System.Threading.Tasks.Dataflow|7.0.0
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.242.8
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.242.8
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.242.9
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.242.9
 
 ## Issues-Debugging-Troubleshooting
 
