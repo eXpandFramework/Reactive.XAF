@@ -10,6 +10,8 @@ using EditorAliases = Xpand.Extensions.XAF.Attributes.EditorAliases;
 namespace Xpand.XAF.Modules.Windows.Editors;
 [PropertyEditor(typeof(object),EditorAliases.LabelPropertyEditor,false)]
 public class LabelControlPropertyEditor : StringPropertyEditor{
+    static LabelControlPropertyEditor() => EnableDisplayFormat = true;
+
     public LabelControlPropertyEditor(Type objectType, IModelMemberViewItem model) : base(objectType, model) 
         => AllowEdit[nameof(LabelControlPropertyEditor)] = false;
     
