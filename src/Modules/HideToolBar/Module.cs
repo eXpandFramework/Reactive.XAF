@@ -18,9 +18,7 @@ namespace Xpand.XAF.Modules.HideToolBar{
         }
 
         public static ReactiveTraceSource TraceSource{ get; set; }
-        static HideToolBarModule(){
-            TraceSource=new ReactiveTraceSource(nameof(HideToolBarModule));
-        }
+        static HideToolBarModule() => TraceSource=new ReactiveTraceSource(nameof(HideToolBarModule));
 
         public override void Setup(ApplicationModulesManager moduleManager){
             base.Setup(moduleManager);
@@ -33,6 +31,7 @@ namespace Xpand.XAF.Modules.HideToolBar{
             base.ExtendModelInterfaces(extenders);
             extenders.Add<IModelClass, IModelClassHideToolBar>();
             extenders.Add<IModelListView, IModelListViewHideToolBar>();
+            extenders.Add<IModelDetailView, IModelListViewHideToolBar>();
         }
 
     }

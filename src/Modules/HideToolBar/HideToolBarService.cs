@@ -23,9 +23,10 @@ namespace Xpand.XAF.Modules.HideToolBar{
 
         public static IObservable<Frame> HideToolBarNestedFrames(this XafApplication application) 
             => application.WhenFrame(ViewType.DetailView)
-                .SelectMany(frame => frame.NestedListViews().Where(editor => editor.Frame is NestedFrame)
-                    .Where(editor => editor.Frame.ToNestedFrame().HideToolBar()))
-                .Select(editor => editor.Frame);
+                .SelectMany(frame => frame.NestedListViews().Select(editor => editor.Frame)
+                    .StartWith(frame).OfType<NestedFrame>()
+                    .Where(nestedFrame => nestedFrame.HideToolBar()||nestedFrame.View is DetailView))
+                .Select(frame => frame);
 
         private static bool HideToolBar(this NestedFrame frame) 
             => frame.Template is ISupportActionsToolbarVisibility&&frame.View is ListView && frame.View.Model is IModelListViewHideToolBar { HideToolBar: { } } modelListViewHideToolBar && modelListViewHideToolBar.HideToolBar.Value;
