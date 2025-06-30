@@ -65,6 +65,10 @@ namespace Xpand.XAF.Modules.GridListEditor{
         IEnumerable<string> RowHandles { get; }
     }
 
+    [ModelDisplayName("HideIndicatorRow")]
+    public interface IModelGridListEditorHideIndicatorRow:IModelGridListEditorRule {
+        
+    }
     [ModelDisplayName("LinkSelection")]
     public interface IModelGridListEditorLinkSelection:IModelGridListEditorRule {
         [DataSourceProperty("Application.Views")][Required]

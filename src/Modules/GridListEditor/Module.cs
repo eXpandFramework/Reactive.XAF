@@ -14,9 +14,8 @@ namespace Xpand.XAF.Modules.GridListEditor {
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public static ReactiveTraceSource TraceSource{ get; set; }
 
-        static GridListEditorModule(){
-            TraceSource=new ReactiveTraceSource(nameof(GridListEditorModule));
-        }
+        static GridListEditorModule() => TraceSource=new ReactiveTraceSource(nameof(GridListEditorModule));
+
         public GridListEditorModule() {
             RequiredModuleTypes.Add(typeof(DevExpress.ExpressApp.SystemModule.SystemModule));
             RequiredModuleTypes.Add(typeof(ReactiveModule));

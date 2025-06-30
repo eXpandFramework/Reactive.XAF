@@ -38,6 +38,7 @@ namespace Xpand.XAF.Modules.GridListEditor{
             => manager.WhenApplication(application => 
                 application.RememberTopRow()
                     .Merge(application.FocusRow())
+                    .Merge(application.HideIndicatorRow())
                     .Merge(application.SortProperties())
                     .Merge(application.ColSummaryDisplay())
                     .Merge(application.SortPartialGroups())
@@ -46,7 +47,8 @@ namespace Xpand.XAF.Modules.GridListEditor{
 
         private static IObservable<(Frame frame,TRule rule)> WhenRulesOnView<TRule>(this XafApplication application) where TRule:IModelGridListEditorRule
             => application.WhenViewOnFrame(viewType: ViewType.ListView)
-                .SelectMany(frame => application.ModelRules<TRule>(frame).Select(rule => (frame,rule)));
+                .SelectMany(frame => application.ModelRules<TRule>(frame).Select(rule => (frame,rule)))
+                .SelectMany(t => t.frame.View.WhenControlsCreated(true).To(t));
 
         private static IObservable<Unit> SortProperties(this ApplicationModulesManager manager) 
             => manager.WhenCustomizeTypesInfo().SelectMany(e => e.TypesInfo.PersistentTypes.Attributed<SortPropertyAttribute>())
@@ -134,6 +136,10 @@ namespace Xpand.XAF.Modules.GridListEditor{
                     var gridView = t.frame.View.AsListView().GridView();
                     return t.rule.FocusRow(gridView).Merge(t.rule.MoveFocus( gridView));
                 })
+                .ToUnit();
+        static IObservable<Unit> HideIndicatorRow(this XafApplication application)
+            => application.WhenRulesOnView<IModelGridListEditorHideIndicatorRow>()
+                .Do(t => t.frame.View.AsListView().GridView().OptionsView.ShowIndicator=false)
                 .ToUnit();
 
         private static IObservable<Unit> FocusRow(this IModelGridListEditorFocusRow rule, GridView gridView) 

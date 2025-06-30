@@ -136,8 +136,8 @@ namespace Xpand.Extensions.Reactive.Utility{
         }
 
         private static string[] AllValues(string name, string sourceFilePath, int sourceLineNumber, string mName, string m, string value) 
-            => string.IsNullOrEmpty(name) ? new[] { Path.GetFileNameWithoutExtension(sourceFilePath), ".", mName, "(", sourceLineNumber.ToString(), "): ", m, "(", value, ")" }
-                : new[] { name, ".", Path.GetFileNameWithoutExtension(sourceFilePath), ".", mName, "(", sourceLineNumber.ToString(), "): ", m, "(", value, ")" };
+            => string.IsNullOrEmpty(name) ? [Path.GetFileNameWithoutExtension(sourceFilePath), ".", mName, "(", sourceLineNumber.ToString(), "): ", m, "(", value, ")"]
+                : [name, ".", Path.GetFileNameWithoutExtension(sourceFilePath), ".", mName, "(", sourceLineNumber.ToString(), "): ", m, "(", value, ")"];
 
         public static bool Is(this ObservableTraceStrategy source,ObservableTraceStrategy target) 
             => source == ObservableTraceStrategy.All || source switch {
