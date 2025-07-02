@@ -56,6 +56,7 @@ namespace Xpand.XAF.Modules.Reactive.Services {
                 .Merge(manager.LinkUnlinkPropertyAttribute())
                 .Merge(manager.ReadOnlyObjectViewAttribute())
                 .Merge(manager.DetailCollectionAttribute())
+                .Merge(manager.AppearanceToolAttribute())
                 .Merge(PreventAggregatedObjectsValidationAttribute(manager))
             ;
 
@@ -232,6 +233,21 @@ namespace Xpand.XAF.Modules.Reactive.Services {
                     ?.Method("CustomizeTypesInfo",Flags.StaticAnyVisibility).Call(null,typesInfo))
                 .ToUnit();
 
+        static IObservable<Unit> AppearanceToolAttribute(this ApplicationModulesManager manager)
+            => manager.WhenApplication(application => application.WhenFrameCreated().ToController<AppearanceController>()
+                .SelectMany(controller => controller.WhenEvent<CustomCreateAppearanceRuleEventArgs>(nameof(AppearanceController.CustomCreateAppearanceRule))
+                    .Where(e => e.RuleProperties is IModelAppearanceWithToolTipRule)
+                    .Do(e => e.Rule = new ToolTipAppearanceRule(e.RuleProperties, e.ObjectSpace))
+                    .MergeToUnit(controller.WhenEvent<ApplyAppearanceEventArgs>(nameof(AppearanceController.AppearanceApplied))
+                        .Do(e => {
+                            if (e.AppearanceObject.Items.FirstOrDefault(item => item is AppearanceItemToolTip) is not AppearanceItemToolTip toolTip) return;
+                            if (toolTip.State == AppearanceState.None) return;
+                            var toolTipText = toolTip.State == AppearanceState.CustomValue ?  toolTip.ToolTipText :  "";
+                            if (e.Item is not ColumnWrapper columnWrapper) return;
+                            columnWrapper.ToolTip = toolTipText;
+                        }))))
+                .ToUnit();
+        
         static IObservable<Unit> DetailCollectionAttribute(this ApplicationModulesManager manager)
             => manager.WhenApplication(application => application.WhenSetupComplete()
                 .SelectMany(_ => application.TypesInfo.PersistentTypes.Where(info => !info.IsAbstract)
@@ -313,4 +329,38 @@ namespace Xpand.XAF.Modules.Reactive.Services {
                 .ToObservable(Scheduler.Immediate)
                 );
     }
+    
+    public class ToolTipAppearanceRule(IAppearanceRuleProperties properties, IObjectSpace objectSpace)
+        : AppearanceRule(properties, objectSpace) {
+        protected override IList<IConditionalAppearanceItem> CreateAppearanceItems(AppearanceState state) {
+            var result = base.CreateAppearanceItems(state);
+            if(Properties is IModelAppearanceWithToolTipRule { ToolTip: not null } rule) {
+                result.Add(new AppearanceItemToolTip(state, Properties.Priority, rule.ToolTip,rule.Id()));
+            }
+            return result;
+        }
+    }
+    public interface IModelAppearanceWithToolTipRule:IModelNode {
+        string ToolTip { get; set; }
+    }
+    [DomainLogic(typeof(IModelAppearanceWithToolTipRule))]
+    public static class ModelAppearanceRuleLogic {
+        public static string Get_ToolTip(IModelAppearanceWithToolTipRule modelAppearanceRule) 
+            => ((IModelAppearanceRule)modelAppearanceRule).Attribute is AppearanceToolTipAttribute ? ((AppearanceToolTipAttribute)((IModelAppearanceRule)modelAppearanceRule).Attribute).ToolTip : "";
+    }
+
+    public class AppearanceItemToolTip : AppearanceItemBase {
+        public string ID{ get; }
+
+        public AppearanceItemToolTip(AppearanceState state, int priority, string toolTip, string id)
+            : base(state, priority) {
+            ID = id;
+            if(state == AppearanceState.CustomValue) {
+                ToolTipText = toolTip;
+            }
+        }
+        public string ToolTipText { get; }
+        protected override void ApplyCore(object targetItem) {}
+    }
+
 }

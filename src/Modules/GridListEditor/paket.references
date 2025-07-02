@@ -1,5 +1,6 @@
 DevExpress.ExpressApp
 DevExpress.ExpressApp.Win
+DevExpress.ExpressApp.ConditionalAppearance
 System.Reactive
 Fasterflect.Xpand
 System.Text.Json

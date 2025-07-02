@@ -384,7 +384,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static IObservable<(XafApplication application, DetailViewCreatedEventArgs e)> WhenDetailViewCreated(this XafApplication application,Type objectType) 
             => application.WhenDetailViewCreated().Where(t => objectType?.IsAssignableFrom(t.e.View.ObjectTypeInfo.Type)??true);
-
+        public static IObservable<(XafApplication application, DetailViewCreatedEventArgs e)> WhenDetailViewCreated(this XafApplication application,params string[] viewIds) 
+            => application.WhenDetailViewCreated().Where(t => viewIds.Any(viewId => t.e.View.Id==viewId));
         
         public static IObservable<(XafApplication application, ListViewCreatingEventArgs args)> WhenListViewCreating(this IObservable<XafApplication> source,Type objectType=null,bool? isRoot=null) 
             => source.SelectMany(application => application.WhenListViewCreating(objectType,isRoot));

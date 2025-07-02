@@ -7,16 +7,12 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using DevExpress.Data;
-using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;
-using DevExpress.ExpressApp.Win.Editors;
-using DevExpress.Utils;
 using DevExpress.XtraEditors;
 using DevExpress.XtraEditors.Repository;
 using DevExpress.XtraGrid;
 using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.Base;
-using DevExpress.XtraGrid.Views.Grid;
 using Fasterflect;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.ObjectExtensions;
@@ -31,9 +27,14 @@ using Xpand.Extensions.XAF.ViewExtensions;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Services;
 
+
 namespace Xpand.XAF.Modules.GridListEditor{
+    using DevExpress.ExpressApp;
+    using DevExpress.ExpressApp.Win.Editors;
+    using DevExpress.XtraGrid.Views.Grid;
+    using DevExpress.Utils;
+
     public static class GridListEditorService {
-        
         internal static IObservable<Unit> Connect(this  ApplicationModulesManager manager) 
             => manager.WhenApplication(application => 
                 application.RememberTopRow()
@@ -42,6 +43,7 @@ namespace Xpand.XAF.Modules.GridListEditor{
                     .Merge(application.SortProperties())
                     .Merge(application.ColSummaryDisplay())
                     .Merge(application.SortPartialGroups())
+                    .Merge(application.AppearanceTooltip())
             )
             .MergeToUnit(manager.SortProperties());
 
@@ -55,7 +57,7 @@ namespace Xpand.XAF.Modules.GridListEditor{
                 .SelectMany(t => t.typeInfo.Members.Where(info =>info.IsPublic&& info.FindAttribute<SortPropertyAttribute>()==null)
                     .Do(info => info.AddAttribute(t.attribute)))
                 .ToUnit();
-
+        
         static IObservable<Unit> SortPartialGroups(this XafApplication application)
             => application.WhenSetupComplete()
                 .SelectMany(_ => application.WhenFrame(ViewType.ListView).ToListView()
@@ -103,7 +105,7 @@ namespace Xpand.XAF.Modules.GridListEditor{
         static IObservable<Unit> ColSummaryDisplay(this XafApplication application)
             => application.WhenSetupComplete().SelectMany(_ => application.WhenFrame(ViewType.ListView).ToListView()
                 .WhenControlsCreated(true)
-                .Select(listView => listView.Editor).OfType<DevExpress.ExpressApp.Win.Editors.GridListEditor>()
+                .Select(listView => listView.Editor).OfType<GridListEditor>()
                 .SelectMany(editor => editor.GridView.DataSource.Observe().WhenNotDefault()
                     .SwitchIfEmpty(editor.GridView.WhenEvent(nameof(editor.GridView.DataSourceChanged)).Take(1))
                     .SelectMany(_ => editor.GridView.Columns.Where(column => column.Visible).ToNowObservable().SelectMany(column => {
@@ -172,7 +174,7 @@ namespace Xpand.XAF.Modules.GridListEditor{
         public static IObservable<(RowCellCustomDrawEventArgs e, GridView gridView, Frame frame)> WhenCustomDrawGridViewCell(this XafApplication application, Type objectType, Nesting nesting) 
             => application.WhenFrame(objectType,ViewType.ListView,nesting)
                 .SelectMany(frame => frame.View.WhenControlsCreated(true).To(frame))
-                .SelectMany(frame => ((DevExpress.ExpressApp.Win.Editors.GridListEditor)frame.View.ToListView().Editor).GridView
+                .SelectMany(frame => ((GridListEditor)frame.View.ToListView().Editor).GridView
                     .WhenEvent(nameof(DevExpress.XtraGrid.Views.Grid.GridView.CustomDrawCell))
                     .Select(pattern => (e:(RowCellCustomDrawEventArgs)pattern.EventArgs,gridView:(GridView)pattern.Sender,frame)));
 
@@ -183,11 +185,11 @@ namespace Xpand.XAF.Modules.GridListEditor{
         public static T GetObject<T>(this CollectionSourceBase collectionSource,GridView gridView,int rowHandle) 
             => (T)DevExpress.ExpressApp.Win.Core.XtraGridUtils.GetRow(collectionSource, gridView, rowHandle);
         
-        private static GridView GridView(this ListView view) => ((DevExpress.ExpressApp.Win.Editors.GridListEditor)view.Editor).GridView;
+        private static GridView GridView(this ListView view) => ((GridListEditor)view.Editor).GridView;
 
         private static IObservable<TRule> ModelRules<TRule>(this XafApplication application, Frame frame) where TRule:IModelGridListEditorRule
             => application.ReactiveModulesModel().GridListEditor().Rules().OfType<TRule>()
-		        .Where(row =>row.ListView == frame.View.Model &&((ListView) frame.View).Editor is DevExpress.ExpressApp.Win.Editors.GridListEditor )
+		        .Where(row =>row.ListView == frame.View.Model &&((ListView) frame.View).Editor is GridListEditor )
 		        .TraceGridListEditor(row => row.ListView.Id);
 
         internal static IObservable<TSource> TraceGridListEditor<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<ITraceEvent> traceAction = null,

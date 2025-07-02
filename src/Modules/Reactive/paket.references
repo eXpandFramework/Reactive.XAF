@@ -1,6 +1,8 @@
 DevExpress.ExpressApp
 DevExpress.ExpressApp.Validation
 DevExpress.ExpressApp.ViewVariantsModule
+DevExpress.ExpressApp.ConditionalAppearance
+DevExpress.ExpressApp.Security.Xpo
 DevExpress.Persistent.Base
 System.Interactive
 System.Reactive
