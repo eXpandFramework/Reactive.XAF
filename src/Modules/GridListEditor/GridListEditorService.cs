@@ -24,6 +24,7 @@ using Xpand.Extensions.Tracing;
 using Xpand.Extensions.XAF.Attributes;
 using Xpand.Extensions.XAF.TypesInfoExtensions;
 using Xpand.Extensions.XAF.ViewExtensions;
+using Xpand.XAF.Modules.GridListEditor.Appearance;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Services;
 
@@ -44,6 +45,7 @@ namespace Xpand.XAF.Modules.GridListEditor{
                     .Merge(application.ColSummaryDisplay())
                     .Merge(application.SortPartialGroups())
                     .Merge(application.AppearanceTooltip())
+                    .Merge(application.PreviewAppearance())
             )
             .MergeToUnit(manager.SortProperties());
 

@@ -15,7 +15,7 @@ using Xpand.Extensions.XAF.ViewExtensions;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Controllers;
 
-namespace Xpand.XAF.Modules.GridListEditor{
+namespace Xpand.XAF.Modules.GridListEditor.Appearance{
     static class AppearanceTooltipService {
         internal static IObservable<Unit> AppearanceTooltip(this XafApplication application)
             => application.WhenFrameCreated().ToController<AppearanceController>().WhenNotDefault()
