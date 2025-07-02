@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Drawing;
 using System.IO;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows.Forms;
 using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.SystemModule;
 using DevExpress.XtraGrid.Columns;
@@ -15,6 +17,7 @@ using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.Tracing;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Services;
+using Xpand.XAF.Modules.Reactive.Services.Actions;
 using Xpand.XAF.Modules.Reactive.Services.Controllers;
 using Xpand.XAF.Modules.Windows.SystemActions;
 
@@ -108,6 +111,11 @@ namespace Xpand.XAF.Modules.Windows{
             return propertyDescriptor?.MemberInfo;
         }
 
+        
+        public static IObservable<Control> CustomizeControlSize<TAction>(this TAction action,
+            Size size) where TAction : ActionBase
+            => action.WhenCustomizeControl().Select(e => e.Control).OfType<Control>()
+                .Do(button => button.MinimumSize=size);
     }
 
 }
