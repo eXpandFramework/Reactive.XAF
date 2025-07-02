@@ -124,7 +124,7 @@ namespace Xpand.TestsLib.Common {
         public static string MessageFactory<TSource>(this Func<TSource, string> messageFactory, string caller) => $"{caller}: {messageFactory(default)}";
         
         public static IObservable<Unit> AssertNavigation(this XafApplication application,Func<string> view, Func<IObservable<Frame>,IObservable<Unit>> assert, IObservable<Unit> canNavigate) 
-            => application.AssertNavigation(view,_ => canNavigate.SwitchIfEmpty(Observable.Throw<Unit>(new CannotNavigateException())).ToUnit())
+            => application.AssertNavigation(view,_ => canNavigate.SwitchIfEmpty(new CannotNavigateException().ThrowUnit()).ToUnit())
                 .SelectMany(window => window.Observe().SelectMany(frame => assert(frame.Observe())))
                 .FirstOrDefaultAsync().ReplayFirstTake();
         

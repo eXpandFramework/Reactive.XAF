@@ -8,6 +8,7 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using System.Threading;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Core;
 using DevExpress.ExpressApp.DC;
@@ -16,6 +17,7 @@ using DevExpress.ExpressApp.Model.Core;
 using Fasterflect;
 using HarmonyLib;
 using Xpand.Extensions.AppDomainExtensions;
+using Xpand.Extensions.ExceptionExtensions;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Combine;
@@ -34,7 +36,7 @@ using Xpand.XAF.Modules.Reactive.Services.Security;
 
 namespace Xpand.XAF.Modules.Reactive{
 	public static class RxApp{
-        
+        static readonly ReplaySubject<SynchronizationContext> ContextSubject = new();
         static readonly Subject<ApplicationModulesManager> ApplicationModulesManagerSubject=new();
         static readonly Subject<(List<Controller> __result, Type baseType, IModelApplication modelApplication, View view)> WhenControllerCreatedSubject=new();
         
@@ -95,8 +97,14 @@ namespace Xpand.XAF.Modules.Reactive{
                 .Merge(manager.MergedExtraEmbeddedModels())
                 .Merge(manager.ConnectObjectString())
                 .Merge(manager.WhenApplication(application =>application.Connect()
-                .Merge(manager.SetupPropertyEditorParentView()))
+                    .MergeToUnit(application.WhenSynchronizationContext().Do(context => ContextSubject.OnNext(context)))
+                    .Merge(manager.SetupPropertyEditorParentView()))
         );
+
+        public static IObservable<Unit> ThrowOnContext(this Exception exception) {
+            exception = exception.CaptureStack();
+            return ContextSubject.SelectMany(_ => Observable.Throw<Unit>(exception)).ToUnit();
+        }
 
         private static IObservable<Unit> Connect(this XafApplication application) {
             if (!AppDomain.CurrentDomain.UseNetFramework()) {
