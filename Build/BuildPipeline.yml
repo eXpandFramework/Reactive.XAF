@@ -36,6 +36,7 @@ jobs:
               XpandBlobOwnerSecret     = '$(XpandBlobOwnerSecret)'
               AzureApplicationId       = '$(AzureApplicationId)'
               AzureTenantId            = '$(AzureTenantId)'
+              DXLicense                = '$(DXLicense)'
           }
           "goArgs:"
           $goArgs | Out-String

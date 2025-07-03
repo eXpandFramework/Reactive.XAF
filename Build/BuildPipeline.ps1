@@ -12,8 +12,25 @@ param(
     $XpandBlobOwnerSecret=$env:AzXpandBlobOwnerSecret,
     $AzureApplicationId=$env:AzApplicationId,
     $AzureTenantId=$env:AzTenantId,
-    [switch]$SkipVersioning
+    [switch]$SkipVersioning,
+    $DXLicense
 )
+if ($DXLicense){
+    $licensePath = "$env:APPDATA\DevExpress\DevExpress_License.txt"
+    Write-Host "Starting DevExpress license setup"
+    $dir = Split-Path $licensePath
+    Write-Host "Ensuring directory exists: $dir"
+    New-Item -ItemType Directory -Force -Path $dir | Out-Null
+    Write-Host "Writing license file to: $licensePath"
+    Set-Content -Path $licensePath -Value $env:DXLicense -Encoding UTF8
+    if (Test-Path $licensePath) {
+        Write-Host "License file successfully written."
+    } else {
+        Write-Error "License file not found at $licensePath after write."
+    }
+
+}
+
 
 if (!(Get-Module eXpandFramework -ListAvailable)) {
     $env:AzureToken = $AzureToken
