@@ -70,7 +70,7 @@ namespace Xpand.TestsLib.Blazor {
 			WebHost?.Dispose();
 			typeof(ValueManagerContext).Field("storageHolder", Flags.StaticPrivate).SetValue(null,
 				typeof(AsyncLocal<>).MakeGenericType(AppDomain.CurrentDomain.GetAssemblyType(
-					"DevExpress.ExpressApp.Blazor.AmbientContext.ValueManagerContext+StorageHolder")).CreateInstance());
+					"DevExpress.ExpressApp.AmbientContext.ValueManagerContext+StorageHolder")).CreateInstance());
 		}
 
 		protected BlazorApplication NewBlazorApplication(Type startupType) {
