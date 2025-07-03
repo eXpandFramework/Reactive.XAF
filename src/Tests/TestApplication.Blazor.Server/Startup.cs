@@ -79,7 +79,7 @@ public class Startup(IConfiguration configuration) {
     protected virtual void AddModules(IBlazorApplicationBuilder builder) {
         builder.Modules
             .AddAuditTrailXpo()
-            .AddCloningXpo()
+            // .AddCloningXpo()
             .AddConditionalAppearance()
             .AddDashboards(options => options.DashboardDataType = typeof(DevExpress.Persistent.BaseImpl.DashboardData))
             .AddFileAttachments()

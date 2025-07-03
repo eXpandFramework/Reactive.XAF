@@ -25,14 +25,12 @@ namespace Xpand.XAF.Modules.GridListEditor.Appearance {
                     var gridView = gridListEditor?.GridView;
                     if (gridView == null || string.IsNullOrEmpty(gridView.PreviewFieldName)) return Observable.Empty<Unit>();
                     var controller = frame.GetController<AppearanceController>();
-                    if (controller == null) return Observable.Empty<Unit>();
-                    return PreviewAppearance(gridView, controller, frame);
-
+                    return controller == null ? Observable.Empty<Unit>() : controller.PreviewAppearance(gridView);
                 })
                 .ToUnit();
 
-        private static IObservable<Unit> PreviewAppearance(GridView gridView, AppearanceController controller, Frame frame){
-            return gridView.WhenEvent<RowObjectCustomDrawEventArgs>(nameof(gridView.CustomDrawRowPreview))
+        private static IObservable<Unit> PreviewAppearance(this AppearanceController controller,GridView gridView) 
+            => gridView.WhenEvent<RowObjectCustomDrawEventArgs>(nameof(gridView.CustomDrawRowPreview))
                 .WithLatestFrom(controller.WhenEvent<CollectAppearanceRulesEventArgs>(nameof(AppearanceController.CollectAppearanceRules)),
                     (drawEventArgs, rulesEventArgs) => (drawEventArgs, rulesEventArgs))
                 .Do(t => {
@@ -42,7 +40,7 @@ namespace Xpand.XAF.Modules.GridListEditor.Appearance {
                     var rule = t.rulesEventArgs.AppearanceRules.Where(properties
                             => properties.AppearanceItemType == AppearanceItemType.ViewItem.ToString()
                                && properties.TargetItems.Split(';').Any(x => string.Equals(x.Trim(), previewProperty, StringComparison.OrdinalIgnoreCase)))
-                        .FirstOrDefault(ruleProperties => frame.View.ObjectSpace.IsObjectFitForCriteria( ruleProperties.Criteria,obj));
+                        .FirstOrDefault(ruleProperties => controller.View.ObjectSpace.IsObjectFitForCriteria( ruleProperties.Criteria,obj));
                     if (rule != null) {
                         if (rule.FontColor.HasValue)
                             t.drawEventArgs.Appearance.ForeColor = rule.FontColor.Value;
@@ -56,10 +54,10 @@ namespace Xpand.XAF.Modules.GridListEditor.Appearance {
                     }
 
                     t.drawEventArgs.Appearance.DrawBackground(t.drawEventArgs.Cache, t.drawEventArgs.Bounds);
+                    var stringFormat = new StringFormat { LineAlignment = StringAlignment.Center, Alignment = StringAlignment.Near };
                     t.drawEventArgs.Appearance.DrawString(t.drawEventArgs.Cache,
-                        gridView.GetRowPreviewDisplayText(t.drawEventArgs.RowHandle), t.drawEventArgs.Bounds);
+                        gridView.GetRowPreviewDisplayText(t.drawEventArgs.RowHandle), t.drawEventArgs.Bounds, stringFormat);
                     t.drawEventArgs.Handled = true;
                 }).ToFirst().ToUnit();
-        }
     }
 }

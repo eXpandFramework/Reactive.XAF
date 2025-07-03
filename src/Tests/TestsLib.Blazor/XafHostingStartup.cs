@@ -1,7 +1,7 @@
 ﻿using System;
 using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.AmbientContext;
 using DevExpress.ExpressApp.Blazor;
-using DevExpress.ExpressApp.Blazor.AmbientContext;
 using DevExpress.ExpressApp.Blazor.Services;
 using DevExpress.ExpressApp.Security;
 using DevExpress.Persistent.Base;

@@ -4,9 +4,9 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading;
 using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.AmbientContext;
 using DevExpress.ExpressApp.Blazor;
-using DevExpress.ExpressApp.Blazor.AmbientContext;
-using DevExpress.ExpressApp.Blazor.Editors.Grid;
+using DevExpress.ExpressApp.Blazor.Editors;
 using DevExpress.ExpressApp.Blazor.Services;
 using DevExpress.ExpressApp.Model;
 using Fasterflect;
@@ -89,7 +89,7 @@ namespace Xpand.TestsLib.Blazor {
 
 			newBlazorApplication.WhenApplicationModulesManager().TakeFirst()
 				.SelectMany(manager => manager.WhenGeneratingModelNodes<IModelViews>().TakeFirst()
-					.SelectMany().OfType<IModelListView>().Where(view => view.EditorType == typeof(GridListEditor))
+					.SelectMany().OfType<IModelListView>().Where(view => view.EditorType == typeof(DxGridListEditor))
 					.Do(view => view.DataAccessMode = CollectionSourceDataAccessMode.Client))
 				.Subscribe();
 			return newBlazorApplication;
