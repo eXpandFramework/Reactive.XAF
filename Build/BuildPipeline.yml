@@ -66,8 +66,8 @@ jobs:
   condition: ne(variables['SkipTests'], 'True')
   strategy:
     matrix:
-      # ModelMapper:
-      #   TestAssembly: '**/Xpand.XAF.Modules.ModelMapper.Tests.dll'
+      ModelMapper:
+        TestAssembly: '**/Xpand.XAF.Modules.ModelMapper.Tests.dll'
       OfficeDocumentStyleManager:
         TestAssembly: '**/Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.dll'
       AutoCommit:
