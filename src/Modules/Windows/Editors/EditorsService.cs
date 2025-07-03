@@ -12,7 +12,7 @@ using DevExpress.XtraEditors;
 using DevExpress.XtraEditors.Repository;
 using DevExpress.XtraGrid.Views.Grid;
 using Fasterflect;
-using Humanizer;
+using Xpand.Extensions.DateTimeExtensions;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
@@ -65,11 +65,7 @@ namespace Xpand.XAF.Modules.Windows.Editors{
                         .SelectMany(editor => editor.WhenControlCreated(true))
                         .Select(editor => editor.Control).OfType<TextEdit>()
                         .SelectMany(edit => frame.View.WhenCurrentObjectChanged().To(edit).StartWith(edit))
-                        .Do(edit => {
-                            var value = $"{memberInfo.GetValue(frame.View.CurrentObject)}";
-                            // value.con
-                            edit.Text = $"{value}".Humanize();
-                        })
+                        .Do(edit => edit.Text = memberInfo.MemberType.Humanize(memberInfo.GetValue(frame.View.CurrentObject)))
                     )
                 )
                 .ToUnit();

@@ -1,4 +1,5 @@
 ﻿using System;
+using Humanizer;
 using Xpand.Extensions.LinqExtensions;
 
 namespace Xpand.Extensions.DateTimeExtensions {
@@ -23,29 +24,29 @@ namespace Xpand.Extensions.DateTimeExtensions {
                 _ => timeSpan.ToString(format)
             };
         
-        // public static string Humanize(this Type type,object value) {
-        //     if (value == null)
-        //         return "";
-        //
-        //     if (type == typeof(DateTime) || type == typeof(DateTime?))
-        //         return ((DateTime)value).Humanize();
-        //
-        //     if (type.IsEnum)
-        //         return value.ToString().Humanize();
-        //
-        //     if (type == typeof(bool) || type == typeof(bool?))
-        //         return ((bool)value) ? "Yes" : "No";
-        //
-        //     if (type == typeof(decimal) || type == typeof(double) || type == typeof(float) ||
-        //         type == typeof(int) || type == typeof(long) || type == typeof(short) ||
-        //         type == typeof(byte) || type == typeof(uint) || type == typeof(ulong) ||
-        //         type == typeof(ushort) || type == typeof(sbyte))
-        //         return value.ToString();
-        //
-        //     if (type == typeof(string))
-        //         return ((string)value).Humanize();
-        //
-        //     return value.ToString().Humanize();
-        // }
+        public static string Humanize(this Type type,object value) {
+            if (value == null)
+                return "";
+        
+            if (type == typeof(DateTime) || type == typeof(DateTime?))
+                return ((DateTime)value).Humanize();
+        
+            if (type.IsEnum)
+                return value.ToString().Humanize();
+        
+            if (type == typeof(bool) || type == typeof(bool?))
+                return ((bool)value) ? "Yes" : "No";
+        
+            if (type == typeof(decimal) || type == typeof(double) || type == typeof(float) ||
+                type == typeof(int) || type == typeof(long) || type == typeof(short) ||
+                type == typeof(byte) || type == typeof(uint) || type == typeof(ulong) ||
+                type == typeof(ushort) || type == typeof(sbyte))
+                return value.ToString();
+        
+            if (type == typeof(string))
+                return ((string)value).Humanize();
+        
+            return value.ToString().Humanize();
+        }
     }
 }
