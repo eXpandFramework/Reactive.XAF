@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
@@ -9,12 +10,18 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.SystemModule;
+using DevExpress.Persistent.Base;
 using DevExpress.XtraGrid.Columns;
+using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Numeric;
+using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Transform.System;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.Tracing;
+using Xpand.Extensions.XAF.ObjectExtensions;
+using Xpand.Extensions.XAF.TypesInfoExtensions;
+using Xpand.Extensions.XAF.ViewExtensions;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
@@ -33,9 +40,25 @@ namespace Xpand.XAF.Modules.Windows{
                 .OnWindowEscape()
                 .Merge(application.WhenPopupWindows()
                     .ConfigureForm(window => window.Model().Form.PopupWindows)
-                    .OnWindowDeactivation().OnWindowEscape()).ToUnit()
+                    .OnWindowDeactivation().OnWindowEscape())
+                .ToUnit()
+                .MergeToUnit(application.WhenFormatTooltip() )
                 .Merge(application.SystemActionsConnect())
             ).ToUnit();
+
+        private static IObservable<Unit> WhenFormatTooltip(this XafApplication application) 
+            => application.WhenFrame(ViewType.DetailView)
+                .SelectMany(frame => frame.View.WhenControlsCreated(true).To(frame))
+                .Select(frame => frame.View.ToDetailView())
+                .SelectMany(detailView => detailView.ObjectTypeInfo.AttributedMembers<ToolTipAttribute>()
+                    .Where(t => t.attribute.ToolTip.ContainsAll("{", "}")).ToNowObservable()
+                    .SelectMany(t => detailView.WhenCurrentObjectChanged()
+                        .Do(_ => {
+                            var item = detailView.FindItem(t.memberInfo.Name) as DevExpress.ExpressApp.Win.Editors.DXPropertyEditor;
+                            if (item?.Control == null) return ;
+                            item.Control.ToolTip = item.Control.ToolTip.Format(detailView.CurrentObject);
+                        })))
+                .ToUnit();
 
         private static IObservable<Window> WhenPopupWindows(this XafApplication application) 
             => application.WhenPopupWindowCreated().TemplateChanged();

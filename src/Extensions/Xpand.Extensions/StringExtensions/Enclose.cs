@@ -11,7 +11,7 @@ namespace Xpand.Extensions.StringExtensions {
             return input.StartsWith(start) && input.EndsWith(end) ? input : new[] { start, input, end }.Join();
         }
 
-        public static string EncloseHTMLNonImportant(this string input,bool useItalic=false)
+        public static string EncloseHTMLSpoiler(this string input,bool useItalic=false)
             => input.EncloseHTMLTag(!useItalic?"span class=\"tg-spoiler\"":"i");
         public static string EncloseHTMLVeryImportant(this string input)
             => input.EncloseHTMLTag("b","u");
