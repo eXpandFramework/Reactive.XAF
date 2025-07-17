@@ -24,6 +24,7 @@ using DevExpress.ExpressApp.MultiTenancy;
 using DevExpress.ExpressApp.Security;
 using DevExpress.ExpressApp.SystemModule;
 using DevExpress.ExpressApp.Templates;
+using DevExpress.ExpressApp.Utils;
 using DevExpress.ExpressApp.ViewVariantsModule;
 using DevExpress.Persistent.Base.MultiTenancy;
 using Fasterflect;
@@ -101,6 +102,15 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         
         public static IObservable<XafApplication> WhenModule(this IObservable<XafApplication> source, Type moduleType) 
             => source.Where(a => a.Modules.FindModule(moduleType)!=null);
+        
+        public static IObservable<T> WhenModule<T>(this object value) => FindModules<T>(value).ToNowObservable();
+
+        public static IEnumerable<T> FindModules<T>(this object value){
+            var modules = ((IModelSources)CaptionHelper.ApplicationModel).Modules.ToArray();
+            var module = modules.Module(value);
+            return value is XafApplication application ? application.Modules.OfType<T>()
+                : modules.OfType<T>().Where(@base => @base.GetType() == module?.GetType());
+        }
 
         public static IObservable<(ViewItem item, Frame frame)> WhenViewItemControl(this XafApplication application,Type objectType = null, ViewType viewType = ViewType.Any, Nesting nesting = Nesting.Any)
             => application.WhenControllersActivated( objectType,viewType,nesting)

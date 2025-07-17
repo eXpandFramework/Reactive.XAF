@@ -36,6 +36,10 @@ namespace Xpand.XAF.Modules.Windows.Editors {
         protected override object CreateControlCore() {
             var hyperLinkEdit = _hyperlinkEdit = new MyHyperLinkEdit();
             hyperLinkEdit.Validating+=HyperLinkEditOnValidating;
+            if (!Model.AllowEdit||!Model.ParentView.AllowEdit) {
+                hyperLinkEdit.BorderStyle=BorderStyles.NoBorder;
+                hyperLinkEdit.Properties.BorderStyle=BorderStyles.NoBorder;
+            }
             return hyperLinkEdit;
         }
 
@@ -44,9 +48,8 @@ namespace Xpand.XAF.Modules.Windows.Editors {
             if (attribute==null) return;
             var value = MemberInfo.Owner.FindMember(attribute.Name).GetValue(CurrentObject);
             e.Cancel = value != null && !Regex.IsMatch($"{value}", UrlEmailMask);
-            
         }
-
+        
         protected override void SetupRepositoryItem(RepositoryItem item) {
             base.SetupRepositoryItem(item);
             var hyperLinkProperties = (DevExpress.XtraEditors.Repository.RepositoryItemHyperLinkEdit)item;
@@ -56,13 +59,12 @@ namespace Xpand.XAF.Modules.Windows.Editors {
             EditMaskType = EditMaskType.RegEx;
             hyperLinkProperties.Mask.MaskType = MaskType.RegEx;
             hyperLinkProperties.Mask.EditMask = UrlEmailMask;
+            if (!Model.AllowEdit||!Model.ParentView.AllowEdit) hyperLinkProperties.BorderStyle=BorderStyles.NoBorder;
         }
 
         void hyperLinkProperties_OpenLink(object sender, OpenLinkEventArgs e) {
-            
             e.EditValue = GetResolvedUrl(e.EditValue, MemberInfo, CurrentObject);
             e.Handled = false;
-            
         }
 
         public override void BreakLinksToControl(bool unwireEventsOnly){
@@ -84,9 +86,7 @@ namespace Xpand.XAF.Modules.Windows.Editors {
                 if (IsValidUrl(url))
                     return url;
             }
-            
             return string.Empty;
-            
         }
 
         static bool IsValidUrl(string url) => Regex.IsMatch(url, UrlEmailMask);
@@ -100,7 +100,7 @@ namespace Xpand.XAF.Modules.Windows.Editors {
             if (_hyperlinkEdit?.MaskBox == null || MemberInfo.FindAttribute<HyperLinkPropertyEditorAttribute>() != null) return;
             cancelEventArgs.Cancel = !_hyperlinkEdit.MaskBox.IsMatch;
         }
-        
+
     }
 
     public class RepositoryItemHyperLinkEdit:DevExpress.XtraEditors.Repository.RepositoryItemHyperLinkEdit {
@@ -115,24 +115,18 @@ namespace Xpand.XAF.Modules.Windows.Editors {
 
         public override BaseEdit CreateEditor() => _myHyperLinkEdit ??= new MyHyperLinkEdit();
     }
-    public class MyHyperLinkEdit:HyperLinkEdit {
+    public sealed class MyHyperLinkEdit:HyperLinkEdit {
         static MyHyperLinkEdit() {
             RepositoryItemHyperLinkEdit.Register(); 
         }
         private readonly Subject<CancelEventArgs> _customizeShowBrowserSubject = new();
         private readonly RepositoryItem _item;
 
-        public MyHyperLinkEdit(){
-        }
+        public MyHyperLinkEdit() => AutoSize = true;
 
-        public MyHyperLinkEdit(RepositoryItem item) => _item = item;
+        public MyHyperLinkEdit(RepositoryItem item):this() => _item = item;
 
-        protected override RepositoryItem CreateRepositoryItemCore() {
-            if (_item != null) {
-                return _item;
-            }
-            return base.CreateRepositoryItemCore();
-        }
+        protected override RepositoryItem CreateRepositoryItemCore() => _item ?? base.CreateRepositoryItemCore();
 
         public IObservable<CancelEventArgs> CustomizeShowBrowser => _customizeShowBrowserSubject.AsObservable();
         protected override void Dispose(bool disposing) {

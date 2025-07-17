@@ -21,6 +21,7 @@ using Moq.Protected;
 using NUnit.Framework;
 using NUnit.Framework.Interfaces;
 using Xpand.Extensions.Numeric;
+using Xpand.Extensions.Reactive.ErrorHandling;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Transform.System.Net;
 using Xpand.Extensions.Reactive.Utility;

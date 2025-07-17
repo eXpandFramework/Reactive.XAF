@@ -89,18 +89,19 @@ namespace Xpand.XAF.Modules.Reactive.Services {
                     .SelectMany(t => frame.View.AsDetailView().NestedListViews(t.memberInfo.ListElementType)
                         .SelectMany(editor => editor.WhenLinkUnlinkAction( frame, t)
                             .Merge(editor.WhenNewObjectAction( frame, t)))
-                        )))
-                .MergeToUnit(manager.WhenCustomizeTypesInfo()
-                    .SelectMany(e => e.TypesInfo.Members<LinkUnlinkPropertyAttribute>().Where(t => t.info.Owner.FindMember(t.attribute.PropertyName).ListElementType.IsAbstract)));
+                        ))) ;
 
         private static IObservable<Unit> WhenNewObjectAction(this ListPropertyEditor editor, Frame frame, (LinkUnlinkPropertyAttribute attribute, IMemberInfo memberInfo) t) 
             => editor.Frame.NewObjectAction().WhenExecuted()
-                .SelectMany(e => e.ShowViewParameters.CreatedView.ObjectSpace.WhenCommitted().Take(1).To(e))
                 .Do(e => {
-                    var memberInfo = frame.View.ObjectTypeInfo.FindMember(t.attribute.PropertyName);
-                    ((IList)memberInfo.GetValue(frame.View.CurrentObject))
-                        .Add(frame.View.ObjectSpace.GetObject(e.ShowViewParameters.CreatedView.CurrentObject) );
-                }).ToUnit();
+                    var createdView = e.ShowViewParameters.CreatedView;
+                    var associatedCollection = frame.View.ObjectTypeInfo.FindMember(t.attribute.PropertyName);
+                    if (!associatedCollection.IsAggregated) return;
+                    var associatedMemberInfo = associatedCollection.AssociatedMemberInfo;
+                    if (associatedMemberInfo.GetValue(createdView.CurrentObject) != null) return;
+                    associatedMemberInfo.SetValue(createdView.CurrentObject,createdView.ObjectSpace.GetObject(frame.View.CurrentObject));
+                })
+                .ToUnit();
 
         private static IObservable<Unit> WhenLinkUnlinkAction(this ListPropertyEditor editor, Frame frame, (LinkUnlinkPropertyAttribute attribute, IMemberInfo memberInfo) t){
             var controller = editor.Frame.GetController<LinkUnlinkController>();

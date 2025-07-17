@@ -3,6 +3,7 @@ using System.Windows.Forms;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Win.Editors;
+using DevExpress.XtraEditors;
 using DevExpress.XtraEditors.Controls;
 using DevExpress.XtraEditors.Repository;
 using EditorAliases = Xpand.Extensions.XAF.Attributes.EditorAliases;
@@ -20,6 +21,14 @@ public class LabelControlPropertyEditor : StringPropertyEditor{
         if (controlCore is LargeStringEdit edit) {
             edit.Properties.ScrollBars=ScrollBars.None;
         }
+
+        var textEdit = ((TextEdit)controlCore);
+        textEdit.Enabled=false;
+        textEdit.ReadOnly=false;
+        textEdit.BorderStyle=BorderStyles.NoBorder;
+        textEdit.Properties.AllowFocused=false;
+        textEdit.AutoSize = true;
+        textEdit.AutoSizeInLayoutControl = true;
         return controlCore;
     }
 
