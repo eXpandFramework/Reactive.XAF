@@ -10,7 +10,11 @@ namespace Xpand.Extensions.AssemblyExtensions {
         public static Stream GetManifestResourceStream(this Assembly assembly, Func<string, bool> nameMatch)
             => assembly.GetManifestResourceStream(assembly.GetManifestResourceNames().First(nameMatch));
         public static IEnumerable<Stream> GetManifestResourceStreams(this Assembly assembly, Func<string, bool> nameMatch)
-            => assembly.GetManifestResourceNames().Where(nameMatch).Select(assembly.GetManifestResourceStream);
+            => assembly.GetManifestResourceNames().Where(nameMatch).Distinct()
+                .Select(assembly.GetManifestResourceStream);
+        public static IEnumerable<string> ReadManifestResources(this Assembly assembly, params string[] resources)
+            => assembly.GetManifestResourceStreams(name => resources.Any(name.Contains))
+                .Select(stream => stream.ReadToEndAsString());
         
         public static byte[] GetManifestResourceBytes(this Assembly assembly, Func<string, bool> nameMatch) {
             using var stream = assembly.GetManifestResourceStream(assembly.GetManifestResourceNames().First(nameMatch));

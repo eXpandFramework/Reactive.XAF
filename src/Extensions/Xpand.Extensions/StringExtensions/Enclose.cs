@@ -15,6 +15,9 @@ namespace Xpand.Extensions.StringExtensions {
             => input.EncloseHTMLTag(!useItalic?"span class=\"tg-spoiler\"":"i");
         public static string EncloseHTMLVeryImportant(this string input)
             => input.EncloseHTMLTag("b","u");
+        public static string EncloseHref(this string input, Uri uri)
+            => input.EncloseHTMLTag($"a href=\"{uri}\"");
+
         public static string EncloseHTMLImportant(this string input)
             => input.EncloseHTMLTag("b");
         
