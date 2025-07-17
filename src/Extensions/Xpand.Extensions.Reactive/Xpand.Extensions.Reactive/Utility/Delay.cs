@@ -1,16 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reactive;
-using System.Reactive.Concurrency;
 using System.Reactive.Linq;
-using System.Runtime.CompilerServices;
-using System.Threading;
 using Xpand.Extensions.Numeric;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
-using Xpand.Extensions.Reactive.Transform.System;
 
 namespace Xpand.Extensions.Reactive.Utility {
     public static partial class Utility {
@@ -48,8 +44,13 @@ namespace Xpand.Extensions.Reactive.Utility {
         public static IObservable<T> Defer<T>(this object o, Func<IEnumerable<T>> selector)
             => Observable.Defer(() => selector().ToNowObservable());
         
-        // public static IObservable<T> DelaySubscription<T>(this IObservable<T> source, TimeSpan delay, IScheduler scheduler = null) 
-        //     => scheduler == null ? Observable.Timer(delay).SelectMany(_ => source) : Observable.Timer(delay, scheduler).SelectMany(_ => source);
+        public static IObservable<T> DelayUntil<T, TSignal>(this IObservable<T> source, IObservable<TSignal> trigger) 
+            => source.Select(x => trigger.Take(1).Select(_ => x)).Concat();
+        public static IObservable<T> DelayUntilSequential<T, TSignal>(this IObservable<T> source, Func<T, IObservable<TSignal>> triggerSelector) =>
+            source.Select(x => triggerSelector(x).Take(1).Select(_ => x)).Concat();
+
+        public static IObservable<T> DelayUntil<T, TSignal>(this IObservable<T> source, Func<T, IObservable<TSignal>> triggerSelector) =>
+            source.SelectMany(x => triggerSelector(x).Take(1).Select(_ => x));
 
         public static IObservable<T> DelayRandomly<T>(this IObservable<T> source, int maxValue, int minValue = 0)
             => source.SelectMany(arg => {

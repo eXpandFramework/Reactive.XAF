@@ -2,6 +2,7 @@
 using System.Reactive;
 using System.Reactive.Linq;
 using Xpand.Extensions.ObjectExtensions;
+using Xpand.Extensions.Reactive.ErrorHandling;
 using Xpand.Extensions.Reactive.Filter;
 
 namespace Xpand.Extensions.Reactive.Transform {
@@ -25,5 +26,21 @@ namespace Xpand.Extensions.Reactive.Transform {
         
         public static IObservable<T> WhenIs<T>(this T source,string typeName)
             => source.As(typeName).Observe().WhenNotDefault();
+        public static IObservable<int> WhenPositive(this IObservable<int> source)
+            => source.Where(i => i>0);
+        public static IObservable<decimal> WhenPositive(this IObservable<decimal> source)
+            => source.Where(i => i>0);
+        public static IObservable<double> WhenPositive(this IObservable<double> source)
+            => source.Where(i => i>0);
+        public static IObservable<long> WhenPositive(this IObservable<long> source)
+            => source.Where(i => i>0);
+        public static IObservable<int> WhenNegative(this IObservable<int> source)
+            => source.Where(i => i>0);
+        public static IObservable<decimal> WhenNegative(this IObservable<decimal> source)
+            => source.Where(i => i>0);
+        public static IObservable<double> WhenNegative(this IObservable<double> source)
+            => source.Where(i => i>0);
+        public static IObservable<long> WhenNegative(this IObservable<long> source)
+            => source.Where(i => i>0);
     }
 }
