@@ -12,3 +12,4 @@ Enums.Net
 System.Threading.Tasks.Dataflow
 System.Diagnostics.PerformanceCounter
 Microsoft.Extensions.DependencyInjection
+System.Management

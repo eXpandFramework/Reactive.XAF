@@ -4,6 +4,7 @@ using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Text.Json;
 using Xpand.Extensions.JsonExtensions;
+using Xpand.Extensions.Reactive.ErrorHandling;
 using Xpand.Extensions.Reactive.Transform.System.Net;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.StreamExtensions;

@@ -8,6 +8,7 @@ namespace Xpand.Extensions.ObjectExtensions {
         
         public static string EnsureString(this object o)
             => o?.ToString().EnsureEndWith(String.Empty)??String.Empty;
+
         public static string EnsureStringEndWith(this object o, string end)
             => o?.ToString().EnsureEndWith(end)??end;
         public static T As<T>(this object obj) 

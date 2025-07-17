@@ -1,18 +1,16 @@
 ﻿using System;
 using System.Reactive.Linq;
-using System.Runtime.CompilerServices;
-using Xpand.Extensions.Reactive.Transform;
 
 namespace Xpand.Extensions.Reactive.ErrorHandling {
 	public static partial class ErrorHandling {
 		
-		public static IObservable<T> CompleteOnError<T>(this IObservable<T> source,Action<Exception> onError=null,Func<Exception,bool> match=null,[CallerMemberName]string caller="")
-			=> source.Catch<T,Exception>(exception => {
-				if (!(match?.Invoke(exception) ?? true)) return exception.Throw<T>();
+		public static IObservable<T> CompleteOnError<T>(this IObservable<T> source, Action<Exception> onError = null,
+			Func<Exception, bool> match = null)
+			=> source.WithOrigin().Catch<T, Exception>(exception => {
 				onError?.Invoke(exception);
-				return Observable.Empty<T>();
+				return !(match?.Invoke(exception) ?? true) ? Observable.Throw<T>(exception) : Observable.Empty<T>();
 			});
-        
+
 		public static IObservable<T> CompleteOnError<T,TException>(this IObservable<T> source,Action<Exception> onError=null) where TException:Exception
 			=> source.CompleteOnError(onError,exception => exception is TException);
         

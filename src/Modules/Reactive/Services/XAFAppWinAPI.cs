@@ -12,13 +12,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         XafApplication Application{ get; }
     }
 
-    class XAFAppWinAPI:IXAFAppWinAPI{
-        public XafApplication Application{ get; }
-
-        public XAFAppWinAPI(XafApplication application){
-            Application = application;
-        }
-
+    class XAFAppWinAPI(XafApplication application) : IXAFAppWinAPI {
+        public XafApplication Application{ get; } = application;
     }
 
     public static class XAFWinApiExtensions{

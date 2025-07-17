@@ -5,6 +5,7 @@ using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using Xpand.Extensions.Fasterflect;
 using Xpand.Extensions.Reactive.Combine;
+using Xpand.Extensions.Reactive.ErrorHandling;
 using Xpand.Extensions.Reactive.Transform.System;
 using Xpand.Extensions.TypeExtensions;
 

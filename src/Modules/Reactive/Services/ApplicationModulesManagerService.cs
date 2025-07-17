@@ -5,12 +5,14 @@ using System.Linq.Expressions;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Runtime.CompilerServices;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using Fasterflect;
 using Xpand.Extensions.Reactive.Combine;
+using Xpand.Extensions.Reactive.ErrorHandling;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.TypeExtensions;
 using Xpand.Extensions.XAF.ApplicationModulesManagerExtensions;
@@ -41,10 +43,12 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                             }
                         })));
         
-        public static IObservable<T> WhenApplication<T>(this ApplicationModulesManager manager,Func<XafApplication,IObservable<T>> retriedExecution,bool emitInternalApplications=true) 
+        public static IObservable<T> WhenSetupComplete<T>(this ApplicationModulesManager manager, Func<XafApplication, IObservable<T>> selector)
+	        => manager.WhenApplication(application => application.WhenSetupComplete().SelectMany(selector.WithResilience()));
+        
+        public static IObservable<T> WhenApplication<T>(this ApplicationModulesManager manager,Func<XafApplication,IObservable<T>> selector,bool emitInternalApplications=true) 
             => manager.WhereApplication().Where(application => emitInternalApplications||!application.IsInternal()).ToObservable(ImmediateScheduler.Instance)
-	            .SelectMany(application => Observable.Defer(() => retriedExecution(application)).Retry(application));
-		
+	            .SelectMany(selector.WithResilience());
 
 	    public static IObservable<CustomizeTypesInfoEventArgs> WhenCustomizeTypesInfo(this IObservable<ApplicationModulesManager> source) 
             => source.SelectMany(manager => manager.WhenCustomizeTypesInfo());

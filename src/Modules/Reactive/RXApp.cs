@@ -7,6 +7,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Threading;
 using DevExpress.ExpressApp;
@@ -101,8 +102,7 @@ namespace Xpand.XAF.Modules.Reactive{
                     .Merge(manager.SetupPropertyEditorParentView()))
         );
 
-        public static IObservable<Unit> ThrowOnContext(this Exception exception) {
-            exception = exception.CaptureStack();
+        public static IObservable<Unit> ThrowOnContext(this Exception exception,[CallerMemberName]string caller="",[CallerLineNumber] int line=0) {
             return ContextSubject.SelectMany(_ => Observable.Throw<Unit>(exception)).ToUnit();
         }
 

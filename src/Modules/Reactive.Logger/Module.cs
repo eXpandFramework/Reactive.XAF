@@ -1,8 +1,9 @@
-﻿using DevExpress.Data.Filtering;
+﻿using System;
+using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
-
+using Xpand.Extensions.Reactive.ErrorHandling;
 using Xpand.Extensions.Tracing;
 using Xpand.XAF.Modules.Reactive.Extensions;
 

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.Reactive.Transform.System.Text.Json;
 
 namespace Xpand.Extensions.Reactive.Utility {
     public static partial class Utility {

@@ -1,10 +1,14 @@
 ﻿using System;
+using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
-
+using Xpand.Extensions.Reactive.Combine;
+using Xpand.Extensions.Reactive.ErrorHandling;
+using Xpand.Extensions.Reactive.Utility;
+using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
 
@@ -17,7 +21,7 @@ namespace Xpand.XAF.Modules.Reactive {
         internal IObservable<ModelInterfaceExtenders> ExtendingModel=>_extendingModelSubject;
         
 
-        static ReactiveModule() => TraceSource=new ReactiveTraceSource(nameof(ReactiveModule));
+        static ReactiveModule() => TraceSource = new ReactiveTraceSource(nameof(ReactiveModule));
 
         public ReactiveModule() {
             RequiredModuleTypes.Add(typeof(DevExpress.ExpressApp.SystemModule.SystemModule));
@@ -43,6 +47,8 @@ namespace Xpand.XAF.Modules.Reactive {
         public override void Setup(ApplicationModulesManager moduleManager){
             base.Setup(moduleManager);
             moduleManager.Connect()
+                .MergeToUnit(FaultHub.Bus
+                    .Do(e => Application.HandleException(e)))
                 .Subscribe(this);
         }
 

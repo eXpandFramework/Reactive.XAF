@@ -2,12 +2,26 @@
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using Xpand.Extensions.Reactive.ErrorHandling;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Utility;
 
 namespace Xpand.Extensions.Reactive.Transform{
     
     public static partial class Transform {
+        public static IObservable<TResult> SelectResilient<TSource, TResult>(this IObservable<TSource> source, Func<TSource, TResult> selector)
+            => source.SelectMany(x => {
+                TResult value;
+                try {
+                    value = selector(x);          
+                }
+                catch (Exception ex) {
+                    return ex.Tag().Publish<TResult>();  
+                }
+                return value.Observe();
+            });
+        
+        
         public static IObservable<string> SelectToString(this IObservable<object> source) {
             return source.WhenNotDefault().Select(o => o.ToString());
         }

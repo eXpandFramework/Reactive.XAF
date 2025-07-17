@@ -29,7 +29,7 @@ namespace Xpand.Extensions.DateTimeExtensions {
                 return "";
         
             if (type == typeof(DateTime) || type == typeof(DateTime?))
-                return ((DateTime)value).Humanize();
+                return ((DateTime)value).Humanize ();
         
             if (type.IsEnum)
                 return value.ToString().Humanize();

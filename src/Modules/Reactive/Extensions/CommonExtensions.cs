@@ -12,25 +12,25 @@ using HarmonyLib;
 
 using Xpand.Extensions.ConfigurationExtensions;
 using Xpand.Extensions.ExceptionExtensions;
+using Xpand.Extensions.Reactive.ErrorHandling;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.Reactive.Services.Controllers;
 
 namespace Xpand.XAF.Modules.Reactive.Extensions{
     public static class CommonExtensions{
+
         public static IObservable<Unit> Patch(this IComponent component,Action<Harmony> patch) {
             var id = Guid.NewGuid().ToString();
             var harmony = new Harmony(id);
             patch(harmony);
             return component.WhenDisposed().Do(_ => harmony.UnpatchAll(id)).ToUnit();
         }
-
         
-        public static IDisposable Subscribe<T>(this IObservable<T> source, ModuleBase moduleBase){
-            var takeUntil = source.TakeUntil(moduleBase.WhenDisposed());
-            return moduleBase.Application!=null ? takeUntil.Subscribe(moduleBase.Application) : takeUntil.Subscribe();
-        }
-        
+        public static IDisposable Subscribe<T>(this IObservable<T> source, ModuleBase module) {
+            var safe = source.UseFaultHub().TakeUntil(module.WhenDisposed());
+            return module.Application != null ? safe.Subscribe(module.Application) : safe.Subscribe();
+        }        
         
         public static IDisposable Subscribe<T>(this IObservable<T> source, Controller controller) 
             => source.TakeUntil(controller.WhenDeactivated()).Subscribe(controller.Application);

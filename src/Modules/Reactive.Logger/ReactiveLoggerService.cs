@@ -32,7 +32,7 @@ using Xpand.XAF.Modules.Reactive.Services;
 namespace Xpand.XAF.Modules.Reactive.Logger{
     public static class ReactiveLoggerService{
         public static string RXLoggerLogPath{ get; set; }=@$"{AppDomain.CurrentDomain.ApplicationPath()}\{AppDomain.CurrentDomain.ApplicationName()}_RXLogger.log";
-        private static readonly Subject<ITraceEvent> SavedTraceEventSubject=new();
+        internal static readonly ISubject<ITraceEvent> SavedTraceEventSubject=Subject.Synchronize(new Subject<ITraceEvent>());
         public static IObservable<ITraceEvent> ListenerEvents{ get; private set; }
         public static IObservable<ITraceEvent> SavedTraceEvent => SavedTraceEventSubject;
         private static ReactiveTraceListener _listener;

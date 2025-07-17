@@ -178,11 +178,11 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<ActionBaseEventArgs> WhenActionExecuteCompleted(this XafApplication application,params string[] actions) 
             => application.WhenFrameCreated().SelectMany(window => window.Actions(actions)).WhenExecuteCompleted();
         public static IObservable<T> WhenActionExecuteConcat<T>(this XafApplication application,Func<SimpleActionExecuteEventArgs,IObservable<T>> selector,params string[] actions)  
-            => application.WhenFrameCreated().SelectMany(window => window.Actions(actions).OfType<SimpleAction>().ToObservable()
+            => application.WhenFrameCreated().SelectManyResilient(window => window.Actions(actions).OfType<SimpleAction>().ToObservable()
                 .SelectMany(a => a.WhenConcatExecution(selector)));
         public static IObservable<T> WhenSingleChoiceActionExecuteConcat<T>(this XafApplication application,Func<SingleChoiceActionExecuteEventArgs,IObservable<T>> selector,params string[] actions)  
             => application.WhenFrameCreated().SelectMany(window => window.Actions(actions).OfType<SingleChoiceAction>().ToObservable()
-                .SelectMany(a => a.WhenConcatExecution(selector,typeof(T).Name)));
+                .SelectMany(a => a.WhenConcatExecution(selector,typeof(T).Name))) ;
         
         public static IObservable<(TAction action, CancelEventArgs e)> WhenActionExecuting<TController,TAction>(
             this XafApplication application, Func<TController, TAction> action) where TController : Controller where TAction:ActionBase 
@@ -742,7 +742,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<T> UseProviderObjectSpace<T>(this XafApplication application,Func<IObjectSpace,IObservable<T>> factory,Type objectType=null,[CallerMemberName]string caller="") {
             if (application.IsDisposed())return Observable.Empty<T>();
             var type =objectType?? typeof(T).RealType();
-            return Observable.Using(() => application.CreateObjectSpace(true, type,caller:caller), factory);
+            return application.UsingResilient(() => application.CreateObjectSpace(true, type,caller:caller),factory.WithResilience());
         }
         public static IObservable<Unit> UseProviderObjectSpace<T>(this XafApplication application,Action<IObjectSpace> factory,[CallerMemberName]string caller="") 
             => application.UseProviderObjectSpace(space => {
@@ -1157,6 +1157,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                         [nameof(ITenantWithConnectionString.ConnectionString)])
                     .Select(tenant =>tenant.ConnectionString ))
                 .SwitchIfEmpty(application.Defer(() => application.ObjectSpaceProvider.GetConnectionString().Observe()));
+        
     }
 
 

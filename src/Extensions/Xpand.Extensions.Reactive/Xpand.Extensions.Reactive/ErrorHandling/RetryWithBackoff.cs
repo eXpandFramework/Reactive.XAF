@@ -28,8 +28,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling {
                         return exception.InnerException.Throw<T>();
                     if (retryCount.HasValue && ++attempt >= retryCount.Value)
                         return ex.Throw<T>();
-                    return retryOnError(ex)
-                        .Take(1)
+                    return retryOnError(ex).Take(1)
                         .SelectMany(_ => strategy(attempt).Timer(scheduler)
                             .SelectMany(_ => Resubscribe()))
                         .SwitchIfEmpty(ex.Throw<T>());

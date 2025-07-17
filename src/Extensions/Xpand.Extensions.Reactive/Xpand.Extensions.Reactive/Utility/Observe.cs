@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.Reactive.Conditional;
-using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.Reactive.ErrorHandling;
 
 namespace Xpand.Extensions.Reactive.Utility {
     public static partial class Utility {
