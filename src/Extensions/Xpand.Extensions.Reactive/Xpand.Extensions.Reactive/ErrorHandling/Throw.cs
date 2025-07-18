@@ -35,7 +35,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling {
                 .Value;
         }
 
-        public static Exception Tag(this Exception ex) {
+        public static Exception TagOrigin(this Exception ex) {
             if (ex.Data.Contains(Key)) return ex;
             ex.Data[Key] = Capture();
             return ex;
@@ -43,7 +43,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling {
 
         public static IObservable<T> Throw<T>(this Exception ex) 
             => Observable.Defer(() => {
-                ExceptionDispatchInfo.Capture(ex.Tag()).Throw(); 
+                ExceptionDispatchInfo.Capture(ex.TagOrigin()).Throw(); 
                 return Observable.Empty<T>();                    
             });
         

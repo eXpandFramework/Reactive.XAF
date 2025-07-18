@@ -5,11 +5,13 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.SystemModule;
+using DevExpress.ExpressApp.Win;
 using DevExpress.Persistent.Base;
 using DevExpress.XtraGrid.Columns;
 using Xpand.Extensions.LinqExtensions;
@@ -139,6 +141,30 @@ namespace Xpand.XAF.Modules.Windows{
             Size size) where TAction : ActionBase
             => action.WhenCustomizeControl().Select(e => e.Control).OfType<Control>()
                 .Do(button => button.MinimumSize=size);
+        
+        public static void EnableGlobalExceptionHandling(this ApplicationContext ctx, Action<Exception> log) {
+            Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
+            Application.ThreadException += (_, e) => log?.Invoke(e.Exception);
+            AppDomain.CurrentDomain.UnhandledException += (_, e) => {
+                if (e.ExceptionObject is Exception ex) log?.Invoke(ex);
+            };
+            TaskScheduler.UnobservedTaskException += (_, e) => {
+                log?.Invoke(e.Exception);
+                e.SetObserved();          // prevents crash on unobserved tasks
+            };
+        }
+
+        public static void UseGlobalExceptionHandling(this WinApplication _) {
+            Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
+            Application.ThreadException += (_, e) => Tracing.Tracer.LogError(e.Exception.ToString());
+            AppDomain.CurrentDomain.UnhandledException += (_, e) => {
+                if (e.ExceptionObject is Exception ex) Tracing.Tracer.LogError(ex.ToString());
+            };
+            TaskScheduler.UnobservedTaskException += (_, e) => {
+                Tracing.Tracer.LogError(e.Exception.ToString());
+                e.SetObserved();
+            };
+        }
     }
 
 }

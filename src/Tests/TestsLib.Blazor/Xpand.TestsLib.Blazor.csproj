@@ -70,5 +70,10 @@
   <ItemGroup>
     <Compile Include="..\..\Common\AssemblyInfoVersion.cs" Link="Properties\AssemblyInfoVersion.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Update="Selenium.Support">
+      <Version>4.34.0</Version>
+    </PackageReference>
+  </ItemGroup>
   <Import Project="..\..\..\.paket\Paket.Restore.targets" />
 </Project>

@@ -1,19 +1,20 @@
 ﻿using System;
-using System.ComponentModel;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Reactive;
-using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Notifications;
 using DevExpress.Persistent.Base.General;
 using Fasterflect;
 using Xpand.Extensions.AppDomainExtensions;
+using Xpand.Extensions.DictionaryExtensions;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.ErrorHandling;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
+using Xpand.Extensions.Tracing;
 using Xpand.Extensions.XAF.ObjectExtensions;
 using Xpand.Extensions.XAF.ObjectSpaceExtensions;
 using Xpand.XAF.Modules.Reactive.Services;
@@ -28,7 +29,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
                     var service = application.NotificationsService();
                     return service == null ? Observable.Empty<Unit>() : application.Rules().Observe().NotifyRules(application)
                         .WithLatestFrom(application.WhenSynchronizationContext(),(_, context) 
-                            => context.DeferAction(() => context.Post(state => service.Refresh(),service)))
+                            => context.DeferAction(() => context.Post(_ => service.Refresh(),service)))
                         .Merge()
                         .MergeToUnit(application.NotifySystemExceptions());
                 });
@@ -39,17 +40,17 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
                     .Do(controller => controller.Active[nameof(NotifySystemExceptions)]=!notifications.DisableValidationResults))
                 .SelectMany(application.NotifySystemExceptions);
 
+
+        private static readonly ConcurrentDictionary<Guid, byte> Seen = new();
         private static IObservable<Unit> NotifySystemExceptions(this XafApplication application, IModelReactiveLoggerNotifications notifications) 
             => !notifications.NotifySystemException ? Observable.Empty<Unit>() : application.WhenWin()
-                .WhenCustomHandleException()
-                .SelectMany(t => {
-                    t.handledEventArgs.Handled = notifications.HandleSystemExceptions;
-                    return t.originalException.Observe().SelectMany(exception => exception.Throw<Unit>())
-                        .TraceErrorLogger().CompleteOnError()
-                        .WhenCompleted()
-                        .DoOnError(exception => { })
-                        .Select(VAR => VAR);
+                .WhenCustomHandleException().Do(t => t.handledEventArgs.Handled = true)
+                .Where(t => {
+                    var correlationId = t.exception.CorrelationId();
+                    return correlationId == null || Seen.AddWithTtlAndCap(correlationId.Value);
                 })
+                .SelectMany(t => t.originalException.Observe().SelectMany(exception => exception.Throw<Unit>())
+                    .TraceErrorLogger().CompleteOnError().WhenCompleted())
                 .ToUnit();
 
         public static NotificationsService NotificationsService(this XafApplication application) 
@@ -63,18 +64,19 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
                     .Select(t => {
                         var supportNotifications = (ISupportNotifications)traceEvent.ObjectSpace.CreateObject(t.rule.Type);
                         supportNotifications.AlarmTime = DateTime.Now;
-                        supportNotifications.GetTypeInfo()
-                            .FindMember(nameof(ISupportNotifications.NotificationMessage))
-                            .SetValue(supportNotifications, new[]{traceEvent.Location,traceEvent.Method,traceEvent.Value}.WhereNotEmpty().JoinCommaSpace());
+                        var value = traceEvent.FilterInternals( new[]{traceEvent.Location,traceEvent.Method,traceEvent.Value}.WhereNotEmpty().JoinCommaSpace());
+                        supportNotifications.GetTypeInfo().FindMember(nameof(ISupportNotifications.NotificationMessage)).SetValue(supportNotifications, value);
                         traceEvent.ObjectSpace.CommitChanges();
                         return (supportNotifications, t.rule);
                     })
                     .ToNowObservable()
-                    .ShowXafMessage(application, traceEvent, memberName: null)
-                    )
+                    .ShowXafMessage(application, traceEvent, memberName: null))
                 )
                 .ToUnit()
             ;
+
+        internal static string FilterInternals(this ITraceEvent traceEvent, string value) 
+            => traceEvent.Location != nameof(ReactiveLoggerNotificationService) || traceEvent.Method != nameof(NotifySystemExceptions) ? value : traceEvent.Value;
 
         private static (Type Type, string Criteria, bool ShowXafMessage, InformationType XafMessageType, int MessageDisplayInterval)[] Rules(this XafApplication application) 
             => application.Model.ToReactiveModule<IModelReactiveModuleLogger>().ReactiveLogger.Notifications

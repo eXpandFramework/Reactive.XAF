@@ -36,6 +36,7 @@ nuget System.ServiceModel.Duplex 4.10.2
 nuget Microsoft.CognitiveServices.Speech 1.23.0
 nuget System.Configuration.ConfigurationManager == 9.0.0
 nuget System.Drawing.Common == 9.0.0
+nuget System.Management 9.0.0
 nuget Mono.Cecil 0.11.5
 nuget Humanizer.Core 2.14.1
 nuget Humanizer 2.14.1

@@ -272,9 +272,9 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
                 .TakeUntilDisposed(action);
 
         public static IObservable<SingleChoiceAction> AddItems(this IObservable<SingleChoiceAction> source,Func<SingleChoiceAction,IObservable<Unit>> addItems,IScheduler scheduler=null)
-            => source.MergeIgnored(action => action.Controller.WhenActivated(emitWhenActive:true).SelectMany(_
-                    => action.View().WhenCurrentObjectChanged().StartWith(action.View()).TakeUntilDisposed(action))
-                .WaitUntilInactive(1, scheduler: scheduler).ObserveOnContext()
+            => source.MergeIgnored(action => action.Controller.WhenActivated(emitWhenActive: true)
+                .SelectMany(_ => action.View().WhenCurrentObjectChanged().StartWith(action.View()).TakeUntilDisposed(action))
+                .WaitUntilInactive(1, scheduler: scheduler).ObserveOnContextMaybe()
                 .Do(_ => action.Items.Clear()).SelectMany(_ => addItems(action)).TakeUntilDisposed(action));
 
         public static IObservable<TArgs> CreateDetailView<TArgs>(this IObservable<TArgs> source, Type objectType=null, TargetWindow? targetWindow =null) where TArgs:ActionBaseEventArgs

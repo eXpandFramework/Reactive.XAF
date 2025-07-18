@@ -241,7 +241,8 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
                 showXafMessage, InformationType informationType, int messageDisplayInterval))> 
             ShowXafMessage<T>(this IObservable<(T supportNotifications, (Type objectType, string criteria, bool showXafMessage, InformationType informationType
                 , int messageDisplayInterval) rule)> source, XafApplication application, TraceEvent traceEvent, [CallerMemberName] string memberName = "") 
-            => source.Where(t => t.rule.showXafMessage).ShowXafMessage(_ =>new[]{traceEvent.Location,traceEvent.Method,traceEvent.Value}.WhereNotEmpty().JoinCommaSpace() ,
+            => source.Where(t => t.rule.showXafMessage).ShowXafMessage(_ => traceEvent.FilterInternals(new[] { traceEvent.Location, traceEvent.Method, traceEvent.Value }
+                    .WhereNotEmpty().JoinCommaSpace()),
                 t => t.rule.informationType, t => t.rule.messageDisplayInterval, memberName: memberName,
                 onOk: t => application.ShowViewStrategy.ShowViewInPopupWindow(application.NewDetailView(t.supportNotifications)));
     }

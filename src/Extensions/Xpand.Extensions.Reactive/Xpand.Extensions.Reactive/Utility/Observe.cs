@@ -5,8 +5,6 @@ using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Xpand.Extensions.AppDomainExtensions;
-using Xpand.Extensions.Reactive.Conditional;
-using Xpand.Extensions.Reactive.ErrorHandling;
 
 namespace Xpand.Extensions.Reactive.Utility {
     public static partial class Utility {
@@ -19,18 +17,12 @@ namespace Xpand.Extensions.Reactive.Utility {
         public static IObservable<T> ObserveOnCurrent<T>(this IObservable<T> source) 
             => source.ObserveOn(System.Reactive.Concurrency.Scheduler.CurrentThread);
 
-        public static IObservable<T> ObserveOnContext<T>(this IObservable<T> source, SynchronizationContext synchronizationContext) 
-            => source.ObserveOn(synchronizationContext);
-
-        public static IObservable<T> ObserveOnContext<T>(this IObservable<T> source, bool throwIfNull) 
-            => source.If(_ => throwIfNull && SynchronizationContext.Current == null,
-                () => new NullReferenceException(nameof(SynchronizationContext)).Throw<T>(), () => source);
-
-        public static IObservable<T> ObserveOnContext<T>(this IObservable<T> source) {
-            var synchronizationContext = SynchronizationContext.Current;
-            return synchronizationContext != null ? source.ObserveOn(synchronizationContext) : source;
-        }
         
+        public static IObservable<T> ObserveOnContext<T>(this IObservable<T> source,SynchronizationContext context=null)
+            => source.ObserveOn(context??SynchronizationContext.Current!);
+        public static IObservable<T> ObserveOnContextMaybe<T>(this IObservable<T> source)
+            => SynchronizationContext.Current==null?source:source.ObserveOn(SynchronizationContext.Current!);
+
         public static IObservable<T> ObserveOn<T>(this IObservable<T> source, SynchronizationContext synchronizationContext,Func<bool> state)
             => !state() ? source : source.ObserveOn(synchronizationContext);
         

@@ -12,3 +12,4 @@ Microsoft.Reactive.Testing
 System.Threading.Tasks.Dataflow
 System.Interactive.Async
 Microsoft.Extensions.Options
+Xpand.Patcher
