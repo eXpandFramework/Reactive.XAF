@@ -753,7 +753,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<T> UseProviderObjectSpace<T>(this XafApplication application,Func<IObjectSpace,IObservable<T>> factory,Type objectType=null, Func<IObservable<T>, IObservable<T>> retrySelector = null) {
             if (application.IsDisposed())return Observable.Empty<T>();
             var type =objectType?? typeof(T).RealType();
-            return application.UsingResilient(() => application.CreateObjectSpace(true, type),factory.WithResilience(retrySelector));
+            return application.UsingResilient(() => application.CreateObjectSpace(true, type),factory.ToResilient(retrySelector));
         }
         public static IObservable<Unit> UseProviderObjectSpace<T>(this XafApplication application,Action<IObjectSpace> factory,[CallerMemberName]string caller="") 
             => application.UseProviderObjectSpace(space => {

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Numeric;
@@ -68,7 +70,7 @@ namespace Xpand.Extensions.DictionaryExtensions {
             if (!cache.TryAdd(key, 0))
                 return false;                          
             _ = Task.Delay(ttl??5.ToMinutes()).ContinueWith(_ => cache.TryRemove(key, out var _),
-                    TaskScheduler.Default);
+                TaskScheduler.Default);
             return true;                               
         }
     }

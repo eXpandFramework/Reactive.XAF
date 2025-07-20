@@ -44,11 +44,11 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                         })));
         
         public static IObservable<T> WhenSetupComplete<T>(this ApplicationModulesManager manager, Func<XafApplication, IObservable<T>> selector)
-	        => manager.WhenApplication(application => application.WhenSetupComplete().SelectMany(selector.WithResilience()));
+	        => manager.WhenApplication(application => application.WhenSetupComplete().SelectMany(selector.ToResilient()));
         
         public static IObservable<T> WhenApplication<T>(this ApplicationModulesManager manager,Func<XafApplication,IObservable<T>> selector,bool emitInternalApplications=true) 
             => manager.WhereApplication().Where(application => emitInternalApplications||!application.IsInternal()).ToObservable(ImmediateScheduler.Instance)
-	            .SelectMany(selector.WithResilience());
+	            .SelectMany(selector.ToResilient());
 
 	    public static IObservable<CustomizeTypesInfoEventArgs> WhenCustomizeTypesInfo(this IObservable<ApplicationModulesManager> source) 
             => source.SelectMany(manager => manager.WhenCustomizeTypesInfo());

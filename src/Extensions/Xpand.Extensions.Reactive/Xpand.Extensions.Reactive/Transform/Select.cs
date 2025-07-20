@@ -16,7 +16,7 @@ namespace Xpand.Extensions.Reactive.Transform{
                     value = selector(x);          
                 }
                 catch (Exception ex) {
-                    return ex.TagOrigin().Publish<TResult>();  
+                    return ex.Publish<TResult>();  
                 }
                 return value.Observe();
             });

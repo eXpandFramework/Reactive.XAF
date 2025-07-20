@@ -16,7 +16,6 @@ namespace Xpand.Extensions.Reactive.ErrorHandling {
         
         public static IObservable<T> RetryWithBackoff<T>(this IObservable<T> source,Func<Exception, IObservable<Unit>> retryOnError , int? retryCount = null, Func<int, TimeSpan> strategy = null,
             IScheduler scheduler = null,[CallerMemberName]string caller="") {
-            // if (source.IsResilient()) return source;
             strategy ??= SecondsBackoffStrategy;
             scheduler ??= DefaultScheduler.Instance;
             retryOnError ??= _ => Unit.Default.Observe();
@@ -26,7 +25,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling {
                 return Resubscribe();
                 IObservable<T> Resubscribe() => source.Catch<T, Exception>(ex => {
                     Console.WriteLine(caller.PrefixCaller());
-                    ex.TagCorrelation(newGuid);
+                    // ex.TagCorrelation(newGuid);
                     if (ex is DoNotRetryWithBackoffException exception)
                         return exception.InnerException.Throw<T>();
                     if (retryCount.HasValue && ++attempt >= retryCount.Value)

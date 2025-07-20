@@ -2,6 +2,7 @@
 using akarnokd.reactive_extensions;
 using NUnit.Framework;
 using Shouldly;
+using Xpand.Extensions.Reactive.ErrorHandling;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.TestsLib.Common.Attributes;

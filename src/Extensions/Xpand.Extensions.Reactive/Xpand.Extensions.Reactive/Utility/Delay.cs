@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Runtime.CompilerServices;
 using Xpand.Extensions.Numeric;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Conditional;
+using Xpand.Extensions.Reactive.ErrorHandling;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 
@@ -22,27 +24,27 @@ namespace Xpand.Extensions.Reactive.Utility {
                 .SelectManySequential( arg1 => Observable.Return(arg1).Delay(timeSpan).ObserveOnContext());
 
         public static IObservable<T> Defer<T>(this object o, IObservable<T> execute)
-            => Observable.Defer(() => execute);
+            => o.Defer(() => execute);
         
         public static IObservable<Unit> DeferAction<T>(this T o, Action execute)
-            => Observable.Defer(() => {
+            => o.Defer(() => {
                 execute();
                 return Observable.Empty<Unit>();
             });
         public static IObservable<Unit> DeferAction<T>(this T o, Action<T> execute)
-            => Observable.Defer(() => {
+            => o.Defer(() => {
                 execute(o);
                 return Observable.Empty<Unit>();
             });
 
         public static IObservable<T> Defer<T,TObject>(this TObject o, Func<TObject,IObservable<T>> selector)
-            => Observable.Defer(() => selector(o));
+            => o.Defer(() => selector(o));
         
-        public static IObservable<T> Defer<T>(this object o, Func<IObservable<T>> selector)
-            => Observable.Defer(selector);
+        public static IObservable<T> Defer<T>(this object o, Func<IObservable<T>> selector,Func<IObservable<T>, IObservable<T>> retrySelector = null,[CallerMemberName]string caller="")
+            => Observable.Defer(selector.ToResilient(retrySelector,caller:caller));
         
         public static IObservable<T> Defer<T>(this object o, Func<IEnumerable<T>> selector)
-            => Observable.Defer(() => selector().ToNowObservable());
+            => o.Defer(() => selector().ToNowObservable());
         
         public static IObservable<T> DelayUntil<T, TSignal>(this IObservable<T> source, IObservable<TSignal> trigger) 
             => source.Select(x => trigger.Take(1).Select(_ => x)).Concat();
