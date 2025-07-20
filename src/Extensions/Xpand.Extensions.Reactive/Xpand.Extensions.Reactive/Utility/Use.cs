@@ -17,6 +17,6 @@ namespace Xpand.Extensions.Reactive.Utility {
 
         public static IObservable<TResult> UsingResilient<TResource, TResult>(this object _,
             Func<TResource> resourceFactory, Func<TResource, IObservable<TResult>> busFactory, Func<IObservable<TResult>, IObservable<TResult>> retrySelector = null) where TResource : IDisposable 
-            => Observable.Using(resourceFactory, busFactory).WithResilient(retrySelector);
+            => Observable.Using(resourceFactory, busFactory.ToResilient(retrySelector));
     }
 }

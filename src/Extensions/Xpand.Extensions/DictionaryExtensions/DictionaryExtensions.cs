@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Numeric;
@@ -62,14 +64,32 @@ namespace Xpand.Extensions.DictionaryExtensions {
                     TaskScheduler.Default);
             return true;                               
         }
-        public static bool AddWithTtlAndCap<TKey>(this ConcurrentDictionary<TKey, byte> cache, TKey key,TimeSpan? ttl=null, int cap=10000) {
-            if (cache.Count > cap)
-                cache.Clear();
+        
+        public static bool AddWithTtlAndCap<TKey>(this ConcurrentDictionary<TKey, byte> cache, TKey key, TimeSpan? ttl = null, int cap = 10000)
+        {
+            lock (cache)
+            {
+                if (cache.Count > cap)
+                {
+                    var evictCount = cache.Count - cap + 1;
+                    var keysToEvict = cache.Keys.Take(evictCount).ToList();
+                    keysToEvict.ForEach(k => cache.TryRemove(k, out _));
+                }
+            }
+
             if (!cache.TryAdd(key, 0))
-                return false;                          
-            _ = Task.Delay(ttl??5.ToMinutes()).ContinueWith(_ => cache.TryRemove(key, out var _),
-                    TaskScheduler.Default);
-            return true;                               
+                return false;
+
+            var effectiveTtl = ttl ?? TimeSpan.FromMinutes(5);
+            Task.Delay(effectiveTtl).ContinueWith(
+                    _ => cache.TryRemove(key, out _),
+                    CancellationToken.None,
+                    TaskContinuationOptions.None,
+                    TaskScheduler.Default)
+                .ContinueWith faultTask => { /* Log or ignore fault */ if (faultTask.IsFaulted) { } },
+            TaskScheduler.Default);
+
+            return true;
         }
     }
 }

@@ -16,10 +16,14 @@ namespace Xpand.Extensions.Reactive.ErrorHandling {
         static readonly ConcurrentDictionary<string, Lazy<StackTrace>> Cache = new();
         
         public static IObservable<T> WithOrigin<T>(this IObservable<T> source) {
-            var origin = new Lazy<StackTrace>(() => new StackTrace(true), LazyThreadSafetyMode.PublicationOnly);
+            var origin = new Lazy<StackTrace>(Capture, LazyThreadSafetyMode.PublicationOnly);
             return Observable.Create<T>(o =>
                 source.Subscribe(o.OnNext,
-                    e => { if (!e.Data.Contains(Key)) e.Data[Key] = origin.Value; o.OnError(e); },
+                    e => {
+                        if (!e.Data.Contains(Key)) 
+                            e.Data[Key] = origin.Value; 
+                        o.OnError(e);
+                    },
                     o.OnCompleted));
         }
 

@@ -47,7 +47,8 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
                 .WhenCustomHandleException().Do(t => t.handledEventArgs.Handled = true)
                 .Where(t => {
                     var correlationId = t.exception.CorrelationId();
-                    return correlationId == null || Seen.AddWithTtlAndCap(correlationId.Value);
+                    return !t.exception.IsSkipped()&&
+                           (correlationId == null || Seen.AddWithTtlAndCap(correlationId.Value));
                 })
                 .SelectMany(t => t.originalException.Observe().SelectMany(exception => exception.Throw<Unit>())
                     .TraceErrorLogger().CompleteOnError().WhenCompleted())
