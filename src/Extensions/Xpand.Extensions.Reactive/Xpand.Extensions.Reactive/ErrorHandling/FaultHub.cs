@@ -10,13 +10,12 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Xpand.Extensions.DictionaryExtensions;
+using Xpand.Extensions.ExceptionExtensions;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Utility;
 
 namespace Xpand.Extensions.Reactive.ErrorHandling{
     public static class FaultHub {
-        // In FaultHub.cs, add this field near your other AsyncLocal fields.
-        internal static readonly AsyncLocal<bool> InSequentialContext = new();
         private static readonly AsyncLocal<bool> IsRetrying = new();
         internal static readonly AsyncLocal<List<Func<Exception, bool>>> HandlersContext = new();
         static readonly AsyncLocal<Guid?> Ctx = new();
@@ -28,8 +27,8 @@ namespace Xpand.Extensions.Reactive.ErrorHandling{
         const string KeyCId     = "CorrelationId";
         public const string SkipKey = "FaultHub.Skip";
         const string PublishedKey  = "FaultHub.Published";
-        public static bool IsSkipped(this Exception exception) => exception.Data.Contains(SkipKey);
-        public static bool IsPublished(this Exception exception) => exception.Data.Contains(PublishedKey);
+        public static bool IsSkipped(this Exception exception) => exception.AccessData(data => data.Contains(SkipKey));
+        public static bool IsPublished(this Exception exception) => exception.AccessData(data => data.Contains(PublishedKey));
         
         public static IObservable<T> WithSharedFaultContext<T>(this IObservable<T> source) {
             if (Ctx.Value.HasValue) {
@@ -60,7 +59,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling{
                 return new CompositeDisposable(busSub, srcSub,Disposable.Create(observer.OnCompleted));
             }));
 
-        public static void MuteForBus(this Exception ex) => ex.Data[SkipKey] = true;
+        public static void MuteForBus(this Exception ex) => ex.AccessData(data => data[SkipKey]=true);
         public static IObservable<T> PropagateFaults<T>(this IObservable<T> source,
             Func<Exception,bool> match = null)
             => Observable.Create<T>(observer => {
@@ -71,83 +70,75 @@ namespace Xpand.Extensions.Reactive.ErrorHandling{
                 return new CompositeDisposable(inner, faults);
             });
         
-        public static IObservable<T> UseFaultHub<T>(this IObservable<T> source, Action<Exception> onError = null,Func<Exception, bool> match = null)
+        public static IObservable<T> UseFaultHub<T>(this IObservable<T> source)
             => source.ToResilient();
 
-        public static Guid? CorrelationId(this Exception ex) => (Guid?)ex.Data[KeyCId];
+        public static Guid? CorrelationId(this Exception ex) => (Guid?)ex.AccessData(data => data[KeyCId]);
 
-        public static Exception TagCorrelation(this Exception ex, Guid? correlationId = null) {
-            lock (ex.Data.SyncRoot) {
-                if (ex.Data[KeyCId] is Guid) return ex;
-                ex.Data[KeyCId] = correlationId;
+        public static Exception TagCorrelation(this Exception ex, Guid? correlationId = null) 
+            => ex.AccessData(data => {
+                if (data[KeyCId] is Guid) return ex;
+                data[KeyCId] = correlationId;
                 return ex;
+            });
+
+        private enum PublishAction { Continue, StopAndReturnTrue, StopAndReturnFalse }
+        public static bool Publish(this Exception ex, [CallerMemberName] string caller = "") {
+            var (action, correlationId) = ex.AccessData(data => {
+                if (data.Contains(PublishedKey)) {
+                    return (PublishAction.StopAndReturnTrue, Guid.Empty);
+                }
+                data[PublishedKey] = new object();
+                if (!data.Contains(KeyCId) && Ctx.Value.HasValue) {
+                    data[KeyCId] = Ctx.Value;
+                }
+                if (data.Contains(SkipKey)) {
+                    return (PublishAction.StopAndReturnFalse, Guid.Empty);
+                }
+                ex.TagOrigin(); 
+                var id = data[KeyCId] as Guid? ?? Guid.Empty;
+                return (PublishAction.Continue, id);
+            });
+
+            switch (action) {
+                case PublishAction.StopAndReturnTrue:
+                    return true;
+                case PublishAction.StopAndReturnFalse:
+                    return false;
             }
-        }
+
+            var deduplicationKey = $"{correlationId}:{ex.GetType().FullName}:{ex.Message}";
+            if (correlationId != Guid.Empty && !Seen.AddWithTtlAndCap(deduplicationKey)) {
+                return false;
+            }
         
-        public static bool Publish(this Exception ex,[CallerMemberName]string caller="") {
-            Guid id;
-            lock (ex.Data.SyncRoot) {
-                if (ex.Data.Contains(PublishedKey)) return true;
-                ex.Data[PublishedKey] = new object();
-                if (!ex.Data.Contains(KeyCId) && Ctx.Value.HasValue)
-                    ex.Data[KeyCId] = Ctx.Value;
-                if (ex.Data.Contains(SkipKey)) return false;
-                ex.TagOrigin();
-                id = ex.Data[KeyCId] as Guid? ?? Guid.Empty;
-            }
-            var deduplicationKey = $"{id}:{ex.GetType().FullName}:{ex.Message}";
-            if (id != Guid.Empty && !Seen.AddWithTtlAndCap(deduplicationKey)) return false;
             PreRaw.OnNext(ex);
             MainRaw.OnNext(ex);
             return true;
         }
         
         public static IObservable<T> Publish<T>(this Exception ex,[CallerMemberName]string caller="") {
-            ex.Publish(); // Attempt to publish, but we don't care about the result here.
-            return Observable.Empty<T>(); // Alwa
+            return ex.Publish() ? Observable.Empty<T>() : Observable.Throw<T>(ex);
         }
-
-// In FaultHub.cs, REPLACE your MakeResilient method with this new version:
-
+        
         static IObservable<T> MakeResilient<T>(this IObservable<T> source,
-            Func<IObservable<T>, IObservable<T>> retrySelector = null) {
-
-            return Observable.Defer(() => {
-                // Capture the state of the outer retry context.
+            Func<IObservable<T>, IObservable<T>> retrySelector = null)
+            => Observable.Defer(() => {
                 var isNestedRetry = IsRetrying.Value;
-
                 var streamToCatch = source;
                 if (retrySelector != null) {
-                    // If a new retry is applied, set the flag for inner operators.
                     streamToCatch = Observable.Defer(() => {
                         IsRetrying.Value = true;
                         return retrySelector(source);
-                    }).Finally(() => {
-                        // Restore the flag to its original state when this retry block is done.
-                        IsRetrying.Value = isNestedRetry;
-                    });
+                    }).Finally(() => IsRetrying.Value = isNestedRetry);
                 }
-        
-                // The final catch block now combines both necessary checks.
                 return streamToCatch.Catch<T, Exception>(ex => {
-                    // PRIORITY 1: Check if a specific downstream handler wants this exception.
                     var handlers = HandlersContext.Value;
-                    if (handlers != null && handlers.Any(handler => handler(ex))) {
-                        // A handler like CompleteOnError wants this. Let the exception pass through.
-                        return Observable.Throw<T>(ex);
-                    }
-
-                    // PRIORITY 2: If no specific handler, check if an outer retry operator wants this.
-                    if (isNestedRetry) {
-                        return Observable.Throw<T>(ex);
-                    }
-
-                    // PRIORITY 3: If we are the outermost boundary, publish the unhandled error.
-                    return ex.Publish<T>();
+                    return handlers != null && handlers.Any(handler => handler(ex)) ? Observable.Throw<T>(ex) :
+                        isNestedRetry ? Observable.Throw<T>(ex) : ex.Publish<T>();
                 });
             });
-        }
-        
+
         public static Func<TSource, IObservable<TResult>> ToResilient<TSource, TResult>(this Func<TSource, IObservable<TResult>> selector,
             Func<IObservable<TResult>, IObservable<TResult>> retrySelector = null)
             => x => selector.Defer(() => selector(x),retrySelector);
