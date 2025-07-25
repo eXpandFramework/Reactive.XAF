@@ -104,3 +104,4 @@ nuget Microsoft.Extensions.FileProviders.Abstractions == 9.0
 nuget Microsoft.Extensions.Options == 9.0
 nuget System.Diagnostics.DiagnosticSource == 9.0
 nuget Azure.Core == 1.6
+nuget Microsoft.Extensions.Caching.Memory == 9.0.7

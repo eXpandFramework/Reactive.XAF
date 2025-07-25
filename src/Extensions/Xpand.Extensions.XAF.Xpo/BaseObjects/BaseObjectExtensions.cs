@@ -1,4 +1,5 @@
-﻿using DevExpress.Xpo;
+﻿using DevExpress.ExpressApp;
+using DevExpress.Xpo;
 using DevExpress.Xpo.Helpers;
 using Fasterflect;
 
@@ -7,6 +8,6 @@ namespace Xpand.Extensions.XAF.Xpo.BaseObjects {
         public static void OnChanged(this PersistentBase persistentBase, string memberName) 
             => persistentBase.CallMethod(nameof(OnChanged), memberName);
         public static bool IsDisposed<TObject>(this TObject obj) where TObject:IXPInvalidateableObject,ISessionProvider 
-            => obj.IsInvalidated||(bool)obj.Session.GetFieldValue("isDisposed");
+            =>obj is IObjectSpaceLink link&&link.ObjectSpace.IsDisposed|| obj.IsInvalidated||(bool)obj.Session.GetFieldValue("isDisposed");
     }
 }

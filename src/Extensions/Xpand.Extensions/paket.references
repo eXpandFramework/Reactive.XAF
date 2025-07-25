@@ -12,3 +12,4 @@ Microsoft.AspNetCore.Http.Abstractions
 System.Security.Cryptography.ProtectedData
 System.Interactive
 Humanizer.Core
+Microsoft.Extensions.Caching.Abstractions

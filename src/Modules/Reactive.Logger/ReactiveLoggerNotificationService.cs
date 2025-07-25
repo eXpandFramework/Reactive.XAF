@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -7,9 +6,10 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Notifications;
 using DevExpress.Persistent.Base.General;
 using Fasterflect;
+using Microsoft.Extensions.Caching.Memory;
 using Xpand.Extensions.AppDomainExtensions;
-using Xpand.Extensions.DictionaryExtensions;
 using Xpand.Extensions.LinqExtensions;
+using Xpand.Extensions.MemoryCacheExtensions;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.ErrorHandling;
 using Xpand.Extensions.Reactive.Transform;
@@ -41,14 +41,15 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
                 .SelectMany(application.NotifySystemExceptions);
 
 
-        private static readonly ConcurrentDictionary<Guid, byte> Seen = new();
+        private static readonly IMemoryCache Seen = new MemoryCache(new MemoryCacheOptions { SizeLimit = 10000 });
+
         private static IObservable<Unit> NotifySystemExceptions(this XafApplication application, IModelReactiveLoggerNotifications notifications) 
             => !notifications.NotifySystemException ? Observable.Empty<Unit>() : application.WhenWin()
                 .WhenCustomHandleException().Do(t => t.handledEventArgs.Handled = true)
                 .Where(t => {
                     var correlationId = t.exception.CorrelationId();
-                    return !t.exception.IsSkipped()&&
-                           (correlationId == null || Seen.AddWithTtlAndCap(correlationId.Value));
+                    return !t.exception.IsSkipped() &&
+                           (correlationId == null || Seen.TryAdd(correlationId.Value));
                 })
                 .SelectMany(t => t.originalException.Observe().SelectMany(exception => exception.Throw<Unit>())
                     .TraceErrorLogger().CompleteOnError().WhenCompleted())

@@ -9,6 +9,7 @@ using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.NonPersistentObjects;
 
+
 namespace Xpand.XAF.Modules.Reactive.Objects {
     public static class ObjectsExtensions {
         public static IObservable<KeyValuePair<object, string>> WhenCheckedListBoxItems(this ObjectString objectString, IMemberInfo member, object o) 

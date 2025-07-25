@@ -29,6 +29,7 @@ using Xpand.Extensions.XAF.ObjectSpaceExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.Reactive.Services;
 
+
 namespace Xpand.XAF.Modules.Reactive.Logger{
     public static class ReactiveLoggerService{
         public static string RXLoggerLogPath{ get; set; }=@$"{AppDomain.CurrentDomain.ApplicationPath()}\{AppDomain.CurrentDomain.ApplicationName()}_RXLogger.log";

@@ -1,35 +1,58 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Xpand.Extensions.DictionaryExtensions;
+using Microsoft.Extensions.Caching.Memory;
 using Xpand.Extensions.ExceptionExtensions;
+using Xpand.Extensions.LinqExtensions;
+using Xpand.Extensions.MemoryCacheExtensions;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Utility;
 
 namespace Xpand.Extensions.Reactive.ErrorHandling{
+    public class AmbientFaultContext {
+        public StackTrace DefinitionStackTrace { get; init; }
+        public IReadOnlyList<string> CustomContext { get; init; }
+    }
     public static class FaultHub {
+        
+        internal static readonly AsyncLocal<AmbientFaultContext> CurrentContext = new();
         private static readonly AsyncLocal<bool> IsRetrying = new();
         internal static readonly AsyncLocal<List<Func<Exception, bool>>> HandlersContext = new();
         static readonly AsyncLocal<Guid?> Ctx = new();
         static readonly Subject<Exception> PreRaw  = new();
         static readonly Subject<Exception> MainRaw = new();
-        public static readonly ConcurrentDictionary<string, byte> Seen = new();
+        public static readonly MemoryCache Seen = new(new MemoryCacheOptions { SizeLimit = 10000 });
         public static readonly ISubject<Exception> PreBus  = Subject.Synchronize(PreRaw);
         public static readonly ISubject<Exception> Bus     = Subject.Synchronize(MainRaw);
         const string KeyCId     = "CorrelationId";
         public const string SkipKey = "FaultHub.Skip";
         const string PublishedKey  = "FaultHub.Published";
+        
         public static bool IsSkipped(this Exception exception) => exception.AccessData(data => data.Contains(SkipKey));
         public static bool IsPublished(this Exception exception) => exception.AccessData(data => data.Contains(PublishedKey));
-        
+        public static IObservable<T> TraceFaults<T>(this IObservable<T> source, string[] context,[CallerMemberName]string caller="") {
+            var stackTrace = new StackTrace(1, true);
+            var faultContext = new AmbientFaultContext {
+                DefinitionStackTrace = stackTrace,
+                CustomContext = caller.YieldItem().Concat(context).WhereNotNullOrEmpty().ToArray()
+            };
+
+            return Observable.Create<T>(observer => {
+                var originalContext = CurrentContext.Value;
+                CurrentContext.Value = faultContext;
+                var subscription = source.Subscribe(observer);
+                return new CompositeDisposable(subscription, Disposable.Create(CurrentContext,local =>local.Value = originalContext));
+            });
+        }
         public static IObservable<T> WithSharedFaultContext<T>(this IObservable<T> source) {
             if (Ctx.Value.HasValue) {
                 return source;
@@ -83,7 +106,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling{
             });
 
         private enum PublishAction { Continue, StopAndReturnTrue, StopAndReturnFalse }
-        public static bool Publish(this Exception ex, [CallerMemberName] string caller = "") {
+        public static bool Publish(this Exception ex) {
             var (action, correlationId) = ex.AccessData(data => {
                 if (data.Contains(PublishedKey)) {
                     return (PublishAction.StopAndReturnTrue, Guid.Empty);
@@ -108,7 +131,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling{
             }
 
             var deduplicationKey = $"{correlationId}:{ex.GetType().FullName}:{ex.Message}";
-            if (correlationId != Guid.Empty && !Seen.AddWithTtlAndCap(deduplicationKey)) {
+            if (correlationId != Guid.Empty && !Seen.TryAdd(deduplicationKey)) {
                 return false;
             }
         
@@ -117,13 +140,12 @@ namespace Xpand.Extensions.Reactive.ErrorHandling{
             return true;
         }
         
-        public static IObservable<T> Publish<T>(this Exception ex,[CallerMemberName]string caller="") {
-            return ex.Publish() ? Observable.Empty<T>() : Observable.Throw<T>(ex);
-        }
-        
+        public static IObservable<T> Publish<T>(this Exception ex) 
+            => ex.Publish() ? Observable.Empty<T>() : Observable.Throw<T>(ex);
+
         static IObservable<T> MakeResilient<T>(this IObservable<T> source,
-            Func<IObservable<T>, IObservable<T>> retrySelector = null)
-            => Observable.Defer(() => {
+            Func<IObservable<T>, IObservable<T>> retrySelector = null) {
+            return Observable.Defer(() => {
                 var isNestedRetry = IsRetrying.Value;
                 var streamToCatch = source;
                 if (retrySelector != null) {
@@ -133,12 +155,26 @@ namespace Xpand.Extensions.Reactive.ErrorHandling{
                     }).Finally(() => IsRetrying.Value = isNestedRetry);
                 }
                 return streamToCatch.Catch<T, Exception>(ex => {
+                    var faultContext = CurrentContext.Value;
+                    var exceptionToPublish = ex;
+                    
+                    if (faultContext != null && ex is not FaultHubException) {
+                        exceptionToPublish = new FaultHubException("An exception occurred in a traced fault context.", ex, faultContext);
+                    }
+                    
                     var handlers = HandlersContext.Value;
-                    return handlers != null && handlers.Any(handler => handler(ex)) ? Observable.Throw<T>(ex) :
-                        isNestedRetry ? Observable.Throw<T>(ex) : ex.Publish<T>();
+                    var originalException = (exceptionToPublish as FaultHubException)?.InnerException ?? exceptionToPublish;
+                    if (handlers != null && handlers.Any(handler => handler(originalException))) {
+                        return Observable.Throw<T>(exceptionToPublish); 
+                    }
+                    
+                    return isNestedRetry
+                        ? Observable.Throw<T>(exceptionToPublish) 
+                        : exceptionToPublish.Publish<T>();    
                 });
             });
-
+        } 
+        
         public static Func<TSource, IObservable<TResult>> ToResilient<TSource, TResult>(this Func<TSource, IObservable<TResult>> selector,
             Func<IObservable<TResult>, IObservable<TResult>> retrySelector = null)
             => x => selector.Defer(() => selector(x),retrySelector);
@@ -152,12 +188,31 @@ namespace Xpand.Extensions.Reactive.ErrorHandling{
             => (x, i) => selector.Defer(() => selector(x, i),retrySelector:retrySelector);
 
         public static Func<IObservable<TResult>> ToResilient<TResult>(this Func<IObservable<TResult>> action,
-            Func<IObservable<TResult>, IObservable<TResult>> retrySelector = null,[CallerMemberName]string caller="")
+            Func<IObservable<TResult>, IObservable<TResult>> retrySelector = null)
             => () => Observable.Defer(action).MakeResilient(retrySelector);
 
         public static IObservable<TResult> ToResilient<TResult>(this IObservable<TResult> source,
-            Func<IObservable<TResult>, IObservable<TResult>> retrySelector = null,[CallerMemberName]string caller="")
+            Func<IObservable<TResult>, IObservable<TResult>> retrySelector = null)
             => source.MakeResilient(retrySelector);
         
     }
-}
+    
+    public class FaultHubException(string message, Exception innerException, AmbientFaultContext context)
+        : Exception(message, innerException) {
+        public AmbientFaultContext Context { get; } = context;
+
+        public override string ToString() {
+            var builder = new StringBuilder();
+            var frame = Context.DefinitionStackTrace.GetFrame(0);
+            builder.AppendLine($"--- Origin: {System.IO.Path.GetFileName(frame?.GetFileName())}:line {frame?.GetFileLineNumber()} ---");
+            if (Context.CustomContext.Any()) {
+                builder.AppendLine($"--- Context: {string.Join(" | ", Context.CustomContext)} ---");
+            }
+            builder.AppendLine("--- Original Exception ---");
+            builder.AppendLine(InnerException?.ToString() ?? base.ToString());
+            builder.AppendLine("--- Definition Site Stack Trace ---");
+            builder.AppendLine(Context.DefinitionStackTrace.ToString());
+        
+            return builder.ToString();
+        }
+    }}

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Reactive;
 using System.Reactive.Linq;
-using System.Runtime.CompilerServices;
 using Xpand.Extensions.Numeric;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Conditional;
@@ -40,8 +39,8 @@ namespace Xpand.Extensions.Reactive.Utility {
         public static IObservable<T> Defer<T,TObject>(this TObject o, Func<TObject,IObservable<T>> selector)
             => o.Defer(() => selector(o));
         
-        public static IObservable<T> Defer<T>(this object o, Func<IObservable<T>> selector,Func<IObservable<T>, IObservable<T>> retrySelector = null,[CallerMemberName]string caller="")
-            => Observable.Defer(selector.ToResilient(retrySelector,caller:caller));
+        public static IObservable<T> Defer<T>(this object o, Func<IObservable<T>> selector,Func<IObservable<T>, IObservable<T>> retrySelector = null)
+            => Observable.Defer(selector.ToResilient(retrySelector));
         
         public static IObservable<T> Defer<T>(this object o, Func<IEnumerable<T>> selector)
             => o.Defer(() => selector().ToNowObservable());

@@ -6,6 +6,7 @@ using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Threading;
 using Xpand.Extensions.Numeric;
 
 namespace Xpand.Extensions.Reactive.Transform {
@@ -24,87 +25,70 @@ namespace Xpand.Extensions.Reactive.Transform {
             });
         }
         
-        // public static IObservable<IList<T>> BufferUntilInactive<T>(this IObservable<T> source, TimeSpan delay,IScheduler scheduler=null)
-            // => source.BufferUntilInactive(delay,scheduler);
-            // => source.BufferUntilInactive(delay,window => window.ToList(),scheduler);
-            // => source.Quiescent(delay,scheduler);
-        
         public static IObservable<IList<T>> BufferUntilInactive<T>(this IObservable<T> source, int seconds,IScheduler scheduler=null)
             => source.BufferUntilInactive(seconds.Seconds());
-            // => source.BufferUntilInactive(seconds.Seconds(),window => window.ToList(),scheduler);
-            // => source.Quiescent(seconds.Seconds(),scheduler);
         
-            public static IObservable<IEnumerable<T>> BufferWithInactivity<T>(this IObservable<T> source, TimeSpan inactivity, TimeSpan? maxBufferTime=null,IScheduler scheduler=null) {
-                if (maxBufferTime.HasValue && maxBufferTime.Value < inactivity)
-                    throw new ArgumentException("maxBufferTime must be greater than or equal to inactivity", nameof(maxBufferTime));
-                maxBufferTime ??= inactivity * 3;
+        public static IObservable<IEnumerable<T>> BufferWithInactivity<T>(this IObservable<T> source, TimeSpan inactivity, TimeSpan? maxBufferTime=null,IScheduler scheduler=null) {
+            if (maxBufferTime.HasValue && maxBufferTime.Value < inactivity)
+                throw new ArgumentException("maxBufferTime must be greater than or equal to inactivity", nameof(maxBufferTime));
+            maxBufferTime ??= inactivity * 3;
 
-                return Observable.Create<IEnumerable<T>>(observer => {
-                    var gate = new object();
-                    var buffer = new List<T>();
-                    var inactivityTimer = new SerialDisposable();
-                    var maxTimeTimer = new SerialDisposable();
-                    var subscription = new SerialDisposable();
-                    scheduler ??= Scheduler.ThreadPool;
-                    void Dump() {
-                        if (buffer.Count <= 0) return;
-                        var items = buffer.ToArray();
-                        buffer.Clear();
-                        observer.OnNext(items);
-                    }
+            return Observable.Create<IEnumerable<T>>(observer => {
+                var gate = new object();
+                var buffer = new List<T>();
+                var inactivityTimer = new SerialDisposable();
+                var maxTimeTimer = new SerialDisposable();
+                var subscription = new SerialDisposable();
+                scheduler ??= Scheduler.ThreadPool;
+                void Dump() {
+                    if (buffer.Count <= 0) return;
+                    var items = buffer.ToArray();
+                    buffer.Clear();
+                    observer.OnNext(items);
+                }
 
-                    void ScheduleMaxTimeTimer() {
-                        maxTimeTimer.Disposable = scheduler.Schedule(maxBufferTime.Value, () => {
-                            lock (gate) {
-                                Dump();
-                                ScheduleMaxTimeTimer();
-                            }
-                        });
-                    }
+                void ScheduleMaxTimeTimer() {
+                    maxTimeTimer.Disposable = scheduler.Schedule(maxBufferTime.Value, () => {
+                        lock (gate) {
+                            Dump();
+                            ScheduleMaxTimeTimer();
+                        }
+                    });
+                }
 
-                    ScheduleMaxTimeTimer();
+                ScheduleMaxTimeTimer();
 
-                    subscription.Disposable = source.Subscribe(
-                        onNext: x => {
-                            lock (gate) {
-                                buffer.Add(x);
-                                inactivityTimer.Disposable = scheduler.Schedule(inactivity, () => {
-                                    lock (gate) {
-                                        Dump();
-                                    }
-                                });
-                            }
-                        },
-                        onError: ex => {
-                            lock (gate) {
-                                Dump(); 
-                                observer.OnError(ex);
-                            }                        },
-                        onCompleted: () => {
-                            lock (gate) {
-                                Dump();
-                                observer.OnCompleted();
-                            }
-                        });
+                subscription.Disposable = source.Subscribe(
+                    onNext: x => {
+                        lock (gate) {
+                            buffer.Add(x);
+                            inactivityTimer.Disposable = scheduler.Schedule(inactivity, () => {
+                                lock (gate) {
+                                    Dump();
+                                }
+                            });
+                        }
+                    },
+                    onError: ex => {
+                        lock (gate) {
+                            Dump(); 
+                            observer.OnError(ex);
+                        }                        },
+                    onCompleted: () => {
+                        lock (gate) {
+                            Dump();
+                            observer.OnCompleted();
+                        }
+                    });
 
-                    return new CompositeDisposable(subscription, inactivityTimer, maxTimeTimer);
-                });
-            }
-public static IObservable<IList<T>> BufferUntilInactive<T>(this IObservable<T> source, TimeSpan delay,IScheduler scheduler=null) {
-            return source.BufferWithInactivity(delay,scheduler:scheduler).Select(enumerable => enumerable.ToList());
-            // var publish = source.Publish(p => {
-            //     var closes = p.Throttle(delay);
-            //     if (maxCount != null) {
-            //         var overflows = source.Where((_, index) => index + 1 >= maxCount);
-            //         closes = closes.Merge(overflows);
-            //     }
-            //     return p.Window(() => closes).SelectMany(window => window.ToList()).Delay(TimeSpan.Zero);
-            // });
-            //
-            // return publish;
+                return new CompositeDisposable(subscription, inactivityTimer, maxTimeTimer);
+            });
         }
-        // => source.Quiescent(delay,scheduler).SelectMany(list => resultSelector(list.ToNowObservable()));
         
+        public static IObservable<IList<T>> BufferUntilInactive<T>(this IObservable<T> source, TimeSpan delay,IScheduler scheduler=null) 
+            => source.BufferWithInactivity(delay,scheduler:scheduler).Select(enumerable => enumerable.ToList());
+
+
         public static IObservable<IList<T>> Quiescent<T>(this IObservable<T> src, TimeSpan minimumInactivityPeriod, IScheduler scheduler=null) {
             scheduler ??= DefaultScheduler.Instance;
             var onoffs = src.SelectMany(_
@@ -132,7 +116,7 @@ public static IObservable<IList<T>> BufferUntilInactive<T>(this IObservable<T> s
             private readonly Subject<T> _liveEvents = new();
             private bool _observationsStarted;
             private Queue<T> _buffer = new();
-            private readonly object _gate = new();
+            private readonly Lock _gate = new();
 
             public IDisposable Subscribe(IObserver<T> observer) {
                 lock (_gate) {

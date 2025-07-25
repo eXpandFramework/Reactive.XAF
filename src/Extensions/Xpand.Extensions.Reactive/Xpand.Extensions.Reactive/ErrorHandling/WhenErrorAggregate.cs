@@ -14,7 +14,8 @@ namespace Xpand.Extensions.Reactive.ErrorHandling {
                 return Observable.Throw<T>(exception);
             });
         }
+        [Obsolete]
         public static IObservable<T> WhenErrorAggregate<T>(this IObservable<T> source, [CallerMemberName] string caller = "")
-            => source.Catch<T, Exception>(exception => new AggregateException(caller, exception).Throw<T>());
+            => source.AddErrorCallerContext(caller);
     }
 }

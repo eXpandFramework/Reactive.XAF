@@ -5,7 +5,6 @@ using System.Linq.Expressions;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Runtime.CompilerServices;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
@@ -19,7 +18,7 @@ using Xpand.Extensions.XAF.ApplicationModulesManagerExtensions;
 using Xpand.Extensions.XAF.Attributes.Custom;
 using Xpand.Extensions.XAF.TypesInfoExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
-using Xpand.XAF.Modules.Reactive.Extensions;
+
 
 namespace Xpand.XAF.Modules.Reactive.Services{
 	public static class ApplicationModulesManagerService {

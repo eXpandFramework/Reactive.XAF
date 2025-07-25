@@ -18,10 +18,10 @@ using DevExpress.ExpressApp.Model.Core;
 using Fasterflect;
 using HarmonyLib;
 using Xpand.Extensions.AppDomainExtensions;
-using Xpand.Extensions.ExceptionExtensions;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Combine;
+using Xpand.Extensions.Reactive.ErrorHandling;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.TypeExtensions;
@@ -32,6 +32,7 @@ using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.Extensions.XAF.ModuleExtensions;
 using Xpand.Extensions.XAF.ObjectExtensions;
 using Xpand.Extensions.XAF.TypesInfoExtensions;
+using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Security;
 
@@ -111,18 +112,23 @@ namespace Xpand.XAF.Modules.Reactive{
                 new HarmonyMethod(typeof(XafApplicationRxExtensions), nameof(XafApplicationRxExtensions.Exit))
                     .PreFix(typeof(XafApplication).Method(nameof(XafApplication.Exit)),true);
             }
-            return application.PatchAuthentication()
-                .Merge(application.WhenNonPersistentPropertyCollectionSource())
-                .Merge(application.PatchObjectSpaceProvider())
-                .Merge(application.NonPersistentChangesEnabledAttribute())
-                .Merge(application.PopulateAdditionalObjectSpaces())
-                .Merge(application.ReloadWhenChanged())
-                .Merge(application.FireChanged())
-                .Merge(application.ShowMessages())
-                .Merge(application.ExplicitModificationAttribute())
-                .Merge(application.ShowInstanceDetailView())
-                ;
+            
+            return application.HandleFaultBusException()
+                    
+                    .Merge(application.PatchAuthentication())
+                    .Merge(application.WhenNonPersistentPropertyCollectionSource())
+                    .Merge(application.PatchObjectSpaceProvider())
+                    .Merge(application.NonPersistentChangesEnabledAttribute())
+                    .Merge(application.PopulateAdditionalObjectSpaces())
+                    .Merge(application.ReloadWhenChanged())
+                    .Merge(application.FireChanged())
+                    .Merge(application.ShowMessages())
+                    .Merge(application.ExplicitModificationAttribute())
+                    .Merge(application.ShowInstanceDetailView());
         }
+        
+        private static IObservable<Unit> HandleFaultBusException(this XafApplication application)
+            => FaultHub.Bus.Do(application.HandleException).ToUnit();
         
         private static IObservable<Unit> ExplicitModificationAttribute(this XafApplication application)
             => application.WhenSetupComplete()

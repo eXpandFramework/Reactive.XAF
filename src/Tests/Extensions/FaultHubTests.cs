@@ -1,18 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reactive;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using akarnokd.reactive_extensions;
-using DevExpress.ExpressApp.Win;
 using NUnit.Framework;
 using Shouldly;
+using Xpand.Extensions.ExceptionExtensions;
 using Xpand.Extensions.Numeric;
 using Xpand.Extensions.Reactive.ErrorHandling;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 
-namespace Xpand.XAF.Modules.Reactive.Tests{
+namespace Xpand.Extensions.Tests{
     [TestFixture]
     public class FaultHubTests{
         private TestObserver<Exception> _busObserver;
@@ -26,10 +28,10 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
         private static Func<IObservable<Unit>,IObservable<Unit>> RetrySelectorWithBackoff=>source => source.RetryWithBackoff(3, strategy:_ => 100.Milliseconds());
         [SetUp]
         public void Setup(){
-         _busObserver = FaultHub.Bus.Test();
-         _preBusObserver = FaultHub.PreBus.Test();
+            FaultHub.Seen.Clear();  
+            _busObserver = FaultHub.Bus.Test();
+            _preBusObserver = FaultHub.PreBus.Test();
         }
-
 
         [Test]
         public void Exceptions_emitted_from_FaultHub(){
@@ -109,17 +111,17 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
         [Test]
         public void Inner_resilient_stream_can_CompleteOnError_when_error_when_outer_stream_resilient(){
             var bus = Unit.Default.Observe()
-                .SelectManyResilient(unit => unit.Defer(() => unit.Defer(() => Observable.Throw<Unit>(new InvalidOperationException())
-                    ,caller:"caller0").CompleteOnError(match:e => e is InvalidOperationException).WhenCompleted(),caller:"caller1"));
+                .SelectManyResilient(unit => unit.Defer(() => unit.Defer(() => Observable.Throw<Unit>(new InvalidOperationException()))
+                    .CompleteOnError(match:e => e.Has<InvalidOperationException>()).WhenCompleted()));
 
             var testObserver = bus.UseFaultHub().Test();
-
             
             testObserver.ItemCount.ShouldBe(1);
             testObserver.ErrorCount.ShouldBe(0);
             testObserver.CompletionCount.ShouldBe(1);
             _busObserver.ItemCount.ShouldBe(0);
         }
+
         
         [Test, TestCaseSource(nameof(RetrySelectors))]
         public void Can_Retry_outer_resilient_stream_with_retry_selector_when_error_in_inner_resilient_stream(Func<IObservable<Unit>,IObservable<Unit>> retrySelector){
@@ -275,7 +277,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
             var innerOpObserver = new TestObserver<int>();
             
             var opBus = Unit.Default.Observe()
-                .UsingResilient(() => new WinApplication(),_ => Observable.Defer(() => {
+                .UsingResilient(() => new SerialDisposable(),_ => Observable.Defer(() => {
                     innerOpObserver.OnNext(1);
                     return Observable.Defer(() => Observable.Throw<Unit>(new Exception()));
                 })) ;
@@ -294,7 +296,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
             var innerOpObserver = new TestObserver<int>();
             
             var opBus = Unit.Default.Observe()
-                .UsingResilient(() => new WinApplication(),_ => Observable.Defer(() => {
+                .UsingResilient(() => new SerialDisposable(),_ => Observable.Defer(() => {
                     innerOpObserver.OnNext(1);
                     return Observable.Defer(() => Observable.Throw<Unit>(new Exception()));
                 }),retrySelector) ;
@@ -314,7 +316,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
             var innerOpObserver = new TestObserver<int>();
             
             var opBus=innerOpObserver.Defer(() => innerOpObserver
-                .UsingResilient(() => new WinApplication(),_ => Observable.Defer(() => {
+                .UsingResilient(() => new SerialDisposable(),_ => Observable.Defer(() => {
                     innerOpObserver.OnNext(1);
                     return Observable.Defer(() => Observable.Throw<Unit>(new Exception()));
                 })),retrySelector) ;
@@ -326,8 +328,34 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
             innerOpObserver.ItemCount.ShouldBe(3);
             opBusObserver.ItemCount.ShouldBe(0);
             opBusObserver.ErrorCount.ShouldBe(0);
-            opBusObserver.CompletionCount.ShouldBe(1);        }
+            opBusObserver.CompletionCount.ShouldBe(1);
+        }
+        
+        [Test]
+        public void TraceFaults_Captures_And_Flows_Ambient_Context_To_Downstream_Resilience_Operator() {
+            var source = Observable.Throw<Unit>(new InvalidOperationException("Originating Error"));
+            
+            source.TraceFaults(["context1", "context2"])
+                .ToResilient()
+                .Subscribe();
+
+            _busObserver.ItemCount.ShouldBe(1);
+            var publishedException = _busObserver.Items.Single();
+
+            publishedException.ShouldBeOfType<FaultHubException>();
+            var faultHubException = (FaultHubException)publishedException;
+
+
+            faultHubException.Context.CustomContext.ShouldNotBeNull();
+            faultHubException.Context.CustomContext.ShouldContain("context1");
+            faultHubException.Context.CustomContext.ShouldContain("context2");
+
+
+            var topFrame = faultHubException.Context.DefinitionStackTrace.GetFrame(0);
+            topFrame?.GetMethod()?.Name.ShouldBe(nameof(TraceFaults_Captures_And_Flows_Ambient_Context_To_Downstream_Resilience_Operator));
+        }
     }
+    
     
 }
 

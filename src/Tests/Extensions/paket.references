@@ -13,3 +13,4 @@ System.Threading.Tasks.Dataflow
 System.Interactive.Async
 Microsoft.Extensions.Options
 Xpand.Patcher
+Microsoft.Extensions.Caching.Memory

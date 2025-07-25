@@ -59,7 +59,8 @@ namespace Xpand.Extensions.DateTimeExtensions {
                 "HH:mm d MMM yyyy",
                 "hh:mm tt MMM d yyyy",
                 "hh:mm tt MMM d, yyyy",
-                "hh:mm tt d MMM yyyy"
+                "hh:mm tt d MMM yyyy",
+                "d MMMM h:mm tt yyyy",      
             ], CultureInfo.InvariantCulture).DateTime;
 
             return dateTimeStyles == DateTimeStyles.AssumeUniversal ? dateTime.ToLocalTime() : dateTime;

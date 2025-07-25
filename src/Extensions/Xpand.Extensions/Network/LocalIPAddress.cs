@@ -11,6 +11,8 @@ namespace Xpand.Extensions.Network {
                 address => address.AddressFamily == AddressFamily.InterNetwork,
                 () => "No network adapters with an IPv4 address in the system!").ToString();
         
+        public static bool IsSameTo(this Uri first, string second)
+            => first.IsSameTo(new Uri(second));
         public static bool IsSameTo(this Uri first, Uri second) 
             => first != null && second != null && Uri.Compare(first, second,
                 UriComponents.SchemeAndServer | UriComponents.PathAndQuery, UriFormat.Unescaped,

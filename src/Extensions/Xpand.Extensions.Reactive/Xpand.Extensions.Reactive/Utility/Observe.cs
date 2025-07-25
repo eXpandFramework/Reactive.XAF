@@ -19,7 +19,7 @@ namespace Xpand.Extensions.Reactive.Utility {
 
         
         public static IObservable<T> ObserveOnContext<T>(this IObservable<T> source,SynchronizationContext context=null)
-            => source.ObserveOn(context??SynchronizationContext.Current!);
+            => source.ObserveOn((context ?? SynchronizationContext.Current!));
         public static IObservable<T> ObserveOnContextMaybe<T>(this IObservable<T> source)
             => SynchronizationContext.Current==null?source:source.ObserveOn(SynchronizationContext.Current!);
 

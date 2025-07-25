@@ -10,9 +10,9 @@ using Xpand.Extensions.Reactive.ErrorHandling;
 namespace Xpand.Extensions.Reactive.Transform{
     public static partial class Transform{
         
-        public static IObservable<TResult> SelectManySequential<T1, TResult>(this IObservable<T1> source, Func<T1, IObservable<TResult>> selector, Func<IObservable<TResult>, IObservable<TResult>> retrySelector = null) {
-            return source.Select(item => selector(item).ToResilient(retrySelector)).Concat();
-        }
+        public static IObservable<TResult> SelectManySequential<T1, TResult>(this IObservable<T1> source, Func<T1, IObservable<TResult>> selector, Func<IObservable<TResult>, IObservable<TResult>> retrySelector = null) 
+            => source.Select(item => selector(item).ToResilient(retrySelector)).Concat();
+
         public static IObservable<TResult> SelectManySequential<T1, TResult>(this IObservable<T1> source, Func<T1, Task<TResult>> selector, Func<IObservable<TResult>, IObservable<TResult>> retrySelector = null) 
             => source.SelectManySequential(selector.ToResilient(retrySelector));
         

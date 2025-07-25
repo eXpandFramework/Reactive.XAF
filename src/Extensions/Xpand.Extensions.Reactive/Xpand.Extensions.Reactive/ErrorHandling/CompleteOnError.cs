@@ -1,41 +1,26 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Reactive;
 using System.Reactive.Linq;
-using System.Runtime.CompilerServices;
-using System.Threading;
-using Xpand.Extensions.ExceptionExtensions;
 
 namespace Xpand.Extensions.Reactive.ErrorHandling {
 	public static partial class ErrorHandling {
-// Add this helper method to your extensions class
-		private static IObservable<T> RegisterHandler<T>(this IObservable<T> source, Func<Exception, bool> predicate) {
-			return Observable.Defer(() => {
-				if (FaultHub.HandlersContext.Value == null) FaultHub.HandlersContext.Value = new List<Func<Exception, bool>>();
+		private static IObservable<T> RegisterHandler<T>(this IObservable<T> source, Func<Exception, bool> predicate) 
+			=> Observable.Defer(() => {
+				FaultHub.HandlersContext.Value ??= [];
 				FaultHub.HandlersContext.Value.Add(predicate);
-				return source.Finally(() => {
-					FaultHub.HandlersContext.Value?.Remove(predicate);
-				});
+				return source.Finally(() => FaultHub.HandlersContext.Value?.Remove(predicate));
 			});
-		}
 
-// Replace ALL existing CompleteOnError overloads with this block
-		public static IObservable<T> CompleteOnError<T>(this IObservable<T> source, Action<Exception> onError = null,
-			Func<Exception, bool> match = null, bool mute = true, [CallerMemberName] string caller = "") {
+
+		public static IObservable<T> CompleteOnError<T>(this IObservable<T> source, Action<Exception> onError = null, Func<Exception, bool> match = null, bool mute = true) {
 			var predicate = match ?? (_ => true);
-			return source
-				.RegisterHandler(predicate)
+			return source.RegisterHandler(predicate)
 				.Catch<T, Exception>(e => {
-					if (predicate(e)) {
-						if (mute) {
-							e.MuteForBus();
-						}
-						onError?.Invoke(e);
-						return Observable.Empty<T>();
+					if (!predicate(e)) return Observable.Throw<T>(e);
+					if (mute) {
+						e.MuteForBus();
 					}
-					return Observable.Throw<T>(e);
+					onError?.Invoke(e);
+					return Observable.Empty<T>();
 				});
 		}
 

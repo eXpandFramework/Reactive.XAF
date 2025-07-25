@@ -5,3 +5,4 @@ Fasterflect.Xpand
 Xpand.Patcher
 System.Text.Json
 System.Threading.Tasks.Dataflow
+Microsoft.Extensions.Caching.Memory
