@@ -1,7 +1,4 @@
-﻿using System.Linq;
-using System.Reactive;
-using System.Reactive.Linq;
-using System.Reactive.Subjects;
+﻿using System.Reactive.Subjects;
 using akarnokd.reactive_extensions;
 using NUnit.Framework;
 using Shouldly;
@@ -10,23 +7,8 @@ using Xpand.Extensions.Reactive.Utility;
 using Xpand.TestsLib;
 using Xpand.TestsLib.Common.Attributes;
 
-namespace Xpand.Extensions.Tests {
-    public class TransformTests:BaseTest {
-        [Test]
-        public void DoNotComplete_Arrays() {
-            var testObserver = Enumerable.Range(0, 2).ToArray().ToNowObservable().DoNotComplete().Finally(() => {}).Test();
-            
-            testObserver.CompletionCount.ShouldBe(0);
-            testObserver.ItemCount.ShouldBe(2);
-        }
-        [Test]
-        public void DoNotComplete_Empty() {
-            var testObserver = Observable.Empty<Unit>().DoNotComplete().Finally(() => {}).Test();
-            
-            testObserver.CompletionCount.ShouldBe(0);
-            testObserver.ItemCount.ShouldBe(0);
-        }
-
+namespace Xpand.Extensions.Tests.TransformTests{
+    public class CountSubSequentTests : BaseTest {
         [Test]
         [XpandTest]
         public void CountSubSequent(){

@@ -23,8 +23,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling{
         public IReadOnlyList<string> CustomContext { get; init; }
     }
     public static class FaultHub {
-        
-        internal static readonly AsyncLocal<AmbientFaultContext> CurrentContext = new();
+        public static readonly AsyncLocal<AmbientFaultContext> CurrentContext = new();
         private static readonly AsyncLocal<bool> IsRetrying = new();
         internal static readonly AsyncLocal<List<Func<Exception, bool>>> HandlersContext = new();
         static readonly AsyncLocal<Guid?> Ctx = new();
@@ -144,8 +143,8 @@ namespace Xpand.Extensions.Reactive.ErrorHandling{
             => ex.Publish() ? Observable.Empty<T>() : Observable.Throw<T>(ex);
 
         static IObservable<T> MakeResilient<T>(this IObservable<T> source,
-            Func<IObservable<T>, IObservable<T>> retrySelector = null) {
-            return Observable.Defer(() => {
+            Func<IObservable<T>, IObservable<T>> retrySelector = null)
+            => Observable.Defer(() => {
                 var isNestedRetry = IsRetrying.Value;
                 var streamToCatch = source;
                 if (retrySelector != null) {
@@ -168,13 +167,10 @@ namespace Xpand.Extensions.Reactive.ErrorHandling{
                         return Observable.Throw<T>(exceptionToPublish); 
                     }
                     
-                    return isNestedRetry
-                        ? Observable.Throw<T>(exceptionToPublish) 
-                        : exceptionToPublish.Publish<T>();    
+                    return isNestedRetry ? Observable.Throw<T>(exceptionToPublish) : exceptionToPublish.Publish<T>();    
                 });
             });
-        } 
-        
+
         public static Func<TSource, IObservable<TResult>> ToResilient<TSource, TResult>(this Func<TSource, IObservable<TResult>> selector,
             Func<IObservable<TResult>, IObservable<TResult>> retrySelector = null)
             => x => selector.Defer(() => selector(x),retrySelector);
@@ -194,7 +190,14 @@ namespace Xpand.Extensions.Reactive.ErrorHandling{
         public static IObservable<TResult> ToResilient<TResult>(this IObservable<TResult> source,
             Func<IObservable<TResult>, IObservable<TResult>> retrySelector = null)
             => source.MakeResilient(retrySelector);
-        
+
+        public static IDisposable Disable() => AddHandler(_ => true);
+
+        public static IDisposable AddHandler(Func<Exception, bool> handler) {
+            var context = HandlersContext.Value ??= new List<Func<Exception, bool>>();
+            context.Add(handler);
+            return Disposable.Create(context,list => list.Remove(handler));
+        }
     }
     
     public class FaultHubException(string message, Exception innerException, AmbientFaultContext context)

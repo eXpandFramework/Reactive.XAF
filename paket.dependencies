@@ -87,7 +87,7 @@ nuget System.ValueTuple 4.5
 nuget System.Threading.Tasks.Dataflow 7.0.0
 nuget Microsoft.NET.Test.SDK 17.0
 nuget RazorLight 2.0.0-rc.3
-nuget System.Reactive 6.0.0
+nuget System.Reactive 6.0.1
 nuget Microsoft.Reactive.Testing 5.0.0
 nuget System.Collections.Concurrent 4.3.0
 nuget System.Memory 4.5.5

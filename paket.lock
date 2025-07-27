@@ -1124,7 +1124,7 @@ NUGET
       System.Reflection.DispatchProxy (>= 4.7.1)
       System.Security.Cryptography.Xml (>= 6.0.1)
       System.Security.Principal.Windows (>= 5.0)
-    System.Reactive (6.0)
+    System.Reactive (6.0.1)
     System.Reflection (4.3)
       Microsoft.NETCore.Platforms (>= 1.1)
       Microsoft.NETCore.Targets (>= 1.1)
