@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using akarnokd.reactive_extensions;
 using NUnit.Framework;
@@ -11,6 +13,7 @@ using Xpand.Extensions.Reactive.ErrorHandling;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Transform.System;
 using Xpand.TestsLib;
+using TestScheduler = Microsoft.Reactive.Testing.TestScheduler;
 
 namespace Xpand.Extensions.Tests.TransformTests{
     public class SelectManySequentialTests : BaseTest {
@@ -79,37 +82,39 @@ namespace Xpand.Extensions.Tests.TransformTests{
                 capturedError.ShouldBe(ex);
             }
         }
-        
-        [Test]
-        public void SelectManySequential_FailsWhenSelectorIsHot() {
-            // --- Arrange ---
-            var startTimes = new System.Collections.Concurrent.ConcurrentQueue<DateTime>();
-            var operationDuration = TimeSpan.FromMilliseconds(150);
 
-            // This factory is "hot". It immediately records the start time when it's *called*,
-            // proving that the work is initiated before subscription.
-            Func<int, IObservable<int>> hotObservableFactory = value =>
-            {
-                startTimes.Enqueue(DateTime.UtcNow);
-                // The real "work" is delayed, but the factory call has already happened.
-                return Observable.Timer(operationDuration).Select(_ => value);
+        [Test]
+        public void SelectManySequential_Executes_Operations_In_Sequence() {
+            // ARRANGE
+            var eventLog = new System.Collections.Concurrent.ConcurrentQueue<string>();
+            var source = new[] { 1, 2, 3 }.ToObservable();
+            var operationDelay = TimeSpan.FromMilliseconds(100);
+
+            // This selector logs when an operation starts and when it ends.
+            Func<int, IObservable<int>> selector = i => {
+                eventLog.Enqueue($"Start {i}");
+                return Observable.Timer(operationDelay)
+                    .Select(_ => i)
+                    .Do(_ => eventLog.Enqueue($"End {i}"));
             };
 
-            var source = new[] { 1, 2, 3 }.ToObservable();
+            // ACT
+            // We use TestObserver to run the stream and wait for it to complete.
+            var testObserver = source.SelectManySequential(selector).Test();
+            testObserver.AwaitDone(TimeSpan.FromSeconds(5));
 
-            // --- Act ---
-            // This is the operator under test. No fix has been applied.
-            source.SelectManySequential(hotObservableFactory).Wait();
+            // ASSERT
+            // The final values should be correct.
+            testObserver.AssertResult(1, 2, 3);
 
-            // --- Assert ---
-            // If execution were sequential, the time difference between the start of the 1st
-            // and 2nd operation would be at least the duration of one operation (~150ms).
-            var timeDifference = startTimes.ElementAt(1) - startTimes.ElementAt(0);
-
-            // This assertion is expected to FAIL.
-            // The actual timeDifference will be very small (e.g., < 1ms),
-            // proving the factory was called for all items concurrently at the start.
-            timeDifference.TotalMilliseconds.ShouldBeGreaterThan(operationDuration.TotalMilliseconds);
+            // The event log must show that each operation started and ended
+            // before the next one began. This proves sequential execution.
+            eventLog.ShouldBe(new[] { 
+                "Start 1", "End 1", 
+                "Start 2", "End 2", 
+                "Start 3", "End 3" 
+            });
         }
+        
     }
 }

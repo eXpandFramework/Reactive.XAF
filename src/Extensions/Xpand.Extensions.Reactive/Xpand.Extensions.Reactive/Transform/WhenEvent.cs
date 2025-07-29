@@ -22,36 +22,35 @@ namespace Xpand.Extensions.Reactive.Transform {
             => source.FromEventPattern<EventArgs>(eventName,scheduler,caller)
                 .Select(pattern => new EventPattern<object>(pattern.Sender, pattern.EventArgs));
 
-        private static IObservable<EventPattern<TArgs>> FromEventPattern<TArgs>(this object source, string eventName,IScheduler scheduler,[CallerMemberName]string caller="") {
+        internal static IObservable<EventPattern<TArgs>> FromEventPattern<TArgs>(this object source, string eventName,IScheduler scheduler,[CallerMemberName]string caller="") {
             var eventInfo = source.EventInfo(eventName);
-            if ((eventInfo.info.EventHandlerType?.IsGenericType ?? false)&&eventInfo.info.EventHandlerType.GenericTypeArguments.First()==typeof(TArgs)) {
-                return Observable.FromEventPattern<TArgs>(
+            IObservable<EventPattern<TArgs>> eventStream;
+
+            if ((eventInfo.info.EventHandlerType?.IsGenericType ?? false) && eventInfo.info.EventHandlerType.GenericTypeArguments.First() == typeof(TArgs)) {
+                eventStream = Observable.FromEventPattern<TArgs>(
                         handler => eventInfo.add.Invoke(source, [handler]),
-                        handler => eventInfo.remove.Invoke(source, [handler]),scheduler??ImmediateScheduler)
-                    .Select(pattern => new EventPattern<TArgs>(pattern.Sender, pattern.EventArgs))
-                    .TakeUntilDisposed(source as IComponent,caller)
-                    ;
+                        handler => eventInfo.remove.Invoke(source, [handler]), scheduler ?? ImmediateScheduler)
+                    .Select(pattern => new EventPattern<TArgs>(pattern.Sender, pattern.EventArgs));
+            }
+            else if (eventInfo.add.IsPublic && !eventInfo.add.IsStatic) {
+                eventStream = Observable.FromEventPattern<TArgs>(source, eventName, scheduler ?? ImmediateScheduler);
+            }
+            else if (eventInfo.info.EventHandlerType == typeof(EventHandler)) {
+                eventStream = Observable.FromEventPattern(
+                        handler => eventInfo.add.Invoke(source, [handler]),
+                        handler => eventInfo.remove.Invoke(source, [handler]), scheduler ?? ImmediateScheduler)
+                    .Select(pattern => new EventPattern<TArgs>(pattern.Sender, (TArgs)pattern.EventArgs));
+            }
+            else {
+                eventStream = Observable.FromEventPattern<TArgs>(
+                        handler => eventInfo.add.Invoke(source, [handler]),
+                        handler => eventInfo.remove.Invoke(source, [handler]), scheduler ?? ImmediateScheduler)
+                    .Select(pattern => new EventPattern<TArgs>(pattern.Sender, pattern.EventArgs));
             }
 
-            if (eventInfo.add.IsPublic&&!eventInfo.add.IsStatic) {
-                return Observable.FromEventPattern<TArgs>(source, eventName,scheduler??ImmediateScheduler)
-                    .TakeUntilDisposed(source as IComponent,caller);    
-            }
-
-            if (eventInfo.info.EventHandlerType == typeof(EventHandler)) {
-                return Observable.FromEventPattern(
-                        handler => eventInfo.add.Invoke(source, [handler]),
-                        handler => eventInfo.remove.Invoke(source, [handler]),scheduler??ImmediateScheduler)
-                    .Select(pattern => new EventPattern<TArgs>(pattern.Sender, (TArgs)pattern.EventArgs))
-                    .TakeUntilDisposed(source as IComponent,caller)
-                    ;    
-            }
-            return Observable.FromEventPattern<TArgs>(
-                    handler => eventInfo.add.Invoke(source, [handler]),
-                    handler => eventInfo.remove.Invoke(source, [handler]),scheduler??ImmediateScheduler)
-                .Select(pattern => new EventPattern<TArgs>(pattern.Sender, pattern.EventArgs))
-                .TakeUntilDisposed(source as IComponent,caller)
-                ;
+            return eventStream
+                .TakeUntilDisposed(source as IComponent, caller)
+                ; 
         }
         
         private static (EventInfo info,MethodInfo add,MethodInfo remove) EventInfo(this object source,string eventName) 
@@ -65,6 +64,10 @@ namespace Xpand.Extensions.Reactive.Transform {
             => source.FromEventPattern<TEventArgs>(eventName,scheduler,caller).Select(pattern => (pattern.EventArgs,(TSource)source));
         
         public static IObservable<TEventArgs> WhenEvent<TEventArgs>(this object source, string eventName,IScheduler scheduler=null,[CallerMemberName]string caller="") 
-            => source.FromEventPattern<TEventArgs>(eventName,scheduler,caller).Select(pattern => pattern.EventArgs);
+            => source.FromEventPattern<TEventArgs>(eventName,scheduler,caller).Select(pattern => pattern.EventArgs) ;
+        public static IObservable<TResult> WhenEvent<TEventArgs,TResult>(this object source, string eventName,Func<TEventArgs,IObservable<TResult>> selector,IScheduler scheduler=null,[CallerMemberName]string caller="") 
+            => source.FromEventPattern<TEventArgs>(eventName,scheduler,caller).SelectMany(pattern => selector(pattern.EventArgs)) ;
+        
+        
     }
 }

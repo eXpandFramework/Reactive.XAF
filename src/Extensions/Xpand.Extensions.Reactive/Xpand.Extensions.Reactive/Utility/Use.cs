@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reactive.Linq;
+using System.Runtime.CompilerServices;
 using Xpand.Extensions.Reactive.ErrorHandling;
 
 namespace Xpand.Extensions.Reactive.Utility {
@@ -18,8 +19,8 @@ namespace Xpand.Extensions.Reactive.Utility {
                 .Zip(safeSideEffect.LastOrDefaultAsync()));
         });
 
-        public static IObservable<TResult> UsingResilient<TResource, TResult>(this object _,
-            Func<TResource> resourceFactory, Func<TResource, IObservable<TResult>> busFactory, Func<IObservable<TResult>, IObservable<TResult>> retrySelector = null) where TResource : IDisposable 
-            => Observable.Using(resourceFactory, busFactory.ToResilient(retrySelector));
+        public static IObservable<TResult> Using<TResource, TResult>(this object _,
+            Func<TResource> resourceFactory, Func<TResource, IObservable<TResult>> busFactory,[CallerMemberName]string caller="") where TResource : IDisposable 
+            => Observable.Using(resourceFactory, arg => busFactory(arg).WithFaultContext([caller,typeof(TResult)]));
     }
 }

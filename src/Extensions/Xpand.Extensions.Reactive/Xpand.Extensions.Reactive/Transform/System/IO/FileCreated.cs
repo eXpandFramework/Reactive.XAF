@@ -62,7 +62,7 @@ namespace Xpand.Extensions.Reactive.Transform.System.IO {
                     Directory.CreateDirectory(fileInfo.DirectoryName!);
                 }
                 await using var fileStream = File.Open(fileInfo.FullName, fileMode, fileAccess, fileShare);
-                return (await selector(fileStream)).Observe();
+                return (await selector(fileStream)).Observe().AsObservable();
             }).RetryWithBackoff(retry);
 
         public static IObservable<DirectoryInfo> WhenDirectory(this DirectoryInfo directory,bool create=true) 

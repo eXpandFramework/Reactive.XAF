@@ -9,22 +9,12 @@ using Xpand.Extensions.Reactive.Utility;
 namespace Xpand.Extensions.Reactive.Transform{
     
     public static partial class Transform {
-        public static IObservable<TResult> SelectResilient<TSource, TResult>(this IObservable<TSource> source, Func<TSource, TResult> selector)
-            => source.SelectMany(x => {
-                TResult value;
-                try {
-                    value = selector(x);          
-                }
-                catch (Exception ex) {
-                    return ex.Publish<TResult>();  
-                }
-                return value.Observe();
-            });
-        
-        
-        public static IObservable<string> SelectToString(this IObservable<object> source) {
-            return source.WhenNotDefault().Select(o => o.ToString());
-        }
+
+        public static IObservable<TResult> SelectResilient<TSource, TResult>(this IObservable<TSource> source,
+            Func<TSource, TResult> selector, [CallerMemberName] string caller = "") 
+            => source.SelectMany(item => item.Defer(() => selector(item).Observe(),caller));        
+        public static IObservable<string> SelectToString(this IObservable<object> source) 
+            => source.WhenNotDefault().Select(o => o.ToString());
 
         [Obsolete(nameof(ExhaustMap),true)]
         public static IObservable<TResult> SelectAndOmit<T, TResult>(this IObservable<T> source,

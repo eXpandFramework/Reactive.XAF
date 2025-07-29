@@ -6,6 +6,8 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
+using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp;
 using Microsoft.Reactive.Testing;
 using NUnit.Framework;
@@ -13,6 +15,7 @@ using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.FileExtensions;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Numeric;
+using Xpand.Extensions.Reactive.ErrorHandling;
 using Xpand.Extensions.StringExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.Reactive;
@@ -136,12 +139,16 @@ namespace Xpand.TestsLib.Common{
 
         public static TraceSource TraceSource{ get; }
         
-
+        protected TestObserver<Exception> BusObserver;
+        protected TestObserver<Exception> PreBusObserver;
          public const string NotImplemented = "NotImplemented";
 
         [SetUp]
         public virtual void Setup() {
             TestContext.Out.Write(TestContext.CurrentContext.Test.FullName);
+            FaultHub.Seen.Clear();  
+            BusObserver = FaultHub.Bus.Test();
+            PreBusObserver = FaultHub.PreBus.Test();
         }
 
         [TearDown]
@@ -163,7 +170,7 @@ namespace Xpand.TestsLib.Common{
                 TestContext.Out.Write(e);
             }
         }
-        static readonly object Locker=new();
+        static readonly Lock Locker=new();
         protected virtual void ResetXAF() {
             lock (Locker) {
                 XafTypesInfo.HardReset();

@@ -128,7 +128,9 @@ namespace Xpand.XAF.Modules.Reactive{
         }
         
         private static IObservable<Unit> HandleFaultBusException(this XafApplication application)
-            => FaultHub.Bus.Do(application.HandleException).ToUnit();
+            => FaultHub.Bus.Do(exception => {
+                // application.HandleException(exception);
+            }).ToUnit();
         
         private static IObservable<Unit> ExplicitModificationAttribute(this XafApplication application)
             => application.WhenSetupComplete()

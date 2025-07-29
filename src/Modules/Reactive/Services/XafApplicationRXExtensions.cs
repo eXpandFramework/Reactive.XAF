@@ -123,8 +123,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => application.WhenFrameCreated().SelectMany(frame => frame.WhenViewControllersActivated().To(frame)
                 .Where(frame1 => frame1.When(objectType)&&frame1.When(viewType)&&frame1.When(nesting)));
         
-        public static IObservable<Frame> WhenFrameCreated(this XafApplication application,TemplateContext templateContext=default)
-            => application.WhenEvent<FrameCreatedEventArgs>(nameof(XafApplication.FrameCreated)).Select(e => e.Frame)
+        public static ResilientObservable<Frame> WhenFrameCreated(this XafApplication application,TemplateContext templateContext=default)
+            => application.ProcessEvent<FrameCreatedEventArgs>(nameof(XafApplication.FrameCreated)).Select(e => e.Frame)
                 .Where(frame => frame.Application==application&& (templateContext==default ||frame.Context == templateContext));
 
         private static readonly Subject<GenericEventArgs<XafApplication>> WhenExitingSubject = new();
@@ -205,18 +205,21 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<Window> WhenMainWindowCreated(this XafApplication application,  bool emitIfMainExists = true) 
             => application.WhenWindowCreated(true, emitIfMainExists);
         
-        public static IObservable<Window> WhenWindowCreated(this XafApplication application,bool isMain=false,bool emitIfMainExists=true) {
+        public static ResilientObservable<Window> WhenWindowCreated(this XafApplication application,bool isMain=false,bool emitIfMainExists=true) {
             var windowCreated = application.WhenFrameCreated().OfType<Window>();
-            return isMain ? emitIfMainExists && application.MainWindow != null ? application.MainWindow.Observe()
-                : windowCreated.WhenMainWindowAvailable().Select(window => window) : windowCreated;
+            return (isMain ? emitIfMainExists && application.MainWindow != null ? application.MainWindow.Observe()
+                    : windowCreated.WhenMainWindowAvailable().Select(window => window)
+                : windowCreated);
         }
 
-        private static IObservable<Window> WhenMainWindowAvailable(this IObservable<Window> windowCreated) 
+        private static ResilientObservable<Window> WhenMainWindowAvailable(this IObservable<Window> windowCreated) 
             => windowCreated.When(TemplateContext.ApplicationWindow).TemplateChanged().Cast<Window>()
-                .If(window => window.Application.GetPlatform()==Platform.Win,window => window.WhenEvent("Showing")
-                    .SelectMany(_ => 1.Seconds().Interval().TakeUntilDisposed(window.Application).ObserveOnContext().WhenNotDefault(_ => window.Application?.MainWindow).Take(1))
-                    .To(window),window => (window.Application.MainWindow ?? window).Observe()).Take(1);
-        
+                .If(window => window.Application.GetPlatform() == Platform.Win, window => window.ProcessEvent("Showing")
+                    .SelectMany(_ => 1.Seconds().Interval().TakeUntilDisposed(window.Application).ObserveOnContext()
+                        .WhenNotDefault(_ => window.Application?.MainWindow).Take(1).ToResilient())
+                    .To(window), window => (window.Application.MainWindow ?? window).Observe()).ToResilient()
+                .Take(1);
+
         public static IObservable<Window> WhenPopupWindowCreated(this XafApplication application) 
             => application.WhenFrameCreated(TemplateContext.PopupWindow).Where(frame => frame.Application==application).Cast<Window>();
         
@@ -364,21 +367,20 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<Frame> WhenFrame(this XafApplication application, params string[] viewIds) 
             => application.WhenFrame().WhenFrame(viewIds);
         
-        public static IObservable<Frame> WhenFrame(this XafApplication application, Type objectType ,
+        public static ResilientObservable<Frame> WhenFrame(this XafApplication application, Type objectType ,
             ViewType viewType = ViewType.Any, Nesting nesting = Nesting.Any) 
             => application.WhenFrame(_ => objectType,_ => viewType,nesting);
         
-        public static IObservable<Frame> WhenFrame(this XafApplication application, Type objectType ,
+        public static ResilientObservable<Frame> WhenFrame(this XafApplication application, Type objectType ,
             params ViewType[] viewTypes) 
             => application.WhenFrame(objectType).WhenFrame(viewTypes);
         
-        public static IObservable<Frame> WhenFrame(this XafApplication application, Func<Frame,Type> objectType,
+        public static ResilientObservable<Frame> WhenFrame(this XafApplication application, Func<Frame,Type> objectType,
             Func<Frame,ViewType> viewType = null, Nesting nesting = Nesting.Any) 
             => application.WhenFrame().WhenFrame(objectType,viewType,nesting);
         
-        static IObservable<Frame> WhenFrameViewChanged(this XafApplication application) 
+        static ResilientObservable<Frame> WhenFrameViewChanged(this XafApplication application) 
             => application.WhenFrameCreated().Merge(application.MainWindow.Observe().WhenNotDefault())
-                
                 .WhenViewChanged().Select(tuple => tuple.frame)
                 .StartWith(application.MainWindow.Cast<Frame>()).WhenNotDefault(frame => frame?.View);
         
@@ -736,9 +738,9 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         
         
         public static IObservable<TResult> UseObject<TSource, TResult>(this XafApplication application,
-            TSource instance, Func<TSource, IObservable<TResult>> selector, bool useObjectSpaceProvider = false, Func<IObservable<TResult>, IObservable<TResult>> retrySelector = null)
-            => application.UsingResilient(() => application.CreateObjectSpace(useObjectSpaceProvider, typeof(TSource)),
-                space => selector(space.GetObjectFromKey(instance)),retrySelector);
+            TSource instance, Func<TSource, IObservable<TResult>> selector, bool useObjectSpaceProvider = false,[CallerMemberName]string caller="")
+            => application.Using(() => application.CreateObjectSpace(useObjectSpaceProvider, typeof(TSource)),
+                space => selector(space.GetObjectFromKey(instance)),caller.PrefixCaller());
 
         public static IObservable<TResult> UseArray<TSource,TResult>(this XafApplication application,TSource[] instance,Func<TSource[],IObservable<TResult>> selector,bool useObjectSpaceProvider=false,[CallerMemberName]string caller="") 
             => application.UseObjectSpace( space => selector(instance.Select(space.GetObject).ToArray()) ,useObjectSpaceProvider,caller);
@@ -750,10 +752,10 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 return factory(obj);
             }, obj.GetType());
 
-        public static IObservable<T> UseProviderObjectSpace<T>(this XafApplication application,Func<IObjectSpace,IObservable<T>> factory,Type objectType=null, Func<IObservable<T>, IObservable<T>> retrySelector = null) {
+        public static IObservable<T> UseProviderObjectSpace<T>(this XafApplication application,Func<IObjectSpace,IObservable<T>> factory,Type objectType=null,[CallerMemberName]string caller="") {
             if (application.IsDisposed())return Observable.Empty<T>();
             var type =objectType?? typeof(T).RealType();
-            return application.UsingResilient(() => application.CreateObjectSpace(true, type),factory.ToResilient(retrySelector));
+            return application.Using(() => application.CreateObjectSpace(true, type),factory,caller.PrefixCaller());
         }
         public static IObservable<Unit> UseProviderObjectSpace<T>(this XafApplication application,Action<IObjectSpace> factory,[CallerMemberName]string caller="") 
             => application.UseProviderObjectSpace(space => {

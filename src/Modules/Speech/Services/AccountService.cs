@@ -32,7 +32,7 @@ namespace Xpand.XAF.Modules.Speech.Services {
 
         private static IObservable<Unit> UpdateVoicesOnViewRefresh(this ApplicationModulesManager manager) 
             => manager.WhenSpeechApplication(application => application.WhenFrame(typeof(BusinessObjects.SpeechService),ViewType.DetailView)
-                .SelectUntilViewClosed(frame => frame.GetController<RefreshController>().RefreshAction.WhenConcatRetriedExecution(_ =>frame.View.CurrentObject.Cast<BusinessObjects.SpeechService>().UpdateVoices() )).ToUnit());
+                .SelectUntilViewClosed(frame => frame.GetController<RefreshController>().RefreshAction.WhenConcatExecution(_ =>frame.View.CurrentObject.Cast<BusinessObjects.SpeechService>().UpdateVoices() )).ToUnit());
 
         public static BusinessObjects.SpeechService DefaultSpeechAccount(this IObjectSpace space,IModelSpeech modelSpeech) 
             => space.FindObject<BusinessObjects.SpeechService>(CriteriaOperator.Parse(modelSpeech.DefaultSpeechServiceCriteria));

@@ -13,3 +13,4 @@ DevExpress.ExpressApp.ViewVariantsModule
 DevExpress.Persistent.BaseImpl.Xpo
 Microsoft.Reactive.Testing
 Microsoft.Extensions.Options
+Microsoft.Extensions.Caching.Memory
