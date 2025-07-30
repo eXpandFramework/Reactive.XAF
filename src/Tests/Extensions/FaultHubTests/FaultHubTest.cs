@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
@@ -336,6 +337,38 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
         }
     
     
-        
+        [Test]
+        public void MakeResilient_WithTopLevelRetry_CorrectlyRetriesAndPublishes() {
+            // ARRANGE
+            var attemptCount = 0;
+            // The failing operation, wrapped in a Defer to track attempts.
+            var failingOperation = Observable.Defer(() => {
+                attemptCount++;
+                Console.WriteLine($"[TEST_TRACE] Attempt #{attemptCount}. IsRetrying = {FaultHub.IsRetrying.Value}");
+                return Observable.Throw<int>(new InvalidOperationException("Operation Failed"));
+            });
+    
+            // The retry policy: 1 initial attempt + 2 retries = 3 total attempts.
+            var retrySelector = (Func<IObservable<int>, IObservable<int>>)(source => source.Retry(2));
+
+            // ACT
+            // This is the exact composition from your WebDriver test. A deferred source
+            // is wrapped in a top-level WithFaultContext that has a retry policy.
+            var resilientOperation = failingOperation
+                .WithFaultContext(["TOP_LEVEL_RETRY"], retrySelector);
+    
+            // We subscribe, which runs the observable to completion.
+            resilientOperation.Subscribe();
+
+            // ASSERT
+            // This proves the retry logic was correctly executed.
+            attemptCount.ShouldBe(2);
+    
+            // This proves the final error was published after all retries were exhausted.
+            BusObserver.ItemCount.ShouldBe(1);
+            var ex = BusObserver.Items.Single().ShouldBeOfType<FaultHubException>();
+            ex.Context.CustomContext.ShouldContain("TOP_LEVEL_RETRY");
+            ex.InnerException.ShouldBeOfType<InvalidOperationException>();
+        }
     }
 }
