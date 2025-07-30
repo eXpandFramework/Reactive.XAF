@@ -42,12 +42,12 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar{
         public static IObservable<(Event cloud, IEvent local, MapAction mapAction, CallDirection callDirection)> When(
             this IObservable<(Event cloud,IEvent local, MapAction mapAction,CallDirection callDirection)> source,
             MapAction mapAction, CallDirection callDirection = CallDirection.Both)
-            => source.Where(_ => _.mapAction == mapAction&& (callDirection == CallDirection.Both || _.callDirection == callDirection));
+            => source.Where(t => t.mapAction == mapAction&& (callDirection == CallDirection.Both || t.callDirection == callDirection));
         
         public static IObservable<GenericEventArgs<(Func<IObjectSpace> objectSpaceFactory, IEvent local, Event cloud, MapAction mapAction, CallDirection callDirection)>> When(
             this IObservable<GenericEventArgs<(Func<IObjectSpace> objectSpaceFactory, IEvent local, Event cloud, MapAction mapAction, CallDirection callDirection)>> source,
             MapAction mapAction, CallDirection callDirection = CallDirection.Both)
-            => source.Where(_ => _.Instance.mapAction == mapAction&& (callDirection == CallDirection.Both || _.Instance.callDirection == callDirection));
+            => source.Where(e => e.Instance.mapAction == mapAction&& (callDirection == CallDirection.Both || e.Instance.callDirection == callDirection));
 
         internal static IObservable<TSource> TraceGoogleCalendarModule<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<ITraceEvent> traceAction = null,
             Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.OnNextOrOnError,Func<string> allMessageFactory = null,
@@ -75,12 +75,12 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar{
             .Merge(manager.ConfigureModel());
 
         private static IObservable<(Frame frame, UserCredential credential, CalendarListEntry calendarListEntry)> EnsureCalendar(this IObservable<(Frame frame, UserCredential credential)> source) 
-            => source.Select(_ => {
-                    var defaultCalendarName = _.frame.View.AsObjectView().Application().Model
+            => source.Select(t => {
+                    var defaultCalendarName = t.frame.View.AsObjectView().Application().Model
                         .ToReactiveModule<IModelReactiveModuleOffice>().Office.Google().Calendar().DefaultCalendarName;
-                    return Observable.Start(() => _.credential.NewService<global::Google.Apis.Calendar.v3.CalendarService>()
-                            .GetCalendar(defaultCalendarName, true,defaultCalendarName==DefaultCalendarId)).Merge().Wait().Observe()
-                        .Select(calendarListEntry => (_.frame, _.credential, calendarListEntry));
+                    return Observable.Start(() => t.credential.NewService<global::Google.Apis.Calendar.v3.CalendarService>()
+                            .GetCalendar(defaultCalendarName, true,defaultCalendarName==DefaultCalendarId)).Merge().Wait().Observe().AsObservable()
+                        .Select(calendarListEntry => (t.frame, t.credential, calendarListEntry));
                 })
                 .Merge()
                 .TraceGoogleCalendarModule(t => t.calendarListEntry.Summary);
@@ -89,9 +89,9 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar{
             this IObservable<(Frame frame, UserCredential userCredential, CalendarListEntry calendar, IModelCalendarItem calerdarItem)> source)  
             => source
                 .Where(t => t.calerdarItem.CallDirection!=CallDirection.Out)
-                .SelectMany(_ => _.frame.Application
-                .SelectMany(() => _.SynchronizeLocal(_.calerdarItem.SynchronizationType))
-                .Select(calendar => (_.frame,_.userCredential,calendar))
+                .SelectMany(t => t.frame.Application
+                .SelectMany(() => t.SynchronizeLocal(t.calerdarItem.SynchronizationType))
+                .Select(calendar => (t.frame,t.userCredential,calendar))
                 .TraceGoogleCalendarModule(folder => $"Event: {folder.calendar.source?.Id}"));
 
         private static IObservable<(IEvent target, Event source)> SynchronizeLocal(
@@ -114,7 +114,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar{
                     .ToReactiveModule<IModelReactiveModuleOffice>().Office
                     .Google().Calendar().Items.Where(item => item.ObjectView == t.frame.View.Model)
                     .Select(item => (t.frame, t.credential, t.calendarListEntry, item)))
-                .TraceGoogleCalendarModule(_ => _.frame.View.Id);
+                .TraceGoogleCalendarModule(t => t.frame.View.Id);
 
         private static IObservable<(Event serviceObject, MapAction mapAction)> SynchronizeBoth(
             this IObservable<(Frame frame, UserCredential credential, CalendarListEntry calendarListEntry, IModelCalendarItem modelCalendarItem)> source) 
@@ -129,7 +129,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar{
                     .TakeUntil(t.frame.View.WhenClosing())
                 ).Switch()
                 .Do(tuple => UpdatedSubject.OnNext((tuple.serviceObject,null,tuple.mapAction,CallDirection.Out)))
-                .TraceGoogleCalendarModule(_ => $"{_.mapAction} {_.serviceObject.Description}, {_.serviceObject.Status}, {_.serviceObject.Id}");
+                .TraceGoogleCalendarModule(t => $"{t.mapAction} {t.serviceObject.Description}, {t.serviceObject.Status}, {t.serviceObject.Id}");
 
         private static IObservable<(Event serviceObject, MapAction mapAction)> SynchronizeCloud(this IObservable<global::Google.Apis.Calendar.v3.CalendarService> source,
             SynchronizationType synchronizationType, IObjectSpace objectSpace, Func<IObjectSpace> objectSpaceFactory,CalendarListEntry calendar) 
@@ -265,7 +265,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar{
                 .SelectMany(events => events)
                 .Where(events => events.Items != null)
                 .SelectMany(events => events.Items)
-                .SelectMany(_ => Observable.FromAsync(() => calendarService.Events.Delete(calendarId, _.Id).ExecuteAsync()))
+                .SelectMany(e => Observable.FromAsync(() => calendarService.Events.Delete(calendarId, e.Id).ExecuteAsync()))
                 .LastOrDefaultAsync();
 
         

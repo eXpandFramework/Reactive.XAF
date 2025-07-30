@@ -44,7 +44,7 @@ namespace Xpand.Extensions.Reactive.Filter{
         #region Resilient ResilientObservable Operators
         public static ResilientObservable<TSource> WhenIncludeNotDefault<TSource, TValue>(this ResilientObservable<TSource> source,
             TSource value, Func<TSource, TValue> valueSelector)
-            => source.StartWith(value).ToResilient().WhenNotDefault(valueSelector);
+            => source.StartWith(value).ToResilientObservable().WhenNotDefault(valueSelector);
 
         public static ResilientObservable<bool> WhenTrue(this ResilientObservable<bool> source) => source.WhenNotDefault();
         public static ResilientObservable<bool> WhenFalse(this ResilientObservable<bool> source) => source.WhenDefault();

@@ -67,19 +67,19 @@ namespace Xpand.Extensions.Reactive.Transform {
             => source.Concat(value.Observe());
         
          public static ResilientObservable<T> ConcatDefer<T>(this ResilientObservable<T> source, Func<IObservable<T>> target)
-            => source.Concat(Observable.Defer(target).ToResilient());
+            => source.Concat(Observable.Defer(target).ToResilientObservable());
 
         public static ResilientObservable<T> ConcatDeferAction<T>(this ResilientObservable<T> source, Action target)
             => source.Concat(Observable.Defer(() => {
                 target();
                 return Observable.Empty<T>();
-            }).ToResilient());
+            }).ToResilientObservable());
 
         public static ResilientObservable<Unit> ConcatDeferToUnit<T>(this ResilientObservable<T> source, Func<IObservable<T>> target)
-            => source.ToUnit().Concat(Observable.Defer(target).ToUnit().ToResilient());
+            => source.ToUnit().Concat(Observable.Defer(target).ToUnit().ToResilientObservable());
 
         public static ResilientObservable<Unit> ConcatDeferToUnit<T>(this ResilientObservable<T> source, Func<IObservable<object>> target)
-            => source.ToUnit().Concat(Observable.Defer(target).ToUnit().ToResilient());
+            => source.ToUnit().Concat(Observable.Defer(target).ToUnit().ToResilientObservable());
 
         public static ResilientObservable<Unit> ConcatToUnit<T, T1>(this ResilientObservable<T> source, ResilientObservable<T1> target)
             => source.ToUnit().Concat(target.ToUnit());
@@ -88,7 +88,7 @@ namespace Xpand.Extensions.Reactive.Transform {
             => source.ToObject().Concat(target.ToObject());
 
         public static ResilientObservable<TTarget> ConcatIgnoredValue<TSource, TTarget>(this ResilientObservable<TSource> source, TTarget value)
-            => source.Select(_ => default(TTarget)).WhenNotDefault().Concat(value.Observe().ToResilient());
+            => source.Select(_ => default(TTarget)).WhenNotDefault().Concat(value.Observe().ToResilientObservable());
 
         public static ResilientObservable<Unit> ConcatIgnoredUnit<TSource>(this ResilientObservable<TSource> source)
             => source.ConcatIgnoredValue(Unit.Default);
@@ -99,7 +99,7 @@ namespace Xpand.Extensions.Reactive.Transform {
         public static ResilientObservable<T> ConcatIgnored<T, T2>(this ResilientObservable<T> source, Func<T, int, IObservable<T2>> secondSelector, Func<T, bool> merge = null)
             => source.SelectMany((arg, i) => {
                 merge ??= _ => true;
-                return merge(arg) ? secondSelector(arg, i).IgnoreElements().ToResilient().ConcatIgnoredValue(arg) : arg.Observe().ToResilient();
+                return merge(arg) ? secondSelector(arg, i).IgnoreElements().ToResilientObservable().ConcatIgnoredValue(arg) : arg.Observe().ToResilientObservable();
             });
 
         public static ResilientObservable<T> ConcatIgnored<T, T2>(this ResilientObservable<T> source, ResilientObservable<T2> secondSelector)
@@ -110,25 +110,25 @@ namespace Xpand.Extensions.Reactive.Transform {
                 merge ??= _ => true;
                 if (merge(arg)) {
                     action(arg);
-                    return Observable.Empty<T>().ToResilient().ConcatIgnoredValue(arg);
+                    return Observable.Empty<T>().ToResilientObservable().ConcatIgnoredValue(arg);
                 }
-                return arg.Observe().ToResilient();
+                return arg.Observe().ToResilientObservable();
             });
 
         public static ResilientObservable<T> ConcatIgnoredFirst<T, T2>(this ResilientObservable<T> source, Func<T, IObservable<T2>> secondSelector, Func<T, bool> merge = null)
             => source.SelectMany((arg, i) => {
-                var observable = Observable.Empty<T>().ToResilient();
+                var observable = Observable.Empty<T>().ToResilientObservable();
                 if (i == 0) {
                     merge ??= _ => true;
                     if (merge(arg)) {
-                        observable = secondSelector(arg).IgnoreElements().ToResilient().To(arg);
+                        observable = secondSelector(arg).IgnoreElements().ToResilientObservable().To(arg);
                     }
-                    return observable.Concat(arg.Observe().ToResilient());
+                    return observable.Concat(arg.Observe().ToResilientObservable());
                 }
-                return arg.Observe().ToResilient();
+                return arg.Observe().ToResilientObservable();
             });
 
         public static ResilientObservable<T> Concat<T>(this ResilientObservable<T> source, T value)
-            => source.Concat(value.Observe().ToResilient());
+            => source.Concat(value.Observe().ToResilientObservable());
     }
 }

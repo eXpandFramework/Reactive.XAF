@@ -17,7 +17,7 @@ namespace Xpand.Extensions.Reactive.Transform{
             
             return new ResilientObservable<TEventArgs>(initialObservable, caller);
         }        
-        public static ResilientObservable<T> ToResilient<T>(this IObservable<T> source, [CallerMemberName] string caller = "") 
+        public static ResilientObservable<T> ToResilientObservable<T>(this IObservable<T> source, [CallerMemberName] string caller = "") 
             => new(source, caller);
         public static ResilientObservable<EventPattern<object>> ProcessEvent(this object source, string eventName, IScheduler scheduler = null, [CallerMemberName] string caller = "") {
             var eventStream = source.FromEventPattern<EventArgs>(eventName, scheduler, caller)
@@ -45,26 +45,6 @@ namespace Xpand.Extensions.Reactive.Transform{
     }
     public readonly struct ResilientObservable<T>(IObservable<T> source, [CallerMemberName] string caller = "")
         : IObservable<T> {
-        public ResilientObservable<TResult> Select<TResult>(Func<T, TResult> selector) {
-            var source1 = source;
-            var caller1 = caller;
-
-            var newSource = Observable.Create<TResult>(observer => {
-                var context = new AmbientFaultContext { DefinitionStackTrace = new StackTrace(1, true), CustomContext = [caller1, "Select"] };
-                return source1.Subscribe( 
-                    onNext: item => {
-                        try {
-                            observer.OnNext(selector(item));
-                        } catch (Exception ex) {
-                            new FaultHubException("Error in Select", ex, context).Publish();
-                        }
-                    },
-                    onError: observer.OnError,
-                    onCompleted: observer.OnCompleted
-                );
-            });
-            return new ResilientObservable<TResult>(newSource, caller1);
-        }
         
         public ResilientObservable<TResult> Cast<TResult>()
             => Select(item => (TResult)(object)item);
@@ -75,66 +55,60 @@ namespace Xpand.Extensions.Reactive.Transform{
             return new ResilientObservable<T>(newSource, caller);
         }
         public ResilientObservable<T> Do(Action<T> action) {
-            var source1 = source;
             var caller1 = caller;
-
-            var newSource = Observable.Create<T>(observer => {
-                var context = new AmbientFaultContext { DefinitionStackTrace = new StackTrace(1, true), CustomContext = [caller1, "Do"] };
-                return source1.Subscribe(
-                    onNext: item => {
-                        try {
-                            action(item);
-                        } catch (Exception ex) {
-                            new FaultHubException("Error in Do", ex, context).Publish();
-                        }
-                        observer.OnNext(item);
-                    },
-                    onError: observer.OnError,
-                    onCompleted: observer.OnCompleted
-                );
-            });
-            return new ResilientObservable<T>(newSource, caller1);
+            return source.Select(item => {
+                try {
+                    action(item);
+                }
+                catch (Exception ex) {
+                    HandleException<T>(ex, caller1);
+                }
+                return item;
+            }).ToResilientObservable(caller1);
         }
         
         public ResilientObservable<T> Take(int count) => new(source.Take(count), caller);
 
         public ResilientObservable<T> Skip(int count) => new(source.Skip(count), caller);
 
-        public ResilientObservable<T> Where(Func<T, bool> predicate) {
-            var source1 = source;
+        public ResilientObservable<TResult> Select<TResult>(Func<T, TResult> selector) {
             var caller1 = caller;
-    
-            var newSource = Observable.Create<T>(observer => {
-                var context = new AmbientFaultContext { DefinitionStackTrace = new StackTrace(1, true), CustomContext = [caller1, "Where"] };
-                return source1.Subscribe( 
-                    onNext: item => {
-                        try {
-                            if (predicate(item)) {
-                                observer.OnNext(item);
-                            }
-                        } catch (Exception ex) {
-                            new FaultHubException("Error in Where", ex, context).Publish();
-                        }
-                    },
-                    onError: observer.OnError,
-                    onCompleted: observer.OnCompleted
-                );
-            });
-            return new ResilientObservable<T>(newSource, caller1);
+            return source.SelectMany(item => {
+                try {
+                    return Observable.Return(selector(item));
+                }
+                catch (Exception ex) {
+                    return HandleException<TResult>(ex,caller1);
+                }
+            }).ToResilientObservable(caller1);
         }
+
+        public ResilientObservable<T> Where(Func<T, bool> predicate) {
+            var caller1 = caller;
+            return source.SelectMany(item => {
+                try {
+                    return predicate(item) ? Observable.Return(item) : Observable.Empty<T>();
+                }
+                catch (Exception ex) {
+                    return HandleException<T>(ex,caller1);
+                }
+            }).ToResilientObservable(caller1);
+        }
+
+        private static IObservable<TResult> HandleException<TResult>(Exception ex,string caller,[CallerMemberName]string op=""){
+            new FaultHubException($"Error in {op}", ex,  new AmbientFaultContext { DefinitionStackTrace = new StackTrace(2, true), CustomContext = [caller, op] }).Publish();
+            return Observable.Empty<TResult>();
+        }
+
         public ResilientObservable<TResult> SelectMany<TResult>(Func<T, int, IObservable<TResult>> selector) {
             var source1 = source;
             var caller1 = caller;
-
-            var newSource = source1.SelectMany((item, index) => selector(item, index).WithFaultContext(caller: caller1)); 
-            return new ResilientObservable<TResult>(newSource, caller1);
+            return source1.SelectMany((item, index) => selector(item, index).WithFaultContext(caller: caller1)).ToResilientObservable(caller1);
         }
         public ResilientObservable<TResult> SelectMany<TResult>(Func<T, IObservable<TResult>> selector) {
             var source1 = source;
             var caller1 = caller;
-
-            var newSource = source1.SelectMany(item => selector(item).WithFaultContext(caller:caller1)); 
-            return new ResilientObservable<TResult>(newSource, caller1);
+            return source1.SelectMany(item => selector(item).WithFaultContext(caller:caller1)).ToResilientObservable(caller1);
         }
         public IDisposable Subscribe(IObserver<T> observer) => source.Subscribe(observer);
         
@@ -143,6 +117,17 @@ namespace Xpand.Extensions.Reactive.Transform{
         public ResilientObservable<T> StartWith(params T[] values) {
             var newSource = source.StartWith(values);
             return new ResilientObservable<T>(newSource, caller);
+        }
+
+        public bool IsValid => source != null;
+        public ResilientObservable<T> Aggregate(Func<T, T, T> accumulator) {
+            var newSource = source.Aggregate(accumulator);
+            return new ResilientObservable<T>(newSource, caller);
+        }
+
+        public ResilientObservable<TAccumulate> Aggregate<TAccumulate>(TAccumulate seed, Func<TAccumulate, T, TAccumulate> accumulator) {
+            var newSource = source.Aggregate(seed, accumulator);
+            return new ResilientObservable<TAccumulate>(newSource, caller);
         }
     }
 }

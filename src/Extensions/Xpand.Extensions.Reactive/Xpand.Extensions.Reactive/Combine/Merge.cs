@@ -49,12 +49,12 @@ namespace Xpand.Extensions.Reactive.Combine{
             var standardSource = (IObservable<T>)source;
             
             var newSource = standardSource.Publish(obs =>
-                obs.ToResilient()
+                obs.ToResilientObservable()
                     .SelectMany(arg => {
                         merge ??= _ => true;
-                        var observable = Observable.Empty<T>().ToResilient();
+                        var observable = Observable.Empty<T>().ToResilientObservable();
                         if (merge(arg)) {
-                            observable = secondSelector(arg).ToResilient().IgnoreElements().To(arg);
+                            observable = secondSelector(arg).ToResilientObservable().IgnoreElements().To(arg);
                         }
                         return arg.Observe().Merge(observable);
                     })
@@ -106,7 +106,7 @@ namespace Xpand.Extensions.Reactive.Combine{
         }
         public static ResilientObservable<TValue> MergeWith<TSource, TValue>(
             this ResilientObservable<TSource> source, TValue value, IScheduler scheduler = null)
-            => source.Merge(default(TSource).Observe(scheduler ?? CurrentThreadScheduler.Instance).ToResilient()).Select(_ => value);
+            => source.Merge(default(TSource).Observe(scheduler ?? CurrentThreadScheduler.Instance).ToResilientObservable()).Select(_ => value);
 
         public static ResilientObservable<Unit> MergeToUnit<TSource, TValue>(
             this ResilientObservable<TSource> source, ResilientObservable<TValue> value, IScheduler scheduler = null)
@@ -116,11 +116,11 @@ namespace Xpand.Extensions.Reactive.Combine{
 
         public static ResilientObservable<TValue> MergeTo<TSource, TValue>(
             this ResilientObservable<TSource> source, ResilientObservable<TValue> value, IScheduler scheduler = null) where TValue : class
-            => source.Select(source1 => source1 as TValue).WhenNotDefault().Merge( value.To<TValue>().ToResilient());
+            => source.Select(source1 => source1 as TValue).WhenNotDefault().Merge( value.To<TValue>().ToResilientObservable());
 
         public static ResilientObservable<object> MergeToObject<TSource, TValue>(
             this ResilientObservable<TSource> source, ResilientObservable<TValue> value, IScheduler scheduler = null) where TValue : class
-            => source.Select(source1 => source1 as object).WhenNotDefault().Merge(value.To<TValue>().ToResilient()).ToResilient();
+            => source.Select(source1 => source1 as object).WhenNotDefault().Merge(value.To<TValue>().ToResilientObservable()).ToResilientObservable();
 
         public static ResilientObservable<T> MergeFollow<T>(this ResilientObservable<T> source, ResilientObservable<T> target, int take = 1) {
             var resilientObservable = target.Merge(source);

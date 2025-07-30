@@ -83,7 +83,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
                     )
                 .WithFaultContext(s => s.Retry(3));
 
-            var testObserver = bus.UseFaultHub().Test();
+            var testObserver = bus.WithFaultContext().Test();
 
             
             testObserver.ItemCount.ShouldBe(0);
@@ -98,7 +98,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
                 .SelectManyResilient(unit => unit.Defer(() => unit.Defer(() => Observable.Throw<Unit>(new InvalidOperationException()))
                     .CompleteOnError(match:e => e.Has<InvalidOperationException>()).WhenCompleted()));
 
-            var testObserver = bus.UseFaultHub().Test();
+            var testObserver = bus.WithFaultContext().Test();
             
             testObserver.ItemCount.ShouldBe(1);
             testObserver.ErrorCount.ShouldBe(0);
@@ -157,7 +157,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
                     ).WithFaultContext(innerRetry)
             ).WithFaultContext(outerRetry);
 
-            var opBusObserver = opBus.UseFaultHub().Test();
+            var opBusObserver = opBus.WithFaultContext().Test();
 
             opBusObserver.AwaitDone(1.ToSeconds());
 
@@ -177,10 +177,12 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
                     return Observable.Defer(() => Observable.Throw<Unit>(new Exception()));
                         
                 }))
-                .WithFaultContext()
+                
                 .Retry(3);
 
-            var testObserver = bus.UseFaultHub().Test();
+            var testObserver = bus
+                
+                .Test();
 
             
             testObserver.ItemCount.ShouldBe(0);
@@ -201,7 +203,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
                 }))
                 .WithFaultContext();
 
-            var opBusObserver = opBus.UseFaultHub().Test();
+            var opBusObserver = opBus.WithFaultContext().Test();
 
             opBusObserver.AwaitDone(5.ToSeconds()).CompletionCount.ShouldBe(1);
             BusObserver.ItemCount.ShouldBe(1);
@@ -243,7 +245,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
                     return Observable.Defer(() => Observable.Throw<Unit>(new Exception())).WithFaultContext();
                 })) ;
 
-            var opBusObserver = opBus.UseFaultHub().Test();
+            var opBusObserver = opBus.WithFaultContext().Test();
             
             BusObserver.ItemCount.ShouldBe(2); 
             innerOpObserver.AwaitDone(1.ToSeconds()).ItemCount.ShouldBe(2);
@@ -326,7 +328,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
                 .WithFaultContext(retrySelector)
             ) ;
 
-            var opBusObserver = opBus.UseFaultHub().Test();
+            var opBusObserver = opBus.WithFaultContext().Test();
             
             opBusObserver.AwaitDone(1.ToSeconds()).CompletionCount.ShouldBe(1);
             BusObserver.ItemCount.ShouldBe(1);

@@ -60,9 +60,9 @@ namespace Xpand.Extensions.Office.Cloud{
                 Func<TLocalEntity, IObservable<(TCloudEntity serviceObject, MapAction mapAction)>> map) where TLocalEntity : class {
             
             var deleteObjects =synchronizationType.IsDelete()? objectSpace.WhenDeletedObjects<TLocalEntity>(true)
-                .SelectMany(_ => _.objects.SelectMany(o => {
-	                var deletedId = _.objectSpace.GetKeyValue(o).ToString();
-	                return _.objectSpace.QueryCloudOfficeObject(typeof(TCloudEntity), o).Where(officeObject => officeObject.LocalId == deletedId).ToArray()
+                .SelectMany(t => t.objects.SelectMany(o => {
+	                var deletedId = t.objectSpace.GetKeyValue(o).ToString();
+	                return t.objectSpace.QueryCloudOfficeObject(typeof(TCloudEntity), o).Where(officeObject => officeObject.LocalId == deletedId).ToArray()
                         .Select(officeObject => (officeObject,bo:o));
                 }))
                 .SelectMany(t => delete(t).Select(_ => t.officeObject))
@@ -70,10 +70,10 @@ namespace Xpand.Extensions.Office.Cloud{
                 .Select(o => (o,MapAction.Delete)):Observable.Empty<(TCloudEntity serviceObject, MapAction mapAction)>();
 
             var newObjects = synchronizationType.IsCreate() ? objectSpace.WhenCommiting<TLocalEntity>(ObjectModification.New,true)
-                .SelectMany(_ => _.objects).SelectMany(map):Observable.Empty<(TCloudEntity serviceObject, MapAction mapAction)>();
+                .SelectMany(t => t.objects).SelectMany(map):Observable.Empty<(TCloudEntity serviceObject, MapAction mapAction)>();
             
             var updateObjects = synchronizationType.IsUpdate() ? objectSpace.WhenCommiting<TLocalEntity>(ObjectModification.Updated,true)
-                .SelectMany(_ => _.objects).SelectMany(map):Observable.Empty<(TCloudEntity serviceObject, MapAction mapAction)>();
+                .SelectMany(t => t.objects).SelectMany(map):Observable.Empty<(TCloudEntity serviceObject, MapAction mapAction)>();
             return updateObjects.Merge(newObjects).Merge(deleteObjects);
         }
 
@@ -81,9 +81,9 @@ namespace Xpand.Extensions.Office.Cloud{
             IObservable<TBO> newOrUpdatedObjects, Func<CloudOfficeObject, IObservable<TServiceObject>> delete, Func<TBO, IObservable<TServiceObject>> map) 
             => newOrUpdatedObjects.SelectMany(map)
                 .Merge(deletedObjects
-                    .SelectMany(_ => {
-                        var deletedId = objectSpace.GetKeyValue(_).ToString();
-                        return objectSpace.QueryCloudOfficeObject(typeof(TServiceObject), _).Where(o => o.LocalId == deletedId).ToObservable();
+                    .SelectMany(b => {
+                        var deletedId = objectSpace.GetKeyValue(b).ToString();
+                        return objectSpace.QueryCloudOfficeObject(typeof(TServiceObject), b).Where(o => o.LocalId == deletedId).ToObservable();
                     })
                     .SelectMany(cloudOfficeObject => delete(cloudOfficeObject).Select(_ => cloudOfficeObject))
                     .To<TServiceObject>());
@@ -145,7 +145,7 @@ namespace Xpand.Extensions.Office.Cloud{
 
         public static IObservable<bool> NeedsAuthentication<TAuthentication>(this XafApplication application,Func<IObservable<bool>> authorize) where TAuthentication:CloudOfficeBaseObject 
             => application.UseObjectSpace(typeof(TAuthentication),space => (space.GetObjectByKey<TAuthentication>( application.CurrentUserId())).Observe())
-                .SelectMany(b => b!=null ? authorize() : true.Observe());
+                .SelectMany(b => !b.IsValid ? authorize() : true.Observe());
 
         private static IObservable<Unit> ConfigureStyle(this IObservable<SimpleAction> source) 
             => source.WhenCustomizeControl()

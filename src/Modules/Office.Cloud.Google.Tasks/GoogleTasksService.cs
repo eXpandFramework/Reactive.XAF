@@ -42,12 +42,12 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Tasks{
 
         
         public static IObservable<(Task cloud, MapAction mapAction)> When(this IObservable<(Task outlookTask, MapAction mapAction)> source, MapAction mapAction)
-            => source.Where(_ => _.mapAction == mapAction);
+            => source.Where(t => t.mapAction == mapAction);
         
         
         public static IObservable<GenericEventArgs<(IObjectSpace objectSpace, ITask local, Task cloud, MapAction mapAction)>> When(
             this IObservable<GenericEventArgs<(IObjectSpace objectSpace, ITask local, Task cloud, MapAction mapAction)>> source, MapAction mapAction)
-            => source.Where(_ => _.Instance.mapAction == mapAction);
+            => source.Where(e => e.Instance.mapAction == mapAction);
         
         private static IObservable<(Task serviceObject, MapAction mapAction)> SynchronizeCloud(this IObservable<TasksService> source,IModelTasksItem modelTasksItem, 
             IObjectSpace objectSpace, Func<IObjectSpace> objectSpaceFactory,TaskList taskList) 
@@ -112,11 +112,11 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Tasks{
                 .Do(model => model.Application.OAuthGoogle().AddScopes(TasksService.Scope.Tasks)).ToUnit();
 
         private static IObservable<(Frame frame, UserCredential credential, TaskList taskList)> EnsureTasksList(this IObservable<(Frame frame, UserCredential credential)> source) 
-            => source.Select(_ => {
-                    var defaultTaskListName = _.frame.View.AsObjectView().Application().Model
+            => source.Select(t => {
+                    var defaultTaskListName = t.frame.View.AsObjectView().Application().Model
                         .ToReactiveModule<IModelReactiveModuleOffice>().Office.Google().Tasks().DefaultTaskListName;
-                    return Observable.Start(() => _.credential.NewService<TasksService>().GetTaskList(defaultTaskListName, true,defaultTaskListName==DefaultTasksListId)).Merge().Wait().Observe()
-                        .Select(folder => (_.frame, _.credential, folder));
+                    return Observable.Start(() => t.credential.NewService<TasksService>().GetTaskList(defaultTaskListName, true,defaultTaskListName==DefaultTasksListId)).Merge().Wait().Observe().AsObservable()
+                        .Select(folder => (t.frame, t.credential, folder));
                 }).Merge()
                 .TraceGoogleTasksModule(folder => folder.folder.Title);
 
@@ -126,7 +126,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Tasks{
                     .TakeUntil(t.frame.View.WhenClosing())
                 ).Switch()
                 .Do(UpdatedSubject.OnNext)
-                .TraceGoogleTasksModule(_ => $"{_.mapAction} {_.serviceObject.Title}, {_.serviceObject.Status}, {_.serviceObject.Id}");
+                .TraceGoogleTasksModule(t => $"{t.mapAction} {t.serviceObject.Title}, {t.serviceObject.Status}, {t.serviceObject.Id}");
         
         public static IObservable<global::Google.Apis.Tasks.v1.Data.Tasks[]> ListTasks(this TasksService tasksService,string tasksListId, ICloudOfficeToken cloudOfficeToken = null,
             Action<ICloudOfficeToken> @finally = null,  int? maxResults = 100, Func<GoogleApiException, bool> repeat = null){
@@ -146,7 +146,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Tasks{
                 .SelectMany(tasks => tasks)
                 .Where(tasks => tasks.Items != null)
                 .SelectMany(tasks => tasks.Items)
-                .SelectMany(_ => Observable.FromAsync(() => tasksService.Tasks.Delete(tasksListId, _.Id).ExecuteAsync()))
+                .SelectMany(t => Observable.FromAsync(() => tasksService.Tasks.Delete(tasksListId, t.Id).ExecuteAsync()))
                 .LastOrDefaultAsync();
 
         
@@ -158,6 +158,6 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Tasks{
                 .ToReactiveModule<IModelReactiveModuleOffice>().Office
                 .Google().Tasks().Items.Where(item => item.ObjectView == t.frame.View.Model)
                 .Select(item => (t.frame, t.credential, t.taskList, item)))
-            .TraceGoogleTasksModule(_ => _.frame.View.Id);
+            .TraceGoogleTasksModule(t => t.frame.View.Id);
     }
 }

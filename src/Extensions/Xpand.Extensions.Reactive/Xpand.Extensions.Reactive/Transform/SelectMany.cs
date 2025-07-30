@@ -16,8 +16,7 @@ namespace Xpand.Extensions.Reactive.Transform {
         public static IObservable<TSource> SelectMany<TSource>(this IObservable<IAsyncEnumerable<TSource>> source) 
             => source.SelectMany(source1 => source1.ToObservable());
 
-        public static IObservable<TResult> SelectManyResilient<TSource, TResult>(this IObservable<TSource> source,
-            Func<TSource, IObservable<TResult>> selector, Func<IObservable<TResult>, IObservable<TResult>> retrySelector = null)
-            => source.SelectMany(selector);
+        public static IObservable<TResult> SelectManyResilient<TSource, TResult>(this IObservable<TSource> source, Func<TSource, IObservable<TResult>> selector)
+            => source.SelectMany(arg => selector(arg).WithFaultContext([arg]));
     }
 }
