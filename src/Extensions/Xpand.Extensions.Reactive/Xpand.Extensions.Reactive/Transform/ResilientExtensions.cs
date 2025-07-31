@@ -27,7 +27,7 @@ namespace Xpand.Extensions.Reactive.Transform{
         public static ResilientObservable<T> Switch<T>(this ResilientObservable<IObservable<T>> source, [CallerMemberName] string caller = "") {
             var sourceOfStreams = (IObservable<IObservable<T>>)source;
             var resilientSourceOfStreams = sourceOfStreams.Select(innerStream => 
-                innerStream.WithFaultContext(caller: caller));
+                innerStream.ChainFaultContext(caller: caller));
             return new ResilientObservable<T>(resilientSourceOfStreams.Switch(), caller);
         }
         public static IObservable<bool> Any<TSource>(this ResilientObservable<TSource> source) 
@@ -38,7 +38,7 @@ namespace Xpand.Extensions.Reactive.Transform{
         
         public static ResilientObservable<T> Concat<T>(this ResilientObservable<T> source, params IObservable<T>[] others) {
             var allSources = Enumerable.Concat([source], others);
-            var resilientSources = allSources.Select(s => s.WithFaultContext());
+            var resilientSources = allSources.Select(s => s.ChainFaultContext());
             return new ResilientObservable<T>(resilientSources.Concat());
         }
         
@@ -56,18 +56,19 @@ namespace Xpand.Extensions.Reactive.Transform{
         }
         public ResilientObservable<T> Do(Action<T> action) {
             var caller1 = caller;
-            return source.Select(item => {
+            return source.SelectMany(item => {
                 try {
                     action(item);
+                    return Observable.Return(item);
                 }
                 catch (Exception ex) {
-                    HandleException<T>(ex, caller1);
+                    return HandleException<T>(ex, caller1);
                 }
-                return item;
             }).ToResilientObservable(caller1);
         }
         
         public ResilientObservable<T> Take(int count) => new(source.Take(count), caller);
+        public ResilientObservable<T> DistinctUntilChanged() => new(source.DistinctUntilChanged(), caller);
 
         public ResilientObservable<T> Skip(int count) => new(source.Skip(count), caller);
 
@@ -96,19 +97,38 @@ namespace Xpand.Extensions.Reactive.Transform{
         }
 
         private static IObservable<TResult> HandleException<TResult>(Exception ex,string caller,[CallerMemberName]string op=""){
-            new FaultHubException($"Error in {op}", ex,  new AmbientFaultContext { DefinitionStackTrace = new StackTrace(2, true), CustomContext = [caller, op] }).Publish();
-            return Observable.Empty<TResult>();
+            var faultHubException = new FaultHubException($"Error in {op}", ex, new AmbientFaultContext { DefinitionStackTrace = new StackTrace(2, true), CustomContext = [caller, op] });
+    
+            var (action, mute) = ex.GetFaultResult();
+    
+            if (mute) {
+                faultHubException.MuteForBus();
+            }
+    
+            switch (action) {
+                case FaultHub.FaultResult.Complete:
+                    faultHubException.Publish();
+                    return Observable.Empty<TResult>();
+
+                case FaultHub.FaultResult.Rethrow:
+                    return Observable.Throw<TResult>(faultHubException);
+
+                case FaultHub.FaultResult.Proceed:
+                default:
+                    faultHubException.Publish();
+                    return Observable.Empty<TResult>();
+            }
         }
 
         public ResilientObservable<TResult> SelectMany<TResult>(Func<T, int, IObservable<TResult>> selector) {
             var source1 = source;
             var caller1 = caller;
-            return source1.SelectMany((item, index) => selector(item, index).WithFaultContext(caller: caller1)).ToResilientObservable(caller1);
+            return source1.SelectMany((item, index) => selector(item, index).ChainFaultContext(caller: caller1)).ToResilientObservable(caller1);
         }
         public ResilientObservable<TResult> SelectMany<TResult>(Func<T, IObservable<TResult>> selector) {
             var source1 = source;
             var caller1 = caller;
-            return source1.SelectMany(item => selector(item).WithFaultContext(caller:caller1)).ToResilientObservable(caller1);
+            return source1.SelectMany(item => selector(item).ChainFaultContext(caller:caller1)).ToResilientObservable(caller1);
         }
         public IDisposable Subscribe(IObserver<T> observer) => source.Subscribe(observer);
         

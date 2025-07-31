@@ -62,7 +62,7 @@ namespace Xpand.Extensions.Tests.TransformTests{
         }
         [Test]
         public void SelectManySequential_ErrorInInnerSequencePropagates() {
-            using (FaultHub.AddHandler(_ => true)) {
+            using (FaultHub.AddHandler(_ => FaultAction.Complete)) {
                 var finalized = false;
                 var ex = new InvalidOperationException("Failure");
                 Exception capturedError = null;

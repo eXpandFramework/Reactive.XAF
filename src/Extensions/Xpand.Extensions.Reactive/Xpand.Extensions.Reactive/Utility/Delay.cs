@@ -4,7 +4,6 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using Xpand.Extensions.Numeric;
-using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.ErrorHandling;
@@ -41,9 +40,8 @@ namespace Xpand.Extensions.Reactive.Utility {
         public static IObservable<T> Defer<T,TObject>(this TObject o, Func<TObject,IObservable<T>> selector)
             => o.Defer(() => selector(o));
         
-        public static IObservable<T> Defer<T>(this object o, Func<IObservable<T>> selector,[CallerMemberName]string caller="") {
-            return Observable.Defer(selector).WithFaultContext([caller]);
-        }
+        public static IObservable<T> Defer<T>(this object o, Func<IObservable<T>> selector,[CallerMemberName]string caller="") 
+            => Observable.Defer(selector).ChainFaultContext([caller]);
 
         public static IObservable<T> Defer<T>(this object o, Func<IEnumerable<T>> selector)
             => o.Defer(() => selector().ToNowObservable());

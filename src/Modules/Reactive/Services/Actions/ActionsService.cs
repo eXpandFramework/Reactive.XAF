@@ -67,39 +67,39 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
             => source.Select(frame => frame.Action<TModule>());
 
         public static IObservable<T> WhenExecute<T>(this IObservable<SimpleAction> source,Func<SimpleActionExecuteEventArgs, IObservable<T>> selector,[CallerMemberName]string caller="") 
-            => source.SelectMany(action => action.WhenExecute(e => selector(e).WithFaultContext([caller,action])).TakeUntilDeactivated(action.Controller));
+            => source.SelectMany(action => action.WhenExecute(e => selector(e).ChainFaultContext([caller,action])).TakeUntilDeactivated(action.Controller));
         public static IObservable<T> WhenExecuted<T>(this IObservable<SimpleAction> source, Func<SimpleActionExecuteEventArgs, IObservable<T>> selector,[CallerMemberName]string caller="") 
             => source.SelectMany(action => action.WhenExecuted(selector,caller).TakeUntilDeactivated(action.Controller));
         public static IObservable<Unit> WhenExecuted(this IObservable<SimpleAction> source,Action<SimpleActionExecuteEventArgs> selector,[CallerMemberName]string caller="") 
-            => source.SelectMany(action => action.WhenExecuted(e => Unit.Default.Observe().Do(_ => selector(e)).WithFaultContext([caller,action])));
+            => source.SelectMany(action => action.WhenExecuted(e => Unit.Default.Observe().Do(_ => selector(e)).ChainFaultContext([caller,action])));
         public static IObservable<Unit> WhenExecuted(this IObservable<SingleChoiceAction> source,Action<SingleChoiceActionExecuteEventArgs> selector,[CallerMemberName]string caller="") 
-            => source.SelectMany(action => action.WhenExecuted(e => Unit.Default.Observe().Do(_ => selector(e)).WithFaultContext([caller,action])));
+            => source.SelectMany(action => action.WhenExecuted(e => Unit.Default.Observe().Do(_ => selector(e)).ChainFaultContext([caller,action])));
         
         public static IObservable<Unit> WhenExecuted(this IObservable<ParametrizedAction> source,Action<ParametrizedActionExecuteEventArgs> selector,[CallerMemberName]string caller="") 
-            => source.SelectMany(action => action.WhenExecuted(e => Unit.Default.Observe().Do(_ => selector(e)).WithFaultContext([caller,action])));
+            => source.SelectMany(action => action.WhenExecuted(e => Unit.Default.Observe().Do(_ => selector(e)).ChainFaultContext([caller,action])));
         
         public static IObservable<T> WhenExecuted<T>(this IObservable<SingleChoiceAction> source,Func<SingleChoiceActionExecuteEventArgs, IObservable<T>> selector,[CallerMemberName]string caller="") 
-            => source.SelectMany(action => action.WhenExecuted(e => selector(e).WithFaultContext([caller,action])).TakeUntilDeactivated(action.Controller));
+            => source.SelectMany(action => action.WhenExecuted(e => selector(e).ChainFaultContext([caller,action])).TakeUntilDeactivated(action.Controller));
 
         public static IObservable<T> WhenExecute<T>(this SimpleAction simpleAction,Func<SimpleActionExecuteEventArgs, IObservable<T>> selector,[CallerMemberName]string caller="") 
-            => simpleAction.WhenExecute().SelectMany(e =>selector(e).WithFaultContext([caller,simpleAction]) ).TakeUntilDeactivated(simpleAction.Controller);
+            => simpleAction.WhenExecute().SelectMany(e =>selector(e).ChainFaultContext([caller,simpleAction]) ).TakeUntilDeactivated(simpleAction.Controller);
         public static IObservable<Unit> WhenExecute(this SimpleAction simpleAction,Action<SimpleActionExecuteEventArgs> selector,[CallerMemberName]string caller="") 
-            => simpleAction.WhenExecute(e => Unit.Default.Observe().Do(_ => selector(e)).WithFaultContext([caller,simpleAction]));
+            => simpleAction.WhenExecute(e => Unit.Default.Observe().Do(_ => selector(e)).ChainFaultContext([caller,simpleAction]));
         
         public static IObservable<Unit> WhenExecuted(this ParametrizedAction simpleAction,Action<ParametrizedActionExecuteEventArgs> selector,[CallerMemberName]string caller="") 
-            => simpleAction.WhenExecute(e => Unit.Default.Observe().Do(_ => selector(e)).WithFaultContext([caller,simpleAction]));
+            => simpleAction.WhenExecute(e => Unit.Default.Observe().Do(_ => selector(e)).ChainFaultContext([caller,simpleAction]));
         
         public static IObservable<T> WhenExecuted<T>(this SimpleAction simpleAction, Func<SimpleActionExecuteEventArgs, IObservable<T>> execution,[CallerMemberName]string caller="") 
             => simpleAction.WhenExecuted() 
-                .SelectMany(e => execution(e).WithFaultContext([caller,simpleAction]));
+                .SelectMany(e => execution(e).ChainFaultContext([caller,simpleAction]));
         public static IObservable<T> WhenExecuted<T>(this ParametrizedAction simpleAction, Func<ParametrizedActionExecuteEventArgs, IObservable<T>> selector,[CallerMemberName]string caller="")
-            => simpleAction.WhenExecuted().SelectMany(e => selector(e).WithFaultContext([caller,simpleAction]).TakeUntilDeactivated(simpleAction.Controller));
+            => simpleAction.WhenExecuted().SelectMany(e => selector(e).ChainFaultContext([caller,simpleAction]).TakeUntilDeactivated(simpleAction.Controller));
         
         public static IObservable<Unit> WhenExecuted(this SimpleAction simpleAction,Action<SimpleActionExecuteEventArgs> selector,[CallerMemberName]string caller="") 
-            => simpleAction.WhenExecuted(e => Unit.Default.Observe().Do(_ => selector(e)).WithFaultContext([caller,simpleAction]));
+            => simpleAction.WhenExecuted(e => Unit.Default.Observe().Do(_ => selector(e)).ChainFaultContext([caller,simpleAction]));
 
         public static IObservable<Unit> WhenConcatExecution(this SimpleAction action,Action<SimpleActionExecuteEventArgs> sourceSelector,[CallerMemberName]string caller="") 
-            => action.AsSimpleAction().WhenExecuted().SelectMany(e => e.WhenConcatExecution(pe => Unit.Default.Observe().Do(_ => sourceSelector(pe)).WithFaultContext([caller,action])));
+            => action.AsSimpleAction().WhenExecuted().SelectMany(e => e.WhenConcatExecution(pe => Unit.Default.Observe().Do(_ => sourceSelector(pe)).ChainFaultContext([caller,action])));
         
         public static IObservable<T> WhenConcatExecution<T>(this IObservable<SimpleAction> source, Func<SimpleActionExecuteEventArgs, IObservable<T>> sourceSelector,[CallerMemberName]string caller="")
             => source.SelectMany(action => action.WhenConcatExecution(sourceSelector,caller:caller));
@@ -109,7 +109,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
         
         private static IObservable<T> WhenConcatExecution<T,TArgs>(this TArgs e,Func<TArgs, IObservable<T>> sourceSelector,[CallerMemberName]string caller="") where TArgs:ActionBaseEventArgs{
             e.Action.Enabled[nameof(WhenConcatExecution)] = false;
-            return sourceSelector(e).WithFaultContext([caller,e.Action]).TakeUntilDisposed(e.Action).ObserveOnContext()
+            return sourceSelector(e).ChainFaultContext([caller,e.Action]).TakeUntilDisposed(e.Action).ObserveOnContext()
                 .Finally(() => {
                     e.Action.Enabled[nameof(WhenConcatExecution)] = true;
                     e.Action.ExecutionFinished();
@@ -117,7 +117,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
         }
 
         public static IObservable<Unit> WhenConcatExecution(this ParametrizedAction action,Action<ParametrizedActionExecuteEventArgs> sourceSelector,[CallerMemberName]string caller="") 
-            => action.AsParametrizedAction().WhenExecuted().SelectMany(e => e.WhenConcatExecution(pe => Unit.Default.Observe().Do(_ => sourceSelector(pe)).WithFaultContext([caller,action])));
+            => action.AsParametrizedAction().WhenExecuted().SelectMany(e => e.WhenConcatExecution(pe => Unit.Default.Observe().Do(_ => sourceSelector(pe)).ChainFaultContext([caller,action])));
 
         public static IObservable<T> WhenConcatRetriedExecution<T>(this ParametrizedAction simpleAction,Func<ParametrizedActionExecuteEventArgs, IObservable<T>> sourceSelector,[CallerMemberName]string caller="")
             => simpleAction.WhenExecuted().SelectMany(e => e.WhenConcatExecution(sourceSelector,caller:caller));
@@ -133,31 +133,31 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
                     .Finally(() => action.Update(_ => action.Enabled[caller] = true)));
 
         public static IObservable<T> WhenExecuted<T>(this SingleChoiceAction simpleAction,Func<SingleChoiceActionExecuteEventArgs, IObservable<T>> selector,[CallerMemberName]string caller="") 
-            => simpleAction.WhenExecuted().SelectMany(e => selector(e).WithFaultContext([caller,simpleAction])).TakeUntilDeactivated(simpleAction.Controller);
+            => simpleAction.WhenExecuted().SelectMany(e => selector(e).ChainFaultContext([caller,simpleAction])).TakeUntilDeactivated(simpleAction.Controller);
 
         public static IObservable<T> WhenExecute<T>(this IObservable<SingleChoiceAction> source,Func<SingleChoiceActionExecuteEventArgs, IObservable<T>> selector,[CallerMemberName]string caller="") 
-            => source.SelectMany(action => action.WhenExecute(e => selector(e).WithFaultContext([caller,action])).TakeUntilDeactivated(action.Controller));
+            => source.SelectMany(action => action.WhenExecute(e => selector(e).ChainFaultContext([caller,action])).TakeUntilDeactivated(action.Controller));
 
         public static IObservable<T> WhenExecute<T>(this SingleChoiceAction singleChoiceAction,Func<SingleChoiceActionExecuteEventArgs, IObservable<T>> selector,[CallerMemberName]string caller="") 
-            => singleChoiceAction.WhenExecute().SelectMany(e => selector(e).WithFaultContext([caller,singleChoiceAction])).TakeUntilDeactivated(singleChoiceAction.Controller);
+            => singleChoiceAction.WhenExecute().SelectMany(e => selector(e).ChainFaultContext([caller,singleChoiceAction])).TakeUntilDeactivated(singleChoiceAction.Controller);
         
         public static IObservable<T> WhenExecute<T>(this IObservable<ParametrizedAction> source,Func<ParametrizedActionExecuteEventArgs, IObservable<T>> selector,[CallerMemberName]string caller="") 
-            => source.SelectMany(action => action.WhenExecute(e => selector(e).WithFaultContext([caller,action])).TakeUntilDeactivated(action.Controller));
+            => source.SelectMany(action => action.WhenExecute(e => selector(e).ChainFaultContext([caller,action])).TakeUntilDeactivated(action.Controller));
 
         public static IObservable<T> WhenExecute<T>(this ParametrizedAction action,Func<ParametrizedActionExecuteEventArgs, IObservable<T>> selector,[CallerMemberName]string caller="") 
-            => action.WhenExecute().SelectMany(e => selector(e).WithFaultContext([caller,action])).TakeUntilDeactivated(action.Controller);
+            => action.WhenExecute().SelectMany(e => selector(e).ChainFaultContext([caller,action])).TakeUntilDeactivated(action.Controller);
         
         public static IObservable<T> WhenExecute<T>(this IObservable<PopupWindowShowAction> source,Func<PopupWindowShowActionExecuteEventArgs, IObservable<T>> selector,[CallerMemberName]string caller="") 
-            => source.SelectMany(action => action.WhenExecute(e => selector(e).WithFaultContext([caller,action])).TakeUntilDeactivated(action.Controller));
+            => source.SelectMany(action => action.WhenExecute(e => selector(e).ChainFaultContext([caller,action])).TakeUntilDeactivated(action.Controller));
 
         public static IObservable<T> WhenExecute<T>(this PopupWindowShowAction action,Func<PopupWindowShowActionExecuteEventArgs, IObservable<T>> selector,[CallerMemberName]string caller="") 
-            => action.WhenExecute().SelectMany(e => selector(e).WithFaultContext([caller,action])).TakeUntilDeactivated(action.Controller);
+            => action.WhenExecute().SelectMany(e => selector(e).ChainFaultContext([caller,action])).TakeUntilDeactivated(action.Controller);
 
         public static IObservable<T> CommitChanges<T>(this IObservable<T> source,[CallerMemberName]string caller="") where T : ActionBaseEventArgs
             => source.SelectMany(e => e.Observe().Do(_ => {
                 var view = e.Action.View();
                 view?.AsObjectView()?.ObjectSpace.CommitChanges();
-            } ).WithFaultContext([caller, e.Action]));
+            } ).ChainFaultContext([caller, e.Action]));
 
         public static IObservable<SimpleActionExecuteEventArgs> WhenExecute(this IObservable<SimpleAction> source) 
             => source.SelectMany(action => action.WhenExecute());
@@ -172,13 +172,13 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
         public static IObservable<Unit> WhenConcatExecution(this IObservable<ParametrizedAction> source,Action<ParametrizedActionExecuteEventArgs> selector,[CallerMemberName]string caller="") 
             => source.SelectMany(action => action.WhenConcatExecution(selector,caller:caller));
         public static IObservable<Unit> WhenConcatExecution(this IObservable<SingleChoiceAction> source,Action<SingleChoiceActionExecuteEventArgs> selector,[CallerMemberName]string caller="") 
-        => source.SelectMany(action => action.WhenConcatExecution<Unit,SingleChoiceActionExecuteEventArgs>(e => Unit.Default.Observe().Do(_ => selector(e)).WithFaultContext([caller,action])));
+        => source.SelectMany(action => action.WhenConcatExecution<Unit,SingleChoiceActionExecuteEventArgs>(e => Unit.Default.Observe().Do(_ => selector(e)).ChainFaultContext([caller,action])));
         
         public static IObservable<Unit> WhenConcatExecution(this IObservable<SimpleAction> source,Action<SimpleActionExecuteEventArgs> selector,[CallerMemberName]string caller="") 
             => source.SelectMany(action => action.WhenConcatExecution(selector,caller:caller));
         
         public static IObservable<Unit> WhenConcatExecution(this IObservable<SimpleAction> source,Func<SimpleActionExecuteEventArgs,IObservable<Unit>> selector,[CallerMemberName]string caller="") 
-            => source.SelectMany(action => action.WhenConcatExecution(e => selector(e).WithFaultContext([caller,action])));
+            => source.SelectMany(action => action.WhenConcatExecution(e => selector(e).ChainFaultContext([caller,action])));
         
         public static IObservable<T> WhenConcatExecution<T>(this IObservable<ParametrizedAction> source,Func<ParametrizedActionExecuteEventArgs,IObservable<T>> selector,[CallerMemberName]string caller="") 
             => source.SelectMany(action => action.WhenConcatExecution(selector,caller:caller));
@@ -187,7 +187,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
             => source.SelectMany(action => action.WhenConcatExecution(selector,caller:caller));
 
         public static IObservable<T> WhenExecuted<T>(this IObservable<ParametrizedAction> source,Func<ParametrizedActionExecuteEventArgs, IObservable<T>> selector,[CallerMemberName]string caller="") 
-            => source.SelectMany(action => action.WhenExecuted(e => selector(e).WithFaultContext([caller,action])));
+            => source.SelectMany(action => action.WhenExecuted(e => selector(e).ChainFaultContext([caller,action])));
         
         public static IObservable<PopupWindowShowActionExecuteEventArgs> WhenExecute(this IObservable<PopupWindowShowAction> source) 
             => source.SelectMany(action => action.WhenExecute());
@@ -243,7 +243,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
             => source.MergeIgnored(action => action.Controller.WhenActivated(emitWhenActive: true)
                 .SelectMany(_ => action.View().WhenCurrentObjectChanged().StartWith(action.View()).TakeUntilDisposed(action))
                 .WaitUntilInactive(1, scheduler: scheduler).ObserveOnContextMaybe()
-                .Do(_ => action.Items.Clear()).SelectMany(_ => addItems(action).WithFaultContext([caller,action])).TakeUntilDisposed(action));
+                .Do(_ => action.Items.Clear()).SelectMany(_ => addItems(action).ChainFaultContext([caller,action])).TakeUntilDisposed(action));
 
         public static IObservable<TArgs> CreateDetailView<TArgs>(this IObservable<TArgs> source, Type objectType=null, TargetWindow? targetWindow =null) where TArgs:ActionBaseEventArgs
 	        => source.Do(e => {
