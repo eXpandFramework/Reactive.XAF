@@ -25,20 +25,7 @@ namespace Xpand.Extensions.Reactive.Transform{
             => source.Select(_ => Unit.Default);
         
 
-        public static ResilientObservable<Unit> ToUnit<T>(this ResilientObservable<T> source)
-            => source.Select(_ => Unit.Default);
-
-        public static ResilientObservable<Unit> ToUnit<T1, T2>(this ResilientObservable<(T1, T2)> source)
-            => source.Select(_ => Unit.Default);
-
-        public static ResilientObservable<Unit> ToUnit<T1, T2, T3>(this ResilientObservable<(T1, T2, T3)> source)
-            => source.Select(_ => Unit.Default);
-
-        public static ResilientObservable<Unit> ToUnit<T1, T2, T3, T4>(this ResilientObservable<(T1, T2, T3, T4)> source)
-            => source.Select(_ => Unit.Default);
-
-        public static ResilientObservable<Unit> ToUnit<T1, T2, T3, T4, T5>(this ResilientObservable<(T1, T2, T3, T4, T5)> source)
-            => source.Select(_ => Unit.Default);
+        
     }
 
  }

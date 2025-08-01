@@ -21,6 +21,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling {
     }
 
     public static class FaultHub {
+        internal static readonly AsyncLocal<bool> IsInHandlingScope = new();
         public static readonly AsyncLocal<AmbientFaultContext> CurrentContext = new();
         internal static readonly AsyncLocal<List<Func<Exception, FaultAction?>>> HandlersContext = new();
         static readonly AsyncLocal<Guid?> Ctx = new();
@@ -33,36 +34,101 @@ namespace Xpand.Extensions.Reactive.ErrorHandling {
         public const string SkipKey = "FaultHub.Skip";
         const string PublishedKey = "FaultHub.Published";
         
-        public static IObservable<T> ChainFaultContext<T>(this IObservable<T> source, Func<IObservable<T>, IObservable<T>> retryStrategy,
-            object[] context = null, [CallerMemberName] string caller = "") {
-    
+        public static IObservable<T> PropagateFaults<T>(this IObservable<T> source, Func<IObservable<T>, IObservable<T>> retryStrategy,
+            object[] context = null,[CallerMemberName] string caller = "")
+            => source.ConfigureFaults(retryStrategy,context,false,caller);
+        public static IObservable<T> ContinueOnError<T>(this IObservable<T> source, Func<IObservable<T>, IObservable<T>> retryStrategy,
+            object[] context = null,[CallerMemberName] string caller = "")
+            => source.ConfigureFaults(retryStrategy,context,true,caller);
+
+        static IObservable<T> ConfigureFaults<T>(this IObservable<T> source, Func<IObservable<T>, IObservable<T>> retryStrategy,
+            object[] context = null,bool publishOnError=false, [CallerMemberName] string caller = "") {
             var faultContext = context.NewFaultContext(caller);
             var contextName = faultContext.CustomContext.FirstOrDefault() ?? "Unknown";
-            Console.WriteLine($"[HUB][WithFaultContext] Operator defined in '{contextName}'. Applying retry strategy.");
-
-            return retryStrategy(source).Catch((Exception ex) => ex.HandleFaultContext<T>(contextName, faultContext));
+            var isInHandlingScope = IsInHandlingScope.Value;
+            Console.WriteLine($"[HUB][ConfigureFaultContext] Operator defined in '{contextName}'. IsInHandlingScope: {isInHandlingScope}. Policy: {(publishOnError ? "Handle" : "Propagate")}. Applying retry strategy.");
+            return Observable.Using(
+                () => {
+                    var originalScope = IsInHandlingScope.Value;
+                    IsInHandlingScope.Value = true;
+                    return Disposable.Create(() => IsInHandlingScope.Value = originalScope);
+                },
+                _ => {
+                    return retryStrategy(source)
+                        .Catch((Exception ex) => ex.HandleError<T>(publishOnError, contextName,  faultContext, isInHandlingScope));
+                });
         }
 
-        public static IObservable<T> ChainFaultContext<T>(this IObservable<T> source, object[] context, [CallerMemberName] string caller = "") {
+        static IObservable<T> ConfigureFaults<T>(this IObservable<T> source, object[] context,bool publishOnError=false, [CallerMemberName] string caller = "") {
             var faultContext = context.NewFaultContext(caller);
             var contextName = faultContext.CustomContext.FirstOrDefault() ?? "Unknown";
-            Console.WriteLine($"[HUB][WithFaultContext] Operator defined in '{contextName}'.");
-            return source.Catch((Exception ex) => ex.HandleFaultContext<T>(contextName, faultContext));
+            var isInHandlingScope = IsInHandlingScope.Value;
+            Console.WriteLine($"[HUB][ConfigureFaultContext] Operator defined in '{contextName}'. {nameof(isInHandlingScope)}: {isInHandlingScope}. Policy: {(publishOnError ? "Handle" : "Propagate")}.");
+            return Observable.Using(
+                () => {
+                    var originalScope = IsInHandlingScope.Value;
+                    IsInHandlingScope.Value = true;
+                    return Disposable.Create(() => IsInHandlingScope.Value = originalScope);
+                },
+                _ => source.ToPublishOnError(!isInHandlingScope && publishOnError) // If nested, always propagate. Otherwise, follow policy.
+                    .Catch((Exception ex) => ex.HandleFaultContext<T>(contextName, faultContext))
+            );
         }
 
-        public static IObservable<T> ChainFaultContext<T>(this IObservable<T> source, 
-            bool handleUpstreamRetries, object[] context = null, [CallerMemberName] string caller = "")
-            => !handleUpstreamRetries ? source.ChainFaultContext(context, caller)
-                : source.ChainFaultContext(errors => errors.Take(1).IgnoreElements(), context, caller);
+        private static IObservable<T> PropagateFaults<T>(this Exception enrichedException) => Observable.Throw<T>(enrichedException);
 
-        public static IObservable<T> ChainFaultContext<T>(this IObservable<T> source, [CallerMemberName] string caller = "")
-            => source.ChainFaultContext([],caller);
+        private static IObservable<T> ContinueOnError<T>(this Exception enrichedException){
+            enrichedException.Publish();
+            return Observable.Empty<T>();
+        }
+
+        public static IObservable<T> PropagateFaults<T>(this IObservable<T> source, object[] context,[CallerMemberName] string caller = "") 
+            => source.ConfigureFaults(context, false, caller);
+
+        public static IObservable<T> ContinueOnError<T>(this IObservable<T> source, object[] context,[CallerMemberName] string caller = "") 
+            => source.ConfigureFaults(context, true, caller);
+
+        private static IObservable<T> HandleError<T>(this Exception ex,bool publishOnError, string contextName, AmbientFaultContext faultContext, bool isInHandlingScope){
+            Console.WriteLine($"[HUB][ConfigureFaultContext][{contextName}] Retry strategy exhausted. Final exception caught.");
+            var enrichedException = ex.ExceptionToPublish(faultContext);
+            if (isInHandlingScope) {
+                Console.WriteLine($"[HUB][ConfigureFaultContext][{contextName}] {nameof(isInHandlingScope)}. Propagating enriched exception.");
+                return Observable.Throw<T>(enrichedException);
+            }
+            Console.WriteLine($"[HUB][ConfigureFaultContext][{contextName}] Is not {nameof(isInHandlingScope)}. Executing final policy: {(publishOnError ? "Handle" : "Propagate")}.");
+            return publishOnError ? enrichedException.ContinueOnError<T>() : enrichedException.PropagateFaults<T>();
+        }
+
+        public static IObservable<T> PropagateFaults<T>(this IObservable<T> source, 
+            bool handleUpstreamRetries, object[] context = null,[CallerMemberName] string caller = "")
+            => source.ConfigureFaults(handleUpstreamRetries,context,false,caller);
+        public static IObservable<T> ContinueOnError<T>(this IObservable<T> source, 
+            bool handleUpstreamRetries, object[] context = null,[CallerMemberName] string caller = "")
+            => source.ConfigureFaults(handleUpstreamRetries,context,true,caller);
+
+        static IObservable<T> ConfigureFaults<T>(this IObservable<T> source, 
+            bool handleUpstreamRetries, object[] context = null,bool publishOnError=false, [CallerMemberName] string caller = "")
+            => !handleUpstreamRetries ? source.ConfigureFaults(context,publishOnError, caller)
+                : source.ConfigureFaults(errors => errors.Take(1).IgnoreElements(), context,publishOnError, caller);
+
+        public static IObservable<T> PropagateFaults<T>(this IObservable<T> source, [CallerMemberName] string caller = "")
+            => source.ConfigureFaults(false, caller);
+        public static IObservable<T> ContinueOnError<T>(this IObservable<T> source,[CallerMemberName] string caller = "")
+            => source.ConfigureFaults(true, caller);
+        static IObservable<T> ConfigureFaults<T>(this IObservable<T> source,bool publishOnError=false, [CallerMemberName] string caller = "")
+            => source.ConfigureFaults([],publishOnError,caller);
+
+        private static IObservable<T> ToPublishOnError<T>(this IObservable<T> source, bool publishOnError) => publishOnError?source.PublishOnError():source;
 
         private static IObservable<T> HandleFaultContext<T>(this Exception ex,string contextName,  AmbientFaultContext faultContext){
             Console.WriteLine($"[HUB][WithFaultContext][{contextName}] Caught exception. Enriching and re-throwing.");
+            
+    
+            // 1. The check for the ambient context MUST come first to enable nested retries.
+            Console.WriteLine($"[HUB][HandleFaultContext][{contextName}] Evaluating standard handlers.");
             var (action, muteOnRethrow) = ex.GetFaultResult();
             var enrichedException = ex.ExceptionToPublish(faultContext);
-        
+
             if (ex.IsSkipped()) {
                 enrichedException.MuteForBus();
             }
@@ -71,7 +137,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling {
                 case FaultResult.Complete:
                     enrichedException.Publish();
                     return Observable.Empty<T>();
-            
+    
                 default: 
                     if (muteOnRethrow) {
                         enrichedException.MuteForBus();
@@ -169,33 +235,6 @@ namespace Xpand.Extensions.Reactive.ErrorHandling {
             return publish ? Observable.Empty<T>() : Observable.Throw<T>(ex);
         }
 
-        public static IObservable<T> MakeResilient<T>(this IObservable<T> source, AmbientFaultContext faultContext = null) {
-            return source.Catch<T, Exception>(e => {
-                Console.WriteLine($"[HUB][MakeResilient] Caught exception: '{e.Message}'. Enriching with context...");
-                var (action, muteOnRethrow) = e.GetFaultResult();
-                var exceptionToPublish = e.ExceptionToPublish(faultContext);
-                if (e.IsSkipped()) {
-                    exceptionToPublish.MuteForBus();
-                }
-
-                switch (action) {
-                    case FaultResult.Complete:
-                        exceptionToPublish.Publish();
-                        return Observable.Empty<T>();
-        
-                    case FaultResult.Rethrow:
-                        if (muteOnRethrow) {
-                            exceptionToPublish.MuteForBus();
-                        }
-                        return Observable.Throw<T>(exceptionToPublish);
-        
-                    case FaultResult.Proceed:
-                    default:
-                        Console.WriteLine("[HUB][MakeResilient] Throwing enriched exception for publish/retry.");
-                        return Observable.Throw<T>(exceptionToPublish);
-                }
-            });
-        }
         public static IObservable<T> PublishFaults<T>(this IObservable<T> source) {
             return source.Catch<T, Exception>(ex => {
                 Console.WriteLine($"[HUB][PublishFaults] Caught final exception: {ex.GetType().Name}. Attempting to publish.");

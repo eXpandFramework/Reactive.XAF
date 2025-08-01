@@ -155,7 +155,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
             Func<(ViewController controller, string id), TAction> actionBase) where TAction:ActionBase 
 	        => applicationModulesManager.RegisterAction(id, actionBase);
 
-        static ResilientObservable<TAction> RegisterAction<TController,TAction>(this ApplicationModulesManager applicationModulesManager, string id,
+        static IObservable<TAction> RegisterAction<TController,TAction>(this ApplicationModulesManager applicationModulesManager, string id,
             Func<(TController controller, string id), TAction> actionBase) where TController : Controller where TAction:ActionBase{
 	        var type = ActionsModule.Assembly.GetType(ActionControllerName(id,GetBaseController<TController>()));
 	        var controllerType = type ?? NewControllerType<TController>(id);
@@ -165,7 +165,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
             }
             var controller = (TController) Controller.Create(controllerType,applicationModulesManager.ControllersManager.ServiceProvider());
             applicationModulesManager.ControllersManager.RegisterController(controller);
-            return ((IActionController) controller).WhenCloned.ToResilientObservable()
+            return ((IActionController) controller).WhenCloned
                 .Merge(applicationModulesManager.WhenApplication(application => application.WhenFrameCreated()
                     .Select(frame => frame.Controllers[controllerType]).WhenNotDefault()))
                 .DistinctUntilChanged()
@@ -173,8 +173,8 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
                 .StartWith(controller.Actions.Select(@base => @base).Cast<TAction>()) ;
         }
 
-        public static ResilientObservable<ActionBase> WhenActionAdded(this ActionList actionList)
-            => actionList.ProcessEvent<ActionManipulationEventArgs>(nameof(ActionList.ActionAdded)).Select(e => e.Action);
+        public static IObservable<ActionBase> WhenActionAdded(this ActionList actionList)
+            => actionList.WhenEvent<ActionManipulationEventArgs>(nameof(ActionList.ActionAdded)).Select(e => e.Action);
         
         private static Type NewControllerType<T>(string id) where T:Controller{
             var baseController = GetBaseController<T>();

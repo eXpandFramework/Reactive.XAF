@@ -92,7 +92,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests.FaultContextTests{
             
         private IObservable<Unit> GetResilientFailingObservable(SimpleActionExecuteEventArgs e) 
             => Observable.Throw<Unit>(new InvalidOperationException("Deep error"))
-                .ChainFaultContext(["InnerContext"]);
+                .ContinueOnError(["InnerContext"]);
 
         [Test]
         public void Innermost_WithFaultContext_Takes_Precedence() {

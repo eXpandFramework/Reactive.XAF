@@ -94,14 +94,14 @@ namespace Xpand.XAF.Modules.Reactive{
                 .ToUnit();
 
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager)
-        => manager.Attributes()
-                .Merge(manager.AddNonSecuredTypes())
-                .Merge(manager.MergedExtraEmbeddedModels())
-                .Merge(manager.ConnectObjectString())
-                .Merge(manager.WhenApplication(application =>application.Connect()
-                    .MergeToUnit(application.WhenSynchronizationContext().Do(context => ContextSubject.OnNext(context)))
-                    .Merge(manager.SetupPropertyEditorParentView()))
-        );
+            => manager.Attributes()
+                    .Merge(manager.AddNonSecuredTypes())
+                    .Merge(manager.MergedExtraEmbeddedModels())
+                    .Merge(manager.ConnectObjectString())
+                    .Merge(manager.WhenApplication(application =>application.Connect()
+                        .MergeToUnit(application.WhenSynchronizationContext().Do(context => ContextSubject.OnNext(context)))
+                        .Merge(manager.SetupPropertyEditorParentView()))
+            );
 
         public static IObservable<Unit> ThrowOnContext(this Exception exception,[CallerMemberName]string caller="",[CallerLineNumber] int line=0) {
             return ContextSubject.SelectMany(_ => Observable.Throw<Unit>(exception)).ToUnit();

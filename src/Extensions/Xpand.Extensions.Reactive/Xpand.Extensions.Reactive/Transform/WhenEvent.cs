@@ -10,6 +10,7 @@ using System.Runtime.CompilerServices;
 using Fasterflect;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Conditional;
+using Xpand.Extensions.Reactive.ErrorHandling;
 using Xpand.Extensions.TypeExtensions;
 using Type = System.Type;
 
@@ -62,11 +63,12 @@ namespace Xpand.Extensions.Reactive.Transform {
 
         public static IObservable<(TEventArgs args, TSource source)> WhenEvent<TSource,TEventArgs>(this object source, string eventName,IScheduler scheduler=null,[CallerMemberName]string caller="")
             => source.FromEventPattern<TEventArgs>(eventName,scheduler,caller).Select(pattern => (pattern.EventArgs,(TSource)source));
-        
+        [Obsolete]
         public static IObservable<TEventArgs> WhenEvent<TEventArgs>(this object source, string eventName,IScheduler scheduler=null,[CallerMemberName]string caller="") 
-            => source.FromEventPattern<TEventArgs>(eventName,scheduler,caller).Select(pattern => pattern.EventArgs) ;
+            => source.FromEventPattern<TEventArgs>(eventName,scheduler,caller).Select(pattern => pattern.EventArgs).ContinueOnError([caller]) ;
         public static IObservable<TResult> WhenEvent<TEventArgs,TResult>(this object source, string eventName,Func<TEventArgs,IObservable<TResult>> selector,IScheduler scheduler=null,[CallerMemberName]string caller="") 
-            => source.FromEventPattern<TEventArgs>(eventName,scheduler,caller).SelectMany(pattern => selector(pattern.EventArgs)) ;
+            => source.FromEventPattern<TEventArgs>(eventName,scheduler,caller).SelectMany(pattern => selector(pattern.EventArgs).ContinueOnError()) ;
+        
         
         
     }
