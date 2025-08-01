@@ -83,82 +83,82 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             return retriedExecution == null ? refreshAction.WhenExecuted().Select(e => e.Frame()).Cast<TFrame>() : refreshAction.WhenExecuted(retriedExecution).To(source);
         }
 
-        public static ResilientObservable<(TFrame frame, ViewChangingEventArgs args)> WhenViewChanging<TFrame>(this TFrame source) where TFrame : Frame 
-            => source.ProcessEvent<ViewChangingEventArgs>(nameof(Frame.ViewChanging)).InversePair(source);
+        public static IObservable<(TFrame frame, ViewChangingEventArgs args)> WhenViewChanging<TFrame>(this TFrame source) where TFrame : Frame 
+            => source.WhenEvent<ViewChangingEventArgs>(nameof(Frame.ViewChanging)).InversePair(source);
 
-        public static ResilientObservable<(TFrame frame, ViewChangingEventArgs args)> ViewChanging<TFrame>(
+        public static IObservable<(TFrame frame, ViewChangingEventArgs args)> ViewChanging<TFrame>(
             this IObservable<TFrame> source) where TFrame : Frame 
-            => source.ToResilientObservable().SelectMany(item => item.WhenViewChanging());
+            => source.SelectMany(item => item.WhenViewChanging());
         
-        public static ResilientObservable<TFrame> ViewChanged<TFrame>(
+        public static IObservable<TFrame> ViewChanged<TFrame>(
             this IObservable<TFrame> source) where TFrame : Frame 
-            => source.ToResilientObservable().SelectMany(item => item.WhenViewChanged().Select(t => t.frame));
+            => source.SelectMany(item => item.WhenViewChanged().Select(t => t.frame));
 
-        public static ResilientObservable<(TFrame frame, Frame source)> WhenViewChanged<TFrame>(this IObservable<TFrame> source) where TFrame : Frame
-            => source.ToResilientObservable().SelectMany(frame => frame.WhenViewChanged());
+        public static IObservable<(TFrame frame, Frame source)> WhenViewChanged<TFrame>(this IObservable<TFrame> source) where TFrame : Frame
+            => source.SelectMany(frame => frame.WhenViewChanged());
         
-        public static ResilientObservable<TController> WhenController<TController>(this Frame frame) where TController : Controller
-            => frame.Observe().ToResilientObservable().Select(frame1 => frame1.GetController<TController>()).WhenNotDefault();
+        public static IObservable<TController> WhenController<TController>(this Frame frame) where TController : Controller
+            => frame.Observe().Select(frame1 => frame1.GetController<TController>()).WhenNotDefault();
         
-        public static ResilientObservable<(TFrame frame, Frame source)> WhenViewChanged<TFrame>(this TFrame item) where TFrame : Frame 
-            => item.ProcessEvent<ViewChangedEventArgs>(nameof(Frame.ViewChanged))
+        public static IObservable<(TFrame frame, Frame source)> WhenViewChanged<TFrame>(this TFrame item) where TFrame : Frame 
+            => item.WhenEvent<ViewChangedEventArgs>(nameof(Frame.ViewChanged))
                 .TakeUntil(item.WhenDisposedFrame()).Select(e => e.SourceFrame).InversePair(item);
 
-        public static ResilientObservable<T> TemplateChanged<T>(this IObservable<T> source) where T : Frame 
-            => source.ToResilientObservable().SelectMany(item => item.Template != null ? item.Observe() : item.WhenTemplateChanged().Select(_ => item));
+        public static IObservable<T> TemplateChanged<T>(this IObservable<T> source) where T : Frame 
+            => source.SelectMany(item => item.Template != null ? item.Observe() : item.WhenTemplateChanged().Select(_ => item));
 
-        public static ResilientObservable<TFrame> WhenTemplateChanged<TFrame>(this TFrame item) where TFrame : Frame 
-            => item.ProcessEvent(nameof(Frame.TemplateChanged)).Select(pattern => pattern).To(item)
+        public static IObservable<TFrame> WhenTemplateChanged<TFrame>(this TFrame item) where TFrame : Frame 
+            => item.WhenEvent(nameof(Frame.TemplateChanged)).Select(pattern => pattern).To(item)
                 .TakeUntil(item.WhenDisposingFrame())
             ;
 
-        public static ResilientObservable<TFrame> WhenViewControllersActivated<TFrame>(this TFrame source) where TFrame : Frame
-            => source.ProcessEvent(nameof(Frame.ViewControllersActivated)).To(source)
+        public static IObservable<TFrame> WhenViewControllersActivated<TFrame>(this TFrame source) where TFrame : Frame
+            => source.WhenEvent(nameof(Frame.ViewControllersActivated)).To(source)
                 .TakeUntil(source.WhenDisposedFrame());
         
-        public static ResilientObservable<TFrame> WhenTemplateViewChanged<TFrame>(this TFrame source) where TFrame : Frame 
-            => source.ProcessEvent(nameof(Frame.TemplateViewChanged)).To(source)
+        public static IObservable<TFrame> WhenTemplateViewChanged<TFrame>(this TFrame source) where TFrame : Frame 
+            => source.WhenEvent(nameof(Frame.TemplateViewChanged)).To(source)
                 .TakeUntil(source.WhenDisposedFrame());
 
-        public static ResilientObservable<T> TemplateViewChanged<T>(this IObservable<T> source) where T : Frame 
-            => source.ToResilientObservable().SelectMany(item => item.WhenTemplateViewChanged().Select(_ => item));
+        public static IObservable<T> TemplateViewChanged<T>(this IObservable<T> source) where T : Frame 
+            => source.SelectMany(item => item.WhenTemplateViewChanged().Select(_ => item));
 
-        public static ResilientObservable<TFrame> DisableSimultaneousModificationsException<TFrame>(this TFrame frame) where TFrame : Frame 
+        public static IObservable<TFrame> DisableSimultaneousModificationsException<TFrame>(this TFrame frame) where TFrame : Frame 
             => frame.Controllers.Cast<Controller>().Where(controller1 => controller1.Name=="DevExpress.ExpressApp.Win.SystemModule.LockController").Take(1).ToNowObservable()
-                .SelectMany(controller1 => controller1.ProcessEvent("CustomProcessSimultaneousModificationsException").TakeUntil(frame.WhenDisposedFrame())
+                .SelectMany(controller1 => controller1.WhenEvent("CustomProcessSimultaneousModificationsException").TakeUntil(frame.WhenDisposedFrame())
                     .Do(args => args.EventArgs.Cast<HandledEventArgs>().Handled=true)).To(frame);
 
-        public static ResilientObservable<Unit> WhenDisposingFrame<TFrame>(this TFrame source) where TFrame : Frame
-            => source.ProcessEvent(nameof(Frame.Disposing)).TakeUntil(source.WhenDisposedFrame()).ToUnit();
+        public static IObservable<Unit> WhenDisposingFrame<TFrame>(this TFrame source) where TFrame : Frame
+            => source.WhenEvent(nameof(Frame.Disposing)).TakeUntil(source.WhenDisposedFrame()).ToUnit();
 
-        public static ResilientObservable<Unit> WhenDisposedFrame<TFrame>(this TFrame source) where TFrame : Frame
-            => source.ProcessEvent(nameof(Frame.Disposed)).ToUnit();
+        public static IObservable<Unit> WhenDisposedFrame<TFrame>(this TFrame source) where TFrame : Frame
+            => source.WhenEvent(nameof(Frame.Disposed)).ToUnit();
 
-        public static ResilientObservable<Unit> DisposingFrame<TFrame>(this IObservable<TFrame> source) where TFrame : Frame 
-            => source.ToResilientObservable().WhenNotDefault().SelectMany(item => item.WhenDisposingFrame()).ToUnit();
+        public static IObservable<Unit> DisposingFrame<TFrame>(this IObservable<TFrame> source) where TFrame : Frame 
+            => source.WhenNotDefault().SelectMany(item => item.WhenDisposingFrame()).ToUnit();
 
-        public static ResilientObservable<T> SelectUntilViewClosed<TFrame, T>(this IObservable<TFrame> source,
+        public static IObservable<T> SelectUntilViewClosed<TFrame, T>(this IObservable<TFrame> source,
             Func<TFrame, IObservable<T>> selector) where TFrame : View
-            => source.ToResilientObservable().SelectMany(view => selector(view).TakeUntil(view.WhenClosed()));
+            => source.SelectMany(view => selector(view).TakeUntil(view.WhenClosed()));
         
-        public static ResilientObservable<Window> CloseWindow<TFrame>(this IObservable<TFrame> source) where TFrame:Frame 
-            => source.ToResilientObservable().SelectMany(frame => frame.View.WhenActivated().To(frame).WaitUntilInactive(1.Seconds()).ObserveOnContext())
+        public static IObservable<Window> CloseWindow<TFrame>(this IObservable<TFrame> source) where TFrame:Frame 
+            => source.SelectMany(frame => frame.View.WhenActivated().To(frame).WaitUntilInactive(1.Seconds()).ObserveOnContext())
                 .Cast<Window>().Do(frame => frame.Close());
         
-        public static ResilientObservable<T> SelectUntilViewClosed<T,TFrame>(this IObservable<TFrame> source, Func<TFrame, IObservable<T>> selector) where TFrame:Frame 
-            => source.ToResilientObservable().SelectMany(frame => selector(frame).TakeUntilViewClosed(frame));
+        public static IObservable<T> SelectUntilViewClosed<T,TFrame>(this IObservable<TFrame> source, Func<TFrame, IObservable<T>> selector) where TFrame:Frame 
+            => source.SelectMany(frame => selector(frame).TakeUntilViewClosed(frame));
 
-        public static ResilientObservable<TFrame> TakeUntilViewClosed<TFrame>(this IObservable<TFrame> source,Frame frame)  
-            => source.ToResilientObservable().TakeUntil(frame.WhenDisposedFrame());
+        public static IObservable<TFrame> TakeUntilViewClosed<TFrame>(this IObservable<TFrame> source,Frame frame)  
+            => source.TakeUntil(frame.WhenDisposedFrame());
 
-        public static ResilientObservable<NestedFrame> ToNestedFrame(this IObservable<ListPropertyEditor> source)
-            => source.ToResilientObservable().Select(editor => editor.Frame).Cast<NestedFrame>();
+        public static IObservable<NestedFrame> ToNestedFrame(this IObservable<ListPropertyEditor> source)
+            => source.Select(editor => editor.Frame).Cast<NestedFrame>();
 
-        public static ResilientObservable<TFrame> WhenViewControllersActivated<TFrame>(this IObservable<TFrame> source) where TFrame : Frame
-            => source.ToResilientObservable().ConcatIgnored(frame => frame.WhenViewControllersActivated().Take(1));
+        public static IObservable<TFrame> WhenViewControllersActivated<TFrame>(this IObservable<TFrame> source) where TFrame : Frame
+            => source.ConcatIgnored(frame => frame.WhenViewControllersActivated().Take(1));
         
-        public static ResilientObservable<ListPropertyEditor> NestedListViews(this Frame frame, params Type[] objectTypes ) 
-            => frame.View.ToDetailView().NestedListViews(objectTypes).ToResilientObservable();
+        public static IObservable<ListPropertyEditor> NestedListViews(this Frame frame, params Type[] objectTypes ) 
+            => frame.View.ToDetailView().NestedListViews(objectTypes);
 
         public static IEnumerable<Frame> WhenFrame<T>(this IEnumerable<T> source, Type objectType = null,
             ViewType viewType = ViewType.Any, Nesting nesting = Nesting.Any) where T:Frame
@@ -167,91 +167,91 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IEnumerable<Frame> WhenFrame<T>(this IEnumerable<T> source, params string[] viewIds) where T:Frame 
             => source.ToObservable(Transform.ImmediateScheduler).Where(arg => viewIds.Contains(arg.View.Id)).ToEnumerable();
 
-        public static ResilientObservable<T> WhenFrame<T>(this IObservable<T> source, params Type[] objectTypes) where T:Frame 
-            => source.ToResilientObservable().Where(frame => frame.When(objectTypes));
-        public static ResilientObservable<T> WhenFrame<T>(this IObservable<T> source, params string[] viewIds) where T:Frame 
-            => source.ToResilientObservable().Where(frame => frame.When(viewIds));
+        public static IObservable<T> WhenFrame<T>(this IObservable<T> source, params Type[] objectTypes) where T:Frame 
+            => source.Where(frame => frame.When(objectTypes));
+        public static IObservable<T> WhenFrame<T>(this IObservable<T> source, params string[] viewIds) where T:Frame 
+            => source.Where(frame => frame.When(viewIds));
         
-        public static ResilientObservable<T> WhenFrame<T>(this IObservable<T> source, params Nesting[] nesting) where T:Frame 
-            => source.ToResilientObservable().Where(frame => frame.When(nesting));
+        public static IObservable<T> WhenFrame<T>(this IObservable<T> source, params Nesting[] nesting) where T:Frame 
+            => source.Where(frame => frame.When(nesting));
 
-        public static ResilientObservable<View> ToView<T>(this IObservable<T> source) where T : Frame
-            => source.ToResilientObservable().Select(frame => frame.View);
+        public static IObservable<View> ToView<T>(this IObservable<T> source) where T : Frame
+            => source.Select(frame => frame.View);
         
-        public static ResilientObservable<Frame> OfView<TView>(this IObservable<Frame> source)
-            => source.ToResilientObservable().Where(item => item.View is TView);
+        public static IObservable<Frame> OfView<TView>(this IObservable<Frame> source)
+            => source.Where(item => item.View is TView);
         
-        public static ResilientObservable<SingleChoiceAction> ChangeViewVariant(this IObservable<Frame> source, string id) 
-            => source.ToResilientObservable()
+        public static IObservable<SingleChoiceAction> ChangeViewVariant(this IObservable<Frame> source, string id) 
+            => source
                 .SelectMany(frame => frame.Actions("ChangeVariant").Cast<SingleChoiceAction>().ToNowObservable())
                 .Do(action => action.DoExecute(action.Items.First(item => item.Id == id)))
                 .Select(action => action);        
-        public static ResilientObservable<DetailView> ToDetailView<T>(this IObservable<T> source) where T : Frame
-            => source.ToResilientObservable().Select(frame => frame.View.ToDetailView());
+        public static IObservable<DetailView> ToDetailView<T>(this IObservable<T> source) where T : Frame
+            => source.Select(frame => frame.View.ToDetailView());
         
-        public static ResilientObservable<ListView> ToListView<T>(this IObservable<T> source) where T : Frame
-            => source.ToResilientObservable().Select(frame => frame.View.ToListView());
+        public static IObservable<ListView> ToListView<T>(this IObservable<T> source) where T : Frame
+            => source.Select(frame => frame.View.ToListView());
         
-        public static ResilientObservable<T> WhenFrame<T>(this IObservable<T> source, params ViewType[] viewTypes) where T : Frame
-            => source.ToResilientObservable().Where(frame => frame.When(viewTypes));
+        public static IObservable<T> WhenFrame<T>(this IObservable<T> source, params ViewType[] viewTypes) where T : Frame
+            => source.Where(frame => frame.When(viewTypes));
 
-        public static ResilientObservable<View> WhenView<TFrame>(this IObservable<TFrame> source, Type objectType = null,
+        public static IObservable<View> WhenView<TFrame>(this IObservable<TFrame> source, Type objectType = null,
             ViewType viewType = ViewType.Any, Nesting nesting = Nesting.Any) where TFrame : Frame
             => source.WhenFrame(objectType, viewType, nesting).ToView();
 
-        public static ResilientObservable<View> WhenDetailView<TFrame>(this IObservable<TFrame> source, params Type[] objectTypes) where TFrame : Frame
+        public static IObservable<View> WhenDetailView<TFrame>(this IObservable<TFrame> source, params Type[] objectTypes) where TFrame : Frame
             => source.WhenFrame(objectTypes).WhenFrame(ViewType.DetailView).ToView();
         
-        public static ResilientObservable<View> WhenDetailView<TFrame>(this IObservable<TFrame> source, Type objectType = null, Nesting nesting = Nesting.Any) where TFrame : Frame
+        public static IObservable<View> WhenDetailView<TFrame>(this IObservable<TFrame> source, Type objectType = null, Nesting nesting = Nesting.Any) where TFrame : Frame
             => source.WhenFrame(objectType,ViewType.DetailView, nesting).ToView();
         
-        public static ResilientObservable<View> WhenListView<TFrame>(this IObservable<TFrame> source, Type objectType = null, Nesting nesting = Nesting.Any) where TFrame : Frame
+        public static IObservable<View> WhenListView<TFrame>(this IObservable<TFrame> source, Type objectType = null, Nesting nesting = Nesting.Any) where TFrame : Frame
             => source.WhenFrame(objectType,ViewType.ListView, nesting).ToView();
         
-        public static ResilientObservable<T> WhenDetailView<T,TObject>(this IObservable<T> source, Func<TObject,bool> criteria) where T:Frame
+        public static IObservable<T> WhenDetailView<T,TObject>(this IObservable<T> source, Func<TObject,bool> criteria) where T:Frame
             => source.WhenFrame(typeof(TObject),ViewType.DetailView).Where(frame => criteria(frame.View.CurrentObject.As<TObject>()));
         
-        public static ResilientObservable<T> WhenFrame<T>(this IObservable<T> source, Type objectType = null,
+        public static IObservable<T> WhenFrame<T>(this IObservable<T> source, Type objectType = null,
             ViewType viewType = ViewType.Any, Nesting nesting = Nesting.Any) where T:Frame
-            => source.ToResilientObservable().Where(frame => frame.When(nesting)).SelectMany(frame => frame.WhenFrame(viewType, objectType)) ;
-        public static ResilientObservable<T> WhenFrame<T>(this IObservable<T> source, Func<Frame,Type> objectType = null,
+            => source.Where(frame => frame.When(nesting)).SelectMany(frame => frame.WhenFrame(viewType, objectType)) ;
+        public static IObservable<T> WhenFrame<T>(this IObservable<T> source, Func<Frame,Type> objectType = null,
             Func<Frame,ViewType> viewType = null, Nesting nesting = Nesting.Any) where T:Frame
-            => source.ToResilientObservable().Where(frame => frame.When(nesting))
+            => source.Where(frame => frame.When(nesting))
                 .SelectMany(frame => frame.WhenFrame(viewType?.Invoke(frame)??ViewType.Any, objectType?.Invoke(frame))) ;
         
-        public static ResilientObservable<T> WhenFrame<T>(this T frame, params string[] viewIds) where T : Frame 
+        public static IObservable<T> WhenFrame<T>(this T frame, params string[] viewIds) where T : Frame 
             => frame.WhenViewChanged().To(frame).Where(_ => viewIds.Contains(frame.View.Id));
-        private static ResilientObservable<T> WhenFrame<T>(this T frame,ViewType viewType, Type types) where T : Frame 
+        private static IObservable<T> WhenFrame<T>(this T frame,ViewType viewType, Type types) where T : Frame 
             => (frame.View != null ? frame.When(viewType) && frame.When(types) ? frame.Observe() : Observable.Empty<T>()
                 : frame.WhenViewChanged().Where(t => t.frame.When(viewType) && t.frame.When(types)).To(frame))
-                .ToResilientObservable();
+                ;
         
-        public static ResilientObservable<Frame> ListViewProcessSelectedItem(this IObservable<Frame> source,Action<SimpleActionExecuteEventArgs> executed=null) 
-            => source.ToResilientObservable().SelectMany(frame => frame.ListViewProcessSelectedItem(executed).Take(1));
+        public static IObservable<Frame> ListViewProcessSelectedItem(this IObservable<Frame> source,Action<SimpleActionExecuteEventArgs> executed=null) 
+            => source.SelectMany(frame => frame.ListViewProcessSelectedItem(executed).Take(1));
         
-        public static ResilientObservable<Frame> ListViewProcessSelectedItem(this IObservable<Frame> source,string defaultFocusedItem) 
-            => source.ToResilientObservable().SelectMany(frame => frame.ListViewProcessSelectedItem(defaultFocusedItem).Take(1));
+        public static IObservable<Frame> ListViewProcessSelectedItem(this IObservable<Frame> source,string defaultFocusedItem) 
+            => source.SelectMany(frame => frame.ListViewProcessSelectedItem(defaultFocusedItem).Take(1));
 
-        public static ResilientObservable<Frame> ListViewProcessSelectedItem(this Frame frame,string defaultFocusedItem) 
-            => frame.ListViewProcessSelectedItem(e => e.ShowViewParameters.CreatedView.ToDetailView().SetDefaultFocusedItem(defaultFocusedItem)).ToResilientObservable();
+        public static IObservable<Frame> ListViewProcessSelectedItem(this Frame frame,string defaultFocusedItem) 
+            => frame.ListViewProcessSelectedItem(e => e.ShowViewParameters.CreatedView.ToDetailView().SetDefaultFocusedItem(defaultFocusedItem));
 
-        public static ResilientObservable<Frame> ListViewProcessSelectedItem(this Frame frame,Action<SimpleActionExecuteEventArgs> executed=null) 
+        public static IObservable<Frame> ListViewProcessSelectedItem(this Frame frame,Action<SimpleActionExecuteEventArgs> executed=null) 
             => frame.ListViewProcessSelectedItem(() => frame.View.SelectedObjects.Cast<object>().FirstOrDefault() ,executed);
 
-        public static ResilientObservable<Frame> ListViewProcessSelectedItem<T>(this Frame frame, Func<T> selectedObject,Action<SimpleActionExecuteEventArgs> executed=null){
+        public static IObservable<Frame> ListViewProcessSelectedItem<T>(this Frame frame, Func<T> selectedObject,Action<SimpleActionExecuteEventArgs> executed=null){
             var action = frame.GetController<ListViewProcessCurrentObjectController>().ProcessCurrentObjectAction;
             var invoke = selectedObject.Invoke()??default(T);
             var afterNavigation = action.WhenExecuted().DoWhen(_ => executed != null, e => executed!(e))
                 .If(e => e.ShowViewParameters.CreatedView!=null,e => frame.Application.WhenFrame(e.ShowViewParameters.CreatedView.ObjectTypeInfo.Type).Take(1),e => e.Frame().Observe());
-            return action.Trigger(afterNavigation,invoke.YieldItem().Cast<object>().ToArray()).ToResilientObservable();
+            return action.Trigger(afterNavigation,invoke.YieldItem().Cast<object>().ToArray());
         }
 
-        public static ResilientObservable<Unit> SaveAndCloseObject(this Frame frame)
-            => frame.SaveAndCloseAction().Trigger().ToResilientObservable();
+        public static IObservable<Unit> SaveAndCloseObject(this Frame frame)
+            => frame.SaveAndCloseAction().Trigger();
         
-        public static ResilientObservable<Frame> NewObject(this Frame frame, Type objectType,bool saveAndClose=false,Func<Frame,IObservable<Unit>> detailview=null) 
+        public static IObservable<Frame> NewObject(this Frame frame, Type objectType,bool saveAndClose=false,Func<Frame,IObservable<Unit>> detailview=null) 
             => frame.NewObjectAction().Trigger(frame.Application.WhenFrame(objectType,ViewType.DetailView).Take(1),() => frame.NewObjectAction().Items.First(item => (Type)item.Data==objectType))
                 .ConcatIgnored(frame1 => detailview?.Invoke(frame1)?? Observable.Empty<Unit>())
-                .If(_ => saveAndClose,frame1 => frame1.SaveAndCloseObject().To<Frame>().Concat(frame),frame1 => frame1.Observe()).ToResilientObservable();
+                .If(_ => saveAndClose,frame1 => frame1.SaveAndCloseObject().To<Frame>().Concat(frame),frame1 => frame1.Observe());
     }
 }

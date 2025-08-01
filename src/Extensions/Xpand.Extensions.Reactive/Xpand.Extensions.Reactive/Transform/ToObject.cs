@@ -9,8 +9,7 @@ namespace Xpand.Extensions.Reactive.Transform {
     public static partial class Transform {
         public static IObservable<object> ToObject<T>(this IObservable<T> source) 
             => source.Select(z => (object)z);
-        public static ResilientObservable<object> ToObject<T>(this ResilientObservable<T> source)
-            => source.Select(item => (object)item);
+        
         public static IObservable<TResult> ToObject<TResult>(this IObservable<JsonNode> source) 
             => source.Select(jToken => jToken.Deserialize<TResult>());
         

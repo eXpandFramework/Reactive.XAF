@@ -123,8 +123,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => application.WhenFrameCreated().SelectMany(frame => frame.WhenViewControllersActivated().To(frame)
                 .Where(frame1 => frame1.When(objectType)&&frame1.When(viewType)&&frame1.When(nesting)));
         
-        public static ResilientObservable<Frame> WhenFrameCreated(this XafApplication application,TemplateContext templateContext=default)
-            => application.ProcessEvent<FrameCreatedEventArgs>(nameof(XafApplication.FrameCreated)).Select(e => e.Frame)
+        public static IObservable<Frame> WhenFrameCreated(this XafApplication application,TemplateContext templateContext=default)
+            => application.WhenEvent<FrameCreatedEventArgs>(nameof(XafApplication.FrameCreated)).Select(e => e.Frame)
                 .Where(frame => frame.Application==application&& (templateContext==default ||frame.Context == templateContext));
 
         private static readonly Subject<GenericEventArgs<XafApplication>> WhenExitingSubject = new();
@@ -205,19 +205,19 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<Window> WhenMainWindowCreated(this XafApplication application,  bool emitIfMainExists = true) 
             => application.WhenWindowCreated(true, emitIfMainExists);
         
-        public static ResilientObservable<Window> WhenWindowCreated(this XafApplication application,bool isMain=false,bool emitIfMainExists=true) {
+        public static IObservable<Window> WhenWindowCreated(this XafApplication application,bool isMain=false,bool emitIfMainExists=true) {
             var windowCreated = application.WhenFrameCreated().OfType<Window>();
             return (isMain ? emitIfMainExists && application.MainWindow != null ? application.MainWindow.Observe()
                     : windowCreated.WhenMainWindowAvailable().Select(window => window)
                 : windowCreated);
         }
 
-        private static ResilientObservable<Window> WhenMainWindowAvailable(this IObservable<Window> windowCreated) 
+        private static IObservable<Window> WhenMainWindowAvailable(this IObservable<Window> windowCreated) 
             => windowCreated.When(TemplateContext.ApplicationWindow).TemplateChanged().Cast<Window>()
-                .If(window => window.Application.GetPlatform() == Platform.Win, window => window.ProcessEvent("Showing")
+                .If(window => window.Application.GetPlatform() == Platform.Win, window => window.WhenEvent("Showing")
                     .SelectMany(_ => 1.Seconds().Interval().TakeUntilDisposed(window.Application).ObserveOnContext()
-                        .WhenNotDefault(_ => window.Application?.MainWindow).Take(1).ToResilientObservable())
-                    .To(window), window => (window.Application.MainWindow ?? window).Observe()).ToResilientObservable()
+                        .WhenNotDefault(_ => window.Application?.MainWindow).Take(1))
+                    .To(window), window => (window.Application.MainWindow ?? window).Observe())
                 .Take(1);
 
         public static IObservable<Window> WhenPopupWindowCreated(this XafApplication application) 
@@ -367,19 +367,19 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<Frame> WhenFrame(this XafApplication application, params string[] viewIds) 
             => application.WhenFrame().WhenFrame(viewIds);
         
-        public static ResilientObservable<Frame> WhenFrame(this XafApplication application, Type objectType ,
+        public static IObservable<Frame> WhenFrame(this XafApplication application, Type objectType ,
             ViewType viewType = ViewType.Any, Nesting nesting = Nesting.Any) 
             => application.WhenFrame(_ => objectType,_ => viewType,nesting);
         
-        public static ResilientObservable<Frame> WhenFrame(this XafApplication application, Type objectType ,
+        public static IObservable<Frame> WhenFrame(this XafApplication application, Type objectType ,
             params ViewType[] viewTypes) 
             => application.WhenFrame(objectType).WhenFrame(viewTypes);
         
-        public static ResilientObservable<Frame> WhenFrame(this XafApplication application, Func<Frame,Type> objectType,
+        public static IObservable<Frame> WhenFrame(this XafApplication application, Func<Frame,Type> objectType,
             Func<Frame,ViewType> viewType = null, Nesting nesting = Nesting.Any) 
             => application.WhenFrame().WhenFrame(objectType,viewType,nesting);
         
-        static ResilientObservable<Frame> WhenFrameViewChanged(this XafApplication application) 
+        static IObservable<Frame> WhenFrameViewChanged(this XafApplication application) 
             => application.WhenFrameCreated().Merge(application.MainWindow.Observe().WhenNotDefault())
                 .WhenViewChanged().Select(tuple => tuple.frame)
                 .StartWith(application.MainWindow.Cast<Frame>()).WhenNotDefault(frame => frame?.View);
