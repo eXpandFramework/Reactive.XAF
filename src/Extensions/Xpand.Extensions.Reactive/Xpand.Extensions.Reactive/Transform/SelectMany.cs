@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Runtime.CompilerServices;
 using Xpand.Extensions.Reactive.ErrorHandling;
 
 namespace Xpand.Extensions.Reactive.Transform {
@@ -16,7 +17,10 @@ namespace Xpand.Extensions.Reactive.Transform {
         public static IObservable<TSource> SelectMany<TSource>(this IObservable<IAsyncEnumerable<TSource>> source) 
             => source.SelectMany(source1 => source1.ToObservable());
 
-        public static IObservable<TResult> SelectManyResilient<TSource, TResult>(this IObservable<TSource> source, Func<TSource, IObservable<TResult>> selector)
-            => source.SelectMany(arg => selector(arg).ChainFaultContext([arg]));
+        [Obsolete]
+        public static IObservable<TResult> SelectManyResilient<TSource, TResult>(this IObservable<TSource> source, Func<TSource, IObservable<TResult>> selector,[CallerMemberName]string caller="")
+            => source.SelectMany(selector).ChainFaultContext();
+        public static IObservable<TResult> SelectManyItemResilient<TSource, TResult>(this IObservable<TSource> source, Func<TSource, IObservable<TResult>> selector,[CallerMemberName]string caller="")
+            => source.SelectMany(arg => selector(arg).ChainFaultContext().ContinueOnError());
     }
 }

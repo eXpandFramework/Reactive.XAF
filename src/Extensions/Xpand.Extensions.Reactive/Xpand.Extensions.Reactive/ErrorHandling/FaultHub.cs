@@ -14,41 +14,11 @@ using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.MemoryCacheExtensions;
 
 namespace Xpand.Extensions.Reactive.ErrorHandling {
-
-    public class AmbientFaultContext {
-        public StackTrace DefinitionStackTrace { get; init; }
-        public IReadOnlyList<string> CustomContext { get; init; }
-    }
-
-    public static class FaultHub {
-        public static readonly AsyncLocal<AmbientFaultContext> CurrentContext = new();
-        internal static readonly AsyncLocal<List<Func<Exception, FaultAction?>>> HandlersContext = new();
-        static readonly AsyncLocal<Guid?> Ctx = new();
-        static readonly Subject<Exception> PreRaw = new();
-        static readonly Subject<Exception> MainRaw = new();
-        public static readonly MemoryCache Seen = new(new MemoryCacheOptions { SizeLimit = 10000 });
-        public static readonly ISubject<Exception> PreBus = Subject.Synchronize(PreRaw);
-        public static readonly ISubject<Exception> Bus = Subject.Synchronize(MainRaw);
-        const string KeyCId = "CorrelationId";
-        public const string SkipKey = "FaultHub.Skip";
-        const string PublishedKey = "FaultHub.Published";
-        
+    public static class ChainFaultContextService {
+        internal static readonly AsyncLocal<Stack<object>> ContextStack = new();
         public static IObservable<T> ChainFaultContext<T>(this IObservable<T> source, Func<IObservable<T>, IObservable<T>> retryStrategy,
-            object[] context = null, [CallerMemberName] string caller = "") {
-    
-            var faultContext = context.NewFaultContext(caller);
-            var contextName = faultContext.CustomContext.FirstOrDefault() ?? "Unknown";
-            Console.WriteLine($"[HUB][WithFaultContext] Operator defined in '{contextName}'. Applying retry strategy.");
-
-            return retryStrategy(source).Catch((Exception ex) => ex.HandleFaultContext<T>(contextName, faultContext));
-        }
-
-        public static IObservable<T> ChainFaultContext<T>(this IObservable<T> source, object[] context, [CallerMemberName] string caller = "") {
-            var faultContext = context.NewFaultContext(caller);
-            var contextName = faultContext.CustomContext.FirstOrDefault() ?? "Unknown";
-            Console.WriteLine($"[HUB][WithFaultContext] Operator defined in '{contextName}'.");
-            return source.Catch((Exception ex) => ex.HandleFaultContext<T>(contextName, faultContext));
-        }
+            object[] context = null, [CallerMemberName] string caller = "")
+            => retryStrategy(source).ChainFaultContext(context, caller);
 
         public static IObservable<T> ChainFaultContext<T>(this IObservable<T> source, 
             bool handleUpstreamRetries, object[] context = null, [CallerMemberName] string caller = "")
@@ -57,27 +27,24 @@ namespace Xpand.Extensions.Reactive.ErrorHandling {
 
         public static IObservable<T> ChainFaultContext<T>(this IObservable<T> source, [CallerMemberName] string caller = "")
             => source.ChainFaultContext([],caller);
-
-        private static IObservable<T> HandleFaultContext<T>(this Exception ex,string contextName,  AmbientFaultContext faultContext){
-            Console.WriteLine($"[HUB][WithFaultContext][{contextName}] Caught exception. Enriching and re-throwing.");
-            var (action, muteOnRethrow) = ex.GetFaultResult();
-            var enrichedException = ex.ExceptionToPublish(faultContext);
         
-            if (ex.IsSkipped()) {
-                enrichedException.MuteForBus();
-            }
-
-            switch (action) {
-                case FaultResult.Complete:
-                    enrichedException.Publish();
-                    return Observable.Empty<T>();
-            
-                default: 
-                    if (muteOnRethrow) {
-                        enrichedException.MuteForBus();
-                    }
-                    return Observable.Throw<T>(enrichedException);
-            }
+        
+        public static IObservable<T> ChainFaultContext<T>(this IObservable<T> source, object[] context, [CallerMemberName] string caller = "") {
+            var faultContext = context.NewFaultContext(caller);
+            var contextName = faultContext.CustomContext.FirstOrDefault() ?? "Unknown";
+    
+            return Observable.Using(
+                () => {
+                    var stack = ContextStack.Value ??= new Stack<object>();
+                    var token = new object();
+                    stack.Push(token);
+                    return Disposable.Create(() => stack.Pop());
+                },
+                _ => {
+                    Console.WriteLine($"[HUB][WithFaultContext] Operator defined in '{contextName}'.");
+                    return source.Catch((Exception ex) => ex.HandleFaultContext<T>(contextName, faultContext));
+                }
+            );
         }
         
         private static AmbientFaultContext NewFaultContext(this object[] context, string caller) 
@@ -87,6 +54,60 @@ namespace Xpand.Extensions.Reactive.ErrorHandling {
                     .WhereNotNullOrEmpty()
                     .ToArray()
             };
+        
+        private static IObservable<T> HandleFaultContext<T>(this Exception ex,string contextName,  AmbientFaultContext faultContext){
+            Console.WriteLine($"[HUB][HandleFaultContext] Entered for context '{contextName}'.");
+            var enrichedException = ex.ExceptionToPublish(faultContext);
+            var (localAction, muteOnRethrow) = ex.GetFaultResult();
+            Console.WriteLine($"[HUB][HandleFaultContext] Local handler check resulted in action: '{(localAction,muteOnRethrow)}'.");
+            if (ex.IsSkipped()) {
+                Console.WriteLine($"[HUB][HandleFaultContext] {nameof(FaultHub.MuteForBus)} '{contextName}'.");
+                enrichedException.MuteForBus();
+            }
+
+            if (localAction == FaultResult.Complete) {
+                Console.WriteLine("[HUB][HandleFaultContext] Honoring local 'Complete' action.");
+                if (!enrichedException.IsSkipped()){
+                    enrichedException.Publish();
+                }
+                return Observable.Empty<T>();
+            }
+    
+            if (localAction == FaultResult.Rethrow) {
+                Console.WriteLine("[HUB][HandleFaultContext] Honoring local 'Rethrow' action.");
+                if (muteOnRethrow) {
+                    enrichedException.MuteForBus();
+                }
+                return Observable.Throw<T>(enrichedException);
+            }
+            
+            var stackDepth = ContextStack.Value?.Count ?? 0;
+            Console.WriteLine($"[HUB][HandleFaultContext] Local action is 'Proceed'. Checking for nesting. Stack depth: {stackDepth}.");
+            if (stackDepth > 1) {
+                Console.WriteLine($"[HUB][HandleFaultContext] Nested context detected. Propagating error upwards.");
+                return Observable.Throw<T>(enrichedException);
+            }
+            
+            Console.WriteLine($"[HUB][HandleFaultContext] Outermost context. Propagating error by default.");
+            return Observable.Throw<T>(enrichedException);
+
+            
+        }
+
+    }
+
+    public static class FaultHub {
+        internal static readonly AsyncLocal<List<Func<Exception, FaultAction?>>> HandlersContext = new();
+        
+        static readonly AsyncLocal<Guid?> Ctx = new();
+        static readonly Subject<Exception> PreRaw = new();
+        static readonly Subject<Exception> MainRaw = new();
+        public static readonly MemoryCache Seen = new(new MemoryCacheOptions { SizeLimit = 10000 });
+        public static readonly ISubject<Exception> PreBus = Subject.Synchronize(PreRaw);
+        public static readonly ISubject<Exception> Bus = Subject.Synchronize(MainRaw);
+        const string KeyCId = "CorrelationId";
+        public const string SkipKey = "FaultHub.Skip";
+        const string PublishedKey = "FaultHub.Published";
 
         public static bool IsSkipped(this Exception exception) => exception.AccessData(data => data.Contains(SkipKey));
 
@@ -106,11 +127,6 @@ namespace Xpand.Extensions.Reactive.ErrorHandling {
             StopAndReturnFalse
         }
 
-        public enum FaultResult {
-            Proceed,
-            Complete,
-            Rethrow
-        }
         public static (FaultResult Action, bool Mute) GetFaultResult(this Exception originalException) {
             var handlerAction = HandlersContext.Value?.Select(handler => handler(originalException)).FirstOrDefault(action => action.HasValue);
             if (!handlerAction.HasValue) {
@@ -169,8 +185,8 @@ namespace Xpand.Extensions.Reactive.ErrorHandling {
             return publish ? Observable.Empty<T>() : Observable.Throw<T>(ex);
         }
 
-        public static IObservable<T> MakeResilient<T>(this IObservable<T> source, AmbientFaultContext faultContext = null) {
-            return source.Catch<T, Exception>(e => {
+        public static IObservable<T> MakeResilient<T>(this IObservable<T> source, AmbientFaultContext faultContext = null) 
+            => source.Catch<T, Exception>(e => {
                 Console.WriteLine($"[HUB][MakeResilient] Caught exception: '{e.Message}'. Enriching with context...");
                 var (action, muteOnRethrow) = e.GetFaultResult();
                 var exceptionToPublish = e.ExceptionToPublish(faultContext);
@@ -182,40 +198,28 @@ namespace Xpand.Extensions.Reactive.ErrorHandling {
                     case FaultResult.Complete:
                         exceptionToPublish.Publish();
                         return Observable.Empty<T>();
-        
+            
                     case FaultResult.Rethrow:
                         if (muteOnRethrow) {
                             exceptionToPublish.MuteForBus();
                         }
                         return Observable.Throw<T>(exceptionToPublish);
-        
+            
                     case FaultResult.Proceed:
                     default:
                         Console.WriteLine("[HUB][MakeResilient] Throwing enriched exception for publish/retry.");
                         return Observable.Throw<T>(exceptionToPublish);
                 }
             });
-        }
+
         public static IObservable<T> PublishFaults<T>(this IObservable<T> source) {
             return source.Catch<T, Exception>(ex => {
                 Console.WriteLine($"[HUB][PublishFaults] Caught final exception: {ex.GetType().Name}. Attempting to publish.");
-        
-                // This now uses the helper which correctly re-throws muted exceptions.
                 return ex.Publish<T>();
             });
-        }        
-        private static Exception ReOrderContext(this Exception e)
-            => e is not FaultHubException faultHubException
-                ? e
-                : new FaultHubException(
-                    faultHubException.Message,
-                    faultHubException.InnerException,
-                    new AmbientFaultContext {
-                        DefinitionStackTrace = faultHubException.Context.DefinitionStackTrace,
-                        CustomContext = faultHubException.Context.CustomContext.MoveFirstToEnd()
-                    });
+        }
 
-        private static Exception ExceptionToPublish(this Exception e, AmbientFaultContext contextToUse)
+        internal static Exception ExceptionToPublish(this Exception e, AmbientFaultContext contextToUse)
             => contextToUse == null ? e : e is not FaultHubException faultHubException
                     ? new FaultHubException("An exception occurred in a traced fault context.", e, contextToUse)
                     : new FaultHubException(faultHubException.Message, faultHubException.InnerException,
@@ -229,15 +233,30 @@ namespace Xpand.Extensions.Reactive.ErrorHandling {
         public static IDisposable Disable() => AddHandler(_ => FaultAction.Rethrow);
 
         public static IDisposable AddHandler(this Func<Exception, FaultAction?> handler) {
-            var context = HandlersContext.Value ??= new List<Func<Exception, FaultAction?>>();
+            var context = HandlersContext.Value ??= [];
             context.Add(handler);
             return Disposable.Create(context, list => list.Remove(handler));
         }
 
     }
-    public class FaultHubException(string message, Exception innerException, AmbientFaultContext context)
-        : Exception(message, innerException) {
-        public AmbientFaultContext Context { get; } = context;
+
+    public class AmbientFaultContext {
+        public StackTrace DefinitionStackTrace { get; init; }
+        public IReadOnlyList<string> CustomContext { get; init; }
+    }
+
+    public sealed class FaultHubException : Exception {
+        public FaultHubException(string message, Exception innerException, AmbientFaultContext context) : base(message, innerException) {
+            Context = context;
+            if (innerException != null) {
+                foreach (var key in innerException.Data.Keys) {
+                    Data[key] = innerException.Data[key];
+                }
+            }
+        }
+
+        
+        public AmbientFaultContext Context { get; }
 
         public override string ToString() {
             var builder = new StringBuilder();
@@ -256,5 +275,12 @@ namespace Xpand.Extensions.Reactive.ErrorHandling {
             return builder.ToString();
         }
     }
+    
+    public enum FaultResult {
+        Proceed,
+        Complete,
+        Rethrow
+    }
+
 
 }

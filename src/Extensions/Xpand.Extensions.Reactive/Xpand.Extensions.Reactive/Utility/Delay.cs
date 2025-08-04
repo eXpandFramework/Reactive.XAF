@@ -40,8 +40,8 @@ namespace Xpand.Extensions.Reactive.Utility {
         public static IObservable<T> Defer<T,TObject>(this TObject o, Func<TObject,IObservable<T>> selector)
             => o.Defer(() => selector(o));
         
-        public static IObservable<T> Defer<T>(this object o, Func<IObservable<T>> selector,[CallerMemberName]string caller="") 
-            => Observable.Defer(selector).ChainFaultContext([caller]);
+        public static IObservable<T> Defer<T>(this object o, Func<IObservable<T>> selector) 
+            => Observable.Defer(selector);
 
         public static IObservable<T> Defer<T>(this object o, Func<IEnumerable<T>> selector)
             => o.Defer(() => selector().ToNowObservable());

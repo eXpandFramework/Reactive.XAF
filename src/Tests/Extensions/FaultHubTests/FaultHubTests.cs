@@ -16,9 +16,7 @@ using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 
 namespace Xpand.Extensions.Tests.FaultHubTests{
-    
-    [TestFixture]
-    public class FaultHubTest:FaultHubTestBase{
+    public class FaultHubTests:FaultHubTestBase{
         [Test]
         public void Exceptions_emitted_from_FaultHub(){
             using var observer = Observable.Throw<Unit>(new Exception()).ChainFaultContext().PublishFaults().Test();
@@ -33,9 +31,9 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
         public async Task PreBus_Emits_Exceptions_before_Bus(){
             var error = Observable.Throw<string>(new Exception()).ChainFaultContext();
             var busObserver = FaultHub.PreBus
-                .SelectMany(_ => FaultHub.Bus).PublishFaults().Test();
+                .SelectMany(_ => FaultHub.Bus).Test();
 
-            await error.PublishOnError().FirstOrDefaultAsync();
+            await error.PublishFaults().FirstOrDefaultAsync();
             
             busObserver.ItemCount.ShouldBe(1);
         }
@@ -65,7 +63,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
         public void Any_UpStream_emits_until_completion_when_inner_resilient_stream_throws(){
             int count = 0;
             var bus = 1.Range(3).ToObservable().Do(_ => count++)
-                .SelectMany(_ => Observable.Defer(() => Observable.Throw<Unit>(new Exception())).ChainFaultContext().CompleteOnError(mute:false) );
+                .SelectMany(_ => Observable.Defer(() => Observable.Throw<Unit>(new Exception())).ContinueOnError());
 
             var testObserver = bus.PublishFaults().Test();
 
@@ -124,10 +122,11 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
             var innerOpObserver = new TestObserver<int>();
             
             var opBus=innerOpObserver.Defer(() => Unit.Default.Observe()
-                    .SelectManyResilient(_ => {
+                    .SelectMany(_ => {
                         innerOpObserver.OnNext(1);
                         return Observable.Throw<Unit>(new Exception());
-                    }))
+                    })
+                    .ChainFaultContext())
                 .ChainFaultContext(retrySelector) ;
         
             var opBusObserver = opBus.Take(3).PublishFaults().Test().AwaitDone(4.ToSeconds());
@@ -160,8 +159,10 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
         [Test]
         public void Inner_resilient_stream_can_CompleteOnError_when_error_when_outer_stream_resilient(){
             var bus = Observable.Return(Unit.Default)
-                .SelectManyResilient(unit => unit.Defer(() => Observable.Throw<Unit>(new InvalidOperationException()))
-                    .CompleteOnError(match:e => e.Has<InvalidOperationException>()).WhenCompleted());
+                .SelectMany(unit => unit.Defer(() => Observable.Throw<Unit>(new InvalidOperationException()))
+                    .CompleteOnError(match:e => e.Has<InvalidOperationException>())
+                    .ChainFaultContext().WhenCompleted())
+                .ChainFaultContext();
 
             var testObserver = bus.ChainFaultContext().PublishFaults().Test();
             
@@ -180,9 +181,11 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
             var innerRetry = (Func<IObservable<Unit>, IObservable<Unit>>)(source => source.Retry(2));
         
             var opBus = innerOpObserver.Defer(() => Unit.Default.Observe()
-                    .SelectManyResilient(_ => {
-                            innerOpObserver.OnNext(1);
-                            return Observable.Throw<Unit>(new Exception());
+                    .SelectMany(_ => {
+                            return Observable.Defer(() => {
+                                innerOpObserver.OnNext(1);
+                                return Observable.Throw<Unit>(new Exception());
+                            }).ChainFaultContext();
                         }
                     ).ChainFaultContext(innerRetry)
             ).ChainFaultContext(outerRetry);
@@ -202,11 +205,11 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
         public void Cannot_Retry_resilient_stream_with_retry(){
             int count = 0;
             var bus = Unit.Default.Observe()
-                .SelectManyResilient(_ => Observable.Defer(() => {
+                .SelectMany(_ => Observable.Defer(() => {
                     count++;
                     return Observable.Defer(() => Observable.Throw<Unit>(new Exception()));
                         
-                }))
+                }).ChainFaultContext())
                 
                 .Retry(3);
 
@@ -265,7 +268,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
             testObserver.CompletionCount.ShouldBe(1);
         }
         
-        [Test]
+        [Test][Obsolete]
         public void SelectManyResilient_op(){
             var innerOpObserver = new TestObserver<int>();
             
@@ -288,7 +291,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
             
         }
         
-        [Test, TestCaseSource(nameof(RetrySelectors))]
+        [Test, TestCaseSource(nameof(RetrySelectors))][Obsolete]
         public void SelectManyResilient_can_Retry(Func<IObservable<Unit>,IObservable<Unit>> retrySelector){
             var innerOpObserver = new TestObserver<int>();
             
@@ -453,7 +456,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
             var source = new[] { 1, 2, 3, 4 }.ToObservable();
 
 
-            var testObserver = source.SelectResilient(num => {
+            var testObserver = source.SelectResilientItem(num => {
                     if (num == 2) {
                         throw new InvalidOperationException("This is a test error.");
                     }
@@ -485,7 +488,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
             using var observer = testObserver.Defer(() => {
                 testObserver.OnNext(Unit.Default);
                 return Observable.Throw<int>(new Exception());
-            }).PublishOnError().Test();
+            }).ChainFaultContext().PublishOnError().Test();
             
             observer.ErrorCount.ShouldBe(0);
             testObserver.ItemCount.ShouldBe(1);
@@ -538,7 +541,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
         [Test]
         public void Handles_Nested_Contexts_Correctly2() {
             this.Defer(() => Unit.Default.Observe()
-                    .SelectManyResilient(_ => Observable.Throw<Unit>(new Exception("Nested Error"))).ChainFaultContext(["Outer"])
+                    .SelectMany(_ => this.Defer(() => Observable.Throw<Unit>(new Exception("Nested Error"))).ChainFaultContext()).ChainFaultContext(["Outer"])
             ).PublishFaults().Test();
 
             BusObserver.ItemCount.ShouldBe(1);
@@ -548,7 +551,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
         }
         
         [Test]
-        public async Task Works_With_Retry_Logic() {
+        public void Works_With_Retry_Logic() {
             
             var attemptCount = 0;
             var retrySelector = (Func<IObservable<Unit>, IObservable<Unit>>)(source => source.RetryWithBackoff(3,_ => 100.ToMilliseconds()));
@@ -560,14 +563,13 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
                     }
                 ).ChainFaultContext(retrySelector,["RetryContext"])
                 .PublishFaults()
-                .Test();
-        
-            await Task.Delay(1.ToSeconds());
+                .Test().AwaitDone(1.ToSeconds());
+            
             attemptCount.ShouldBe(3);
             BusObserver.ItemCount.ShouldBe(1);
             var ex = BusObserver.Items.Single().ShouldBeOfType<FaultHubException>();
             ex.Context.CustomContext.ShouldContain("RetryContext");
-            ex.Context.CustomContext.Join().ShouldContain("Defer");
+            ex.Context.CustomContext.ShouldContain(nameof(Works_With_Retry_Logic));
         }
         
         [Test]
@@ -591,6 +593,8 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
             finalException.Context.CustomContext.ShouldContain("OuterContext");
         }
         
-        
+ 
     }
+
+    
 }

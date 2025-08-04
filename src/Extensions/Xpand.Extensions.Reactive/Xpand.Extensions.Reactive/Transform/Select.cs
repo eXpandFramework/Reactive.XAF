@@ -10,9 +10,9 @@ namespace Xpand.Extensions.Reactive.Transform{
     
     public static partial class Transform {
 
-        public static IObservable<TResult> SelectResilient<TSource, TResult>(this IObservable<TSource> source,
-            Func<TSource, TResult> selector, [CallerMemberName] string caller = "") 
-            => source.SelectMany(item => item.Defer(() => selector(item).Observe(),caller));        
+        public static IObservable<TResult> SelectResilientItem<TSource, TResult>(this IObservable<TSource> source,
+            Func<TSource, TResult> selector) 
+            => source.SelectMany(item => item.Defer(() => selector(item).Observe()).ChainFaultContext().ContinueOnError());        
         public static IObservable<string> SelectToString(this IObservable<object> source) 
             => source.WhenNotDefault().Select(o => o.ToString());
 

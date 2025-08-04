@@ -188,8 +188,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<ActionBaseEventArgs> WhenActionExecuteCompleted(this XafApplication application,params string[] actions) 
             => application.WhenFrameCreated().SelectMany(window => window.Actions(actions)).WhenExecuteCompleted();
         public static IObservable<T> WhenActionExecuteConcat<T>(this XafApplication application,Func<SimpleActionExecuteEventArgs,IObservable<T>> selector,params string[] actions)  
-            => application.WhenFrameCreated().SelectManyResilient(window => window.Actions(actions).OfType<SimpleAction>().ToObservable()
-                .SelectMany(a => a.WhenConcatExecution(selector)));
+            => application.WhenFrameCreated().SelectMany(window => window.Actions(actions).OfType<SimpleAction>().ToObservable()
+                .SelectMany(a => a.WhenConcatExecution(selector)).ChainFaultContext());
         public static IObservable<T> WhenSingleChoiceActionExecuteConcat<T>(this XafApplication application,Func<SingleChoiceActionExecuteEventArgs,IObservable<T>> selector,params string[] actions)  
             => application.WhenFrameCreated().SelectMany(window => window.Actions(actions).OfType<SingleChoiceAction>().ToObservable()
                 .SelectMany(a => a.WhenConcatExecution(selector,typeof(T).Name))) ;

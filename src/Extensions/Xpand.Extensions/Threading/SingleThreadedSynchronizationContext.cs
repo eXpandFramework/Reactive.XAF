@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Xpand.Extensions.Threading {
     public static class SingleThreadedSynchronizationContextExtensions {
-        
+
         public static void Await(this object any, Func<Task> invoker) {
             var originalContext = SynchronizationContext.Current;
             try {

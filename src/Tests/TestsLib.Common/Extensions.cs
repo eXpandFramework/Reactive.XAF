@@ -36,6 +36,7 @@ using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.ExceptionExtensions;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Numeric;
+using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
@@ -97,6 +98,9 @@ namespace Xpand.TestsLib.Common{
                     eventArgs.Tracer=tracing;
                     return tracing.Exceptions;
                 });
+
+        public static Task AwaitDoneAsync<T>(this TestObserver<T> observer,TimeSpan timeSpan) 
+            => observer.AwaitAsync(testObserver => testObserver.AwaitDone(timeSpan));
 
         public static Guid SetupSecurity(this XafApplication application, Guid userId,Type userType=null,Type roleType=null,bool notAdmin=false) {
             userType ??= typeof(PermissionPolicyUser);

@@ -28,15 +28,15 @@ namespace Xpand.XAF.Modules.Reactive.Extensions{
         }
         
         public static IDisposable Subscribe<T>(this IObservable<T> source, ModuleBase module) {
-            var safe = source.MakeResilient().TakeUntil(module.WhenDisposed());
+            var safe = source.TakeUntil(module.WhenDisposed());
             return module.Application != null ? safe.Subscribe(module.Application) : safe.Subscribe();
-        }        
-        
-        public static IDisposable Subscribe<T>(this IObservable<T> source, Controller controller) 
-            => source.TakeUntil(controller.WhenDeactivated()).Subscribe(controller.Application);
+        }
 
         public static IDisposable Subscribe<T>(this IObservable<T> source,XafApplication application) 
-            => source.HandleErrors(application).Subscribe();
+            => source.HandleErrors(application).PublishFaults().Subscribe();
+
+        public static IDisposable Subscribe<T>(this IObservable<T> source, Controller controller) 
+            => source.TakeUntil(controller.WhenDeactivated()).Subscribe(controller.Application);
 
         public static IObservable<T> Retry<T>(this IObservable<T> source, Func<XafApplication> applicationSelector) 
             => source.RetryWhen(obs => {
@@ -51,8 +51,7 @@ namespace Xpand.XAF.Modules.Reactive.Extensions{
             );
 
         public static IObservable<T> HandleErrors<T>(this IObservable<T> source, XafApplication application, CancelEventArgs args=null,Func<Exception, IObservable<T>> exceptionSelector=null) 
-            => // exceptionSelector ??= (exception => Observable.Empty<T>());
-            source.Catch<T, Exception>(exception => {
+            => source.Catch<T, Exception>(exception => {
                 if (args != null) args.Cancel = true;
                 application?.HandleException( exception);
                 return exception.Handle(exceptionSelector);

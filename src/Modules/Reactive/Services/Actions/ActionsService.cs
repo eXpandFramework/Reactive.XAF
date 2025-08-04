@@ -260,6 +260,9 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
             => action.WhenEvent<ActionBaseEventArgs>(nameof(SimpleAction.Executed))
                 .Cast<SimpleActionExecuteEventArgs>()
                 .TakeUntilDisposed(action);
+        public static IObservable<Unit> WhenExecuted(this SimpleAction action,Func<SimpleActionExecuteEventArgs,IObservable<Unit>> selector) 
+            => action.ProcessEvent<SimpleActionExecuteEventArgs>(nameof(SimpleAction.Executed),selector)
+                .TakeUntilDisposed(action);
         
         public static IObservable<SimpleActionExecuteEventArgs> WhenExecuteCompleted(this SimpleAction action) 
             => action.WhenEvent<ActionBaseEventArgs>(nameof(ActionBase.ExecuteCompleted)).Cast<SimpleActionExecuteEventArgs>().TakeUntilDisposed(action);

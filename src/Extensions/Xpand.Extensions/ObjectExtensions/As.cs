@@ -1,11 +1,11 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Xpand.Extensions.StringExtensions;
 using Xpand.Extensions.TypeExtensions;
 
 namespace Xpand.Extensions.ObjectExtensions {
 
     public static partial class ObjectExtensions {
-        
         public static string EnsureString(this object o)
             => o?.ToString().EnsureEndWith(String.Empty)??String.Empty;
 
