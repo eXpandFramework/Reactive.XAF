@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using Microsoft.Extensions.Caching.Memory;
@@ -13,6 +14,7 @@ using Xpand.Extensions.MemoryCacheExtensions;
 
 namespace Xpand.Extensions.Reactive.ErrorHandling {
     public static class FaultHub {
+        public static readonly AsyncLocal<MethodInfo> AmbientLogicMethod = new();
         internal static readonly AsyncLocal<List<Func<Exception, FaultAction?>>> HandlersContext = new();
         public static readonly AsyncLocal<StackTrace> OriginStackTrace = new();
         static readonly AsyncLocal<Guid?> Ctx = new();
@@ -25,8 +27,6 @@ namespace Xpand.Extensions.Reactive.ErrorHandling {
         public const string SkipKey = "FaultHub.Skip";
         const string PublishedKey = "FaultHub.Published";
         
-        
-
         public static bool IsSkipped(this Exception exception) => exception.AccessData(data => data.Contains(SkipKey));
 
         public static bool IsPublished(this Exception exception)
@@ -164,7 +164,8 @@ namespace Xpand.Extensions.Reactive.ErrorHandling {
     public class AmbientFaultContext {
         public StackTrace InvocationStackTrace { get; init; }
         public IReadOnlyList<string> CustomContext { get; init; }
-        public AmbientFaultContext InnerContext { get; init; } 
+        public AmbientFaultContext InnerContext { get; init; }
+         
     }
     
     public sealed class FaultHubException : Exception {

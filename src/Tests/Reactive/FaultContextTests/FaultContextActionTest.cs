@@ -60,6 +60,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests.FaultContextTests{
         private IObservable<Unit> GetFailingObservable(SimpleActionExecuteEventArgs e) => 100.Milliseconds().Timer()
             .SelectMany(_ => Observable.Throw<Unit>(new InvalidOperationException("Deep error from a nested method.")))
             .ChainFaultContext()
+            
         ;
 
         [Test]
@@ -121,6 +122,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests.FaultContextTests{
             testObserver.ErrorCount.ShouldBe(0);
             BusObserver.ItemCount.ShouldBe(1);
             var fault = BusObserver.Items.Single().ShouldBeOfType<FaultHubException>();
+            
             
             fault.Context.CustomContext.ShouldContain("InnerContext");
             

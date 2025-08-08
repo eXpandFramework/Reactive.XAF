@@ -561,24 +561,17 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
      
         [Test]
         public void Preserves_Origin_StackTrace_For_Synchronous_Exception_Without_StackTrace() {
-            // ARRANGE
             var source = Observable.Throw<Unit>(new InvalidOperationException("Stackless fail"));
-
-            // ACT
+            
             source.ContinueOnError().Subscribe();
-
-            // ASSERT
+            
             BusObserver.ItemCount.ShouldBe(1);
             var fault = BusObserver.Items.Single().ShouldBeOfType<FaultHubException>();
-
-            // The new assertion: Verify the ToString() output.
+            
             var output = fault.ToString();
-
-            // 1. Check for the special header indicating the stack trace was substituted.
+            
             output.ShouldContain("--- Stack Trace (from innermost fault context) ---");
-
-            // 2. Check that the substituted stack trace contains the name of this test method,
-            // proving that the correct InvocationStackTrace was captured and used.
+            
             output.ShouldContain(nameof(Preserves_Origin_StackTrace_For_Synchronous_Exception_Without_StackTrace));
         }
         

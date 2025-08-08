@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
 
-namespace Xpand.Extensions.Tests.FaultHubTests;
+namespace Xpand.Extensions.Tests.FaultHubTests.POC;
 [TestFixture]
 public class ChainedContextProofOfConceptTests {
     
