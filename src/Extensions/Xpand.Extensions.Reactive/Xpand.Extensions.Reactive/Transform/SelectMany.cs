@@ -18,11 +18,12 @@ namespace Xpand.Extensions.Reactive.Transform {
         public static IObservable<TSource> SelectMany<TSource>(this IObservable<IAsyncEnumerable<TSource>> source) 
             => source.SelectMany(source1 => source1.ToObservable());
 
-        [Obsolete]
-        public static IObservable<TResult> SelectManyResilient<TSource, TResult>(this IObservable<TSource> source, Func<TSource, IObservable<TResult>> resilientSelector,[CallerMemberName]string caller="")
-            => source.SelectMany(resilientSelector).ChainFaultContext(caller);
+
         public static IObservable<TResult> SelectManyItemResilient<TSource, TResult>(this IObservable<TSource> source, Func<TSource, IObservable<TResult>> resilientSelector,[CallerMemberName]string caller="")
             => source.SelectManyItemResilient(resilientSelector,[],caller);
+        public static IObservable<TResult> SelectManyItemResilient<TSource, TResult>(this IObservable<TSource> source, Func<TSource, IEnumerable<TResult>> resilientSelector,[CallerMemberName]string caller="")
+            => source.SelectManyItemResilient(arg => resilientSelector(arg).ToNowObservable(),[],caller);
+        
         public static IObservable<TResult> SelectManyItemResilient<TSource, TResult>(this IObservable<TSource> source, Func<TSource, IObservable<TResult>> resilientSelector,object[] context,[CallerMemberName]string caller="")
             => source.SelectMany(arg => resilientSelector(arg).ContinueOnError((context ?? Enumerable.Empty<object>()).Concat(((object)arg).YieldItem()).ToArray(), caller));
     }

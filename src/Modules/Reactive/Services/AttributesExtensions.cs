@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
-using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.ConditionalAppearance;
@@ -18,6 +17,7 @@ using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.ActionExtensions;
 using Xpand.Extensions.XAF.ApplicationModulesManagerExtensions;
 using Xpand.Extensions.XAF.Attributes;
@@ -81,19 +81,18 @@ namespace Xpand.XAF.Modules.Reactive.Services {
                 .ToUnit();
 
         private static IObservable<Unit> PreventAggregatedObjectsValidationAttribute(this ApplicationModulesManager manager) 
-            => manager.WhenApplication(application => application.WhenSetupComplete().SelectMany(_ => application.PreventAggregatedObjectsValidationAttribute()));
+            => manager.WhenApplication(application => application.WhenSetupComplete(xafApplication => xafApplication.PreventAggregatedObjectsValidationAttribute()));
 
         static IObservable<Unit> LinkUnlinkPropertyAttribute(this ApplicationModulesManager manager)
-            => manager.WhenApplication(application => application.WhenFrame(typeof(object),ViewType.DetailView)
-                .SelectMany(frame => frame.View.ObjectTypeInfo.AttributedMembers<LinkUnlinkPropertyAttribute>().ToNowObservable()
-                    .SelectMany(t => frame.View.AsDetailView().NestedListViews(t.memberInfo.ListElementType)
-                        .SelectMany(editor => editor.WhenLinkUnlinkAction( frame, t)
-                            .Merge(editor.WhenNewObjectAction( frame, t)))
-                        ))) ;
+            => manager.WhenApplication(application => application.WhenFrame(frame => frame.View.ObjectTypeInfo.AttributedMembers<LinkUnlinkPropertyAttribute>().ToNowObservable()
+                .SelectMany(t => frame.View.AsDetailView().NestedListViews(t.memberInfo.ListElementType)
+                    .SelectMany(editor => editor.WhenLinkUnlinkAction( frame, t)
+                        .Merge(editor.WhenNewObjectAction( frame, t)))
+                ),typeof(object),ViewType.DetailView) ) ;
 
         private static IObservable<Unit> WhenNewObjectAction(this ListPropertyEditor editor, Frame frame, (LinkUnlinkPropertyAttribute attribute, IMemberInfo memberInfo) t) 
             => editor.Frame.NewObjectAction().WhenExecuted()
-                .Do(e => {
+                .DoItemResilient(e => {
                     var createdView = e.ShowViewParameters.CreatedView;
                     var associatedCollection = frame.View.ObjectTypeInfo.FindMember(t.attribute.PropertyName);
                     if (!associatedCollection.IsAggregated) return;
@@ -105,19 +104,18 @@ namespace Xpand.XAF.Modules.Reactive.Services {
 
         private static IObservable<Unit> WhenLinkUnlinkAction(this ListPropertyEditor editor, Frame frame, (LinkUnlinkPropertyAttribute attribute, IMemberInfo memberInfo) t){
             var controller = editor.Frame.GetController<LinkUnlinkController>();
-            return controller.LinkAction.WhenExecuteCompleted()
-                .SelectMany(e => e.PopupWindowViewSelectedObjects.Cast<object>())
-                .Do(value => {
-                    var memberInfo = frame.View.ObjectTypeInfo.FindMember(t.attribute.PropertyName);
-                    if (!memberInfo.ListElementType.IsAssignableFrom(t.memberInfo.ListElementType)) {
-                        var target = frame.View.ObjectSpace.CreateObject(memberInfo.ListElementType);
-                        memberInfo.AssociatedMemberInfo.SetValue(target,frame.View.CurrentObject);
-                        memberInfo.ListElementTypeInfo.Members.Single(info =>info.IsPublic&& info.MemberType==t.memberInfo.ListElementType)
-                            .SetValue(target,value);
-                        value = target;
-                    }
-                    ((IList)memberInfo.GetValue(frame.View.CurrentObject)).Add(value);
-                })
+            return controller.LinkAction.WhenExecuteCompleted(e => e.PopupWindowViewSelectedObjects.Cast<object>().ToNowObservable()
+                    .Do(value => {
+                        var memberInfo = frame.View.ObjectTypeInfo.FindMember(t.attribute.PropertyName);
+                        if (!memberInfo.ListElementType.IsAssignableFrom(t.memberInfo.ListElementType)) {
+                            var target = frame.View.ObjectSpace.CreateObject(memberInfo.ListElementType);
+                            memberInfo.AssociatedMemberInfo.SetValue(target,frame.View.CurrentObject);
+                            memberInfo.ListElementTypeInfo.Members.Single(info =>info.IsPublic&& info.MemberType==t.memberInfo.ListElementType)
+                                .SetValue(target,value);
+                            value = target;
+                        }
+                        ((IList)memberInfo.GetValue(frame.View.CurrentObject)).Add(value);
+                    }))
                 .MergeToUnit(controller.UnlinkAction.WhenExecuteCompleted(e => e.SelectedObjects.Cast<object>()
                     .Do(value => ((IList)frame.View.ObjectTypeInfo.FindMember(t.attribute.PropertyName)
                         .GetValue(frame.View.CurrentObject)).Remove(value)).ToNowObservable()));
@@ -125,7 +123,7 @@ namespace Xpand.XAF.Modules.Reactive.Services {
         
         static IObservable<Unit> DisableNewObjectAction(this ApplicationModulesManager manager)
             => manager.WhenApplication(application => application.WhenFrameCreated().ToController<NewObjectViewController>()
-                .SelectMany(controller => controller.WhenCollectDescendantTypes()
+                .SelectManyItemResilient(controller => controller.WhenCollectDescendantTypes()
                     .SelectMany(e => e.Types.Where(type => type.Attributes<DisableNewObjectActionAttribute>().Any()).ToArray()
                         .Do(type => e.Types.Remove(type)))))
                 .ToUnit();
@@ -159,8 +157,7 @@ namespace Xpand.XAF.Modules.Reactive.Services {
                 .MergeToUnit(manager.WhenApplication(application => application.WhenSetupComplete().Where(_ => application.GetPlatform()==Platform.Win)
                     .SelectMany(_ => application.TypesInfo.PersistentTypes.AttributedMembers<ColumnSummaryAttribute>()
                         .GroupBy(t => t.memberInfo.Owner).ToNowObservable()
-                        .SelectMany(types => application.WhenFrame(types.Key.Type,ViewType.ListView)
-                            .SelectUntilViewClosed(frame => frame.View.WhenControlsCreated(true)
+                        .SelectMany(types => application.WhenFrame(frame => frame.View.WhenControlsCreated(true)
                                 .Select(view => view.ToListView().Editor.GridView())
                                 .SelectMany(gridView => types.SelectMany(t1 => {
                                     var column = gridView.GetPropertyValue("Columns")
@@ -168,25 +165,27 @@ namespace Xpand.XAF.Modules.Reactive.Services {
                                     return column==null?[]: ((IEnumerable)column
                                             .GetPropertyValue("Summary")).Cast<object>()
                                         .Do(item => item.SetPropertyValue("Mode", t1.attribute.SummaryMode));
-                                })))
+                                })),types.Key.Type,ViewType.ListView)
+                            
                         ))));
         
         static IObservable<Unit> VisibleInAllViewsAttribute(this ApplicationModulesManager manager)
             => manager.WhenGeneratingModelNodes<IModelViewItems>()
-                .SelectMany(items => items.GetParent<IModelDetailView>().ModelClass.TypeInfo.AttributedMembers<VisibleInAllViewsAttribute>(attribute => attribute.CreateModelMember)
+                .SelectManyItemResilient(items => items.GetParent<IModelDetailView>().ModelClass.TypeInfo.AttributedMembers<VisibleInAllViewsAttribute>(attribute => attribute.CreateModelMember)
                     .Where(t => !items.OfType<IModelPropertyEditor>().Select(editor => editor.ModelMember.MemberInfo).Contains(t.memberInfo)).ToArray()
-                    .Do(t => items.AddNode<IModelPropertyEditor>(t.memberInfo.Name).PropertyName = t.memberInfo.Name))
+                    .Do(t => items.AddNode<IModelPropertyEditor>(t.memberInfo.Name).PropertyName = t.memberInfo.Name).ToNowObservable())
                 .ToUnit();
         
         static IObservable<Unit> ListViewShowFooterCollection(this ApplicationModulesManager manager)
             => manager.WhenGeneratingModelNodes<IModelViews>()
-                .SelectMany(views => views.OfType<IModelListView>()).Where(view =>
+                .SelectManyItemResilient(views => views.OfType<IModelListView>()).Where(view =>
                     view.ModelClass.TypeInfo.FindAttributes<ListViewShowFooterAttribute>(true).Any())
                 .Do(view => view.IsFooterVisible = true)
                 .ToUnit();
         
         static IObservable<Unit> HiddenActions(this ApplicationModulesManager manager)
-            => manager.WhenGeneratingModelNodes<IModelViews>().SelectMany(views =>views.OfType<IModelObjectView>()
+            => manager.WhenGeneratingModelNodes<IModelViews>()
+                .SelectManyItemResilient(views =>views.OfType<IModelObjectView>()
                     .SelectMany(view => view.ModelClass.TypeInfo.Attributed<HiddenActionAttribute>()
                         .SelectMany(t => t.attribute.Actions).Distinct().Do(action => ((IModelViewHiddenActions)view).HiddenActions.EnsureNode<IModelActionLink>(action)).ToUnit()
                         .Concat(view.ModelClass.TypeInfo.AttributedMembers<HiddenActionAttribute>()
@@ -200,7 +199,7 @@ namespace Xpand.XAF.Modules.Reactive.Services {
         
         static IObservable<Unit> ReadOnlyProperty(this ApplicationModulesManager manager)
             => manager.WhenGeneratingModelNodes<IModelBOModelClassMembers>()
-                .SelectMany(members => members.SelectMany(member => member.MemberInfo.FindAttributes<ReadOnlyPropertyAttribute>()
+                .SelectManyItemResilient(members => members.SelectMany(member => member.MemberInfo.FindAttributes<ReadOnlyPropertyAttribute>()
                     .Do(attribute => {
                         member.AllowClear = attribute.AllowClear;
                         member.AllowEdit = false;
@@ -210,7 +209,7 @@ namespace Xpand.XAF.Modules.Reactive.Services {
         static IObservable<Unit> ReadOnlyCollection(this ApplicationModulesManager manager)
             => manager.WhenApplication(application => application.WhenFrame(ViewType.DetailView)
                 .SelectMany(frame => frame.View.AsDetailView().NestedListViews()
-                    .SelectMany(editor => editor.MemberInfo.FindAttributes<ReadOnlyCollectionAttribute>()
+                    .SelectManyItemResilient(editor => editor.MemberInfo.FindAttributes<ReadOnlyCollectionAttribute>()
                         .Select(attribute => (attribute, editor))
                         .Do(t => {
                             var nestedFrameView = t.editor.Frame.View;
@@ -229,37 +228,35 @@ namespace Xpand.XAF.Modules.Reactive.Services {
 
         static IObservable<Unit> XpoAttributes(this ApplicationModulesManager manager)
             => manager.WhenCustomizeTypesInfo().Take(1).Select(e => e.TypesInfo)
-                .Do(typesInfo => AppDomain.CurrentDomain.GetAssemblyType("Xpand.Extensions.XAF.Xpo.XpoExtensions")
+                .DoItemResilient(typesInfo => AppDomain.CurrentDomain.GetAssemblyType("Xpand.Extensions.XAF.Xpo.XpoExtensions")
                     ?.Method("CustomizeTypesInfo",Flags.StaticAnyVisibility).Call(null,typesInfo))
                 .ToUnit();
 
         static IObservable<Unit> AppearanceToolAttribute(this ApplicationModulesManager manager)
             => manager.WhenApplication(application => application.WhenFrameCreated().ToController<AppearanceController>()
-                .SelectMany(controller => controller.ProcessEvent<CustomCreateAppearanceRuleEventArgs>(nameof(AppearanceController.CustomCreateAppearanceRule))
-                    .SelectMany(e => e.Observe()
-                        .Where(_ => e.RuleProperties is IModelAppearanceWithToolTipRule)
-                        .Do(_ => e.Rule = new ToolTipAppearanceRule(e.RuleProperties, e.ObjectSpace)))
-                    .MergeToUnit(controller.ProcessEvent<ApplyAppearanceEventArgs>(nameof(AppearanceController.AppearanceApplied))
-                        .SelectMany(e => e.Observe()
-                            .Do(_ => {
+                .SelectMany(controller => controller.ProcessEvent<CustomCreateAppearanceRuleEventArgs>(nameof(AppearanceController.CustomCreateAppearanceRule),
+                        e => e.Observe().Where(_ => e.RuleProperties is IModelAppearanceWithToolTipRule)
+                            .Do(_ => e.Rule = new ToolTipAppearanceRule(e.RuleProperties, e.ObjectSpace)))
+                    .MergeToUnit(controller.ProcessEvent<ApplyAppearanceEventArgs>(nameof(AppearanceController.AppearanceApplied),
+                        e => e.Observe().Do(_ => {
                                 if (e.AppearanceObject.Items.FirstOrDefault(item => item is AppearanceItemToolTip) is not AppearanceItemToolTip toolTip) return;
                                 if (toolTip.State == AppearanceState.None) return;
                                 var toolTipText = toolTip.State == AppearanceState.CustomValue ?  toolTip.ToolTipText :  "";
                                 if (e.Item is not ColumnWrapper columnWrapper) return;
                                 columnWrapper.ToolTip = toolTipText;
-                            })))))
+                            })) )))
                 .ToUnit();
         
         static IObservable<Unit> DetailCollectionAttribute(this ApplicationModulesManager manager)
             => manager.WhenApplication(application => application.WhenSetupComplete()
                 .SelectMany(_ => application.TypesInfo.PersistentTypes.Where(info => !info.IsAbstract)
-                    .AttributedMembers<DetailCollectionAttribute>().ToObservable()
-                    .SelectMany(t => application.SynchronizeNestedListViewSource(
+                    .AttributedMembers<DetailCollectionAttribute>().ToNowObservable()
+                    .SelectManyItemResilient(t => application.SynchronizeNestedListViewSource(
                         t.memberInfo.Owner.FindMember(t.attribute.MasterCollectionName),
                         t.memberInfo, t.attribute.ChildPropertyName))));
         static IObservable<Unit> ReadOnlyObjectViewAttribute(this ApplicationModulesManager manager)
             => manager.WhenGeneratingModelNodes<IModelViews>().SelectMany().OfType<IModelObjectView>()
-                .SelectMany(view => view.ModelClass.TypeInfo.FindAttributes<ReadOnlyObjectViewAttribute>()
+                .SelectManyItemResilient(view => view.ModelClass.TypeInfo.FindAttributes<ReadOnlyObjectViewAttribute>()
                     .Where(attribute => view.Is( attribute.ViewType)).ToArray()
                     .Execute(attribute => {
                         view.AllowEdit = attribute.AllowEdit;
@@ -275,20 +272,20 @@ namespace Xpand.XAF.Modules.Reactive.Services {
                     }).ToObservable(Transform.ImmediateScheduler))
                 .ToUnit()
                 .Merge(manager.WhenCustomizeTypesInfo()
-                    .SelectMany(e => e.TypesInfo.Members<ReadOnlyObjectViewAttribute>().ToObservable().Where(t1 => t1.info.IsList)
+                    .SelectMany(e => e.TypesInfo.Members<ReadOnlyObjectViewAttribute>().ToNowObservable().Where(t1 => t1.info.IsList)
                         .GroupBy(t2 => t2.info.ListElementTypeInfo).Select(ts => ts.Key)
-                        .Do(info => ((TypeInfo) info).AddAttribute(new ReadOnlyObjectViewAttribute()))
+                        .DoItemResilient(info => ((TypeInfo) info).AddAttribute(new ReadOnlyObjectViewAttribute()))
                         .ToUnit()));
 
         static IObservable<Unit> VisibleInAllViewsAttribute(this IObservable<CustomizeTypesInfoEventArgs> source)
-            => source.ConcatIgnored(e => e.TypesInfo.Members<VisibleInAllViewsAttribute>().ToArray().ToObservable()
-                    .SelectMany(t1 => new Attribute[] { new VisibleInDetailViewAttribute(true), new VisibleInListViewAttribute(true), new VisibleInLookupListViewAttribute(true) }
+            => source.ConcatIgnored(e => e.TypesInfo.Members<VisibleInAllViewsAttribute>().ToArray().ToNowObservable()
+                    .SelectManyItemResilient(t1 => new Attribute[] { new VisibleInDetailViewAttribute(true), new VisibleInListViewAttribute(true), new VisibleInLookupListViewAttribute(true) }
                         .Execute(attribute => t1.info.AddAttribute(attribute))))
                 .ToUnit();
                 
         static IObservable<CustomizeTypesInfoEventArgs> InvisibleInAllViewsAttribute(this IObservable<CustomizeTypesInfoEventArgs> source)
             => source.ConcatIgnored(e => e.TypesInfo.Members<InvisibleInAllViewsAttribute>().ToArray().Observe()
-                .SelectMany(attributes => attributes.AddVisibleViewAttributes()
+                .SelectManyItemResilient(attributes => attributes.AddVisibleViewAttributes()
                     .Concat(attributes.Distinct(t1 => t1.info).ToArray().AddAppearanceAttributes())));
 
         private static IEnumerable<Attribute> AddVisibleViewAttributes(this (InvisibleInAllViewsAttribute attribute, IMemberInfo info)[] source) 
@@ -307,28 +304,28 @@ namespace Xpand.XAF.Modules.Reactive.Services {
                 }.Execute(attribute => t.info.Owner.AddAttribute(attribute)));
 
         static IObservable<CustomizeTypesInfoEventArgs> InvisibleInAllListViewsAttribute(this IObservable<CustomizeTypesInfoEventArgs> source)
-            => source.ConcatIgnored(e => e.TypesInfo.Members<InvisibleInAllListViewsAttribute>().ToArray().ToObservable()
-                    .SelectMany(t1 => new Attribute[] {
+            => source.ConcatIgnored(e => e.TypesInfo.Members<InvisibleInAllListViewsAttribute>().ToArray().ToNowObservable()
+                    .SelectManyItemResilient(t1 => new Attribute[] {
                         new VisibleInListViewAttribute(false),
                         new VisibleInLookupListViewAttribute(false)
                     }.Execute(attribute => t1.info.AddAttribute(attribute))));
 
         static IObservable<CustomizeTypesInfoEventArgs> MapTypeMembersAttributes(this IObservable<CustomizeTypesInfoEventArgs> source)
             => source.ConcatIgnored(e => e.TypesInfo.PersistentTypes.ToNowObservable()
-                .SelectMany(info => info.FindAttributes<MapTypeMembersAttribute>()
-                .SelectMany(attribute => attribute.Source.ToTypeInfo().OwnMembers)
-                .WhereDefault(memberInfo => info.FindMember(memberInfo.Name))
-                .Execute(memberInfo => info.CreateMember(memberInfo.Name, memberInfo.MemberType)).IgnoreElements()
-                .ToArray().Finally(() => XafTypesInfo.Instance.RefreshInfo(info))
-                .ToNowObservable()));
+                .SelectManyItemResilient(info => info.FindAttributes<MapTypeMembersAttribute>()
+                    .SelectMany(attribute => attribute.Source.ToTypeInfo().OwnMembers)
+                    .WhereDefault(memberInfo => info.FindMember(memberInfo.Name))
+                    .Execute(memberInfo => info.CreateMember(memberInfo.Name, memberInfo.MemberType)).IgnoreElements()
+                    .ToArray().Finally(() => XafTypesInfo.Instance.RefreshInfo(info))
+                    .ToNowObservable()));
         
         static IObservable<CustomizeTypesInfoEventArgs> CustomAttributes(this IObservable<CustomizeTypesInfoEventArgs> source) 
-            => source.ConcatIgnored(e => e.TypesInfo.PersistentTypes
-                .SelectMany(info => info.Members.SelectMany(memberInfo => memberInfo.FindAttributes<Attribute>()
+            => source.ConcatIgnored(e => e.TypesInfo.PersistentTypes.ToNowObservable()
+                .SelectManyItemResilient(info => info.Members.SelectMany(memberInfo => memberInfo.FindAttributes<Attribute>()
                     .OfType<ICustomAttribute>().ToArray().Select(memberInfo.AddCustomAttribute))
-                ).Concat(e.TypesInfo.PersistentTypes.SelectMany(typeInfo => typeInfo
+                ).Concat(e.TypesInfo.PersistentTypes.ToNowObservable().SelectManyItemResilient(typeInfo => typeInfo
                     .FindAttributes<Attribute>().OfType<ICustomAttribute>().ToArray().Select(typeInfo.AddCustomAttribute)))
-                .ToObservable(Scheduler.Immediate)
+                
                 );
     }
     

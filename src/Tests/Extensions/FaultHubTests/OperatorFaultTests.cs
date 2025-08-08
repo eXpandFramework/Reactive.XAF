@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Disposables;
@@ -140,55 +139,14 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
             // The resource should have been disposed.
             resource.IsDisposed.ShouldBeTrue();
 
-            // The exception from the Dispose method should have been published to the FaultHub.
+
             BusObserver.ItemCount.ShouldBe(1);
             var fault = BusObserver.Items.Single().ShouldBeOfType<FaultHubException>();
             fault.InnerException.ShouldBeOfType<InvalidOperationException>().Message.ShouldBe("Dispose failed.");
             fault.Context.CustomContext.ShouldContain("DisposeFail");
         }
         
-        [Test][Obsolete]
-        public void SelectManyResilient_op(){
-            var innerOpObserver = new TestObserver<int>();
-            
-            var opBus = Unit.Default.Observe()
-                .SelectManyResilient(_ => Observable.Defer(() => {
-                    innerOpObserver.OnNext(1);
-                    return Observable.Defer(() => Observable.Throw<Unit>(new Exception()));
-                }))
-                .ChainFaultContext();
-
-            var opBusObserver = opBus.ChainFaultContext().PublishFaults().Test();
-
-            opBusObserver.AwaitDone(5.ToSeconds()).CompletionCount.ShouldBe(1);
-            BusObserver.ItemCount.ShouldBe(1);
-            innerOpObserver.AwaitDone(1.ToSeconds()).ItemCount.ShouldBe(1);
-            opBusObserver.ItemCount.ShouldBe(0);
-            opBusObserver.ErrorCount.ShouldBe(0);
-            opBusObserver.CompletionCount.ShouldBe(1);
-            
-            
-        }
         
-        [Test, TestCaseSource(nameof(RetrySelectors))][Obsolete]
-        public void SelectManyResilient_can_Retry(Func<IObservable<Unit>,IObservable<Unit>> retrySelector){
-            var innerOpObserver = new TestObserver<int>();
-            
-            var opBus = Unit.Default.Observe()
-                .SelectManyResilient(_ => Observable.Defer(() => {
-                    innerOpObserver.OnNext(1);
-                    return Observable.Defer(() => Observable.Throw<Unit>(new Exception()));
-                }))
-                .ChainFaultContext(retrySelector);
-        
-            var opBusObserver = opBus.PublishFaults().Test();
-            
-            opBusObserver.AwaitDone(1.ToSeconds()).CompletionCount.ShouldBe(1);
-            BusObserver.ItemCount.ShouldBe(1);
-            innerOpObserver.ItemCount.ShouldBe(3);
-            opBusObserver.ItemCount.ShouldBe(0);
-            opBusObserver.ErrorCount.ShouldBe(0);
-        }
         
         [Test]
         public void SelectManySequential_op(){

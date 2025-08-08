@@ -10,16 +10,14 @@ namespace Xpand.Extensions.Reactive.Transform{
     
     public static partial class Transform {
 
-        public static IObservable<TResult> SelectResilientItem<TSource, TResult>(this IObservable<TSource> source,
-            Func<TSource, TResult> selector) 
-            => source.SelectMany(item => item.Defer(() => selector(item).Observe()).ChainFaultContext().ContinueOnError());        
+                
         public static IObservable<string> SelectToString(this IObservable<object> source) 
             => source.WhenNotDefault().Select(o => o.ToString());
 
         [Obsolete(nameof(ExhaustMap),true)]
         public static IObservable<TResult> SelectAndOmit<T, TResult>(this IObservable<T> source,
             Func<T, int, IObservable<TResult>> process, SemaphoreSlim semaphoreSlim = null, Action<T> noProcess = null,
-            int maximumConcurrencyCount = 1, [CallerMemberName] string caller = "")
+            int maximumConcurrencyCount = 1)
         {
             var dispose = false;
             if (semaphoreSlim == null)
@@ -46,12 +44,10 @@ namespace Xpand.Extensions.Reactive.Transform{
                         .FinallySafe(() =>
                         {
                             semaphoreSlim.Release();
-
-                            // Decrement active count
+                            
                             lock (gate)
                             {
                                 activeCount--;
-                                // If this was the last active operation and we created the semaphore, dispose it
                                 if (dispose && activeCount == 0)
                                 {
                                     semaphoreSlim.Dispose();
@@ -70,11 +66,13 @@ namespace Xpand.Extensions.Reactive.Transform{
         [Obsolete(nameof(ExhaustMap),true)]
         public static IObservable<TResult> SelectAndOmit<T, TResult>(this IObservable<T> source,
             Func<T, IObservable<TResult>> process,SemaphoreSlim semaphoreSlim=null, Action<T> noProcess=null, int maximumConcurrencyCount = 1,[CallerMemberName]string caller="") 
-            => source.SelectAndOmit((item, _) => process(item), semaphoreSlim, noProcess, maximumConcurrencyCount,caller);
+            => source.SelectAndOmit((item, _) => process(item), semaphoreSlim, noProcess, maximumConcurrencyCount);
         
+        public static IObservable<TResult> SelectResilientItem<TSource, TResult>(this IObservable<TSource> source,
+            Func<TSource, TResult> selector) 
+            => source.SelectMany(item => item.Defer(() => selector(item).Observe()).ContinueOnError());
         public static IObservable<TResult> SelectItemResilient<TSource, TResult>(this IObservable<TSource> source,
             Func<TSource, TResult> resilientSelector, object[] context = null, [CallerMemberName] string caller = "")
-            => source.SelectMany(item => Observable.Defer(() => Observable.Return(resilientSelector(item)))
-                    .ContinueOnError(context, caller));
+            => source.SelectMany(item => item.DeferItemResilient(() => resilientSelector(item).Observe(),context,caller));
     }
 }

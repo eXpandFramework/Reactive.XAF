@@ -23,11 +23,6 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects{
 		private int _position;
 		private int _paragraph;
 
-		public DocumentStyleManager(){
-		   UsedStyles=new List<IDocumentStyle>();
-		   UnusedStyles=new List<IDocumentStyle>();
-		}
-
 		[XafDisplayName("Template")]
 		public DocumentStyleLinkTemplate DocumentStyleLinkTemplate{
 			get => _documentStyleLinkTemplate;
@@ -62,9 +57,9 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects{
 		       .Concat(UnusedStyles).Cast<DocumentStyle>().Distinct()));
 
 		[Browsable(false)]
-		public List<IDocumentStyle> UnusedStyles{ get;  }
-		
-		
+		public List<IDocumentStyle> UnusedStyles{ get;  } = new();
+
+
 		public int Position{
 			get => _position;
 			set{
@@ -85,7 +80,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects{
 		}
 
 		[Browsable(false)]
-		public List<IDocumentStyle> UsedStyles{ get;  }
+		public List<IDocumentStyle> UsedStyles{ get;  } = new();
 
 		public BindingList<DocumentStyle> ReplacementStyles => new(ImmutableList.CreateRange(UsedStyles.Concat(UnusedStyles).Cast<DocumentStyle>().Distinct()));
 		public event PropertyChangedEventHandler PropertyChanged;

@@ -374,7 +374,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
         public static IObservable<TAction> WhenActive<TAction>(this TAction simpleAction) where TAction : ActionBase 
             => simpleAction.Observe().WhenActive();
 
-		public static IObservable<TAction> WhenActivated<TAction>(this IObservable<TAction> source,string[] contexts,[CallerMemberName]string caller="") where TAction : ActionBase 
+		public static IObservable<TAction> WhenActivated<TAction>(this IObservable<TAction> source,string[] contexts=null,[CallerMemberName]string caller="") where TAction : ActionBase 
             => source.SelectMany(a => a.WhenActivated(contexts,caller));
 		
 		public static IObservable<TAction> WhenInActive<TAction>(this TAction simpleAction) where TAction : ActionBase 

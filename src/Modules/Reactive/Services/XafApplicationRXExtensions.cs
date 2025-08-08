@@ -531,6 +531,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => emitIfSetupAlready && application.MainWindow != null ? application.Observe()
                 : application.ProcessEvent(nameof(XafApplication.SetupComplete)).Take(1)
                     .To(application);
+        public static IObservable<T> WhenSetupComplete<T>(this XafApplication application,Func<XafApplication,IObservable<T>> resilientSelector,bool emitIfSetupAlready=true) 
+            => application.ProcessEvent(nameof(XafApplication.SetupComplete)).SelectMany(resilientSelector);
 
         
         public static IObservable<(XafApplication application, CreateCustomModelDifferenceStoreEventArgs e)> WhenCreateCustomModelDifferenceStore(this XafApplication application) 
@@ -824,8 +826,12 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         
         public static IObservable<T> WhenExistingObject<T>(this XafApplication application, string criteriaExpression ,            [CallerMemberName] string caller = "") 
             => application.WhenExistingObject<T>(CriteriaOperator.Parse(criteriaExpression),caller);
+        public static IObservable<T> WhenExistingObject<T>(this XafApplication application,Func<T,IObservable<T>> resilientSelector, CriteriaOperator criteriaExpression , [CallerMemberName] string caller = "")
+            =>application.UseObjectSpace(space => space.GetObjects<T>(criteriaExpression).ToNowObservable()
+                .SelectManyItemResilient(resilientSelector,caller),caller:caller);
+        
         public static IObservable<T> WhenExistingObject<T>(this XafApplication application, CriteriaOperator criteriaExpression , [CallerMemberName] string caller = "") 
-            => application.UseObjectSpace(space => space.GetObjects<T>(criteriaExpression).ToNowObservable(),caller:caller);
+            => application.WhenExistingObject<T>(arg => arg.Observe(),criteriaExpression,caller);
         
         public static IObservable<object> WhenProviderExistingObject(this XafApplication application,Type objectType, CriteriaOperator criteriaExpression =null, [CallerMemberName] string caller = "") 
             => application.UseProviderObjectSpace(space => space.GetObjects(objectType,criteriaExpression).Cast<object>().ToNowObservable(),objectType:objectType);

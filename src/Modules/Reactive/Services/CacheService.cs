@@ -5,9 +5,11 @@ using System.Reactive.Linq;
 using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
 using Fasterflect;
+using Xpand.Extensions.Reactive.ErrorHandling;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.Attributes;
+using Xpand.Extensions.XAF.ObjectSpaceExtensions;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
     public static class CacheService {
@@ -25,15 +27,15 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         private static IObservable<TObject[]> Cache<TObject, TKey>(this XafApplication application,
             CriteriaOperator criteriaExpression, string[] modifiedProperties, ConcurrentDictionary<TKey, TObject> objectSpaceLinks,Func<TObject,TKey> keyValue=null) where TObject : class, IObjectSpaceLink 
-            => application.WhenCommitted<TObject>(modifiedProperties).SelectMany(t => t.RemoveDeleted(objectSpaceLinks)
+            => application.WhenCommitted<TObject>(modifiedProperties).SelectManyItemResilient(t => t.RemoveDeleted(objectSpaceLinks)
                     .Concat(application.Cache(criteriaExpression, objectSpaceLinks, keyValue, t)).BufferUntilCompleted())
                 .Merge(application.WhenExisting(criteriaExpression, objectSpaceLinks, keyValue)
-                    .SelectMany(links => links.ToNowObservable().SelectMany(link =>
+                    .SelectManyItemResilient(links => links.ToNowObservable().SelectMany(link =>
                             application.Cache(criteriaExpression, objectSpaceLinks, keyValue, link)).BufferUntilCompleted()));
 
         private static IObservable<TObject> Cache<TObject, TKey>(this XafApplication application, CriteriaOperator criteriaExpression, ConcurrentDictionary<TKey, TObject> objectSpaceLinks, Func<TObject, TKey> keyValue, (IObjectSpace objectSpace, (TObject instance, ObjectModification modification)[] details) t) where TObject : class, IObjectSpaceLink 
             => t.details.Where(detail => detail.modification!=ObjectModification.Deleted).Select(detail => detail.instance).ToNowObservable()
-                .SelectMany(link => application.Cache( criteriaExpression, objectSpaceLinks, keyValue, link));
+                .SelectManyItemResilient(link => application.Cache( criteriaExpression, objectSpaceLinks, keyValue, link));
 
         private static IObservable<TObject> RemoveDeleted<TObject, TKey>(this (IObjectSpace objectSpace, (TObject instance, ObjectModification modification)[] details) t,ConcurrentDictionary<TKey, TObject> objectSpaceLinks) where TObject : class, IObjectSpaceLink 
             => t.details.Where(detail => detail.modification==ObjectModification.Deleted)
@@ -42,7 +44,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         private static IObservable<TObject> Cache<TObject, TKey>(this XafApplication application, CriteriaOperator criteriaExpression, ConcurrentDictionary<TKey, TObject> objectSpaceLinks, Func<TObject, TKey> keyValue, TObject link) where TObject : class, IObjectSpaceLink 
             => application.UseObject(link, spaceLink => {
-                var match = Xpand.Extensions.XAF.ObjectSpaceExtensions.ObjectSpaceExtensions.Match(spaceLink, criteriaExpression);
+                var match = spaceLink.Match( criteriaExpression);
                 var value = spaceLink.GetKeyValue(keyValue);
                 spaceLink.CallMethod("Invalidate", true);
                 spaceLink.ObjectSpace.Dispose();
@@ -50,20 +52,19 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                     return objectSpaceLinks.AddOrUpdate(value, spaceLink, (_, _) => spaceLink).Observe();
                 objectSpaceLinks.TryRemove((TKey)link.ObjectSpace.GetKeyValue(link), out _);
                 return Observable.Empty<TObject>();
-
-            });
+            }).ContinueOnError();
 
         private static IObservable<(IObjectSpace objectSpace, (TObject instance, ObjectModification modification)[] details)> WhenCommitted<TObject>(this XafApplication application, string[] modifiedProperties) where TObject : class, IObjectSpaceLink 
-            => application.WhenProviderCommittedDetailed<TObject>(ObjectModification.All,modifiedProperties:modifiedProperties);
+            => application.WhenProviderCommittedDetailed<TObject>(ObjectModification.All,modifiedProperties:modifiedProperties).ContinueOnError();
 
         private static IObservable<TObject[]> WhenExisting<TObject, TKey>(this XafApplication application, CriteriaOperator criteriaExpression, ConcurrentDictionary<TKey, TObject> objectSpaceLinks, Func<TObject, TKey> keyValue) where TObject : class, IObjectSpaceLink 
             => application.WhenExistingObject<TObject>(criteriaExpression)
-                .Do(o => {
+                .DoItemResilient(o => {
                     var value = o.GetKeyValue(keyValue);
                     o.CallMethod("Invalidate", true);
                     objectSpaceLinks.TryAdd(value, o);
                 })
-                .DoOnLast(o => o.ObjectSpace.Dispose())
+                .DoOnLast(o => o.ObjectSpace?.Dispose())
                 .BufferUntilCompleted()
                 .Do(links => links.FirstOrDefault()?.ObjectSpace.Dispose());
     }

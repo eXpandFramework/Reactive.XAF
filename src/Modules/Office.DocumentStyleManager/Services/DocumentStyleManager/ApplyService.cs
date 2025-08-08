@@ -35,8 +35,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Services.DocumentStyleMa
                         .WhenExecuting(e => e.DeferAction(_ => {
                             e.Cancel = true;
                             action.DoExecute();
-                        }))
-                        ))
+                        }))))
                 .ToUnit();
 
         private static IObservable<SimpleAction> RegisterAction(this ApplicationModulesManager manager) 
