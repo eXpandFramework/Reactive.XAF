@@ -10,18 +10,6 @@ namespace Xpand.Extensions.Reactive.ErrorHandling {
 	public static partial class ErrorHandling {
 		private static IObservable<T> RegisterHandler<T>(this IObservable<T> source, Func<Exception, FaultAction?> handler) 
 			=> Observable.Using(handler.AddHandler, _ => source);
-		
-		public static IObservable<T> CompleteOnError<T>(this IObservable<T> source, Func<Exception, bool> predicate)
-			=> source.CompleteOnError(_ => { },predicate);
-		public static IObservable<T> PublishOnError<T>(this IObservable<T> source, Func<Exception, bool> predicate)
-			=> source.PublishOnError(_ => {},predicate);
-		public static IObservable<T> PublishOnError<T>(this IObservable<T> source, Action<Exception> onError = null, Func<Exception, bool> match = null) 
-			=> source.CompleteOnError(mute: false,onError, match);
-		public static IObservable<T> ContinueOnError<T>(this IObservable<T> source, object[] context=null,[CallerMemberName]string caller="") 
-			=> source.ChainFaultContext(context,caller).PublishOnError();
-		public static IObservable<T> ContinueOnError<T>(this IObservable<T> source,
-			Func<IObservable<T>, IObservable<T>> retryStrategy, object[] context = null, [CallerMemberName] string caller = "") 
-			=> source.ChainFaultContext(retryStrategy,context,caller).PublishOnError();
 
 		static IObservable<T> CompleteOnError<T>(this IObservable<T> source, bool mute = true, Action<Exception> onError = null, Func<Exception, bool> match = null) {
 			var predicate = match ?? (_ => true);

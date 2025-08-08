@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reactive;
-using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using Xpand.Extensions.Numeric;
@@ -37,22 +36,21 @@ namespace Xpand.Extensions.Reactive.Utility {
                 execute(o);
                 return Observable.Empty<Unit>();
             });
-        public static IObservable<T> DeferItemResilient<T>(this object o, Func<IObservable<T>> resilientObservableFactory, object[] context = null, [CallerMemberName] string caller = "")
-            =>  Observable.Defer(() => {
+        public static IObservable<T> DeferItemResilient<T>(this object _, Func<IObservable<T>> resilientSelector,Func<IObservable<T>,IObservable<T>> retryStrategy, object[] context = null, [CallerMemberName] string caller = "")
+            => Observable.Defer(() => {
                 IObservable<T> source;
                 try {
-                    source = resilientObservableFactory();
+                    source = resilientSelector();
                 }
                 catch (Exception ex) {
                     source = Observable.Throw<T>(ex);
                 }
-                return source.ContinueOnError(context, caller);
+                return source.ContinueOnError(retryStrategy,context, caller);
             });
-
-        public static IObservable<T> Defer<T,TObject>(this TObject o, Func<TObject,IObservable<T>> selector)
-            => o.Defer(() => selector(o));
+        public static IObservable<T> DeferItemResilient<T>(this object o, Func<IObservable<T>> resilientObservableFactory, object[] context = null, [CallerMemberName] string caller = "")
+            =>  o.DeferItemResilient(resilientObservableFactory,null,context,caller);
         
-        public static IObservable<T> Defer<T>(this object o, Func<IObservable<T>> selector) 
+        public static IObservable<T> Defer<T>(this object _, Func<IObservable<T>> selector) 
             => Observable.Defer(selector);
 
         public static IObservable<T> Defer<T>(this object o, Func<IEnumerable<T>> selector)

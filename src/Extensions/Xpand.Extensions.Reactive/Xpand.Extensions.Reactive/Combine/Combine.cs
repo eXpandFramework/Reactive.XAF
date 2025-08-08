@@ -1,7 +1,10 @@
 ﻿using System;
-using System.Reactive.Disposables;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
 using Xpand.Extensions.ObjectExtensions;
+using Xpand.Extensions.Reactive.Transform;
 
 namespace Xpand.Extensions.Reactive.Combine {
     public static partial class Combine {
@@ -22,30 +25,8 @@ namespace Xpand.Extensions.Reactive.Combine {
             => source.Select(t => t.current);
         
         public static IObservable<TResult> CombineLatestWhenFirstEmits<TFirst, TSecond, TResult>(
-            this IObservable<TFirst> first, IObservable<TSecond> second, Func<TFirst, TSecond, TResult> resultSelector) {
-            return first.WithLatestFrom(second, resultSelector);
-            // return Observable.Create<TResult>(observer => {
-            //     TFirst firstValue;
-            //     var secondValue = default(TSecond);
-            //     var secondHasValue = false;
-            //
-            //     var subscription1 = first.Subscribe(x => {
-            //             firstValue = x;
-            //             _ = true;
-            //             if (secondHasValue) {
-            //                 observer.OnNext(resultSelector(firstValue, secondValue));
-            //             }
-            //         },
-            //         observer.OnError, observer.OnCompleted);
-            //
-            //     var subscription2 = second.Subscribe(x => {
-            //         secondValue = x;
-            //         secondHasValue = true;
-            //     }, observer.OnError, () => { });
-            //
-            //     return new CompositeDisposable(subscription1, subscription2);
-            // });
-        }
+            this IObservable<TFirst> first, IObservable<TSecond> second, Func<TFirst, TSecond, TResult> resultSelector)
+            => first.WithLatestFrom(second, resultSelector);
 
 
         public static IObservable<TResult> CombineVeryLatest<TLeft, TRight, TResult>(this IObservable<TLeft> leftSource,

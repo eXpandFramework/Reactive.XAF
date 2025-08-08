@@ -120,6 +120,8 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
             => source.SelectMany(action => action.WhenExecuted(resilientSelector,caller).TakeUntilDeactivated(action.Controller));
         public static IObservable<SimpleAction> WhenExecuted(this IObservable<SimpleAction> source, Action<SimpleActionExecuteEventArgs> resilientSelector, [CallerMemberName] string caller = "")
             => source.WhenExecuted(e => e.DeferAction(() => resilientSelector(e)).To(e.Action).Concat(e.Action.Observe()).Cast<SimpleAction>(),caller);
+        public static IObservable<SingleChoiceAction> WhenExecuted(this IObservable<SingleChoiceAction> source, Action<SingleChoiceActionExecuteEventArgs> resilientSelector, [CallerMemberName] string caller = "")
+            => source.WhenExecuted(e => e.DeferAction(() => resilientSelector(e)).To(e.Action).Concat(e.Action.Observe()).Cast<SingleChoiceAction>(),caller);
         public static IObservable<ParametrizedAction> WhenExecuted(this IObservable<ParametrizedAction> source, Action<ParametrizedActionExecuteEventArgs> resilientSelector, [CallerMemberName] string caller = "")
             => source.WhenExecuted(e => e.DeferAction(() => resilientSelector(e)).To(e.Action).Concat(e.Action.Observe()).Cast<ParametrizedAction>(),caller);
         
@@ -127,6 +129,8 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
             => source.SelectMany(action => action.WhenConcatExecution(resilientSelector,caller:caller).TakeUntilDeactivated(action.Controller));
         public static IObservable<SimpleAction> WhenConcatExecution(this IObservable<SimpleAction> source, Action<SimpleActionExecuteEventArgs> resilientSelector,[CallerMemberName]string caller="")
             => source.WhenConcatExecution(e => e.DeferAction(() => resilientSelector(e)).To<SimpleAction>().Concat(e.Action.Observe().Cast<SimpleAction>()),caller);
+        public static IObservable<SingleChoiceAction> WhenConcatExecution(this IObservable<SingleChoiceAction> source, Action<SingleChoiceActionExecuteEventArgs> resilientSelector,[CallerMemberName]string caller="")
+            => source.WhenConcatExecution(e => e.DeferAction(() => resilientSelector(e)).To<SingleChoiceAction>().Concat(e.Action.Observe().Cast<SingleChoiceAction>()),caller);
         public static IObservable<ParametrizedAction> WhenConcatExecution(this IObservable<ParametrizedAction> source, Action<ParametrizedActionExecuteEventArgs> resilientSelector,[CallerMemberName]string caller="")
             => source.WhenConcatExecution(e => e.DeferAction(() => resilientSelector(e)).To<ParametrizedAction>().Concat(e.Action.Observe().Cast<ParametrizedAction>()),caller);
         
