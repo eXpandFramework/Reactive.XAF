@@ -46,9 +46,7 @@ namespace Xpand.Extensions.Reactive.Utility {
                 catch (Exception ex) {
                     source = Observable.Throw<T>(ex);
                 }
-                return source
-                    // .SafeguardDisposal(context, caller)
-                    .ContinueOnError(context, caller);
+                return source.ContinueOnError(context, caller);
             });
 
         public static IObservable<T> Defer<T,TObject>(this TObject o, Func<TObject,IObservable<T>> selector)

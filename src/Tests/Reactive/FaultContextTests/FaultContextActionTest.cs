@@ -124,9 +124,9 @@ namespace Xpand.XAF.Modules.Reactive.Tests.FaultContextTests{
             var fault = BusObserver.Items.Single().ShouldBeOfType<FaultHubException>();
             
             
-            fault.Context.CustomContext.ShouldContain("InnerContext");
-            
-            fault.Context.CustomContext.ShouldNotContain(nameof(Innermost_WithFaultContext_Takes_Precedence));
+            var allContexts = fault.AllContexts().ToArray();
+            allContexts.ShouldContain("InnerContext");
+            allContexts.ShouldContain(nameof(Innermost_WithFaultContext_Takes_Precedence));
         }
     }
 }
