@@ -97,13 +97,13 @@ namespace Xpand.XAF.Modules.Speech.Services{
 
         public static T PreviousSpeechText<T>(this T current) where T:SpeechText{
 	        var speechTexts = current.SpeechToText?.Texts.Where(text => text.GetType()==current.GetType()).Cast<T>()
-		        .OrderBy(text => text.Start).ToArray()??Array.Empty<T>();
+		        .OrderBy(text => text.Start).ToArray()??[];
 	        var index = speechTexts.FindIndex(text => text.Oid == current.Oid);
 	        return speechTexts.Where((_, i) => i<index).LastOrDefault();
         }
         public static T NextSpeechText<T>(this T current) where T:SpeechText{
 	        if (current.SpeechToText == null) {
-		        return default;
+		        return null;
 	        }
 	        var speechTexts = current.SpeechToText.Texts.Where(text => text.GetType()==current.GetType()).Cast<T>()
 		        .OrderBy(text => text.Start).ToArray();
@@ -131,21 +131,21 @@ namespace Xpand.XAF.Modules.Speech.Services{
 	        return file;
         }
         public static IObservable<SpeechRecognitionResult> WhenRecognized(this SpeechRecognizer recognizer) 
-	        => recognizer.WhenEvent<SpeechRecognitionEventArgs>(nameof(SpeechRecognizer.Recognized)).Select(args => args.Result);
+	        => recognizer.ProcessEvent<SpeechRecognitionEventArgs>(nameof(SpeechRecognizer.Recognized)).Select(args => args.Result);
 
         public static IObservable<Unit> WhenSessionStopped(this Recognizer recognizer) 
-	        => recognizer.WhenEvent<SessionEventArgs>(nameof(Recognizer.SessionStopped)).TraceSpeechManager(e => e.SessionId).ToUnit();
+	        => recognizer.ProcessEvent<SessionEventArgs>(nameof(Recognizer.SessionStopped)).TraceSpeechManager(e => e.SessionId).ToUnit();
         public static IObservable<Unit> WhenSessionStarted(this Recognizer recognizer) 
-	        => recognizer.WhenEvent<SessionEventArgs>(nameof(Recognizer.SessionStarted)).TraceSpeechManager(e => e.SessionId).ToUnit();
+	        => recognizer.ProcessEvent<SessionEventArgs>(nameof(Recognizer.SessionStarted)).TraceSpeechManager(e => e.SessionId).ToUnit();
         public static IObservable<TranslationRecognitionCanceledEventArgs> WhenCanceled(this TranslationRecognizer recognizer) 
-	        => recognizer.WhenEvent<TranslationRecognitionCanceledEventArgs>(nameof(TranslationRecognizer.Canceled));
+	        => recognizer.ProcessEvent<TranslationRecognitionCanceledEventArgs>(nameof(TranslationRecognizer.Canceled));
 
         public static IObservable<Unit> NotifyWhenCanceled(this TranslationRecognizer recognizer) 
 	        => recognizer.WhenCanceled().Select(e => new SpeechException($"Id:{e.SessionId}, reason:{e.Reason}, details:{e.ErrorDetails}"))
 		        .SelectMany(e => Observable.Throw<Unit>(e).TraceSpeechError().CompleteOnError());
         
         public static IObservable<SpeechSynthesisEventArgs> WhenSynthesisCompleted(this SpeechSynthesizer speechSynthesizer) 
-	        => speechSynthesizer.WhenEvent<SpeechSynthesisEventArgs>(nameof(Microsoft.CognitiveServices.Speech.SpeechSynthesizer.SynthesisCompleted))
+	        => speechSynthesizer.ProcessEvent<SpeechSynthesisEventArgs>(nameof(Microsoft.CognitiveServices.Speech.SpeechSynthesizer.SynthesisCompleted))
 		        .TraceSpeechManager(e => e.Result.Reason.ToString());
         
         public static SpeechSynthesizer SpeechSynthesizer(this SpeechVoice speechVoice,Type speechTextType) {
@@ -164,15 +164,15 @@ namespace Xpand.XAF.Modules.Speech.Services{
 		        .ConcatIgnoredValue(e);
 
         public static IObservable<SpeechSynthesisEventArgs> WhenSynthesisCanceled(this SpeechSynthesizer synthesizer) 
-	        => synthesizer.WhenEvent<SpeechSynthesisEventArgs>(nameof(Microsoft.CognitiveServices.Speech.SpeechSynthesizer.SynthesisCanceled)).TraceSpeechManager();
+	        => synthesizer.ProcessEvent<SpeechSynthesisEventArgs>(nameof(Microsoft.CognitiveServices.Speech.SpeechSynthesizer.SynthesisCanceled)).TraceSpeechManager();
         public static IObservable<SpeechSynthesisWordBoundaryEventArgs> WhenWordBoundary(this SpeechSynthesizer synthesizer) 
-	        => synthesizer.WhenEvent<SpeechSynthesisWordBoundaryEventArgs>(nameof(Microsoft.CognitiveServices.Speech.SpeechSynthesizer.WordBoundary));
+	        => synthesizer.ProcessEvent<SpeechSynthesisWordBoundaryEventArgs>(nameof(Microsoft.CognitiveServices.Speech.SpeechSynthesizer.WordBoundary));
 
         public static IModelSpeech SpeechModel(this IModelApplication applicationModel) 
 	        => applicationModel.ToReactiveModule<IModelReactiveModuleSpeech>().Speech;
 
         public static IObservable<TranslationRecognitionEventArgs> WhenRecognized(this TranslationRecognizer translationRecognizer) 
-	        => translationRecognizer.WhenEvent<TranslationRecognitionEventArgs>(nameof(TranslationRecognizer.Recognized));
+	        => translationRecognizer.ProcessEvent<TranslationRecognitionEventArgs>(nameof(TranslationRecognizer.Recognized));
 
 
 		internal static IObservable<TSource> TraceSpeechManager<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<ITraceEvent> traceAction = null,

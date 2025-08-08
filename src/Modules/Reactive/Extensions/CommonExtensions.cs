@@ -77,6 +77,6 @@ namespace Xpand.XAF.Modules.Reactive.Extensions{
             });
 
         public static IObservable<ListChangedEventArgs> WhenListChanged<T>(this BindingListBase<T> listBase) 
-            => listBase.WhenEvent<ListChangedEventArgs>(nameof(BindingListBase<T>.ListChanged));
+            => listBase.ProcessEvent<ListChangedEventArgs>(nameof(BindingListBase<T>.ListChanged));
     }
 }

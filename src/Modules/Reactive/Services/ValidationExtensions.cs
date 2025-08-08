@@ -19,7 +19,7 @@ namespace Xpand.XAF.Modules.Reactive.Services {
             return application.WhenFrame(application.TypesInfo.PersistentTypes
                     .Attributed<PreventAggregatedObjectsValidationAttribute>().Select(t => t.typeInfo.Type).ToArray())
                 .SelectMany(frame => frame.WhenController<PersistenceValidationController>()
-                    .SelectMany(controller => controller.WhenEvent<CustomGetAggregatedObjectsToValidateEventArgs>(nameof(PersistenceValidationController.CustomGetAggregatedObjectsToValidate)))
+                    .SelectMany(controller => controller.ProcessEvent<CustomGetAggregatedObjectsToValidateEventArgs>(nameof(PersistenceValidationController.CustomGetAggregatedObjectsToValidate)))
                     .Do(e => {
                         e.AggregatedObjects.Clear();
                         e.Handled = true;

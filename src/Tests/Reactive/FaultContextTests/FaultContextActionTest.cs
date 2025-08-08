@@ -2,12 +2,16 @@
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Threading;
 using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using NUnit.Framework;
 using Shouldly;
+using Xpand.Extensions.Numeric;
 using Xpand.Extensions.Reactive.ErrorHandling;
+using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.Reactive.Transform.System;
 using Xpand.Extensions.XAF.ActionExtensions;
 using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
@@ -15,33 +19,50 @@ using Xpand.TestsLib.Common;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
 using Xpand.XAF.Modules.Reactive.Tests.BOModel;
+using ListView = DevExpress.ExpressApp.ListView;
 
 namespace Xpand.XAF.Modules.Reactive.Tests.FaultContextTests{
     public class FaultContextActionTest:FaultContextTestBase {
-        [Test][Order(400)]
-        public void Can_Execute_Again_On_error() {
+        [Test][Apartment(ApartmentState.STA)]
+        [TestCaseSource(typeof(FaultContextActionEventSelectors), nameof(FaultContextActionEventSelectors.ExecutionSelectors))]
+        public void Action_Events_Resilience(ExecutionPipe execution, ActionFactory actionFactory,ActionConfig actionConfig,ActionRepeat actionRepeat) {
             using var application = Platform.Win.NewApplication<ReactiveModule>();
-            using var testObserver = application.WhenApplicationModulesManager()
-                .SelectMany(manager => manager.RegisterViewSimpleAction(nameof(Can_Execute_Again_On_error)))
-                .WhenExecuted(_ => Observable.Throw<Unit>(new Exception()))
-                .Test();
+            var actionRegistered = application.WhenApplicationModulesManager()
+                .SelectMany(manager => manager.RegisterViewAction(TestContext.CurrentContext.Test.FullName,t => actionFactory(t.controller, t.id)));
+            var observer = execution(actionRegistered).Test();
             DefaultReactiveModule(application);
-            var window = application.CreateViewWindow();
-            var actionBase = window.Action(nameof(Can_Execute_Again_On_error));
-            window.SetView(application.NewView<ListView>(typeof(R)));
+            application.StartWinTest(frame => {
+                var action = frame.Action(TestContext.CurrentContext.Test.FullName);
+                var whenActionIsEnabled = actionRepeat(action).Take(1);
+                DoExecute(action);
+                return whenActionIsEnabled
+                    .Do(_ => DoExecute(action))
+                    .SelectMany(whenActionIsEnabled)
+                    .ToUnit();
+            });
             
-            actionBase.DoTheExecute();
-            actionBase.DoTheExecute();
-            
-            testObserver.ItemCount.ShouldBe(0);
-            testObserver.ErrorCount.ShouldBe(0);
+            observer.ErrorCount.ShouldBe(0);
+            observer.ItemCount.ShouldBe(0);
             BusObserver.ItemCount.ShouldBe(2);
+            
         }
-            
-            
-        private IObservable<Unit> GetFailingObservable(SimpleActionExecuteEventArgs e) => Observable.Throw<Unit>(new InvalidOperationException("Deep error from a nested method."));
 
-        [Test][Order(401)]
+        private static void DoExecute(ActionBase action){
+            if (action is PopupWindowShowAction popupWindowShowAction) {
+                popupWindowShowAction.DoExecute((Window)popupWindowShowAction.Controller.Frame);
+            }
+            else {
+                action.DoTheExecute();    
+            }
+        }
+
+
+        private IObservable<Unit> GetFailingObservable(SimpleActionExecuteEventArgs e) => 100.Milliseconds().Timer()
+            .SelectMany(_ => Observable.Throw<Unit>(new InvalidOperationException("Deep error from a nested method.")))
+            .ChainFaultContext()
+        ;
+
+        [Test]
         public void Can_Get_Correct_StackTrace_From_Nested_Method() {
             using var application = Platform.Win.NewApplication<ReactiveModule>();
             var actionExecuted = application.WhenApplicationModulesManager()
@@ -54,32 +75,40 @@ namespace Xpand.XAF.Modules.Reactive.Tests.FaultContextTests{
             var actionBase = window.Action(nameof(Can_Get_Correct_StackTrace_From_Nested_Method));
             window.SetView(application.NewView<ListView>(typeof(R)));
 
-            // ACT
             actionBase.DoTheExecute();
 
-            // ASSERT
-            testObserver.ErrorCount.ShouldBe(0);
+            testObserver.AwaitDone(1.Seconds()).ErrorCount.ShouldBe(0);
             BusObserver.ItemCount.ShouldBe(1);
             var fault = BusObserver.Items.Single().ShouldBeOfType<FaultHubException>();
-
-            // Corrected Assertion: Check the type and message instead of the StackTrace.
+            
             fault.InnerException.ShouldBeOfType<InvalidOperationException>();
             fault.InnerException.Message.ShouldBe("Deep error from a nested method.");
-        }
+            
+            fault.AllContexts().Distinct().ShouldBe([
+                nameof(Can_Get_Correct_StackTrace_From_Nested_Method),actionBase.ToString(),
+                typeof(SimpleActionExecuteEventArgs).FullName,nameof(GetFailingObservable)
+            ]);
+
+
+            var output = fault.ToString();
+            output.ShouldContain("--- Stack Trace (from innermost fault context) ---");
+            output.ShouldContain(nameof(GetFailingObservable));
+        }            
+        
 
             
-        private IObservable<Unit> GetResilientFailingObservable(SimpleActionExecuteEventArgs e) 
+        private IObservable<Unit> GetResilientFailingObservable() 
             => Observable.Throw<Unit>(new InvalidOperationException("Deep error"))
                 .ChainFaultContext(["InnerContext"]);
 
         [Test]
         public void Innermost_WithFaultContext_Takes_Precedence() {
+            
             using var application = Platform.Win.NewApplication<ReactiveModule>();
             
             var actionExecuted = application.WhenApplicationModulesManager()
                 .SelectMany(manager => manager.RegisterViewSimpleAction(nameof(Innermost_WithFaultContext_Takes_Precedence)))
-                .SelectMany(action => action.WhenExecuted()
-                    .SelectMany(GetResilientFailingObservable));
+                .SelectMany(action => action.WhenExecuted(_ => GetResilientFailingObservable()) );
             
             using var testObserver = actionExecuted.PublishFaults().Test();
             DefaultReactiveModule(application);

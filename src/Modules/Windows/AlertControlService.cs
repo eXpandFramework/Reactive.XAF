@@ -21,7 +21,7 @@ namespace Xpand.XAF.Modules.Windows{
                 var modelWindows = applicationModel.ToReactiveModule<IModelReactiveModuleWindows>().Windows;
                 __instance.FormLocation = modelWindows.Alert.FormLocation;
                 if (modelWindows.Alert.FormWidth != null) {
-                    __instance.WhenEvent<AlertFormWidthEventArgs>(nameof(AlertControl.GetDesiredAlertFormWidth)).Take(1)
+                    __instance.ProcessEvent<AlertFormWidthEventArgs>(nameof(AlertControl.GetDesiredAlertFormWidth)).Take(1)
                         .Subscribe(e => e.Width = modelWindows.Alert.FormWidth.Value);
                 }
             }
@@ -30,7 +30,7 @@ namespace Xpand.XAF.Modules.Windows{
 
         static AlertControlService() 
             => new HarmonyMethod(typeof(AlertControlService), nameof(Show))
-                .PreFix(typeof(AlertControl).Method(nameof(AlertControl.Show), new[] { typeof(Form), typeof(AlertInfo) }),true);
+                .PreFix(typeof(AlertControl).Method(nameof(AlertControl.Show), [typeof(Form), typeof(AlertInfo)]),true);
 
         public static IObservable<Unit> ConnectAlertForm(this ApplicationModulesManager manager) => Observable.Empty<Unit>();
     }

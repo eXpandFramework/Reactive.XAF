@@ -17,7 +17,7 @@ namespace Xpand.Extensions.Reactive.Transform.System.IO {
             if (!infoClone.Exists) {
                 directoryInfo = directoryInfo.ParentExists();
                 return Observable.Using(() => new FileSystemWatcher(directoryInfo.FullName) { EnableRaisingEvents = true,IncludeSubdirectories = true}, 
-                    watcher => watcher.WhenEvent<FileSystemEventArgs>(nameof(FileSystemWatcher.Created)).TakeUntil(watcher.WhenDisposed())
+                    watcher => watcher.ProcessEvent<FileSystemEventArgs>(nameof(FileSystemWatcher.Created)).TakeUntil(watcher.WhenDisposed())
                         .Where(e => new[]{WatcherChangeTypes.Created,WatcherChangeTypes.Renamed}.Contains(e.ChangeType))
                         .Publish(source =>source.Where(e => File.Exists(e.FullPath))
                             .Where(e =>Path.GetDirectoryName(e.FullPath)==infoClone.FullName&& (pattern==null||Regex.IsMatch(Path.GetFileName(e.FullPath),
@@ -25,7 +25,7 @@ namespace Xpand.Extensions.Reactive.Transform.System.IO {
                     .Select(e => new FileInfo(e.FullPath));
             }
             return Observable.Using(() => new FileSystemWatcher(directoryInfo.FullName, pattern??"*"){ EnableRaisingEvents = true }, watcher => watcher
-                .WhenEvent<FileSystemEventArgs>(nameof(FileSystemWatcher.Created)).TakeUntil(watcher.WhenDisposed())
+                .ProcessEvent<FileSystemEventArgs>(nameof(FileSystemWatcher.Created)).TakeUntil(watcher.WhenDisposed())
                 .Select(args => new FileInfo(args.FullPath)));
         }
 
@@ -38,7 +38,7 @@ namespace Xpand.Extensions.Reactive.Transform.System.IO {
 
         private static IObservable<FileInfo> When(this FileInfo fileInfo,string eventName) 
             => Observable.Using(() => new FileSystemWatcher(fileInfo.DirectoryName!,fileInfo.Name){ EnableRaisingEvents = true }, watcher => watcher
-                .WhenEvent<FileSystemEventArgs>(eventName).TakeUntil(watcher.WhenDisposed())
+                .ProcessEvent<FileSystemEventArgs>(eventName).TakeUntil(watcher.WhenDisposed())
                 .Select(args => new FileInfo(args.FullPath)));
 
         public static IObservable<FileInfo> WhenDeleted(this FileInfo fileInfo) 

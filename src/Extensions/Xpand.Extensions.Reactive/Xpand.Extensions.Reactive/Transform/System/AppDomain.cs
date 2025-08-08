@@ -13,10 +13,10 @@ namespace Xpand.Extensions.Reactive.Transform.System {
             AppdomainOneEmission.Connect();
         }
         public static IObservable<Assembly> WhenAssemblyLoad(this AppDomain appDomain) 
-            => appDomain.WhenEvent<AssemblyLoadEventArgs>(nameof(AppDomain.AssemblyLoad)).Select(eventArgs => eventArgs.LoadedAssembly);
+            => appDomain.ProcessEvent<AssemblyLoadEventArgs>(nameof(AppDomain.AssemblyLoad)).Select(eventArgs => eventArgs.LoadedAssembly);
 
         public static IObservable<ResolveEventArgs> WhenAssemblyResolve(this AppDomain appDomain)
-	        => appDomain.WhenEvent<ResolveEventArgs>(nameof(AppDomain.AssemblyResolve));
+	        => appDomain.ProcessEvent<ResolveEventArgs>(nameof(AppDomain.AssemblyResolve));
 
         public static IObservable<AppDomain> ExecuteOnce(this AppDomain appDomain) 
             => AppdomainOneEmission.AsObservable();

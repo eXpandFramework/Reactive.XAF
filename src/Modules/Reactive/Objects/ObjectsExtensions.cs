@@ -23,9 +23,9 @@ namespace Xpand.XAF.Modules.Reactive.Objects {
                     .Do(pair => e.Objects.Add(pair.Key,pair.Value)));
 
         public static IObservable<CheckListboxItemsProviderArgs> WhenCheckedListBoxItems(this ObjectString objectString) 
-            => objectString.WhenEvent<CheckListboxItemsProviderArgs>(nameof(ObjectString.CheckedListBoxItems));
+            => objectString.ProcessEvent<CheckListboxItemsProviderArgs>(nameof(ObjectString.CheckedListBoxItems));
         
         public static IObservable<T> WhenObjectSpaceChanged<T>(this T baseObject) where T:NonPersistentBaseObject
-            => baseObject.WhenEvent(nameof(NonPersistentBaseObject.ObjectSpaceChanged)).To(baseObject);
+            => baseObject.ProcessEvent(nameof(NonPersistentBaseObject.ObjectSpaceChanged));
     }
 }

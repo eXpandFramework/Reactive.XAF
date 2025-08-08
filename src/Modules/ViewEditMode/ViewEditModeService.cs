@@ -6,6 +6,7 @@ using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
+using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
@@ -43,17 +44,14 @@ namespace Xpand.XAF.Modules.ViewEditMode{
                 .Select(controller => controller.Actions.First(action => action.Id == "SwitchToEditMode")).Cast<SimpleAction>()
                 .Publish().RefCount();
             editAction.SelectMany(action => action.Enabled.WhenResultValueChanged()).Subscribe();
-            var unLockEdit = editAction.SelectMany(action => action.WhenExecuting()).TakeFirst()
-                .Select(t => {
-                    ((IModelDetailViewViewEditMode) t.action.Controller.Frame.View.Model).LockViewEditMode = false;
-                    return Unit.Default;
-                });
+            var unLockEdit = editAction.SelectMany(action => action.WhenExecuting(e => e.Observe()
+                .Do(_ => ((IModelDetailViewViewEditMode)action.Controller.Frame.View.Model).LockViewEditMode = false)));
             var lockEdit = editAction.SelectMany(action => action.WhenExecuteCompleted()).Select(e => e.Action).TakeFirst()
                 .Select(actionBase => {
                     ((IModelDetailViewViewEditMode) actionBase.Controller.Frame.View.Model).LockViewEditMode = true;
                     return Unit.Default;
                 });
-            return unLockEdit.Merge(lockEdit)
+            return unLockEdit.MergeToUnit(lockEdit)
                 .TraceViewEditModeModule().ToUnit();
         }
 

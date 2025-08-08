@@ -16,11 +16,11 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<(string parameter, object result)> WhenCallBack(this IObservable<IXAFAppWebAPI> source,string parameter=null) 
             => source.SelectMany(api => api.Application.WhenWindowCreated().When(TemplateContext.ApplicationWindow)
                     .TemplateChanged()
-                    .SelectMany(_ => AppDomain.CurrentDomain.XAF().CurrentRequestPage().WhenEvent("InitComplete").To(_))
-                    .Select(_ => _.Template.GetPropertyValue("CallbackManager").GetPropertyValue("CallbackControl"))
-                    .SelectMany(o =>o.WhenEvent("Callback") ))
-                .Select(_ => (parameter:$"{_.EventArgs.GetPropertyValue("Parameter")}",result:_.EventArgs.GetPropertyValue("Result")))
-                .Where(_ => parameter==null||_.parameter.StartsWith($"{parameter}:"));
+                    .SelectMany(window => AppDomain.CurrentDomain.XAF().CurrentRequestPage().ProcessEvent("InitComplete").To(window))
+                    .Select(window => window.Template.GetPropertyValue("CallbackManager").GetPropertyValue("CallbackControl"))
+                    .SelectMany(o =>o.ProcessEvent<EventArgs>("Callback") ))
+                .Select(e => (parameter:$"{e.GetPropertyValue("Parameter")}",result:e.GetPropertyValue("Result")))
+                .Where(t => parameter==null||t.parameter.StartsWith($"{parameter}:"));
 
         public static IObservable<Unit> CheckAsync(this IObservable<IXAFAppWebAPI> source,string module) 
             => source.Where(api => api.Application.GetPlatform()!=Platform.Blazor)
@@ -48,8 +48,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             }
             else{
                 AppDomain.CurrentDomain.XAF().WebApplicationType()
-                    .GetMethod("Redirect", new[]{typeof(string), typeof(bool)})
-                    ?.Invoke(null, new object[]{url, endResponse});
+                    .GetMethod("Redirect", [typeof(string), typeof(bool)])
+                    ?.Invoke(null, [url, endResponse]);
             }
         }
 
@@ -75,11 +75,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         XafApplication Application{ get; }
     }
 
-    class XAFAppWebAPI:IXAFAppWebAPI{
-        public XafApplication Application{ get; }
-
-        public XAFAppWebAPI(XafApplication application){
-            Application = application;
-        }
+    class XAFAppWebAPI(XafApplication application) : IXAFAppWebAPI {
+        public XafApplication Application{ get; } = application;
     }
 }

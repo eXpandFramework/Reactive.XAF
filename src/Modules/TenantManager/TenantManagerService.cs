@@ -37,7 +37,6 @@ using Xpand.Extensions.XAF.ObjectExtensions;
 using Xpand.Extensions.XAF.ViewExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.Extensions.XAF.Xpo.ObjectSpaceExtensions;
-using Xpand.XAF.Modules.Blazor;
 using Xpand.XAF.Modules.Blazor.Editors;
 using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
@@ -81,8 +80,7 @@ namespace Xpand.XAF.Modules.TenantManager{
         private static IObservable<Unit> WhenOrganizationLookupView(this XafApplication application)
             => application.WhenDetailViewCreated().Where(t => t.e.View.Model==application.Model.TenantManager().StartupView)
                 .SelectMany(t => t.e.View.GetItems<LookupPropertyEditor>().Where(editor => editor.MemberInfo.MemberType==application.Model.TenantManager().OrganizationType).ToObservable()
-                    .SelectMany(editor => editor.GetFieldValue("helper").WhenEvent(nameof(LookupEditorHelper.CustomCreateCollectionSource))
-                        .Select(pattern => pattern.EventArgs).Cast<CustomCreateCollectionSourceEventArgs>()
+                    .SelectMany(editor => editor.GetFieldValue("helper").ProcessEvent<CustomCreateCollectionSourceEventArgs>(nameof(LookupEditorHelper.CustomCreateCollectionSource))
                         .Do(e => {
                             var collectionSourceBase = application.CreateCollectionSource(application.CreateNonSecuredObjectSpace(editor.MemberInfo.MemberType), editor.MemberInfo.MemberType, editor.View.Id);
                             collectionSourceBase.Criteria[nameof(TenantManagerService)] = CriteriaOperator.Parse(application.Model.TenantManager().Registration);
@@ -366,8 +364,7 @@ namespace Xpand.XAF.Modules.TenantManager{
             => objectSpace.FindObject((((SecurityStrategyComplex)SecuritySystem.Instance).RoleType), objectSpace.ParseCriteria(criteria));
 
         private static IObservable<Unit> Logoff(this DialogController controller) 
-            => controller.CancelAction.WhenExecuting()
-                .Do(t => t.action.Application.LogOff())
+            => controller.CancelAction.WhenExecuting(_ => controller.DeferAction(() => controller.Application.LogOff()))
                 .ToUnit();
     }
 

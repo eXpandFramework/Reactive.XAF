@@ -174,7 +174,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
         }
 
         public static IObservable<ActionBase> WhenActionAdded(this ActionList actionList)
-            => actionList.WhenEvent<ActionManipulationEventArgs>(nameof(ActionList.ActionAdded)).Select(e => e.Action);
+            => actionList.ProcessEvent<ActionManipulationEventArgs>(nameof(ActionList.ActionAdded)).Select(e => e.Action);
         
         private static Type NewControllerType<T>(string id) where T:Controller{
             var baseController = GetBaseController<T>();

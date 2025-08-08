@@ -145,8 +145,8 @@ namespace Xpand.Extensions.Office.Cloud{
 
         public static IObservable<bool> NeedsAuthentication<TAuthentication>(this XafApplication application,Func<IObservable<bool>> authorize) where TAuthentication:CloudOfficeBaseObject 
             => application.UseObjectSpace(typeof(TAuthentication),space => (space.GetObjectByKey<TAuthentication>( application.CurrentUserId())).Observe())
-                .SelectMany(b => !b.IsValid ? authorize() : true.Observe());
-
+                .SelectMany(b => b!=null ? authorize() : true.Observe());
+        
         private static IObservable<Unit> ConfigureStyle(this IObservable<SimpleAction> source) 
             => source.WhenCustomizeControl()
                 .Select(t => {
@@ -203,20 +203,16 @@ namespace Xpand.Extensions.Office.Cloud{
         private static IObservable<SimpleAction> Authorize(this SimpleAction action, string serviceName,
             Type serviceStorageType, Func<XafApplication, IObservable<Unit>> authorize,
             Func<XafApplication, IObservable<bool>> needsAuthentication) 
-            => action.WhenExecute(e => {
-                var execute = e.Action.Id == $"Disconnect{serviceName}"
-                    ? e.Action.Application.UseObjectSpace(_ => {
-                        var objectSpace = e.Action.View().ObjectSpace;
-                        objectSpace.Delete(objectSpace.GetObjectByKey(serviceStorageType,e.Action.Application.CurrentUserId()));
-                        objectSpace.CommitChanges();
-                        e.Action.Data.Clear();
-                        return e.Action.AsSimpleAction().Observe();
-                    })
-                    : authorize(e.Action.Application).To(e.Action.AsSimpleAction());
-                return execute.SelectMany(simpleAction => needsAuthentication(simpleAction.Application).Pair(simpleAction))
-                    .ActivateWhenAuthenticationNeeded(serviceName, serviceStorageType);
-            });
-
+            => action.WhenExecute(e => e.Action.Id == $"Disconnect{serviceName}" ? e.Action.Application.UseObjectSpace(_ => {
+                var objectSpace = e.Action.View().ObjectSpace;
+                objectSpace.Delete(objectSpace.GetObjectByKey(serviceStorageType,e.Action.Application.CurrentUserId()));
+                objectSpace.CommitChanges();
+                e.Action.Data.Clear();
+                return e.Action.AsSimpleAction().Observe();
+            }) : authorize(e.Action.Application).To(e.Action.AsSimpleAction())
+                .SelectMany(simpleAction => needsAuthentication(simpleAction.Application).Pair(simpleAction))
+                .ActivateWhenAuthenticationNeeded(serviceName, serviceStorageType));
+        
         private static IObservable<SimpleAction> ActivateWhenUserDetails(this IObservable<SimpleAction> registerActions) 
             => registerActions.Select(action => action).ActivateInUserDetails()
                 .Do(action => action.Activate(nameof(NeedsAuthentication),false) );

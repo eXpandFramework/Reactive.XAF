@@ -5,6 +5,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Runtime.CompilerServices;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.Editors;
@@ -78,13 +79,16 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                     .RootView(controller.Frame.View.ObjectTypeInfo.Type, ViewType.DetailView)
                     .Select(detailView => detailView)));
         public static IObservable<TFrame> WhenViewRefreshExecuted<TFrame>(this TFrame source,
-            Action<SimpleActionExecuteEventArgs> retriedExecution=null) where TFrame : Frame {
+            Action<SimpleActionExecuteEventArgs> selector=null) where TFrame : Frame {
             var refreshAction = source.GetController<RefreshController>().RefreshAction;
-            return retriedExecution == null ? refreshAction.WhenExecuted().Select(e => e.Frame()).Cast<TFrame>() : refreshAction.WhenExecuted(retriedExecution).To(source);
+            return refreshAction.WhenExecuted(args => {
+                selector?.Invoke(args);
+                return Observable.Empty<TFrame>();
+            }).To(source);
         }
 
         public static IObservable<(TFrame frame, ViewChangingEventArgs args)> WhenViewChanging<TFrame>(this TFrame source) where TFrame : Frame 
-            => source.WhenEvent<ViewChangingEventArgs>(nameof(Frame.ViewChanging)).InversePair(source);
+            => source.ProcessEvent<ViewChangingEventArgs>(nameof(Frame.ViewChanging)).InversePair(source);
 
         public static IObservable<(TFrame frame, ViewChangingEventArgs args)> ViewChanging<TFrame>(
             this IObservable<TFrame> source) where TFrame : Frame 
@@ -101,23 +105,23 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => frame.Observe().Select(frame1 => frame1.GetController<TController>()).WhenNotDefault();
         
         public static IObservable<(TFrame frame, Frame source)> WhenViewChanged<TFrame>(this TFrame item) where TFrame : Frame 
-            => item.WhenEvent<ViewChangedEventArgs>(nameof(Frame.ViewChanged))
+            => item.ProcessEvent<ViewChangedEventArgs>(nameof(Frame.ViewChanged))
                 .TakeUntil(item.WhenDisposedFrame()).Select(e => e.SourceFrame).InversePair(item);
 
         public static IObservable<T> TemplateChanged<T>(this IObservable<T> source) where T : Frame 
             => source.SelectMany(item => item.Template != null ? item.Observe() : item.WhenTemplateChanged().Select(_ => item));
 
         public static IObservable<TFrame> WhenTemplateChanged<TFrame>(this TFrame item) where TFrame : Frame 
-            => item.WhenEvent(nameof(Frame.TemplateChanged)).Select(pattern => pattern).To(item)
+            => item.ProcessEvent(nameof(Frame.TemplateChanged))
                 .TakeUntil(item.WhenDisposingFrame())
             ;
 
         public static IObservable<TFrame> WhenViewControllersActivated<TFrame>(this TFrame source) where TFrame : Frame
-            => source.WhenEvent(nameof(Frame.ViewControllersActivated)).To(source)
+            => source.ProcessEvent(nameof(Frame.ViewControllersActivated)).To(source)
                 .TakeUntil(source.WhenDisposedFrame());
         
         public static IObservable<TFrame> WhenTemplateViewChanged<TFrame>(this TFrame source) where TFrame : Frame 
-            => source.WhenEvent(nameof(Frame.TemplateViewChanged)).To(source)
+            => source.ProcessEvent(nameof(Frame.TemplateViewChanged)).To(source)
                 .TakeUntil(source.WhenDisposedFrame());
 
         public static IObservable<T> TemplateViewChanged<T>(this IObservable<T> source) where T : Frame 
@@ -125,14 +129,14 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static IObservable<TFrame> DisableSimultaneousModificationsException<TFrame>(this TFrame frame) where TFrame : Frame 
             => frame.Controllers.Cast<Controller>().Where(controller1 => controller1.Name=="DevExpress.ExpressApp.Win.SystemModule.LockController").Take(1).ToNowObservable()
-                .SelectMany(controller1 => controller1.WhenEvent("CustomProcessSimultaneousModificationsException").TakeUntil(frame.WhenDisposedFrame())
-                    .Do(args => args.EventArgs.Cast<HandledEventArgs>().Handled=true)).To(frame);
+                .SelectMany(controller1 => controller1.ProcessEvent<HandledEventArgs>("CustomProcessSimultaneousModificationsException").TakeUntil(frame.WhenDisposedFrame())
+                    .Do(e => e.Handled=true)).To(frame);
 
         public static IObservable<Unit> WhenDisposingFrame<TFrame>(this TFrame source) where TFrame : Frame
-            => source.WhenEvent(nameof(Frame.Disposing)).TakeUntil(source.WhenDisposedFrame()).ToUnit();
+            => source.ProcessEvent(nameof(Frame.Disposing)).TakeUntil(source.WhenDisposedFrame()).ToUnit();
 
         public static IObservable<Unit> WhenDisposedFrame<TFrame>(this TFrame source) where TFrame : Frame
-            => source.WhenEvent(nameof(Frame.Disposed)).ToUnit();
+            => source.ProcessEvent(nameof(Frame.Disposed)).ToUnit();
 
         public static IObservable<Unit> DisposingFrame<TFrame>(this IObservable<TFrame> source) where TFrame : Frame 
             => source.WhenNotDefault().SelectMany(item => item.WhenDisposingFrame()).ToUnit();
@@ -142,7 +146,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => source.SelectMany(view => selector(view).TakeUntil(view.WhenClosed()));
         
         public static IObservable<Window> CloseWindow<TFrame>(this IObservable<TFrame> source) where TFrame:Frame 
-            => source.SelectMany(frame => frame.View.WhenActivated().To(frame).WaitUntilInactive(1.Seconds()).ObserveOnContext())
+            => source.SelectMany(frame => frame.View.WhenViewActivated().To(frame).WaitUntilInactive(1.Seconds()).ObserveOnContext())
                 .Cast<Window>().Do(frame => frame.Close());
         
         public static IObservable<T> SelectUntilViewClosed<T,TFrame>(this IObservable<TFrame> source, Func<TFrame, IObservable<T>> selector) where TFrame:Frame 
@@ -216,15 +220,25 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => source.Where(frame => frame.When(nesting)).SelectMany(frame => frame.WhenFrame(viewType, objectType)) ;
         public static IObservable<T> WhenFrame<T>(this IObservable<T> source, Func<Frame,Type> objectType = null,
             Func<Frame,ViewType> viewType = null, Nesting nesting = Nesting.Any) where T:Frame
+            => source.WhenFrame(frame => frame.Observe().Cast<T>(),objectType,viewType,nesting) ;
+        
+        public static IObservable<TResult> WhenFrame<T,TResult>(this IObservable<T> source,Func<Frame,IObservable<TResult>> resilientSelector, Func<Frame,Type> objectType = null,
+            Func<Frame,ViewType> viewType = null, Nesting nesting = Nesting.Any) where T:Frame
             => source.Where(frame => frame.When(nesting))
-                .SelectMany(frame => frame.WhenFrame(viewType?.Invoke(frame)??ViewType.Any, objectType?.Invoke(frame))) ;
+                .SelectMany(frame => frame.WhenFrame(viewType?.Invoke(frame)??ViewType.Any, objectType?.Invoke(frame),() => resilientSelector(frame))) ;
         
         public static IObservable<T> WhenFrame<T>(this T frame, params string[] viewIds) where T : Frame 
             => frame.WhenViewChanged().To(frame).Where(_ => viewIds.Contains(frame.View.Id));
-        private static IObservable<T> WhenFrame<T>(this T frame,ViewType viewType, Type types) where T : Frame 
-            => (frame.View != null ? frame.When(viewType) && frame.When(types) ? frame.Observe() : Observable.Empty<T>()
-                : frame.WhenViewChanged().Where(t => t.frame.When(viewType) && t.frame.When(types)).To(frame))
-                ;
+
+        private static IObservable<T> WhenFrame<T>(this T frame, ViewType viewType, Type type,
+            [CallerMemberName] string caller = "") where T : Frame
+            => frame.WhenFrame(viewType,type, () => frame.Observe().Cast<T>(), caller);
+        
+        private static IObservable<TResult> WhenFrame<T,TResult>(this T frame,ViewType viewType, Type type,Func<IObservable<TResult>> resilientSelector,[CallerMemberName]string caller="") where T : Frame 
+            => (frame.View != null ? frame.When(viewType) && frame.When(type) ? frame.Observe() : Observable.Empty<T>()
+                : frame.WhenViewChanged().Where(t => t.frame.When(viewType) && t.frame.When(type)).To(frame))
+                .SelectManyItemResilient(arg => resilientSelector()
+                    .TakeUntil(arg.View.WhenClosed()),[frame.View?.Id,type,viewType],caller);
         
         public static IObservable<Frame> ListViewProcessSelectedItem(this IObservable<Frame> source,Action<SimpleActionExecuteEventArgs> executed=null) 
             => source.SelectMany(frame => frame.ListViewProcessSelectedItem(executed).Take(1));
@@ -237,7 +251,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static IObservable<Frame> ListViewProcessSelectedItem(this Frame frame,Action<SimpleActionExecuteEventArgs> executed=null) 
             => frame.ListViewProcessSelectedItem(() => frame.View.SelectedObjects.Cast<object>().FirstOrDefault() ,executed);
-
+        
         public static IObservable<Frame> ListViewProcessSelectedItem<T>(this Frame frame, Func<T> selectedObject,Action<SimpleActionExecuteEventArgs> executed=null){
             var action = frame.GetController<ListViewProcessCurrentObjectController>().ProcessCurrentObjectAction;
             var invoke = selectedObject.Invoke()??default(T);

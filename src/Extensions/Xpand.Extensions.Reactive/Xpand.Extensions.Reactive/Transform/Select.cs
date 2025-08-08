@@ -71,5 +71,10 @@ namespace Xpand.Extensions.Reactive.Transform{
         public static IObservable<TResult> SelectAndOmit<T, TResult>(this IObservable<T> source,
             Func<T, IObservable<TResult>> process,SemaphoreSlim semaphoreSlim=null, Action<T> noProcess=null, int maximumConcurrencyCount = 1,[CallerMemberName]string caller="") 
             => source.SelectAndOmit((item, _) => process(item), semaphoreSlim, noProcess, maximumConcurrencyCount,caller);
+        
+        public static IObservable<TResult> SelectItemResilient<TSource, TResult>(this IObservable<TSource> source,
+            Func<TSource, TResult> resilientSelector, object[] context = null, [CallerMemberName] string caller = "")
+            => source.SelectMany(item => Observable.Defer(() => Observable.Return(resilientSelector(item)))
+                    .ContinueOnError(context, caller));
     }
 }

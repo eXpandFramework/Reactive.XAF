@@ -6,6 +6,7 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.SystemModule;
 using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.ActionExtensions;
 using Xpand.Extensions.XAF.DetailViewExtensions;
 using Xpand.Extensions.XAF.FrameExtensions;
@@ -31,11 +32,11 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Services.DocumentStyleMa
                 .SelectMany(action => action.View<DetailView>().WhenControlsCreated()
                     .Select(view => view.GetListPropertyEditor<BusinessObjects.DocumentStyleManager>(manager => manager.AllStyles).Frame)
                     .SelectMany(frame => frame.GetController<ListViewProcessCurrentObjectController>().ProcessCurrentObjectAction
-                        .WhenExecuting()
-                        .Do(_ => {
-                            _.e.Cancel = true;
+                        .WhenExecuting(e => e.DeferAction(_ => {
+                            e.Cancel = true;
                             action.DoExecute();
-                        })))
+                        }))
+                        ))
                 .ToUnit();
 
         private static IObservable<SimpleAction> RegisterAction(this ApplicationModulesManager manager) 

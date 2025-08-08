@@ -5,10 +5,7 @@ using DevExpress.Xpo;
 
 namespace Xpand.Extensions.Office.Cloud.BusinessObjects{
     [NonPersistent][OptimisticLocking(false)][DeferredDeletion(false)]
-    public abstract class CloudOfficeBaseObject : XPCustomObject, IObjectSpaceLink{
-        protected CloudOfficeBaseObject(Session session) : base(session){
-        }
-
+    public abstract class CloudOfficeBaseObject(Session session) : XPCustomObject(session), IObjectSpaceLink {
         protected override void OnSaving(){
             base.OnSaving();
             if (Session is NestedUnitOfWork || !Session.IsNewObject(this) || !Oid.Equals(Guid.Empty))

@@ -38,7 +38,7 @@ namespace Xpand.XAF.Modules.Windows.Editors{
                     return gridView.Observe().WhenNotDefault()
                         .SelectMany(view => view.OpenLink(frame)
                             .MergeToUnit(view.HyperLinkPropertyEditorAttribute(frame)))
-                        .MergeToUnit(gridView.WhenEvent<CancelEventArgs>(nameof(gridView.ShowingEditor))
+                        .MergeToUnit(gridView.ProcessEvent<CancelEventArgs>(nameof(gridView.ShowingEditor))
                             .Do(e => {
                                 var memberInfo = gridView.FocusedColumn.MemberInfo();
                                 if (memberInfo==null)return;
@@ -47,7 +47,7 @@ namespace Xpand.XAF.Modules.Windows.Editors{
                                 if (modelColumn==null)return;
                                 e.Cancel = !modelColumn.AllowEdit;
                             }))
-                        .MergeToUnit(listEditor.WhenEvent<CustomizeAppearanceEventArgs>(nameof(GridListEditor.CustomizeAppearance))
+                        .MergeToUnit(listEditor.ProcessEvent<CustomizeAppearanceEventArgs>(nameof(GridListEditor.CustomizeAppearance))
                             .Do(e => {
                                 var item = e.Item as GridViewRowCellStyleEventArgsAppearanceAdapter;
                                 if (item?.Column.ColumnEdit is not DevExpress.XtraEditors.Repository.RepositoryItemHyperLinkEdit repositoryItem) return;
@@ -71,7 +71,7 @@ namespace Xpand.XAF.Modules.Windows.Editors{
                 .ToUnit();
         
         private static IObservable<CustomRowCellEditEventArgs> HyperLinkPropertyEditorAttribute(this GridView gridView, Frame frame) 
-            => gridView.WhenEvent<CustomRowCellEditEventArgs>(nameof(gridView.CustomRowCellEdit))
+            => gridView.ProcessEvent<CustomRowCellEditEventArgs>(nameof(gridView.CustomRowCellEdit))
                 .Do(e => {
                     if (e.RepositoryItem is not DevExpress.XtraEditors.Repository.RepositoryItemHyperLinkEdit) return;
                     var memberInfo = frame.View.ObjectTypeInfo.FindMember(e.Column.Name);
@@ -90,7 +90,7 @@ namespace Xpand.XAF.Modules.Windows.Editors{
                 });
 
         private static IObservable<MouseEventArgs> OpenLink(this GridView gridView, Frame frame)
-            => gridView.WhenEvent<MouseEventArgs>(nameof(GridView.MouseDown))
+            => gridView.ProcessEvent<MouseEventArgs>(nameof(GridView.MouseDown))
                 .Do(e => {
                     var hi = gridView.CalcHitInfo(new Point(e.X, e.Y));
                     if (!hi.InRowCell || hi.Column.ColumnEdit is not DevExpress.XtraEditors.Repository.RepositoryItemHyperLinkEdit repositoryItemHyperLinkEdit) return;

@@ -116,7 +116,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static IObservable<IDataStore> WhenDataStoreCreated<TProvider>(this TProvider provider) where TProvider:IObjectSpaceProvider 
             => provider.GetPropertyValue("DataStoreProvider").WhenIs("DevExpress.ExpressApp.Xpo.ConnectionStringDataStoreProvider")
-                .SelectMany(spaceProvider => spaceProvider.WhenEvent("DataStoreCreated").Select(pattern => pattern.EventArgs.GetPropertyValue("DataStore")))
+                .SelectMany(spaceProvider => spaceProvider.ProcessEvent<EventArgs>("DataStoreCreated").Select(e => e.GetPropertyValue("DataStore")))
                 .Cast<IDataStore>();
 
     }

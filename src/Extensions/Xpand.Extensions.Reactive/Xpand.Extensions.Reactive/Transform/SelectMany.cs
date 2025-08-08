@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
+using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.ErrorHandling;
 
 namespace Xpand.Extensions.Reactive.Transform {
@@ -18,9 +19,11 @@ namespace Xpand.Extensions.Reactive.Transform {
             => source.SelectMany(source1 => source1.ToObservable());
 
         [Obsolete]
-        public static IObservable<TResult> SelectManyResilient<TSource, TResult>(this IObservable<TSource> source, Func<TSource, IObservable<TResult>> selector,[CallerMemberName]string caller="")
-            => source.SelectMany(selector).ChainFaultContext();
-        public static IObservable<TResult> SelectManyItemResilient<TSource, TResult>(this IObservable<TSource> source, Func<TSource, IObservable<TResult>> selector,[CallerMemberName]string caller="")
-            => source.SelectMany(arg => selector(arg).ChainFaultContext().ContinueOnError());
+        public static IObservable<TResult> SelectManyResilient<TSource, TResult>(this IObservable<TSource> source, Func<TSource, IObservable<TResult>> resilientSelector,[CallerMemberName]string caller="")
+            => source.SelectMany(resilientSelector).ChainFaultContext(caller);
+        public static IObservable<TResult> SelectManyItemResilient<TSource, TResult>(this IObservable<TSource> source, Func<TSource, IObservable<TResult>> resilientSelector,[CallerMemberName]string caller="")
+            => source.SelectManyItemResilient(resilientSelector,[],caller);
+        public static IObservable<TResult> SelectManyItemResilient<TSource, TResult>(this IObservable<TSource> source, Func<TSource, IObservable<TResult>> resilientSelector,object[] context,[CallerMemberName]string caller="")
+            => source.SelectMany(arg => resilientSelector(arg).ContinueOnError((context ?? Enumerable.Empty<object>()).Concat(((object)arg).YieldItem()).ToArray(), caller));
     }
 }

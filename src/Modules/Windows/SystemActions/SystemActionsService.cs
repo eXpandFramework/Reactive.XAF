@@ -62,9 +62,9 @@ namespace Xpand.XAF.Modules.Windows.SystemActions {
                 });
 
         private static IObservable<GlobalHotKeyEventArgs> WhenGlobalHotKeyPressed(this HotKeyManager hotKeyManager, GlobalHotKey globalHotKey) 
-            => hotKeyManager.WhenEvent<GlobalHotKeyEventArgs>(nameof(HotKeyManager.GlobalHotKeyPressed)).Where(e => e.HotKey.Name==globalHotKey.Name);
+            => hotKeyManager.ProcessEvent<GlobalHotKeyEventArgs>(nameof(HotKeyManager.GlobalHotKeyPressed)).Where(e => e.HotKey.Name==globalHotKey.Name);
         private static IObservable<LocalHotKeyEventArgs> WhenLocalHotKeyPressed(this HotKeyManager hotKeyManager, LocalHotKey globalHotKey) 
-            => hotKeyManager.WhenEvent<LocalHotKeyEventArgs>(nameof(HotKeyManager.LocalHotKeyPressed)).Where(e => e.HotKey.Name==globalHotKey.Name);
+            => hotKeyManager.ProcessEvent<LocalHotKeyEventArgs>(nameof(HotKeyManager.LocalHotKeyPressed)).Where(e => e.HotKey.Name==globalHotKey.Name);
         
         private static void DoTheExecute(this ActionBase action, IModelHotkeyAction model) {
             switch (action) {
@@ -120,16 +120,16 @@ namespace Xpand.XAF.Modules.Windows.SystemActions {
             var separators = new[] { " + " };
             var result = model.HotKey.Split(separators, StringSplitOptions.RemoveEmptyEntries);
             foreach (var entry in result) {
-                if (entry.Trim() == Keys.Control.ToString()) {
+                if (entry.Trim() == nameof(Keys.Control)) {
                     hasControl = true;
                 }
-                if (entry.Trim() == Keys.Alt.ToString()) {
+                if (entry.Trim() == nameof(Keys.Alt)) {
                     hasAlt = true;
                 }
-                if (entry.Trim() == Keys.Shift.ToString()) {
+                if (entry.Trim() == nameof(Keys.Shift)) {
                     hasShift = true;
                 }
-                if (entry.Trim() == Keys.LWin.ToString() && current != result.Length - 1) {
+                if (entry.Trim() == nameof(Keys.LWin) && current != result.Length - 1) {
                     hasWin = true;
                 }
                 current++;

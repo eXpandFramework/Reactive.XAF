@@ -19,6 +19,9 @@ namespace Xpand.Extensions.Reactive.ErrorHandling {
 			=> source.CompleteOnError(mute: false,onError, match);
 		public static IObservable<T> ContinueOnError<T>(this IObservable<T> source, object[] context=null,[CallerMemberName]string caller="") 
 			=> source.ChainFaultContext(context,caller).PublishOnError();
+		public static IObservable<T> ContinueOnError<T>(this IObservable<T> source,
+			Func<IObservable<T>, IObservable<T>> retryStrategy, object[] context = null, [CallerMemberName] string caller = "") 
+			=> source.ChainFaultContext(retryStrategy,context,caller).PublishOnError();
 
 		static IObservable<T> CompleteOnError<T>(this IObservable<T> source, bool mute = true, Action<Exception> onError = null, Func<Exception, bool> match = null) {
 			var predicate = match ?? (_ => true);
@@ -44,6 +47,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling {
 			=> source.CompleteOnError(onError,exceptionType.IsInstanceOfType);
 
 		public static IObservable<T> CompleteOnTimeout<T>(this IObservable<T> source) 
-			=> source.CompleteOnError(typeof(TimeoutException));		
+			=> source.CompleteOnError(typeof(TimeoutException));
+		
 	}
 }

@@ -48,12 +48,12 @@ namespace Xpand.XAF.Modules.Windows {
         }
 
         private static IObservable<Frame> ShowOnDoubleClick(this NotifyIcon notifyIcon, Frame frame) 
-            => notifyIcon.WhenEvent(nameof(notifyIcon.DoubleClick)).Where(_ => frame.Model().NotifyIcon.ShowOnDblClick)
+            => notifyIcon.ProcessEvent(nameof(notifyIcon.DoubleClick)).Where(_ => frame.Model().NotifyIcon.ShowOnDblClick)
                 .Do(_ => ((Form) frame.Application.MainWindow.Template).Show()).To(frame).TraceWindows();
 
         private static IObservable<Frame> ExecuteMenuItems(this NotifyIcon notifyIcon,Frame frame) 
             => notifyIcon.ContextMenuStrip.UpdateMenuItems(frame).Finally(() => NotifyIconSubject.OnNext(notifyIcon))
-                .SelectMany(item => item.WhenEvent(nameof(item.Click)).ObserveOn(SynchronizationContext.Current!).To(item))
+                .SelectMany(item => item.ProcessEvent(nameof(item.Click)).ObserveOn(SynchronizationContext.Current!).To(item))
                 .Do(item => {
                     var model = frame.Model().NotifyIcon;
                     var mainForm = ((Form) frame.Application.MainWindow.Template);

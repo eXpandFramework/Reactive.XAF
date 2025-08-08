@@ -67,7 +67,12 @@ namespace Xpand.Extensions.Reactive.Transform{
             => source.SelectManySequential((arg1, _) => selector(arg1),caller);
         
         public static IObservable<TResult> SelectManySequential<T1, TResult>(this IObservable<T1> source, Func<T1,int, IObservable<TResult>> selector,[CallerMemberName]string caller="") 
-            => source.Select(item => Observable.Defer(() => selector(item,0)).ChainFaultContext([item], caller: caller)).Concat();
+            => source.Select(item => Observable.Defer(() => selector(item,0))).Concat();
+        public static IObservable<TResult> SelectManySequentialItemResilient<T1, TResult>(this IObservable<T1> source, Func<T1, IObservable<TResult>> selector,object[] context=null,[CallerMemberName]string caller="") 
+            => source.SelectManySequentialItemResilient((arg1, _) => selector(arg1),context,caller);
+        
+        public static IObservable<TResult> SelectManySequentialItemResilient<T1, TResult>(this IObservable<T1> source, Func<T1,int, IObservable<TResult>> selector,object[] context=null,[CallerMemberName]string caller="") 
+            => source.Select(item => Observable.Defer(() => selector(item,0).ContinueOnError(context, caller))).Concat();
         
         // Maps the user's dictionary instance (the handle) to the robust sequencer instance.
         // We use <object, object> because ConditionalWeakTable requires reference types, 

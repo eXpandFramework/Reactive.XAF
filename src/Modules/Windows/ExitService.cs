@@ -107,7 +107,7 @@ namespace Xpand.XAF.Modules.Windows {
 
 
         private static IObservable<Unit> WhenCustomExit(this Frame frame)
-            => frame.GetController<EditModelController>().EditModelAction.WhenExecuting().ToUnit()
+            => frame.GetController<EditModelController>().EditModelAction.WhenExecuting(args => Observable.Empty<ActionBase>()).ToUnit()
                 .Merge(frame.Application.WhenLoggingOff().ToUnit())
                 .Merge(frame.Application.WhenExiting().ToUnit())
         ;

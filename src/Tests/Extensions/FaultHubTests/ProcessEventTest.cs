@@ -29,7 +29,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
             var hasThrown = false;
 
             
-            using var _ = eventSource.ProcessEvent<EventArgs>(nameof(TestEventSource.MyEvent),e => e.Observe().Do(_ => {
+            using var _ = eventSource.ProcessEvent<EventArgs,Unit>(nameof(TestEventSource.MyEvent),e => e.Observe().Do(_ => {
                         Console.WriteLine($"{nameof(ProceedEvent_Survives_Error_And_Continues)} {nameof(eventCounter)}={eventCounter} {nameof(hasThrown)}={hasThrown})");
                         eventCounter++;
                         if (!hasThrown) {
@@ -52,26 +52,6 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
 
         }
 
-        [Test]
-        public void ProcessEvent_With_Unit_Return_Type_Does_Not_Emit_OnNext() {
-            var eventSource = new TestEventSource();
-            var selectWasCalled = false;
-            
-            var stream = eventSource.ProcessEvent(nameof(TestEventSource.MyEvent), _ => Observable.Return(Unit.Default));
-            
-            using var _ = stream.Select(_ => {
-                selectWasCalled = true;
-                throw new InvalidOperationException("This should never be thrown.");
-#pragma warning disable CS0162 // Unreachable code detected
-                return Unit.Default.Observe();
-#pragma warning restore CS0162 // Unreachable code detected
-            }).Subscribe();
-
-            
-            Should.NotThrow(() => eventSource.RaiseEvent());
-            
-            selectWasCalled.ShouldBeFalse();
-        }   
         
         [Test]
         public void ProcessEvent_DetachesHandler_On_Disposal() {
@@ -79,7 +59,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
             var eventCounter = 0;
 
             
-            var subscription = eventSource.ProcessEvent<EventArgs>(nameof(TestEventSource.MyEvent), _ => {
+            var subscription = eventSource.ProcessEvent<EventArgs,Unit>(nameof(TestEventSource.MyEvent), _ => {
                 eventCounter++;
                 return Observable.Return(Unit.Default);
             }).Test();
@@ -102,7 +82,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
             var eventCounter = 0;
             var hasThrown = false;
 
-            using var _ = eventSource.ProcessEvent<EventArgs>(nameof(TestEventSource.MyEvent), _ => {
+            using var _ = eventSource.ProcessEvent<EventArgs,Unit>(nameof(TestEventSource.MyEvent), _ => {
                 eventCounter++;
                 if (!hasThrown) {
                     hasThrown = true;
@@ -127,7 +107,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
             var eventSource = new TestEventSource();
             
 
-            Should.Throw<ArgumentException>(() => eventSource.ProcessEvent<EventArgs>("NonExistentEvent", _ => Observable.Return(Unit.Default)));
+            Should.Throw<ArgumentException>(() => eventSource.ProcessEvent<EventArgs,Unit>("NonExistentEvent", _ => Observable.Return(Unit.Default)));
         }
     }
 }

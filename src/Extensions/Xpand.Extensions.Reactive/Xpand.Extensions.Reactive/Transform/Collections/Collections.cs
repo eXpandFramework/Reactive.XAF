@@ -6,7 +6,7 @@ using System.Reactive.Linq;
 namespace Xpand.Extensions.Reactive.Transform.Collections {
     public static class Collections {
         public static IObservable<ListChangedEventArgs> WhenListChanged<T>(this T source,params ListChangedType[] changedTypes) where T:IBindingList
-            => source.WhenEvent<ListChangedEventArgs>(nameof(IBindingList.ListChanged))
+            => source.ProcessEvent<ListChangedEventArgs>(nameof(IBindingList.ListChanged))
                 .Where(args =>!changedTypes.Any()|| changedTypes.Contains(args.ListChangedType));
     }
 }

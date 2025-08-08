@@ -11,7 +11,7 @@ using Xpand.Extensions.Reactive.Utility;
 namespace Xpand.XAF.Modules.Reactive.Services{
     public static class ListEditorExtensions {
         public static IObservable<TListEditor> WhenControlsCreated<TListEditor>(this TListEditor listEditor) where TListEditor:ListEditor 
-            => listEditor.WhenEvent(nameof(listEditor.ControlsCreated)).StartWith(listEditor.Control).WhenNotDefault().To(listEditor);
+            => listEditor.ProcessEvent(nameof(listEditor.ControlsCreated)).StartWith(listEditor.Control).WhenNotDefault().To(listEditor);
         public static IObservable<T> UpdateGridView<T>(this ListEditor editor, Func<IEnumerable<T>> selector)
             => editor.UpdateGridView(() => selector().ToNowObservable());
         
@@ -38,14 +38,14 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => source.TakeWhileInclusive(editor => !editor.IsDisposed);
         
         public static IObservable<ListEditor> WhenModelApplied(this ListEditor editor) 
-            => editor.WhenEvent(nameof(ListEditor.ModelApplied)).To(editor).TakeUntilDisposed();
+            => editor.ProcessEvent(nameof(ListEditor.ModelApplied)).To(editor).TakeUntilDisposed();
 
         public static IObservable<NewObjectAddingEventArgs> WhenNewObjectAdding(this ListEditor editor) 
-            => editor.WhenEvent<NewObjectAddingEventArgs>(nameof(editor.NewObjectAdding));
+            => editor.ProcessEvent<NewObjectAddingEventArgs>(nameof(editor.NewObjectAdding));
         public static IObservable<ListEditor> WhenDatasourceChanged(this ListEditor editor) 
-            => editor.WhenEvent(nameof(editor.DataSourceChanged)).To(editor).TakeUntilDisposed();
+            => editor.ProcessEvent(nameof(editor.DataSourceChanged)).To(editor).TakeUntilDisposed();
 
         public static IObservable<ListEditor> WhenProcessSelectedItem(this ListEditor editor) 
-            => editor.WhenEvent(nameof(ListEditor.ProcessSelectedItem)).To(editor).TakeUntilDisposed();
+            => editor.ProcessEvent(nameof(ListEditor.ProcessSelectedItem)).To(editor).TakeUntilDisposed();
     }
 }

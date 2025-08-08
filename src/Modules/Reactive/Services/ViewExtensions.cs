@@ -40,7 +40,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => listView.Application().GetPlatform() == Platform.Blazor
                 ? listView.Application().GetRequiredService<IObjectSelector<TO>>().SelectObject(listView, objects)
                 : listView.Editor.WhenControlsCreated()
-                    .SelectMany(editor => editor.WhenEvent("DataSourceChanged").To(listView).StartWith(listView)
+                    .SelectMany(editor => editor.ProcessEvent("DataSourceChanged").To(listView).StartWith(listView)
                         .WhenNotDefault(_ => editor.GetPropertyValue("DataSource"))
                         .WhenNotDefault(_ => editor.List.Count)
                     )
@@ -91,8 +91,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             this DetailView detailView, params Type[] objectTypes) 
             => detailView.FrameContainers(objectTypes).ToNowObservable()
                 .SelectMany(frame => frame.GetController<ListViewProcessCurrentObjectController>()
-                    .WhenEvent(nameof(ListViewProcessCurrentObjectController.CustomizeShowViewParameters))
-                    .Select(pattern => pattern.EventArgs).Cast<CustomizeShowViewParametersEventArgs>());
+                    .ProcessEvent<CustomizeShowViewParametersEventArgs>(nameof(ListViewProcessCurrentObjectController.CustomizeShowViewParameters)));
 
         public static IObservable<T> WhenClosing<T>(this T view) where T : View 
             => view.WhenViewEvent(nameof(view.Closing)).To(view).Select(view1 => view1);
@@ -117,11 +116,11 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<T[]> WhenObjects<T>(this View view) 
             => view.WhenObjects().Select(objects => objects.Cast<T>().ToArray());
         
-        public static IObservable<T> WhenActivated<T>(this T view) where T : View 
+        public static IObservable<T> WhenViewActivated<T>(this T view) where T : View 
             => view.WhenViewEvent(nameof(View.Activated));
 
         public static IObservable<T> Activated<T>(this IObservable<T> source) where T:View 
-            => source.SelectMany(view => view.WhenActivated());
+            => source.SelectMany(view => view.WhenViewActivated());
 
         public static IObservable<T> WhenClosed<T>(this T view) where T : View 
             => view.WhenViewEvent(nameof(view.Closed));
@@ -194,10 +193,10 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => source.TakeWhileInclusive(view => !view.IsDisposed);
 
         public static IObservable<TView> WhenViewEvent<TView>(this TView view,string eventName) where TView:View 
-            => view.WhenEvent(eventName).To(view).TakeUntilViewDisposed();
+            => view.ProcessEvent(eventName).TakeUntilViewDisposed();
         
         public static IObservable<(TView value, TArgs source)> WhenViewEvent<TView,TArgs>(this TView view,string eventName) where TView:View where TArgs : EventArgs 
-            => view.WhenEvent<TArgs>(eventName).InversePair(view).TakeUntilViewDisposed();
+            => view.ProcessEvent<TArgs>(eventName).InversePair(view).TakeUntilViewDisposed();
         
         public static IObservable<(TView view, TArgs e)> TakeUntilViewDisposed<TView,TArgs>(this IObservable<(TView view,TArgs)> source) where TView:View where TArgs:EventArgs 
             => source.TakeWhileInclusive(t => !t.view.IsDisposed);

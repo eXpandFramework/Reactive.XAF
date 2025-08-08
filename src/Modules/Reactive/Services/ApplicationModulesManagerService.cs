@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using DevExpress.ExpressApp;
@@ -57,7 +56,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 		    => source.Select(e => e.TypesInfo);
 	    
 	    public static IObservable<CustomizeTypesInfoEventArgs> WhenCustomizeTypesInfo(this ApplicationModulesManager manager) 
-            => manager.WhenEvent<CustomizeTypesInfoEventArgs>(nameof(ApplicationModulesManager.CustomizeTypesInfo));
+            => manager.ProcessEvent<CustomizeTypesInfoEventArgs>(nameof(ApplicationModulesManager.CustomizeTypesInfo));
 	    
 	    public static IObservable<ITypeInfo> DomainComponents(this IObservable<CustomizeTypesInfoEventArgs> source) 
             => source.SelectMany(e => e.TypesInfo.PersistentTypes);

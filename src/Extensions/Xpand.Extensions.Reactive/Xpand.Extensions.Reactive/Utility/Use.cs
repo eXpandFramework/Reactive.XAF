@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using Xpand.Extensions.Reactive.ErrorHandling;
@@ -22,5 +23,33 @@ namespace Xpand.Extensions.Reactive.Utility {
         public static IObservable<TResult> Using<TResource, TResult>(this object _,
             Func<TResource> resourceFactory, Func<TResource, IObservable<TResult>> busFactory,[CallerMemberName]string caller="") where TResource : IDisposable 
             => Observable.Using(resourceFactory, arg => busFactory(arg).ChainFaultContext([caller,typeof(TResult)]));
+
+        public static IObservable<TSource> UsingItemResilient<TSource, TResource>(this object o,Func<TResource> resourceFactory,
+            Func<TResource, IObservable<TSource>> observableFactory, object[] context = null,
+            [CallerMemberName] string caller = "") where TResource : IDisposable
+            => o.DeferItemResilient(() => Observable.Using(resourceFactory, observableFactory),context, caller);
+
+        public static IObservable<T> SafeguardSubscription<T>(this IObservable<T> source,Action<Exception,string> onError, [CallerMemberName] string caller = "")
+            => Observable.Create<T>(observer => {
+                IDisposable subscription;
+                try {
+                    subscription = source.Subscribe(observer);
+                }
+                catch (Exception ex) {
+                    onError(ex, caller);
+                    observer.OnCompleted();
+                    return Disposable.Empty;
+                }
+
+                return Disposable.Create(subscription, disposable => {
+                    try {
+                        disposable.Dispose();
+                    }
+                    catch (Exception ex) {
+                        onError(ex, caller);
+                    }
+                });
+            });
+
     }
 }

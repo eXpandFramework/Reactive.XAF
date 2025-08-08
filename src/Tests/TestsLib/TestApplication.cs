@@ -83,6 +83,7 @@ namespace Xpand.TestsLib{
         protected override string GetDcAssemblyFilePath() => null;
 
         public override void StartSplash(){
+            
         }
 
         protected override string GetModelAssemblyFilePath() => $@"{AppDomain.CurrentDomain.ApplicationPath()}\ModelAssembly{Guid.NewGuid()}.dll";

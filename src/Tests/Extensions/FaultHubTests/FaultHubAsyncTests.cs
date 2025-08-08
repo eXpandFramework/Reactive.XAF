@@ -8,9 +8,7 @@ using akarnokd.reactive_extensions;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.Numeric;
-using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.ErrorHandling;
-using Xpand.Extensions.Threading;
 using Xpand.TestsLib.Common;
 
 namespace Xpand.Extensions.Tests.FaultHubTests {
@@ -77,6 +75,31 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             var fault = BusObserver.Items.Single().ShouldBeOfType<FaultHubException>();
             fault.Context.CustomContext.ShouldContain("AsyncRetryContext");
             fault.InnerException.ShouldBeOfType<InvalidOperationException>();
+        }
+
+        [Test]
+        public void Preserves_Origin_StackTrace_For_Asynchronous_Exception_Without_StackTrace() {
+            // ARRANGE
+            var source = Observable.Timer(TimeSpan.FromMilliseconds(20))
+                .SelectMany(_ => Observable.Throw<Unit>(new InvalidOperationException("Async stackless fail")));
+
+            // ACT
+            using var testObserver = source.ContinueOnError().Test();
+            testObserver.AwaitDone(TimeSpan.FromSeconds(1));
+
+            // ASSERT
+            BusObserver.ItemCount.ShouldBe(1);
+            var fault = BusObserver.Items.Single().ShouldBeOfType<FaultHubException>();
+
+            // The new assertion: Verify the ToString() output.
+            var output = fault.ToString();
+
+            // 1. Check for the special header indicating the stack trace was substituted.
+            output.ShouldContain("--- Stack Trace (from innermost fault context) ---");
+
+            // 2. Check that the substituted stack trace contains the name of this test method,
+            // proving that the correct InvocationStackTrace was captured and used.
+            output.ShouldContain(nameof(Preserves_Origin_StackTrace_For_Asynchronous_Exception_Without_StackTrace));
         }
     }
     

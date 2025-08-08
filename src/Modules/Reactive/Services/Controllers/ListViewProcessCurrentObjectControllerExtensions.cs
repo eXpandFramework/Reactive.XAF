@@ -13,19 +13,19 @@ namespace Xpand.XAF.Modules.Reactive.Services.Controllers{
         [SuppressMessage("ReSharper", "PossibleInvalidOperationException")]
         public static IObservable<SimpleActionExecuteEventArgs> WhenCustomProcessSelectedItem(
             this ListViewProcessCurrentObjectController controller,bool? handled=null) 
-            => controller.WhenEvent<CustomProcessListViewSelectedItemEventArgs>(nameof(ListViewProcessCurrentObjectController.CustomProcessSelectedItem))
+            => controller.ProcessEvent<CustomProcessListViewSelectedItemEventArgs>(nameof(ListViewProcessCurrentObjectController.CustomProcessSelectedItem))
                 .DoWhen(_ => handled.HasValue,eventArgs => eventArgs.Handled=handled.Value)
                 .Select(eventArgs => eventArgs.InnerArgs);
         public static IObservable<SimpleActionExecuteEventArgs> WhenCustomProcessSelectedItem(
             this ListViewProcessCurrentObjectController controller,Func<SimpleActionExecuteEventArgs,bool> overwrite) 
-            => controller.WhenEvent<CustomProcessListViewSelectedItemEventArgs>(nameof(ListViewProcessCurrentObjectController.CustomProcessSelectedItem))
+            => controller.ProcessEvent<CustomProcessListViewSelectedItemEventArgs>(nameof(ListViewProcessCurrentObjectController.CustomProcessSelectedItem))
                 .Do(e => e.Handled=overwrite(e.InnerArgs)).Where(e => e.Handled)
                 .Select(eventArgs => eventArgs.InnerArgs);
         
         [SuppressMessage("ReSharper", "PossibleInvalidOperationException")]
         public static IObservable<HandledEventArgs> WhenCustomHandleProcessSelectedItem(
             this ListViewProcessCurrentObjectController controller,bool? handled=null) 
-            => controller.WhenEvent<HandledEventArgs>(nameof(ListViewProcessCurrentObjectController.CustomHandleProcessSelectedItem))
+            => controller.ProcessEvent<HandledEventArgs>(nameof(ListViewProcessCurrentObjectController.CustomHandleProcessSelectedItem))
                 .DoWhen(_ => handled.HasValue,eventArgs => eventArgs.Handled=handled.Value)
                 .Select(eventArgs => eventArgs);
 

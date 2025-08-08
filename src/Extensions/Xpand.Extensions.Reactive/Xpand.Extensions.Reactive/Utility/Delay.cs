@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reactive;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using Xpand.Extensions.Numeric;
@@ -35,6 +36,19 @@ namespace Xpand.Extensions.Reactive.Utility {
             => o.Defer(() => {
                 execute(o);
                 return Observable.Empty<Unit>();
+            });
+        public static IObservable<T> DeferItemResilient<T>(this object o, Func<IObservable<T>> resilientObservableFactory, object[] context = null, [CallerMemberName] string caller = "")
+            =>  Observable.Defer(() => {
+                IObservable<T> source;
+                try {
+                    source = resilientObservableFactory();
+                }
+                catch (Exception ex) {
+                    source = Observable.Throw<T>(ex);
+                }
+                return source
+                    // .SafeguardDisposal(context, caller)
+                    .ContinueOnError(context, caller);
             });
 
         public static IObservable<T> Defer<T,TObject>(this TObject o, Func<TObject,IObservable<T>> selector)

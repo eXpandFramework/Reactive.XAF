@@ -34,9 +34,9 @@ namespace Xpand.XAF.Modules.Reactive.Services.Controllers{
             objectType ??= typeof(object);
             return source
                 .SelectMany(controller => controller.Frame?.View != null ? controller.Observe()
-                        .Where(_ => _.Frame.View.Is(viewType, nesting) && objectType.IsAssignableFrom(_.Frame.View.ObjectTypeInfo.Type))
-                    : Observable.Return(controller).FrameAssigned().SelectMany(_ => _.Frame.WhenViewChanged().Select(tuple => _)))
-                .Where(_ => _.Frame.View.Is(viewType, nesting) && objectType.IsAssignableFrom(_.Frame.View.ObjectTypeInfo.Type));
+                        .Where(c => c.Frame.View.Is(viewType, nesting) && objectType.IsAssignableFrom(c.Frame.View.ObjectTypeInfo.Type))
+                    : Observable.Return(controller).FrameAssigned().SelectMany(c => c.Frame.WhenViewChanged().Select(_ => c)))
+                .Where(controller => controller.Frame.View.Is(viewType, nesting) && objectType.IsAssignableFrom(controller.Frame.View.ObjectTypeInfo.Type));
         }
 
 
@@ -47,7 +47,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Controllers{
             => controller as T;
 
         public static IObservable<T> WhenViewControlsCreated<T>(this T controller) where T : ViewController 
-            => controller.WhenEvent(nameof(ViewController.ViewControlsCreated)).To(controller);
+            => controller.ProcessEvent(nameof(ViewController.ViewControlsCreated));
 
         public static IObservable<T> WhenActivated<T>(this T controller, bool emitWhenActive = false) where T : Controller 
             => controller.Observe().Activated(emitWhenActive);
@@ -60,18 +60,18 @@ namespace Xpand.XAF.Modules.Reactive.Services.Controllers{
             => source.SelectMany(controller => selector(controller).TakeUntilDeactivated(controller));
         
         public static IObservable<Frame> WhenFrameAssigned(this Controller controller)
-            => controller.WhenEvent(nameof(Controller.FrameAssigned)).Select(pattern => (((Controller)pattern.Sender)!).Frame)
+            => controller.ProcessEvent(nameof(Controller.FrameAssigned)).Select(_ => controller.Frame)
                 .TakeUntilDisposed(controller);
 
         public static IObservable<T> Activated<T>(this IObservable<T> controllers, bool emitWhenActive = false) where T : Controller 
             => controllers.SelectMany(controller => emitWhenActive && controller.Active
                 ? controller.Observe()
-                : controller.WhenEvent(nameof(Controller.Activated)).TakeUntilDisposed(controller)
+                : controller.ProcessEvent(nameof(Controller.Activated)).TakeUntilDisposed(controller)
                     .Select(_ => controller))
                 .TraceRX(controller => controller.Name);
 
         public static IObservable<T> WhenDeactivated<T>(this T controller) where T : Controller 
-            => controller.WhenEvent(nameof(Controller.Deactivated)).To(controller).TakeUntilDisposed(controller);
+            => controller.ProcessEvent(nameof(Controller.Deactivated)).To(controller).TakeUntilDisposed(controller);
 
         public static IObservable<T> Deactivated<T>(this IObservable<T> controllers) where T : Controller 
             => controllers.SelectMany(controller => controller.WhenDeactivated());

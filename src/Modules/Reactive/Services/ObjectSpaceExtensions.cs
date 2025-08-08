@@ -38,7 +38,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         private static readonly Subject<(IObjectSpace objectSpace,object instance)> ObjectsSubject = new();
 
         public static IObservable<(IObjectSpace objectSpace, CancelEventArgs e)> WhenRollingBack(this IObjectSpace objectSpace) 
-            => objectSpace.WhenEvent<CancelEventArgs>(nameof(IObjectSpace.RollingBack)).TakeUntil(objectSpace.WhenDisposed()).InversePair(objectSpace);
+            => objectSpace.ProcessEvent<CancelEventArgs>(nameof(IObjectSpace.RollingBack)).TakeUntil(objectSpace.WhenDisposed()).InversePair(objectSpace);
         
         public static IObservable<TObject> WhenNewObjectCreated<TObjectSpace, TObject>(
             this IObservable<TObjectSpace> source) where TObjectSpace : class,IObjectSpace where TObject : IObjectSpaceLink 
@@ -554,33 +554,33 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => source.SelectMany(item => item.WhenObjectsGetting());
 
         public static IObservable<(NonPersistentObjectSpace objectSpace,ObjectsGettingEventArgs e)> WhenObjectsGetting(this NonPersistentObjectSpace objectSpace) 
-            => objectSpace.WhenEvent<ObjectsGettingEventArgs>(nameof(NonPersistentObjectSpace.ObjectsGetting))
+            => objectSpace.ProcessEvent<ObjectsGettingEventArgs>(nameof(NonPersistentObjectSpace.ObjectsGetting))
                 .InversePair(objectSpace).TakeUntil(objectSpace.WhenDisposed());
 
         public static IObservable<(NonPersistentObjectSpace objectSpace,ObjectGettingEventArgs e)> ObjectGetting(this IObservable<NonPersistentObjectSpace> source) 
             => source.SelectMany(item => item.WhenObjectGetting());
 
         public static IObservable<(NonPersistentObjectSpace objectSpace,ObjectGettingEventArgs e)> WhenObjectGetting(this NonPersistentObjectSpace objectSpace) 
-            => objectSpace.WhenEvent<ObjectGettingEventArgs>(nameof(NonPersistentObjectSpace.ObjectGetting))
+            => objectSpace.ProcessEvent<ObjectGettingEventArgs>(nameof(NonPersistentObjectSpace.ObjectGetting))
                 .InversePair(objectSpace).TakeUntil(objectSpace.WhenDisposed());
         
         public static IObservable<CancelEventArgs> Commiting(this IObservable<IObjectSpace> source) 
             => source.SelectMany(space => space.WhenCommiting());
         
         public static IObservable<(IObjectSpace objectSpace,HandledEventArgs e)> WhenCustomCommitChanges(this IObjectSpace objectSpace) 
-            => objectSpace.WhenEvent<HandledEventArgs>(nameof(IObjectSpace.CustomCommitChanges)).InversePair(objectSpace)
+            => objectSpace.ProcessEvent<HandledEventArgs>(nameof(IObjectSpace.CustomCommitChanges)).InversePair(objectSpace)
                 .TakeUntil(objectSpace.WhenDisposed());
 
         public static IObservable<IObjectSpace> Committed(this IObservable<IObjectSpace> source) 
             => source.SelectMany(objectSpace => objectSpace.WhenCommitted());
         
         public static IObservable<IObjectSpace> WhenCommitted(this IObjectSpace objectSpace) 
-            => objectSpace.WhenEvent(nameof(IObjectSpace.Committed)).To(objectSpace)
-                // .TakeUntil(objectSpace.WhenDisposed())
+            => objectSpace.ProcessEvent(nameof(IObjectSpace.Committed)).To(objectSpace)
+                .TakeUntil(objectSpace.WhenDisposed())
             ;
 
         public static IObservable<CancelEventArgs> WhenCommiting(this IObjectSpace objectSpace) 
-            => objectSpace.WhenEvent<CancelEventArgs>(nameof(IObjectSpace.Committing))
+            => objectSpace.ProcessEvent<CancelEventArgs>(nameof(IObjectSpace.Committing))
                 .TakeUntil(objectSpace.WhenDisposed());
 
         
@@ -588,7 +588,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => source.SelectMany(item => item.WhenObjectDeleted());
 
         public static IObservable<(IObjectSpace objectSpace,ObjectsManipulatingEventArgs e)> WhenObjectDeleted(this IObjectSpace objectSpace) 
-            => objectSpace.WhenEvent<ObjectsManipulatingEventArgs>(nameof(IObjectSpace.ObjectDeleted)).InversePair(objectSpace)
+            => objectSpace.ProcessEvent<ObjectsManipulatingEventArgs>(nameof(IObjectSpace.ObjectDeleted)).InversePair(objectSpace)
                 .TakeUntil(objectSpace.WhenDisposed());
 
         
@@ -596,12 +596,12 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => source.SelectMany(item => item.WhenObjectChanged());
 
         public static IObservable<(IObjectSpace objectSpace,ObjectChangedEventArgs e)> WhenObjectChanged(this IObjectSpace objectSpace,params Type[] objectTypes) 
-            => objectSpace.WhenEvent<ObjectChangedEventArgs>(nameof(IObjectSpace.ObjectChanged)).InversePair(objectSpace)
+            => objectSpace.ProcessEvent<ObjectChangedEventArgs>(nameof(IObjectSpace.ObjectChanged)).InversePair(objectSpace)
                 .TakeUntil(objectSpace.WhenDisposed())
                 .Where(t =>!objectTypes.Any() ||objectTypes.Any(type => type.IsInstanceOfType(t.source.Object)));
         
         public static IObservable<(IObjectSpace objectSpace,ObjectChangedEventArgs e)> WhenObjectChanged(this IObjectSpace objectSpace,Type objectType,params string[] properties) 
-            => objectSpace.WhenEvent<ObjectChangedEventArgs>(nameof(IObjectSpace.ObjectChanged)).InversePair(objectSpace)
+            => objectSpace.ProcessEvent<ObjectChangedEventArgs>(nameof(IObjectSpace.ObjectChanged)).InversePair(objectSpace)
                 .TakeUntil(objectSpace.WhenDisposed())
                 .Where(t =>objectType.IsInstanceOfType(t.source.Object)&&properties.Any(s => t.source.PropertyName==s));
 
@@ -609,10 +609,10 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => source.SelectMany(objectSpace => objectSpace.WhenDisposed());
 
         public static IObservable<Unit> WhenDisposed(this IObjectSpace objectSpace)
-            => objectSpace.WhenEvent(nameof(IObjectSpace.Disposed)).ToUnit();
+            => objectSpace.ProcessEvent(nameof(IObjectSpace.Disposed)).ToUnit();
 
         public static IObservable<IObjectSpace> WhenModifyChanged(this IObjectSpace objectSpace) 
-            => objectSpace.WhenEvent(nameof(IObjectSpace.ModifiedChanged)).To(objectSpace)
+            => objectSpace.ProcessEvent(nameof(IObjectSpace.ModifiedChanged)).To(objectSpace)
                 .TakeUntil(objectSpace.WhenDisposed());
 
         public static IObservable<IObjectSpace> WhenModifyChanged(this IObservable<IObjectSpace> source) 
@@ -621,7 +621,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 #if !XAF192
         
         public static IObservable<(IObjectSpace objectSpace, ObjectSpaceModificationEventArgs e)> WhenModifiedChanging(this IObjectSpace objectSpace) 
-            => objectSpace.WhenEvent<ObjectSpaceModificationEventArgs>(nameof(BaseObjectSpace.ModifiedChanging)).InversePair(objectSpace)
+            => objectSpace.ProcessEvent<ObjectSpaceModificationEventArgs>(nameof(BaseObjectSpace.ModifiedChanging)).InversePair(objectSpace)
                 .TakeUntil(objectSpace.WhenDisposed());
 
         public static IObservable<(IObjectSpace objectSpace, ObjectSpaceModificationEventArgs e)> WhenModifiedChanging(this IObservable<IObjectSpace> source) 
@@ -638,7 +638,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
                         if (!(bool)link.GetPropertyValue("IsInvalidated") && !(bool)link.GetPropertyValue("Session").GetPropertyValue("IsObjectsLoading"))
                             return link.ReloadObject().Observe();
-                        return link.GetPropertyValue("Session").WhenEvent("ObjectLoaded").Take(1)
+                        return link.GetPropertyValue("Session").ProcessEvent("ObjectLoaded").Take(1)
                             .Do(_ => link.ReloadObject()).To(link);
                     }
                     throw new NotImplementedException();
@@ -655,9 +655,9 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => ReloadObjectSubject.Where(t => t.objectSpace==objectSpace&&t.obj is T tObj&&(obj==null||obj==tObj)).Select(t => (t.objectSpace,(T)t.obj)).AsObservable();
 
         public static IObservable<IObjectSpace> WhenRefreshing(this IObjectSpace objectSpace)
-            => objectSpace.WhenEvent(nameof(IObjectSpace.Refreshing)).TakeUntil(objectSpace.WhenDisposed()).To(objectSpace);
+            => objectSpace.ProcessEvent(nameof(IObjectSpace.Refreshing)).TakeUntil(objectSpace.WhenDisposed()).To(objectSpace);
         public static IObservable<IObjectSpace> WhenReloaded(this IObjectSpace objectSpace) 
-            => objectSpace.WhenEvent(nameof(IObjectSpace.Reloaded)).TakeUntil(objectSpace.WhenDisposed()).To(objectSpace);
+            => objectSpace.ProcessEvent(nameof(IObjectSpace.Reloaded)).TakeUntil(objectSpace.WhenDisposed()).To(objectSpace);
 
         public static IObservable<IObjectSpace> WhenReloaded(this IObservable<IObjectSpace> source) 
             => source.SelectMany(item => item.WhenReloaded());

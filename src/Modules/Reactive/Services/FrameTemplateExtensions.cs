@@ -12,12 +12,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 		IFrameTemplate Template{ get; }	
 	}
 
-	class WindowsForm:IWindowsForm{
-		public IFrameTemplate Template{ get; }
-
-		public WindowsForm(IFrameTemplate template){
-			Template = template;
-		}
+	class WindowsForm(IFrameTemplate template) : IWindowsForm {
+		public IFrameTemplate Template{ get; } = template;
 	}
 	public static class FrameTemplateExtensions{
 		public static IObservable<IWindowsForm> WhenWindowsForm(this IFrameTemplate frameTemplate) 
@@ -31,7 +27,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 	            .Cast<Window>();
 
 		public static IObservable<IWindowsForm> When(this IObservable<IWindowsForm> source, params string[] eventNames) 
-			=> source.SelectMany(form => eventNames.ToNowObservable().SelectMany(eventName => form.Template.WhenEvent(eventName).To(form)));
+			=> source.SelectMany(form => eventNames.ToNowObservable().SelectMany(eventName => form.Template.ProcessEvent(eventName).To(form)));
 		
 	}
 }

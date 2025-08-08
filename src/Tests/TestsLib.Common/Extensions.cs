@@ -99,8 +99,11 @@ namespace Xpand.TestsLib.Common{
                     return tracing.Exceptions;
                 });
 
-        public static Task AwaitDoneAsync<T>(this TestObserver<T> observer,TimeSpan timeSpan) 
-            => observer.AwaitAsync(testObserver => testObserver.AwaitDone(timeSpan));
+        public static Task<TestObserver<T>> AwaitDoneAsync<T>(this TestObserver<T> observer,TimeSpan timeSpan) 
+            => Task.Run(() => {
+                var testObserver = observer.AwaitDone(timeSpan);
+                return testObserver;
+            });
 
         public static Guid SetupSecurity(this XafApplication application, Guid userId,Type userType=null,Type roleType=null,bool notAdmin=false) {
             userType ??= typeof(PermissionPolicyUser);

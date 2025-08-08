@@ -5,9 +5,7 @@ using System.Linq;
 using System.Management;
 using System.Reactive;
 using System.Reactive.Linq;
-using Xpand.Extensions.Numeric;
 using Xpand.Extensions.Reactive.ErrorHandling;
-using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Utility;
 
 namespace Xpand.Extensions.Reactive.Transform.System.Diagnostics{
@@ -36,18 +34,16 @@ namespace Xpand.Extensions.Reactive.Transform.System.Diagnostics{
         }
 
         public static IObservable<string> WhenOutputDataReceived(this Process process)
-            => process.WhenEvent<DataReceivedEventArgs>(nameof(Process.OutputDataReceived))
+            => process.ProcessEvent<DataReceivedEventArgs>(nameof(Process.OutputDataReceived))
                 // .TakeUntil(process.WhenExited())
                 .Select(pattern => pattern.Data);
 
         public static IObservable<string> WhenErrorDataReceived(this Process process)
-            => process.WhenEvent<DataReceivedEventArgs>(nameof(Process.ErrorDataReceived))
+            => process.ProcessEvent<DataReceivedEventArgs>(nameof(Process.ErrorDataReceived))
                 .Select(pattern => pattern.Data);
 
         public static IObservable<Process> WhenExited(this Process process) 
-            => process.WhenEvent(nameof(Process.Exited)).Take(1).To(process);
-
-
+            => process.ProcessEvent(nameof(Process.Exited)).Take(1).To(process);
 
         public static IObservable<Process> WhenNewProcess(this ProcessStartInfo existing,bool systemManagement=false) 
             => WhenNewProcess(Path.GetFileNameWithoutExtension(existing.FileName),systemManagement);
@@ -60,7 +56,7 @@ namespace Xpand.Extensions.Reactive.Transform.System.Diagnostics{
             return new ManagementEventWatcher($"SELECT * FROM Win32_ProcessStartTrace WHERE ProcessName = '{processName}.exe'")
                 .Use(watcher => {
                     watcher.Start();
-                    return watcher.WhenEvent<EventArrivedEventArgs>(nameof(watcher.EventArrived))
+                    return watcher.ProcessEvent<EventArrivedEventArgs>(nameof(watcher.EventArrived))
                         .SelectMany(e => Observable.Defer(() => Process.GetProcessById(Convert.ToInt32((UInt32)e.NewEvent.Properties["ProcessID"].Value)).Observe())
                             .OnErrorResumeNext(Observable.Empty<Process>()).CompleteOnError())
                         .Where(process => !processes.Contains(process))

@@ -29,7 +29,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 => PopupWindowShowActionHelperType.CreateInstance(action).CallMethod("ShowPopupWindow")).To<Window>());
 
         public static IObservable<ListPropertyEditor> WhenFrameChanged(this ListPropertyEditor editor) 
-            => editor.WhenEvent(nameof(ListPropertyEditor.FrameChanged)).To(editor).TakeUntilDisposed();
+            => editor.ProcessEvent(nameof(ListPropertyEditor.FrameChanged)).To(editor).TakeUntilDisposed();
 
         internal static IObservable<Unit> SetupPropertyEditorParentView(this XafApplication application){
             var detailViewEditors = application.WhenDetailViewCreated().ToDetailView()
@@ -56,7 +56,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         }
             
         public static IObservable<T> WhenVisibilityChanged<T>(this T editor) where T:PropertyEditor 
-            => editor.WhenEvent(nameof(PropertyEditor.VisibilityChanged)).TakeUntil(_ => editor.IsDisposed()).To(editor);
+            => editor.ProcessEvent(nameof(PropertyEditor.VisibilityChanged)).TakeUntil(_ => editor.IsDisposed()).To(editor);
 
         public static IObservable<T> WhenVisibilityChanged<T>(this IObservable<T> source) where T:PropertyEditor 
             => source.SelectMany(editor => editor.WhenVisibilityChanged());

@@ -76,7 +76,7 @@ namespace Xpand.XAF.Modules.Speech.Services {
 				.Where(frame => frame.View.ObjectTypeInfo.Type==typeof(SpeechToText))
 				.SelectUntilViewClosed(frame => {
 					var observeOnContext = frame.View.ObjectSpace
-						.WhenCommittedDetailed<SpeechText>(ObjectModification.NewOrUpdated,new[]{nameof(SpeechText.Text)}, text => text.Text != null)
+						.WhenCommittedDetailed<SpeechText>(ObjectModification.NewOrUpdated, [nameof(SpeechText.Text)], text => text.Text != null)
 						.Select(t => t).Where(t => t.details.Any()).ToObjects()
 						// .WaitUntilInactive(2)
 						.ObserveOnContext();
@@ -91,28 +91,6 @@ namespace Xpand.XAF.Modules.Speech.Services {
 								})));
 				}))
 				.ToUnit();
-        
-        // public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)>
-	       //  WhenCommittedDetailed1<T>(this IObjectSpace objectSpace, ObjectModification objectModification,Func<T, bool> criteria=null,params string[] modifiedProperties) 
-	       //  => objectSpace.WhenCommitingDetailed1(true, objectModification,criteria, modifiedProperties);
-
-        // public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)>
-	       //  WhenCommitingDetailed1<T>(this IObjectSpace objectSpace, bool emitAfterCommit, ObjectModification objectModification,Func<T, bool> criteria,params string[] modifiedProperties) 
-	       //  => modifiedProperties.Any()?objectSpace.WhenModifiedObjects1(typeof(T),modifiedProperties).Cast<T>().Take(1)
-			     //    .SelectMany(_ => objectSpace.WhenCommitingDetailed(emitAfterCommit,objectModification, criteria,modifiedProperties)
-				    //     .Select(t => t)):
-		      //   objectSpace.WhenCommitingDetailed(objectModification, emitAfterCommit,criteria);
-
-        // public static IObservable<object> WhenModifiedObjects1(this IObjectSpace objectSpace,Type objectType, params string[] properties) 
-	       //  => Observable.Defer(() => objectSpace.WhenObjectChanged().Where(t => objectType.IsInstanceOfType(t.e.Object) && properties.PropertiesMatch( t))
-			     //    .Select(_ => _.e.Object).Take(1))
-		      //   .RepeatWhen(observable => observable.SelectMany(_ => objectSpace.WhenModifyChanged().Where(space => !space.IsModified).Take(1)))
-		      //   .TakeUntil(objectSpace.WhenDisposed());
-        
-        // private static bool PropertiesMatch(this string[] properties, (IObjectSpace objectSpace, ObjectChangedEventArgs e) t) 
-	       //  => !properties.Any()||(t.e.MemberInfo != null && properties.Contains(t.e.MemberInfo.Name) ||
-	       //                         t.e.PropertyName != null && properties.Contains(t.e.PropertyName));
-
         
         
         private static IObservable<Unit> ConfigureSpeechTextView(this ApplicationModulesManager manager)
@@ -173,7 +151,7 @@ namespace Xpand.XAF.Modules.Speech.Services {
         
         private static IObservable<Unit> NewSpeechTextFromUI(this ApplicationModulesManager manager) 
 	        => manager.WhenSpeechApplication(application => application.WhenViewOnFrame(typeof(SpeechText),ViewType.ListView)
-			        .SelectUntilViewClosed(frame => frame.GetController<NewObjectViewController>().WhenEvent<ObjectCreatedEventArgs>(nameof(NewObjectViewController.ObjectCreated))
+			        .SelectUntilViewClosed(frame => frame.GetController<NewObjectViewController>().ProcessEvent<ObjectCreatedEventArgs>(nameof(NewObjectViewController.ObjectCreated))
 				        .Do(e => {
 					        var speechText = ((SpeechText)e.CreatedObject);
 					        if (speechText.IsNewObject) {

@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
+using Xpand.Extensions.Reactive.ErrorHandling;
 using Xpand.Extensions.Reactive.Transform;
 
 namespace Xpand.Extensions.Reactive.Utility {
@@ -129,6 +131,15 @@ namespace Xpand.Extensions.Reactive.Utility {
                     })
                     .Concat();
             });
+        
+        public static IObservable<T> DoItemResilient<T>(this IObservable<T> source, Action<T> resilientAction, object[] context = null, [CallerMemberName] string caller = "")
+            => source.SelectMany(item => Observable.Defer(() => {
+                        resilientAction(item);
+                        return Observable.Empty<T>();
+                    })
+                    .ContinueOnError(context, caller)
+                    .StartWith(item)
+            );
 
     }
 }

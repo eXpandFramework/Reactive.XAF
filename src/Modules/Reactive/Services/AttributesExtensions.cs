@@ -118,10 +118,9 @@ namespace Xpand.XAF.Modules.Reactive.Services {
                     }
                     ((IList)memberInfo.GetValue(frame.View.CurrentObject)).Add(value);
                 })
-                .MergeToUnit(controller.UnlinkAction.WhenExecuteCompleted()
-                    .SelectMany(e => e.SelectedObjects.Cast<object>())
+                .MergeToUnit(controller.UnlinkAction.WhenExecuteCompleted(e => e.SelectedObjects.Cast<object>()
                     .Do(value => ((IList)frame.View.ObjectTypeInfo.FindMember(t.attribute.PropertyName)
-                        .GetValue(frame.View.CurrentObject)).Remove(value)));
+                        .GetValue(frame.View.CurrentObject)).Remove(value)).ToNowObservable()));
         }
         
         static IObservable<Unit> DisableNewObjectAction(this ApplicationModulesManager manager)
@@ -236,17 +235,19 @@ namespace Xpand.XAF.Modules.Reactive.Services {
 
         static IObservable<Unit> AppearanceToolAttribute(this ApplicationModulesManager manager)
             => manager.WhenApplication(application => application.WhenFrameCreated().ToController<AppearanceController>()
-                .SelectMany(controller => controller.WhenEvent<CustomCreateAppearanceRuleEventArgs>(nameof(AppearanceController.CustomCreateAppearanceRule))
-                    .Where(e => e.RuleProperties is IModelAppearanceWithToolTipRule)
-                    .Do(e => e.Rule = new ToolTipAppearanceRule(e.RuleProperties, e.ObjectSpace))
-                    .MergeToUnit(controller.WhenEvent<ApplyAppearanceEventArgs>(nameof(AppearanceController.AppearanceApplied))
-                        .Do(e => {
-                            if (e.AppearanceObject.Items.FirstOrDefault(item => item is AppearanceItemToolTip) is not AppearanceItemToolTip toolTip) return;
-                            if (toolTip.State == AppearanceState.None) return;
-                            var toolTipText = toolTip.State == AppearanceState.CustomValue ?  toolTip.ToolTipText :  "";
-                            if (e.Item is not ColumnWrapper columnWrapper) return;
-                            columnWrapper.ToolTip = toolTipText;
-                        }))))
+                .SelectMany(controller => controller.ProcessEvent<CustomCreateAppearanceRuleEventArgs>(nameof(AppearanceController.CustomCreateAppearanceRule))
+                    .SelectMany(e => e.Observe()
+                        .Where(_ => e.RuleProperties is IModelAppearanceWithToolTipRule)
+                        .Do(_ => e.Rule = new ToolTipAppearanceRule(e.RuleProperties, e.ObjectSpace)))
+                    .MergeToUnit(controller.ProcessEvent<ApplyAppearanceEventArgs>(nameof(AppearanceController.AppearanceApplied))
+                        .SelectMany(e => e.Observe()
+                            .Do(_ => {
+                                if (e.AppearanceObject.Items.FirstOrDefault(item => item is AppearanceItemToolTip) is not AppearanceItemToolTip toolTip) return;
+                                if (toolTip.State == AppearanceState.None) return;
+                                var toolTipText = toolTip.State == AppearanceState.CustomValue ?  toolTip.ToolTipText :  "";
+                                if (e.Item is not ColumnWrapper columnWrapper) return;
+                                columnWrapper.ToolTip = toolTipText;
+                            })))))
                 .ToUnit();
         
         static IObservable<Unit> DetailCollectionAttribute(this ApplicationModulesManager manager)

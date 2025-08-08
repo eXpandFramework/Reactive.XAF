@@ -29,16 +29,16 @@ namespace Xpand.XAF.Modules.Reactive.Services.Controllers{
                 .SelectMany(whenFrame),typeof(T)).ToUnit();
         
         public static IObservable<CollectTypesEventArgs> WhenCollectCreatableItemTypes(this NewObjectViewController controller) 
-            => controller.WhenEvent<CollectTypesEventArgs>(nameof(NewObjectViewController.CollectCreatableItemTypes));
+            => controller.ProcessEvent<CollectTypesEventArgs>(nameof(NewObjectViewController.CollectCreatableItemTypes));
         
         public static IObservable<ObjectCreatingEventArgs> WhenObjectCreating(this NewObjectViewController controller) 
-            => controller.WhenEvent<ObjectCreatingEventArgs>(nameof(NewObjectViewController.ObjectCreating));
+            => controller.ProcessEvent<ObjectCreatingEventArgs>(nameof(NewObjectViewController.ObjectCreating));
         
         public static IObservable<ObjectCreatedEventArgs> WhenObjectCreated(this NewObjectViewController controller) 
-            => controller.WhenEvent<ObjectCreatedEventArgs>(nameof(NewObjectViewController.ObjectCreated));
+            => controller.ProcessEvent<ObjectCreatedEventArgs>(nameof(NewObjectViewController.ObjectCreated));
         
         public static IObservable<CollectTypesEventArgs> WhenCollectDescendantTypes(this NewObjectViewController controller) 
-            => controller.WhenEvent<CollectTypesEventArgs>(nameof(NewObjectViewController.CollectDescendantTypes));
+            => controller.ProcessEvent<CollectTypesEventArgs>(nameof(NewObjectViewController.CollectDescendantTypes));
 
         public static IObservable<Unit> ReplaceNewObjectTypes<TParentObject>(this XafApplication application,Type listViewObjectType,params Type[] types)
             => application.WhenFrame(listViewObjectType,nesting:Nesting.Nested)
@@ -73,7 +73,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Controllers{
             ;
         
         public static IObservable<ProcessNewObjectEventArgs> WhenAddObjectToCollection(this NewObjectViewController controller) 
-            => controller.WhenEvent<ProcessNewObjectEventArgs>(nameof(NewObjectViewController.CustomAddObjectToCollection));
+            => controller.ProcessEvent<ProcessNewObjectEventArgs>(nameof(NewObjectViewController.CustomAddObjectToCollection));
 
         public static IObservable<CollectTypesEventArgs> CollectCreatableItemTypes(this IObservable<NewObjectViewController> source)
             => source.SelectMany(controller => controller.WhenCollectCreatableItemTypes());

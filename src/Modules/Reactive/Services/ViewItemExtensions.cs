@@ -33,7 +33,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => source.ToObservable(ImmediateScheduler.Instance).ControlCreated();
 
         public static IObservable<T> WhenControlCreated<T>(this T source,bool emitExisting=false) where T:ViewItem 
-            =>emitExisting&&source.Control!=null?source.Observe(): source.WhenEvent(nameof(ViewItem.ControlCreated))
+            =>emitExisting&&source.Control!=null?source.Observe(): source.ProcessEvent(nameof(ViewItem.ControlCreated))
                 .Select(_ => source).TakeUntilDisposed();
 
         public static IObservable<T> TakeUntilDisposed<T>(this IObservable<T> source) where T : ViewItem

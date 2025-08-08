@@ -66,92 +66,112 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
 		    this IObservable<Frame> source) where TModule : ModuleBase 
             => source.Select(frame => frame.Action<TModule>());
 
-        public static IObservable<T> WhenExecute<T>(this IObservable<SimpleAction> source,Func<SimpleActionExecuteEventArgs, IObservable<T>> selector,[CallerMemberName]string caller="") 
-            => source.SelectMany(action => action.WhenExecute(e => selector(e).ChainFaultContext([caller,action])).TakeUntilDeactivated(action.Controller));
-        public static IObservable<T> WhenExecuted<T>(this IObservable<SimpleAction> source, Func<SimpleActionExecuteEventArgs, IObservable<T>> selector,[CallerMemberName]string caller="") 
-            => source.SelectMany(action => action.WhenExecuted(selector,caller).TakeUntilDeactivated(action.Controller));
-        public static IObservable<Unit> WhenExecuted(this IObservable<SimpleAction> source,Action<SimpleActionExecuteEventArgs> selector,[CallerMemberName]string caller="") 
-            => source.SelectMany(action => action.WhenExecuted(e => Unit.Default.Observe().Do(_ => selector(e)).ChainFaultContext([caller,action])));
-        public static IObservable<Unit> WhenExecuted(this IObservable<SingleChoiceAction> source,Action<SingleChoiceActionExecuteEventArgs> selector,[CallerMemberName]string caller="") 
-            => source.SelectMany(action => action.WhenExecuted(e => Unit.Default.Observe().Do(_ => selector(e)).ChainFaultContext([caller,action])));
+        public static IObservable<T> When<TEventArgs, T>(this IObservable<ActionBase> source, string eventName,
+            Func<TEventArgs, IObservable<T>> resilientSelector, [CallerMemberName] string caller = "") where TEventArgs : EventArgs
+            => source.SelectMany(a => a.When(eventName, resilientSelector, caller));
         
-        public static IObservable<Unit> WhenExecuted(this IObservable<ParametrizedAction> source,Action<ParametrizedActionExecuteEventArgs> selector,[CallerMemberName]string caller="") 
-            => source.SelectMany(action => action.WhenExecuted(e => Unit.Default.Observe().Do(_ => selector(e)).ChainFaultContext([caller,action])));
-        
-        public static IObservable<T> WhenExecuted<T>(this IObservable<SingleChoiceAction> source,Func<SingleChoiceActionExecuteEventArgs, IObservable<T>> selector,[CallerMemberName]string caller="") 
-            => source.SelectMany(action => action.WhenExecuted(e => selector(e).ChainFaultContext([caller,action])).TakeUntilDeactivated(action.Controller));
+        public static IObservable<T> When<TEventArgs, T>(this ActionBase action,string eventName, Func<TEventArgs, IObservable<T>> resilientSelector, [CallerMemberName] string caller = "") 
+            where TEventArgs : EventArgs 
+            => action.ProcessEvent(eventName, resilientSelector,context:[action], caller: caller).TakeUntilDisposed(action);
+        public static IObservable<TEventArgs> When<TEventArgs>(this ActionBase action,string eventName, [CallerMemberName] string caller = "") 
+            where TEventArgs : EventArgs 
+            => action.ProcessEvent<TEventArgs,TEventArgs>(eventName,e => e.Observe(),context:[action] , caller: caller).TakeUntilDisposed(action);
 
-        public static IObservable<T> WhenExecute<T>(this SimpleAction simpleAction,Func<SimpleActionExecuteEventArgs, IObservable<T>> selector,[CallerMemberName]string caller="") 
-            => simpleAction.WhenExecute().SelectMany(e =>selector(e).ChainFaultContext([caller,simpleAction]) ).TakeUntilDeactivated(simpleAction.Controller);
-        public static IObservable<Unit> WhenExecute(this SimpleAction simpleAction,Action<SimpleActionExecuteEventArgs> selector,[CallerMemberName]string caller="") 
-            => simpleAction.WhenExecute(e => Unit.Default.Observe().Do(_ => selector(e)).ChainFaultContext([caller,simpleAction]));
+        public static IObservable<T> WhenExecuted<T>(this SimpleAction action, Func<SimpleActionExecuteEventArgs, IObservable<T>> resilientSelector, [CallerMemberName] string caller = "")
+            => action.When(nameof(ActionBase.Executed),resilientSelector, caller);
         
-        public static IObservable<Unit> WhenExecuted(this ParametrizedAction simpleAction,Action<ParametrizedActionExecuteEventArgs> selector,[CallerMemberName]string caller="") 
-            => simpleAction.WhenExecute(e => Unit.Default.Observe().Do(_ => selector(e)).ChainFaultContext([caller,simpleAction]));
+        public static IObservable<SimpleActionExecuteEventArgs> WhenExecuted(this SimpleAction action, [CallerMemberName] string caller = "")
+            => action.WhenExecuted(e => e.Observe(),caller);
         
-        public static IObservable<T> WhenExecuted<T>(this SimpleAction simpleAction, Func<SimpleActionExecuteEventArgs, IObservable<T>> execution,[CallerMemberName]string caller="") 
-            => simpleAction.WhenExecuted() 
-                .SelectMany(e => execution(e).ChainFaultContext([caller,simpleAction]));
-        public static IObservable<T> WhenExecuted<T>(this ParametrizedAction simpleAction, Func<ParametrizedActionExecuteEventArgs, IObservable<T>> selector,[CallerMemberName]string caller="")
-            => simpleAction.WhenExecuted().SelectMany(e => selector(e).ChainFaultContext([caller,simpleAction]).TakeUntilDeactivated(simpleAction.Controller));
+        public static IObservable<T> WhenExecuteCompleted<T>(this ParametrizedAction action,Func<ParametrizedActionExecuteEventArgs, IObservable<T>> resilientSelector,[CallerMemberName]string caller="")  
+            => action.When(nameof(ActionBase.ExecuteCompleted),resilientSelector, caller);
+        public static IObservable<T> WhenExecuteCompleted<T>(this SingleChoiceAction action,Func<SingleChoiceActionExecuteEventArgs, IObservable<T>> resilientSelector,[CallerMemberName]string caller="")  
+            => action.When(nameof(ActionBase.ExecuteCompleted),resilientSelector, caller);
         
-        public static IObservable<Unit> WhenExecuted(this SimpleAction simpleAction,Action<SimpleActionExecuteEventArgs> selector,[CallerMemberName]string caller="") 
-            => simpleAction.WhenExecuted(e => Unit.Default.Observe().Do(_ => selector(e)).ChainFaultContext([caller,simpleAction]));
+        public static IObservable<SingleChoiceActionExecuteEventArgs> WhenExecuteCompleted(this SingleChoiceAction action) 
+            => action.ProcessEvent<SingleChoiceActionExecuteEventArgs>(nameof(ActionBase.ExecuteCompleted)).TakeUntilDisposed(action);
+        public static IObservable<SimpleActionExecuteEventArgs> WhenExecuteCompleted(this SimpleAction action) 
+            => action.ProcessEvent<SimpleActionExecuteEventArgs>(nameof(ActionBase.ExecuteCompleted)).TakeUntilDisposed(action);
+        public static IObservable<ActionBaseEventArgs> WhenExecuteCompleted(this ActionBase action) 
+            => action.ProcessEvent<ActionBaseEventArgs>(nameof(ActionBase.ExecuteCompleted)).TakeUntilDisposed(action);
+        public static IObservable<ParametrizedActionExecuteEventArgs> WhenExecuteCompleted(this ParametrizedAction action) 
+            => action.ProcessEvent<ParametrizedActionExecuteEventArgs>(nameof(ActionBase.ExecuteCompleted)).TakeUntilDisposed(action);
+        public static IObservable<PopupWindowShowActionExecuteEventArgs> WhenExecuteCompleted(this PopupWindowShowAction action) 
+            => action.ProcessEvent<PopupWindowShowActionExecuteEventArgs>(nameof(ActionBase.ExecuteCompleted)).TakeUntilDisposed(action);
+        
+        public static IObservable<T> WhenExecuteCompleted<T>(this SimpleAction action,Func<SimpleActionExecuteEventArgs, IObservable<T>> resilientSelector,[CallerMemberName]string caller="")  
+            => action.When(nameof(ActionBase.ExecuteCompleted),resilientSelector, caller);
+        
+        public static IObservable<T> WhenExecuteCompleted<T>(this PopupWindowShowAction action,Func<PopupWindowShowActionExecuteEventArgs, IObservable<T>> resilientSelector,[CallerMemberName]string caller="")  
+            => action.When(nameof(ActionBase.ExecuteCompleted),resilientSelector, caller);
+        
+        
+        
+        public static IObservable<T> WhenExecuted<T>(this SingleChoiceAction action, Func<SingleChoiceActionExecuteEventArgs, IObservable<T>> resilientSelector, [CallerMemberName] string caller = "")
+            => action.When(nameof(ActionBase.Executed),resilientSelector, caller);
+        public static IObservable<T> WhenExecuted<T>(this ParametrizedAction parametrizedAction, Func<ParametrizedActionExecuteEventArgs, IObservable<T>> resilientSelector,[CallerMemberName]string caller="")
+            => parametrizedAction.When(nameof(ActionBase.Executed),resilientSelector, caller);
+        public static IObservable<T> WhenExecuted<TAction,TArg,T>(this TAction parametrizedAction, Func<TArg, IObservable<T>> resilientSelector,[CallerMemberName]string caller="") where TAction : ActionBase where TArg : ActionBaseEventArgs 
+            => parametrizedAction.When(nameof(ActionBase.Executed),resilientSelector, caller);
+        public static IObservable<T> WhenExecuted<TAction,TArg,T>(this IObservable<TAction> source, Func<TArg, IObservable<T>> resilientSelector,[CallerMemberName]string caller="") where TAction : ActionBase where TArg : ActionBaseEventArgs 
+            => source.SelectMany(action => action.When(nameof(ActionBase.Executed),resilientSelector, caller));
+        
+        public static IObservable<T> WhenExecuted<T>(this IObservable<SimpleAction> source, Func<SimpleActionExecuteEventArgs, IObservable<T>> resilientSelector, [CallerMemberName] string caller = "")
+            => source.SelectMany(action => action.WhenExecuted(resilientSelector,caller).TakeUntilDeactivated(action.Controller));
+        public static IObservable<SimpleAction> WhenExecuted(this IObservable<SimpleAction> source, Action<SimpleActionExecuteEventArgs> resilientSelector, [CallerMemberName] string caller = "")
+            => source.WhenExecuted(e => e.DeferAction(() => resilientSelector(e)).To(e.Action).Concat(e.Action.Observe()).Cast<SimpleAction>(),caller);
+        public static IObservable<ParametrizedAction> WhenExecuted(this IObservable<ParametrizedAction> source, Action<ParametrizedActionExecuteEventArgs> resilientSelector, [CallerMemberName] string caller = "")
+            => source.WhenExecuted(e => e.DeferAction(() => resilientSelector(e)).To(e.Action).Concat(e.Action.Observe()).Cast<ParametrizedAction>(),caller);
+        
+        public static IObservable<T> WhenConcatExecution<T>(this IObservable<SimpleAction> source, Func<SimpleActionExecuteEventArgs, IObservable<T>> resilientSelector,[CallerMemberName]string caller="")
+            => source.SelectMany(action => action.WhenConcatExecution(resilientSelector,caller:caller).TakeUntilDeactivated(action.Controller));
+        public static IObservable<SimpleAction> WhenConcatExecution(this IObservable<SimpleAction> source, Action<SimpleActionExecuteEventArgs> resilientSelector,[CallerMemberName]string caller="")
+            => source.WhenConcatExecution(e => e.DeferAction(() => resilientSelector(e)).To<SimpleAction>().Concat(e.Action.Observe().Cast<SimpleAction>()),caller);
+        public static IObservable<ParametrizedAction> WhenConcatExecution(this IObservable<ParametrizedAction> source, Action<ParametrizedActionExecuteEventArgs> resilientSelector,[CallerMemberName]string caller="")
+            => source.WhenConcatExecution(e => e.DeferAction(() => resilientSelector(e)).To<ParametrizedAction>().Concat(e.Action.Observe().Cast<ParametrizedAction>()),caller);
+        
+        public static IObservable<T> WhenExecute<T>(this IObservable<SimpleAction> source,Func<SimpleActionExecuteEventArgs, IObservable<T>> resilientSelector,[CallerMemberName]string caller="") 
+            => source.SelectMany(action => action.WhenExecuted(resilientSelector, caller).TakeUntilDeactivated(action.Controller));
+        
+        
+        public static IObservable<T> WhenExecuted<T>(this IObservable<SingleChoiceAction> source, Func<SingleChoiceActionExecuteEventArgs, IObservable<T>> resilientSelector, [CallerMemberName] string caller = "")
+            => source.SelectMany(action => action.WhenExecuted(resilientSelector, caller).TakeUntilDeactivated(action.Controller));
+        public static IObservable<T> WhenExecute<T>(this IObservable<SingleChoiceAction> source,Func<SingleChoiceActionExecuteEventArgs, IObservable<T>> resilientSelector,[CallerMemberName]string caller="") 
+            => source.SelectMany(action => action.WhenExecuted(resilientSelector, caller).TakeUntilDeactivated(action.Controller));
+        
+        public static IObservable<T> WhenExecuted<T>(this IObservable<ParametrizedAction> source, Func<ParametrizedActionExecuteEventArgs, IObservable<T>> resilientSelector, [CallerMemberName] string caller = "")
+            => source.SelectMany(action => action.WhenExecuted(resilientSelector, caller).TakeUntilDeactivated(action.Controller));
+        
+        public static IObservable<T> WhenExecute<T>(this IObservable<ParametrizedAction> source,Func<ParametrizedActionExecuteEventArgs, IObservable<T>> resilientSelector,[CallerMemberName]string caller="") 
+            => source.SelectMany(action => action.WhenExecuted(resilientSelector, caller).TakeUntilDeactivated(action.Controller));
+        
+        public static IObservable<T> WhenExecuted<T>(this IObservable<PopupWindowShowAction> source, Func<PopupWindowShowActionExecuteEventArgs, IObservable<T>> resilientSelector, [CallerMemberName] string caller = "")
+            => source.SelectMany(action => action.When(nameof(ActionBase.Executed),resilientSelector, caller).TakeUntilDeactivated(action.Controller));
 
-        public static IObservable<Unit> WhenConcatExecution(this SimpleAction action,Action<SimpleActionExecuteEventArgs> sourceSelector,[CallerMemberName]string caller="") 
-            => action.AsSimpleAction().WhenExecuted().SelectMany(e => e.WhenConcatExecution(pe => Unit.Default.Observe().Do(_ => sourceSelector(pe)).ChainFaultContext([caller,action])));
-        
-        public static IObservable<T> WhenConcatExecution<T>(this IObservable<SimpleAction> source, Func<SimpleActionExecuteEventArgs, IObservable<T>> sourceSelector,[CallerMemberName]string caller="")
-            => source.SelectMany(action => action.WhenConcatExecution(sourceSelector,caller:caller));
-        
-        public static IObservable<T> WhenConcatExecution<T>(this SimpleAction simpleAction,Func<SimpleActionExecuteEventArgs,IObservable<T>> sourceSelector,[CallerMemberName]string caller="")
-            => simpleAction.WhenExecuted().SelectMany(e => e.WhenConcatExecution(sourceSelector,caller:caller));
-        
-        private static IObservable<T> WhenConcatExecution<T,TArgs>(this TArgs e,Func<TArgs, IObservable<T>> sourceSelector,[CallerMemberName]string caller="") where TArgs:ActionBaseEventArgs{
-            e.Action.Enabled[nameof(WhenConcatExecution)] = false;
-            return sourceSelector(e).ChainFaultContext([caller,e.Action]).TakeUntilDisposed(e.Action).ObserveOnContext()
-                .Finally(() => {
-                    e.Action.Enabled[nameof(WhenConcatExecution)] = true;
-                    e.Action.ExecutionFinished();
-                });
-        }
+        public static IObservable<T> WhenExecute<T>(this IObservable<PopupWindowShowAction> source,Func<PopupWindowShowActionExecuteEventArgs, IObservable<T>> resilientSelector,[CallerMemberName]string caller="") 
+            => source.SelectMany(action => action.When(nameof(ActionBase.Executed),resilientSelector, caller).TakeUntilDeactivated(action.Controller));
 
-        public static IObservable<Unit> WhenConcatExecution(this ParametrizedAction action,Action<ParametrizedActionExecuteEventArgs> sourceSelector,[CallerMemberName]string caller="") 
-            => action.AsParametrizedAction().WhenExecuted().SelectMany(e => e.WhenConcatExecution(pe => Unit.Default.Observe().Do(_ => sourceSelector(pe)).ChainFaultContext([caller,action])));
-
-        public static IObservable<T> WhenConcatRetriedExecution<T>(this ParametrizedAction simpleAction,Func<ParametrizedActionExecuteEventArgs, IObservable<T>> sourceSelector,[CallerMemberName]string caller="")
-            => simpleAction.WhenExecuted().SelectMany(e => e.WhenConcatExecution(sourceSelector,caller:caller));
-        public static IObservable<T> WhenConcatExecution<T>(this ParametrizedAction simpleAction,Func<ParametrizedActionExecuteEventArgs,IObservable<T>> sourceSelector,[CallerMemberName]string caller="")
-            => simpleAction.WhenConcatExecution<T,ParametrizedActionExecuteEventArgs>( sourceSelector,caller:caller);
+        public static IObservable<T> WhenConcatExecution<TArg,T>(this IObservable<ActionBase> source,Func<TArg,IObservable<T>> resilientSelector,[CallerMemberName]string caller="") where TArg:ActionBaseEventArgs
+            => source.SelectMany(a => a.WhenConcatExecution(resilientSelector,caller));
         
-        public static IObservable<T> WhenConcatExecution<T>(this SingleChoiceAction simpleAction,Func<SingleChoiceActionExecuteEventArgs,IObservable<T>> sourceSelector,[CallerMemberName]string caller="")
-            => simpleAction.WhenConcatExecution<T,SingleChoiceActionExecuteEventArgs>( sourceSelector,caller);
+        public static IObservable<T> WhenConcatExecution<T>(this ParametrizedAction simpleAction,Func<ParametrizedActionExecuteEventArgs,IObservable<T>> resilientSelector,[CallerMemberName]string caller="")
+            => simpleAction.WhenConcatExecution<T,ParametrizedActionExecuteEventArgs>( resilientSelector,caller:caller);
         
-        private static IObservable<T> WhenConcatExecution<T,TArgs>(this ActionBase action, Func<TArgs, IObservable<T>> sourceSelector,[CallerMemberName]string caller="")  where TArgs:ActionBaseEventArgs 
-            => action.WhenExecuted().Do(_ => action.Update(_ => action.Enabled[caller] = false)).Cast<TArgs>()
-                .SelectManySequential(e => sourceSelector(e).ObserveOnContext()
-                    .Finally(() => action.Update(_ => action.Enabled[caller] = true)));
-
-        public static IObservable<T> WhenExecuted<T>(this SingleChoiceAction simpleAction,Func<SingleChoiceActionExecuteEventArgs, IObservable<T>> selector,[CallerMemberName]string caller="") 
-            => simpleAction.WhenExecuted().SelectMany(e => selector(e).ChainFaultContext([caller,simpleAction])).TakeUntilDeactivated(simpleAction.Controller);
-
-        public static IObservable<T> WhenExecute<T>(this IObservable<SingleChoiceAction> source,Func<SingleChoiceActionExecuteEventArgs, IObservable<T>> selector,[CallerMemberName]string caller="") 
-            => source.SelectMany(action => action.WhenExecute(e => selector(e).ChainFaultContext([caller,action])).TakeUntilDeactivated(action.Controller));
-
-        public static IObservable<T> WhenExecute<T>(this SingleChoiceAction singleChoiceAction,Func<SingleChoiceActionExecuteEventArgs, IObservable<T>> selector,[CallerMemberName]string caller="") 
-            => singleChoiceAction.WhenExecute().SelectMany(e => selector(e).ChainFaultContext([caller,singleChoiceAction])).TakeUntilDeactivated(singleChoiceAction.Controller);
+        public static IObservable<T> WhenConcatExecution<T>(this SingleChoiceAction simpleAction,Func<SingleChoiceActionExecuteEventArgs,IObservable<T>> resilientSelector,[CallerMemberName]string caller="")
+            => simpleAction.WhenConcatExecution<T,SingleChoiceActionExecuteEventArgs>( resilientSelector,caller);
+        public static IObservable<T> WhenConcatExecution<T>(this SimpleAction simpleAction,Func<SimpleActionExecuteEventArgs,IObservable<T>> resilientSelector,[CallerMemberName]string caller="")
+            => simpleAction.WhenConcatExecution<T,SingleChoiceActionExecuteEventArgs>( resilientSelector,caller);
         
-        public static IObservable<T> WhenExecute<T>(this IObservable<ParametrizedAction> source,Func<ParametrizedActionExecuteEventArgs, IObservable<T>> selector,[CallerMemberName]string caller="") 
-            => source.SelectMany(action => action.WhenExecute(e => selector(e).ChainFaultContext([caller,action])).TakeUntilDeactivated(action.Controller));
-
-        public static IObservable<T> WhenExecute<T>(this ParametrizedAction action,Func<ParametrizedActionExecuteEventArgs, IObservable<T>> selector,[CallerMemberName]string caller="") 
-            => action.WhenExecute().SelectMany(e => selector(e).ChainFaultContext([caller,action])).TakeUntilDeactivated(action.Controller);
-        
-        public static IObservable<T> WhenExecute<T>(this IObservable<PopupWindowShowAction> source,Func<PopupWindowShowActionExecuteEventArgs, IObservable<T>> selector,[CallerMemberName]string caller="") 
-            => source.SelectMany(action => action.WhenExecute(e => selector(e).ChainFaultContext([caller,action])).TakeUntilDeactivated(action.Controller));
-
-        public static IObservable<T> WhenExecute<T>(this PopupWindowShowAction action,Func<PopupWindowShowActionExecuteEventArgs, IObservable<T>> selector,[CallerMemberName]string caller="") 
-            => action.WhenExecute().SelectMany(e => selector(e).ChainFaultContext([caller,action])).TakeUntilDeactivated(action.Controller);
+        private static IObservable<T> WhenConcatExecution<T, TArgs>(this ActionBase action, Func<TArgs, IObservable<T>> resilientSelector, [CallerMemberName] string caller = "") where TArgs : ActionBaseEventArgs 
+            => action.WhenExecuted(e => {
+                e.Action.Enabled[nameof(WhenConcatExecution)] = false;
+                return resilientSelector((TArgs)e)
+                    .ObserveOnContext() 
+                    .Finally(() => {
+                        e.Action.ExecutionFinished();
+                        e.Action.Enabled[nameof(WhenConcatExecution)] = true;
+                    });
+            }, caller);
 
         public static IObservable<T> CommitChanges<T>(this IObservable<T> source,[CallerMemberName]string caller="") where T : ActionBaseEventArgs
             => source.SelectMany(e => e.Observe().Do(_ => {
@@ -162,47 +182,35 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
         public static IObservable<SimpleActionExecuteEventArgs> WhenExecute(this IObservable<SimpleAction> source) 
             => source.SelectMany(action => action.WhenExecute());
         
-        public static IObservable<(SimpleAction action, CancelEventArgs e)> WhenExecuting(this IObservable<SimpleAction> source) 
-            => source.SelectMany(action => action.WhenExecuting());
-        
         public static IObservable<ParametrizedActionExecuteEventArgs> WhenExecute(this IObservable<ParametrizedAction> source) 
             => source.SelectMany(action => action.WhenExecute());
         public static IObservable<ParametrizedActionExecuteEventArgs> WhenExecuted(this IObservable<ParametrizedAction> source) 
             => source.SelectMany(action => action.WhenExecuted());
-        public static IObservable<Unit> WhenConcatExecution(this IObservable<ParametrizedAction> source,Action<ParametrizedActionExecuteEventArgs> selector,[CallerMemberName]string caller="") 
-            => source.SelectMany(action => action.WhenConcatExecution(selector,caller:caller));
-        public static IObservable<Unit> WhenConcatExecution(this IObservable<SingleChoiceAction> source,Action<SingleChoiceActionExecuteEventArgs> selector,[CallerMemberName]string caller="") 
-        => source.SelectMany(action => action.WhenConcatExecution<Unit,SingleChoiceActionExecuteEventArgs>(e => Unit.Default.Observe().Do(_ => selector(e)).ChainFaultContext([caller,action])));
         
-        public static IObservable<Unit> WhenConcatExecution(this IObservable<SimpleAction> source,Action<SimpleActionExecuteEventArgs> selector,[CallerMemberName]string caller="") 
-            => source.SelectMany(action => action.WhenConcatExecution(selector,caller:caller));
+        public static IObservable<T> WhenConcatExecution<T>(this IObservable<ParametrizedAction> source,Func<ParametrizedActionExecuteEventArgs,IObservable<T>> resilientSelector,[CallerMemberName]string caller="") 
+            => source.SelectMany(action => action.WhenConcatExecution(resilientSelector,caller:caller));
         
-        public static IObservable<Unit> WhenConcatExecution(this IObservable<SimpleAction> source,Func<SimpleActionExecuteEventArgs,IObservable<Unit>> selector,[CallerMemberName]string caller="") 
-            => source.SelectMany(action => action.WhenConcatExecution(e => selector(e).ChainFaultContext([caller,action])));
-        
-        public static IObservable<T> WhenConcatExecution<T>(this IObservable<ParametrizedAction> source,Func<ParametrizedActionExecuteEventArgs,IObservable<T>> selector,[CallerMemberName]string caller="") 
-            => source.SelectMany(action => action.WhenConcatExecution(selector,caller:caller));
-        
-        public static IObservable<T> WhenConcatExecution<T>(this IObservable<SingleChoiceAction> source,Func<SingleChoiceActionExecuteEventArgs,IObservable<T>> selector,[CallerMemberName]string caller="") 
-            => source.SelectMany(action => action.WhenConcatExecution(selector,caller:caller));
-
-        public static IObservable<T> WhenExecuted<T>(this IObservable<ParametrizedAction> source,Func<ParametrizedActionExecuteEventArgs, IObservable<T>> selector,[CallerMemberName]string caller="") 
-            => source.SelectMany(action => action.WhenExecuted(e => selector(e).ChainFaultContext([caller,action])));
+        public static IObservable<T> WhenConcatExecution<T>(this IObservable<SingleChoiceAction> source,Func<SingleChoiceActionExecuteEventArgs,IObservable<T>> resilientSelector,[CallerMemberName]string caller="") 
+            => source.SelectMany(action => action.WhenConcatExecution(resilientSelector,caller:caller));
+        public static IObservable<T> WhenConcatExecution<T>(this IObservable<PopupWindowShowAction> source,Func<PopupWindowShowActionExecuteEventArgs,IObservable<T>> resilientSelector,[CallerMemberName]string caller="") 
+            => source.SelectMany(action => action.WhenConcatExecution(resilientSelector,caller:caller));
         
         public static IObservable<PopupWindowShowActionExecuteEventArgs> WhenExecute(this IObservable<PopupWindowShowAction> source) 
             => source.SelectMany(action => action.WhenExecute());
 
         public static IObservable<SimpleActionExecuteEventArgs> WhenExecute(this SimpleAction simpleAction) 
-            => simpleAction.WhenEvent<SimpleActionExecuteEventArgs>(nameof(SimpleAction.Execute)).TakeUntilDisposed(simpleAction);
+            => simpleAction.ProcessEvent<SimpleActionExecuteEventArgs>(nameof(SimpleAction.Execute)).TakeUntilDisposed(simpleAction);
+        public static IObservable<T> WhenExecute<T>(this SimpleAction simpleAction,Func<SimpleActionExecuteEventArgs,IObservable<T>> resilientSelector) 
+            => simpleAction.ProcessEvent(nameof(SimpleAction.Execute),resilientSelector).TakeUntilDisposed(simpleAction);
         
         public static IObservable<PopupWindowShowActionExecuteEventArgs> WhenExecute(this PopupWindowShowAction action) 
-            => action.WhenEvent<PopupWindowShowActionExecuteEventArgs>(nameof(PopupWindowShowAction.Execute)).TakeUntilDisposed(action);
+            => action.ProcessEvent<PopupWindowShowActionExecuteEventArgs>(nameof(PopupWindowShowAction.Execute)).TakeUntilDisposed(action);
         
         public static IObservable<ParametrizedActionExecuteEventArgs> WhenExecute(this ParametrizedAction action) 
-            => action.WhenEvent<ParametrizedActionExecuteEventArgs>(nameof(ParametrizedAction.Execute)).TakeUntilDisposed(action);
+            => action.ProcessEvent<ParametrizedActionExecuteEventArgs>(nameof(ParametrizedAction.Execute)).TakeUntilDisposed(action);
 
         public static IObservable<SingleChoiceActionExecuteEventArgs> WhenExecute(this SingleChoiceAction singleChoiceAction) 
-            => singleChoiceAction.WhenEvent<SingleChoiceActionExecuteEventArgs>(nameof(SingleChoiceAction.Execute));
+            => singleChoiceAction.ProcessEvent<SingleChoiceActionExecuteEventArgs>(nameof(SingleChoiceAction.Execute));
 
         public static IObservable<SingleChoiceActionExecuteEventArgs> WhenExecute(this IObservable<SingleChoiceAction> source) 
             => source.SelectMany(action => action.WhenExecute());
@@ -223,8 +231,10 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
         public static IObservable<(TAction action, CancelEventArgs e)> WhenNotCanceled<TAction>(
             this IObservable<(TAction action, CancelEventArgs e)> source) where TAction : ActionBase
             => source.Where(t => !t.e.Cancel);
-        public static IObservable<(TAction action, CancelEventArgs e)> WhenExecuting<TAction>(this TAction action) where TAction : ActionBase 
-            => action.WhenEvent<CancelEventArgs>(nameof(ActionBase.Executing)).InversePair(action).TakeUntilDisposed(action);
+        
+        public static IObservable<T> WhenExecuting<TAction, T>(this TAction action, Func<CancelEventArgs, IObservable<T>> resilientSelector) where TAction : ActionBase
+            => action.ProcessEvent< CancelEventArgs,T>(nameof(ActionBase.Executing), e => resilientSelector(e).DoOnError(_ => e.Cancel = true))
+                .TakeUntilDisposed(action);
 
         public static  IObservable<(TAction action, Type objectType, View view, Frame frame, IObjectSpace objectSpace, ShowViewParameters showViewParameters)> ToParameter<TAction>(
                 this IObservable<(TAction action, ActionBaseEventArgs e)> source) where TAction : ActionBase => source.Select(t => {
@@ -236,7 +246,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
             => source.Select(t => t.action);
 
         public static IObservable<CustomizePopupWindowParamsEventArgs> WhenCustomizePopupWindowParams(this PopupWindowShowAction action) 
-            => action.WhenEvent<CustomizePopupWindowParamsEventArgs>(nameof(PopupWindowShowAction.CustomizePopupWindowParams))
+            => action.ProcessEvent<CustomizePopupWindowParamsEventArgs>(nameof(PopupWindowShowAction.CustomizePopupWindowParams))
                 .TakeUntilDisposed(action);
 
         public static IObservable<SingleChoiceAction> AddItems(this IObservable<SingleChoiceAction> source,Func<SingleChoiceAction,IObservable<Unit>> addItems,IScheduler scheduler=null,[CallerMemberName]string caller="")
@@ -256,45 +266,30 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
 		        }
 	        });
 
-        public static IObservable<SimpleActionExecuteEventArgs> WhenExecuted(this SimpleAction action) 
-            => action.WhenEvent<ActionBaseEventArgs>(nameof(SimpleAction.Executed))
-                .Cast<SimpleActionExecuteEventArgs>()
-                .TakeUntilDisposed(action);
-        public static IObservable<Unit> WhenExecuted(this SimpleAction action,Func<SimpleActionExecuteEventArgs,IObservable<Unit>> selector) 
-            => action.ProcessEvent<SimpleActionExecuteEventArgs>(nameof(SimpleAction.Executed),selector)
-                .TakeUntilDisposed(action);
         
-        public static IObservable<SimpleActionExecuteEventArgs> WhenExecuteCompleted(this SimpleAction action) 
-            => action.WhenEvent<ActionBaseEventArgs>(nameof(ActionBase.ExecuteCompleted)).Cast<SimpleActionExecuteEventArgs>().TakeUntilDisposed(action);
+        public static IObservable<T> WhenExecuted<T>(this ActionBase action,Func<ActionBaseEventArgs,IObservable<T>> resilientSelector,[CallerMemberName]string caller="") 
+            => action.ProcessEvent(nameof(ActionBase.Executed),resilientSelector,caller:caller).TakeUntilDisposed(action);
+        public static IObservable<ActionBaseEventArgs> WhenExecuted(this ActionBase action,[CallerMemberName]string caller="") 
+            => action.WhenExecuted(e => e.Observe(),caller);
         
         public static IObservable<SingleChoiceActionExecuteEventArgs> WhenExecuted(this SingleChoiceAction action) 
-            => action.WhenEvent<ActionBaseEventArgs>(nameof(SingleChoiceAction.Executed)).Cast<SingleChoiceActionExecuteEventArgs>().TakeUntilDisposed(action);
+            => action.ProcessEvent<SingleChoiceActionExecuteEventArgs>(nameof(SingleChoiceAction.Executed)).TakeUntilDisposed(action);
         
-        public static IObservable<SingleChoiceActionExecuteEventArgs> WhenExecuteCompleted(this SingleChoiceAction action) 
-            => action.WhenEvent<ActionBaseEventArgs>(nameof(ActionBase.ExecuteCompleted)).Cast<SingleChoiceActionExecuteEventArgs>().TakeUntilDisposed(action);
-
+        
         public static IObservable<ParametrizedActionExecuteEventArgs> WhenExecuted(this ParametrizedAction action) 
-            => action.WhenEvent<ActionBaseEventArgs>(nameof(ParametrizedAction.Executed)).Cast<ParametrizedActionExecuteEventArgs>().TakeUntilDisposed(action);
+            => action.ProcessEvent<ParametrizedActionExecuteEventArgs>(nameof(ParametrizedAction.Executed)).TakeUntilDisposed(action);
         
-        public static IObservable<ParametrizedActionExecuteEventArgs> WhenExecuteCompleted(this ParametrizedAction action) 
-            => action.WhenEvent<ActionBaseEventArgs>(nameof(ActionBase.ExecuteCompleted)).Cast<ParametrizedActionExecuteEventArgs>().TakeUntilDisposed(action);
+        
 
         public static IObservable<PopupWindowShowActionExecuteEventArgs> WhenExecuted(this PopupWindowShowAction action) 
-            => action.WhenEvent<ActionBaseEventArgs>(nameof(PopupWindowShowAction.Executed)).Cast<PopupWindowShowActionExecuteEventArgs>().TakeUntilDisposed(action);
+            => action.ProcessEvent<PopupWindowShowActionExecuteEventArgs>(nameof(PopupWindowShowAction.Executed)).TakeUntilDisposed(action);
         
-        public static IObservable<PopupWindowShowActionExecuteEventArgs> WhenExecuteCompleted(this PopupWindowShowAction action) 
-            => action.WhenEvent<ActionBaseEventArgs>(nameof(ActionBase.ExecuteCompleted)).Cast<PopupWindowShowActionExecuteEventArgs>().TakeUntilDisposed(action);
-
-        public static IObservable<ActionBaseEventArgs> WhenExecuted<TAction>(this TAction action) where TAction : ActionBase 
-            => action.WhenEvent<ActionBaseEventArgs>(nameof(ActionBase.Executed)).TakeUntilDisposed(action);
+        
 
         public static IObservable<ItemsChangedEventArgs> WhenItemsChanged(this SingleChoiceAction action,ChoiceActionItemChangesType? changesType=null) 
-            => action.WhenEvent<ItemsChangedEventArgs>(nameof(SingleChoiceAction.ItemsChanged))
+            => action.ProcessEvent<ItemsChangedEventArgs>(nameof(SingleChoiceAction.ItemsChanged))
                 .Where(e =>changesType==null||e.ChangedItemsInfo.Any(pair => pair.Value==changesType) ).TakeUntil(action.WhenDisposed());
-        
-        public static IObservable<ActionBaseEventArgs> WhenExecuteCompleted<TAction>(this TAction action) where TAction : ActionBase 
-            => action.WhenEvent<ActionBaseEventArgs>(nameof(ActionBase.ExecuteCompleted)).TakeUntilDisposed(action);
-        
+        [Obsolete]
         public static IObservable<TAction> WhenExecuteConcat<TAction>(this TAction action) where TAction : ActionBase 
             => action.WhenDisabled().Where(a => a.Enabled.Contains(nameof(WhenConcatExecution)))
                 .SelectMany(a => a.WhenEnabled().Where(ab1 => ab1.Enabled.Contains(nameof(WhenConcatExecution))).To(a));
@@ -302,7 +297,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
         private static readonly ISubject<ActionBase> ExecuteFinishedSubject = Subject.Synchronize(new Subject<ActionBase>());
         public static IObservable<TAction> WhenExecuteFinished<TAction>(this TAction action,bool customEmit=false) where TAction : ActionBase
             => customEmit || (action.Data.ContainsKey(nameof(ExecutionFinished)) && (bool)action.Data[nameof(ExecutionFinished)])
-                ? ExecuteFinishedSubject.Where(a => a == action).Cast<TAction>() : action.WhenExecuteCompleted().To(action);
+                ? ExecuteFinishedSubject.Where(a => a == action).Cast<TAction>() : action.When<EventArgs,TAction>(nameof(ActionBase.ExecuteCompleted),_ => action.Observe());
 
         public static void CustomizeExecutionFinished<TAction>(this TAction action, bool enable=true) where TAction : ActionBase
             => action.Data[nameof(ExecutionFinished)] = enable;
@@ -310,12 +305,11 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
         public static void ExecutionFinished<TAction>(this TAction action) where TAction:ActionBase 
             => ExecuteFinishedSubject.OnNext(action);
 
+        public static IObservable<ActionBaseEventArgs> WhenExecuteCompleted(this IObservable<ActionBase> source) 
+            => source.SelectMany(a => a.When<ActionBaseEventArgs,ActionBaseEventArgs>(nameof(ActionBase.ExecuteCompleted),e => e.Observe()));
+        
         public static IObservable<TAction> WhenExecuteFinished<TAction>(this IObservable<TAction> source,bool customEmit=false) where TAction : ActionBase 
             => source.SelectMany(a=>a.WhenExecuteFinished(customEmit));
-        public static IObservable<ActionBaseEventArgs> WhenExecuteCompleted<TAction>(this IObservable<TAction> source) where TAction : ActionBase 
-            => source.SelectMany(a=>a.WhenExecuteCompleted());
-        public static IObservable<TAction> WhenExecuteConcat<TAction>(this IObservable<TAction> source) where TAction : ActionBase 
-            => source.SelectMany(a=>a.WhenExecuteConcat());
         
         public static IObservable<ActionBaseEventArgs> WhenExecuted<TAction>(this IObservable<TAction> source) where TAction : ActionBase 
             => source.SelectMany(a=>a.WhenExecuted());
@@ -334,14 +328,14 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
             => source.TakeUntil(component.WhenDisposed());
 
         public static IObservable<(TAction action, BoolList boolList, BoolValueChangedEventArgs e)> ResultValueChanged<TAction>(
-                this TAction source, Func<TAction, BoolList> boolListSelector) where TAction : ActionBase 
-            => boolListSelector(source).Observe().ResultValueChanged().Select(tuple => (source, tuple.boolList, tuple.e));
+                this TAction source, Func<TAction, BoolList> boolListSelector,[CallerMemberName]string caller="") where TAction : ActionBase 
+            => boolListSelector(source).Observe().ResultValueChanged(caller:caller).Select(tuple => (source, tuple.boolList, tuple.e));
 
         public static IObservable<SingleChoiceAction> WhenSelectedItemChanged(this IObservable<SingleChoiceAction> source) 
             =>source.SelectMany(action => action.WhenSelectedItemChanged());
 
         public static IObservable<SingleChoiceAction> WhenSelectedItemChanged(this SingleChoiceAction action) 
-            => action.WhenEvent(nameof(SingleChoiceAction.SelectedItemChanged)).To(action);
+            => action.ProcessEvent(nameof(SingleChoiceAction.SelectedItemChanged)).To(action);
 
         public static TAction As<TAction>(this ActionBase action) where TAction:ActionBase 
             => ((TAction) action);
@@ -366,7 +360,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
             => source.MergeIgnored(a =>a.Controller.WhenActivated(emitWhenActive).TakeUntil(a.Controller.WhenDeactivated())
                 .SelectMany(_ => mergeSelector(a)).To(a) );
         
-        public static IObservable<TAction> WhenControllerDeActivated<TAction>(this IObservable<TAction> source,bool emitWhenActive=false) where TAction : ActionBase 
+        public static IObservable<TAction> WhenControllerDeActivated<TAction>(this IObservable<TAction> source) where TAction : ActionBase 
             => source.SelectMany(a =>a.Controller.WhenDeactivated().To(a) );
 
         public static IObservable<TAction> WhenActive<TAction>(this IObservable<TAction> source) where TAction : ActionBase 
@@ -380,8 +374,8 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
         public static IObservable<TAction> WhenActive<TAction>(this TAction simpleAction) where TAction : ActionBase 
             => simpleAction.Observe().WhenActive();
 
-		public static IObservable<TAction> WhenActivated<TAction>(this IObservable<TAction> source,params string[] contexts) where TAction : ActionBase 
-            => source.SelectMany(a => a.WhenActivated());
+		public static IObservable<TAction> WhenActivated<TAction>(this IObservable<TAction> source,string[] contexts,[CallerMemberName]string caller="") where TAction : ActionBase 
+            => source.SelectMany(a => a.WhenActivated(contexts,caller));
 		
 		public static IObservable<TAction> WhenInActive<TAction>(this TAction simpleAction) where TAction : ActionBase 
             => simpleAction.Observe().WhenInActive();
@@ -389,8 +383,8 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
 		public static IObservable<TAction> WhenDeactivated<TAction>(this IObservable<TAction> source) where TAction : ActionBase 
             => source.SelectMany(a => a.WhenDeactivated());
 
-        public static IObservable<TAction> WhenActivated<TAction>(this TAction simpleAction,params string[] contexts) where TAction : ActionBase 
-            => simpleAction.ResultValueChanged(action => action.Active).SelectMany(t => contexts.Concat(Controller.ControllerActiveKey.YieldItem()).Select(context => (t,context)))
+        public static IObservable<TAction> WhenActivated<TAction>(this TAction simpleAction,string[] contexts=null,[CallerMemberName]string caller="") where TAction : ActionBase 
+            => simpleAction.ResultValueChanged(action => action.Active,caller:caller).SelectMany(t => (contexts ??[]).Concat(Controller.ControllerActiveKey.YieldItem()).Select(context => (t,context)))
 		        .Where(t => t.t.action.Active.ResultValue&&t.t.action.Active.Contains(t.context)&& t.t.action.Active[t.context])
 		        .Select(t => t.t.action);
         
@@ -409,8 +403,8 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
             => source.SelectMany(a => a.WhenChanged(actionChangedType));
 
         public static IObservable<TAction> WhenChanged<TAction>(this TAction action, ActionChangedType? actionChangedType = null) where TAction : ActionBase 
-            => action.WhenEvent<ActionChangedEventArgs>(nameof(ActionBase.Changed))
-		        .Where(eventArgs =>actionChangedType==null|| eventArgs.ChangedPropertyType == actionChangedType).To(action);
+            => action.ProcessEvent<ActionChangedEventArgs,TAction>(nameof(ActionBase.Changed), e => e.Observe()
+                .Where(eventArgs => actionChangedType == null || eventArgs.ChangedPropertyType == actionChangedType).To(action));
 
         public static IObservable<TAction> WhenEnable<TAction>(this IObservable<TAction> source)where TAction : ActionBase 
             => source.Where(a => a.Enabled);
@@ -426,10 +420,10 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
                 .Select(t => t.action);
 
         public static IObservable<Unit> Disposing<TAction>(this IObservable<TAction> source) where TAction : ActionBase 
-            => source .SelectMany(item => item.WhenEvent(nameof(ActionBase.Disposing)).ToUnit());
+            => source .SelectMany(item => item.ProcessEvent(nameof(ActionBase.Disposing)).ToUnit());
 
         public static IObservable<ParametrizedAction> WhenValueChanged(this ParametrizedAction action)
-            => action.WhenEvent(nameof(ParametrizedAction.ValueChanged)).TakeUntilDisposed(action).Select(pattern => (ParametrizedAction)pattern.Sender);
+            => action.ProcessEvent(nameof(ParametrizedAction.ValueChanged)).TakeUntilDisposed(action);
 
         public static IObservable<Unit> Trigger<TAction>(this IObservable<TAction> source) where TAction : ActionBase
             => source.SelectMany(action => action.Trigger());
@@ -459,12 +453,12 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
             => source.MergeIgnored(a => a.WhenCustomizeControl().InversePair(a).SelectMany(selector));
 
         public static IObservable<CustomizeControlEventArgs> WhenCustomizeControl<TAction>(this TAction action) where TAction:ActionBase 
-            => action.WhenEvent<CustomizeControlEventArgs>(nameof(ActionBase.CustomizeControl));
+            => action.ProcessEvent<CustomizeControlEventArgs>(nameof(ActionBase.CustomizeControl));
         
         public static IObservable<T2> WhenUpdating<T2>(this ActionBase action,Func<UpdateActionEventArgs,IObservable<T2>> selector) 
             => action.Controller.WhenActivated(true)
                 .SelectManyUntilDeactivated(controller => controller.Frame.GetController<ActionsCriteriaViewController>()
-                    .WhenEvent<UpdateActionEventArgs>(nameof(ActionsCriteriaViewController.ActionUpdating)).Where(e => e.Active&&e.NeedUpdateEnabled)
+                    .ProcessEvent<UpdateActionEventArgs>(nameof(ActionsCriteriaViewController.ActionUpdating)).Where(e => e.Active&&e.NeedUpdateEnabled)
                     .SelectMany(selector));
 
         public static IObservable<DialogController> CreateDialogController(this ActionBaseEventArgs e,ObjectView objectView,string caption=null,bool refreshViewAfterObjectSpaceCommit=true,bool closeOnCancel=true,TargetWindow targetWindow=TargetWindow.NewModalWindow){
@@ -491,6 +485,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
                 .If(_ => closeOnCancel,controller => controller.CancelAction.WhenExecuted(_ => {
                         e.Action.View().ObjectSpace.Rollback(askConfirmation:false);
                         e.ShowViewParameters.CreatedView.Close();
+                        return Observable.Empty<DialogController>();
                     })
                     .IgnoreElements().To<DialogController>().StartWith(dialogController));
         }
@@ -508,7 +503,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
             => afterExecuted.Trigger(() => action.DoExecute(selectedItem(), selection));
 
         public static IObservable<CustomizeTemplateEventArgs> WhenCustomizeTemplate(this PopupWindowShowAction action) 
-            => action.WhenEvent<CustomizeTemplateEventArgs>(nameof(action.CustomizeTemplate)).TakeUntilDisposed(action);
+            => action.ProcessEvent<CustomizeTemplateEventArgs>(nameof(action.CustomizeTemplate)).TakeUntilDisposed(action);
 
         public static IObservable<T> Trigger<T>(this PopupWindowShowAction action, IObservable<T> afterExecuted) 
             => action.ShowPopupWindow().ToController<DialogController>().DelayOnContext()
@@ -550,8 +545,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
             => source.WhenValueChangedApplyValue(action => action.Trigger());
         public static IObservable<ParametrizedAction> WhenValueChangedApplyValue(this IObservable<ParametrizedAction> source,Func<ParametrizedAction,IObservable<Unit>> selector=null)
             => source.WhenCustomizeControl(t => t.e.Control.Observe()
-                // .Do(spinEdit => spinEdit.Properties.Buttons.First().Visible = false)
-                .SelectMany(spinEdit => spinEdit.WhenEvent("ValueChanged")
+                .SelectMany(spinEdit => spinEdit.ProcessEvent("ValueChanged")
                     .Select(_ => spinEdit.GetPropertyValue("EditValue")).WhenNotDefault()
                     .Do(value =>t.action.Value=value )
                     .WaitUntilInactive(1.Seconds()).ObserveOnContext().To(t.action)

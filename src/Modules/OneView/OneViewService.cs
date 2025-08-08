@@ -39,7 +39,7 @@ namespace Xpand.XAF.Modules.OneView{
 
         private static IObservable<Unit> ExitApplication(this IObservable<ShowViewParameters> showView,XafApplication application){
             var editingModel = showView.SelectMany(parameters =>parameters.Controllers.OfType<OneViewDialogController>().ToObservable()
-                .SelectMany(controller => controller.AcceptAction.WhenExecuting()));
+                .SelectMany(controller => controller.AcceptAction.WhenExecuting(args => Observable.Empty<SimpleAction>())));
             return  Observable.Defer(() => showView.SelectMany(parameters => parameters.CreatedView.WhenClosing()
 			            .SelectMany(_ => parameters.CreatedView.WhenClosed().To(application.MainWindow)))
 		            .TakeUntil(editingModel)).Repeat()

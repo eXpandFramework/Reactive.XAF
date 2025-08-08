@@ -9,8 +9,19 @@ using Xpand.Extensions.Reactive.ErrorHandling;
 
 namespace Xpand.Extensions.Tests.FaultHubTests{
     public class FaultHubTestBase {
+        public FaultHubTestBase() => FaultHub.Logging = true;
+
         protected TestObserver<Exception> BusObserver;
         protected TestObserver<Exception> PreBusObserver;
+
+        protected class TestResource : IDisposable {
+            public bool IsDisposed { get; private set; }
+            public Action OnDispose { get; init; } = () => { };
+            public void Dispose() {
+                IsDisposed = true;
+                OnDispose();
+            }
+        }
 
         protected static IEnumerable<TestCaseData> RetrySelectors() {
             yield return new TestCaseData(RetrySelector).SetName("Retry");
