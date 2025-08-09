@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading;
-using Xpand.Extensions.Reactive.ErrorHandling;
-using Xpand.Extensions.Reactive.Transform;
 
 namespace Xpand.Extensions.Reactive.Utility {
     public static partial class Utility {
@@ -15,8 +12,6 @@ namespace Xpand.Extensions.Reactive.Utility {
         
         public static SynchronizationContextScheduler Scheduler(this SynchronizationContext context) => new(context);
 
-        public static IObservable<T> DoAfter<T>(this T self,TimeSpan delay,Action execute) 
-            => self.Observe().Delay(delay);
 
         public static IObservable<T> TryDo<T>(this IObservable<T> source, Action<T> tryDo)
             => source.Do(obj => {
@@ -132,14 +127,5 @@ namespace Xpand.Extensions.Reactive.Utility {
                     .Concat();
             });
         
-        public static IObservable<T> DoItemResilient<T>(this IObservable<T> source, Action<T> resilientAction, object[] context = null, [CallerMemberName] string caller = "")
-            => source.SelectMany(item => Observable.Defer(() => {
-                        resilientAction(item);
-                        return Observable.Empty<T>();
-                    })
-                    .ContinueOnError(context, caller)
-                    .StartWith(item)
-            );
-
     }
 }

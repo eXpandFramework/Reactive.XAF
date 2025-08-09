@@ -6,6 +6,7 @@ using akarnokd.reactive_extensions;
 using NUnit.Framework;
 using Xpand.Extensions.Numeric;
 using Xpand.Extensions.Reactive.ErrorHandling;
+using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 
 namespace Xpand.Extensions.Tests.FaultHubTests{
     public class FaultHubTestBase {

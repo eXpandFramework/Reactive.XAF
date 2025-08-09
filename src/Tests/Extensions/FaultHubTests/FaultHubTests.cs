@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
+using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
@@ -12,6 +13,7 @@ using Xpand.Extensions.ExceptionExtensions;
 using Xpand.Extensions.Numeric;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.ErrorHandling;
+using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 
@@ -345,7 +347,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
             var source = new[] { 1, 2, 3, 4 }.ToObservable();
 
 
-            var testObserver = source.SelectResilientItem(num => {
+            var testObserver = source.SelectItemResilient(num => {
                     if (num == 2) {
                         throw new InvalidOperationException("This is a test error.");
                     }
@@ -360,44 +362,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
             BusObserver.ItemCount.ShouldBe(1);
             BusObserver.Items.Single().InnerException.ShouldBeOfType<InvalidOperationException>();
         }
-
-        [Test]
-        public void SelectManySequentialItemResilient_survives_error() {
-            using var testObserver = new TestObserver<Unit>();
-            using var observer = 1.Range(3).ToNowObservable()
-                .Do(_ => testObserver.OnNext(Unit.Default))
-                .SelectManySequentialItemResilient(_ => Observable.Throw<int>(new Exception()))
-                .PublishFaults().Test();
-
-            observer.ErrorCount.ShouldBe(0);
-            testObserver.ItemCount.ShouldBe(3);
-            BusObserver.ItemCount.ShouldBe(3);
-        }
-
-        [Test]
-        public void SelectItemResilient_Continues_Stream_After_Error_And_Filters_Failing_Item() {
-
-            var source = Enumerable.Range(1, 4).ToObservable();
-
-            var testObserver = source.SelectItemResilient(num => {
-                    if (num == 2) {
-                        throw new InvalidOperationException("This is a test error.");
-                    }
-
-                    return num * 10;
-                })
-                .PublishFaults()
-                .Test();
-
-            testObserver.Items.ShouldBe(new[] { 10, 30, 40 });
-            testObserver.ErrorCount.ShouldBe(0);
-            testObserver.CompletionCount.ShouldBe(1);
-
-
-            BusObserver.ItemCount.ShouldBe(1);
-            BusObserver.Items.Single().InnerException.ShouldBeOfType<InvalidOperationException>();
-        }
-
+        
         [Test]
         public void Defer_survives_error() {
             using var testObserver = new TestObserver<Unit>();
@@ -654,6 +619,35 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
             fault.AllContexts().ShouldContain("Outer");
             fault.InnerException.ShouldBeOfType<InvalidOperationException>().Message.ShouldBe("Sequence failed");
 
+            testObserver.CompletionCount.ShouldBe(1);
+            testObserver.ErrorCount.ShouldBe(0);
+        }
+        
+        [Test]
+        public void ChainFaultContext_With_Retry_Propagates_Error_To_Subsequent_Catch() {
+            var subscriptionAttempts = 0;
+            var catchBlockReached = false;
+
+            var failingSource = Observable.Defer(() => {
+                subscriptionAttempts++;
+                return Observable.Throw<Unit>(new InvalidOperationException("Persistent Failure"));
+            });
+
+            var resilientStream = failingSource
+                .ChainFaultContext(s => s.Retry(3), ["RetryContext"])
+                .ToUnit()
+                .Catch<Unit, Exception>(e => {
+                    catchBlockReached = true;
+                    var fault = e.ShouldBeOfType<FaultHubException>();
+                    fault.AllContexts().ShouldContain("RetryContext");
+                    return Observable.Empty<Unit>();
+                });
+
+            using var testObserver = resilientStream.SubscribeOn(NewThreadScheduler.Default).Test();
+            testObserver.AwaitDone(TimeSpan.FromSeconds(5));
+
+            subscriptionAttempts.ShouldBe(3);
+            catchBlockReached.ShouldBe(true);
             testObserver.CompletionCount.ShouldBe(1);
             testObserver.ErrorCount.ShouldBe(0);
         }

@@ -37,6 +37,7 @@ using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.ErrorHandling;
+using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Transform.System;
@@ -129,7 +130,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<T> WhenFrameCreated<T>(this XafApplication application,Func<Frame,IObservable<T>> resilientSelector,TemplateContext templateContext=default,[CallerMemberName]string caller="")
             => application.ProcessEvent<FrameCreatedEventArgs>(nameof(XafApplication.FrameCreated)).Select(e => e.Frame)
                 .Where(frame => frame.Application==application&& (templateContext==default ||frame.Context == templateContext))
-                .SelectManyItemResilient(frame => resilientSelector(frame).TakeUntil(frame.WhenDisposedFrame()),caller);
+                .SelectManyItemResilient(frame => resilientSelector(frame).TakeUntil(frame.WhenDisposedFrame()),caller:caller);
 
         private static readonly Subject<GenericEventArgs<XafApplication>> WhenExitingSubject = new();
         [SuppressMessage("ReSharper", "InconsistentNaming")]
@@ -213,7 +214,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 : windowCreated);
         }
         public static IObservable<T> WhenWindowCreated<T>(this XafApplication application,Func<Window,IObservable<T>> resilientSelector,bool isMain=false,bool emitIfMainExists=true,[CallerMemberName]string caller="") 
-            => application.WhenWindowCreated(isMain,emitIfMainExists).SelectManyItemResilient(window => resilientSelector(window).TakeUntil(window.WhenDisposedFrame()),caller);
+            => application.WhenWindowCreated(isMain,emitIfMainExists).SelectManyItemResilient(window => resilientSelector(window).TakeUntil(window.WhenDisposedFrame()),caller:caller);
 
         private static IObservable<Window> WhenMainWindowAvailable(this IObservable<Window> windowCreated) 
             => windowCreated.When(TemplateContext.ApplicationWindow).TemplateChanged().Cast<Window>()
@@ -828,7 +829,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => application.WhenExistingObject<T>(CriteriaOperator.Parse(criteriaExpression),caller);
         public static IObservable<T> WhenExistingObject<T>(this XafApplication application,Func<T,IObservable<T>> resilientSelector, CriteriaOperator criteriaExpression , [CallerMemberName] string caller = "")
             =>application.UseObjectSpace(space => space.GetObjects<T>(criteriaExpression).ToNowObservable()
-                .SelectManyItemResilient(resilientSelector,caller),caller:caller);
+                .SelectManyItemResilient(resilientSelector,caller:caller),caller:caller);
         
         public static IObservable<T> WhenExistingObject<T>(this XafApplication application, CriteriaOperator criteriaExpression , [CallerMemberName] string caller = "") 
             => application.WhenExistingObject<T>(arg => arg.Observe(),criteriaExpression,caller);

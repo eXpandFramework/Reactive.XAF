@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 using Xpand.Extensions.Numeric;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Conditional;
-using Xpand.Extensions.Reactive.ErrorHandling;
+using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 
@@ -36,19 +36,7 @@ namespace Xpand.Extensions.Reactive.Utility {
                 execute(o);
                 return Observable.Empty<Unit>();
             });
-        public static IObservable<T> DeferItemResilient<T>(this object _, Func<IObservable<T>> resilientSelector,Func<IObservable<T>,IObservable<T>> retryStrategy, object[] context = null, [CallerMemberName] string caller = "")
-            => Observable.Defer(() => {
-                IObservable<T> source;
-                try {
-                    source = resilientSelector();
-                }
-                catch (Exception ex) {
-                    source = Observable.Throw<T>(ex);
-                }
-                return source.ContinueOnError(retryStrategy,context, caller);
-            });
-        public static IObservable<T> DeferItemResilient<T>(this object o, Func<IObservable<T>> resilientObservableFactory, object[] context = null, [CallerMemberName] string caller = "")
-            =>  o.DeferItemResilient(resilientObservableFactory,null,context,caller);
+                
         
         public static IObservable<T> Defer<T>(this object _, Func<IObservable<T>> selector) 
             => Observable.Defer(selector);

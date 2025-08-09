@@ -5,19 +5,60 @@ using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Threading;
+using Microsoft.Extensions.Caching.Memory;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Utility;
 
-namespace Xpand.Extensions.Reactive.ErrorHandling{
+namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
     public static class ChainFaultContextService {
         
         internal static readonly AsyncLocal<Stack<object>> ContextStack = new();
         
-        
+        private static readonly MemoryCache StackTraceStringCache = new(new MemoryCacheOptions());
+
+        internal static string GetOrAddCachedStackTraceString() {
+            var keyTrace = new StackTrace(false);
+            StackFrame originFrame = null;
+            var ourNamespace = typeof(ChainFaultContextService).Namespace;
+            
+            foreach (var frame in keyTrace.GetFrames()) {
+                var method = frame.GetMethod();
+                if (method?.DeclaringType != null && method.DeclaringType.Namespace != ourNamespace) {
+                    originFrame = frame;
+                    break;
+                }
+            }
+            if (originFrame?.GetMethod() == null) {
+                return "  Stack trace could not be reliably determined for this call site.";
+            }
+            var originMethod = originFrame.GetMethod();
+            var key = $"{originMethod?.DeclaringType?.AssemblyQualifiedName}:{originMethod?.MetadataToken}:{originFrame.GetILOffset()}";
+
+            return StackTraceStringCache.GetOrCreate(key, _ => {
+                var fullTrace = new StackTrace(true);
+                var stringBuilder = new StringBuilder();
+                string[] reactiveNamespaces = ["System.Reactive."];
+
+                var filteredFrames = fullTrace.GetFrames().Where(frame => {
+                    var method = frame.GetMethod();
+                    if (method?.DeclaringType == null) return false;
+                    
+                    var ns = method.DeclaringType.Namespace;
+                    return ns != null && ns != ourNamespace && reactiveNamespaces.All(rns => !ns.StartsWith(rns));
+                });
+
+                foreach (var frame in filteredFrames) {
+                    stringBuilder.AppendLine($"   at {frame.ToString().Trim()}");
+                }
+                
+                return stringBuilder.ToString().TrimEnd();
+            });
+        }
         public static IObservable<T> ChainFaultContext<T>(this IObservable<T> source, Func<IObservable<T>, IObservable<T>> retryStrategy,
             object[] context = null, [CallerMemberName] string caller = "")
-            => retryStrategy(source).ChainFaultContext(context, caller);
+            => (retryStrategy != null ? retryStrategy(source) : source).ChainFaultContext(context, caller);
 
         public static IObservable<T> ChainFaultContext<T>(this IObservable<T> source, 
             bool handleUpstreamRetries, object[] context = null, [CallerMemberName] string caller = "")
@@ -48,8 +89,8 @@ namespace Xpand.Extensions.Reactive.ErrorHandling{
                                 stack.Push(token);
                                 FaultHub.HandlersContext.Value = new List<Func<Exception, FaultAction?>>();
                                 $"ChainFaultContext('{contextName}') - Using Setup (Scope Cleared)".LogAsyncLocalState();
-                                return Disposable.Create(() => {
-                                    stack.Pop();
+                                return Disposable.Create(stack, objects => {
+                                    objects.Pop();
                                     FaultHub.HandlersContext.Value = parentHandlers;
                                     $"ChainFaultContext('{contextName}') - Using Dispose (Scope Restored)".LogAsyncLocalState();
                                 });
@@ -79,6 +120,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling{
                 .SafeguardSubscription((e, s) => e.ExceptionToPublish(context.NewFaultContext(s)).Publish(), caller);
             
         }
+        
 
         internal static void LogToConsole(this string message) {
             if (FaultHub.Logging) Console.WriteLine(message);
@@ -87,13 +129,14 @@ namespace Xpand.Extensions.Reactive.ErrorHandling{
         public static AmbientFaultContext NewFaultContext(this object[] context, string caller) {
             $"[HUB-TRACE][NewFaultContext] Caller: '{caller}', Context: '{(context == null ? "null" : string.Join(", ", context))}'".LogToConsole();
             return new AmbientFaultContext {
-                InvocationStackTrace = new StackTrace(2, true), CustomContext = caller.YieldItem()
+                InvocationStackTrace = GetOrAddCachedStackTraceString(), 
+                CustomContext = caller.YieldItem()
                     .Concat((context ?? []).Distinct().WhereNotDefault().Select(o => o.ToString()))
                     .WhereNotNullOrEmpty()
                     .ToArray()
             };
         }
-
+        
         private static IObservable<T> HandleFaultContext<T>(this Exception ex, string contextName, AmbientFaultContext faultContext) {
             $"[HUB][HandleFaultContext] Entered for context '{contextName}'.".LogToConsole();
             var enrichedException = ex.ExceptionToPublish(faultContext);

@@ -9,6 +9,7 @@ using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.Numeric;
 using Xpand.Extensions.Reactive.ErrorHandling;
+using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.TestsLib.Common;
 
 namespace Xpand.Extensions.Tests.FaultHubTests {

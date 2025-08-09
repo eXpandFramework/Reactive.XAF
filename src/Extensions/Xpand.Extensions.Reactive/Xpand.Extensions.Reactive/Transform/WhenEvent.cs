@@ -12,6 +12,7 @@ using System.Runtime.CompilerServices;
 using Fasterflect;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Conditional;
+using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.TypeExtensions;
 using Type = System.Type;
 

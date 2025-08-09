@@ -5,13 +5,15 @@ using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using Microsoft.Extensions.Caching.Memory;
 using Xpand.Extensions.ExceptionExtensions;
 using Xpand.Extensions.MemoryCacheExtensions;
+using Xpand.Extensions.Reactive.Utility;
 
-namespace Xpand.Extensions.Reactive.ErrorHandling {
+namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
     public static class FaultHub {
         internal static readonly AsyncLocal<List<Func<Exception, FaultAction?>>> HandlersContext = new();
         public static readonly AsyncLocal<StackTrace> OriginStackTrace = new();
@@ -116,6 +118,13 @@ namespace Xpand.Extensions.Reactive.ErrorHandling {
 
         public static bool Logging { get; set; }
 
+        public static IObservable<T> CatchAndComplete<T>(this IObservable<T> source, object[] context, [CallerMemberName] string caller = "")
+            => source.Catch((Exception ex) => {
+                    var faultContext = context.NewFaultContext(caller);
+                    ex.ExceptionToPublish(faultContext).Publish();
+                    return Observable.Empty<T>();
+                })
+                .SafeguardSubscription((e, _) => e.ExceptionToPublish(context.NewFaultContext(caller)).Publish());
         
         public static Exception ExceptionToPublish(this Exception e, AmbientFaultContext contextToUse) {
             "[HUB-TRACE][ExceptionToPublish] Entered.".LogToConsole();
@@ -129,24 +138,11 @@ namespace Xpand.Extensions.Reactive.ErrorHandling {
 
             if (e is not FaultHubException faultHubException) {
                 "[HUB-TRACE][ExceptionToPublish] Exception is not a FaultHubException. Creating new chain.".LogToConsole();
-                // This is the first time the exception is being wrapped.
-                // It becomes the innermost frame.
                 return new FaultHubException("An exception occurred in a traced fault context.", e, contextToUse);
             }
-
-            // The exception has already been wrapped. We are adding a new, outer frame.
             "[HUB-TRACE][ExceptionToPublish] Exception is already a FaultHubException. Chaining new context.".LogToConsole();
-            var newChainedContext = new AmbientFaultContext {
-                InvocationStackTrace = contextToUse.InvocationStackTrace,
-                CustomContext = contextToUse.CustomContext,
-                InnerContext = faultHubException.Context // Link to the existing context chain.
-            };
-
-            var newException = new FaultHubException(
-                faultHubException.Message, 
-                faultHubException.InnerException, // Always preserve the original root exception.
-                newChainedContext);
-    
+            var newChainedContext = new AmbientFaultContext { InvocationStackTrace = contextToUse.InvocationStackTrace, CustomContext = contextToUse.CustomContext, InnerContext = faultHubException.Context };
+            var newException = new FaultHubException(faultHubException.Message, faultHubException.InnerException, newChainedContext);
             var finalContextSummary = $"'{string.Join(" | ", newException.Context.CustomContext)}' -> '{string.Join(" | ", newException.Context.InnerContext?.CustomContext ?? [])}'";
             $"[HUB-TRACE][ExceptionToPublish] Created new FaultHubException. Final Context Chain: {finalContextSummary}".LogToConsole();
     
@@ -162,10 +158,9 @@ namespace Xpand.Extensions.Reactive.ErrorHandling {
     }
 
     public class AmbientFaultContext {
-        public StackTrace InvocationStackTrace { get; init; }
+        public string InvocationStackTrace { get; init; }
         public IReadOnlyList<string> CustomContext { get; init; }
         public AmbientFaultContext InnerContext { get; init; }
-         
     }
     
     public sealed class FaultHubException : Exception {
@@ -189,7 +184,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling {
         }
         public AmbientFaultContext Context { get; }
 
-        public override string ToString() {
+public override string ToString() {
             var builder = new StringBuilder();
             builder.AppendLine($"Exception: {GetType().Name}");
             builder.AppendLine($"Message: {Message}");
@@ -219,8 +214,8 @@ namespace Xpand.Extensions.Reactive.ErrorHandling {
                 
                 builder.AppendLine("    --- Invocation Stack ---");
                 var indentedStackTrace = string.Join(Environment.NewLine, 
-                    frame.InvocationStackTrace.ToString().Split([Environment.NewLine], StringSplitOptions.RemoveEmptyEntries)
-                    .Select(line => $"    {line}"));
+                    (frame.InvocationStackTrace ?? "").Split([Environment.NewLine], StringSplitOptions.RemoveEmptyEntries)
+                    .Select(line => $"  {line}"));
                 builder.AppendLine(indentedStackTrace);
                 
                 if (frame.InnerContext == null) {
@@ -236,7 +231,10 @@ namespace Xpand.Extensions.Reactive.ErrorHandling {
                 if (string.IsNullOrEmpty(InnerException.StackTrace) && innermostFrame != null) {
                     builder.AppendLine($"{InnerException.GetType().FullName}: {InnerException.Message}");
                     builder.AppendLine("  --- Stack Trace (from innermost fault context) ---");
-                    builder.AppendLine(innermostFrame.InvocationStackTrace.ToString());
+                    var indentedInnermost = string.Join(Environment.NewLine,
+                        (innermostFrame.InvocationStackTrace ?? "").Split([Environment.NewLine], StringSplitOptions.RemoveEmptyEntries)
+                        .Select(line => $"  {line}"));
+                    builder.AppendLine(indentedInnermost);
                 }
                 else {
                     builder.AppendLine(InnerException.ToString());
@@ -246,7 +244,6 @@ namespace Xpand.Extensions.Reactive.ErrorHandling {
 
             return builder.ToString();
         }
-
     }
     
     public enum FaultResult {

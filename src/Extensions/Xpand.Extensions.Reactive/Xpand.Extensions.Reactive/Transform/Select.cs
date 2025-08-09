@@ -2,7 +2,7 @@
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
-using Xpand.Extensions.Reactive.ErrorHandling;
+using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Utility;
 
@@ -65,14 +65,9 @@ namespace Xpand.Extensions.Reactive.Transform{
 
         [Obsolete(nameof(ExhaustMap),true)]
         public static IObservable<TResult> SelectAndOmit<T, TResult>(this IObservable<T> source,
-            Func<T, IObservable<TResult>> process,SemaphoreSlim semaphoreSlim=null, Action<T> noProcess=null, int maximumConcurrencyCount = 1,[CallerMemberName]string caller="") 
+            Func<T, IObservable<TResult>> process,SemaphoreSlim semaphoreSlim=null, Action<T> noProcess=null, int maximumConcurrencyCount = 1) 
             => source.SelectAndOmit((item, _) => process(item), semaphoreSlim, noProcess, maximumConcurrencyCount);
         
-        public static IObservable<TResult> SelectResilientItem<TSource, TResult>(this IObservable<TSource> source,
-            Func<TSource, TResult> selector) 
-            => source.SelectMany(item => item.Defer(() => selector(item).Observe()).ContinueOnError());
-        public static IObservable<TResult> SelectItemResilient<TSource, TResult>(this IObservable<TSource> source,
-            Func<TSource, TResult> resilientSelector, object[] context = null, [CallerMemberName] string caller = "")
-            => source.SelectMany(item => item.DeferItemResilient(() => resilientSelector(item).Observe(),context,caller));
+        
     }
 }
