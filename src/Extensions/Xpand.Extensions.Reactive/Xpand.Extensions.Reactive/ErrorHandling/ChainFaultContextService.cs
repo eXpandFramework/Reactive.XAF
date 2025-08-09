@@ -17,7 +17,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling{
         
         public static IObservable<T> ChainFaultContext<T>(this IObservable<T> source, Func<IObservable<T>, IObservable<T>> retryStrategy,
             object[] context = null, [CallerMemberName] string caller = "")
-            => retryStrategy(source).ChainFaultContext(context, caller);
+            => source.ChainFaultContext(context,retryStrategy, caller);
 
         public static IObservable<T> ChainFaultContext<T>(this IObservable<T> source, 
             bool handleUpstreamRetries, object[] context = null, [CallerMemberName] string caller = "")
@@ -33,14 +33,14 @@ namespace Xpand.Extensions.Reactive.ErrorHandling{
             var nestingDepth = ContextStack.Value?.Count ?? -1;
             $"[HUB-DIAGNOSTIC][{step}] Handlers: {handlerCount}, HasOrigin: {hasOrigin}, Nesting: {nestingDepth}".LogToConsole();
         }
-        public static IObservable<T> ChainFaultContext<T>(this IObservable<T> source, object[] context,
-            [CallerMemberName] string caller = "") {
+
+        public static IObservable<T> ChainFaultContext<T>(this IObservable<T> source, object[] context, Func<IObservable<T>, IObservable<T>> retryStrategy, [CallerMemberName] string caller = "") {
             var faultContext = context.NewFaultContext(caller);
             var contextName = faultContext.CustomContext.FirstOrDefault() ?? "Unknown";
-
             return Observable.Defer(() => {
                     $"ChainFaultContext('{contextName}') - Defer Entry".LogAsyncLocalState();
                     var parentHandlers = FaultHub.HandlersContext.Value;
+                    var sourceWithRetry = retryStrategy != null ? retryStrategy(source) : source;
                     return Observable.Using(
                             () => {
                                 var stack = ContextStack.Value ??= new Stack<object>();
@@ -56,29 +56,18 @@ namespace Xpand.Extensions.Reactive.ErrorHandling{
                             },
                             _ => {
                                 $"[HUB][WithFaultContext] Operator defined in '{contextName}'.".LogToConsole();
-                                return source;
+                                return sourceWithRetry;
                             }
                         )
-                        .Catch((Exception ex) => {
-                            $"ChainFaultContext('{contextName}') - Catch Entry".LogAsyncLocalState();
-                            var localHandlers = FaultHub.HandlersContext.Value;
-                            try {
-                                var mergedHandlers = new List<Func<Exception, FaultAction?>>();
-                                if (parentHandlers != null) mergedHandlers.AddRange(parentHandlers);
-                                if (localHandlers != null) mergedHandlers.AddRange(localHandlers.Where(h => !mergedHandlers.Contains(h)));
-                                FaultHub.HandlersContext.Value = mergedHandlers;
-                                $"ChainFaultContext('{contextName}') - Catch Pre-Handle (Scope Merged)".LogAsyncLocalState();
-                                return ex.HandleFaultContext<T>(contextName, faultContext);
-                            }
-                            finally {
-                                FaultHub.HandlersContext.Value = localHandlers;
-                                $"ChainFaultContext('{contextName}') - Catch Finally (Scope Restored)".LogAsyncLocalState();
-                            }
-                        });
+                        ;
                 })
+                
                 .SafeguardSubscription((e, s) => e.ExceptionToPublish(context.NewFaultContext(s)).Publish(), caller);
-            
+
         }
+
+        public static IObservable<T> ChainFaultContext<T>(this IObservable<T> source, object[] context,[CallerMemberName] string caller = "") 
+            => source.ChainFaultContext(context,null, caller);
 
         internal static void LogToConsole(this string message) {
             if (FaultHub.Logging) Console.WriteLine(message);

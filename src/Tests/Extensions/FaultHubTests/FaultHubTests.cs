@@ -657,5 +657,34 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
             testObserver.CompletionCount.ShouldBe(1);
             testObserver.ErrorCount.ShouldBe(0);
         }
+        
+        [Test]
+        public void ChainFaultContext_With_Retry_Propagates_Error_To_Subsequent_Catch() {
+            var subscriptionAttempts = 0;
+            var catchBlockReached = false;
+
+            var failingSource = Observable.Defer(() => {
+                subscriptionAttempts++;
+                return Observable.Throw<Unit>(new InvalidOperationException("Persistent Failure"));
+            });
+
+            var resilientStream = failingSource
+                .ChainFaultContext(s => s.Retry(3), ["RetryContext"])
+                .ToUnit()
+                .Catch<Unit, Exception>(e => {
+                    catchBlockReached = true;
+                    e.ShouldBeOfType<FaultHubException>();
+                    e.Message.ShouldContain("RetryContext");
+                    return Observable.Empty<Unit>();
+                });
+
+            using var testObserver = resilientStream.Test();
+            testObserver.AwaitDone(TimeSpan.FromSeconds(5));
+
+            subscriptionAttempts.ShouldBe(3);
+            catchBlockReached.ShouldBe(true);
+            testObserver.CompletionCount.ShouldBe(1);
+            testObserver.ErrorCount.ShouldBe(0);
+        }
     }
 }
