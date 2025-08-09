@@ -45,7 +45,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
         public void CatchAndComplete_Suppresses_Error_Publishes_And_Completes() {
             var source = Observable.Throw<int>(new InvalidOperationException("Test Failure"));
             
-            var testObserver = source.CatchAndComplete(["TestContext"]).Test();
+            var testObserver = source.CatchAndCompleteOnFault(["TestContext"]).Test();
             
             testObserver.ItemCount.ShouldBe(0);
             testObserver.ErrorCount.ShouldBe(0);
@@ -64,7 +64,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
             var testObserver = source.SelectMany(i => {
                 if (i == 2) {
                     return Observable.Throw<int>(new InvalidOperationException("Failure on item 2"))
-                        .CatchAndComplete(["FailingItem"]);
+                        .CatchAndCompleteOnFault(["FailingItem"]);
                 }
                 return Observable.Return(i * 10);
             }).Test();
@@ -225,7 +225,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
                 .SelectManySequential(_ => Observable.Defer(() => {
                     innerOpObserver.OnNext(1);
                     return Observable.Defer(() => Observable.Throw<Unit>(new Exception())).ChainFaultContext();
-                }).PublishOnError()) ;
+                }).PublishOnFault()) ;
 
             var opBusObserver = opBus.ChainFaultContext().PublishFaults().Test();
             
@@ -245,7 +245,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
                     innerOpObserver.OnNext(1);
                     return Observable.Defer(() => Observable.Throw<Unit>(new Exception()))
                         ;
-                }).ChainFaultContext(retrySelector).PublishOnError())
+                }).ChainFaultContext(retrySelector).PublishOnFault())
                 ;
         
             var opBusObserver = opBus.PublishFaults().Test();

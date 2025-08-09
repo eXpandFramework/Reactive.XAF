@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
@@ -11,6 +12,7 @@ using System.Threading;
 using Microsoft.Extensions.Caching.Memory;
 using Xpand.Extensions.ExceptionExtensions;
 using Xpand.Extensions.MemoryCacheExtensions;
+using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 
 namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
@@ -118,7 +120,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
 
         public static bool Logging { get; set; }
 
-        public static IObservable<T> CatchAndComplete<T>(this IObservable<T> source, object[] context, [CallerMemberName] string caller = "")
+        public static IObservable<T> CatchAndCompleteOnFault<T>(this IObservable<T> source, object[] context, [CallerMemberName] string caller = "")
             => source.Catch((Exception ex) => {
                     var faultContext = context.NewFaultContext(caller);
                     ex.ExceptionToPublish(faultContext).Publish();
@@ -126,6 +128,56 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
                 })
                 .SafeguardSubscription((e, _) => e.ExceptionToPublish(context.NewFaultContext(caller)).Publish());
         
+        private static IObservable<T> RegisterHandler<T>(this IObservable<T> source, Func<Exception, FaultAction?> handler) 
+            => Observable.Using(handler.AddHandler, _ => source);
+
+        static IObservable<T> CompleteOnFault<T>(this IObservable<T> source, bool mute = true, Action<Exception> onError = null, Func<Exception, bool> match = null) {
+            var predicate = match ?? (_ => true);
+
+            FaultAction? Handler(Exception ex) {
+                if (!predicate(ex)) return null;
+                if (mute) {
+                    ex.MuteForBus();
+                }
+                onError?.Invoke(ex);
+                return FaultAction.Complete;
+            }
+            return source.RegisterHandler(Handler);
+        }
+        public static IObservable<T> CompleteOnFault<T>(this IObservable<T> source, Action<Exception> onError = null, Func<Exception, bool> match = null) 
+            => source.CompleteOnFault(true,onError,match);
+
+        public static IObservable<T> CompleteOnFault<T,TException>(this IObservable<T> source,Action<Exception> onError=null) where TException:Exception
+            => source.CompleteOnFault(onError,exception => exception is TException);
+      
+        public static IObservable<T> CompleteOnFault<T>(this IObservable<T> source,Type exceptionType,Action<Exception> onError=null) 
+            => source.CompleteOnFault(onError,exceptionType.IsInstanceOfType);
+        public static IObservable<T> CompleteOnFault<T>(this IObservable<T> source, Func<Exception, bool> predicate)
+            => source.CompleteOnFault(_ => { },predicate);
+        public static IObservable<T> PublishOnFault<T>(this IObservable<T> source, Func<Exception, bool> predicate)
+            => source.PublishOnFault(_ => {},predicate);
+        public static IObservable<T> PublishOnFault<T>(this IObservable<T> source, Action<Exception> onError = null, Func<Exception, bool> match = null)
+            => source.CompleteOnFault( false, onError,match);
+        public static IObservable<TResult> SwitchOnFault<TSource, TResult>(this IObservable<TSource> source, Func<FaultHubException, IObservable<TResult>> fallbackSelector, 
+            Func<IObservable<TSource>, IObservable<TSource>> retryStrategy = null, object[] context = null, [CallerMemberName] string caller = "")
+            => source.ChainFaultContext(retryStrategy, context, caller)
+                .Select(t => (TResult)(object)t).Catch(fallbackSelector);
+        public static IObservable<Unit> SwitchOnFault<TSource>(this IObservable<TSource> source, 
+            Func<IObservable<TSource>, IObservable<TSource>> retryStrategy = null, object[] context = null, [CallerMemberName] string caller = "")
+            => source.SwitchOnFault(_ => Unit.Default.Observe(),retryStrategy, context, caller);
+        
+        public static IObservable<T> ContinueOnFault<T>(this IObservable<T> source, object[] context=null,[CallerMemberName]string caller="") 
+            => source.ChainFaultContext(context,caller).PublishOnFault();
+        public static IObservable<T> ContinueOnFault<T>(this IObservable<T> source,
+            Func<IObservable<T>, IObservable<T>> retryStrategy, object[] context = null,
+            [CallerMemberName] string caller = "")
+            => source.ChainFaultContext(retryStrategy, context, caller).PublishOnFault();
+        
+        public static IObservable<T> RethrowOnFault<T>(this IObservable<T> source, Func<Exception, bool> predicate = null) {
+            predicate ??= _ => true;
+            return source.RegisterHandler(ex => predicate(ex) ? FaultAction.Rethrow : null);
+        }
+
         public static Exception ExceptionToPublish(this Exception e, AmbientFaultContext contextToUse) {
             "[HUB-TRACE][ExceptionToPublish] Entered.".LogToConsole();
             if (contextToUse == null) {
@@ -250,6 +302,11 @@ public override string ToString() {
         Proceed,
         Complete,
         Rethrow
+    }
+    
+    public enum FaultAction {
+        Rethrow,
+        Complete
     }
 
 

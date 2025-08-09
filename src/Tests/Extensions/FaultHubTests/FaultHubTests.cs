@@ -21,7 +21,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
     public class FaultHubTests : FaultHubTestBase {
         [Test]
         public void Exceptions_emitted_from_FaultHub() {
-            using var observer = Observable.Throw<Unit>(new Exception()).ContinueOnError().PublishFaults().Test();
+            using var observer = Observable.Throw<Unit>(new Exception()).ContinueOnFault().PublishFaults().Test();
 
             observer.ErrorCount.ShouldBe(0);
             BusObserver.ItemCount.ShouldBe(1);
@@ -32,7 +32,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
 
         [Test]
         public async Task PreBus_Emits_Exceptions_before_Bus() {
-            var error = Observable.Throw<string>(new Exception()).ContinueOnError();
+            var error = Observable.Throw<string>(new Exception()).ContinueOnFault();
             var busObserver = FaultHub.PreBus
                 .SelectMany(_ => FaultHub.Bus).Test();
 
@@ -43,7 +43,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
 
         [Test]
         public void Resilient_streams_complete_and_do_not_throw() {
-            var bus = Observable.Throw<Unit>(new Exception()).ContinueOnError();
+            var bus = Observable.Throw<Unit>(new Exception()).ContinueOnFault();
 
             var testObserver = bus.Take(1).PublishFaults().Test();
 
@@ -55,7 +55,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
         [Test]
         public void Resilient_streams_do_not_throw_when_inner_stream_throws() {
             var bus = Observable.Defer(() => Observable.Defer(() => Observable.Throw<Unit>(new Exception())))
-                .ContinueOnError();
+                .ContinueOnFault();
 
             var testObserver = bus.Take(1).PublishFaults().Test();
 
@@ -68,7 +68,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
         public void Any_UpStream_emits_until_completion_when_inner_resilient_stream_throws() {
             int count = 0;
             var bus = 1.Range(3).ToObservable().Do(_ => count++)
-                .SelectMany(_ => Observable.Defer(() => Observable.Throw<Unit>(new Exception())).ContinueOnError());
+                .SelectMany(_ => Observable.Defer(() => Observable.Throw<Unit>(new Exception())).ContinueOnFault());
 
             var testObserver = bus.PublishFaults().Test();
 
@@ -91,7 +91,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
             });
 
             retrySelector(sourceWithTimeout)
-                .ContinueOnError()
+                .ContinueOnFault()
                 .PublishFaults()
                 .Subscribe();
 
@@ -110,11 +110,11 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
                             return Observable.Defer(() => Observable.Throw<Unit>(new Exception()));
                         })
                         .Retry(3)
-                        .ContinueOnError(bus => bus.Take(1).IgnoreElements()))
+                        .ContinueOnFault(bus => bus.Take(1).IgnoreElements()))
                 ;
 
             var testObserver = bus
-                .ContinueOnError().PublishFaults()
+                .ContinueOnFault().PublishFaults()
                 .Test();
             await Task.Delay(1.ToSeconds());
 
@@ -181,8 +181,51 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
             testObserver.CompletionCount.ShouldBe(1);
             BusObserver.ItemCount.ShouldBe(0);
         }
+        [Test]
+        public void Inner_resilient_stream_can_CompleteOnFault_when_error_when_outer_stream_resilient() {
+            var bus = Observable.Return(Unit.Default)
+                .SelectMany(unit => unit.Defer(() => Observable.Throw<Unit>(new InvalidOperationException()))
+                    .CompleteOnFault(match: e => e.Has<InvalidOperationException>())
+                    .ChainFaultContext().WhenCompleted())
+                .ChainFaultContext();
 
+            var testObserver = bus.ChainFaultContext().PublishFaults().Test();
 
+            testObserver.ItemCount.ShouldBe(1);
+            testObserver.ErrorCount.ShouldBe(0);
+            testObserver.CompletionCount.ShouldBe(1);
+            BusObserver.ItemCount.ShouldBe(0);
+        }
+
+        [Test]
+        public void CompleteOnError_Prevents_Composition_While_CompleteOnFault_Allows_It() {
+            // ARRANGE
+            var source = Observable.Throw<Unit>(new InvalidOperationException("Test Error"));
+
+            // ACT & ASSERT for CompleteOnError (Immediate suppression prevents composition)
+            // CompleteOnError immediately catches the error, so the RethrowOnFault instruction is never seen.
+            var completeOnErrorStream = source
+                .CompleteOnError()
+                .RethrowOnFault()
+                .ChainFaultContext();
+            
+            var testObserverOnError = completeOnErrorStream.Test();
+            testObserverOnError.CompletionCount.ShouldBe(1);
+            testObserverOnError.ErrorCount.ShouldBe(0);
+
+            // ACT & ASSERT for CompleteOnFault (Declarative instructions compose)
+            // Both instructions are registered. ChainFaultContext catches the error and consults the handlers.
+            // The last registered handler (RethrowOnFault) wins, and the error is propagated.
+            var completeOnFaultStream = source
+                .CompleteOnFault()
+                .RethrowOnFault()
+                .ChainFaultContext();
+
+            var testObserverOnFault = completeOnFaultStream.Test();
+            testObserverOnFault.CompletionCount.ShouldBe(0);
+            testObserverOnFault.ErrorCount.ShouldBe(1);
+            testObserverOnFault.Errors.Single().ShouldBeOfType<FaultHubException>();
+        }
         [Test]
         public void Can_Compose_Nested_Retry_Strategies() {
             var innerOpObserver = new TestObserver<int>();
@@ -219,11 +262,11 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
                     count++;
                     return Observable.Defer(() => Observable.Throw<Unit>(new Exception()));
 
-                }).ContinueOnError())
+                }).ContinueOnFault())
 
                 .Retry(3);
 
-            var testObserver = bus.PublishOnError().Test();
+            var testObserver = bus.PublishOnFault().Test();
 
 
             testObserver.ItemCount.ShouldBe(0);
@@ -330,10 +373,10 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
 
 
         [Test]
-        public void RethrowOnError_Causes_Resilient_Stream_To_Throw() {
+        public void RethrowOnFault_Causes_Resilient_Stream_To_Throw() {
             var failingSource = Observable.Throw<object>(new InvalidOperationException("Test Exception"));
 
-            var testObserver = failingSource.ContinueOnError().RethrowOnError().Test();
+            var testObserver = failingSource.ContinueOnFault().RethrowOnFault().Test();
 
             testObserver.ErrorCount.ShouldBe(1);
             var faultHubException = testObserver.Errors.OfType<FaultHubException>().FirstOrDefault().ShouldNotBeNull();
@@ -353,7 +396,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
                     }
 
                     return num * 10;
-                }).PublishOnError()
+                }).PublishOnFault()
                 .PublishFaults().Test();
 
             testObserver.Items.ShouldBe(new[] { 10, 30, 40 });
@@ -369,7 +412,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
             using var observer = testObserver.Defer(() => {
                 testObserver.OnNext(Unit.Default);
                 return Observable.Throw<int>(new Exception());
-            }).ChainFaultContext().PublishOnError().Test();
+            }).ChainFaultContext().PublishOnFault().Test();
 
             observer.ErrorCount.ShouldBe(0);
             testObserver.ItemCount.ShouldBe(1);
@@ -545,7 +588,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
                 .ChainFaultContext(["InnerContext"]);
 
             using var testObserver = source
-                .SelectMany(_ => innerFailingStreamWithBookmark.ContinueOnError(["OuterContext"]))
+                .SelectMany(_ => innerFailingStreamWithBookmark.ContinueOnFault(["OuterContext"]))
                 .PublishFaults()
                 .Test();
 
@@ -562,7 +605,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
         public void Preserves_Origin_StackTrace_For_Synchronous_Exception_Without_StackTrace() {
             var source = Observable.Throw<Unit>(new InvalidOperationException("Stackless fail"));
 
-            source.ContinueOnError().Subscribe();
+            source.ContinueOnFault().Subscribe();
 
             BusObserver.ItemCount.ShouldBe(1);
             var fault = BusObserver.Items.Single().ShouldBeOfType<FaultHubException>();

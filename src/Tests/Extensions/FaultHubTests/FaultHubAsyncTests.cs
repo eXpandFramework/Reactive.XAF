@@ -85,7 +85,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
                 .SelectMany(_ => Observable.Throw<Unit>(new InvalidOperationException("Async stackless fail")));
 
             
-            using var testObserver = source.ContinueOnError().Test();
+            using var testObserver = source.ContinueOnFault().Test();
             testObserver.AwaitDone(TimeSpan.FromSeconds(1));
 
             

@@ -53,10 +53,10 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                     return objectSpaceLinks.AddOrUpdate(value, spaceLink, (_, _) => spaceLink).Observe();
                 objectSpaceLinks.TryRemove((TKey)link.ObjectSpace.GetKeyValue(link), out _);
                 return Observable.Empty<TObject>();
-            }).ContinueOnError();
+            }).CompleteOnError();
 
         private static IObservable<(IObjectSpace objectSpace, (TObject instance, ObjectModification modification)[] details)> WhenCommitted<TObject>(this XafApplication application, string[] modifiedProperties) where TObject : class, IObjectSpaceLink 
-            => application.WhenProviderCommittedDetailed<TObject>(ObjectModification.All,modifiedProperties:modifiedProperties).ContinueOnError();
+            => application.WhenProviderCommittedDetailed<TObject>(ObjectModification.All,modifiedProperties:modifiedProperties).CompleteOnError();
 
         private static IObservable<TObject[]> WhenExisting<TObject, TKey>(this XafApplication application, CriteriaOperator criteriaExpression, ConcurrentDictionary<TKey, TObject> objectSpaceLinks, Func<TObject, TKey> keyValue) where TObject : class, IObjectSpaceLink 
             => application.WhenExistingObject<TObject>(criteriaExpression)
