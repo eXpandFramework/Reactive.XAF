@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Disposables;
@@ -18,7 +17,6 @@ using Xpand.Extensions.Reactive.Utility;
 namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
     public static class FaultHub {
         internal static readonly AsyncLocal<List<Func<Exception, FaultAction?>>> HandlersContext = new();
-        public static readonly AsyncLocal<StackTrace> OriginStackTrace = new();
         static readonly AsyncLocal<Guid?> Ctx = new();
         static readonly Subject<Exception> PreRaw = new();
         static readonly Subject<Exception> MainRaw = new();
@@ -236,7 +234,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
         }
         public AmbientFaultContext Context { get; }
 
-public override string ToString() {
+        public override string ToString() {
             var builder = new StringBuilder();
             builder.AppendLine($"Exception: {GetType().Name}");
             builder.AppendLine($"Message: {Message}");

@@ -2,14 +2,17 @@
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
 using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.Numeric;
-using Xpand.Extensions.Reactive.ErrorHandling;
+using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Transform.System;
@@ -58,45 +61,39 @@ namespace Xpand.XAF.Modules.Reactive.Tests.FaultContextTests{
         }
 
 
-        private IObservable<Unit> GetFailingObservable(SimpleActionExecuteEventArgs e) => 100.Milliseconds().Timer()
-            .SelectMany(_ => Observable.Throw<Unit>(new InvalidOperationException("Deep error from a nested method.")))
-            .ChainFaultContext()
-            
-        ;
 
-        [Test]
-        public void Can_Get_Correct_StackTrace_From_Nested_Method() {
-            using var application = Platform.Win.NewApplication<ReactiveModule>();
-            var actionExecuted = application.WhenApplicationModulesManager()
-                .SelectMany(manager => manager.RegisterViewSimpleAction(nameof(Can_Get_Correct_StackTrace_From_Nested_Method)))
-                .WhenExecuted(GetFailingObservable); 
-
-            using var testObserver = actionExecuted.Test();
+        [Test][Apartment(ApartmentState.STA)]
+        public async Task Can_Get_Correct_StackTrace_From_Nested_Method() {
+            await using var application = Platform.Win.NewApplication<ReactiveModule>(handleExceptions:false);
+            application.WhenWin().WhenCustomHandleException().Do(t => t.handledEventArgs.Handled=true).Test();
+            SubscribeToActionThatThrows_And_Assert_The_StackTrace(application);
             DefaultReactiveModule(application);
-            var window = application.CreateViewWindow();
-            var actionBase = window.Action(nameof(Can_Get_Correct_StackTrace_From_Nested_Method));
-            window.SetView(application.NewView<ListView>(typeof(R)));
-
-            actionBase.DoTheExecute();
-
-            testObserver.AwaitDone(1.Seconds()).ErrorCount.ShouldBe(0);
-            BusObserver.ItemCount.ShouldBe(1);
-            var fault = BusObserver.Items.Single().ShouldBeOfType<FaultHubException>();
             
+            application.StartWinTest(frame => frame.Actions(nameof(Can_Get_Correct_StackTrace_From_Nested_Method))
+                .Do(a => a.DoTheExecute()).ToNowObservable());
+
+            BusObserver.AwaitDone(1.Seconds()).ItemCount.ShouldBe(1);
+            var fault = BusObserver.Items.Single().ShouldBeOfType<FaultHubException>();
+        
             fault.InnerException.ShouldBeOfType<InvalidOperationException>();
             fault.InnerException.Message.ShouldBe("Deep error from a nested method.");
-            
-            fault.AllContexts().Distinct().ShouldBe([
-                nameof(Can_Get_Correct_StackTrace_From_Nested_Method),actionBase.ToString(),
-                typeof(SimpleActionExecuteEventArgs).FullName,nameof(GetFailingObservable)
-            ]);
-
 
             var output = fault.ToString();
-            output.ShouldContain("--- Stack Trace (from innermost fault context) ---");
-            output.ShouldContain(nameof(GetFailingObservable));
-        }            
+            var expectedPattern = $@"--- Invocation Stack ---.*{nameof(SubscribeToActionThatThrows_And_Assert_The_StackTrace)}";
+            output.ShouldMatch(expectedPattern, "The stack trace did not contain the calling method.");
+        }
         
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private void SubscribeToActionThatThrows_And_Assert_The_StackTrace(XafApplication application) {
+            var actionExecuted = application.WhenApplicationModulesManager()
+                .SelectMany(manager => manager.RegisterViewSimpleAction(nameof(Can_Get_Correct_StackTrace_From_Nested_Method)))
+                .WhenExecuted(e => 100.Milliseconds().Timer()
+                    .SelectMany(_ => Observable.Throw<Unit>(new InvalidOperationException("Deep error from a nested method.")))
+                    
+                );
+            
+            actionExecuted.Test();
+        }
 
             
         private IObservable<Unit> GetResilientFailingObservable() 

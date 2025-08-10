@@ -5,6 +5,7 @@ using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using akarnokd.reactive_extensions;
 using NUnit.Framework;
@@ -199,11 +200,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
 
         [Test]
         public void CompleteOnError_Prevents_Composition_While_CompleteOnFault_Allows_It() {
-            // ARRANGE
             var source = Observable.Throw<Unit>(new InvalidOperationException("Test Error"));
-
-            // ACT & ASSERT for CompleteOnError (Immediate suppression prevents composition)
-            // CompleteOnError immediately catches the error, so the RethrowOnFault instruction is never seen.
             var completeOnErrorStream = source
                 .CompleteOnError()
                 .RethrowOnFault()
@@ -212,10 +209,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
             var testObserverOnError = completeOnErrorStream.Test();
             testObserverOnError.CompletionCount.ShouldBe(1);
             testObserverOnError.ErrorCount.ShouldBe(0);
-
-            // ACT & ASSERT for CompleteOnFault (Declarative instructions compose)
-            // Both instructions are registered. ChainFaultContext catches the error and consults the handlers.
-            // The last registered handler (RethrowOnFault) wins, and the error is propagated.
+            
             var completeOnFaultStream = source
                 .CompleteOnFault()
                 .RethrowOnFault()
@@ -693,6 +687,26 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
             catchBlockReached.ShouldBe(true);
             testObserver.CompletionCount.ShouldBe(1);
             testObserver.ErrorCount.ShouldBe(0);
+        }
+        
+        private IObservable<Unit> ThrowAndCatchWithHelper(IObservable<Unit> source) 
+            => source.SelectMany(_ => Observable.Throw<Unit>(new InvalidOperationException("Error from helper")))
+                .ContinueOnFault(["HelperContext"]);
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private IObservable<Unit> MyBusinessLogicStream() 
+            => ThrowAndCatchWithHelper(Observable.Return(Unit.Default));
+        
+        [Test]
+        public void Exception_ToString_Should_Point_To_The_Calling_Method_Of_A_Higher_Level_Helper() {
+            using var testObserver = MyBusinessLogicStream().PublishFaults().Test();
+
+            BusObserver.ItemCount.ShouldBe(1);
+            var faultException = BusObserver.Items.Single().ShouldBeOfType<FaultHubException>();
+            
+            var output = faultException.ToString();
+            
+            output.ShouldContain(nameof(MyBusinessLogicStream));
         }
     }
 }

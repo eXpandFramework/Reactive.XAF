@@ -70,9 +70,8 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
 
         private static void LogAsyncLocalState(this string step) {
             var handlerCount = FaultHub.HandlersContext.Value?.Count ?? -1;
-            var hasOrigin = FaultHub.OriginStackTrace.Value != null;
             var nestingDepth = ContextStack.Value?.Count ?? -1;
-            $"[HUB-DIAGNOSTIC][{step}] Handlers: {handlerCount}, HasOrigin: {hasOrigin}, Nesting: {nestingDepth}".LogToConsole();
+            $"[HUB-DIAGNOSTIC][{step}] Handlers: {handlerCount}, Nesting: {nestingDepth}".LogToConsole();
         }
         public static IObservable<T> ChainFaultContext<T>(this IObservable<T> source, object[] context,
             [CallerMemberName] string caller = "") {

@@ -9,13 +9,22 @@ using Shouldly;
 using Xpand.Extensions.Reactive.Transform;
 using System.ComponentModel;
 using System.Linq;
+using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp.Win;
+using Humanizer;
 using Xpand.Extensions.ObjectExtensions;
+using Xpand.Extensions.Reactive.Combine;
+using Xpand.Extensions.XAF.ActionExtensions;
+using Xpand.Extensions.XAF.FrameExtensions;
+using Xpand.Extensions.XAF.XafApplicationExtensions;
+using Xpand.TestsLib.Common;
 using Xpand.XAF.Modules.Reactive.Extensions;
+using Xpand.XAF.Modules.Reactive.Services;
+using Xpand.XAF.Modules.Reactive.Services.Actions;
 
 namespace Xpand.XAF.Modules.Reactive.Tests.FaultContextTests {
     [TestFixture]
-    public class MultiModuleErrorHandlingTests {
+    public class MultiModuleErrorHandlingTests:FaultContextTestBase {
         
         public class MockXafApplication : WinApplication {
 
@@ -67,7 +76,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests.FaultContextTests {
         }
         
         [Test]
-        public void Error_In_One_Connection_Does_Not_Affect_Other_Modules_And_Is_Handled() {
+        public void Error_In_One_Connection_Does_Not_Affect_Other_Modules_And_Is_Handled1() {
             var application = new MockXafApplication();
             var successfulModule = new SuccessfulModule();
             var failingModule = new FailingModuleWithConnections();
@@ -83,5 +92,31 @@ namespace Xpand.XAF.Modules.Reactive.Tests.FaultContextTests {
             
             failingModule.SuccessfulConnectionExecuted.ShouldBe(true);
         }
+
+        [Test]
+        public void Error_In_One_Connection_Does_Not_Affect_Other_Modules_And_Is_Handled() {
+            using var application = Platform.Win.NewApplication<ReactiveModule>(handleExceptions:false);
+            application.WhenApplicationModulesManager()
+                .Do(manager => {
+                    manager.RegisterViewSimpleAction("TestModuleAction")
+                        .WhenExecuted(_ => Observable.Throw<Unit>(new Exception()))
+                        .Subscribe(manager.Modules.OfType<TestModule>().First());
+                    manager.RegisterViewSimpleAction("RXModuleAction")
+                        .WhenExecuted(_ => Observable.Throw<Unit>(new Exception()))
+                        .Subscribe(manager.Modules.OfType<ReactiveModule>().First());
+                })
+                .Test();
+            var appErrorObserver = application.WhenWin().WhenCustomHandleException().Do(t => t.handledEventArgs.Handled=true).Test();
+            DefaultReactiveModule(application);
+            application.StartWinTest(frame => frame.Actions("TestModuleAction").ToNowObservable()
+                .Do(a => a.DoTheExecute()).Do(a => a.DoTheExecute())
+                .MergeToUnit(frame.Actions("RXModuleAction").ToNowObservable()
+                    .Do(a => a.DoTheExecute()).Do(a => a.DoTheExecute()))
+            );
+            
+            BusObserver.ItemCount.ShouldBe(4);
+            appErrorObserver.ItemCount.ShouldBe(4);
+        }
+
     }
 }
