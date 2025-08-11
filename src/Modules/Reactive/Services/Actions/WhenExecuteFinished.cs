@@ -1,0 +1,32 @@
+﻿using System;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
+using System.Runtime.CompilerServices;
+using DevExpress.ExpressApp.Actions;
+using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
+using Xpand.Extensions.Reactive.Transform;
+
+namespace Xpand.XAF.Modules.Reactive.Services.Actions {
+    public static partial class ActionsService {
+
+
+        public static IObservable<TAction> WhenExecuteFinished<TAction>(this TAction action,bool customEmit=false, [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0) where TAction : ActionBase
+            => customEmit || (action.Data.ContainsKey(nameof(ExecutionFinished)) && (bool)action.Data[nameof(ExecutionFinished)])
+                ? ExecuteFinishedSubject.Where(a => a == action).Cast<TAction>() 
+                : action.ProcessEvent<EventArgs,TAction>(nameof(ActionBase.ExecuteCompleted),_ => action.Observe()).TakeUntilDisposed(action).PushStackFrame(memberName, filePath, lineNumber);
+
+        public static IObservable<TAction> WhenExecuteFinished<TAction>(this IObservable<TAction> source,
+            bool customEmit = false, [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0) where TAction : ActionBase
+            => source.SelectMany(a => a.WhenExecuteFinished(customEmit, memberName, filePath, lineNumber));
+
+
+
+        private static readonly ISubject<ActionBase> ExecuteFinishedSubject = Subject.Synchronize(new Subject<ActionBase>());
+        
+        public static void CustomizeExecutionFinished<TAction>(this TAction action, bool enable=true) where TAction : ActionBase
+            => action.Data[nameof(ExecutionFinished)] = enable;
+        
+        public static void ExecutionFinished<TAction>(this TAction action) where TAction:ActionBase 
+            => ExecuteFinishedSubject.OnNext(action);
+    }
+}
