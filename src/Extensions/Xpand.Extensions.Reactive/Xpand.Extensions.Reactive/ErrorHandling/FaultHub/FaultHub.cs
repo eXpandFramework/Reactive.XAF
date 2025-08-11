@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
@@ -11,11 +10,10 @@ using System.Threading;
 using Microsoft.Extensions.Caching.Memory;
 using Xpand.Extensions.ExceptionExtensions;
 using Xpand.Extensions.MemoryCacheExtensions;
-using Xpand.Extensions.Reactive.Transform;
-using Xpand.Extensions.Reactive.Utility;
 
 namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
     public static class FaultHub {
+        internal static readonly AsyncLocal<IReadOnlyList<LogicalStackFrame>> LogicalStackContext = new();
         internal static readonly AsyncLocal<List<Func<Exception, FaultAction?>>> HandlersContext = new();
         static readonly AsyncLocal<Guid?> Ctx = new();
         static readonly Subject<Exception> PreRaw = new();
@@ -39,6 +37,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
             return ex;
         }
 
+        
         public static Guid? CorrelationId(this Exception ex) => (Guid?)ex.AccessData(data => data[KeyCId]);
 
         private enum PublishAction {
@@ -119,12 +118,10 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
         public static bool Logging { get; set; }
 
         public static IObservable<T> CatchAndCompleteOnFault<T>(this IObservable<T> source, object[] context, [CallerMemberName] string caller = "")
-            => source.Catch((Exception ex) => {
-                    var faultContext = context.NewFaultContext(caller);
-                    ex.ExceptionToPublish(faultContext).Publish();
-                    return Observable.Empty<T>();
-                })
-                .SafeguardSubscription((e, _) => e.ExceptionToPublish(context.NewFaultContext(caller)).Publish());
+            => source.SwitchOnFault(ex => {
+                ex.Publish();
+                return Observable.Empty<T>();
+            }, null, context, caller);
         
         private static IObservable<T> RegisterHandler<T>(this IObservable<T> source, Func<Exception, FaultAction?> handler) 
             => Observable.Using(handler.AddHandler, _ => source);
@@ -160,17 +157,27 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
             Func<IObservable<TSource>, IObservable<TSource>> retryStrategy = null, object[] context = null, [CallerMemberName] string caller = "")
             => source.ChainFaultContext(retryStrategy, context, caller)
                 .Select(t => (TResult)(object)t).Catch(fallbackSelector);
-        public static IObservable<Unit> SwitchOnFault<TSource>(this IObservable<TSource> source, 
-            Func<IObservable<TSource>, IObservable<TSource>> retryStrategy = null, object[] context = null, [CallerMemberName] string caller = "")
-            => source.SwitchOnFault(_ => Unit.Default.Observe(),retryStrategy, context, caller);
+        // public static IObservable<Unit> SwitchOnFault<TSource>(this IObservable<TSource> source, 
+        //     Func<IObservable<TSource>, IObservable<TSource>> retryStrategy = null, object[] context = null, [CallerMemberName] string caller = "")
+        //     => source.SwitchOnFault(_ => Unit.Default.Observe(),retryStrategy, context, caller);
         
-        public static IObservable<T> ContinueOnFault<T>(this IObservable<T> source, object[] context=null,[CallerMemberName]string caller="") 
-            => source.ChainFaultContext(context,caller).PublishOnFault();
+        public static IObservable<T> ContinueOnFault<T>(this IObservable<T> source, object[] context=null,[CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0) 
+            => source.PushStackFrame(memberName, filePath, lineNumber)
+                .Catch((Exception ex) => {
+                    ex.ExceptionToPublish(context.NewFaultContext(memberName, filePath, lineNumber)).Publish();
+                    return Observable.Empty<T>();
+                });
         public static IObservable<T> ContinueOnFault<T>(this IObservable<T> source,
             Func<IObservable<T>, IObservable<T>> retryStrategy, object[] context = null,
-            [CallerMemberName] string caller = "")
-            => source.ChainFaultContext(retryStrategy, context, caller).PublishOnFault();
-        
+            [CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0) {
+            var stream = retryStrategy != null ? retryStrategy(source) : source;
+            return stream.PushStackFrame(memberName, filePath, lineNumber)
+                .Catch((Exception ex) => {
+                    ex.ExceptionToPublish(context.NewFaultContext(memberName, filePath, lineNumber)).Publish();
+                    return Observable.Empty<T>();
+                });
+        }
+
         public static IObservable<T> RethrowOnFault<T>(this IObservable<T> source, Func<Exception, bool> predicate = null) {
             predicate ??= _ => true;
             return source.RegisterHandler(ex => predicate(ex) ? FaultAction.Rethrow : null);
@@ -191,13 +198,16 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
                 return new FaultHubException("An exception occurred in a traced fault context.", e, contextToUse);
             }
             "[HUB-TRACE][ExceptionToPublish] Exception is already a FaultHubException. Chaining new context.".LogToConsole();
-            var newChainedContext = new AmbientFaultContext { InvocationStackTrace = contextToUse.InvocationStackTrace, CustomContext = contextToUse.CustomContext, InnerContext = faultHubException.Context };
+            
+            // This line is corrected to use the new LogicalStackTrace property.
+            var newChainedContext = new AmbientFaultContext { LogicalStackTrace = contextToUse.LogicalStackTrace, CustomContext = contextToUse.CustomContext, InnerContext = faultHubException.Context };
+            
             var newException = new FaultHubException(faultHubException.Message, faultHubException.InnerException, newChainedContext);
             var finalContextSummary = $"'{string.Join(" | ", newException.Context.CustomContext)}' -> '{string.Join(" | ", newException.Context.InnerContext?.CustomContext ?? [])}'";
             $"[HUB-TRACE][ExceptionToPublish] Created new FaultHubException. Final Context Chain: {finalContextSummary}".LogToConsole();
     
             return newException;
-        }        
+        }
         public static IDisposable Disable() => AddHandler(_ => FaultAction.Rethrow);
 
         public static IDisposable AddHandler(this Func<Exception, FaultAction?> handler) {
@@ -207,22 +217,33 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
         }
     }
 
-    public class AmbientFaultContext {
-        public string InvocationStackTrace { get; init; }
+    public record AmbientFaultContext {
+        public IReadOnlyList<LogicalStackFrame> LogicalStackTrace { get; init; }
         public IReadOnlyList<string> CustomContext { get; init; }
         public AmbientFaultContext InnerContext { get; init; }
-    }
-    
+    }    
     public sealed class FaultHubException : Exception {
         public FaultHubException(string message, Exception innerException, AmbientFaultContext context) 
             : base(message, innerException) {
             Context = context;
-            if (innerException != null) {
-                foreach (var key in innerException.Data.Keys) {
-                    Data[key] = innerException.Data[key];
-                }
+            if (innerException == null) return;
+            foreach (var key in innerException.Data.Keys) {
+                Data[key] = innerException.Data[key];
             }
         }        
+        public IEnumerable<LogicalStackFrame> GetLogicalStackTrace() {
+            var allStacks = new List<IReadOnlyList<LogicalStackFrame>>();
+            var context = Context;
+            while (context != null) {
+                if (context.LogicalStackTrace != null) {
+                    allStacks.Add(context.LogicalStackTrace);
+                }
+                context = context.InnerContext;
+            }
+            allStacks.Reverse();
+            return allStacks.SelectMany(s => s);
+        }
+        
         public IEnumerable<string> AllContexts() {
             var context = Context;
             while (context != null) {
@@ -239,35 +260,33 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
             builder.AppendLine($"Exception: {GetType().Name}");
             builder.AppendLine($"Message: {Message}");
             builder.AppendLine();
-
             builder.AppendLine("--- Logical Operation Stack ---");
             var frame = Context;
             var depth = 1;
             AmbientFaultContext innermostFrame = null;
-            string lastCaller = null; 
-
+            string lastCaller = null;
             while (frame != null) {
                 var currentCaller = frame.CustomContext.FirstOrDefault();
                 var specificContext = string.Join(" | ", frame.CustomContext.Skip(1));
-
                 if (currentCaller != lastCaller) {
                     builder.AppendLine($"Operation: {currentCaller}");
                     lastCaller = currentCaller;
                 }
-
                 if (!string.IsNullOrEmpty(specificContext)) {
                     builder.AppendLine($"  [Frame {depth++}] Details: '{specificContext}'");
                 }
                 else {
                     builder.AppendLine($"  [Frame {depth++}]");
                 }
-                
-                builder.AppendLine("    --- Invocation Stack ---");
-                var indentedStackTrace = string.Join(Environment.NewLine, 
-                    (frame.InvocationStackTrace ?? "").Split([Environment.NewLine], StringSplitOptions.RemoveEmptyEntries)
-                    .Select(line => $"  {line}"));
-                builder.AppendLine(indentedStackTrace);
-                
+
+                builder.AppendLine("   --- Invocation Stack ---");
+                // This section is changed to format the new LogicalStackTrace list.
+                if (frame.LogicalStackTrace != null) {
+                    var indentedStackTrace = string.Join(Environment.NewLine,
+                        frame.LogicalStackTrace.Select(f => $"{f.ToString().TrimStart()}"));
+                    builder.AppendLine(indentedStackTrace);
+                }
+
                 if (frame.InnerContext == null) {
                     innermostFrame = frame;
                 }
@@ -275,15 +294,14 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
             }
             builder.AppendLine("--- End of Logical Operation Stack ---");
             builder.AppendLine();
-
             if (InnerException != null) {
                 builder.AppendLine("--- Original Exception ---");
-                if (string.IsNullOrEmpty(InnerException.StackTrace) && innermostFrame != null) {
+                // This fallback logic for stackless exceptions is also updated.
+                if (string.IsNullOrEmpty(InnerException.StackTrace) && innermostFrame?.LogicalStackTrace != null) {
                     builder.AppendLine($"{InnerException.GetType().FullName}: {InnerException.Message}");
                     builder.AppendLine("  --- Stack Trace (from innermost fault context) ---");
                     var indentedInnermost = string.Join(Environment.NewLine,
-                        (innermostFrame.InvocationStackTrace ?? "").Split([Environment.NewLine], StringSplitOptions.RemoveEmptyEntries)
-                        .Select(line => $"  {line}"));
+                        innermostFrame.LogicalStackTrace.Select(f => $"{f.ToString().TrimStart()}"));
                     builder.AppendLine(indentedInnermost);
                 }
                 else {
@@ -291,9 +309,9 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
                 }
                 builder.AppendLine("--- End of Original Exception ---");
             }
-
             return builder.ToString();
         }
+    
     }
     
     public enum FaultResult {
@@ -306,6 +324,14 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
         Rethrow,
         Complete
     }
+    public readonly struct LogicalStackFrame(string memberName, string filePath, int lineNumber) {
+        public string MemberName => memberName;
 
+        public string FilePath => filePath;
+
+        public int LineNumber => lineNumber;
+
+        public override string ToString() => $"at {memberName} in {filePath}:line {lineNumber}";
+    }
 
 }

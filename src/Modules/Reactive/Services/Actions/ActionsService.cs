@@ -16,6 +16,7 @@ using DevExpress.ExpressApp.Utils;
 using Fasterflect;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Numeric;
+using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
@@ -34,6 +35,15 @@ using Xpand.XAF.Modules.Reactive.Services.Controllers;
 namespace Xpand.XAF.Modules.Reactive.Services.Actions{
     
     public static partial class ActionsService {
+        public static IObservable<T> When<TEventArgs, T>(this ActionBase action,string eventName, Func<TEventArgs, IObservable<T>> resilientSelector, [CallerMemberName] string caller = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0) 
+            where TEventArgs : EventArgs 
+            => action.ProcessEvent(eventName, resilientSelector,context:[action]).TakeUntilDisposed(action)
+                .PushStackFrame();
+
+        public static IObservable<T> WhenExecuted<T>(this SimpleAction action, Func<SimpleActionExecuteEventArgs, IObservable<T>> resilientSelector, 
+            [CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0)
+            => action.When(nameof(ActionBase.Executed), resilientSelector).PushStackFrame(memberName, filePath, lineNumber);
+
         public static IObservable<T> WhenAvailable<T>(this IObservable<T> source) where T:ActionBase 
             => source.Where(action => action.Available());
 
@@ -70,15 +80,13 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
             Func<TEventArgs, IObservable<T>> resilientSelector, [CallerMemberName] string caller = "") where TEventArgs : EventArgs
             => source.SelectMany(a => a.When(eventName, resilientSelector, caller));
         
-        public static IObservable<T> When<TEventArgs, T>(this ActionBase action,string eventName, Func<TEventArgs, IObservable<T>> resilientSelector, [CallerMemberName] string caller = "") 
-            where TEventArgs : EventArgs 
-            => action.ProcessEvent(eventName, resilientSelector,context:[action], caller: caller).TakeUntilDisposed(action);
+        
         public static IObservable<TEventArgs> When<TEventArgs>(this ActionBase action,string eventName, [CallerMemberName] string caller = "") 
             where TEventArgs : EventArgs 
             => action.ProcessEvent<TEventArgs,TEventArgs>(eventName,e => e.Observe(),context:[action] , caller: caller).TakeUntilDisposed(action);
 
-        public static IObservable<T> WhenExecuted<T>(this SimpleAction action, Func<SimpleActionExecuteEventArgs, IObservable<T>> resilientSelector, [CallerMemberName] string caller = "")
-            => action.When(nameof(ActionBase.Executed),resilientSelector, caller);
+        // public static IObservable<T> WhenExecuted<T>(this SimpleAction action, Func<SimpleActionExecuteEventArgs, IObservable<T>> resilientSelector, [CallerMemberName] string caller = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0)
+        //     => action.When(nameof(ActionBase.Executed),resilientSelector, caller);
         
         public static IObservable<SimpleActionExecuteEventArgs> WhenExecuted(this SimpleAction action, [CallerMemberName] string caller = "")
             => action.WhenExecuted(e => e.Observe(),caller);
@@ -111,13 +119,13 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
             => action.When(nameof(ActionBase.Executed),resilientSelector, caller);
         public static IObservable<T> WhenExecuted<T>(this ParametrizedAction parametrizedAction, Func<ParametrizedActionExecuteEventArgs, IObservable<T>> resilientSelector,[CallerMemberName]string caller="")
             => parametrizedAction.When(nameof(ActionBase.Executed),resilientSelector, caller);
-        public static IObservable<T> WhenExecuted<TAction,TArg,T>(this TAction parametrizedAction, Func<TArg, IObservable<T>> resilientSelector,[CallerMemberName]string caller="") where TAction : ActionBase where TArg : ActionBaseEventArgs 
-            => parametrizedAction.When(nameof(ActionBase.Executed),resilientSelector, caller);
-        public static IObservable<T> WhenExecuted<TAction,TArg,T>(this IObservable<TAction> source, Func<TArg, IObservable<T>> resilientSelector,[CallerMemberName]string caller="") where TAction : ActionBase where TArg : ActionBaseEventArgs 
-            => source.SelectMany(action => action.When(nameof(ActionBase.Executed),resilientSelector, caller));
+        public static IObservable<T> WhenExecuted<TAction,TArg,T>(this TAction parametrizedAction, Func<TArg, IObservable<T>> resilientSelector,[CallerMemberName]string caller="", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0) where TAction : ActionBase where TArg : ActionBaseEventArgs 
+            => parametrizedAction.When(nameof(ActionBase.Executed),resilientSelector, caller.PrefixCaller()).PushStackFrame(caller,filePath,lineNumber);
+        public static IObservable<T> WhenExecuted<TAction,TArg,T>(this IObservable<TAction> source, Func<TArg, IObservable<T>> resilientSelector,[CallerMemberName]string caller="",[CallerFilePath]string path="",[CallerLineNumber]int line=0) where TAction : ActionBase where TArg : ActionBaseEventArgs 
+            => source.SelectMany(action => action.When(nameof(ActionBase.Executed),resilientSelector, caller)).PushStackFrame(caller,path,line);
         
-        public static IObservable<T> WhenExecuted<T>(this IObservable<SimpleAction> source, Func<SimpleActionExecuteEventArgs, IObservable<T>> resilientSelector, [CallerMemberName] string caller = "")
-            => source.SelectMany(action => action.WhenExecuted(resilientSelector,caller).TakeUntilDeactivated(action.Controller));
+        public static IObservable<T> WhenExecuted<T>(this IObservable<SimpleAction> source, Func<SimpleActionExecuteEventArgs, IObservable<T>> resilientSelector, [CallerMemberName] string caller = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0)
+            => source.SelectMany(action => action.WhenExecuted(resilientSelector).TakeUntilDeactivated(action.Controller)).PushStackFrame();
         public static IObservable<SimpleAction> WhenExecuted(this IObservable<SimpleAction> source, Action<SimpleActionExecuteEventArgs> resilientSelector, [CallerMemberName] string caller = "")
             => source.WhenExecuted(e => e.DeferAction(() => resilientSelector(e)).To(e.Action).Concat(e.Action.Observe()).Cast<SimpleAction>(),caller);
         public static IObservable<SingleChoiceAction> WhenExecuted(this IObservable<SingleChoiceAction> source, Action<SingleChoiceActionExecuteEventArgs> resilientSelector, [CallerMemberName] string caller = "")

@@ -63,10 +63,10 @@ namespace Xpand.XAF.Modules.Reactive.Tests.FaultContextTests{
 
 
         [Test][Apartment(ApartmentState.STA)]
-        public async Task Can_Get_Correct_StackTrace_From_Nested_Method() {
-            await using var application = Platform.Win.NewApplication<ReactiveModule>(handleExceptions:false);
+        public void Can_Get_Correct_StackTrace_From_Nested_Method() {
+            using var application = Platform.Win.NewApplication<ReactiveModule>(handleExceptions:false);
             application.WhenWin().WhenCustomHandleException().Do(t => t.handledEventArgs.Handled=true).Test();
-            SubscribeToActionThatThrows_And_Assert_The_StackTrace(application);
+            SubscribeToActionThatThrows_And_Assert_The_StackTrace(application).Test();
             DefaultReactiveModule(application);
             
             application.StartWinTest(frame => frame.Actions(nameof(Can_Get_Correct_StackTrace_From_Nested_Method))
@@ -84,15 +84,13 @@ namespace Xpand.XAF.Modules.Reactive.Tests.FaultContextTests{
         }
         
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private void SubscribeToActionThatThrows_And_Assert_The_StackTrace(XafApplication application) {
-            var actionExecuted = application.WhenApplicationModulesManager()
+        private IObservable<Unit> SubscribeToActionThatThrows_And_Assert_The_StackTrace(XafApplication application) {
+            return application.WhenApplicationModulesManager()
                 .SelectMany(manager => manager.RegisterViewSimpleAction(nameof(Can_Get_Correct_StackTrace_From_Nested_Method)))
                 .WhenExecuted(e => 100.Milliseconds().Timer()
                     .SelectMany(_ => Observable.Throw<Unit>(new InvalidOperationException("Deep error from a nested method.")))
                     
                 );
-            
-            actionExecuted.Test();
         }
 
             
@@ -125,6 +123,39 @@ namespace Xpand.XAF.Modules.Reactive.Tests.FaultContextTests{
             var allContexts = fault.AllContexts().ToArray();
             allContexts.ShouldContain("InnerContext");
             allContexts.ShouldContain(nameof(Innermost_WithFaultContext_Takes_Precedence));
+        }
+        
+        [Test]
+        [Apartment(ApartmentState.STA)]
+        public void Chained_Action_Helpers_Propagate_Correct_Stack_Trace() {
+            using var application = Platform.Win.NewApplication<ReactiveModule>(handleExceptions:false);
+            application.WhenWin().WhenCustomHandleException().Do(t => t.handledEventArgs.Handled=true).Test();
+            
+            SubscribeToActionWithChainedHelpers(application).Test();
+            
+            DefaultReactiveModule(application);
+            
+            application.StartWinTest(frame => frame.Actions(nameof(Chained_Action_Helpers_Propagate_Correct_Stack_Trace))
+                .Do(a => a.DoTheExecute()).ToNowObservable());
+
+            BusObserver.AwaitDone(1.Seconds()).ItemCount.ShouldBe(1);
+            var fault = BusObserver.Items.Single().ShouldBeOfType<FaultHubException>();
+            var logicalStack = fault.GetLogicalStackTrace().ToList();
+            
+            // This assertion is designed to fail with the current code.
+            // It proves that the stack is being corrupted because the wrong caller name is propagated.
+            // With the fix, the stack will contain the correct, distinct names of the chained helpers.
+            logicalStack.ShouldNotBeNull();
+            logicalStack.Count.ShouldBeGreaterThanOrEqualTo(2);
+            logicalStack.ShouldContain(frame => frame.MemberName == nameof(SubscribeToActionWithChainedHelpers));
+            logicalStack.ShouldContain(frame => frame.MemberName == nameof(ActionsService.WhenExecuted));
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private IObservable<Unit> SubscribeToActionWithChainedHelpers(XafApplication application) {
+            return application.WhenApplicationModulesManager()
+                .SelectMany(manager => manager.RegisterViewSimpleAction(nameof(Chained_Action_Helpers_Propagate_Correct_Stack_Trace)))
+                .WhenExecuted(_ => Observable.Throw<Unit>(new InvalidOperationException("Action Failure")));
         }
     }
 }

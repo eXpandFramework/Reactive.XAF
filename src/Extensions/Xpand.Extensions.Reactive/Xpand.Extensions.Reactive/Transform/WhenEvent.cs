@@ -24,14 +24,10 @@ namespace Xpand.Extensions.Reactive.Transform {
         public static IObservable<EventPattern<object>> WhenEvent(this object source,string eventName,IScheduler scheduler=null,[CallerMemberName]string caller="") 
             => source.FromEventPattern<EventArgs>(eventName,scheduler,caller)
                 .Select(pattern => new EventPattern<object>(pattern.Sender, pattern.EventArgs));
-        public static IObservable<T> ProcessEvent<TEventArgs,T>(this object source,string eventName,Func<TEventArgs,IObservable<T>> resilientSelector,IScheduler scheduler=null,object[] context=null,[CallerMemberName]string caller="") 
-            => source.FromEventPattern<TEventArgs>(eventName,scheduler,caller).Select(pattern => pattern.EventArgs)
-                .ToResilientEvent(resilientSelector,context,caller);
-        
-        public static IObservable<TEventArgs> ProcessEvent<TEventArgs>(this object source, string eventName, Action<TEventArgs> action, Func<TEventArgs, bool> when = null, IScheduler scheduler = null, [CallerMemberName] string caller = "") where TEventArgs : EventArgs 
-            => source.ProcessEvent<TEventArgs, TEventArgs>(eventName, 
-                e => (when?.Invoke(e) ?? true) ? Observable.Return(e).Do(_ => action(e)) : Observable.Empty<TEventArgs>(),
-                scheduler, caller:caller);
+        // public static IObservable<T> ProcessEvent<TEventArgs,T>(this object source,string eventName,Func<TEventArgs,IObservable<T>> resilientSelector,IScheduler scheduler=null,object[] context=null,[CallerMemberName]string caller=""){
+        //     return source.FromEventPattern<TEventArgs>(eventName, scheduler, caller).Select(pattern => pattern.EventArgs)
+        //         .ToResilientEvent(resilientSelector, context, caller);
+        // }
         
         public static IObservable<TEventArgs> ProcessEvent<TEventArgs>(this object source, string eventName, IScheduler scheduler = null, [CallerMemberName] string caller = "") where TEventArgs:EventArgs
             => source.FromEventPattern<TEventArgs>(eventName, scheduler, caller).Select(pattern => pattern.EventArgs);
@@ -105,7 +101,15 @@ namespace Xpand.Extensions.Reactive.Transform {
         public static IObservable<TEventArgs> WhenEvent<TEventArgs>(this object source, string eventName,IScheduler scheduler=null,[CallerMemberName]string caller="")  
             => source.FromEventPattern<TEventArgs>(eventName,scheduler,caller).Select(pattern => pattern.EventArgs) ;
 
-        public static IObservable<TResult> ToResilientEvent<TEventArgs,TResult>(this IObservable<TEventArgs> source,Func<TEventArgs,IObservable<TResult>> resilientSelector,object[] context=null,[CallerMemberName]string caller="") 
-            => source.SelectManyItemResilient(resilientSelector,context, caller);
+        public static IObservable<TResult> ToResilientEvent<TEventArgs,TResult>(this IObservable<TEventArgs> source,Func<TEventArgs,IObservable<TResult>> resilientSelector,object[] context=null,[CallerMemberName]string caller="", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0) 
+            => source.SelectManyItemResilient(resilientSelector,context, caller).PushStackFrame(caller,filePath,lineNumber); 
+
+        public static IObservable<T> ProcessEvent<TEventArgs,T>(this object source,string eventName,Func<TEventArgs,IObservable<T>> resilientSelector,IScheduler scheduler=null,object[] context=null,[CallerMemberName]string caller="", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0){
+            return source.FromEventPattern<TEventArgs>(eventName, scheduler, caller).Select(pattern => pattern.EventArgs)
+                .ToResilientEvent(resilientSelector, context).PushStackFrame(); 
+        }
+     
+        public static IObservable<TEventArgs> ProcessEvent<TEventArgs>(this object source, string eventName, Func<TEventArgs, IObservable<TEventArgs>> resilientSelector, IScheduler scheduler = null, object[] context = null, [CallerMemberName] string caller = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0) 
+            => source.ProcessEvent<TEventArgs, TEventArgs>(eventName, resilientSelector, scheduler, context, caller,filePath, lineNumber);
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
@@ -13,7 +14,15 @@ namespace Xpand.Extensions.Reactive.ErrorHandling {
         public static Exception TagOrigin(this Exception ex)
             => ex.AccessData(data => {
                 if (data.Contains(Key)) return ex;
-                data[Key] = ChainFaultContextService.GetOrAddCachedStackTraceString();
+        
+                // 1. Capture the current physical stack trace.
+                var trace = new System.Diagnostics.StackTrace(true);
+                // 2. Convert it to our logical frame structure using the new helper.
+                var logicalFrames = trace.GetLogicalStackFrames();
+                // 3. Format the logical frames into a string for storage.
+                var stackTraceString = string.Join(Environment.NewLine, logicalFrames.Select(f => f.ToString()));
+
+                data[Key] = stackTraceString;
                 return ex;
             });
         

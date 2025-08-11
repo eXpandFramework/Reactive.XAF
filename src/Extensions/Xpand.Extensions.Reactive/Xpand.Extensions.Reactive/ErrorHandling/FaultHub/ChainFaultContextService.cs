@@ -5,7 +5,6 @@ using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
 using System.Threading;
 using Microsoft.Extensions.Caching.Memory;
 using Xpand.Extensions.LinqExtensions;
@@ -15,47 +14,11 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
     public static class ChainFaultContextService {
         
         internal static readonly AsyncLocal<Stack<object>> ContextStack = new();
+        internal static readonly AsyncLocal<StackTrace> InvocationTrace = new();
         
         private static readonly MemoryCache StackTraceStringCache = new(new MemoryCacheOptions());
 
-        internal static string GetOrAddCachedStackTraceString() {
-            var keyTrace = new StackTrace(false);
-            StackFrame originFrame = null;
-            var ourNamespace = typeof(ChainFaultContextService).Namespace;
-            
-            foreach (var frame in keyTrace.GetFrames()) {
-                var method = frame.GetMethod();
-                if (method?.DeclaringType != null && method.DeclaringType.Namespace != ourNamespace) {
-                    originFrame = frame;
-                    break;
-                }
-            }
-            if (originFrame?.GetMethod() == null) {
-                return "  Stack trace could not be reliably determined for this call site.";
-            }
-            var originMethod = originFrame.GetMethod();
-            var key = $"{originMethod?.DeclaringType?.AssemblyQualifiedName}:{originMethod?.MetadataToken}:{originFrame.GetILOffset()}";
-
-            return StackTraceStringCache.GetOrCreate(key, _ => {
-                var fullTrace = new StackTrace(true);
-                var stringBuilder = new StringBuilder();
-                string[] reactiveNamespaces = ["System.Reactive."];
-
-                var filteredFrames = fullTrace.GetFrames().Where(frame => {
-                    var method = frame.GetMethod();
-                    if (method?.DeclaringType == null) return false;
-                    
-                    var ns = method.DeclaringType.Namespace;
-                    return ns != null && ns != ourNamespace && reactiveNamespaces.All(rns => !ns.StartsWith(rns));
-                });
-
-                foreach (var frame in filteredFrames) {
-                    stringBuilder.AppendLine($"   at {frame.ToString().Trim()}");
-                }
-                
-                return stringBuilder.ToString().TrimEnd();
-            });
-        }
+        
         public static IObservable<T> ChainFaultContext<T>(this IObservable<T> source, Func<IObservable<T>, IObservable<T>> retryStrategy,
             object[] context = null, [CallerMemberName] string caller = "")
             => (retryStrategy != null ? retryStrategy(source) : source).ChainFaultContext(context, caller);
@@ -68,55 +31,96 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
         public static IObservable<T> ChainFaultContext<T>(this IObservable<T> source, [CallerMemberName] string caller = "")
             => source.ChainFaultContext([],caller);
 
+
+        public static IObservable<T> PushStackFrame<T>(this IObservable<T> source, [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0)
+            => Observable.Using(() => {
+                    var stackFromAbove = FaultHub.LogicalStackContext.Value;
+                    var myFrame = new LogicalStackFrame(memberName, filePath, lineNumber);
+                    var newStack = new[] { myFrame }.Concat(stackFromAbove ?? Enumerable.Empty<LogicalStackFrame>()).ToList();
+                    FaultHub.LogicalStackContext.Value = newStack;
+                    return Disposable.Create(() => FaultHub.LogicalStackContext.Value = stackFromAbove);
+                }, _ => source);
+
         private static void LogAsyncLocalState(this string step) {
             var handlerCount = FaultHub.HandlersContext.Value?.Count ?? -1;
             var nestingDepth = ContextStack.Value?.Count ?? -1;
             $"[HUB-DIAGNOSTIC][{step}] Handlers: {handlerCount}, Nesting: {nestingDepth}".LogToConsole();
         }
+        
+        // This helper replaces GetOrAddCachedStackTraceString.
+        // It converts a physical StackTrace into our logical structure.
+        internal static IReadOnlyList<LogicalStackFrame> GetLogicalStackFrames(this StackTrace trace) {
+            return trace.GetFrames()
+                .Select(frame => {
+                    var method = frame.GetMethod();
+                    var type = method?.DeclaringType;
+                    if (type == null) return default;
+                    var fileName = frame.GetFileName();
+                    var lineNumber = frame.GetFileLineNumber();
+                    return new LogicalStackFrame(method.Name, fileName, lineNumber);
+                })
+                .WhereNotDefault()
+                .ToList();
+        }
+        
         public static IObservable<T> ChainFaultContext<T>(this IObservable<T> source, object[] context,
             [CallerMemberName] string caller = "") {
-            var faultContext = context.NewFaultContext(caller);
-            var contextName = faultContext.CustomContext.FirstOrDefault() ?? "Unknown";
+// 1. Capture the physical stack at the definition site.
+            var trace = new StackTrace(true);
+            var logicalStack = trace.GetLogicalStackFrames();
 
-            return Observable.Defer(() => {
-                    $"ChainFaultContext('{contextName}') - Defer Entry".LogAsyncLocalState();
-                    var parentHandlers = FaultHub.HandlersContext.Value;
-                    return Observable.Using(
-                            () => {
-                                var stack = ContextStack.Value ??= new Stack<object>();
-                                var token = new object();
-                                stack.Push(token);
-                                FaultHub.HandlersContext.Value = new List<Func<Exception, FaultAction?>>();
-                                $"ChainFaultContext('{contextName}') - Using Setup (Scope Cleared)".LogAsyncLocalState();
-                                return Disposable.Create(stack, objects => {
-                                    objects.Pop();
-                                    FaultHub.HandlersContext.Value = parentHandlers;
-                                    $"ChainFaultContext('{contextName}') - Using Dispose (Scope Restored)".LogAsyncLocalState();
-                                });
-                            },
-                            _ => {
-                                $"[HUB][WithFaultContext] Operator defined in '{contextName}'.".LogToConsole();
-                                return source;
-                            }
-                        )
-                        .Catch((Exception ex) => {
-                            $"ChainFaultContext('{contextName}') - Catch Entry".LogAsyncLocalState();
-                            var localHandlers = FaultHub.HandlersContext.Value;
-                            try {
-                                var mergedHandlers = new List<Func<Exception, FaultAction?>>();
-                                if (parentHandlers != null) mergedHandlers.AddRange(parentHandlers);
-                                if (localHandlers != null) mergedHandlers.AddRange(localHandlers.Where(h => !mergedHandlers.Contains(h)));
-                                FaultHub.HandlersContext.Value = mergedHandlers;
-                                $"ChainFaultContext('{contextName}') - Catch Pre-Handle (Scope Merged)".LogAsyncLocalState();
-                                return ex.HandleFaultContext<T>(contextName, faultContext);
-                            }
-                            finally {
-                                FaultHub.HandlersContext.Value = localHandlers;
-                                $"ChainFaultContext('{contextName}') - Catch Finally (Scope Restored)".LogAsyncLocalState();
-                            }
-                        });
-                })
-                .SafeguardSubscription((e, s) => e.ExceptionToPublish(context.NewFaultContext(s)).Publish(), caller);
+            // 2. Wrap the entire operation in a Using block that sets the AsyncLocal context.
+            return Observable.Using(
+                () => {
+                    var originalStack = FaultHub.LogicalStackContext.Value;
+                    FaultHub.LogicalStackContext.Value = logicalStack;
+                    return Disposable.Create(() => FaultHub.LogicalStackContext.Value = originalStack);
+                },
+                _ => {
+                    // 3. The rest of the implementation now works correctly because NewFaultContext()
+                    //    will read the logicalStack we just placed in the AsyncLocal.
+                    var faultContext = context.NewFaultContext(caller);
+                    var contextName = faultContext.CustomContext.FirstOrDefault() ?? "Unknown";
+
+                    return Observable.Defer(() => {
+                        var parentHandlers = FaultHub.HandlersContext.Value;
+                        return Observable.Using(
+                                () => {
+                                    var stack = ContextStack.Value ??= new Stack<object>();
+                                    var token = new object();
+                                    stack.Push(token);
+                                    FaultHub.HandlersContext.Value = new List<Func<Exception, FaultAction?>>();
+                                    $"ChainFaultContext('{contextName}') - Using Setup (Scope Cleared)".LogAsyncLocalState();
+                                    return Disposable.Create(stack, objects => {
+                                        objects.Pop();
+                                        FaultHub.HandlersContext.Value = parentHandlers;
+                                        $"ChainFaultContext('{contextName}') - Using Dispose (Scope Restored)".LogAsyncLocalState();
+                                    });
+                                },
+                                s => {
+                                    $"[HUB][WithFaultContext] Operator defined in '{contextName}'.".LogToConsole();
+                                    return source;
+                                }
+                            )
+                            .Catch<T, Exception>(ex => {
+                                $"ChainFaultContext('{contextName}') - Catch Entry".LogAsyncLocalState();
+                                var localHandlers = FaultHub.HandlersContext.Value;
+                                try {
+                                    var mergedHandlers = new List<Func<Exception, FaultAction?>>();
+                                    if (parentHandlers != null) mergedHandlers.AddRange(parentHandlers);
+                                    if (localHandlers != null) mergedHandlers.AddRange(localHandlers.Where(h => !mergedHandlers.Contains(h)));
+                                    FaultHub.HandlersContext.Value = mergedHandlers;
+                                    $"ChainFaultContext('{contextName}') - Catch Pre-Handle (Scope Merged)".LogAsyncLocalState();
+                                    return ex.HandleFaultContext<T>(contextName, faultContext);
+                                }
+                                finally {
+                                    FaultHub.HandlersContext.Value = localHandlers;
+                                    $"ChainFaultContext('{contextName}') - Catch Finally (Scope Restored)".LogAsyncLocalState();
+                                }
+                            });
+                    })
+                    .SafeguardSubscription((e, s) => e.ExceptionToPublish(context.NewFaultContext(s)).Publish(), caller);
+                });
             
         }
         
@@ -125,11 +129,12 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
             if (FaultHub.Logging) Console.WriteLine(message);
         }
 
-        public static AmbientFaultContext NewFaultContext(this object[] context, string caller) {
-            $"[HUB-TRACE][NewFaultContext] Caller: '{caller}', Context: '{(context == null ? "null" : string.Join(", ", context))}'".LogToConsole();
+        public static AmbientFaultContext NewFaultContext(this object[] context, [CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0) {
+            $"[HUB-TRACE][NewFaultContext] Caller: '{memberName}', filePath: {filePath}, line: {lineNumber} Context: '{(context == null ? "null" : string.Join(", ", context))}'".LogToConsole();
+            var logicalStack = FaultHub.LogicalStackContext.Value;
             return new AmbientFaultContext {
-                InvocationStackTrace = GetOrAddCachedStackTraceString(), 
-                CustomContext = caller.YieldItem()
+                LogicalStackTrace = logicalStack,
+                CustomContext = memberName.YieldItem()
                     .Concat((context ?? []).Distinct().WhereNotDefault().Select(o => o.ToString()))
                     .WhereNotNullOrEmpty()
                     .ToArray()

@@ -234,10 +234,10 @@ namespace Xpand.XAF.Modules.Reactive.Services {
 
         static IObservable<Unit> AppearanceToolAttribute(this ApplicationModulesManager manager)
             => manager.WhenApplication(application => application.WhenFrameCreated().ToController<AppearanceController>()
-                .SelectMany(controller => controller.ProcessEvent<CustomCreateAppearanceRuleEventArgs>(nameof(AppearanceController.CustomCreateAppearanceRule),
+                .SelectMany(controller => controller.ProcessEvent<CustomCreateAppearanceRuleEventArgs,CustomCreateAppearanceRuleEventArgs>(nameof(AppearanceController.CustomCreateAppearanceRule),
                         e => e.Observe().Where(_ => e.RuleProperties is IModelAppearanceWithToolTipRule)
                             .Do(_ => e.Rule = new ToolTipAppearanceRule(e.RuleProperties, e.ObjectSpace)))
-                    .MergeToUnit(controller.ProcessEvent<ApplyAppearanceEventArgs>(nameof(AppearanceController.AppearanceApplied),
+                    .MergeToUnit(controller.ProcessEvent<ApplyAppearanceEventArgs,ApplyAppearanceEventArgs>(nameof(AppearanceController.AppearanceApplied),
                         e => e.Observe().Do(_ => {
                                 if (e.AppearanceObject.Items.FirstOrDefault(item => item is AppearanceItemToolTip) is not AppearanceItemToolTip toolTip) return;
                                 if (toolTip.State == AppearanceState.None) return;
