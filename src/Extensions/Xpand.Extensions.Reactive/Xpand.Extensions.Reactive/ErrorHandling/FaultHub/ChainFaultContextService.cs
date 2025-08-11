@@ -32,14 +32,16 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
             => source.ChainFaultContext([],caller);
 
 
-        public static IObservable<T> PushStackFrame<T>(this IObservable<T> source, [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0)
-            => Observable.Using(() => {
-                    var stackFromAbove = FaultHub.LogicalStackContext.Value;
-                    var myFrame = new LogicalStackFrame(memberName, filePath, lineNumber);
-                    var newStack = new[] { myFrame }.Concat(stackFromAbove ?? Enumerable.Empty<LogicalStackFrame>()).ToList();
-                    FaultHub.LogicalStackContext.Value = newStack;
-                    return Disposable.Create(() => FaultHub.LogicalStackContext.Value = stackFromAbove);
-                }, _ => source);
+        public static IObservable<T> PushStackFrame<T>(this IObservable<T> source, [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0) {
+            return Observable.Using(() => {
+                var stackFromAbove = FaultHub.LogicalStackContext.Value;
+                var myFrame = new LogicalStackFrame(memberName, filePath, lineNumber);
+                var newStack = new[] { myFrame }.Concat(stackFromAbove ?? Enumerable.Empty<LogicalStackFrame>())
+                    .ToList();
+                FaultHub.LogicalStackContext.Value = newStack;
+                return Disposable.Create(() => FaultHub.LogicalStackContext.Value = stackFromAbove);
+            }, _ => source);
+        }
 
         private static void LogAsyncLocalState(this string step) {
             var handlerCount = FaultHub.HandlersContext.Value?.Count ?? -1;
@@ -123,9 +125,9 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
                 });
             
         }
-        
 
-        internal static void LogToConsole(this string message) {
+
+        public static void LogToConsole(this string message) {
             if (FaultHub.Logging) Console.WriteLine(message);
         }
 

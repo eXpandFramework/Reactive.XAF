@@ -10,8 +10,8 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions {
     public static partial class ActionsService {
 
         public static IObservable<T> WhenExecute<T>(this SimpleAction simpleAction,Func<SimpleActionExecuteEventArgs,IObservable<T>> resilientSelector, [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0) 
-            => simpleAction.ProcessEvent(nameof(SimpleAction.Execute),resilientSelector).TakeUntilDisposed(simpleAction).PushStackFrame(memberName,filePath,lineNumber);
-        
+            => simpleAction.ProcessEvent(nameof(SimpleAction.Execute), resilientSelector, context: [simpleAction])
+                .TakeUntilDisposed(simpleAction).PushStackFrame(memberName,filePath,lineNumber);        
         public static IObservable<T> WhenExecute<T>(this SingleChoiceAction singleChoiceAction,Func<SingleChoiceActionExecuteEventArgs,IObservable<T>> resilientSelector, [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0) 
             => singleChoiceAction.ProcessEvent(nameof(SingleChoiceAction.Execute),resilientSelector).TakeUntilDisposed(singleChoiceAction).PushStackFrame(memberName,filePath,lineNumber);
 

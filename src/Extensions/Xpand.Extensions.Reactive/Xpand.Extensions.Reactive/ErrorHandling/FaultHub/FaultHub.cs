@@ -13,7 +13,7 @@ using Xpand.Extensions.MemoryCacheExtensions;
 
 namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
     public static class FaultHub {
-        internal static readonly AsyncLocal<IReadOnlyList<LogicalStackFrame>> LogicalStackContext = new();
+        public static readonly AsyncLocal<IReadOnlyList<LogicalStackFrame>> LogicalStackContext = new();
         internal static readonly AsyncLocal<List<Func<Exception, FaultAction?>>> HandlersContext = new();
         static readonly AsyncLocal<Guid?> Ctx = new();
         static readonly Subject<Exception> PreRaw = new();

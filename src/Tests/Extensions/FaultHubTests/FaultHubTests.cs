@@ -370,7 +370,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
         public void RethrowOnFault_Causes_Resilient_Stream_To_Throw() {
             var failingSource = Observable.Throw<object>(new InvalidOperationException("Test Exception"));
 
-            var testObserver = failingSource.ContinueOnFault().RethrowOnFault().Test();
+            var testObserver = failingSource.ChainFaultContext().RethrowOnFault().Test();
 
             testObserver.ErrorCount.ShouldBe(1);
             var faultHubException = testObserver.Errors.OfType<FaultHubException>().FirstOrDefault().ShouldNotBeNull();
@@ -691,11 +691,13 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
         
         private IObservable<Unit> ThrowAndCatchWithHelper(IObservable<Unit> source) 
             => source.SelectMany(_ => Observable.Throw<Unit>(new InvalidOperationException("Error from helper")))
-                .ContinueOnFault(["HelperContext"]);
+                .ContinueOnFault(["HelperContext"])
+                .PushStackFrame();
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         private IObservable<Unit> MyBusinessLogicStream() 
-            => ThrowAndCatchWithHelper(Observable.Return(Unit.Default));
+            => ThrowAndCatchWithHelper(Unit.Default.Observe())
+                .PushStackFrame();
         
         [Test]
         public void Exception_ToString_Should_Point_To_The_Calling_Method_Of_A_Higher_Level_Helper() {

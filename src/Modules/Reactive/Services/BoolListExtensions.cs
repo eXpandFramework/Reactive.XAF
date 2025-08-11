@@ -11,7 +11,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static IObservable<(BoolList boolList, BoolValueChangedEventArgs e)> ResultValueChanged(
             this IObservable<BoolList> source,bool? newValue=null,[CallerMemberName]string caller="") 
-            => source.SelectMany(item => item.ProcessEvent<BoolValueChangedEventArgs>(nameof(BoolList.ResultValueChanged),caller:caller)
+            => source.SelectMany(item => item.ProcessEvent<BoolValueChangedEventArgs>(nameof(BoolList.ResultValueChanged))
                     .Where(eventArgs => !newValue.HasValue || eventArgs.NewValue == newValue).InversePair(item));
     }
 }

@@ -20,23 +20,31 @@ namespace Xpand.Extensions.Reactive.Transform {
     public static partial class Transform {
         private static readonly ConcurrentDictionary<(Type type, string eventName),(EventInfo info,MethodInfo add,MethodInfo remove)> Events = new();
         public static readonly IScheduler ImmediateScheduler=Scheduler.Immediate;
-        [Obsolete("use "+nameof(ProcessEvent))]
-        public static IObservable<EventPattern<object>> WhenEvent(this object source,string eventName,IScheduler scheduler=null,[CallerMemberName]string caller="") 
-            => source.FromEventPattern<EventArgs>(eventName,scheduler,caller)
-                .Select(pattern => new EventPattern<object>(pattern.Sender, pattern.EventArgs));
-        // public static IObservable<T> ProcessEvent<TEventArgs,T>(this object source,string eventName,Func<TEventArgs,IObservable<T>> resilientSelector,IScheduler scheduler=null,object[] context=null,[CallerMemberName]string caller=""){
-        //     return source.FromEventPattern<TEventArgs>(eventName, scheduler, caller).Select(pattern => pattern.EventArgs)
-        //         .ToResilientEvent(resilientSelector, context, caller);
-        // }
         
-        public static IObservable<TEventArgs> ProcessEvent<TEventArgs>(this object source, string eventName, IScheduler scheduler = null, [CallerMemberName] string caller = "") where TEventArgs:EventArgs
-            => source.FromEventPattern<TEventArgs>(eventName, scheduler, caller).Select(pattern => pattern.EventArgs);
-        
-        public static IObservable<T> ProcessEvent<T>(this T source, string eventName, IScheduler scheduler = null, [CallerMemberName] string caller = "") 
-            => source.FromEventPattern<EventArgs>(eventName, scheduler, caller).Select(pattern => pattern.EventArgs).To(source);
+        public static IObservable<T> ProcessEvent<TEventArgs, T>(this object source, string eventName, Func<TEventArgs, IObservable<T>> resilientSelector, 
+            object[] context = null, [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0, 
+            IScheduler scheduler = null) where TEventArgs : EventArgs
+            => source.FromEventPattern<TEventArgs>(eventName, scheduler)
+                .SelectMany(pattern => resilientSelector(pattern.EventArgs)
+                    .PushStackFrame(memberName, filePath, lineNumber)
+                    .Catch((Exception ex) => {
+                        ex.ExceptionToPublish(context.NewFaultContext(memberName)).Publish();
+                        return Observable.Empty<T>();
+                    }));
 
-        internal static IObservable<EventPattern<TArgs>> FromEventPattern<TArgs>(this object source, string eventName,
-            IScheduler scheduler, [CallerMemberName] string caller = "") {
+
+        [Obsolete("use "+nameof(ProcessEvent))]
+        public static IObservable<EventPattern<object>> WhenEvent(this object source,string eventName,IScheduler scheduler=null) 
+            => source.FromEventPattern<EventArgs>(eventName,scheduler)
+                .Select(pattern => new EventPattern<object>(pattern.Sender, pattern.EventArgs));
+        
+        public static IObservable<TEventArgs> ProcessEvent<TEventArgs>(this object source, string eventName, IScheduler scheduler = null) where TEventArgs:EventArgs
+            => source.FromEventPattern<TEventArgs>(eventName, scheduler).Select(pattern => pattern.EventArgs);
+        
+        public static IObservable<T> ProcessEvent<T>(this T source, string eventName, IScheduler scheduler = null) 
+            => source.FromEventPattern<EventArgs>(eventName, scheduler).Select(pattern => pattern.EventArgs).To(source);
+
+        internal static IObservable<EventPattern<TArgs>> FromEventPattern<TArgs>(this object source, string eventName, IScheduler scheduler) {
             var eventInfo = source.EventInfo(eventName);
             if (eventInfo.info == null) {
                 throw new ArgumentException($"Event '{eventName}' not found on type '{source.GetType().Name}'.");
@@ -83,7 +91,7 @@ namespace Xpand.Extensions.Reactive.Transform {
                 observable = observable.ObserveOn(scheduler);
             }
 
-            return observable.TakeUntilDisposed(source as IComponent, caller);
+            return observable.TakeUntilDisposed(source as IComponent);
         }
 
         private static (EventInfo info,MethodInfo add,MethodInfo remove) EventInfo(this object source,string eventName) 
@@ -93,23 +101,11 @@ namespace Xpand.Extensions.Reactive.Transform {
                 return (eventInfo, eventInfo.AddMethod,eventInfo.RemoveMethod);
             });
 
-        public static IObservable<(TEventArgs args, TSource source)> WhenEvent<TSource,TEventArgs>(this object source, string eventName,IScheduler scheduler=null,[CallerMemberName]string caller="")  
-            => source.FromEventPattern<TEventArgs>(eventName,scheduler,caller).Select(pattern => (pattern.EventArgs,(TSource)source));
-        
+        public static IObservable<(TEventArgs args, TSource source)> WhenEvent<TSource,TEventArgs>(this object source, string eventName,IScheduler scheduler=null)  
+            => source.FromEventPattern<TEventArgs>(eventName,scheduler).Select(pattern => (pattern.EventArgs,(TSource)source));
         
         [Obsolete("use "+nameof(ProcessEvent))]
-        public static IObservable<TEventArgs> WhenEvent<TEventArgs>(this object source, string eventName,IScheduler scheduler=null,[CallerMemberName]string caller="")  
-            => source.FromEventPattern<TEventArgs>(eventName,scheduler,caller).Select(pattern => pattern.EventArgs) ;
-
-        public static IObservable<TResult> ToResilientEvent<TEventArgs,TResult>(this IObservable<TEventArgs> source,Func<TEventArgs,IObservable<TResult>> resilientSelector,object[] context=null,[CallerMemberName]string caller="", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0) 
-            => source.SelectManyItemResilient(resilientSelector,context, caller).PushStackFrame(caller,filePath,lineNumber); 
-
-        public static IObservable<T> ProcessEvent<TEventArgs,T>(this object source,string eventName,Func<TEventArgs,IObservable<T>> resilientSelector,IScheduler scheduler=null,object[] context=null,[CallerMemberName]string caller="", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0){
-            return source.FromEventPattern<TEventArgs>(eventName, scheduler, caller).Select(pattern => pattern.EventArgs)
-                .ToResilientEvent(resilientSelector, context).PushStackFrame(); 
-        }
-     
-        public static IObservable<TEventArgs> ProcessEvent<TEventArgs>(this object source, string eventName, Func<TEventArgs, IObservable<TEventArgs>> resilientSelector, IScheduler scheduler = null, object[] context = null, [CallerMemberName] string caller = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0) 
-            => source.ProcessEvent<TEventArgs, TEventArgs>(eventName, resilientSelector, scheduler, context, caller,filePath, lineNumber);
+        public static IObservable<TEventArgs> WhenEvent<TEventArgs>(this object source, string eventName,IScheduler scheduler=null)  
+            => source.FromEventPattern<TEventArgs>(eventName,scheduler).Select(pattern => pattern.EventArgs) ;
     }
 }

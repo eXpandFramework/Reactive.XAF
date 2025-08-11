@@ -9,7 +9,7 @@ using Xpand.XAF.Modules.Reactive.Services.Controllers;
 
 namespace Xpand.XAF.Modules.Reactive.Services.Actions {
     public static partial class ActionsService {
-
+    
         private static IObservable<T> WhenConcatExecution<T, TArgs>(this ActionBase action, Func<TArgs, IObservable<T>> resilientSelector, [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0) where TArgs : ActionBaseEventArgs 
             => action.WhenExecuted(e => {
                 e.Action.Enabled[nameof(WhenConcatExecution)] = false;
@@ -30,6 +30,12 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions {
         public static IObservable<T> WhenConcatExecution<T>(this ParametrizedAction simpleAction,Func<ParametrizedActionExecuteEventArgs,IObservable<T>> resilientSelector,[CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0)
             => simpleAction.WhenConcatExecution<T,ParametrizedActionExecuteEventArgs>(resilientSelector,memberName,filePath,lineNumber);
         
+        public static IObservable<T> WhenConcatExecution<T>(this PopupWindowShowAction popupWindowShowAction,Func<PopupWindowShowActionExecuteEventArgs,IObservable<T>> resilientSelector,[CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0)
+            => popupWindowShowAction.WhenConcatExecution<T,PopupWindowShowActionExecuteEventArgs>(resilientSelector,memberName,filePath,lineNumber);
+
+        public static IObservable<T> WhenConcatExecution<TAction, T>(this IObservable<TAction> source, Func<ActionBaseEventArgs, IObservable<T>> resilientSelector, [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0) where TAction:ActionBase
+            => source.SelectMany(action => action.WhenConcatExecution(resilientSelector).TakeUntilDeactivated(action.Controller)).PushStackFrame(memberName,filePath,lineNumber);
+
         public static IObservable<T> WhenConcatExecution<T>(this IObservable<SimpleAction> source, Func<SimpleActionExecuteEventArgs, IObservable<T>> resilientSelector,[CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0)
             => source.SelectMany(action => action.WhenConcatExecution(resilientSelector).TakeUntilDeactivated(action.Controller)).PushStackFrame(memberName,filePath,lineNumber);
         

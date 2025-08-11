@@ -71,6 +71,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             var logicalStack = fault.GetLogicalStackTrace().ToList();
             
             logicalStack.ShouldNotBeEmpty();
+            logicalStack.Count.ShouldBe(1);
             logicalStack.ShouldContain(frame => frame.MemberName == nameof(Level2_Intermediate_ItemResilient_Operation));
             logicalStack.ShouldNotContain(frame => frame.MemberName == nameof(Level1_Outer_Operation));
         }
@@ -99,6 +100,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             var logicalStack = fault.GetLogicalStackTrace().ToList();
 
             logicalStack.ShouldNotBeEmpty();
+            logicalStack.Count.ShouldBe(1);
             logicalStack.ShouldContain(frame => frame.MemberName == nameof(Seq_Level2_Intermediate_ItemResilient_Operation));
             logicalStack.ShouldNotContain(frame => frame.MemberName == nameof(Seq_Level1_Outer_Operation));
         }
@@ -125,6 +127,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             var logicalStack = fault.GetLogicalStackTrace().ToList();
             
             logicalStack.ShouldNotBeEmpty();
+            logicalStack.Count.ShouldBe(1);
             logicalStack.ShouldContain(frame => frame.MemberName == nameof(ResilientSelect_Operation));
         }
 
@@ -148,7 +151,32 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             var logicalStack = fault.GetLogicalStackTrace().ToList();
             
             logicalStack.ShouldNotBeEmpty();
+            logicalStack.Count.ShouldBe(1);
             logicalStack.ShouldContain(frame => frame.MemberName == nameof(ResilientDo_Operation));
+        }
+        
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private IObservable<int> ResilientSelectMany_Operation()
+            => Observable.Range(1, 3).SelectManyItemResilient(i => {
+                if (i == 2) return Observable.Throw<int>(new InvalidOperationException("SelectMany Failure"));
+                return Observable.Return(i);
+            });
+
+        [Test]
+        public void SelectManyItemResilient_Captures_Trace_From_Handling_Site() {
+            var testStream = ResilientSelectMany_Operation();
+            using var testObserver = testStream.Test();
+
+            testObserver.Items.ShouldBe(new[] { 1, 3 });
+            testObserver.CompletionCount.ShouldBe(1);
+
+            BusObserver.ItemCount.ShouldBe(1);
+            var fault = BusObserver.Items.Single().ShouldBeOfType<FaultHubException>();
+            var logicalStack = fault.GetLogicalStackTrace().ToList();
+    
+            logicalStack.ShouldNotBeEmpty();
+            logicalStack.Count.ShouldBe(1); 
+            logicalStack.ShouldContain(frame => frame.MemberName == nameof(ResilientSelectMany_Operation));
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -167,6 +195,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             var logicalStack = fault.GetLogicalStackTrace().ToList();
 
             logicalStack.ShouldNotBeEmpty();
+            logicalStack.Count.ShouldBe(1);
             logicalStack.ShouldContain(frame => frame.MemberName == nameof(ResilientDefer_Operation));
         }
         
@@ -188,6 +217,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             var logicalStack = fault.GetLogicalStackTrace().ToList();
 
             logicalStack.ShouldNotBeEmpty();
+            logicalStack.Count.ShouldBe(1);
             logicalStack.ShouldContain(frame => frame.MemberName == nameof(ResilientUsing_Stream_Fails_Operation));
         }
     }

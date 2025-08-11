@@ -19,9 +19,8 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions {
     public static partial class ActionsService {
 
         public static IObservable<T> WhenExecuting<TAction, T>(this TAction action, Func<CancelEventArgs, IObservable<T>> resilientSelector, [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0) where TAction : ActionBase
-            => action.ProcessEvent<CancelEventArgs,T>(nameof(ActionBase.Executing), e => resilientSelector(e).DoOnError(_ => e.Cancel = true))
-                .TakeUntilDisposed(action).PushStackFrame(memberName,filePath,lineNumber);
-        
+            => action.ProcessEvent<CancelEventArgs, T>(nameof(ActionBase.Executing), e => resilientSelector(e).DoOnError(_ => e.Cancel = true),
+                    [action], memberName, filePath, lineNumber).TakeUntilDisposed(action);        
         public static IObservable<T2> WhenUpdating<T2>(this ActionBase action,Func<UpdateActionEventArgs,IObservable<T2>> selector, [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0) 
             => action.Controller.WhenActivated(true)
                 .SelectManyUntilDeactivated(controller => controller.Frame.GetController<ActionsCriteriaViewController>()
@@ -60,9 +59,10 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions {
             => source.SelectMany(a => a.WhenChanged(actionChangedType));
 
         public static IObservable<TAction> WhenChanged<TAction>(this TAction action, ActionChangedType? actionChangedType = null) where TAction : ActionBase 
-            => action.ProcessEvent<ActionChangedEventArgs,TAction>(nameof(ActionBase.Changed), e => e.Observe()
-                .Where(eventArgs => actionChangedType == null || eventArgs.ChangedPropertyType == actionChangedType).To(action));
-
+            => action.ProcessEvent<ActionChangedEventArgs>(nameof(ActionBase.Changed))
+                .Where(e => actionChangedType == null || e.ChangedPropertyType == actionChangedType)
+                .To(action);
+        
         public static IObservable<Unit> Disposing<TAction>(this IObservable<TAction> source) where TAction : ActionBase 
             => source .SelectMany(item => item.ProcessEvent(nameof(ActionBase.Disposing)).ToUnit());
 

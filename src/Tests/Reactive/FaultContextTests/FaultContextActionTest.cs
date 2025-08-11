@@ -2,6 +2,8 @@
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Reflection;
+using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -27,13 +29,43 @@ using ListView = DevExpress.ExpressApp.ListView;
 
 namespace Xpand.XAF.Modules.Reactive.Tests.FaultContextTests{
     public class FaultContextActionTest:FaultContextTestBase {
+        private static ExecutionPipe CreateDynamicExecutionPipe(ExecutionPipe originalPipe, string methodName) {
+            var assemblyName = new AssemblyName("DynamicTestActionAssembly");
+            var assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
+            var moduleBuilder = assemblyBuilder.DefineDynamicModule("MainModule");
+            var typeBuilder = moduleBuilder.DefineType("DynamicType", TypeAttributes.Public);
+
+            // Store the original delegate in a static field on the new type.
+            var delegateField = typeBuilder.DefineField("originalPipeDelegate", typeof(ExecutionPipe), FieldAttributes.Public | FieldAttributes.Static);
+
+            // Define the new method with the desired name.
+            var methodBuilder = typeBuilder.DefineMethod(methodName, MethodAttributes.Public, typeof(IObservable<ActionBase>), [typeof(IObservable<ActionBase>)]);
+            
+            var ilGenerator = methodBuilder.GetILGenerator();
+            ilGenerator.Emit(OpCodes.Ldsfld, delegateField); // Load the static delegate field.
+            ilGenerator.Emit(OpCodes.Ldarg_1); // Load the 'source' argument.
+            ilGenerator.Emit(OpCodes.Callvirt, typeof(ExecutionPipe).GetMethod("Invoke")!); // Invoke the delegate.
+            ilGenerator.Emit(OpCodes.Ret); // Return the result.
+
+            var dynamicType = typeBuilder.CreateType();
+            dynamicType.GetField(delegateField.Name)!.SetValue(null, originalPipe);
+
+            var instance = Activator.CreateInstance(dynamicType);
+            return (ExecutionPipe)Delegate.CreateDelegate(typeof(ExecutionPipe), instance, methodName);
+        }
+
         [Test][Apartment(ApartmentState.STA)]
         [TestCaseSource(typeof(FaultContextActionEventSelectors), nameof(FaultContextActionEventSelectors.ExecutionSelectors))]
-        public void Action_Events_Resilience(ExecutionPipe execution, ActionFactory actionFactory,ActionConfig actionConfig,ActionRepeat actionRepeat) {
+        public void Action_Events_Resilience(ExecutionPipe execution, ActionFactory actionFactory,ActionConfig actionConfig,ActionRepeat actionRepeat, string expectedMethodName) {
+            // MODIFICATION: Create and use the dynamic execution pipe.
+            var dynamicExecution = CreateDynamicExecutionPipe(execution, expectedMethodName);
+
             using var application = Platform.Win.NewApplication<ReactiveModule>();
             var actionRegistered = application.WhenApplicationModulesManager()
                 .SelectMany(manager => manager.RegisterViewAction(TestContext.CurrentContext.Test.FullName,t => actionFactory(t.controller, t.id)));
-            var observer = execution(actionRegistered).Test();
+            
+            var observer = dynamicExecution(actionRegistered).Test();
+            
             DefaultReactiveModule(application);
             application.StartWinTest(frame => {
                 var action = frame.Action(TestContext.CurrentContext.Test.FullName);
@@ -48,6 +80,11 @@ namespace Xpand.XAF.Modules.Reactive.Tests.FaultContextTests{
             observer.ErrorCount.ShouldBe(0);
             observer.ItemCount.ShouldBe(0);
             BusObserver.ItemCount.ShouldBe(2);
+            var fault = BusObserver.Items.First().ShouldBeOfType<FaultHubException>();
+            var logicalStack = fault.GetLogicalStackTrace().ToList();
+            logicalStack.ShouldNotBeEmpty();
+            logicalStack.ShouldContain(frame => frame.MemberName == expectedMethodName);
+
             
         }
 
@@ -79,8 +116,9 @@ namespace Xpand.XAF.Modules.Reactive.Tests.FaultContextTests{
             fault.InnerException.Message.ShouldBe("Deep error from a nested method.");
 
             var output = fault.ToString();
-            var expectedPattern = $@"--- Invocation Stack ---.*{nameof(SubscribeToActionThatThrows_And_Assert_The_StackTrace)}";
+            var expectedPattern = $@"  --- Invocation Stack ---.*{nameof(SubscribeToActionThatThrows_And_Assert_The_StackTrace)}";
             output.ShouldMatch(expectedPattern, "The stack trace did not contain the calling method.");
+
         }
         
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -142,9 +180,6 @@ namespace Xpand.XAF.Modules.Reactive.Tests.FaultContextTests{
             var fault = BusObserver.Items.Single().ShouldBeOfType<FaultHubException>();
             var logicalStack = fault.GetLogicalStackTrace().ToList();
             
-            // This assertion is designed to fail with the current code.
-            // It proves that the stack is being corrupted because the wrong caller name is propagated.
-            // With the fix, the stack will contain the correct, distinct names of the chained helpers.
             logicalStack.ShouldNotBeNull();
             logicalStack.Count.ShouldBeGreaterThanOrEqualTo(2);
             logicalStack.ShouldContain(frame => frame.MemberName == nameof(SubscribeToActionWithChainedHelpers));
@@ -155,7 +190,8 @@ namespace Xpand.XAF.Modules.Reactive.Tests.FaultContextTests{
         private IObservable<Unit> SubscribeToActionWithChainedHelpers(XafApplication application) {
             return application.WhenApplicationModulesManager()
                 .SelectMany(manager => manager.RegisterViewSimpleAction(nameof(Chained_Action_Helpers_Propagate_Correct_Stack_Trace)))
-                .WhenExecuted(_ => Observable.Throw<Unit>(new InvalidOperationException("Action Failure")));
+                .WhenExecuted(_ => 100.Milliseconds().Timer().SelectMany(l => Observable.Throw<Unit>(new InvalidOperationException("Action Failure"))))
+                ;
         }
     }
 }

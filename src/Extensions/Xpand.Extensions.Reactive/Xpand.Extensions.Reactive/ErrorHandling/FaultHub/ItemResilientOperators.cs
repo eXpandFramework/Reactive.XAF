@@ -108,7 +108,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
                     ex.ExceptionToPublish(new object[] { sourceItem }.Concat(context??Enumerable.Empty<object>()).ToArray().NewFaultContext(caller)).Publish();
                     return Observable.Empty<TResult>();
                 });
-            }).PushStackFrame();
+            });
             
         public static IObservable<TResult> SelectManyItemResilient<TSource, TResult>(this IObservable<TSource> source,
             Func<TSource, IObservable<TResult>> resilientSelector, Func<IObservable<TResult>, IObservable<TResult>> retryStrategy,

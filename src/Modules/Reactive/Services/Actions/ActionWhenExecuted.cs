@@ -9,15 +9,21 @@ using Xpand.XAF.Modules.Reactive.Services.Controllers;
 
 namespace Xpand.XAF.Modules.Reactive.Services.Actions {
     public static partial class ActionsService {
-        public static IObservable<T> WhenExecuted<T>(this ActionBase action,Func<ActionBaseEventArgs,IObservable<T>> resilientSelector,[CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0) 
-            => action.ProcessEvent(nameof(ActionBase.Executed),resilientSelector).TakeUntilDisposed(action).PushStackFrame(memberName,filePath,lineNumber);
-        
+        public static IObservable<T> WhenExecuted<T>(this ActionBase action,Func<ActionBaseEventArgs,IObservable<T>> resilientSelector,[CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0) {
+            $"[WhenExecuted - ActionBase] Called by: '{memberName}'.".LogToConsole();
+            return action.ProcessEvent(nameof(ActionBase.Executed), resilientSelector).TakeUntilDisposed(action)
+                .PushStackFrame(memberName, filePath, lineNumber);
+        }
+
         public static IObservable<ActionBaseEventArgs> WhenExecuted(this ActionBase action,[CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0) 
             => action.WhenExecuted(e => e.Observe()).PushStackFrame(memberName,filePath,lineNumber);
         
-        public static IObservable<T> WhenExecuted<T>(this SimpleAction action, Func<SimpleActionExecuteEventArgs, IObservable<T>> resilientSelector, [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0)
-            => action.When(nameof(ActionBase.Executed), resilientSelector).PushStackFrame(memberName, filePath, lineNumber);
-        
+        public static IObservable<T> WhenExecuted<T>(this SimpleAction action, Func<SimpleActionExecuteEventArgs, IObservable<T>> resilientSelector, [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0) {
+            $"[WhenExecuted - SimpleAction] Called by: '{memberName}'.".LogToConsole();
+            return action.When(nameof(ActionBase.Executed), resilientSelector)
+                .PushStackFrame(memberName, filePath, lineNumber);
+        }
+
         public static IObservable<SimpleActionExecuteEventArgs> WhenExecuted(this SimpleAction action, [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0)
             => action.WhenExecuted(e => e.Observe()).PushStackFrame(memberName,filePath,lineNumber);
         
@@ -27,14 +33,21 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions {
         public static IObservable<T> WhenExecuted<T>(this ParametrizedAction parametrizedAction, Func<ParametrizedActionExecuteEventArgs, IObservable<T>> resilientSelector,[CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0)
             => parametrizedAction.When(nameof(ActionBase.Executed),resilientSelector).PushStackFrame(memberName,filePath,lineNumber);
         
-        public static IObservable<T> WhenExecuted<T>(this IObservable<SimpleAction> source, Func<SimpleActionExecuteEventArgs, IObservable<T>> resilientSelector, [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0)
-            => source.SelectMany(action => action.WhenExecuted(resilientSelector).TakeUntilDeactivated(action.Controller)).PushStackFrame(memberName,filePath,lineNumber);
-        
+        public static IObservable<T> WhenExecuted<T>(this IObservable<SimpleAction> source, Func<SimpleActionExecuteEventArgs, IObservable<T>> resilientSelector, [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0) {
+            $"[WhenExecuted - IObservable<SimpleAction>] Called by: '{memberName}'.".LogToConsole();
+            return source.PushStackFrame(memberName, filePath, lineNumber)
+                .SelectMany(action => action.WhenExecuted(resilientSelector, memberName, filePath, lineNumber)
+                    .TakeUntilDeactivated(action.Controller));
+        }
+
+        // public static IObservable<T> WhenExecuted<T>(this IObservable<SingleChoiceAction> source, Func<SingleChoiceActionExecuteEventArgs, IObservable<T>> resilientSelector, [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0)
+        //     => source.SelectMany( action => action.WhenExecuted(resilientSelector, memberName, filePath, lineNumber).TakeUntilDeactivated(action.Controller));
         public static IObservable<T> WhenExecuted<T>(this IObservable<SingleChoiceAction> source, Func<SingleChoiceActionExecuteEventArgs, IObservable<T>> resilientSelector, [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0)
-            => source.SelectMany( action => action.WhenExecuted(resilientSelector).TakeUntilDeactivated(action.Controller)).PushStackFrame(memberName,filePath,lineNumber);
-        
+            => source.PushStackFrame(memberName,filePath,lineNumber)
+                .SelectMany( action => action.WhenExecuted(resilientSelector).TakeUntilDeactivated(action.Controller));
+
         public static IObservable<T> WhenExecuted<T>(this IObservable<ParametrizedAction> source, Func<ParametrizedActionExecuteEventArgs, IObservable<T>> resilientSelector, [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0)
-            => source.SelectMany(action => action.WhenExecuted(resilientSelector).TakeUntilDeactivated(action.Controller)).PushStackFrame(memberName,filePath,lineNumber);
+            => source.SelectMany(action => action.WhenExecuted(resilientSelector, memberName, filePath, lineNumber).TakeUntilDeactivated(action.Controller));
         
         public static IObservable<T> WhenExecuted<T>(this IObservable<PopupWindowShowAction> source, Func<PopupWindowShowActionExecuteEventArgs, IObservable<T>> resilientSelector, [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0)
             => source.SelectMany(action => action.When(nameof(ActionBase.Executed),resilientSelector).TakeUntilDeactivated(action.Controller)).PushStackFrame(memberName,filePath,lineNumber);
