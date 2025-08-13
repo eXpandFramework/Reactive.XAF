@@ -31,15 +31,12 @@ namespace Xpand.XAF.Modules.Reactive.Tests.FaultContextTests {
             [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
             public int HandleExceptionCount { get; private set; }
 
-            protected override void HandleExceptionCore(Exception e) => HandleExceptionCount++;
-
-            public void SetupModules() {
-                
-                foreach (var module in Modules) {
-                    module.Setup(new ApplicationModulesManager(){Modules = Modules});
-                }
+            protected override void CreateDefaultObjectSpaceProvider(CreateCustomObjectSpaceProviderEventArgs args) {
+                // base.CreateDefaultObjectSpaceProvider(args);
             }
 
+            protected override void HandleExceptionCore(Exception e) => HandleExceptionCount++;
+            
             protected override LayoutManager CreateLayoutManagerCore(bool simple) => throw new NotImplementedException();
         }
         
@@ -84,7 +81,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests.FaultContextTests {
             application.Modules.Add(failingModule);
             application.Modules.Add(successfulModule);
             
-            application.SetupModules();
+            application.Setup();
             
             application.HandleExceptionCount.ShouldBe(1);
             
@@ -108,7 +105,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests.FaultContextTests {
                 .Test();
             var appErrorObserver = application.WhenWin().WhenCustomHandleException().Do(t => t.handledEventArgs.Handled=true).Test();
             DefaultReactiveModule(application);
-            application.StartWinTest(frame => frame.Actions("TestModuleAction").ToNowObservable()
+            application.StartWinTest2(frame => frame.Actions("TestModuleAction").ToNowObservable()
                 .Do(a => a.DoTheExecute()).Do(a => a.DoTheExecute())
                 .MergeToUnit(frame.Actions("RXModuleAction").ToNowObservable()
                     .Do(a => a.DoTheExecute()).Do(a => a.DoTheExecute()))

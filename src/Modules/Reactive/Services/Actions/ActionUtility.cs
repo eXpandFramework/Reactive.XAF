@@ -25,7 +25,8 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions {
 
         public static IObservable<TAction> WhenControllerActivated<TAction>(this IObservable<TAction> source,Func<TAction,IObservable<Unit>> mergeSelector,bool emitWhenActive=false) where TAction : ActionBase 
             => source.MergeIgnored(a =>a.Controller.WhenActivated(emitWhenActive).TakeUntil(a.Controller.WhenDeactivated())
-                .SelectMany(_ => mergeSelector(a)).To(a) );
+                .SelectMany(_ => mergeSelector(a)).To(a) )
+                .PushStackFrame();
 
         public static IObservable<T> CommitChanges<T>(this IObservable<T> source,[CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0) where T : ActionBaseEventArgs
             => source.SelectMany(e => e.Observe().Do(_ => {
@@ -36,14 +37,16 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions {
                 .Catch((Exception ex) => {
                     ex.ExceptionToPublish(new object[] { memberName, e.Action }.NewFaultContext(memberName)).Publish();
                     return Observable.Empty<T>();
-                }));
+                }))
+                .PushStackFrame();
         
         public static IObservable<SingleChoiceAction> AddItems(this IObservable<SingleChoiceAction> source,Func<SingleChoiceAction,IObservable<Unit>> addItems,IScheduler scheduler=null,[CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0)
             => source.MergeIgnored(action => action.Controller.WhenActivated(emitWhenActive: true)
                 .SelectMany(_ => action.View().WhenCurrentObjectChanged().StartWith(action.View()).TakeUntilDisposed(action))
                 .WaitUntilInactive(1, scheduler: scheduler).ObserveOnContextMaybe()
                 .Do(_ => action.Items.Clear()).SelectMany(_ => addItems(action)
-                    .PushStackFrame( memberName,filePath,lineNumber)).TakeUntilDisposed(action));
+                    .PushStackFrame( memberName,filePath,lineNumber)).TakeUntilDisposed(action))
+                .PushStackFrame();
 
         public static IObservable<(TModule module, Frame frame)> Action<TModule>(
            this IObservable<Frame> source) where TModule : ModuleBase 
@@ -73,7 +76,8 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions {
                if (targetWindow.HasValue) {
                   parameters.TargetWindow = targetWindow.Value;
                }
-            });
+                })
+                .PushStackFrame();
 
         public static IObservable<T> TakeUntilDisposed<T>(this IObservable<T> source, ActionBase component) 
             => source.TakeUntil(component.WhenDisposed());
@@ -117,13 +121,15 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions {
                         e.ShowViewParameters.CreatedView.Close();
                         return Observable.Empty<DialogController>();
                     })
-                    .IgnoreElements().To<DialogController>().StartWith(dialogController));
+                    .IgnoreElements().To<DialogController>().StartWith(dialogController))
+                .PushStackFrame();
         }
 
         public static IObservable<Frame> LinkObject(this PopupWindowShowAction action) 
             => action.Application.WhenFrame().When(TemplateContext.LookupWindowContextName).Take(1)
                 .If(frame => ((ILookupPopupFrameTemplate)frame.Template).IsSearchEnabled,frame => frame.GetController<FilterController>().FullTextFilterAction
                     .Trigger(frame.View.WhenObjects().Take(1).To(frame)),frame => frame.View.WhenObjects().Take(1).To(frame) ).IgnoreElements()
-                .Merge(action.Trigger(action.WhenExecuteCompleted().To(action.Frame())));
+                .Merge(action.Trigger(action.WhenExecuteCompleted().To(action.Frame())))
+                .PushStackFrame();
     }
 }

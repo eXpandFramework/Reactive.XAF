@@ -13,13 +13,13 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions {
         public static IObservable<TAction> WhenExecuteFinished<TAction>(this TAction action,bool customEmit=false, [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0) where TAction : ActionBase
             => customEmit || (action.Data.ContainsKey(nameof(ExecutionFinished)) && (bool)action.Data[nameof(ExecutionFinished)])
                 ? ExecuteFinishedSubject.Where(a => a == action).Cast<TAction>() 
-                : action.ProcessEvent<EventArgs,TAction>(nameof(ActionBase.ExecuteCompleted),_ => action.Observe()).TakeUntilDisposed(action).PushStackFrame(memberName, filePath, lineNumber);
+                : action.ProcessEvent<EventArgs,TAction>(nameof(ActionBase.ExecuteCompleted),_ => action.Observe()).TakeUntilDisposed(action).PushStackFrame(memberName, filePath, lineNumber)
+                    .PushStackFrame();
 
         public static IObservable<TAction> WhenExecuteFinished<TAction>(this IObservable<TAction> source,
             bool customEmit = false, [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0) where TAction : ActionBase
-            => source.SelectMany(a => a.WhenExecuteFinished(customEmit, memberName, filePath, lineNumber));
-
-
+            => source.SelectMany(a => a.WhenExecuteFinished(customEmit, memberName, filePath, lineNumber))
+                .PushStackFrame();
 
         private static readonly ISubject<ActionBase> ExecuteFinishedSubject = Subject.Synchronize(new Subject<ActionBase>());
         

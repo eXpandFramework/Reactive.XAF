@@ -11,7 +11,12 @@ namespace Xpand.Extensions.Reactive.Transform {
             var takeAndReplay = source.TakeAndReplay(1);
             return mode == ConnectionMode.AutoConnect ? takeAndReplay.AutoConnect() : takeAndReplay.RefCount();
         }
-        
+
+        public static IObservable<T> AutoReplayFirst<T>(this IObservable<T> source)
+            => source.AutoReplay(1);
+        public static IObservable<T> AutoReplay<T>(this IObservable<T> source,int count) 
+            => source.Replay(count).AutoConnect(0);
+
         public enum ConnectionMode{
             AutoConnect,
             RefCount

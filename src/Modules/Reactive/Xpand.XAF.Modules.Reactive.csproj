@@ -36,6 +36,69 @@
     <PackageReference Include="Serialize.Linq" Version="2.0.0" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Update="Services\FrameExtensions.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Services\FrameExtensions.Nested.cs">
+      <DependentUpon>FrameExtensions.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Services\ObjectSpaceExtensions.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Services\ObjectSpaceExtensions.Nested.cs">
+      <DependentUpon>ObjectSpaceExtensions.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Services\ObjectSpaceProviderExtensions.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Services\ObjectSpaceProviderExtensions.Nested.cs">
+      <DependentUpon>ObjectSpaceProviderExtensions.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Services\ViewExtensions.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Services\ViewExtensions.ViewItem.cs">
+      <DependentUpon>ViewExtensions.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Services\XafApplicationRXExtensions.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Services\XafApplicationRXExtensions.WebAPI.cs">
+      <DependentUpon>XafApplicationRXExtensions.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Services\XafApplicationRXExtensions.WinAPI.cs">
+      <DependentUpon>XafApplicationRXExtensions.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Services\XafApplicationRXExtensions.Nested.cs">
+      <DependentUpon>XafApplicationRXExtensions.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Services\CollectionSourceExtensions.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Services\CollectionSourceService.NonPersistentPropertyCollectionSource.cs">
+      <DependentUpon>CollectionSourceService.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Services\AttributesExtensions.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Services\AttributesExtensions.Actions.cs">
+      <DependentUpon>AttributesExtensions.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Services\AttributesExtensions.Model.cs">
+      <DependentUpon>AttributesExtensions.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Services\AttributesExtensions.TypesInfo.cs">
+      <DependentUpon>AttributesExtensions.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Services\AttributesExtensions.Validation.cs">
+      <DependentUpon>AttributesExtensions.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Services\AttributesExtensions.AppearanceToolTip.cs">
+      <DependentUpon>AttributesExtensions.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
     <Reference Include="Xpand.Extensions">
       <HintPath>..\..\..\bin\Xpand.Extensions.dll</HintPath>
     </Reference>

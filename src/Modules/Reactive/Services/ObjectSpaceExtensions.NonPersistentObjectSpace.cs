@@ -8,6 +8,7 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using Fasterflect;
 using Xpand.Extensions.LinqExtensions;
+using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.Extensions.XAF.NonPersistentObjects;
@@ -15,28 +16,17 @@ using NonPersistentBaseObject = DevExpress.ExpressApp.NonPersistentBaseObject;
 
 namespace Xpand.XAF.Modules.Reactive.Services {
     public static class NonPersistentObjectsExtensions {
+        #region High-Level Logical Operations
         internal static IObservable<Unit> ConnectObjectString(this ApplicationModulesManager manager) {
             return manager.WhenGeneratingModelNodes<IModelViews>().SelectMany().OfType<IModelDetailView>()
                 .SelectMany(view => view.MemberViewItems()).Where(item =>
                     item.ModelMember.MemberInfo.Owner.Type == typeof(ObjectString) &&
                     item.PropertyName == nameof(ObjectString.Caption))
-                // .Do(item => item.PropertyEditorType = item.PropertyEditorTypes.FirstOrDefault(type =>
-                    // type.FullName == "DevExpress.ExpressApp.Blazor.Editors.CheckedLookupStringPropertyEditor"))
-                .ToUnit();
-            // .Merge(manager.WhenApplication(application => {
-            //     var detailViewCreated = application.WhenDetailViewCreated().Where(t => t.e.View.ObjectTypeInfo.Type!=typeof(ObjectString))
-            //             .SelectMany(t => application.WhenFrame().WhenFrame(typeof(ObjectString)).WhenFrame(ViewType.DetailView)
-            //                 .SelectMany(frame => ((ObjectString) frame.View.AsDetailView().CurrentObject).Datasource
-            //                     .Do(e => {
-            //                         e.Instance.Objects
-            //                     })))
-            //         ;
-            //     
-            //     return datasource.CombineLatest(detailViewCreated);
-            // }));
+                .ToUnit().PushStackFrame();
         }
+        #endregion
 
-        
+        #region Low-Level Plumbing
         public static BindingList<ObjectString> ToObjectString(this IEnumerable<object> source, IObjectSpace objectSpace)
             => source.Select(o1 => {
                 var isModified =objectSpace.IsDisposed || objectSpace.ModifiedObjects.Contains(o1);
@@ -52,5 +42,6 @@ namespace Xpand.XAF.Modules.Reactive.Services {
 
         public static void MarkChanged(this NonPersistentBaseObject baseObject,params string[] memberNames) 
             => memberNames.ForEach(s => baseObject.CallMethod("OnPropertyChanged", s));
+        #endregion
     }
 }

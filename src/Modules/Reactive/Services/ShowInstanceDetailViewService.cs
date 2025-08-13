@@ -5,6 +5,7 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.SystemModule;
 using Xpand.Extensions.Reactive.Combine;
+using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.ActionExtensions;
 using Xpand.Extensions.XAF.Attributes;
@@ -15,6 +16,7 @@ using Xpand.XAF.Modules.Reactive.Services.Controllers;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
     static class ShowInstanceDetailViewService {
+        #region High-Level Logical Operations
         internal static IObservable<Unit> ShowInstanceDetailView(this XafApplication application,params  Type[] objectTypes) 
             => application.WhenFrameCreated().WhenViewControllersActivated()
                 .WhenFrame(objectTypes).WhenFrame(ViewType.ListView).Where(frame => frame.View.Model.ToListView().MasterDetailMode==MasterDetailMode.ListViewAndDetailView)
@@ -22,13 +24,15 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                     .DoWhen(e =>e.ListViewCurrentObject!=null,e => 
                         e.DetailView = frame.View.ToListView().NewDetailView(e.ListViewCurrentObject)))
                 .MergeToUnit(application.WhenViewOnFrame().WhenFrame(objectTypes).WhenFrame(ViewType.ListView)
-                    // .Where(frame => frame.View.ObjectTypeInfo.FindAttribute<ShowInstanceDetailViewAttribute>().Property!=null)
                     .Where(frame => frame.View.Model.ToListView().MasterDetailMode==MasterDetailMode.ListViewOnly)
                     .WhenIsNotOnLookupPopupTemplate().ToController<ListViewProcessCurrentObjectController>()
                     .CustomProcessSelectedItem(OverwriteShowInstanceDetailView)
                     .Where(e => e.View().ObjectTypeInfo.Type.IsInstanceOfType(e.View().CurrentObject))
-                    .Do(e => e.ShowViewParameters.CreatedView = e.View().ToListView().NewDetailView(e.Action.View().CurrentObject)));
+                    .Do(e => e.ShowViewParameters.CreatedView = e.View().ToListView().NewDetailView(e.Action.View().CurrentObject)))
+                .PushStackFrame();
+        #endregion
 
+        #region Low-Level Plumbing
         private static bool OverwriteShowInstanceDetailView(SimpleActionExecuteEventArgs e) {
             var objectTypeInfo = e.View().ObjectTypeInfo;
             var property = objectTypeInfo.FindAttribute<ShowInstanceDetailViewAttribute>().Property;
@@ -42,9 +46,9 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             o = property is { } prop ? o.GetType().ToTypeInfo().FindMember(prop).GetValue(o) : o;
             if (o==null) return null;
             var objectSpace = property==null? (listView.MasterDetailMode==MasterDetailMode.ListViewOnly?listView.Application().CreateObjectSpace():listView.ObjectSpace):listView.Application().CreateObjectSpace();
-            // var objectSpace = listView.Application().CreateObjectSpace();
             var modelClass = o.GetType().GetModelClass();
             return modelClass==null ? null : listView.Application().CreateDetailView(objectSpace, modelClass.DefaultDetailView,property != null || listView.IsRoot, objectSpace.GetObject(o));
         }
+        #endregion
     }
 }

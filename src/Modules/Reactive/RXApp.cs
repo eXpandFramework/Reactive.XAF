@@ -7,7 +7,6 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Threading;
 using DevExpress.ExpressApp;
@@ -21,7 +20,6 @@ using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Combine;
-using Xpand.Extensions.Reactive.ErrorHandling;
 using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
@@ -33,12 +31,11 @@ using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.Extensions.XAF.ModuleExtensions;
 using Xpand.Extensions.XAF.ObjectExtensions;
 using Xpand.Extensions.XAF.TypesInfoExtensions;
-using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Security;
 
 namespace Xpand.XAF.Modules.Reactive{
-	public static class RxApp{
+    public static class RxApp{
         static readonly ReplaySubject<SynchronizationContext> ContextSubject = new();
         static readonly Subject<ApplicationModulesManager> ApplicationModulesManagerSubject=new();
         static readonly Subject<(List<Controller> __result, Type baseType, IModelApplication modelApplication, View view)> WhenControllerCreatedSubject=new();
@@ -91,8 +88,8 @@ namespace Xpand.XAF.Modules.Reactive{
 
         internal static IObservable<Unit> NonPersistentChangesEnabledAttribute(this XafApplication application) 
             => application.WhenObjectViewCreated().Where(view => view.ObjectTypeInfo.FindAttributes<NonPersistentChangesEnabledAttribute>().Any())
-                .Do(view => view.ObjectSpace.NonPersistentChangesEnabled = true)
-                .ToUnit();
+                .Do(view => view.ObjectSpace.NonPersistentChangesEnabled = true).ToUnit()
+                .PushStackFrame();
 
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager)
         => manager.Attributes()
@@ -102,9 +99,10 @@ namespace Xpand.XAF.Modules.Reactive{
                 .Merge(manager.WhenApplication(application =>application.Connect()
                     .MergeToUnit(application.WhenSynchronizationContext().Do(context => ContextSubject.OnNext(context)))
                     .Merge(manager.SetupPropertyEditorParentView()))
-        );
+        )
+        .PushStackFrame();
 
-        public static IObservable<Unit> ThrowOnContext(this Exception exception,[CallerMemberName]string caller="",[CallerLineNumber] int line=0) {
+        public static IObservable<Unit> ThrowOnContext(this Exception exception) {
             return ContextSubject.SelectMany(_ => Observable.Throw<Unit>(exception)).ToUnit();
         }
 
@@ -114,9 +112,7 @@ namespace Xpand.XAF.Modules.Reactive{
                     .PreFix(typeof(XafApplication).Method(nameof(XafApplication.Exit)),true);
             }
             
-            return application.HandleFaultBusException()
-                    
-                    .Merge(application.PatchAuthentication())
+            return application.PatchAuthentication()
                     .Merge(application.WhenNonPersistentPropertyCollectionSource())
                     .Merge(application.PatchObjectSpaceProvider())
                     .Merge(application.NonPersistentChangesEnabledAttribute())
@@ -125,13 +121,10 @@ namespace Xpand.XAF.Modules.Reactive{
                     .Merge(application.FireChanged())
                     .Merge(application.ShowMessages())
                     .Merge(application.ExplicitModificationAttribute())
-                    .Merge(application.ShowInstanceDetailView());
+                    .Merge(application.ShowInstanceDetailView())
+                    .PushStackFrame();
         }
         
-        private static IObservable<Unit> HandleFaultBusException(this XafApplication application)
-            => FaultHub.Bus.Do(exception => {
-                // application.HandleException(exception);
-            }).ToUnit();
         
         private static IObservable<Unit> ExplicitModificationAttribute(this XafApplication application)
             => application.WhenSetupComplete()
@@ -153,11 +146,13 @@ namespace Xpand.XAF.Modules.Reactive{
                             }));
                 })
                 .Switch()
-                .ToUnit());
+                .ToUnit())
+                .PushStackFrame();
         
         private static IObservable<Unit> ShowInstanceDetailView(this XafApplication application)
             => application.WhenSetupComplete().SelectMany(_ => application.ShowInstanceDetailView(application.TypesInfo
-                    .PersistentTypes.Attributed<ShowInstanceDetailViewAttribute>().Types(true).Select(info => info.Type).ToArray())).ToUnit();
+                    .PersistentTypes.Attributed<ShowInstanceDetailViewAttribute>().Types(true).Select(info => info.Type).ToArray())).ToUnit()
+                    .PushStackFrame();
         
         private static IObservable<Unit> FireChanged(this XafApplication application)
             => application.WhenSetupComplete().SelectMany(_ => {
@@ -171,7 +166,8 @@ namespace Xpand.XAF.Modules.Reactive{
                             .ObserveOnContext().Select(o => o);
                     })
                     .ToUnit();
-            });
+            })
+            .PushStackFrame();
         
         private static IObservable<Unit> ReloadWhenChanged(this XafApplication application)
             => application.WhenSetupComplete().SelectMany(_ => {
@@ -193,7 +189,8 @@ namespace Xpand.XAF.Modules.Reactive{
                             }
                         })
                         .ToUnit());
-            });
+            })
+            .PushStackFrame();
 
         private static IEnumerable<Type> AttributeTypes(this ReloadWhenChangeAttribute attribute, IMemberInfo memberInfo) 
             => attribute.Types.Any()?attribute.Types: memberInfo.Owner.Type.RealType().YieldItem();
@@ -221,10 +218,12 @@ namespace Xpand.XAF.Modules.Reactive{
                         if (models.Any()){
                             t.e.AddExtraDiffStore("After Setup", new ModelStoreBase.EmptyModelStore());
                         }
-                    })).ToUnit();
+                    })).ToUnit()
+                    .PushStackFrame();
 
         private static IObservable<Unit> SetupPropertyEditorParentView(this ApplicationModulesManager applicationModulesManager) 
-            => applicationModulesManager.WhereApplication().ToObservable().SelectMany(application => application.SetupPropertyEditorParentView());
+            => applicationModulesManager.WhereApplication().ToObservable().SelectMany(application => application.SetupPropertyEditorParentView())
+                .PushStackFrame();
 
         
         internal static IObservable<ApplicationModulesManager> ApplicationModulesManager => ApplicationModulesManagerSubject.AsObservable();

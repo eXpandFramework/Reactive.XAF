@@ -31,17 +31,14 @@ using DevExpress.Xpo;
 using Fasterflect;
 using Moq;
 using Moq.Protected;
-using NUnit.Framework;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.ExceptionExtensions;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Numeric;
-using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
-using Xpand.Extensions.StringExtensions;
 using Xpand.Extensions.XAF.ActionExtensions;
 using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.Extensions.XAF.ViewExtensions;
@@ -261,7 +258,7 @@ namespace Xpand.TestsLib.Common{
         };
 
         public static TestObserver<T> StartWinTest<T>(this XafApplication application, IObservable<T> test,int delay = 200) 
-            => application.Start(application.WhenFrame(Nesting.Root).Take(1)
+            => application.Start2(application.WhenFrame(Nesting.Root).Take(1)
                 .Do(_ => SynchronizationContext.SetSynchronizationContext((SynchronizationContext)AppDomain.CurrentDomain
                     .GetAssemblyType("System.Windows.Forms.WindowsFormsSynchronizationContext").CreateInstance()))
                 .SelectMany(frame => (frame.Template)
@@ -269,21 +266,55 @@ namespace Xpand.TestsLib.Common{
                     .SelectMany(_ => test.BufferUntilCompleted().Do(_ => application.Exit()).SelectMany()))
                 .DoNotComplete(),delay);
         
-        public static TestObserver<T> StartWinTest<T>(this XafApplication application, Func<Frame,IObservable<T>> testFactory,int delay = 200) 
-            => application.Start(application.WhenFrame(Nesting.Root).Take(1)
-                .Do(_ => SynchronizationContext.SetSynchronizationContext((SynchronizationContext)AppDomain.CurrentDomain
-                    .GetAssemblyType("System.Windows.Forms.WindowsFormsSynchronizationContext").CreateInstance()))
-                .SelectMany(frame => (frame.Template)
-                    .WhenEvent("Activated").Take(1).WaitUntilInactive(2.Seconds()).Take(1).ObserveOnContext()
-                    .SelectMany(_ => testFactory(frame).BufferUntilCompleted().Do(_ => application.Exit()).SelectMany()))
-                .DoNotComplete(),delay);
+        [Obsolete]
+        public static TestObserver<T> StartWinTest2<T>(this XafApplication application, Func<Frame,IObservable<T>> testFactory,int delay = 200) {
+            var testWithProperContext = Observable.Defer(() => {
+                // 1. Save the original context provided by the test runner.
+                var originalSyncContext = SynchronizationContext.Current;
+        
+                // 2. Set the required WindowsFormsSynchronizationContext.
+                var winformsSyncContextType = AppDomain.CurrentDomain.GetAssemblyType("System.Windows.Forms.WindowsFormsSynchronizationContext");
+                SynchronizationContext.SetSynchronizationContext((SynchronizationContext)winformsSyncContextType.CreateInstance());
 
-        public static TestObserver<T> Start<T>(this XafApplication application,IObservable<T> test,int delay=200) {
+                // 3. Define the original test logic.
+                var testObservable = application.WhenFrame(Nesting.Root).Take(1)
+                    .SelectMany(frame => (frame.Template)
+                        .WhenEvent("Activated").Take(1).WaitUntilInactive(2.Seconds()).Take(1).ObserveOnContext()
+                        .SelectMany(_ => testFactory(frame).BufferUntilCompleted().Do(_ => application.Exit()).SelectMany()));
+        
+                // 4. Use the Finally operator to GUARANTEE that the original context is restored
+                //    when the test completes, fails, or is disposed.
+                return testObservable.Finally(() => SynchronizationContext.SetSynchronizationContext(originalSyncContext));
+            });
+
+            return application.Start2(testWithProperContext.DoNotComplete(), delay);
+        }
+        public static IObservable<T> StartWinTest<T>(this XafApplication application, Func<Frame,IObservable<T>> testFactory,int delay = 200) 
+            => application.Start(Observable.Defer(() => {
+                var originalSyncContext = SynchronizationContext.Current;
+                var winformsSyncContextType = AppDomain.CurrentDomain.GetAssemblyType("System.Windows.Forms.WindowsFormsSynchronizationContext");
+                SynchronizationContext.SetSynchronizationContext((SynchronizationContext)winformsSyncContextType.CreateInstance());
+                return application.WhenFrame(Nesting.Root).Take(1)
+                    .SelectMany(frame => (frame.Template)
+                        .WhenEvent("Activated").Take(1).WaitUntilInactive(2.Seconds()).Take(1).ObserveOnContext()
+                        .SelectMany(_ => testFactory(frame).BufferUntilCompleted().Do(_ => application.Exit()).SelectMany()))
+                    .Finally(() => SynchronizationContext.SetSynchronizationContext(originalSyncContext));
+            }), delay);
+
+        public static TestObserver<T> Start2<T>(this XafApplication application,IObservable<T> test,int delay=200) {
             var testObserver = test
-                .AsyncFinally(async () => await Task.Delay(delay).ToObservable().Do(_ => application.Exit()).ToTask())
+                // .AsyncFinally(async () => await Task.Delay(delay).ToObservable().Do(_ => application.Exit()).ToTask())
                 .Test();
             application.CallMethod("Start");
             return testObserver;
+        }
+        public static IObservable<T> Start<T>(this XafApplication application,IObservable<T> test,int delay=200) {
+            var testObserver = test
+                // .AsyncFinally(async () => await Task.Delay(delay).ToObservable().Do(_ => application.Exit()).ToTask())
+                // .Test()
+                ;
+            
+            return testObserver.Merge(application.DeferAction(_ => application.CallMethod("Start")).To<T>().IgnoreElements());
         }
 
         [SuppressMessage("ReSharper", "SuspiciousTypeConversion.Global")]
@@ -401,7 +432,7 @@ namespace Xpand.TestsLib.Common{
         
         public static XafApplication NewXafApplication<TModule>(this Platform platform, bool transmitMessage=true, bool handleExceptions=true)
 	        where TModule : ModuleBase {
-	        Tracing.Initialize(AppDomain.CurrentDomain.ApplicationPath(), TraceLevel.Verbose.ToString());
+	        Tracing.Initialize(AppDomain.CurrentDomain.ApplicationPath(), nameof(TraceLevel.Verbose));
 	        XafApplication application;
 	        ApplicationModulesManager.UseStaticCache = false;
 	        string applicationTypeName;
@@ -558,6 +589,7 @@ namespace Xpand.TestsLib.Common{
                 : Unit.Default.Observe();
 
         
+        [SuppressMessage("ReSharper", "UnusedParameter.Global")]
         public static IObservable<Unit> ClientConnect(this ITestApplication application) 
             => Process.GetProcessesByName("Xpand.XAF.Modules.Reactive.Logger.Client.Win").Any()
                 ? TraceEventHub.Connecting.TakeFirst().SubscribeReplay()
@@ -581,7 +613,7 @@ namespace Xpand.TestsLib.Common{
         private void ApplicationOnLoggingOn(object sender, LogonEventArgs e) => ((AuthenticationStandardLogonParameters) e.LogonParameters).UserName = NotAdmin?"User":"Admin";
 
         public override IEnumerable<ModuleUpdater> GetModuleUpdaters(IObjectSpace objectSpace, Version versionFromDB) 
-            => new[]{new DefaultUserModuleUpdater(objectSpace, versionFromDB,UserId,!NotAdmin)};
+            => [new DefaultUserModuleUpdater(objectSpace, versionFromDB,UserId,!NotAdmin)];
 
         public Guid UserId{ get; set; }
         public bool NotAdmin { get; set; }

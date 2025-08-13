@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Reactive;
 using System.Reactive.Linq;
-using akarnokd.reactive_extensions;
 using NUnit.Framework;
 using Xpand.Extensions.Numeric;
 using Xpand.Extensions.Reactive.ErrorHandling;
@@ -10,10 +9,9 @@ using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 
 namespace Xpand.Extensions.Tests.FaultHubTests{
     public class FaultHubTestBase {
+        protected List<Exception> BusEvents;
+        private IDisposable _busSubscription;
         public FaultHubTestBase() => FaultHub.Logging = true;
-
-        protected TestObserver<Exception> BusObserver;
-        protected TestObserver<Exception> PreBusObserver;
 
         protected class TestResource : IDisposable {
             public bool IsDisposed { get; private set; }
@@ -24,6 +22,11 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
             }
         }
 
+        [TearDown]
+        public void TearDown() {
+            _busSubscription?.Dispose();
+        }
+        
         protected static IEnumerable<TestCaseData> RetrySelectors() {
             yield return new TestCaseData(RetrySelector).SetName("Retry");
             yield return new TestCaseData(RetrySelectorWithBackoff).SetName("RetrySelector");
@@ -34,8 +37,8 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
         [SetUp]
         public void Setup(){
             FaultHub.Seen.Clear();  
-            BusObserver = FaultHub.Bus.Test();
-            PreBusObserver = FaultHub.PreBus.Test();
+            BusEvents = new List<Exception>();
+            _busSubscription = FaultHub.Bus.Subscribe(BusEvents.Add);
         }
     }
 }

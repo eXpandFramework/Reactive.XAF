@@ -15,7 +15,6 @@ using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.FileExtensions;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Numeric;
-using Xpand.Extensions.Reactive.ErrorHandling;
 using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.StringExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
@@ -52,7 +51,7 @@ namespace Xpand.TestsLib.Common{
             }
         }
 
-        public static string EasyTestTraceLevel = "Verbose";
+        public static readonly string EasyTestTraceLevel = "Verbose";
         [SuppressMessage("ReSharper", "InconsistentNaming")]
         public static bool Get(string name,ref object __result) {
             if (name == nameof(EasyTestTraceLevel)) {
@@ -140,8 +139,10 @@ namespace Xpand.TestsLib.Common{
 
         public static TraceSource TraceSource{ get; }
         
-        protected TestObserver<Exception> BusObserver;
-        protected TestObserver<Exception> PreBusObserver;
+        protected TestObserver<Exception> BusObserver = null!;
+        protected List<Exception> BusEvents = null!;
+        
+        private IDisposable _busSubscription = null!;
          public const string NotImplemented = "NotImplemented";
 
         [SetUp]
@@ -149,11 +150,14 @@ namespace Xpand.TestsLib.Common{
             TestContext.Out.Write(TestContext.CurrentContext.Test.FullName);
             FaultHub.Seen.Clear();  
             BusObserver = FaultHub.Bus.Test();
-            PreBusObserver = FaultHub.PreBus.Test();
+            BusEvents = new List<Exception>();
+            _busSubscription = FaultHub.Bus.Subscribe(BusEvents.Add);
         }
 
         [TearDown]
         public virtual void Dispose() {
+            BusObserver.Dispose();
+            _busSubscription.Dispose();
             ResetXAF();
             try{
                 LogPaths.ForEach(path => {

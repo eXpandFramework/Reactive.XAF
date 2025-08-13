@@ -16,18 +16,17 @@ namespace Xpand.Extensions.Tests.FaultHubTests.POC{
     [TestFixture]
     public class AsyncLocalPoc {
         public static readonly AsyncLocal<string> TestContext = new();
-
-
         
         [Test]
-        public async Task SelectMany_WithConcurrentItems_Context_Is_Preserved() {
-            var capturedContexts = new ConcurrentBag<string>();
+        public async Task AsyncLocal_Context_Is_Correctly_Isolated_In_Concurrent_SelectMany() {
+            var capturedContexts = new ConcurrentDictionary<int, string>();
 
             var stream = Observable.Range(1, 3)
                 .SelectMany(i => {
                     var innerStream = Observable.Timer(TimeSpan.FromMilliseconds(i * 20))
-                        .Select(_ => TestContext.Value);
-                    
+                        .Select(_ => TestContext.Value)
+                        .Do(ctx => capturedContexts.TryAdd(i, ctx));
+
                     return Observable.Using(
                         () => {
                             var contextValue = $"CONTEXT_FOR_{i}";
@@ -36,14 +35,15 @@ namespace Xpand.Extensions.Tests.FaultHubTests.POC{
                         },
                         _ => innerStream
                     );
-                })
-                .Do(capturedContexts.Add);
+                });
 
             var observer = await stream.Test().AwaitDoneAsync(1.ToSeconds());
 
             observer.ItemCount.ShouldBe(3);
-            capturedContexts.Skip(1).First().ShouldNotBe("CONTEXT_FOR_1");
-        }
+            capturedContexts.Count.ShouldBe(3);
+            capturedContexts[1].ShouldBe("CONTEXT_FOR_1");
+            capturedContexts[2].ShouldBe("CONTEXT_FOR_2");
+            capturedContexts[3].ShouldBe("CONTEXT_FOR_3");        }
         
         [Test]
         public async Task Context_Set_BEFORE_SelectMany_Flows_Correctly_To_Concurrent_Operations() {
@@ -90,7 +90,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.POC{
             
 
             var contextIsCorrupted = capturedContexts.Any(kvp => kvp.Value != $"CONTEXT_FOR_{kvp.Key}");
-            contextIsCorrupted.ShouldBe(false, "The AsyncLocal context was not corrupted, which is unexpected in this concurrent scenario.");
+            contextIsCorrupted.ShouldBe(false, "The AsyncLocal context was corrupted, indicating a failure in ExecutionContext flow.");
         }        
         
         [Test]

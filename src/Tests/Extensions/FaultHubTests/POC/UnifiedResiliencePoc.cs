@@ -2,18 +2,16 @@
 using System.Linq;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
-using akarnokd.reactive_extensions;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
+using Xpand.Extensions.Reactive.Utility;
 
 namespace Xpand.Extensions.Tests.FaultHubTests.POC {
-    // A local, simplified version of the core resilience primitive for this POC.
 
     [TestFixture]
     public class UnifiedResiliencePoc : FaultHubTestBase {
-        // This is a high-level, "Item Resilient" operator built according to the new architecture.
-        // It is self-contained and resilient by default.
         private IObservable<int> PocSelectItemResilient(IObservable<int> source,
             [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0) {
             
@@ -24,39 +22,32 @@ namespace Xpand.Extensions.Tests.FaultHubTests.POC {
                     }
                     return Observable.Return(i * 10);
                 });
-
-                // It uses the core resilience primitive internally.
-                // The context of *this* method (PocSelectItemResilient) is captured automatically.
-                return itemStream.ApplyPocResilience(new object[] { i }, memberName, filePath, lineNumber);
-            });
+                
+                return itemStream.ApplyPocResilience([i], memberName, filePath, lineNumber);
+            })
+            .PushStackFrame();
         }
 
         [Test]
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public void High_Level_Operator_Automatically_Captures_Call_Site_Context() {
+        public async Task High_Level_Operator_Automatically_Captures_Call_Site_Context() {
             var source = Observable.Range(1, 3);
-
-            // The call site is clean. There is no manual call to PushStackFrame or ContinueOnFault.
-            // The resilience is built into the PocSelectItemResilient operator itself.
             var testStream = PocSelectItemResilient(source);
 
-            using var testObserver = testStream.Test();
+            var result = await testStream.Capture();
 
-            testObserver.Items.ShouldBe(new[] { 10, 30 });
-            testObserver.CompletionCount.ShouldBe(1);
-            testObserver.ErrorCount.ShouldBe(0);
+            result.Items.ShouldBe([10, 30]);
+            result.IsCompleted.ShouldBe(true);
+            result.Error.ShouldBeNull();
 
-            BusObserver.ItemCount.ShouldBe(1);
-            var fault = BusObserver.Items.Single().ShouldBeOfType<FaultHubException>();
+            BusEvents.Count.ShouldBe(1);
+            var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
             var logicalStack = fault.GetLogicalStackTrace().ToList();
 
             logicalStack.ShouldNotBeEmpty();
             
-            // This assertion proves that the logical stack trace correctly starts with the
-            // name of the test method that called the high-level operator.
-            // The context was captured and propagated automatically.
-            logicalStack[0].MemberName.ShouldBe(nameof(PocSelectItemResilient));
-            logicalStack[1].MemberName.ShouldBe(nameof(High_Level_Operator_Automatically_Captures_Call_Site_Context));
+            logicalStack[1].MemberName.ShouldBe(nameof(PocSelectItemResilient));
+            logicalStack[0].MemberName.ShouldBe(nameof(High_Level_Operator_Automatically_Captures_Call_Site_Context));
         }
     }
 
@@ -68,8 +59,6 @@ namespace Xpand.Extensions.Tests.FaultHubTests.POC {
             [CallerFilePath] string filePath = "", 
             [CallerLineNumber] int lineNumber = 0) {
             
-            // This is the core of the new architecture. The primitive operator
-            // is responsible for establishing the resilience boundary.
             return source
                 .PushStackFrame(memberName, filePath, lineNumber)
                 .Catch((Exception ex) => {

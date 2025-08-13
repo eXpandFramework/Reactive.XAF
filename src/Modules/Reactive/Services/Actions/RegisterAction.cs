@@ -11,6 +11,7 @@ using DevExpress.ExpressApp.Core;
 using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using HarmonyLib;
+using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
@@ -19,20 +20,13 @@ using Xpand.Extensions.XAF.XafApplicationExtensions;
 namespace Xpand.XAF.Modules.Reactive.Services.Actions{
     
     public static partial class ActionsService{
-	    static readonly ConcurrentDictionary<Type, (string id, Func<(Controller controller, string id), ActionBase> actionBase)> ControllerCtorState;
+        public static readonly ConcurrentDictionary<Type, (string id, Func<(Controller controller, string id), ActionBase> actionBase)> ControllerCtorState;
         static ActionsService(){
 	        ControllerCtorState = new ConcurrentDictionary<Type, (string id, Func<(Controller controller, string id), ActionBase> actionBase)>();
 	        var dynamicAssembly = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("ActionsAssembly"),AssemblyBuilderAccess.Run);
-            ActionsModule = dynamicAssembly.DefineDynamicModule("ActionsModule");
-            // AppDomain.CurrentDomain.Patch(harmony => {
-            //     var original = typeof(Controller).Method(nameof(SetInfo));
-            //     harmony.Patch(original, postfix: new HarmonyMethod(typeof(ActionsService), nameof(SetInfo)));
-            // });
+            ActionsModule = dynamicAssembly.DefineDynamicModule($"ActionsModule{Guid.NewGuid():N}");
         }
 
-        public static void SetInfo(Controller destController, IModelApplication modelApplication) {
-
-        }
         private static ModuleBuilder ActionsModule{ get; }
 
         public static IObservable<TAction> RegisterMainWindowAction<TAction>(this ApplicationModulesManager applicationModulesManager, string id,
@@ -41,7 +35,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
 		        var action = actionBase(tuple);
 		        tuple.controller.TargetWindowType=WindowType.Main;
 		        return action;
-	        });
+	        }).PushStackFrame();
 
         public static IObservable<TAction> RegisterChildWindowAction<TAction>(this ApplicationModulesManager applicationModulesManager, string id,
             Func<(WindowController controller, string id), TAction> actionBase) where  TAction:ActionBase 
@@ -49,40 +43,47 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
                     var action = actionBase(tuple);
                     tuple.controller.TargetWindowType=WindowType.Child;
                     return action;
-                });
+                }).PushStackFrame();
 
         public static IObservable<TAction> RegisterWindowAction<TAction>(this ApplicationModulesManager applicationModulesManager, string id,
             Func<(WindowController controller, string id), TAction> actionBase) where TAction:ActionBase 
-	        => applicationModulesManager.RegisterAction(id,actionBase);
+	        => applicationModulesManager.RegisterAction(id,actionBase).PushStackFrame();
 
         public static IObservable<PopupWindowShowAction> RegisterViewPopupWindowShowAction(this ApplicationModulesManager manager, string id,
             Type targetObjectType=null,ViewType viewType=ViewType.Any,PredefinedCategory category=PredefinedCategory.View) 
-	        => manager.RegisterViewAction(id, category.NewAction<PopupWindowShowAction,ViewController>(targetObjectType.Configure(viewType)));
+	        => manager.RegisterViewAction(id, category.NewAction<PopupWindowShowAction,ViewController>(targetObjectType.Configure(viewType)))
+                .PushStackFrame();
 
         public static IObservable<PopupWindowShowAction> RegisterViewPopupWindowShowAction(this ApplicationModulesManager manager, string id,
             Action<PopupWindowShowAction> configure,PredefinedCategory category=PredefinedCategory.View) 
-	        => manager.RegisterViewAction(id, category.NewAction<PopupWindowShowAction,ViewController>(configure));
+	        => manager.RegisterViewAction(id, category.NewAction<PopupWindowShowAction,ViewController>(configure))
+                .PushStackFrame();
 
         public static IObservable<PopupWindowShowAction> RegisterWindowPopupWindowShowAction(this ApplicationModulesManager manager, string id,
             PredefinedCategory category=PredefinedCategory.View,Action<PopupWindowShowAction> configure=null) 
-	        => manager.RegisterWindowAction(id, category.NewAction<PopupWindowShowAction,WindowController>(configure));
+	        => manager.RegisterWindowAction(id, category.NewAction<PopupWindowShowAction,WindowController>(configure))
+                .PushStackFrame();
 
         public static IObservable<SimpleAction> RegisterViewSimpleAction(this ApplicationModulesManager manager, string id, 
             Type targetObjectType=null,ViewType viewType=ViewType.Any,PredefinedCategory category = PredefinedCategory.View) 
-                => manager.RegisterViewAction(id, category.NewAction<SimpleAction,ViewController>( targetObjectType.Configure(viewType)));
+                => manager.RegisterViewAction(id, category.NewAction<SimpleAction,ViewController>( targetObjectType.Configure(viewType)))
+                    .PushStackFrame();
 
 
         public static IObservable<SimpleAction> RegisterViewSimpleAction(this ApplicationModulesManager manager, string id, 
             Action<SimpleAction> configure,PredefinedCategory category = PredefinedCategory.View) 
-                => manager.RegisterViewAction(id, category.NewAction<SimpleAction,ViewController>( configure));
+                => manager.RegisterViewAction(id, category.NewAction<SimpleAction,ViewController>( configure))
+                    .PushStackFrame();
 
         public static IObservable<SingleChoiceAction> RegisterViewSingleChoiceAction(this ApplicationModulesManager manager, string id, 
             Type targetObjectType=null,ViewType viewType=ViewType.Any ,PredefinedCategory category = PredefinedCategory.View) 
-                => manager.RegisterViewAction(id, category.NewAction<SingleChoiceAction,ViewController>( targetObjectType.Configure(viewType)));
+                => manager.RegisterViewAction(id, category.NewAction<SingleChoiceAction,ViewController>( targetObjectType.Configure(viewType)))
+                    .PushStackFrame();
 
         public static IObservable<SingleChoiceAction> RegisterViewSingleChoiceAction(this ApplicationModulesManager manager, string id, 
              Action<SingleChoiceAction> configure ,PredefinedCategory category = PredefinedCategory.View) 
-                => manager.RegisterViewAction(id, category.NewAction<SingleChoiceAction,ViewController>( configure));
+                => manager.RegisterViewAction(id, category.NewAction<SingleChoiceAction,ViewController>( configure))
+                    .PushStackFrame();
 
         private static Func<(TController controller, string id), TAction> NewAction<TAction, TController>(
             this PredefinedCategory category, Action<TAction> configure) where TAction:ActionBase, new() where TController:Controller 
@@ -112,7 +113,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
 		        var parametrizedAction = category.NewAction(targetObjectType.Configure<ParametrizedAction>(viewType),tuple);
 		        parametrizedAction.ValueType=valueType;
 		        return parametrizedAction;
-	        });
+	        }).PushStackFrame();
 
         public static IObservable<ParametrizedAction> RegisterViewParametrizedAction(this ApplicationModulesManager manager, string id,Type valueType,
             Action<ParametrizedAction> configure,PredefinedCategory category=PredefinedCategory.View) 
@@ -120,19 +121,20 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
                 var parametrizedAction = category.NewAction(configure,tuple);
                 parametrizedAction.ValueType=valueType;
                 return parametrizedAction;
-            });
+            }).PushStackFrame();
 
 
         public static IObservable<SimpleAction> RegisterWindowSimpleAction(this ApplicationModulesManager manager, string id,
             PredefinedCategory category=PredefinedCategory.Tools,Action<SimpleAction> configure=null) 
-	        => manager.RegisterWindowAction(id, category.NewAction<SimpleAction,WindowController>(configure));
+	        => manager.RegisterWindowAction(id, category.NewAction<SimpleAction,WindowController>(configure)).PushStackFrame();
 
 
         public static IObservable<SingleChoiceAction> RegisterWindowSingleChoiceAction(this ApplicationModulesManager manager, string id,
             PredefinedCategory category=PredefinedCategory.Tools,Action<SingleChoiceAction> configure=null,WindowType windowType=WindowType.Main) 
             => windowType == WindowType.Main ? manager.RegisterMainWindowAction(id, category.NewAction<SingleChoiceAction, WindowController>(configure))
             : windowType == WindowType.Child ? manager.RegisterChildWindowAction(id, category.NewAction<SingleChoiceAction, WindowController>(configure))
-            : manager.RegisterWindowAction(id, category.NewAction<SingleChoiceAction, WindowController>(configure));
+            : manager.RegisterWindowAction(id, category.NewAction<SingleChoiceAction, WindowController>(configure))
+                .PushStackFrame();
 
         private static Action<T> Configure<T>(this Type targetObjectType, ViewType viewType) where T:ActionBase 
 	        => action => {
@@ -149,11 +151,11 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
 		        var parametrizedAction = category.NewAction(configure,t);
 		        parametrizedAction.ValueType=valueType;
 		        return parametrizedAction;
-	        });
+	        }).PushStackFrame();
 
         public static IObservable<TAction> RegisterViewAction<TAction>(this ApplicationModulesManager applicationModulesManager, string id,
             Func<(ViewController controller, string id), TAction> actionBase) where TAction:ActionBase 
-	        => applicationModulesManager.RegisterAction(id, actionBase);
+	        => applicationModulesManager.RegisterAction(id, actionBase).PushStackFrame();
 
         static IObservable<TAction> RegisterAction<TController,TAction>(this ApplicationModulesManager applicationModulesManager, string id,
             Func<(TController controller, string id), TAction> actionBase) where TController : Controller where TAction:ActionBase{
@@ -174,7 +176,8 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
         }
 
         public static IObservable<ActionBase> WhenActionAdded(this ActionList actionList)
-            => actionList.ProcessEvent<ActionManipulationEventArgs>(nameof(ActionList.ActionAdded)).Select(e => e.Action);
+            => actionList.ProcessEvent<ActionManipulationEventArgs>(nameof(ActionList.ActionAdded)).Select(e => e.Action)
+                .PushStackFrame();
         
         private static Type NewControllerType<T>(string id) where T:Controller{
             var baseController = GetBaseController<T>();
@@ -195,7 +198,14 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
 	        => typeof(T) == typeof(ViewController) ? typeof(ActionViewController) : typeof(ActionWindowController);
 
         internal static void NewAction(this Controller controller){
-	        var tuple = ControllerCtorState[controller.GetType()];
+	        (string id, Func<(Controller controller, string id), ActionBase> actionBase) tuple;
+            try {
+                tuple = ControllerCtorState[controller.GetType()];
+            }
+            catch (Exception e) {
+                Console.WriteLine(e);
+                throw;
+            }
             tuple.actionBase((controller, tuple.id));
         }
     }

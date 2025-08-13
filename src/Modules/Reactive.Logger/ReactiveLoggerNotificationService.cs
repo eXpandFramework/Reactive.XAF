@@ -73,7 +73,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
                         return (supportNotifications, t.rule);
                     })
                     .ToNowObservable()
-                    .ShowXafMessage(application, traceEvent, memberName: null))
+                    .ShowXafMessage(application, traceEvent))
                 )
                 .ToUnit()
             ;

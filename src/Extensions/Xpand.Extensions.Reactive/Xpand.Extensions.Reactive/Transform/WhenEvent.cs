@@ -8,11 +8,9 @@ using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using Fasterflect;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Conditional;
-using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.TypeExtensions;
 using Type = System.Type;
 
@@ -20,18 +18,6 @@ namespace Xpand.Extensions.Reactive.Transform {
     public static partial class Transform {
         private static readonly ConcurrentDictionary<(Type type, string eventName),(EventInfo info,MethodInfo add,MethodInfo remove)> Events = new();
         public static readonly IScheduler ImmediateScheduler=Scheduler.Immediate;
-        
-        public static IObservable<T> ProcessEvent<TEventArgs, T>(this object source, string eventName, Func<TEventArgs, IObservable<T>> resilientSelector, 
-            object[] context = null, [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0, 
-            IScheduler scheduler = null) where TEventArgs : EventArgs
-            => source.FromEventPattern<TEventArgs>(eventName, scheduler)
-                .SelectMany(pattern => resilientSelector(pattern.EventArgs)
-                    .PushStackFrame(memberName, filePath, lineNumber)
-                    .Catch((Exception ex) => {
-                        ex.ExceptionToPublish(context.NewFaultContext(memberName)).Publish();
-                        return Observable.Empty<T>();
-                    }));
-
 
         [Obsolete("use "+nameof(ProcessEvent))]
         public static IObservable<EventPattern<object>> WhenEvent(this object source,string eventName,IScheduler scheduler=null) 

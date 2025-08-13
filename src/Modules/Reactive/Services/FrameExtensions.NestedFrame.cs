@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Editors;
 
-namespace Xpand.XAF.Modules.Reactive.Services{
-    public static class NestedFrameExtensions{
+namespace Xpand.XAF.Modules.Reactive.Services;
+    public partial class FrameExtensions {
         public static IObservable<TFrame> WhenIsNotOnLookupPopupTemplate<TFrame>(this IObservable<TFrame> source)
             where TFrame : Frame{
             return source.Where(frame => !(frame.Template is ILookupPopupFrameTemplate))
@@ -17,4 +17,3 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .Cast<TFrame>();
         }
     }
-}

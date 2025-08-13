@@ -15,6 +15,7 @@ using Xpand.Extensions.ExceptionExtensions;
 using Xpand.Extensions.Reactive.ErrorHandling;
 using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.Reactive.Services.Controllers;
 
@@ -29,12 +30,12 @@ namespace Xpand.XAF.Modules.Reactive.Extensions{
         }
         
         public static IDisposable Subscribe<T>(this IObservable<T> source, ModuleBase module) {
-            var safe = source.TakeUntil(module.WhenDisposed());
+            var safe = source.ChainFaultContext([module.Name]).TakeUntil(module.WhenDisposed());
             return module.Application != null ? safe.Subscribe(module.Application) : safe.Subscribe();
         }
 
         public static IDisposable Subscribe<T>(this IObservable<T> source,XafApplication application) 
-            => source.HandleErrors(application).PublishFaults().Subscribe();
+            => source.Catch<T, Exception>(exception => exception.Handle<T>()).PublishFaults() .Subscribe();
 
         public static IDisposable Subscribe<T>(this IObservable<T> source, Controller controller) 
             => source.TakeUntil(controller.WhenDeactivated()).Subscribe(controller.Application);
@@ -55,7 +56,8 @@ namespace Xpand.XAF.Modules.Reactive.Extensions{
             => source.Catch<T, Exception>(exception => {
                 if (args != null) args.Cancel = true;
                 application?.HandleException( exception);
-                return exception.Handle(exceptionSelector);
+                return exception.Handle(exceptionSelector)
+                    .Select(arg => arg);
             });
 
 

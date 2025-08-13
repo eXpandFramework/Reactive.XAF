@@ -112,6 +112,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
             => application.WhenTraceEvent(location, RXAction.OnNext, methods);
 
         
+        [SuppressMessage("ReSharper", "UnusedParameter.Global")]
         public static IObservable<TraceEvent> WhenTraceEvent(this XafApplication application,Type location=null,RXAction rxAction=RXAction.All,params string[] methods) 
             => SavedTraceEvent.When(location, rxAction,methods).Cast<TraceEvent>();
 
@@ -241,10 +242,10 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
         public static IObservable<(T supportNotifications, (Type objectType, string criteria, bool
                 showXafMessage, InformationType informationType, int messageDisplayInterval))> 
             ShowXafMessage<T>(this IObservable<(T supportNotifications, (Type objectType, string criteria, bool showXafMessage, InformationType informationType
-                , int messageDisplayInterval) rule)> source, XafApplication application, TraceEvent traceEvent, [CallerMemberName] string memberName = "") 
+                , int messageDisplayInterval) rule)> source, XafApplication application, TraceEvent traceEvent) 
             => source.Where(t => t.rule.showXafMessage).ShowXafMessage(_ => traceEvent.FilterInternals(new[] { traceEvent.Location, traceEvent.Method, traceEvent.Value }
                     .WhereNotEmpty().JoinCommaSpace()),
-                t => t.rule.informationType, t => t.rule.messageDisplayInterval, memberName: memberName,
+                t => t.rule.informationType, t => t.rule.messageDisplayInterval, 
                 onOk: t => application.ShowViewStrategy.ShowViewInPopupWindow(application.NewDetailView(t.supportNotifications)));
     }
 }

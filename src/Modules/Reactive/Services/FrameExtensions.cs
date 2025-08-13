@@ -1,20 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reactive;
 using System.Reactive.Linq;
-using System.Runtime.CompilerServices;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.Editors;
-using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.SystemModule;
 using Xpand.Extensions.ExpressionExtensions;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Numeric;
-using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.Reactive.Filter;
@@ -26,20 +22,24 @@ using Xpand.Extensions.XAF.ViewExtensions;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
-    public static class FrameExtensions{
+    public static partial class FrameExtensions{
         public static IObservable<TFrame> MergeCurrentObjectChanged<TFrame>(this IObservable<TFrame> source) where TFrame : Frame
             => source.SkipWhile(frame => frame.View==null).SelectMany(frame => frame.View.WhenCurrentObjectChanged().StartWith(frame.View).WhenNotDefault(view => view.CurrentObject)
                 .DistinctUntilChanged(view => view.ObjectSpace.GetKeyValue(view.CurrentObject))
                     .WhenNotDefault(view => view.CurrentObject).To(frame)
-                .WaitUntilInactive(2.Seconds()).ObserveOnContext().If(frame1 => !(frame1.IsDisposed() || frame1.View == null),frame1 => frame1.Observe()));
+                .WaitUntilInactive(2.Seconds()).ObserveOnContext().If(frame1 => !(frame1.IsDisposed() || frame1.View == null),frame1 => frame1.Observe()))
+                .PushStackFrame();
         
         public static IObservable<TFrame> MergeObjectSpaceReloaded<TFrame>(this IObservable<TFrame> source) where TFrame : Frame
             => source.SkipWhile(frame => frame.View==null).SelectMany(frame => frame.View.ObjectSpace.WhenReloaded().To(frame).StartWith(frame)
-                .WaitUntilInactive(2.Seconds()).ObserveOnContext().If(frame1 => !(frame1.IsDisposed() || frame1.View == null),frame1 => frame1.Observe()));
+                .WaitUntilInactive(2.Seconds()).ObserveOnContext().If(frame1 => !(frame1.IsDisposed() || frame1.View == null),frame1 => frame1.Observe()))
+                .PushStackFrame();
+
         public static IObservable<TFrame> MergeObjectSpaceRefresh<TFrame>(this IObservable<TFrame> source) where TFrame : Frame
             => source.SkipWhile(frame => frame.View==null).SelectMany(frame => frame.View.ObjectSpace.WhenRefreshing().To(frame).StartWith(frame)
                 .WaitUntilInactive(2.Seconds()).ObserveOnContext()
-                .If(frame1 => !(frame1.IsDisposed() || frame1.View == null),frame1 => frame1.Observe()));
+                .If(frame1 => !(frame1.IsDisposed() || frame1.View == null),frame1 => frame1.Observe()))
+                .PushStackFrame();
 
         public static IObservable<Frame> MergeCurrentObjectModified<T>(this IObservable<Frame> source, params string[] properties)
             => source.SkipWhile(frame => frame.View == null).SelectMany(frame => frame.View.ObjectSpace
@@ -47,22 +47,16 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .WaitUntilInactive(2.Seconds()).ObserveOnContext()
                 .If(frame1 => !(frame1.IsDisposed() || frame1.View == null),frame1 => frame1.Observe())
                 .Finally(() => {})
-                .StartWith(frame));
+                .StartWith(frame))
+                .PushStackFrame();
         
         public static IObservable<Frame> MergeCurrentObjectModified<T>(this IObservable<Frame> source,params Expression<Func<T,object>>[] properties) 
-            => source.MergeCurrentObjectModified<T>(properties.Select(expression => expression.MemberExpressionName()).ToArray());
+            => source.MergeCurrentObjectModified<T>(properties.Select(expression => expression.MemberExpressionName()).ToArray())
+                .PushStackFrame();
         
-        public static IObservable<TFrame> When<TFrame>(this IObservable<TFrame> source, TemplateContext templateContext) where TFrame : Frame 
-            => source.Where(window => window.Context == templateContext);
-
-        public static IObservable<Frame> When(this IObservable<Frame> source, Func<Frame,IEnumerable<IModelObjectView>> objectViewsSelector) 
-            => source.Where(frame => objectViewsSelector(frame).Contains(frame.View.Model));
-        
-        public static IObservable<T> When<T>(this IObservable<T> source, Frame parentFrame, NestedFrame nestedFrame) 
-            => source.Where(_ => nestedFrame?.View != null && parentFrame?.View != null);
-
         internal static IObservable<TFrame> WhenFits<TFrame>(this IObservable<TFrame> source, ActionBase action) where TFrame : Frame 
-            => source.WhenFits(action.TargetViewType, action.TargetObjectType);
+            => source.WhenFits(action.TargetViewType, action.TargetObjectType)
+                .PushStackFrame();
 
         internal static IObservable<TFrame> WhenFits<TFrame>(this IObservable<TFrame> source, ViewType viewType,
             Type objectType = null, Nesting nesting = Nesting.Any, bool? isPopupLookup = null) where TFrame : Frame 
@@ -72,201 +66,77 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                     if (!isPopupLookup.HasValue) return true;
                     var popupLookupTemplate = frame.Template is ILookupPopupFrameTemplate;
                     return isPopupLookup.Value ? popupLookupTemplate : !popupLookupTemplate;
-                });
+                })
+                .PushStackFrame();
 
         public static IObservable<View> CreateNewObject(this Window window)
             => window.DashboardViewItems(ViewType.ListView).Select(item => item.Frame).ToNowObservable()
                 .ToController<NewObjectViewController>().SelectMany(controller => controller.NewObjectAction.Trigger(window.Application
                     .RootView(controller.Frame.View.ObjectTypeInfo.Type, ViewType.DetailView)
-                    .Select(detailView => detailView)));
+                    .Select(detailView => detailView)))
+                .PushStackFrame();
+
         public static IObservable<TFrame> WhenViewRefreshExecuted<TFrame>(this TFrame source,
             Action<SimpleActionExecuteEventArgs> selector=null) where TFrame : Frame {
             var refreshAction = source.GetController<RefreshController>().RefreshAction;
             return refreshAction.WhenExecuted(args => {
                 selector?.Invoke(args);
                 return Observable.Empty<TFrame>();
-            }).To(source);
+            }).To(source)
+            .PushStackFrame();
         }
-
-        public static IObservable<(TFrame frame, ViewChangingEventArgs args)> WhenViewChanging<TFrame>(this TFrame source) where TFrame : Frame 
-            => source.ProcessEvent<ViewChangingEventArgs>(nameof(Frame.ViewChanging)).InversePair(source);
-
-        public static IObservable<(TFrame frame, ViewChangingEventArgs args)> ViewChanging<TFrame>(
-            this IObservable<TFrame> source) where TFrame : Frame 
-            => source.SelectMany(item => item.WhenViewChanging());
-        
-        public static IObservable<TFrame> ViewChanged<TFrame>(
-            this IObservable<TFrame> source) where TFrame : Frame 
-            => source.SelectMany(item => item.WhenViewChanged().Select(t => t.frame));
-
-        public static IObservable<(TFrame frame, Frame source)> WhenViewChanged<TFrame>(this IObservable<TFrame> source) where TFrame : Frame
-            => source.SelectMany(frame => frame.WhenViewChanged());
-        
-        public static IObservable<TController> WhenController<TController>(this Frame frame) where TController : Controller
-            => frame.Observe().Select(frame1 => frame1.GetController<TController>()).WhenNotDefault();
-        
-        public static IObservable<(TFrame frame, Frame source)> WhenViewChanged<TFrame>(this TFrame item) where TFrame : Frame 
-            => item.ProcessEvent<ViewChangedEventArgs>(nameof(Frame.ViewChanged))
-                .TakeUntil(item.WhenDisposedFrame()).Select(e => e.SourceFrame).InversePair(item);
-
-        public static IObservable<T> TemplateChanged<T>(this IObservable<T> source) where T : Frame 
-            => source.SelectMany(item => item.Template != null ? item.Observe() : item.WhenTemplateChanged().Select(_ => item));
-
-        public static IObservable<TFrame> WhenTemplateChanged<TFrame>(this TFrame item) where TFrame : Frame 
-            => item.ProcessEvent(nameof(Frame.TemplateChanged))
-                .TakeUntil(item.WhenDisposingFrame())
-            ;
-
-        public static IObservable<TFrame> WhenViewControllersActivated<TFrame>(this TFrame source) where TFrame : Frame
-            => source.ProcessEvent(nameof(Frame.ViewControllersActivated)).To(source)
-                .TakeUntil(source.WhenDisposedFrame());
-        
-        public static IObservable<TFrame> WhenTemplateViewChanged<TFrame>(this TFrame source) where TFrame : Frame 
-            => source.ProcessEvent(nameof(Frame.TemplateViewChanged)).To(source)
-                .TakeUntil(source.WhenDisposedFrame());
-
-        public static IObservable<T> TemplateViewChanged<T>(this IObservable<T> source) where T : Frame 
-            => source.SelectMany(item => item.WhenTemplateViewChanged().Select(_ => item));
 
         public static IObservable<TFrame> DisableSimultaneousModificationsException<TFrame>(this TFrame frame) where TFrame : Frame 
             => frame.Controllers.Cast<Controller>().Where(controller1 => controller1.Name=="DevExpress.ExpressApp.Win.SystemModule.LockController").Take(1).ToNowObservable()
                 .SelectMany(controller1 => controller1.ProcessEvent<HandledEventArgs>("CustomProcessSimultaneousModificationsException").TakeUntil(frame.WhenDisposedFrame())
-                    .Do(e => e.Handled=true)).To(frame);
+                    .Do(e => e.Handled=true)).To(frame)
+                .PushStackFrame();
 
-        public static IObservable<Unit> WhenDisposingFrame<TFrame>(this TFrame source) where TFrame : Frame
-            => source.ProcessEvent(nameof(Frame.Disposing)).TakeUntil(source.WhenDisposedFrame()).ToUnit();
-
-        public static IObservable<Unit> WhenDisposedFrame<TFrame>(this TFrame source) where TFrame : Frame
-            => source.ProcessEvent(nameof(Frame.Disposed)).ToUnit();
-
-        public static IObservable<Unit> DisposingFrame<TFrame>(this IObservable<TFrame> source) where TFrame : Frame 
-            => source.WhenNotDefault().SelectMany(item => item.WhenDisposingFrame()).ToUnit();
-
-        public static IObservable<T> SelectUntilViewClosed<TFrame, T>(this IObservable<TFrame> source,
-            Func<TFrame, IObservable<T>> selector) where TFrame : View
-            => source.SelectMany(view => selector(view).TakeUntil(view.WhenClosed()));
-        
         public static IObservable<Window> CloseWindow<TFrame>(this IObservable<TFrame> source) where TFrame:Frame 
             => source.SelectMany(frame => frame.View.WhenViewActivated().To(frame).WaitUntilInactive(1.Seconds()).ObserveOnContext())
-                .Cast<Window>().Do(frame => frame.Close());
-        
-        public static IObservable<T> SelectUntilViewClosed<T,TFrame>(this IObservable<TFrame> source, Func<TFrame, IObservable<T>> selector) where TFrame:Frame 
-            => source.SelectMany(frame => selector(frame).TakeUntilViewClosed(frame));
-
-        public static IObservable<TFrame> TakeUntilViewClosed<TFrame>(this IObservable<TFrame> source,Frame frame)  
-            => source.TakeUntil(frame.WhenDisposedFrame());
-
-        public static IObservable<NestedFrame> ToNestedFrame(this IObservable<ListPropertyEditor> source)
-            => source.Select(editor => editor.Frame).Cast<NestedFrame>();
-
-        public static IObservable<TFrame> WhenViewControllersActivated<TFrame>(this IObservable<TFrame> source) where TFrame : Frame
-            => source.ConcatIgnored(frame => frame.WhenViewControllersActivated().Take(1));
-        
-        public static IObservable<ListPropertyEditor> NestedListViews(this Frame frame, params Type[] objectTypes ) 
-            => frame.View.ToDetailView().NestedListViews(objectTypes);
-
-        public static IEnumerable<Frame> WhenFrame<T>(this IEnumerable<T> source, Type objectType = null,
-            ViewType viewType = ViewType.Any, Nesting nesting = Nesting.Any) where T:Frame
-            => source.ToObservable(Transform.ImmediateScheduler).WhenFrame(objectType,viewType,nesting).ToEnumerable();
-        
-        public static IEnumerable<Frame> WhenFrame<T>(this IEnumerable<T> source, params string[] viewIds) where T:Frame 
-            => source.ToObservable(Transform.ImmediateScheduler).Where(arg => viewIds.Contains(arg.View.Id)).ToEnumerable();
-
-        public static IObservable<T> WhenFrame<T>(this IObservable<T> source, params Type[] objectTypes) where T:Frame 
-            => source.Where(frame => frame.When(objectTypes));
-        public static IObservable<T> WhenFrame<T>(this IObservable<T> source, params string[] viewIds) where T:Frame 
-            => source.Where(frame => frame.When(viewIds));
-        
-        public static IObservable<T> WhenFrame<T>(this IObservable<T> source, params Nesting[] nesting) where T:Frame 
-            => source.Where(frame => frame.When(nesting));
-
-        public static IObservable<View> ToView<T>(this IObservable<T> source) where T : Frame
-            => source.Select(frame => frame.View);
-        
-        public static IObservable<Frame> OfView<TView>(this IObservable<Frame> source)
-            => source.Where(item => item.View is TView);
-        
-        public static IObservable<SingleChoiceAction> ChangeViewVariant(this IObservable<Frame> source, string id) 
-            => source
-                .SelectMany(frame => frame.Actions("ChangeVariant").Cast<SingleChoiceAction>().ToNowObservable())
-                .Do(action => action.DoExecute(action.Items.First(item => item.Id == id)))
-                .Select(action => action);        
-        public static IObservable<DetailView> ToDetailView<T>(this IObservable<T> source) where T : Frame
-            => source.Select(frame => frame.View.ToDetailView());
-        
-        public static IObservable<ListView> ToListView<T>(this IObservable<T> source) where T : Frame
-            => source.Select(frame => frame.View.ToListView());
-        
-        public static IObservable<T> WhenFrame<T>(this IObservable<T> source, params ViewType[] viewTypes) where T : Frame
-            => source.Where(frame => frame.When(viewTypes));
-
-        public static IObservable<View> WhenView<TFrame>(this IObservable<TFrame> source, Type objectType = null,
-            ViewType viewType = ViewType.Any, Nesting nesting = Nesting.Any) where TFrame : Frame
-            => source.WhenFrame(objectType, viewType, nesting).ToView();
-
-        public static IObservable<View> WhenDetailView<TFrame>(this IObservable<TFrame> source, params Type[] objectTypes) where TFrame : Frame
-            => source.WhenFrame(objectTypes).WhenFrame(ViewType.DetailView).ToView();
-        
-        public static IObservable<View> WhenDetailView<TFrame>(this IObservable<TFrame> source, Type objectType = null, Nesting nesting = Nesting.Any) where TFrame : Frame
-            => source.WhenFrame(objectType,ViewType.DetailView, nesting).ToView();
-        
-        public static IObservable<View> WhenListView<TFrame>(this IObservable<TFrame> source, Type objectType = null, Nesting nesting = Nesting.Any) where TFrame : Frame
-            => source.WhenFrame(objectType,ViewType.ListView, nesting).ToView();
-        
-        public static IObservable<T> WhenDetailView<T,TObject>(this IObservable<T> source, Func<TObject,bool> criteria) where T:Frame
-            => source.WhenFrame(typeof(TObject),ViewType.DetailView).Where(frame => criteria(frame.View.CurrentObject.As<TObject>()));
-        
-        public static IObservable<T> WhenFrame<T>(this IObservable<T> source, Type objectType = null,
-            ViewType viewType = ViewType.Any, Nesting nesting = Nesting.Any) where T:Frame
-            => source.Where(frame => frame.When(nesting)).SelectMany(frame => frame.WhenFrame(viewType, objectType)) ;
-        public static IObservable<T> WhenFrame<T>(this IObservable<T> source, Func<Frame,Type> objectType = null,
-            Func<Frame,ViewType> viewType = null, Nesting nesting = Nesting.Any) where T:Frame
-            => source.WhenFrame(frame => frame.Observe().Cast<T>(),objectType,viewType,nesting) ;
+                .Cast<Window>().Do(frame => frame.Close())
+                .PushStackFrame();
         
         public static IObservable<TResult> WhenFrame<T,TResult>(this IObservable<T> source,Func<Frame,IObservable<TResult>> resilientSelector, Func<Frame,Type> objectType = null,
             Func<Frame,ViewType> viewType = null, Nesting nesting = Nesting.Any) where T:Frame
             => source.Where(frame => frame.When(nesting))
-                .SelectMany(frame => frame.WhenFrame(viewType?.Invoke(frame)??ViewType.Any, objectType?.Invoke(frame),() => resilientSelector(frame))) ;
-        
-        public static IObservable<T> WhenFrame<T>(this T frame, params string[] viewIds) where T : Frame 
-            => frame.WhenViewChanged().To(frame).Where(_ => viewIds.Contains(frame.View.Id));
-
-        private static IObservable<T> WhenFrame<T>(this T frame, ViewType viewType, Type type,
-            [CallerMemberName] string caller = "") where T : Frame
-            => frame.WhenFrame(viewType,type, () => frame.Observe().Cast<T>(), caller);
-        
-        private static IObservable<TResult> WhenFrame<T,TResult>(this T frame,ViewType viewType, Type type,Func<IObservable<TResult>> resilientSelector,[CallerMemberName]string caller="") where T : Frame 
-            => (frame.View != null ? frame.When(viewType) && frame.When(type) ? frame.Observe() : Observable.Empty<T>()
-                : frame.WhenViewChanged().Where(t => t.frame.When(viewType) && t.frame.When(type)).To(frame))
-                .SelectManyItemResilient(arg => resilientSelector()
-                    .TakeUntil(arg.View.WhenClosed()),[frame.View?.Id,type,viewType],caller);
+                .SelectMany(frame => frame.WhenFrame(viewType?.Invoke(frame)??ViewType.Any, objectType?.Invoke(frame),() => resilientSelector(frame)))
+                .PushStackFrame();
         
         public static IObservable<Frame> ListViewProcessSelectedItem(this IObservable<Frame> source,Action<SimpleActionExecuteEventArgs> executed=null) 
-            => source.SelectMany(frame => frame.ListViewProcessSelectedItem(executed).Take(1));
+            => source.SelectMany(frame => frame.ListViewProcessSelectedItem(executed).Take(1))
+                .PushStackFrame();
         
         public static IObservable<Frame> ListViewProcessSelectedItem(this IObservable<Frame> source,string defaultFocusedItem) 
-            => source.SelectMany(frame => frame.ListViewProcessSelectedItem(defaultFocusedItem).Take(1));
+            => source.SelectMany(frame => frame.ListViewProcessSelectedItem(defaultFocusedItem).Take(1))
+                .PushStackFrame();
 
         public static IObservable<Frame> ListViewProcessSelectedItem(this Frame frame,string defaultFocusedItem) 
-            => frame.ListViewProcessSelectedItem(e => e.ShowViewParameters.CreatedView.ToDetailView().SetDefaultFocusedItem(defaultFocusedItem));
+            => frame.ListViewProcessSelectedItem(e => e.ShowViewParameters.CreatedView.ToDetailView().SetDefaultFocusedItem(defaultFocusedItem))
+                .PushStackFrame();
 
         public static IObservable<Frame> ListViewProcessSelectedItem(this Frame frame,Action<SimpleActionExecuteEventArgs> executed=null) 
-            => frame.ListViewProcessSelectedItem(() => frame.View.SelectedObjects.Cast<object>().FirstOrDefault() ,executed);
+            => frame.ListViewProcessSelectedItem(() => frame.View.SelectedObjects.Cast<object>().FirstOrDefault() ,executed)
+                .PushStackFrame();
         
         public static IObservable<Frame> ListViewProcessSelectedItem<T>(this Frame frame, Func<T> selectedObject,Action<SimpleActionExecuteEventArgs> executed=null){
             var action = frame.GetController<ListViewProcessCurrentObjectController>().ProcessCurrentObjectAction;
             var invoke = selectedObject.Invoke()??default(T);
             var afterNavigation = action.WhenExecuted().DoWhen(_ => executed != null, e => executed!(e))
                 .If(e => e.ShowViewParameters.CreatedView!=null,e => frame.Application.WhenFrame(e.ShowViewParameters.CreatedView.ObjectTypeInfo.Type).Take(1),e => e.Frame().Observe());
-            return action.Trigger(afterNavigation,invoke.YieldItem().Cast<object>().ToArray());
+            return action.Trigger(afterNavigation,invoke.YieldItem().Cast<object>().ToArray())
+                .PushStackFrame();
         }
 
         public static IObservable<Unit> SaveAndCloseObject(this Frame frame)
-            => frame.SaveAndCloseAction().Trigger();
+            => frame.SaveAndCloseAction().Trigger()
+                .PushStackFrame();
         
         public static IObservable<Frame> NewObject(this Frame frame, Type objectType,bool saveAndClose=false,Func<Frame,IObservable<Unit>> detailview=null) 
             => frame.NewObjectAction().Trigger(frame.Application.WhenFrame(objectType,ViewType.DetailView).Take(1),() => frame.NewObjectAction().Items.First(item => (Type)item.Data==objectType))
                 .ConcatIgnored(frame1 => detailview?.Invoke(frame1)?? Observable.Empty<Unit>())
-                .If(_ => saveAndClose,frame1 => frame1.SaveAndCloseObject().To<Frame>().Concat(frame),frame1 => frame1.Observe());
+                .If(_ => saveAndClose,frame1 => frame1.SaveAndCloseObject().To<Frame>().Concat(frame),frame1 => frame1.Observe())
+                .PushStackFrame();
+        
     }
 }

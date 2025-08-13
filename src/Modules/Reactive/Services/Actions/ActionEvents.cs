@@ -20,12 +20,14 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions {
 
         public static IObservable<T> WhenExecuting<TAction, T>(this TAction action, Func<CancelEventArgs, IObservable<T>> resilientSelector, [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0) where TAction : ActionBase
             => action.ProcessEvent<CancelEventArgs, T>(nameof(ActionBase.Executing), e => resilientSelector(e).DoOnError(_ => e.Cancel = true),
-                    [action], memberName, filePath, lineNumber).TakeUntilDisposed(action);        
+                    [action], memberName, filePath, lineNumber).TakeUntilDisposed(action)
+                .PushStackFrame();        
         public static IObservable<T2> WhenUpdating<T2>(this ActionBase action,Func<UpdateActionEventArgs,IObservable<T2>> selector, [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0) 
             => action.Controller.WhenActivated(true)
                 .SelectManyUntilDeactivated(controller => controller.Frame.GetController<ActionsCriteriaViewController>()
                     .ProcessEvent<UpdateActionEventArgs>(nameof(ActionsCriteriaViewController.ActionUpdating)).Where(e => e.Active&&e.NeedUpdateEnabled)
-                    .SelectMany(selector)).PushStackFrame(memberName,filePath,lineNumber);
+                    .SelectMany(selector))
+                .PushStackFrame(memberName,filePath,lineNumber);
         
         public static IObservable<ParametrizedAction> WhenValueChangedApplyValue(this IObservable<ParametrizedAction> source,Func<ParametrizedAction,IObservable<Unit>> selector=null, [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0)
             => source.WhenCustomizeControl(t => t.e.Control.Observe()
@@ -67,10 +69,11 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions {
             => source .SelectMany(item => item.ProcessEvent(nameof(ActionBase.Disposing)).ToUnit());
 
         public static IObservable<ParametrizedAction> WhenValueChanged(this ParametrizedAction action)
-            => action.ProcessEvent(nameof(ParametrizedAction.ValueChanged)).TakeUntilDisposed(action);
+            => action.ProcessEvent(nameof(ParametrizedAction.ValueChanged)).TakeUntilDisposed(action) ;
         
         public static IObservable<(TAction action, CustomizeControlEventArgs e)> WhenCustomizeControl<TAction>(this IObservable<TAction> source) where TAction : ActionBase 
-            => source.SelectMany(a => a.WhenCustomizeControl().InversePair(a));
+            => source.SelectMany(a => a.WhenCustomizeControl().InversePair(a))
+                .PushStackFrame();
         
         public static IObservable<TAction> WhenCustomizeControl<TAction>(this IObservable<TAction> source,Func<(TAction action,CustomizeControlEventArgs e),IObservable<Unit>> selector) where TAction : ActionBase 
             => source.MergeIgnored(a => a.WhenCustomizeControl().InversePair(a).SelectMany(selector));

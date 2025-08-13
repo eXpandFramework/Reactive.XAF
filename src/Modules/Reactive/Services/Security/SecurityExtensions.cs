@@ -7,7 +7,6 @@ using System.Reactive.Subjects;
 using System.Security.Claims;
 using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
-using DevExpress.ExpressApp.Core;
 using DevExpress.ExpressApp.Security;
 using DevExpress.ExpressApp.Security.Authentication.Internal;
 using Fasterflect;
@@ -59,8 +58,8 @@ namespace Xpand.XAF.Modules.Reactive.Services.Security{
                 .ToUnit();
 
         public static IObservable<Unit> Logon(this XafApplication application,object userKey) 
-            => AuthenticateSubject.Where(_ => _.authentication== application.Security.GetPropertyValue("Authentication"))
-                .Do(_ => _.args.SetInstance(_ => userKey)).SelectMany(_ => application.WhenLoggedOn().Take(1)).ToUnit()
+            => AuthenticateSubject.Where(t => t.authentication== application.Security.GetPropertyValue("Authentication"))
+                .Do(t => t.args.SetInstance(_ => userKey)).SelectMany(_ => application.WhenLoggedOn().Take(1)).ToUnit()
                 .Merge(Unit.Default.Observe().Do(_ => application.Logon()).IgnoreElements())
                 .TraceRX(_ => $"{userKey}");
 

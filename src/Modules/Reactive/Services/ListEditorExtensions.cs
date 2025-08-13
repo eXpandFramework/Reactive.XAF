@@ -4,25 +4,16 @@ using System.Reactive.Linq;
 using DevExpress.ExpressApp.Editors;
 using Fasterflect;
 using Xpand.Extensions.Reactive.Conditional;
+using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
     public static class ListEditorExtensions {
-        public static IObservable<TListEditor> WhenControlsCreated<TListEditor>(this TListEditor listEditor) where TListEditor:ListEditor 
-            => listEditor.ProcessEvent(nameof(listEditor.ControlsCreated)).StartWith(listEditor.Control).WhenNotDefault().To(listEditor);
+        #region High-Level Logical Operations
         public static IObservable<T> UpdateGridView<T>(this ListEditor editor, Func<IEnumerable<T>> selector)
-            => editor.UpdateGridView(() => selector().ToNowObservable());
-        
-        public static void BeginGridViewDataUpdate(this ListEditor editor)
-            => editor.GridView()?.CallMethod("BeginDataUpdate");
-
-        public static object GridView(this ListEditor editor) => editor.TryGetPropertyValue("GridView");
-        public static T GridView<T>(this ListEditor editor) => (T)editor.GridView();
-
-        public static void EndGridViewDataUpdate(this ListEditor editor)
-            => editor.GridView()?.CallMethod("EndDataUpdate");
+            => editor.UpdateGridView(() => selector().ToNowObservable()).PushStackFrame();
         
         public static IObservable<T> UpdateGridView<T>(this ListEditor editor,Func<IObservable<T>> selector,bool endOnNext=false) 
             => editor.Defer(() => {
@@ -32,7 +23,21 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             }).Finally(() => {
                 if (endOnNext)return;
                 editor.EndGridViewDataUpdate();
-            });
+            }).PushStackFrame();
+        #endregion
+
+        #region Low-Level Plumbing
+        public static IObservable<TListEditor> WhenControlsCreated<TListEditor>(this TListEditor listEditor) where TListEditor:ListEditor 
+            => listEditor.ProcessEvent(nameof(listEditor.ControlsCreated)).StartWith(listEditor.Control).WhenNotDefault().To(listEditor);
+        
+        public static void BeginGridViewDataUpdate(this ListEditor editor)
+            => editor.GridView()?.CallMethod("BeginDataUpdate");
+
+        public static object GridView(this ListEditor editor) => editor.TryGetPropertyValue("GridView");
+        public static T GridView<T>(this ListEditor editor) => (T)editor.GridView();
+
+        public static void EndGridViewDataUpdate(this ListEditor editor)
+            => editor.GridView()?.CallMethod("EndDataUpdate");
         
         public static IObservable<ListEditor> TakeUntilDisposed(this IObservable<ListEditor> source)
             => source.TakeWhileInclusive(editor => !editor.IsDisposed);
@@ -47,5 +52,6 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static IObservable<ListEditor> WhenProcessSelectedItem(this ListEditor editor) 
             => editor.ProcessEvent(nameof(ListEditor.ProcessSelectedItem)).To(editor).TakeUntilDisposed();
+        #endregion
     }
 }
