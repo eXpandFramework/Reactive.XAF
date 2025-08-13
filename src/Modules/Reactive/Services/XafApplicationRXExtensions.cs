@@ -190,7 +190,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         
         public static IObservable<T> WhenSingleChoiceActionExecuteConcat<T>(this XafApplication application,Func<SingleChoiceActionExecuteEventArgs,IObservable<T>> selector,params string[] actions)  
             => application.WhenFrameCreated().SelectMany(window => window.Actions(actions).OfType<SingleChoiceAction>().ToObservable()
-                .SelectMany(a => a.WhenConcatExecution(selector,typeof(T).Name))) ;
+                .SelectMany(a => a.WhenConcatExecution(selector))) ;
         
         public static IObservable<(TAction action, CancelEventArgs e)> WhenActionExecuting<TController, TAction>(
             this XafApplication application, Func<TController, TAction> action) where TController : Controller where TAction : ActionBase

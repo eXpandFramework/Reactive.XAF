@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reactive;
@@ -79,6 +80,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                     return ((IObservable<ModelNode>) updater.GetPropertyValue(name)).Cast<T>();
                 }).PushStackFrame();
 
+        [SuppressMessage("ReSharper", "UnusedParameter.Global")]
         public static IObservable<T> WhenGeneratingModelNodes<T>(this ApplicationModulesManager manager,Expression<Func<IModelApplication,T>> selector=null,bool emitCached=false) where T : IEnumerable<IModelNode> 
             => manager.WhenGeneratingModelNodes<T>(emitCached).PushStackFrame();
         #endregion

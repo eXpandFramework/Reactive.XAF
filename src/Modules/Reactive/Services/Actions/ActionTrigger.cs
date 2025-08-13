@@ -35,7 +35,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions {
                 .PushStackFrame();
 
         private static IObservable<T> Trigger<T>(this IObservable<T> afterExecuted, Action action)
-            => afterExecuted.Merge(Observable.Defer(() => {
+            => afterExecuted.Merge(action.DeferItemResilient(() => {
                 action();
                 return Observable.Empty<T>();
             }),new SynchronizationContextScheduler(SynchronizationContext.Current!))

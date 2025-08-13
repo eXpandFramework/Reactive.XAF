@@ -6,6 +6,7 @@ using System.Reactive.Linq;
 using DevExpress.ExpressApp.DC;
 using DevExpress.Persistent.Base;
 using Xpand.Extensions.Reactive.Combine;
+using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.NonPersistentObjects;
 
@@ -14,7 +15,7 @@ namespace Xpand.XAF.Modules.Reactive.Objects {
     public static class ObjectsExtensions {
         public static IObservable<KeyValuePair<object, string>> WhenCheckedListBoxItems(this ObjectString objectString, IMemberInfo member, object o) 
             => objectString.WhenCheckedListBoxItems()
-                .SelectMany(e => member.FindAttributes<DataSourcePropertyAttribute>()
+                .SelectManyItemResilient(e => member.FindAttributes<DataSourcePropertyAttribute>()
                     .SelectMany(attribute => ((IEnumerable) member.Owner.FindMember(attribute.DataSourceProperty).GetValue(o)).Cast<object>())
                     .ToDictionary(o1 => o1, o1 => $"{o1}").ToObservable(Transform.ImmediateScheduler)
                     .SwitchIfEmpty(Observable.Defer(() => ((IEnumerable) member.GetValue(o)).Cast<object>()

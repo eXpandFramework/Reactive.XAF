@@ -11,7 +11,6 @@ using System.ComponentModel;
 using System.Linq;
 using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp.Win;
-using Humanizer;
 using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.XAF.ActionExtensions;
@@ -105,7 +104,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests.FaultContextTests {
                 .Test();
             var appErrorObserver = application.WhenWin().WhenCustomHandleException().Do(t => t.handledEventArgs.Handled=true).Test();
             DefaultReactiveModule(application);
-            application.StartWinTest2(frame => frame.Actions("TestModuleAction").ToNowObservable()
+            application.StartWinTest(frame => frame.Actions("TestModuleAction").ToNowObservable()
                 .Do(a => a.DoTheExecute()).Do(a => a.DoTheExecute())
                 .MergeToUnit(frame.Actions("RXModuleAction").ToNowObservable()
                     .Do(a => a.DoTheExecute()).Do(a => a.DoTheExecute()))

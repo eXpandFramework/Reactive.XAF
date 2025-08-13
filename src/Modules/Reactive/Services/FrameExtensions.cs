@@ -23,6 +23,12 @@ using Xpand.XAF.Modules.Reactive.Services.Actions;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
     public static partial class FrameExtensions{
+        public static IObservable<TResult> WhenFrame<T,TResult>(this IObservable<T> source,Func<Frame,IObservable<TResult>> resilientSelector, Func<Frame,Type> objectType = null,
+            Func<Frame,ViewType> viewType = null, Nesting nesting = Nesting.Any) where T:Frame
+            => source.Where(frame => frame.When(nesting))
+                .SelectMany(frame => frame.WhenFrame(viewType?.Invoke(frame)??ViewType.Any, objectType?.Invoke(frame),() => resilientSelector(frame)))
+                .PushStackFrame();
+        
         public static IObservable<TFrame> MergeCurrentObjectChanged<TFrame>(this IObservable<TFrame> source) where TFrame : Frame
             => source.SkipWhile(frame => frame.View==null).SelectMany(frame => frame.View.WhenCurrentObjectChanged().StartWith(frame.View).WhenNotDefault(view => view.CurrentObject)
                 .DistinctUntilChanged(view => view.ObjectSpace.GetKeyValue(view.CurrentObject))
@@ -95,12 +101,6 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<Window> CloseWindow<TFrame>(this IObservable<TFrame> source) where TFrame:Frame 
             => source.SelectMany(frame => frame.View.WhenViewActivated().To(frame).WaitUntilInactive(1.Seconds()).ObserveOnContext())
                 .Cast<Window>().Do(frame => frame.Close())
-                .PushStackFrame();
-        
-        public static IObservable<TResult> WhenFrame<T,TResult>(this IObservable<T> source,Func<Frame,IObservable<TResult>> resilientSelector, Func<Frame,Type> objectType = null,
-            Func<Frame,ViewType> viewType = null, Nesting nesting = Nesting.Any) where T:Frame
-            => source.Where(frame => frame.When(nesting))
-                .SelectMany(frame => frame.WhenFrame(viewType?.Invoke(frame)??ViewType.Any, objectType?.Invoke(frame),() => resilientSelector(frame)))
                 .PushStackFrame();
         
         public static IObservable<Frame> ListViewProcessSelectedItem(this IObservable<Frame> source,Action<SimpleActionExecuteEventArgs> executed=null) 

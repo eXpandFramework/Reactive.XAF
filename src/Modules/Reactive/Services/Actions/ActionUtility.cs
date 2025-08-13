@@ -25,7 +25,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions {
 
         public static IObservable<TAction> WhenControllerActivated<TAction>(this IObservable<TAction> source,Func<TAction,IObservable<Unit>> mergeSelector,bool emitWhenActive=false) where TAction : ActionBase 
             => source.MergeIgnored(a =>a.Controller.WhenActivated(emitWhenActive).TakeUntil(a.Controller.WhenDeactivated())
-                .SelectMany(_ => mergeSelector(a)).To(a) )
+                .SelectManyItemResilient(_ => mergeSelector(a)).To(a) )
                 .PushStackFrame();
 
         public static IObservable<T> CommitChanges<T>(this IObservable<T> source,[CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0) where T : ActionBaseEventArgs
@@ -44,7 +44,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions {
             => source.MergeIgnored(action => action.Controller.WhenActivated(emitWhenActive: true)
                 .SelectMany(_ => action.View().WhenCurrentObjectChanged().StartWith(action.View()).TakeUntilDisposed(action))
                 .WaitUntilInactive(1, scheduler: scheduler).ObserveOnContextMaybe()
-                .Do(_ => action.Items.Clear()).SelectMany(_ => addItems(action)
+                .Do(_ => action.Items.Clear()).SelectManyItemResilient(_ => addItems(action)
                     .PushStackFrame( memberName,filePath,lineNumber)).TakeUntilDisposed(action))
                 .PushStackFrame();
 
@@ -68,14 +68,12 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions {
             => source.Select(t => t.action);
 
         public static IObservable<TArgs> CreateDetailView<TArgs>(this IObservable<TArgs> source, Type objectType=null, TargetWindow? targetWindow =null) where TArgs:ActionBaseEventArgs
-            => source.Do(e => {
-               var parameters = e.ShowViewParameters;
-                objectType ??= e.Action.View().ObjectTypeInfo.Type;
-               parameters.CreatedView = e.Action.Application.NewDetailView(objectType);
-                parameters.CreatedView.CurrentObject = parameters.CreatedView.ObjectSpace.CreateObject(objectType);
-               if (targetWindow.HasValue) {
-                  parameters.TargetWindow = targetWindow.Value;
-               }
+            => source.DoItemResilient(e => {
+                    var parameters = e.ShowViewParameters;
+                    objectType ??= e.Action.View().ObjectTypeInfo.Type;
+                    parameters.CreatedView = e.Action.Application.NewDetailView(objectType);
+                    parameters.CreatedView.CurrentObject = parameters.CreatedView.ObjectSpace.CreateObject(objectType);
+                    if (targetWindow.HasValue) parameters.TargetWindow = targetWindow.Value;
                 })
                 .PushStackFrame();
 
@@ -96,33 +94,35 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions {
             => ((TAction) action);
         
         public static IObservable<DialogController> CreateDialogController(this ActionBaseEventArgs e,ObjectView objectView,string caption=null,bool refreshViewAfterObjectSpaceCommit=true,bool closeOnCancel=true,TargetWindow targetWindow=TargetWindow.NewModalWindow){
-            var application = e.Application();
-            var parameters = e.ShowViewParameters;
-            parameters.TargetWindow=targetWindow;
-            parameters.CreateAllControllers = true;
-            var dialogController = application.CreateController<DialogController>();
-            if (caption != null) {
-                dialogController.AcceptAction.Caption = caption;
-            }
-            dialogController.CanCloseWindow = !closeOnCancel;
-            if (closeOnCancel) {
-                dialogController.CancelAction.ActionMeaning = ActionMeaning.Accept;    
-            }
-            parameters.Controllers.Add(dialogController);
-            parameters.CreatedView=objectView;
-            return dialogController.WhenFrame()
-                .DoWhen(_ => refreshViewAfterObjectSpaceCommit,frame => {
-                    var modificationsController = frame.GetController<ModificationsController>();
-                    modificationsController?.SetPropertyValue("RefreshViewAfterObjectSpaceCommit", false);
-                })
-                .IgnoreElements().To<DialogController>().StartWith(dialogController)
-                .If(_ => closeOnCancel,controller => controller.CancelAction.WhenExecuted(_ => {
-                        e.Action.View().ObjectSpace.Rollback(askConfirmation:false);
-                        e.ShowViewParameters.CreatedView.Close();
-                        return Observable.Empty<DialogController>();
+            return e.DeferItemResilient(() => {
+                var application = e.Application();
+                var parameters = e.ShowViewParameters;
+                parameters.TargetWindow=targetWindow;
+                parameters.CreateAllControllers = true;
+                var dialogController = application.CreateController<DialogController>();
+                if (caption != null) {
+                    dialogController.AcceptAction.Caption = caption;
+                }
+                dialogController.CanCloseWindow = !closeOnCancel;
+                if (closeOnCancel) {
+                    dialogController.CancelAction.ActionMeaning = ActionMeaning.Accept;    
+                }
+                parameters.Controllers.Add(dialogController);
+                parameters.CreatedView=objectView;
+                return dialogController.WhenFrame()
+                    .DoWhen(_ => refreshViewAfterObjectSpaceCommit,frame => {
+                        var modificationsController = frame.GetController<ModificationsController>();
+                        modificationsController?.SetPropertyValue("RefreshViewAfterObjectSpaceCommit", false);
                     })
-                    .IgnoreElements().To<DialogController>().StartWith(dialogController))
-                .PushStackFrame();
+                    .IgnoreElements().To<DialogController>().StartWith(dialogController)
+                    .If(_ => closeOnCancel,controller => controller.CancelAction.WhenExecuted(_ => {
+                            e.Action.View().ObjectSpace.Rollback(askConfirmation:false);
+                            e.ShowViewParameters.CreatedView.Close();
+                            return Observable.Empty<DialogController>();
+                        })
+                        .IgnoreElements().To<DialogController>().StartWith(dialogController))
+                    .PushStackFrame();
+            });
         }
 
         public static IObservable<Frame> LinkObject(this PopupWindowShowAction action) 

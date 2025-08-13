@@ -128,8 +128,9 @@ namespace Xpand.XAF.Modules.Reactive{
         
         private static IObservable<Unit> ExplicitModificationAttribute(this XafApplication application)
             => application.WhenSetupComplete()
-                .SelectMany(_ => application.WhenFrame(application.TypesInfo.PersistentTypes.Attributed<ExplicitModificationAttribute>().Types(true).Select(info => info.Type).ToArray()).WhenFrame(ViewType.DetailView)
-                .Select(frame => {
+                .SelectMany(_ => application.WhenFrame(application.TypesInfo.PersistentTypes.Attributed<ExplicitModificationAttribute>().Types(true).Select(info => info.Type).ToArray())
+                    .WhenFrame(ViewType.DetailView)
+                .SelectManyItemResilient(frame => {
                     var propertyName = frame.View.ObjectTypeInfo.Attributed<ExplicitModificationAttribute>().Select(t => t.attribute.PropertyName).First();
                     var currentObject = ((IObjectSpaceLink)frame.View.CurrentObject);
                     if (frame.View.CurrentObject == null) return Observable.Empty<Unit>();
@@ -145,7 +146,6 @@ namespace Xpand.XAF.Modules.Reactive{
                                 properties.Clear();
                             }));
                 })
-                .Switch()
                 .ToUnit())
                 .PushStackFrame();
         
@@ -174,7 +174,7 @@ namespace Xpand.XAF.Modules.Reactive{
                 var membersToReload = application.Model.BOModel.TypeInfos().AttributedMembers<ReloadWhenChangeAttribute>().ToArray();
                 return application.WhenFrame()
                     .WhenFrame(membersToReload.SelectMany(t =>t.attribute.AttributeTypes(t.memberInfo)).Distinct().ToArray())
-                    .SelectUntilViewClosed(frame => membersToReload.WhenFrame(frame)
+                    .WhenFrame(frame => membersToReload.WhenFrame(frame)
                         .SelectMany(ts => application.WhenProviderCommitted(ts.Key).To(ts).SelectMany()).ObserveOnContext()
                         .Do(t => {
                             if (t.attribute.ObjectPropertyChangeMethodName != null) {
@@ -188,7 +188,8 @@ namespace Xpand.XAF.Modules.Reactive{
                                     .Call(frame.View.CurrentObject, t.info.Name);
                             }
                         })
-                        .ToUnit());
+                        .ToUnit())
+                    ;
             })
             .PushStackFrame();
 
@@ -204,7 +205,7 @@ namespace Xpand.XAF.Modules.Reactive{
         private static IObservable<Unit> MergedExtraEmbeddedModels(this ApplicationModulesManager manager) 
             => manager.WhereApplication().ToObservable()
                 .SelectMany(application => application.WhenCreateCustomUserModelDifferenceStore()
-                    .Do(t => {
+                    .DoItemResilient(t => {
                         var models = t.application.Modules.SelectMany(m => m.EmbeddedModels().Select(tuple => tuple with { id = $"{m.Name},{tuple.id}" }))
                             .Where(tuple => {
                                 var pattern = ConfigurationManager.AppSettings["EmbeddedModels"]??@"(\.MDO)|(\.RDO)";

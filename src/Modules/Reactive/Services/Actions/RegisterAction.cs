@@ -158,22 +158,23 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
 	        => applicationModulesManager.RegisterAction(id, actionBase).PushStackFrame();
 
         static IObservable<TAction> RegisterAction<TController,TAction>(this ApplicationModulesManager applicationModulesManager, string id,
-            Func<(TController controller, string id), TAction> actionBase) where TController : Controller where TAction:ActionBase{
-	        var type = ActionsModule.Assembly.GetType(ActionControllerName(id,GetBaseController<TController>()));
-	        var controllerType = type ?? NewControllerType<TController>(id);
-	        if (type == null){
-		        ControllerCtorState
-                    .AddOrUpdate(controllerType, _ => (id, t => actionBase(((TController) t.controller, t.id))),(_, tuple) => tuple);
-            }
-            var controller = (TController) Controller.Create(controllerType,applicationModulesManager.ControllersManager.ServiceProvider());
-            applicationModulesManager.ControllersManager.RegisterController(controller);
-            return ((IActionController) controller).WhenCloned
-                .Merge(applicationModulesManager.WhenApplication(application => application.WhenFrameCreated()
-                    .Select(frame => frame.Controllers[controllerType]).WhenNotDefault()))
-                .DistinctUntilChanged()
-                .SelectMany(viewController => viewController.Actions).Cast<TAction>()
-                .StartWith(controller.Actions.Select(@base => @base).Cast<TAction>()) ;
-        }
+            Func<(TController controller, string id), TAction> actionBase) where TController : Controller where TAction:ActionBase
+            => ActionsModule.DeferItemResilient(() => {
+                var type = ActionsModule.Assembly.GetType(ActionControllerName(id,GetBaseController<TController>()));
+                var controllerType = type ?? NewControllerType<TController>(id);
+                if (type == null){
+                    ControllerCtorState
+                        .AddOrUpdate(controllerType, _ => (id, t => actionBase(((TController) t.controller, t.id))),(_, tuple) => tuple);
+                }
+                var controller = (TController) Controller.Create(controllerType,applicationModulesManager.ControllersManager.ServiceProvider());
+                applicationModulesManager.ControllersManager.RegisterController(controller);
+                return ((IActionController) controller).WhenCloned
+                    .Merge(applicationModulesManager.WhenApplication(application => application.WhenFrameCreated()
+                        .Select(frame => frame.Controllers[controllerType]).WhenNotDefault()))
+                    .DistinctUntilChanged()
+                    .SelectMany(viewController => viewController.Actions).Cast<TAction>()
+                    .StartWith(controller.Actions.Select(@base => @base).Cast<TAction>()) ;
+            });
 
         public static IObservable<ActionBase> WhenActionAdded(this ActionList actionList)
             => actionList.ProcessEvent<ActionManipulationEventArgs>(nameof(ActionList.ActionAdded)).Select(e => e.Action)

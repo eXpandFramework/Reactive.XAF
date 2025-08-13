@@ -15,7 +15,6 @@ using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.ActionExtensions;
 using Xpand.Extensions.XAF.CriteriaOperatorExtensions;
 using Xpand.Extensions.XAF.ObjectSpaceExtensions;
-using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services.Controllers;
 
 namespace Xpand.XAF.Modules.Reactive.Services.Actions {
@@ -96,10 +95,12 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions {
                 .PushStackFrame();
 
         public static IObservable<TAction> WhenActivated<TAction>(this TAction simpleAction,string[] contexts=null,[CallerMemberName]string caller="") where TAction : ActionBase 
-            => simpleAction.ResultValueChanged(action => action.Active,caller:caller).SelectMany(t => (contexts ??[]).Concat(Controller.ControllerActiveKey.YieldItem()).Select(context => (t,context)))
-               .Where(t => t.t.action.Active.ResultValue&&t.t.action.Active.Contains(t.context)&& t.t.action.Active[t.context])
-               .Select(t => t.t.action)
-               .PushStackFrame();
+            => simpleAction.ResultValueChanged(action => action.Active,caller:caller)
+                .SelectManyItemResilient(t => (contexts ??[]).Concat(Controller.ControllerActiveKey.YieldItem()).Select(context => (t,context))
+                    .Where(t1 => t1.t.action.Active.ResultValue&&t1.t.action.Active.Contains(t1.context)&& t1.t.action.Active[t1.context])
+                    .Select(t1 => t1.t.action))
+                
+                .PushStackFrame();
         
         public static IObservable<TAction> WhenDeactivated<TAction>(this TAction simpleAction) where TAction : ActionBase 
             => simpleAction.ResultValueChanged(action => action.Active)
