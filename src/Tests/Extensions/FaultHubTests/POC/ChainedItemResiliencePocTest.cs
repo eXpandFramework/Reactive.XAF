@@ -46,7 +46,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.POC {
             BusEvents.Count.ShouldBe(3);
             
             var finalException = BusEvents.First().ShouldBeOfType<FaultHubException>();
-            var allContexts = finalException.AllContexts().ToArray();
+            var allContexts = finalException.AllContexts.ToArray();
             
             allContexts.ShouldContain("Level1");
             allContexts.ShouldContain("Level2");

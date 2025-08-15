@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Xpand.Extensions.LinqExtensions;
 
 namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
     public sealed class FaultHubException : Exception {
@@ -12,87 +13,67 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
             foreach (var key in innerException.Data.Keys) {
                 Data[key] = innerException.Data[key];
             }
-        }        
-        public IEnumerable<LogicalStackFrame> GetLogicalStackTrace() {
-            var allStacks = new List<IReadOnlyList<LogicalStackFrame>>();
-            var context = Context;
-            while (context != null) {
-                if (context.LogicalStackTrace != null) {
-                    allStacks.Add(context.LogicalStackTrace);
-                }
-                context = context.InnerContext;
-            }
-            allStacks.Reverse();
-            return allStacks.SelectMany(s => s);
         }
-        
-        public IEnumerable<string> AllContexts() {
-            var context = Context;
-            while (context != null) {
-                foreach (var s in context.CustomContext) {
-                    yield return s;
-                }
-                context = context.InnerContext;
-            }
-        }
+
+        public IEnumerable<LogicalStackFrame> LogicalStackTrace 
+            => Context.FromHierarchy(frame => frame.InnerContext).Select(frame => frame.LogicalStackTrace)
+                .FirstOrDefault(stack => stack != null && stack.Any()) ?? Enumerable.Empty<LogicalStackFrame>();
+
+        public IEnumerable<object> AllContexts 
+            => Context.FromHierarchy(context => context.InnerContext)
+                .SelectMany(context => context.CustomContext).WhereNotDefault();
         public AmbientFaultContext Context { get; }
+        private static string FormatContextObject(object obj) 
+            => obj is Type or null ? $"Type: {obj}" :
+                obj.ToString() == obj.GetType().FullName ? null :
+                $"{(obj.GetType().IsValueType||obj is string ? "Context:" : obj.GetType().Name)}: {obj}";
 
         public override string ToString() {
             var builder = new StringBuilder();
-            builder.AppendLine($"Exception: {GetType().Name}");
-            builder.AppendLine($"Message: {Message}");
-            builder.AppendLine();
-            builder.AppendLine("--- Logical Operation Stack ---");
-            var frame = Context;
-            var depth = 1;
-            AmbientFaultContext innermostFrame = null;
-            string lastCaller = null;
-            while (frame != null) {
-                var currentCaller = frame.CustomContext.FirstOrDefault();
-                var specificContext = string.Join(" | ", frame.CustomContext.Skip(1));
-                if (currentCaller != lastCaller) {
-                    builder.AppendLine($"Operation: {currentCaller}");
-                    lastCaller = currentCaller;
-                }
-                if (!string.IsNullOrEmpty(specificContext)) {
-                    builder.AppendLine($"  [Frame {depth++}] Details: '{specificContext}'");
-                }
-                else {
-                    builder.AppendLine($"  [Frame {depth++}]");
-                }
-
-                builder.AppendLine("   --- Invocation Stack ---");
-                // This section is changed to format the new LogicalStackTrace list.
-                if (frame.LogicalStackTrace != null) {
-                    var indentedStackTrace = string.Join(Environment.NewLine,
-                        frame.LogicalStackTrace.Select(f => $"{f.ToString().TrimStart()}"));
-                    builder.AppendLine(indentedStackTrace);
-                }
-
-                if (frame.InnerContext == null) {
-                    innermostFrame = frame;
-                }
-                frame = frame.InnerContext;
+            var exception = InnerException ?? this;
+            builder.AppendLine($"{exception.GetType().Name}: {exception.Message}");
+            if (InnerException?.StackTrace != null) {
+                builder.AppendLine(InnerException.StackTrace);
+                builder.AppendLine();
             }
-            builder.AppendLine("--- End of Logical Operation Stack ---");
-            builder.AppendLine();
+
+            if (FaultHub.Logging) builder.AppendLine("--- Logical Operation Stack ---");
+
+            var frames = Context.FromHierarchy(frame => frame.InnerContext).Reverse().ToList();
+            foreach (var frame in frames)
+                builder.AppendLine($"{frame.CustomContext.Select(FormatContextObject).WhereNotDefault().Join(" | ")}");
+            var logicalStack = LogicalStackTrace.ToList();
+            if (logicalStack.Any()) {
+                if (FaultHub.Logging) builder.AppendLine("--- Invocation Stack ---");
+                var indentedStackTrace = string.Join(Environment.NewLine,
+                    logicalStack.Select(f => $"   {f}"));
+                builder.AppendLine(indentedStackTrace);
+            }
+
+            if (FaultHub.Logging) builder.AppendLine("--- End of Logical Operation Stack ---");
+
             if (InnerException != null) {
-                builder.AppendLine("--- Original Exception ---");
-                // This fallback logic for stackless exceptions is also updated.
-                if (string.IsNullOrEmpty(InnerException.StackTrace) && innermostFrame?.LogicalStackTrace != null) {
-                    builder.AppendLine($"{InnerException.GetType().FullName}: {InnerException.Message}");
-                    builder.AppendLine("  --- Stack Trace (from innermost fault context) ---");
-                    var indentedInnermost = string.Join(Environment.NewLine,
-                        innermostFrame.LogicalStackTrace.Select(f => $"{f.ToString().TrimStart()}"));
-                    builder.AppendLine(indentedInnermost);
+                if (string.IsNullOrEmpty(InnerException.StackTrace)) {
+                    if (FaultHub.Logging) {
+                        builder.AppendLine();
+                        builder.AppendLine("--- Stack Trace (from innermost fault context) ---");
+                        var logicalStackForDisplay = LogicalStackTrace.ToList();
+                        if (logicalStackForDisplay.Any())
+                            builder.AppendLine(string.Join(Environment.NewLine,
+                                logicalStackForDisplay.Select(f => $"   {f}")));
+                        // MODIFICATION: Added the closing tag for the section.
+                        builder.AppendLine("--- End of Stack Trace (from innermost fault context) ---");
+                    }
                 }
                 else {
+                    builder.AppendLine();
+                    builder.AppendLine("--- Original Exception Details ---");
                     builder.AppendLine(InnerException.ToString());
+                    builder.AppendLine("--- End of Original Exception Details ---");
                 }
-                builder.AppendLine("--- End of Original Exception ---");
             }
+
             return builder.ToString();
-        }
-    
+        }        
     }
 }

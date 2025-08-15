@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -17,6 +18,7 @@ using DevExpress.XtraGrid.Columns;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Numeric;
 using Xpand.Extensions.Reactive.Combine;
+using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Transform.System;
 using Xpand.Extensions.Reactive.Utility;
@@ -55,7 +57,7 @@ namespace Xpand.XAF.Modules.Windows{
                 .SelectMany(detailView => detailView.ObjectTypeInfo.AttributedMembers<ToolTipAttribute>()
                     .Where(t => t.attribute.ToolTip.ContainsAll("{", "}")).ToNowObservable()
                     .SelectMany(t => detailView.WhenCurrentObjectChanged()
-                        .Do(_ => {
+                        .DoItemResilient(_ => {
                             var item = detailView.FindItem(t.memberInfo.Name) as DevExpress.ExpressApp.Win.Editors.DXPropertyEditor;
                             if (item?.Control == null) return ;
                             item.Control.ToolTip = item.Control.ToolTip.Format(detailView.CurrentObject);
@@ -66,7 +68,7 @@ namespace Xpand.XAF.Modules.Windows{
             => application.WhenPopupWindowCreated().TemplateChanged();
 
         private static IObservable<Window> Startup(this IObservable<Window> source)
-            => source.Do(frame => {
+            => source.DoItemResilient(frame => {
                 string deskDir = Environment.GetFolderPath(Environment.SpecialFolder.Startup);
                 var path = deskDir + "\\" + frame.Application.Title + ".url";
                 if (frame.Model().Startup) {
@@ -84,7 +86,7 @@ namespace Xpand.XAF.Modules.Windows{
             });
 
         private static IObservable<Window> ConfigureForm(this IObservable<Window> source,Func<Window,bool> apply=null)
-	        => source.SelectMany(frame => apply == null || apply(frame) ? frame.ConfigureForm() : frame.Observe());
+	        => source.SelectManyItemResilient(frame => apply == null || apply(frame) ? frame.ConfigureForm() : frame.Observe());
 
         private static IObservable<Window> ConfigureForm(this Window frame) {
             var form = ((Form)frame.Template);
@@ -107,7 +109,7 @@ namespace Xpand.XAF.Modules.Windows{
             => frame.Application.Model();
 
         public static IObservable<Unit> AddMessages(this IObservable<WindowTemplateController> source,Func<IObservable<string>> messagesSource,int seconds=1) 
-            => source.SelectMany(controller => {
+            => source.SelectManyItemResilient(controller => {
                     var observeLatestOnContext = messagesSource().ObserveOnContext().Replay(1);
                     var connect = observeLatestOnContext.Connect();
                     return seconds.Seconds().Interval().ObserveOnContext()
@@ -142,6 +144,7 @@ namespace Xpand.XAF.Modules.Windows{
             => action.WhenCustomizeControl().Select(e => e.Control).OfType<Control>()
                 .Do(button => button.MinimumSize=size);
         
+        [SuppressMessage("ReSharper", "UnusedParameter.Global")]
         public static void EnableGlobalExceptionHandling(this ApplicationContext ctx, Action<Exception> log) {
             Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
             Application.ThreadException += (_, e) => log?.Invoke(e.Exception);
@@ -150,7 +153,7 @@ namespace Xpand.XAF.Modules.Windows{
             };
             TaskScheduler.UnobservedTaskException += (_, e) => {
                 log?.Invoke(e.Exception);
-                e.SetObserved();          // prevents crash on unobserved tasks
+                e.SetObserved();          
             };
         }
 

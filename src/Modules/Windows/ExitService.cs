@@ -21,9 +21,9 @@ namespace Xpand.XAF.Modules.Windows {
                 .TakeUntil(window.WhenDisposedFrame())
                 .OnWindowEscape(model => model.OnEscape.CloseWindow,model => model.OnEscape.MinimizeWindow,model => model.OnEscape.ExitApplication)
                 .To(window),window => {
-                var onEscape = window.Model().Exit.OnEscape;
-                return onEscape.CloseWindow||onEscape.ExitApplication;
-            });
+                    var onEscape = window.Model().Exit.OnEscape;
+                    return onEscape.CloseWindow||onEscape.ExitApplication;
+                });
 
         static IObservable<Window> OnWindowEscape(this IObservable<Window> source, Func<IModelWindowsExit, bool> closeWindow,
             Func<IModelWindowsExit, bool> minimizeWindow,Func<IModelWindowsExit, bool> exitApplication)

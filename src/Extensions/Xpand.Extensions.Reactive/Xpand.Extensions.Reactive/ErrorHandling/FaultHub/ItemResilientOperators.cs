@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
@@ -8,54 +9,55 @@ using Xpand.Extensions.Reactive.Utility;
 
 namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
     public static class ItemResilientOperators {
-        private static IObservable<T> SuppressAndPublishOnFault<T>(this IObservable<T> source,
-            object[] context, string memberName, string filePath, int lineNumber)
-            => source.Catch((Exception ex) => {
-                var faultContext = context.NewFaultContext(memberName, filePath, lineNumber);
-                return ex.ProcessFault(
-                    faultContext,
-                    proceedAction: enrichedException => {
+        private static IObservable<T> ApplyItemResilience<T>(this IObservable<T> source, Func<IObservable<T>, IObservable<T>> retryStrategy, object[] context,
+            string memberName, string filePath, int lineNumber)
+            => (retryStrategy != null ? retryStrategy(source) : source).PushStackFrame(memberName, filePath, lineNumber)
+                .Catch((Exception ex) => ex.ProcessFault(context.NewFaultContext(FaultHub.LogicalStackContext.Value, memberName, filePath, lineNumber)
+                    , proceedAction: enrichedException => {
                         enrichedException.Publish();
                         return Observable.Empty<T>();
-                    });
-            });
-        
-        static IObservable<T> ApplyItemResilience<T>(this IObservable<T> source, 
-            object[] context, string memberName, string filePath, int lineNumber) 
-            => source.PushStackFrame(memberName, filePath, lineNumber)
-                .SuppressAndPublishOnFault(context, memberName, filePath, lineNumber)
-                .SafeguardSubscription((ex, _) => ex.ExceptionToPublish(context.NewFaultContext(memberName, filePath, lineNumber)).Publish());
+                    }))
+                .SafeguardSubscription((ex, s) => ex.ExceptionToPublish(context.NewFaultContext(FaultHub.LogicalStackContext.Value, s)).Publish(), memberName);
         
         public static IObservable<T> ProcessEvent<TEventArgs, T>(this object source, string eventName, Func<TEventArgs, IObservable<T>> resilientSelector, 
             object[] context = null, [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0, 
             IScheduler scheduler = null) where TEventArgs : EventArgs
             => source.FromEventPattern<TEventArgs>(eventName, scheduler)
-                .PushStackFrame(memberName, filePath, lineNumber)
+                .FlowFaultContext() 
                 .SelectMany(pattern => resilientSelector(pattern.EventArgs)
-                    .SuppressAndPublishOnFault(context.AddToContext(pattern.EventArgs), memberName, filePath, lineNumber));
+                    .ApplyItemResilience(null, context.AddToContext(pattern.EventArgs), memberName, filePath, lineNumber));
         
         public static IObservable<T> DoItemResilient<T>(this IObservable<T> source, Action<T> action,
             object[] context = null, [CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0)
             => source.DoItemResilient(action, null, context, memberName, filePath, lineNumber);
-            
+        
         public static IObservable<T> DoItemResilient<T>(this IObservable<T> source, Action<T> action,
             Func<IObservable<T>, IObservable<T>> retryStrategy, object[] context = null, [CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0)
-            => source
-                .PushStackFrame(memberName, filePath, lineNumber)
-                .SelectMany(item => {
-                    var stream = Observable.Defer(() => {
-                        action(item);
-                        return Observable.Empty<T>();
-                    });
-                    var resilientSource = retryStrategy != null ? retryStrategy(stream) : stream;
-                    return resilientSource
-                        .SuppressAndPublishOnFault(context.AddToContext( item), memberName, filePath, lineNumber)
-                        .StartWith(item);
-                });
-
+            => source.SelectMany(item => Observable.Defer(() => {
+                            action(item);
+                            return Observable.Return(item);
+                        })
+                        .ApplyItemResilience(retryStrategy, context.AddToContext(item), memberName, filePath, lineNumber)
+                        .DefaultIfEmpty(item)
+                )
+                .SafeguardSubscription((ex, s) => ex.ExceptionToPublish(context.NewFaultContext(FaultHub.LogicalStackContext.Value, s)).Publish(), memberName);
+        
         public static IObservable<T> DeferItemResilient<T>(this object _, Func<IObservable<T>> factory,
             object[] context = null, [CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0)
             => _.DeferItemResilient(factory,null,context,memberName,filePath,lineNumber);
+        
+
+        public static IObservable<Unit> DeferActionItemResilient<T>(this T o, Action execute,
+            Func<IObservable<Unit>, IObservable<Unit>> retryStrategy, object[] context = null,
+            [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "",
+            [CallerLineNumber] int lineNumber = 0)
+            => o.DeferItemResilient(() => o.DeferAction(execute), retryStrategy, context, memberName, filePath,
+                lineNumber);
+
+        public static IObservable<Unit> DeferActionItemResilient<T>(this T o, Action execute,
+            object[] context = null, [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "",
+            [CallerLineNumber] int lineNumber = 0)
+            => o.DeferItemResilient(() => o.DeferAction(execute), null, context, memberName, filePath, lineNumber);
         
         public static IObservable<T> DeferItemResilient<T>(this object _, Func<IObservable<T>> factory, Func<IObservable<T>, IObservable<T>> retryStrategy,
             object[] context = null, [CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0) {
@@ -67,24 +69,19 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
                     return Observable.Throw<T>(ex);
                 }
             });
-            var resilientSource = retryStrategy != null ? retryStrategy(stream) : stream;
-            return resilientSource.ApplyItemResilience(context, memberName, filePath, lineNumber);
+            return stream.ApplyItemResilience(retryStrategy, context, memberName, filePath, lineNumber);
         }
         
         public static IObservable<TResult> SelectItemResilient<TSource, TResult>(this IObservable<TSource> source, Func<TSource, TResult> selector,
             object[] context = null, [CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0)
             => source.SelectItemResilient(selector,null,context,memberName,filePath,lineNumber);
-            
+        
         public static IObservable<TResult> SelectItemResilient<TSource, TResult>(this IObservable<TSource> source,
             Func<TSource, TResult> selector, Func<IObservable<TResult>, IObservable<TResult>> retryStrategy,
             object[] context = null, [CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0)
-            => source
-                .PushStackFrame(memberName, filePath, lineNumber)
-                .SelectMany(item => {
-                    var stream = Observable.Defer(() => Observable.Return(selector(item)));
-                    var resilientSource = retryStrategy != null ? retryStrategy(stream) : stream;
-                    return resilientSource.SuppressAndPublishOnFault(context.AddToContext(item), memberName, filePath, lineNumber);
-                });
+            => source.SelectMany(item => Observable.Defer(() => Observable.Return(selector(item)))
+                    .ApplyItemResilience(retryStrategy, context.AddToContext(item), memberName, filePath, lineNumber))
+                .SafeguardSubscription((ex, s) => ex.ExceptionToPublish(context.NewFaultContext(FaultHub.LogicalStackContext.Value, s)).Publish(), memberName);
             
         public static IObservable<TSource> UsingItemResilient<TSource, TResource>(this object o,Func<TResource> resourceFactory,
             Func<TResource, IObservable<TSource>> observableFactory, object[] context = null,
@@ -111,47 +108,35 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
             Func<TSource, int, IObservable<TResult>> resilientSelector, object[] context, [CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0)
             => source.SelectManySequentialItemResilient(resilientSelector,null, context, memberName,filePath,lineNumber);
         
+        
         public static IObservable<TResult> SelectManyItemResilient<TSource, TResult>(this IObservable<TSource> source,
             Func<TSource, int, IObservable<TResult>> resilientSelector, Func<IObservable<TResult>, IObservable<TResult>> retryStrategy,
             object[] context = null, [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0)
-            => source
-                .PushStackFrame(memberName, filePath, lineNumber)
-                .SelectMany((sourceItem, index) => {
-                    var stream = resilientSelector(sourceItem, index);
-                    var resilientSource = retryStrategy != null ? retryStrategy(stream) : stream;
-                    return resilientSource.SuppressAndPublishOnFault(context.AddToContext(sourceItem), memberName, filePath, lineNumber);
-                });
+            => source.SelectMany((sourceItem, index) => resilientSelector(sourceItem, index).ApplyItemResilience(retryStrategy, context.AddToContext(sourceItem), memberName, filePath, lineNumber))
+                .SafeguardSubscription((ex, s) => ex.ExceptionToPublish(context.NewFaultContext(FaultHub.LogicalStackContext.Value, s)).Publish(), memberName);
             
         public static IObservable<TResult> SelectManyItemResilient<TSource, TResult>(this IObservable<TSource> source,
             Func<TSource, IObservable<TResult>> resilientSelector, Func<IObservable<TResult>, IObservable<TResult>> retryStrategy,
             object[] context = null, [CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0)
             => source.SelectManyItemResilient((sourceItem, _) => resilientSelector(sourceItem), retryStrategy, context,memberName, filePath, lineNumber);
         
-        public static IObservable<TResult> SelectManySequentialItemResilient<TSource, TResult>(
-            this IObservable<TSource> source,
-            Func<TSource, int, IObservable<TResult>> resilientSelector,
-            Func<IObservable<TResult>, IObservable<TResult>> retryStrategy,
+        public static IObservable<TResult> SelectManySequentialItemResilient<TSource, TResult>(this IObservable<TSource> source,
+            Func<TSource, int, IObservable<TResult>> resilientSelector, Func<IObservable<TResult>, IObservable<TResult>> retryStrategy,
             object[] context = null, [CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0)
-            => source
-                .PushStackFrame(memberName, filePath, lineNumber)
-                .SelectManySequential((sourceItem, index) => {
-                    var stream = resilientSelector(sourceItem, index);
-                    var resilientSource = retryStrategy != null ? retryStrategy(stream) : stream;
-                    return resilientSource.SuppressAndPublishOnFault(context.AddToContext(sourceItem), memberName, filePath, lineNumber);
-                });
+            => source.SelectManySequential((sourceItem, index) => resilientSelector(sourceItem, index)
+                .ApplyItemResilience(retryStrategy, context.AddToContext(sourceItem), memberName, filePath, lineNumber));
         
         public static IObservable<TResult> SelectManySequentialItemResilient<TSource, TResult>(this IObservable<TSource> source, Func<TSource, IObservable<TResult>> resilientSelector,
             Func<IObservable<TResult>, IObservable<TResult>> retryStrategy=null, object[] context = null, [CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0)
             => source.SelectManySequentialItemResilient((sourceItem, _) => resilientSelector(sourceItem), retryStrategy, context, memberName,filePath,lineNumber);
         
-        
-        
-        public static IObservable<T> ContinueOnFault<T>(this IObservable<T> source, object[] context=null,[CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0) 
-            => source.ApplyItemResilience(context, memberName, filePath, lineNumber);
 
-        public static IObservable<T> ContinueOnFault<T>(this IObservable<T> source,
-            Func<IObservable<T>, IObservable<T>> retryStrategy, object[] context = null,
+        public static IObservable<T> ContinueOnFault<T>(this IObservable<T> source, object[] context=null,[CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0) 
+            => source.ApplyItemResilience(null,context, memberName, filePath, lineNumber);
+
+        
+        public static IObservable<T> ContinueOnFault<T>(this IObservable<T> source, Func<IObservable<T>, IObservable<T>> retryStrategy, object[] context = null,
             [CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0)
-            => (retryStrategy != null ? retryStrategy(source) : source).ApplyItemResilience(context, memberName, filePath, lineNumber);
+            => source.ApplyItemResilience(retryStrategy,  context, memberName, filePath, lineNumber);
     }
 }

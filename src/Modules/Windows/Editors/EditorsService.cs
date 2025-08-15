@@ -14,6 +14,7 @@ using DevExpress.XtraGrid.Views.Grid;
 using Fasterflect;
 using Xpand.Extensions.DateTimeExtensions;
 using Xpand.Extensions.Reactive.Combine;
+using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.Attributes;
@@ -24,13 +25,13 @@ using Xpand.XAF.Modules.Reactive.Services;
 namespace Xpand.XAF.Modules.Windows.Editors{
     static class EditorsService {
         internal static IObservable<Unit> EditorsConnect(this ApplicationModulesManager manager) 
-            => manager.WhenApplication(application => application.WhenFrame(ViewType.ListView)
-                .SelectMany(frame => frame.HyperLinkPropertyEditor())
+            => manager.WhenApplication(application => application.WhenFrame(frame => frame.HyperLinkPropertyEditor(),ViewType.ListView)
+                
                 .MergeToUnit(application.UseHumanizer())).ToUnit();
 
         private static IObservable<Unit> HyperLinkPropertyEditor(this Frame frame){
             return frame.View.WhenControlsCreated(true)
-                .SelectMany(_ => {
+                .SelectManyItemResilient(_ => {
                     var listEditor = frame.View.ToListView().Editor as GridListEditor;
                     if (listEditor == null) return Observable.Empty<Unit>();
                     var gridView = (GridView)listEditor.Control.GetPropertyValue("MainView");
@@ -65,14 +66,14 @@ namespace Xpand.XAF.Modules.Windows.Editors{
                         .SelectMany(editor => editor.WhenControlCreated(true))
                         .Select(editor => editor.Control).OfType<TextEdit>()
                         .SelectMany(edit => frame.View.WhenCurrentObjectChanged().To(edit).StartWith(edit))
-                        .Do(edit => edit.Text = memberInfo.MemberType.Humanize(memberInfo.GetValue(frame.View.CurrentObject)))
+                        .DoItemResilient(edit => edit.Text = memberInfo.MemberType.Humanize(memberInfo.GetValue(frame.View.CurrentObject)))
                     )
                 )
                 .ToUnit();
         
         private static IObservable<CustomRowCellEditEventArgs> HyperLinkPropertyEditorAttribute(this GridView gridView, Frame frame) 
             => gridView.ProcessEvent<CustomRowCellEditEventArgs>(nameof(gridView.CustomRowCellEdit))
-                .Do(e => {
+                .DoItemResilient(e => {
                     if (e.RepositoryItem is not DevExpress.XtraEditors.Repository.RepositoryItemHyperLinkEdit) return;
                     var memberInfo = frame.View.ObjectTypeInfo.FindMember(e.Column.Name);
                     if (frame.View.ToListView().Model.Columns[memberInfo.Name].PropertyEditorType != typeof(HyperLinkPropertyEditor)) return;
@@ -91,7 +92,7 @@ namespace Xpand.XAF.Modules.Windows.Editors{
 
         private static IObservable<MouseEventArgs> OpenLink(this GridView gridView, Frame frame)
             => gridView.ProcessEvent<MouseEventArgs>(nameof(GridView.MouseDown))
-                .Do(e => {
+                .DoItemResilient(e => {
                     var hi = gridView.CalcHitInfo(new Point(e.X, e.Y));
                     if (!hi.InRowCell || hi.Column.ColumnEdit is not DevExpress.XtraEditors.Repository.RepositoryItemHyperLinkEdit repositoryItemHyperLinkEdit) return;
                     var editor = (MyHyperLinkEdit)repositoryItemHyperLinkEdit.CreateEditor();

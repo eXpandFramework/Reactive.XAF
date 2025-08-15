@@ -17,6 +17,7 @@ using Fasterflect;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Combine;
+using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
@@ -65,7 +66,7 @@ namespace Xpand.XAF.Modules.GridListEditor{
                 .SelectMany(_ => application.WhenFrame(ViewType.ListView).ToListView()
                     .Where(view => view.ObjectTypeInfo.FindAttributes<PartialGroupsAttribute>().Any())
                     .WhenControlsCreated(true)
-                    .SelectMany(view => view.SortPartialGroups())
+                    .SelectManyItemResilient(view => view.SortPartialGroups())
                 )
                 .ToUnit();
 
@@ -110,14 +111,15 @@ namespace Xpand.XAF.Modules.GridListEditor{
                 .Select(listView => listView.Editor).OfType<GridListEditor>()
                 .SelectMany(editor => editor.GridView.DataSource.Observe().WhenNotDefault()
                     .SwitchIfEmpty(editor.GridView.WhenEvent(nameof(editor.GridView.DataSourceChanged)).Take(1))
-                    .SelectMany(_ => editor.GridView.Columns.Where(column => column.Visible).ToNowObservable().SelectMany(column => {
-                        var memberInfo = column.MemberInfo();
-                        if (memberInfo==null)return Observable.Empty<Unit>();
-                        var columnSummaryAttribute = memberInfo.FindAttribute<ColumnSummaryAttribute>();
-                        return columnSummaryAttribute?.HideCaption??false ? column.Summary
-                                .Do(item => item.DisplayFormat = item.DisplayFormat.Replace("SUM=", ""))
-                                .ToNowObservable().ToUnit() : Observable.Empty<Unit>();
-                    }))));
+                    .SelectMany(_ => editor.GridView.Columns.Where(column => column.Visible).ToNowObservable()
+                        .SelectManyItemResilient(column => {
+                            var memberInfo = column.MemberInfo();
+                            if (memberInfo==null)return Observable.Empty<Unit>();
+                            var columnSummaryAttribute = memberInfo.FindAttribute<ColumnSummaryAttribute>();
+                            return columnSummaryAttribute?.HideCaption??false ? column.Summary
+                                    .Do(item => item.DisplayFormat = item.DisplayFormat.Replace("SUM=", ""))
+                                    .ToNowObservable().ToUnit() : Observable.Empty<Unit>();
+                        }))));
 
         static IObservable<Unit> SortProperties(this XafApplication application) 
             => application.WhenSetupComplete().SelectMany(_ => application.WhenFrame(ViewType.ListView).ToListView().WhenControlsCreated(true)
@@ -136,7 +138,7 @@ namespace Xpand.XAF.Modules.GridListEditor{
 
         static IObservable<Unit> FocusRow(this XafApplication application)
             => application.WhenRulesOnView<IModelGridListEditorFocusRow>()
-                .SelectMany(t => {
+                .SelectManyItemResilient(t => {
                     var gridView = t.frame.View.AsListView().GridView();
                     return t.rule.FocusRow(gridView).Merge(t.rule.MoveFocus( gridView));
                 })

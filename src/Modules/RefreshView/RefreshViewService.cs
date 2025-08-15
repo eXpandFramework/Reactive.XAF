@@ -3,7 +3,6 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
-using System.Threading;
 using DevExpress.ExpressApp;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Transform.System;
@@ -23,26 +22,9 @@ namespace Xpand.XAF.Modules.RefreshView{
             => manager.WhenApplication(application => application.RefreshView());
 
         private static IObservable<Unit> RefreshView(this XafApplication application)
-            => application.WhenFrame().SelectUntilViewClosed(frame => application.ReactiveModulesModel().RefreshViewModel()
-                .SelectMany(model => model.Items.Where(_ => _.View == frame.View.Model && _.Interval != TimeSpan.Zero).ToNowObservable()
+            => application.WhenFrame(frame => application.ReactiveModulesModel().RefreshViewModel()
+                .SelectMany(model => model.Items.Where(item => item.View == frame.View.Model && item.Interval != TimeSpan.Zero).ToNowObservable()
                     .SelectMany(item => item.Interval.Interval().ObserveOnContext()
-                        .Do(l => frame.View?.RefreshDataSource())))).ToUnit();
-        // => application.WhenViewOnFrame().CombineLatest(application.ReactiveModulesModel().RefreshViewModel(),
-        //         (frame, model) => {
-        //             var synchronizationContext = SynchronizationContext.Current;
-        //             return model.Items
-        //                 .Where(_ => _.View == frame.View.Model && _.Interval != TimeSpan.Zero)
-        //                 .ToObservable()
-        //                 .SelectMany(item => Observable.Interval(item.Interval)
-        //                     .TakeUntil(frame.View.WhenClosing())
-        //                     .ObserveOn(synchronizationContext!)
-        //                     .Select(_ => {
-        //                         frame.View?.RefreshDataSource();
-        //                         return frame?.View;
-        //                     })
-        //                 );
-        //         }).Merge()
-        //     .TraceRefreshView(view => view.Id)
-        //     .ToUnit();
+                        .Do(_ => frame.View?.RefreshDataSource()))),typeof(object)).ToUnit();
     }
 }

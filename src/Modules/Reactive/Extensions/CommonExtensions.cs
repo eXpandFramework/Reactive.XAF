@@ -29,7 +29,7 @@ namespace Xpand.XAF.Modules.Reactive.Extensions{
         }
         
         public static IDisposable Subscribe<T>(this IObservable<T> source, ModuleBase module) {
-            var safe = source.ChainFaultContext([module.Name]).TakeUntil(module.WhenDisposed());
+            var safe = source.TakeUntil(module.WhenDisposed());
             return module.Application != null ? safe.Subscribe(module.Application) : safe.Subscribe();
         }
 

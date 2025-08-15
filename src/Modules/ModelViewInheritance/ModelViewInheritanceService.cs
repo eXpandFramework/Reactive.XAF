@@ -19,9 +19,8 @@ using Xpand.Extensions.XAF.Harmony;
 using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.ModelViewInheritance {
-    class StringModelStore:DevExpress.ExpressApp.StringModelStore {
-        public StringModelStore(string xml, string name) : base(xml) => Name = name;
-        public override string Name { get; }
+    class StringModelStore(string xml, string name) : DevExpress.ExpressApp.StringModelStore(xml) {
+        public override string Name { get; } = name;
         public override string ToString() => Name;
     }
     public static class ModelViewInheritanceService {

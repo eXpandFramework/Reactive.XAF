@@ -4,6 +4,7 @@ using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using DevExpress.ExpressApp;
 using Fasterflect;
+using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.Tracing;
@@ -36,11 +37,11 @@ namespace Xpand.XAF.Modules.AutoCommit{
             objectViewCreated
                 .QueryCanClose()
                 .Merge(objectViewCreated.QueryCanChangeCurrentObject())
-                .Select(_ => {
-                    _.view.ObjectSpace.CommitChanges();
-                    return _.view;
+                .SelectItemResilient(t => {
+                    t.view.ObjectSpace.CommitChanges();
+                    return t.view;
                 })
-                .Merge(objectViewCreated.OfType<ListView>().WhenControlsCreated().Select(BatchEditCommit))
+                .Merge(objectViewCreated.OfType<ListView>().WhenControlsCreated().SelectItemResilient(BatchEditCommit))
                 .TraceAutoCommit(view => view.Id);
 
         private static View BatchEditCommit(ListView listView){

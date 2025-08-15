@@ -7,8 +7,8 @@ using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.Model;
-using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Conditional;
+using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.ActionExtensions;
 using Xpand.Extensions.XAF.CollectionSourceExtensions;
@@ -37,7 +37,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
 
         private static IObservable<View> CreateView(this XafApplication application,ExecuteActionJob job, IModelView modelView) 
             => application.WhenViewCreating()
-                .Select(t => {
+                .SelectItemResilient(t => {
                     var objectType = modelView.AsObjectView.ModelClass.TypeInfo.Type;
                     t.e.View = application.CreateView( job, modelView, application.CreateObjectSpace(objectType,true), objectType);
                     return t.e.View;
@@ -48,23 +48,22 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
                 ? new ListView(modelListView, application.CreateCollectionSource(space, objectType, modelView.Id), application, job.SelectedObjectsCriteria)
                 : new DetailView((IModelDetailView)modelView, space, null, application, true);
 
-        class ListView:DevExpress.ExpressApp.ListView {
-            private readonly string _selectedObjectsCriteria;
-
-            public ListView(IModelListView modelListView, CollectionSourceBase collectionSource, XafApplication application,
-                string selectedObjectsCriteria) : base(modelListView, collectionSource, application, true) {
-                _selectedObjectsCriteria = selectedObjectsCriteria;
-            }
+        class ListView(
+            IModelListView modelListView,
+            CollectionSourceBase collectionSource,
+            XafApplication application,
+            string selectedObjectsCriteria)
+            : DevExpress.ExpressApp.ListView(modelListView, collectionSource, application, true) {
             public override SelectionType SelectionType => SelectionType.MultipleSelection;
             public override IList SelectedObjects 
                 => CollectionSource.Objects()
-                    .Where(o => ObjectSpaceExtensions.IsObjectFitForCriteria(ObjectSpace, CriteriaOperator.Parse(_selectedObjectsCriteria), o))
+                    .Where(o => ObjectSpaceExtensions.IsObjectFitForCriteria(ObjectSpace, CriteriaOperator.Parse(selectedObjectsCriteria), o))
                     .ToArray();
         }
         
         private static IObservable<Unit> ListViewExecute(this ActionBase action) 
             => action.WhenExecuteFinished().TakeFirst().ToUnit()
-                .Merge(Unit.Default.Observe().Do(_ => action.DoTheExecute()).IgnoreElements());
+                .Merge(Unit.Default.Observe().DoItemResilient(_ => action.DoTheExecute()).IgnoreElements());
 
         private static IObservable<Unit> DetailViewExecute(this ActionBase action, ExecuteActionJob job, CompositeView newView) {
             var objects = newView.ObjectSpace
@@ -72,15 +71,15 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
                 .Cast<object>().ToArray();
             return action.WhenExecuteFinished().Select(a => a)
                 .Take(objects.Length).ToUnit()
-                .Merge(objects.Do(o => {
+                .Merge(objects.ToNowObservable().DoItemResilient(o => {
                     newView.CurrentObject = o;
                     action.DoTheExecute();
-                }).ToNowObservable().ToUnit().IgnoreElements());
+                }).ToUnit().IgnoreElements());
         }
         
         private static IObservable<Unit> ExecuteAction(this XafApplication application, ExecuteActionJob job) 
             => Unit.Default.Observe()
-                .SelectMany(_ => {
+                .SelectManyItemResilient(_ => {
                     var modelView = application.Model.Views[job.View.Name];
                     var newView = application.NewView(modelView.ViewType(),
                         modelView.AsObjectView.ModelClass.TypeInfo.Type);

@@ -11,6 +11,7 @@ using DevExpress.ExpressApp.Templates;
 using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Conditional;
+using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.Tracing;
@@ -33,16 +34,15 @@ namespace Xpand.XAF.Modules.ViewItemValue{
             return registerAction.Activate().ToUnit()
                 .Merge(registerAction.SaveViewItemValue())
                 .MergeToUnit(manager.WhenViewItemValueItem()
-                    .Publish(source => source.Select(t => t.model.AssignViewItemValue( t.frame.View.ToDetailView()))
+                    .Publish(source => source.SelectItemResilient(t => t.model.AssignViewItemValue( t.frame.View.ToDetailView()))
                         .MergeToUnit(source.SaveViewItemValue())))
                 .ToUnit();
         }
 
         private static IObservable<Unit> SaveViewItemValue(this IObservable<(IModelViewItemValueObjectViewItem model, Frame frame)> source) 
-            => source
-                .If(t => t.model.SaveViewItemValueStrategy==SaveViewItemValueStrategy.OnCommit,t => t.frame.View.ObjectSpace.WhenCommitted().To(t)
+            => source.If(t => t.model.SaveViewItemValueStrategy==SaveViewItemValueStrategy.OnCommit,t => t.frame.View.ObjectSpace.WhenCommitted().To(t)
                     ,t => t.frame.View.ObjectSpace.WhenObjectChanged(t.frame.View.ObjectTypeInfo.Type,t.model.MemberViewItem.ModelMember.Name).To(t)) 
-                .Do(t => t.frame.SingleChoiceAction(nameof(ViewItemValue)).DoExecute(t.model))
+                .DoItemResilient(t => t.frame.SingleChoiceAction(nameof(ViewItemValue)).DoExecute(t.model))
                 .ToUnit();
 
         private static IObservable<(IModelViewItemValueObjectViewItem model, Frame frame)> WhenViewItemValueItem(this ApplicationModulesManager manager) 

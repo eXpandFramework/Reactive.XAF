@@ -5,13 +5,14 @@ using System.Reactive.Linq;
 using System.Runtime.InteropServices;
 using DevExpress.ExpressApp;
 using Xpand.Extensions.ProcessExtensions;
+using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.Reactive.Transform;
 
 namespace Xpand.XAF.Modules.Windows {
     static class MultiInstanceService {
         public static IObservable<Window> MultiInstance(this IObservable<Window> source)
             => source.ConcatIgnored(frame => Process.GetCurrentProcess().WhenSameNameProcesses()
-                .Do(process => {
+                .DoItemResilient(process => {
                     var modelWindowsMultiInstance = frame.Model().MultiInstance;
                     if (!modelWindowsMultiInstance.Disabled) return;
                     if (!string.IsNullOrEmpty(modelWindowsMultiInstance.NotifyMessage)) {

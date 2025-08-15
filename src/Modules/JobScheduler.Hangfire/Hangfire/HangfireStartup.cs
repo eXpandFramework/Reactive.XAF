@@ -11,14 +11,13 @@ using HarmonyLib;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Xpand.Extensions.Blazor;
 using Xpand.Extensions.Harmony;
+using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.SecurityExtensions;
 using Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects;
 using Xpand.XAF.Modules.Reactive.Services;
-using Xpand.XAF.Modules.Reactive.Services.Actions;
 using StartupExtensions = DevExpress.ExpressApp.Blazor.Services.StartupExtensions;
 
 namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Hangfire {
@@ -36,7 +35,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Hangfire {
                     .Where(state => state.State == WorkerState.Succeeded)
                     .Where(state => state.JobWorker.Job.ChainJobs.Any())
                     .SelectMany(state => state.WhenSucceeded().WhenNeedTrigger().TakeUntil(serviceProvider.WhenApplicationStopping())
-                        .SelectMany(_ => state.JobWorker.Job.ChainJobs.ToNowObservable().Do(job => job.Job.Trigger(serviceProvider))))
+                        .SelectMany(_ => state.JobWorker.Job.ChainJobs.ToNowObservable().DoItemResilient(job => job.Job.Trigger(serviceProvider))))
                     .Finally(() => {})
                     .Subscribe();
                 next(app);
@@ -45,24 +44,22 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Hangfire {
 
         public static readonly Action<IApplicationBuilder> Dashboard = builder 
             => builder.UseHangfireDashboard(options:new DashboardOptions {
-                Authorization = new[] {new DashboardAuthorization()}
-        });
+                Authorization = [new DashboardAuthorization()]
+            });
     }
 
     public class DashboardAuthorization : IDashboardAuthorizationFilter {
         public bool Authorize(DashboardContext context) {
             var httpContext = context.GetHttpContext();
-            return httpContext.User.Identity!.IsAuthenticated && httpContext.RequestServices.RunWithStorageAsync(application => {
+            return httpContext.User.Identity!.IsAuthenticated && httpContext.RequestServices.RunWithStorageAsync(application => application.DeferItemResilient(() => {
                 var security = application.Security;
                 if (!security.IsSecurityStrategyComplex()) return true.Observe();
                 if (security.IsActionPermissionGranted(nameof(JobSchedulerService.JobDashboard))) return true.Observe();
                 using var objectSpace = application.CreateObjectSpace(security?.UserType);
                 var user = (ISecurityUserWithRoles)objectSpace.FindObject(security?.UserType,
                     CriteriaOperator.Parse($"{nameof(ISecurityUser.UserName)}=?", httpContext.User.Identity.Name));
-                var any = user.Roles.Cast<IPermissionPolicyRole>().Any(role => role.IsAdministrative);
-                return any.Observe();
-
-            }).Result;
+                return user.Roles.Cast<IPermissionPolicyRole>().Any(role => role.IsAdministrative).Observe();
+            })).Result;
         }
     }
 
@@ -88,24 +85,5 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Hangfire {
     }
     
 
-    public class CustomStartupFilter : IStartupFilter
-    {
-        public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next)
-        {
-            return app =>
-            {
-                // Access IServiceProvider
-                var serviceProvider = app.ApplicationServices;
-
-                // Retrieve IHostApplicationLifetime
-                var applicationLifetime = serviceProvider.GetService<IHostApplicationLifetime>();
-
-                // Perform your logic here
-
-                // Call the next middleware in the pipeline
-                next(app);
-            };
-        }
-    }
 
 }

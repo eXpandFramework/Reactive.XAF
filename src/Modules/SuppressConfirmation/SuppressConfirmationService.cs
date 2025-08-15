@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.SystemModule;
 using Xpand.Extensions.Reactive.Conditional;
+using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.Tracing;
@@ -34,7 +35,7 @@ namespace Xpand.XAF.Modules.SuppressConfirmation{
                         }
                         return whenNewDetailViewObjectChangedOnce
                             .Merge(frame.View.ObjectSpace.WhenCommitted().Select(tuple => tuple).ToUnit()).ToUnit()
-                            .SelectMany(_ => frame.ChangeModificationHandlingMode());
+                            .SelectManyItemResilient(_ => frame.ChangeModificationHandlingMode());
                     }).ToUnit()
                     .Merge(suppressConfirmationWindows.Select(DisableWebControllers).ToUnit());
             });

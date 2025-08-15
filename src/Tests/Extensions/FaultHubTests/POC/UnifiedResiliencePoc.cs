@@ -12,22 +12,32 @@ namespace Xpand.Extensions.Tests.FaultHubTests.POC {
 
     [TestFixture]
     public class UnifiedResiliencePoc : FaultHubTestBase {
+// MODIFICATION: The entire method is restructured to correctly compose the resilience operators.
         private IObservable<int> PocSelectItemResilient(IObservable<int> source,
             [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0) {
-            
+    
+            // MODIFICATION: The SelectMany now builds the inner part of the logical stack.
             return source.SelectMany(i => {
-                var itemStream = Observable.Defer(() => {
-                    if (i == 2) {
-                        return Observable.Throw<int>(new InvalidOperationException("Failure on item 2"));
-                    }
-                    return Observable.Return(i * 10);
-                });
-                
-                return itemStream.ApplyPocResilience([i], memberName, filePath, lineNumber);
-            })
-            .PushStackFrame();
+                    var itemStream = Observable.Defer(() => {
+                        if (i == 2) {
+                            return Observable.Throw<int>(new InvalidOperationException("Failure on item 2"));
+                        }
+                        return Observable.Return(i * 10);
+                    });
+        
+                    // This is the correct pattern for building a nested logical stack and applying suppression.
+                    // 1. The stream for the individual item is created.
+                    // 2. We push the frame for this helper method itself.
+                    // 3. We then use ContinueOnFault, which pushes the CALLER's frame (the test method)
+                    //    and provides the error suppression.
+                    return itemStream
+                        .PushStackFrame()
+                        .ContinueOnFault([i], memberName, filePath, lineNumber);
+                })
+                // MODIFICATION: ContinueOnFault is now the final operator. It acts as the suppression boundary
+                // and adds its own frame ("PocSelectItemResilient") to the stack before handling the error.
+                .ContinueOnFault();
         }
-
         [Test]
         [MethodImpl(MethodImplOptions.NoInlining)]
         public async Task High_Level_Operator_Automatically_Captures_Call_Site_Context() {
@@ -42,12 +52,12 @@ namespace Xpand.Extensions.Tests.FaultHubTests.POC {
 
             BusEvents.Count.ShouldBe(1);
             var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
-            var logicalStack = fault.GetLogicalStackTrace().ToList();
+            var logicalStack = fault.LogicalStackTrace.ToList();
 
             logicalStack.ShouldNotBeEmpty();
             
-            logicalStack[1].MemberName.ShouldBe(nameof(PocSelectItemResilient));
-            logicalStack[0].MemberName.ShouldBe(nameof(High_Level_Operator_Automatically_Captures_Call_Site_Context));
+            logicalStack[0].MemberName.ShouldBe(nameof(PocSelectItemResilient));
+            logicalStack[1].MemberName.ShouldBe(nameof(High_Level_Operator_Automatically_Captures_Call_Site_Context));
         }
     }
 
@@ -62,7 +72,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.POC {
             return source
                 .PushStackFrame(memberName, filePath, lineNumber)
                 .Catch((Exception ex) => {
-                    ex.ExceptionToPublish(context.NewFaultContext(memberName, filePath, lineNumber)).Publish();
+                    ex.ExceptionToPublish(context.NewFaultContext(FaultHub.LogicalStackContext.Value,memberName, filePath, lineNumber)).Publish();
                     return Observable.Empty<T>();
                 });
         }

@@ -10,10 +10,9 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Hangfire {
         IApplyStateFilter, IServerFilter, IElectStateFilter, IHangfireJobFilter {
         public virtual void OnStateApplied(ApplyStateContext context, IWriteOnlyTransaction transaction) {
             var recurringJobId = context.Connection.RecurringJobId(context.BackgroundJob.Id);
-            if (!string.IsNullOrEmpty(recurringJobId)) {
-	            using var serviceScope = provider.CreateScope();
-                ApplyJobState(context, serviceScope.ServiceProvider);
-            }
+            if (string.IsNullOrEmpty(recurringJobId)) return;
+            using var serviceScope = provider.CreateScope();
+            ApplyJobState(context, serviceScope.ServiceProvider);
         }
 
         protected virtual void ApplyJobState(ApplyStateContext context, IServiceProvider serviceProvider) 

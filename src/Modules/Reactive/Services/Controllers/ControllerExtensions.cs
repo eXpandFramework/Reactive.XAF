@@ -15,7 +15,8 @@ namespace Xpand.XAF.Modules.Reactive.Services.Controllers{
             => controller.WhenFrameAssigned().ViewChanged().Select(_ => controller.Frame)
                 .PushStackFrame();
         public static IObservable<T> TakeUntilDeactivated<T>(this IObservable<T> source, Controller controller) 
-            => source.TakeUntil(controller.WhenDeactivated());
+            => source;
+            // => source.TakeUntil(controller.WhenDeactivated());
 
         public static IObservable<TController> WhenIsOnLookupPopupFrame<TController>(
             this IObservable<TController> source) where TController : Controller 
@@ -77,9 +78,11 @@ namespace Xpand.XAF.Modules.Reactive.Services.Controllers{
                 .TraceRX(controller => controller.Name)
                 .PushStackFrame();
 
-        public static IObservable<T> WhenDeactivated<T>(this T controller) where T : Controller 
-            => controller.ProcessEvent(nameof(Controller.Deactivated)).To(controller).TakeUntilDisposed(controller)
+        public static IObservable<T> WhenDeactivated<T>(this T controller) where T : Controller {
+            return Observable.Empty<T>();
+            return controller.ProcessEvent(nameof(Controller.Deactivated)).To(controller).TakeUntilDisposed(controller)
                 .PushStackFrame();
+        }
 
         public static IObservable<T> Deactivated<T>(this IObservable<T> controllers) where T : Controller 
             => controllers.SelectMany(controller => controller.WhenDeactivated());

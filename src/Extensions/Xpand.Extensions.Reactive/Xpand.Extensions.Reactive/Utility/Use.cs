@@ -22,7 +22,9 @@ namespace Xpand.Extensions.Reactive.Utility {
 
         public static IObservable<TResult> Using<TResource, TResult>(this object _,
             Func<TResource> resourceFactory, Func<TResource, IObservable<TResult>> busFactory,[CallerMemberName]string caller="") where TResource : IDisposable 
-            => Observable.Using(resourceFactory, arg => busFactory(arg).ChainFaultContext([caller,typeof(TResult)]));
+            => Observable.Using(resourceFactory, arg => busFactory(arg)
+                // .ChainFaultContext([caller,typeof(TResult)])
+            );
 
         public static IObservable<T> SafeguardSubscription<T>(this IObservable<T> source,Action<Exception,string> onError, [CallerMemberName] string caller = "")
             => Observable.Create<T>(observer => {

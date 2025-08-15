@@ -5,8 +5,9 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Windows.Forms;
+using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Win;
-
+using Fasterflect;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Transform;
@@ -20,6 +21,7 @@ namespace Xpand.TestsLib{
 
         public TestWinApplication(Type sutModule, bool transmitMessage = true, bool handleExceptions=true) {
             // SettingUp += (_, args) => ((ExportedTypeCollection)args.SetupParameters.DomainComponents).Add(typeof(TraceEvent));
+            Modules.Add((ModuleBase)sutModule.CreateInstance());
             _transmitMessage = transmitMessage;
             SUTModule = sutModule;
             CustomHandleException += (_, e) => {

@@ -24,6 +24,10 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
         const string PublishedKey = "FaultHub.Published";
         private const string Key = "Origin";
 
+        static FaultHub() {
+            Logging = true;
+        }
+
         public static void Reset() {
             LogicalStackContext.Value = null;
             HandlersContext.Value = null;
@@ -51,7 +55,6 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
             ex.AccessData(data => data[SkipKey] = true);
             return ex;
         }
-
         
         public static Guid? CorrelationId(this Exception ex) => (Guid?)ex.AccessData(data => data[KeyCId]);
 
@@ -69,7 +72,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
             $"[HUB] A handler matched with action: {handlerAction.Value}.".LogToConsole();
             return handlerAction.Value switch {
                 FaultAction.Complete => (FaultResult.Complete, false),
-                FaultAction.Rethrow => (FaultResult.Rethrow, true),
+                FaultAction.Rethrow => (FaultResult.Rethrow, false),
                 _ => (FaultResult.Proceed, false)
             };
         }

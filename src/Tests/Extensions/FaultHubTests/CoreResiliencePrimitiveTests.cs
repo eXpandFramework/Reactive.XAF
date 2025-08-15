@@ -23,8 +23,8 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             BusEvents.Count.ShouldBe(1);
             var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
             fault.InnerException.ShouldBeOfType<InvalidOperationException>();
-            fault.GetLogicalStackTrace().First().MemberName.ShouldBe(nameof(Suppresses_Error_Publishes_To_Bus_And_Captures_Caller_Context_Synchronously));
-            fault.AllContexts().ShouldContain("MyContext");
+            fault.LogicalStackTrace.First().MemberName.ShouldBe(nameof(Suppresses_Error_Publishes_To_Bus_And_Captures_Caller_Context_Synchronously));
+            fault.AllContexts.ShouldContain("MyContext");
         }
 
         [Test]

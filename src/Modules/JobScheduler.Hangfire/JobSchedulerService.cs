@@ -29,6 +29,7 @@ using Xpand.Extensions.EventArgExtensions;
 using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.ErrorHandling;
+using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
@@ -75,10 +76,8 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
 
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) 
             => Observable.If(() => DesignerOnlyCalculator.IsRunTime,manager.Defer(() => manager.CheckBlazor(typeof(HangfireStartup).FullName, typeof(JobSchedulerModule).Namespace)))
-                .Merge(manager.WhenApplication(application => application.ScheduleJobs().Merge(application.DeleteJobs())
-                        // .MergeToUnit(application.RefreshDetailViewWhenObjectCommitted<JobWorker>(typeof(Job)))
-                        // .MergeToUnit(application.RefreshListViewWhenObjectCommitted<Job>())
-                    )
+                .Merge(manager.WhenApplication(application => application.ScheduleJobs()
+                        .Merge(application.DeleteJobs()))
                     .Merge(manager.TriggerJobsFromAction())
                     .Merge(manager.PauseJobsFromAction())
                     .Merge(manager.ResumeJobsFromAction())
@@ -92,7 +91,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
                     action.Caption = action.Caption.Replace("Job", "").Trim();
                 })
                 .WhenExecuted()
-                .SelectMany(e => {
+                .SelectManyItemResilient(e => {
                     var uri = $"{new Uri($"{e.Action.Application.GetService<IHttpContextAccessor>()?.HttpContext?.Request.GetDisplayUrl()}")
                         .GetLeftPart(UriPartial.Authority)}/hangfire/jobs/details/";
                     var jsRuntime = e.Action.Application.GetService<IJSRuntime>();
@@ -154,20 +153,20 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
 
         private static IObservable<Unit> TriggerJobsFromAction(this ApplicationModulesManager manager)
             => manager.RegisterViewSimpleAction(nameof(TriggerJob), Configure)
-                .WhenExecute().SelectMany(args => args.SelectedObjects.Cast<Job>().Do(job => job.Trigger(args.Action.Application.ServiceProvider))).ToUnit();
+                .WhenExecute().SelectMany(args => args.SelectedObjects.Cast<Job>().ToNowObservable().DoItemResilient(job => job.Trigger(args.Action.Application.ServiceProvider))).ToUnit();
         
         private static IObservable<Unit> PauseJobsFromAction(this ApplicationModulesManager manager)
             => manager.RegisterViewSimpleAction(nameof(PauseJob), Configure)
                 .WhenExecuted()
                 .SelectMany(args => args.SelectedObjects.Cast<Job>())
-                .Do(job => job.Pause())
+                .DoItemResilient(job => job.Pause())
             .ToUnit();
 
         private static IObservable<Unit> ResumeJobsFromAction(this ApplicationModulesManager manager)
             => manager.RegisterViewSimpleAction(nameof(ResumeJob), Configure)
                 .WhenExecute()
                 .SelectMany(args => args.SelectedObjects.Cast<Job>())
-                .Do(job => job.Resume())
+                .DoItemResilient(job => job.Resume())
             .ToUnit();
 
         private static void Configure(ActionBase action) {
@@ -187,7 +186,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
 
         static IObservable<Unit> ScheduleJobs(this XafApplication application) 
             => application.WhenCommitted<Job>(ObjectModification.NewOrUpdated).ToObjects()
-                .SelectMany(scheduledJob => {
+                .SelectManyItemResilient(scheduledJob => {
                     var args = new GenericEventArgs<IObservable<Job>>(scheduledJob.Observe());
                     CustomJobScheduleSubject.OnNext(args);
                     if (!args.Handled) {
@@ -200,7 +199,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
 
         private static IObservable<Unit> DeleteJobs(this XafApplication application) 
             => application.DeletedObjects<Job>()
-                .SelectMany(t => t.objects.Do(job => application.ServiceProvider.GetService<IRecurringJobManager>().RemoveIfExists(job.Id)))
+                .SelectManyItemResilient(t => t.objects.Do(job => application.ServiceProvider.GetService<IRecurringJobManager>().RemoveIfExists(job.Id)))
                 .TraceJobSchedulerModule().ToUnit();
         
 
@@ -212,9 +211,8 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
             => job.JobType.Type.Method(job.JobMethod.Name.Replace(" ", "")).JobExpression();
 
         public static Expression<Action> JobExpression(this MethodInfo method) 
-            => method.ReflectedType.CallExpression(method, method.Parameters().Count == 1 &&
-                                                           method.Parameters().Any(info => info.ParameterType == typeof(PerformContext))
-                ? new Expression[] { System.Linq.Expressions.Expression.Constant(null, typeof(PerformContext)) } : Array.Empty<Expression>());
+            => method.ReflectedType.CallExpression(method, method.Parameters().Count == 1 && method.Parameters().Any(info => info.ParameterType == typeof(PerformContext))
+                ? [System.Linq.Expressions.Expression.Constant(null, typeof(PerformContext))] : []);
 
         internal static IObservable<TSource> TraceJobSchedulerModule<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<ITraceEvent> traceAction = null,
             Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.OnNextOrOnError,Func<string> allMessageFactory = null,

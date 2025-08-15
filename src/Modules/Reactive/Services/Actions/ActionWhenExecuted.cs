@@ -30,7 +30,8 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions {
         
         public static IObservable<T> WhenExecuted<T>(this IObservable<SimpleAction> source, Func<SimpleActionExecuteEventArgs, IObservable<T>> resilientSelector) {
             return source.SelectMany(action => action.WhenExecuted(resilientSelector)
-                    .TakeUntilDeactivated(action.Controller))
+                    .TakeUntilDeactivated(action.Controller)
+                )
                 .PushStackFrame();
         }
 

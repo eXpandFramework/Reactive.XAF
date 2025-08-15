@@ -106,7 +106,8 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions {
             => simpleAction.ResultValueChanged(action => action.Active)
                .Where(tuple => !tuple.action.Active.ResultValue)
                .Select(t => t.action)
-               .PushStackFrame();
+               // .PushStackFrame()
+            ;
         
         public static IObservable<TAction> WhenDisabled<TAction>(this TAction simpleAction,params string[] contexts) where TAction : ActionBase 
             => simpleAction.ResultValueChanged(action => action.Enabled)

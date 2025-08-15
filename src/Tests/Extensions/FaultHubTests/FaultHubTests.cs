@@ -29,9 +29,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
         [Test]
         public async Task Resilient_streams_complete_and_do_not_throw() {
             var stream = Observable.Throw<Unit>(new Exception()).ContinueOnFault();
-
             var result = await stream.Take(1).PublishFaults().Capture();
-
             result.Error.ShouldBeNull();
             result.IsCompleted.ShouldBeTrue();
             BusEvents.Count.ShouldBe(1);
@@ -214,7 +212,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
             BusEvents.Count.ShouldBe(1);
             var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
             
-            var allContexts = fault.AllContexts().ToArray();
+            var allContexts = fault.AllContexts.ToArray();
             var expectedContexts = new[] {
                 "OuterContext",
                 "InnerContext"
@@ -242,13 +240,13 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
             BusEvents.Count.ShouldBe(1);
             (failingCounter.Count, successfulCounter.Count, outerCounter.Count).ShouldBe((6, 3, 3));
             var finalFault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
-            finalFault.AllContexts().ShouldContain("Outer");
+            finalFault.AllContexts.ShouldContain("Outer");
             
             var transactionException = finalFault.InnerException.ShouldBeOfType<InvalidOperationException>();
             transactionException.Message.ShouldBe("MyTransaction failed");
             var innerFault = transactionException.InnerException.ShouldBeOfType<AggregateException>()
                 .InnerExceptions.Single().ShouldBeOfType<FaultHubException>();
-            innerFault.AllContexts().ShouldContain("MyTransaction - Op:1");
+            innerFault.AllContexts.ShouldContain("MyTransaction - Op:1");
             innerFault.InnerException.ShouldBeOfType<InvalidOperationException>().Message.ShouldBe("Operation Failed");
         }
     
@@ -268,6 +266,27 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
             BusEvents.Count.ShouldBe(1);
             var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
             fault.InnerException.ShouldBeOfType<InvalidOperationException>().Message.ShouldBe("I have failed");
+        }
+        
+        [Test]
+        public async Task Outerstream_Operator_Takes_Over_And_Stacks_Context() {
+            var opAAttemptCounter = 0;
+            var opA = Observable.Defer(() => {
+                    opAAttemptCounter++;
+                    return Observable.Throw<int>(new InvalidOperationException("opA failed"));
+                })
+                .ChainFaultContext(source => source.Retry(2), ["opA"]);
+            var fullChain = opA.ChainFaultContext(["opB"]);
+
+            var result = await fullChain.PublishFaults().Capture();
+
+            opAAttemptCounter.ShouldBe(2);
+            BusEvents.Count.ShouldBe(1);
+            var finalException = BusEvents.Cast<FaultHubException>().Single();
+            finalException.AllContexts.Distinct()
+                .ShouldBe([ "opB", "opA"]);
+            result.Error.ShouldBeNull();
+            result.IsCompleted.ShouldBe(true);
         }
     }
         

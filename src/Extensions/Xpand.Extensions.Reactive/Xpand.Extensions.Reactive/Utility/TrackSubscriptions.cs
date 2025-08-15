@@ -12,7 +12,7 @@ namespace Xpand.Extensions.Reactive.Utility {
     }
     public sealed class SubscriptionCounter {
         public int Count { get; private set; }
-        internal void Increment() => Count++;
+        public void Increment() => Count++;
         public override string ToString() => Count.ToString();
     }
 

@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Templates;
 using Fasterflect;
+using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.Tracing;
@@ -36,7 +37,7 @@ namespace Xpand.XAF.Modules.HideToolBar{
 
         public static IObservable<Frame> HideToolBar(this IObservable<Frame> source) 
             => source.SelectMany(frame => frame.View.WhenControlsCreated(true)
-                .Do(_ => {
+                .DoItemResilient(_ => {
                     if (frame.Application.GetPlatform() == Platform.Win) {
                         var toolbarVisibilityController =
                             frame.GetController(

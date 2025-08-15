@@ -10,6 +10,7 @@ using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.SystemModule;
 using DevExpress.Persistent.Base;
+using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.Tracing;
@@ -64,7 +65,7 @@ namespace Xpand.XAF.Modules.ViewWizard{
                 .Publish().RefCount();
 
         private static IObservable<SimpleActionExecuteEventArgs> NextWizardView(this IObservable<(Frame Frame, IModelWizardView modelWizardView)> source) 
-            => source.SelectMany(t => {
+            => source.SelectManyItemResilient(t => {
                 var nextWizardView = t.Frame.Action<ViewWizardModule>().NextWizardView();
                 nextWizardView.Active["Always"] = true;
                 return nextWizardView.WhenExecute()
@@ -80,7 +81,7 @@ namespace Xpand.XAF.Modules.ViewWizard{
         private static IObservable<SimpleActionExecuteEventArgs> FinishWizardView(
             this IObservable<(Frame Frame, IModelWizardView modelWizardView)> source){
             return source.SelectMany(t => t.Frame.Action<ViewWizardModule>().FinishWizardView().WhenExecuted())
-                .Do(e => e.Action.View().Close());
+                .DoItemResilient(e => e.Action.View().Close());
         }
 
         private static IObservable<SimpleActionExecuteEventArgs> PreviousWizardView(this IObservable<(Frame Frame, IModelWizardView modelWizardView)> source){
@@ -89,7 +90,7 @@ namespace Xpand.XAF.Modules.ViewWizard{
                 previousWizardView.Active["Always"] = true;
                 previousWizardView.Enabled["FirstView"] = false;
                 return previousWizardView.WhenExecute()
-                    .Do(args => {
+                    .DoItemResilient(args => {
                         var wizardView = tuple.modelWizardView;
                         args.ShowViewParameters.CreatedView = args.Action.Application.NewView(tuple.Frame.PreviousChildDetailView(wizardView));
                         args.ShowViewParameters.TargetWindow = TargetWindow.Current;

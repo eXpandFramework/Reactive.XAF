@@ -27,6 +27,45 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             actionWasCalled.ShouldBeTrue();
             BusEvents.Count.ShouldBe(0);
         }
+        
+        [Test]
+        public async Task DeferItemResilient_Suppresses_Error_From_Disposal() {
+            var resource = new TestResource { OnDispose = () => throw new InvalidOperationException("Dispose Failed") };
+            var source = this.DeferItemResilient(() => Observable.Using(() => resource, _ => Observable.Return(42)));
+
+            var result = await source.Capture();
+            
+            result.Items.ShouldBe([42]);
+            result.IsCompleted.ShouldBeTrue();
+            BusEvents.Count.ShouldBe(1);
+            BusEvents.Single().InnerException.ShouldBeOfType<InvalidOperationException>().Message.ShouldBe("Dispose Failed");
+        }
+
+        [Test]
+        public async Task SelectItemResilient_Suppresses_Error_From_Disposal() {
+            var resource = new TestResource { OnDispose = () => throw new InvalidOperationException("Dispose Failed") };
+            var source = Observable.Using(() => resource, _ => Observable.Return(1));
+
+            var result = await source.SelectItemResilient(i => i * 10).Capture();
+
+            result.Items.ShouldBe([10]);
+            result.IsCompleted.ShouldBeTrue();
+            BusEvents.Count.ShouldBe(1);
+            BusEvents.Single().InnerException.ShouldBeOfType<InvalidOperationException>().Message.ShouldBe("Dispose Failed");
+        }
+
+        [Test]
+        public async Task SelectManyItemResilient_Suppresses_Error_From_Disposal() {
+            var resource = new TestResource { OnDispose = () => throw new InvalidOperationException("Dispose Failed") };
+            var source = Observable.Using(() => resource, _ => Observable.Return(1));
+
+            var result = await source.SelectManyItemResilient(i => Observable.Return(i * 10)).Capture();
+
+            result.Items.ShouldBe([10]);
+            result.IsCompleted.ShouldBeTrue();
+            BusEvents.Count.ShouldBe(1);
+            BusEvents.Single().InnerException.ShouldBeOfType<InvalidOperationException>().Message.ShouldBe("Dispose Failed");
+        }
 
         [Test]
         public async Task DoItemResilient_Suppresses_Error_And_Publishes_Fault() {
@@ -41,7 +80,20 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             BusEvents.Count.ShouldBe(1);
             var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
             fault.InnerException.ShouldBeOfType<InvalidOperationException>().Message.ShouldBe("Do Failure");
-            fault.AllContexts().ShouldContain("42");
+            fault.AllContexts.ShouldContain(42);
+        }
+        
+        [Test]
+        public async Task DoItemResilient_Suppresses_Error_From_Disposal() {
+            var resource = new TestResource { OnDispose = () => throw new InvalidOperationException("Dispose Failed") };
+            var source = Observable.Using(() => resource, _ => Observable.Return(42));
+            
+            var result = await source.DoItemResilient(i => i.ShouldBe(42)).Capture();
+            
+            result.Items.ShouldBe([42]);
+            result.IsCompleted.ShouldBeTrue();
+            BusEvents.Count.ShouldBe(1);
+            BusEvents.Single().InnerException.ShouldBeOfType<InvalidOperationException>().Message.ShouldBe("Dispose Failed");
         }
         
         [Test]
@@ -63,7 +115,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             attemptCount.ShouldBe(3);
             BusEvents.Count.ShouldBe(1);
             var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
-            fault.AllContexts().ShouldContain("10");
+            fault.AllContexts.ShouldContain(10);
         }
 
         [Test]
@@ -177,7 +229,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             BusEvents.Count.ShouldBe(1);
             var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
             fault.InnerException.ShouldBeOfType<InvalidOperationException>().Message.ShouldBe("Failure on item 2");
-            fault.AllContexts().ShouldContain("2");
+            fault.AllContexts.ShouldContain(2);
         }
     }
 }

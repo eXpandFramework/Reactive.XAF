@@ -12,6 +12,7 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.Xpo;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Conditional;
+using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.Tracing;
@@ -37,11 +38,10 @@ namespace Xpand.XAF.Modules.PositionInListView{
 
 
         private static IObservable<ListView> WhenPositionInListCreated(this XafApplication application) 
-            => application.WhenListViewCreated().Where(_ => application.Model.IsPositionInListView(_.Model.Id));
+            => application.WhenListViewCreated().Where(listView => application.Model.IsPositionInListView(listView.Model.Id));
 
         private static IObservable<Unit> DisableSorting(this IObservable<ListView> source) 
-            => source
-                .SelectMany(listView => {
+            => source.SelectMany(listView => {
                     var platform = listView.Application().GetPlatform();
                     var modelColumn = listView.PositionMember().modelColumn;
                     return listView.WhenControlsCreated()
@@ -56,8 +56,7 @@ namespace Xpand.XAF.Modules.PositionInListView{
                 .ToUnit();
 
         private static IObservable<Unit> SortCollectionSource(this IObservable<ListView> source) 
-            => source
-                .Select(listView => {
+            => source.SelectItemResilient(listView => {
                     var t = listView.PositionMember();
                     foreach (var listViewColumn in t.modelColumn.GetParent<IModelListView>().Columns){
                         listViewColumn.SortOrder=ColumnSortOrder.None;
@@ -92,7 +91,7 @@ namespace Xpand.XAF.Modules.PositionInListView{
 
         private static IObservable<Unit> PositionNewObjects(this IObservable<XafApplication> whenApplication) 
             => whenApplication.SelectMany(application => application.WhenModelChanged().To(application).Skip(1).TakeFirst())
-	            .SelectMany(application => {
+	            .SelectManyItemResilient(application => {
 		            var modelPositionInListView = application.Model.ModelPositionInListView();
 		            var positionMembers = modelPositionInListView.ListViewItems
 			            .Select(item => item.PositionMember.MemberInfo).ToArray();
@@ -134,7 +133,7 @@ namespace Xpand.XAF.Modules.PositionInListView{
 			            });
 
 	            })
-	            .TracePositionInListView(_ => $"{_.source}")
+	            .TracePositionInListView(t => $"{t.source}")
                 .ToUnit();
     }
 }

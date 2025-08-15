@@ -9,6 +9,7 @@ using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.SystemModule;
 using DevExpress.ExpressApp.Win.SystemModule;
 using Fasterflect;
+using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
@@ -69,7 +70,7 @@ namespace Xpand.XAF.Modules.OneView{
 
         private static IObservable<ShowViewParameters> ShowView(this XafApplication application) 
 	        => application.WhenWindowCreated().When(TemplateContext.ApplicationWindow)
-		        .SelectMany(_ => application.ShowOneViewParameters().ShowOneView())
+		        .SelectManyItemResilient(_ => application.ShowOneViewParameters().ShowOneView())
 		        .TraceOneView(parameters => parameters.CreatedView.Id)
 		        .WhenNotDefault();
 

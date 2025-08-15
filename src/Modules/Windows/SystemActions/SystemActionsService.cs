@@ -9,9 +9,9 @@ using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.Model;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Conditional;
+using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
-using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.ActionExtensions;
 using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.ModelExtensions;
@@ -38,7 +38,7 @@ namespace Xpand.XAF.Modules.Windows.SystemActions {
 
         private static IObservable<Unit> WaitTheExecute(this (ActionBase action, IModelHotkeyAction model) activated, IModelHotkeyAction model) 
             => activated.action.WhenExecuteCompleted().TakeFirst()
-                .MergeToUnit(model.DeferAction(_ => activated.action.DoTheExecute(model)).IgnoreElements()).TakeFirst();
+                .MergeToUnit(model.DeferActionItemResilient(() => activated.action.DoTheExecute(model)).IgnoreElements()).TakeFirst();
 
         private static IObservable<(ActionBase action, IModelHotkeyAction model)> WhenActionActivated(this XafApplication application, (HotKeyManager manager, Frame window) hotKeyManager) 
             => hotKeyManager.window.Actions().Where(a => a.Available()).ToNowObservable().Select(@base => @base)
@@ -49,7 +49,7 @@ namespace Xpand.XAF.Modules.Windows.SystemActions {
 
         private static IObservable<IModelHotkeyAction> WhenHotKeyPressed(this XafApplication application, HotKeyManager hotKeyManager) 
             => application.Model.ToReactiveModule<IModelReactiveModuleWindows>().Windows.HotkeyActions.ToNowObservable()
-                .SelectMany(action => {
+                .SelectManyItemResilient(action => {
                     var modifiers = action.ParseShortcut();
                     if (action is IModelSystemAction) {
                         var globalHotKey = new GlobalHotKey(action.Id(), modifiers.modifier, modifiers.key);

@@ -10,7 +10,8 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions {
         public static IObservable<T> When<TEventArgs, T>(this ActionBase action, string eventName,
             Func<TEventArgs, IObservable<T>> resilientSelector, [CallerMemberName] string memberName = "",
             [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0) where TEventArgs : EventArgs
-            => action.ProcessEvent(eventName, resilientSelector, context: [action], memberName: memberName, filePath: filePath, lineNumber: lineNumber).TakeUntilDisposed(action)
+            => action.ProcessEvent(eventName, resilientSelector, context: [action], memberName: memberName, filePath: filePath, lineNumber: lineNumber)
+                .TakeUntilDisposed(action)
                 .PushStackFrame();
 
         public static IObservable<T> When<TEventArgs, T>(this IObservable<ActionBase> source, string eventName,

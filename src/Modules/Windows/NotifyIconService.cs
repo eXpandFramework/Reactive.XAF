@@ -11,6 +11,7 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.SystemModule;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.Reactive.Combine;
+using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.XAF.Modules.Reactive.Services;
 
@@ -24,7 +25,7 @@ namespace Xpand.XAF.Modules.Windows {
             => source.MergeIgnored(NotifyIcon);
 
         private static IObservable<Frame> NotifyIcon(Window frame) 
-            => Observable.Using(() => new Container(), container => {
+            => frame.UsingItemResilient(() => new Container(), container => {
                 if (frame.Model().NotifyIcon.Enabled) {
                     var notifyIcon = new NotifyIcon(container)
                         {Visible = true, ContextMenuStrip = new ContextMenuStrip(container)};
@@ -49,12 +50,12 @@ namespace Xpand.XAF.Modules.Windows {
 
         private static IObservable<Frame> ShowOnDoubleClick(this NotifyIcon notifyIcon, Frame frame) 
             => notifyIcon.ProcessEvent(nameof(notifyIcon.DoubleClick)).Where(_ => frame.Model().NotifyIcon.ShowOnDblClick)
-                .Do(_ => ((Form) frame.Application.MainWindow.Template).Show()).To(frame).TraceWindows();
+                .DoItemResilient(_ => ((Form) frame.Application.MainWindow.Template).Show()).To(frame).TraceWindows();
 
         private static IObservable<Frame> ExecuteMenuItems(this NotifyIcon notifyIcon,Frame frame) 
             => notifyIcon.ContextMenuStrip.UpdateMenuItems(frame).Finally(() => NotifyIconSubject.OnNext(notifyIcon))
                 .SelectMany(item => item.ProcessEvent(nameof(item.Click)).ObserveOn(SynchronizationContext.Current!).To(item))
-                .Do(item => {
+                .DoItemResilient(item => {
                     var model = frame.Model().NotifyIcon;
                     var mainForm = ((Form) frame.Application.MainWindow.Template);
                     if (item.Text == model.LogOffText) {

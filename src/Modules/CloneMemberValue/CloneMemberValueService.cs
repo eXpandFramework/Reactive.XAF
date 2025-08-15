@@ -10,6 +10,7 @@ using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
 
 using Xpand.Extensions.Reactive.Combine;
+using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.Tracing;
@@ -35,37 +36,37 @@ namespace Xpand.XAF.Modules.CloneMemberValue{
 
         public static IObservable<(ObjectView objectView, IMemberInfo MemberInfo, object previousObject, object currentObject)> CloneMembers(
             this IObservable<(ObjectView objectView,object previous, object current)> source) 
-            => source.SelectMany(_ => _.objectView
-                .CloneValueMemberViewItems()
-                .Select(value =>(_.objectView, ((IModelMemberViewItem) value).ModelMember.MemberInfo, _.previous, _.current).CloneMemberValue()));
+            => source.SelectMany(t => t.objectView
+                .CloneValueMemberViewItems().ToNowObservable()
+                .SelectItemResilient(value =>(t.objectView, ((IModelMemberViewItem) value).ModelMember.MemberInfo, t.previous, t.current).CloneMemberValue()));
 
         public static IObservable<(object previous, object current)> NewObjectPairs(this ListEditor listEditor) 
             => listEditor.WhenNewObjectAdding()
                 .Select(e => e.AddedObject).Cast<object>()
-                .CombineWithPrevious().Where(_ => _.previous != null);
+                .CombineWithPrevious().Where(t => t.previous != null);
 
         public static IObservable<(DetailView previous, DetailView current)> WhenCloneMemberValueDetailViewPairs(this XafApplication application) 
             => application
                 .WhenDetailViewCreated()
-                .Select(_ => _.e.View).Where(view => view.CloneValueMemberViewItems().Any())
-                .CombineWithPrevious().Where(_ => _.previous != null&&_.current.ObjectSpace.IsNewObject(_.current.CurrentObject))
+                .Select(t => t.e.View).Where(view => view.CloneValueMemberViewItems().Any())
+                .CombineWithPrevious().Where(t => t.previous != null&&t.current.ObjectSpace.IsNewObject(t.current.CurrentObject))
                 .Publish().RefCount();
 
         public static IObservable<ListView> WhenCloneMemberValueListViewCreated(this XafApplication application) 
             => application
-                .WhenListViewCreated().Where(_ => _.CloneValueMemberViewItems().Any())
-                .Select(_ => _).Where(view => view.Model.AllowEdit);
+                .WhenListViewCreated().Where(listView => listView.CloneValueMemberViewItems().Any())
+                .Select(listView => listView).Where(view => view.Model.AllowEdit);
 
         public static IObservable<(ObjectView objectView, IMemberInfo MemberInfo, object previousObject, object currentObject)> WhenCloneMemberValues(this XafApplication application) 
             => application.WhenCloneMemberValueDetailViewPairs()
-                .Select(_ => (((ObjectView) _.current),_.previous.CurrentObject,_.current.CurrentObject))
+                .Select(t => (((ObjectView) t.current),t.previous.CurrentObject,t.current.CurrentObject))
                 .Merge(application.WhenCloneMemberValueListViewCreated()
                     .WhenControlsCreated()
-                    .SelectMany(_ => (_.Editor
+                    .SelectMany(listView => (listView.Editor
                         .NewObjectPairs()
-                        .Select(tuple => (((ObjectView) _),tuple.previous,tuple.current)))))
+                        .Select(tuple => (((ObjectView) listView),tuple.previous,tuple.current)))))
                 .CloneMembers()
-                .TraceCloneMemberValueModule(_ => $"{_.objectView.Id}, {_.MemberInfo.Name}, p={_.previousObject}, c={_.currentObject}")
+                .TraceCloneMemberValueModule(t => $"{t.objectView.Id}, {t.MemberInfo.Name}, p={t.previousObject}, c={t.currentObject}")
             ;
 
         private static (ObjectView objectView,IMemberInfo MemberInfo, object previousObject, object currentObject)

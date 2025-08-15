@@ -1,22 +1,25 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Xpand.Extensions.LinqExtensions;
+using Xpand.Extensions.StringExtensions;
 
 namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
     public record AmbientFaultContext {
         public IReadOnlyList<LogicalStackFrame> LogicalStackTrace { get; init; }
-        public IReadOnlyList<string> CustomContext { get; init; }
+        public object[] CustomContext { get; init; }
         public AmbientFaultContext InnerContext { get; init; }
         public object Name => CustomContext.FirstOrDefault() ?? "Unknown";
     }
     
-    public readonly struct LogicalStackFrame(string memberName, string filePath, int lineNumber) {
+    public readonly struct LogicalStackFrame(string memberName, string filePath, int lineNumber,params object[] context) {
+        public object[] Context=> context;
         public string MemberName => memberName;
 
         public string FilePath => filePath;
 
         public int LineNumber => lineNumber;
 
-        public override string ToString() => $"at {memberName} in {filePath}:line {lineNumber}";
+        public override string ToString() => $"{context.JoinCommaSpace().EncloseParenthesis()} at {memberName} in {filePath}:line {lineNumber}";
     }
 
 }
