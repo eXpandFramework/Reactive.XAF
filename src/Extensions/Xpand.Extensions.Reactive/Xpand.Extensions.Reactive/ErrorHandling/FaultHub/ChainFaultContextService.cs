@@ -11,38 +11,44 @@ using Xpand.Extensions.LinqExtensions;
 namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
     public static class ChainFaultContextService {
         internal static readonly AsyncLocal<IImmutableStack<object>> ContextStack = new();
+        internal static readonly IAsyncLocal[] All = [ ContextStack.Wrap()];
 
-        public static IObservable<T> ChainFaultContext<T>(this IObservable<T> source, Func<IObservable<T>, IObservable<T>> retryStrategy, object[] context = null)
-            => source.ChainFaultContext(context ?? [], retryStrategy);
+        public static IObservable<T> ChainFaultContext<T>(this IObservable<T> source, Func<IObservable<T>, IObservable<T>> retryStrategy, object[] context = null,
+            [CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0)
+            => source.ChainFaultContext(context ?? [], retryStrategy,memberName, filePath, lineNumber);
 
         public static IObservable<T> ChainFaultContext<T>(this IObservable<T> source, 
-            bool handleUpstreamRetries, object[] context = null)
-            => !handleUpstreamRetries ? source.ChainFaultContext(context)
-                : source.ChainFaultContext(errors => errors.Take(1).IgnoreElements(), context);
+            bool handleUpstreamRetries, object[] context = null,[CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0)
+            => !handleUpstreamRetries ? source.ChainFaultContext(context,null,memberName, filePath, lineNumber)
+                : source.ChainFaultContext(errors => errors.Take(1).IgnoreElements(), context, memberName, filePath, lineNumber);
 
-        public static IObservable<T> ChainFaultContext<T>(this IObservable<T> source)
-            => source.ChainFaultContext([]);
+        public static IObservable<T> ChainFaultContext<T>(this IObservable<T> source,[CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0)
+            => source.ChainFaultContext([],null, memberName, filePath, lineNumber);
 
 
         public static IObservable<T> PushStackFrame<T>(this IObservable<T> source,object[] context,
-            [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "",
-            [CallerLineNumber] int lineNumber = 0 )
-            => source.PushStackFrame( new LogicalStackFrame(memberName, filePath, lineNumber,context));
+            [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0 )
+            => !FaultHub.Enabled ? source : source.PushStackFrame(new LogicalStackFrame(memberName, filePath, lineNumber, context));
 
         public static IObservable<T> PushStackFrame<T>(this IObservable<T> source,
             [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0)
-            => source.PushStackFrame( new LogicalStackFrame(memberName, filePath, lineNumber));
-        
+            => !FaultHub.Enabled ? source : source.PushStackFrame(new LogicalStackFrame(memberName, filePath, lineNumber));
+
+
         private static IObservable<T> PushStackFrame<T>(this IObservable<T> source, LogicalStackFrame frame) 
             => Observable.Defer(() => {
                 var stackFromAbove = FaultHub.LogicalStackContext.Value;
+                var topFrame = stackFromAbove?.FirstOrDefault();
+                if (topFrame?.MemberName == frame.MemberName) {
+                    return source;
+                }
                 var newStack = new[] { frame }.Concat(stackFromAbove ?? Enumerable.Empty<LogicalStackFrame>()).ToList();
                 FaultHub.LogicalStackContext.Value = newStack;
-                Log(() => $"[HUB-STACK][Push]   '{frame.MemberName}'. Stack depth: {newStack.Count}");
                 return source;
             });
 
-        private static void LogAsyncLocalState(this string step) {
+
+        private static void LogAsyncLocalState(this Func<string> step) {
             var handlerCount = FaultHub.HandlersContext.Value?.Count ?? -1;
             var nestingDepth = ContextStack.Value?.Count() ?? -1;
             Log(() => $"[HUB-DIAGNOSTIC][{step}] Handlers: {handlerCount}, Nesting: {nestingDepth}");
@@ -59,8 +65,9 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
                 .ToList();
 
 
-        public static IObservable<T> ChainFaultContext<T>(this IObservable<T> source, object[] context,
-            Func<IObservable<T>, IObservable<T>> retryStrategy = null) {
+        public static IObservable<T> ChainFaultContext<T>(this IObservable<T> source, object[] context, Func<IObservable<T>, IObservable<T>> retryStrategy = null,
+            [CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0) {
+            if (!FaultHub.Enabled)return source;
             var contextName = context?.FirstOrDefault() ?? "UnnamedBoundary";
             return Observable.Defer(() => {
                 var stackFromAbove = FaultHub.LogicalStackContext.Value;
@@ -68,14 +75,14 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
 
                 var sourceWithAttemptClearing = Observable.Defer(() => {
                     FaultHub.LogicalStackContext.Value = null;
-                    $"ChainFaultContext('{contextName}') - New attempt started".LogAsyncLocalState();
+                    LogAsyncLocalState(() => $"ChainFaultContext('{contextName}') - New attempt started");
                     return source;
                 });
                 var effectiveSource = retryStrategy != null ? retryStrategy(sourceWithAttemptClearing) : sourceWithAttemptClearing;
                 return effectiveSource
                     .Catch((Exception ex) => {
                         Log(() => "[HUB-TRACE][ChainFaultContext Catch] Boundary caught exception.");
-                        var faultContext = context.NewFaultContext(FaultHub.LogicalStackContext.Value);
+                        var faultContext = context.NewFaultContext(FaultHub.LogicalStackContext.Value,memberName, filePath, lineNumber);
                         return ex.ProcessFault(faultContext, Observable.Throw<T>);
                     })
                     .Finally(() => {
@@ -87,25 +94,10 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
         public static void Log(this Func<string> messageSelector) {
             if (FaultHub.Logging) Console.WriteLine(messageSelector());
         }
-        public static IObservable<T> FlowFaultContext<T>(this IObservable<T> source) {
-            return Observable.Create<T>(observer => {
-                var capturedContext = ExecutionContext.Capture();
-                return capturedContext == null
-                    ? source.Subscribe(observer)
-                    : source.Subscribe(
-                        onNext: value => ExecutionContext.Run(capturedContext, _ => observer.OnNext(value), null),
-                        onError: error => ExecutionContext.Run(capturedContext, _ => observer.OnError(error), null),
-                        onCompleted: () => ExecutionContext.Run(capturedContext, _ => observer.OnCompleted(), null)
-                    );
-            });
-        }
         
         public static AmbientFaultContext NewFaultContext(this object[] context, IReadOnlyList<LogicalStackFrame> logicalStack, [CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0) {
             Log(() => $"[HUB-TRACE][NewFaultContext] Caller: '{memberName}', filePath: {filePath}, line: {lineNumber} Context: '{(context == null ? "null" : string.Join(", ", context))}'");
-            var finalContext = (context ?? []).Select(o => o).WhereNotDefault().Distinct().ToList();
-            if (!finalContext.Any()) {
-                finalContext.Add(memberName);
-            }
+            var finalContext = (context ?? []).Select(o => o).WhereNotDefault().Prepend(memberName).Distinct().ToList();
             return new AmbientFaultContext {
                 LogicalStackTrace = logicalStack,
                 CustomContext = finalContext.ToArray()

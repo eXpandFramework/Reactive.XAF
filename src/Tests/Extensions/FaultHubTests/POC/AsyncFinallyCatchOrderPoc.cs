@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Reactive.Linq;
+﻿using System.Collections.Generic;
 using System.Threading;
-using NUnit.Framework;
-using Shouldly;
 
 namespace Xpand.Extensions.Tests.FaultHubTests.POC {
     using System;

@@ -26,54 +26,43 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
         private static string FormatContextObject(object obj) 
             => obj is Type or null ? $"Type: {obj}" :
                 obj.ToString() == obj.GetType().FullName ? null :
-                $"{(obj.GetType().IsValueType||obj is string ? "Context:" : obj.GetType().Name)}: {obj}";
+                $"{(obj.GetType().IsValueType||obj is string ? "Context:" : obj.GetType().Name)} {obj}";
 
         public override string ToString() {
             var builder = new StringBuilder();
             var exception = InnerException ?? this;
             builder.AppendLine($"{exception.GetType().Name}: {exception.Message}");
-            if (InnerException?.StackTrace != null) {
-                builder.AppendLine(InnerException.StackTrace);
-                builder.AppendLine();
-            }
 
-            if (FaultHub.Logging) builder.AppendLine("--- Logical Operation Stack ---");
-
+            builder.AppendLine("--- Logical Operation Stack ---");
             var frames = Context.FromHierarchy(frame => frame.InnerContext).Reverse().ToList();
             foreach (var frame in frames)
                 builder.AppendLine($"{frame.CustomContext.Select(FormatContextObject).WhereNotDefault().Join(" | ")}");
-            var logicalStack = LogicalStackTrace.ToList();
-            if (logicalStack.Any()) {
-                if (FaultHub.Logging) builder.AppendLine("--- Invocation Stack ---");
-                var indentedStackTrace = string.Join(Environment.NewLine,
-                    logicalStack.Select(f => $"   {f}"));
-                builder.AppendLine(indentedStackTrace);
+
+            var fullLogicalStack = LogicalStackTrace.ToList();
+            if (fullLogicalStack.Any()) {
+                var simplifiedStack = fullLogicalStack.DistinctBy(f => f.MemberName).ToList();
+                var wasSimplified = simplifiedStack.Count < fullLogicalStack.Count;
+
+                if (wasSimplified) {
+                    builder.AppendLine("--- Simplified Invocation Stack (Unique Methods) ---");
+                    builder.AppendLine(string.Join(Environment.NewLine, simplifiedStack.Select(f => $"  {f}").Reverse()));
+                }
+
+                builder.AppendLine(wasSimplified ? "--- Full Invocation Stack ---" : "--- Invocation Stack ---");
+                builder.AppendLine(string.Join(Environment.NewLine, fullLogicalStack.Select(f => $"  {f}").Reverse()));
             }
 
-            if (FaultHub.Logging) builder.AppendLine("--- End of Logical Operation Stack ---");
+            builder.AppendLine("--- End of Logical Operation Stack ---");
 
             if (InnerException != null) {
-                if (string.IsNullOrEmpty(InnerException.StackTrace)) {
-                    if (FaultHub.Logging) {
-                        builder.AppendLine();
-                        builder.AppendLine("--- Stack Trace (from innermost fault context) ---");
-                        var logicalStackForDisplay = LogicalStackTrace.ToList();
-                        if (logicalStackForDisplay.Any())
-                            builder.AppendLine(string.Join(Environment.NewLine,
-                                logicalStackForDisplay.Select(f => $"   {f}")));
-                        // MODIFICATION: Added the closing tag for the section.
-                        builder.AppendLine("--- End of Stack Trace (from innermost fault context) ---");
-                    }
-                }
-                else {
-                    builder.AppendLine();
-                    builder.AppendLine("--- Original Exception Details ---");
-                    builder.AppendLine(InnerException.ToString());
-                    builder.AppendLine("--- End of Original Exception Details ---");
-                }
+                builder.AppendLine();
+                builder.AppendLine("--- Original Exception Details ---");
+                builder.AppendLine(InnerException.ToString());
+                builder.AppendLine("--- End of Original Exception Details ---");
             }
 
             return builder.ToString();
-        }        
+        }
     }
+    
 }

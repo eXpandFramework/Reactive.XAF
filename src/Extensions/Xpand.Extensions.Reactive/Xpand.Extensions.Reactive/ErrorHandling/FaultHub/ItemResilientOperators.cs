@@ -5,31 +5,102 @@ using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Enumerable = System.Linq.Enumerable;
 
 namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
+    public interface IAsyncLocal {
+        object Value { get; set; }
+    }
+
+    internal class AsyncLocalWrapper<T>(AsyncLocal<T> asyncLocal) : IAsyncLocal {
+        public object Value {
+            get => asyncLocal.Value;
+            set => asyncLocal.Value = (T)value;
+        }
+    }
     public static class ItemResilientOperators {
+        public static IAsyncLocal Wrap<T>(this AsyncLocal<T> asyncLocal) 
+            => new AsyncLocalWrapper<T>(asyncLocal);
+
         private static IObservable<T> ApplyItemResilience<T>(this IObservable<T> source, Func<IObservable<T>, IObservable<T>> retryStrategy, object[] context,
             string memberName, string filePath, int lineNumber)
-            => (retryStrategy != null ? retryStrategy(source) : source)
-                .Catch((Exception ex) => ex.ProcessFault(context.NewFaultContext(new[] { new LogicalStackFrame(memberName, filePath, lineNumber) }.ToList()
-                        .Concat(FaultHub.LogicalStackContext.Value ?? Enumerable.Empty<LogicalStackFrame>()).ToList(), memberName, filePath, lineNumber),
+            => FaultHub.Enabled ? (retryStrategy != null ? retryStrategy(source) : source)
+                .Catch((Exception ex) => ex.ProcessFault(context.NewFaultContext(
+                        new[] { new LogicalStackFrame(memberName, filePath, lineNumber) }.ToList()
+                            .Concat(FaultHub.LogicalStackContext.Value ?? Enumerable.Empty<LogicalStackFrame>())
+                            .ToList(), memberName, filePath, lineNumber),
                     proceedAction: enrichedException => {
                         enrichedException.Publish();
                         return Observable.Empty<T>();
                     }))
-                .SafeguardSubscription((ex, s) => ex.ExceptionToPublish(context.NewFaultContext(FaultHub.LogicalStackContext.Value, s)).Publish(), memberName);
-        
+                .SafeguardSubscription(
+                    (ex, s) => ex.ExceptionToPublish(context.NewFaultContext(FaultHub.LogicalStackContext.Value, s))
+                        .Publish(), memberName)
+                : source;
+
         public static IObservable<T> ProcessEvent<TEventArgs, T>(this object source, string eventName, Func<TEventArgs, IObservable<T>> resilientSelector, 
             object[] context = null, [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0, 
             IScheduler scheduler = null) where TEventArgs : EventArgs
-            => source.FromEventPattern<TEventArgs>(eventName, scheduler)
-                .FlowFaultContext() 
-                .SelectMany(pattern => resilientSelector(pattern.EventArgs)
-                    .ApplyItemResilience(null, context.AddToContext(pattern.EventArgs), memberName, filePath, lineNumber));
-        
+            => !FaultHub.Enabled ? source.FromEventPattern<TEventArgs>(eventName, scheduler)
+                    .SelectMany(pattern => resilientSelector(pattern.EventArgs))
+                : source.FromEventPattern<TEventArgs>(eventName, scheduler)
+                    .FlowFaultContext(FaultHub.All.Concat(ChainFaultContextService.All).ToArray())
+                    .SelectMany(pattern => resilientSelector(pattern.EventArgs)
+                        .ApplyItemResilience(null, context.AddToContext(pattern.EventArgs), memberName, filePath,
+                            lineNumber));
+
+        public static IObservable<T> FlowFaultContext<T>(this IObservable<T> source,params IAsyncLocal[] asyncLocals) 
+            => Observable.Create<T>(observer => {
+                var capturedValues = asyncLocals.Select(l => l.Value).ToArray();
+
+                return source.Subscribe(
+                    onNext: value => {
+                        var originalValues = asyncLocals.Select(l => l.Value).ToArray();
+                        try {
+                            for (int i = 0; i < asyncLocals.Length; i++) {
+                                asyncLocals[i].Value = capturedValues[i];
+                            }
+                            observer.OnNext(value);
+                        }
+                        finally {
+                            for (int i = 0; i < asyncLocals.Length; i++) {
+                                asyncLocals[i].Value = originalValues[i];
+                            }
+                        }
+                    },
+                    onError: error => {
+                        var originalValues = asyncLocals.Select(l => l.Value).ToArray();
+                        try {
+                            for (int i = 0; i < asyncLocals.Length; i++) {
+                                asyncLocals[i].Value = capturedValues[i];
+                            }
+                            observer.OnError(error);
+                        }
+                        finally {
+                            for (int i = 0; i < asyncLocals.Length; i++) {
+                                asyncLocals[i].Value = originalValues[i];
+                            }
+                        }
+                    },
+                    onCompleted: () => {
+                        var originalValues = asyncLocals.Select(l => l.Value).ToArray();
+                        try {
+                            for (int i = 0; i < asyncLocals.Length; i++) {
+                                asyncLocals[i].Value = capturedValues[i];
+                            }
+                            observer.OnCompleted();
+                        }
+                        finally {
+                            for (int i = 0; i < asyncLocals.Length; i++) {
+                                asyncLocals[i].Value = originalValues[i];
+                            }
+                        }
+                    });
+            });
+    
         public static IObservable<T> DoItemResilient<T>(this IObservable<T> source, Action<T> action,
             object[] context = null, [CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0)
             => source.DoItemResilient(action, null, context, memberName, filePath, lineNumber);

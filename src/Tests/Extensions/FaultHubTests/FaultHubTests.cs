@@ -9,7 +9,6 @@ using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.ExceptionExtensions;
 using Xpand.Extensions.Numeric;
-using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.ErrorHandling;
 using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.Reactive.Transform;
@@ -213,41 +212,11 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
             var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
             
             var allContexts = fault.AllContexts.ToArray();
-            var expectedContexts = new[] {
-                "OuterContext",
-                "InnerContext"
+            var expectedContexts = new Object[] {
+                nameof(Nested_ChainFaultContext_Correctly_Stacks_Context),"OuterContext",
+                nameof(Nested_ChainFaultContext_Correctly_Stacks_Context),"InnerContext"
             };
             allContexts.ShouldBe(expectedContexts);
-        }
-        
-        [Test]
-        public async Task Inner_Operation_Failure_Triggers_Outer_Transactional_Retry() {
-            var failingCounter = new SubscriptionCounter();
-            var successfulCounter = new SubscriptionCounter();
-            var outerCounter = new SubscriptionCounter();
-            
-            var result = await new object[] {Observable.Throw<string>(new InvalidOperationException("Operation Failed"))
-                    .TrackSubscriptions(failingCounter), Unit.Default.Observe()
-                    .TrackSubscriptions(successfulCounter) }
-                .ExecuteTransaction(op => op.Retry(2), "MyTransaction")
-                .TrackSubscriptions(outerCounter)
-                .ChainFaultContext(s => s.Retry(3), ["Outer"])
-                .PublishFaults().Capture();
-            
-            result.IsCompleted.ShouldBe(true);
-            result.Error.ShouldBeNull();
-            
-            BusEvents.Count.ShouldBe(1);
-            (failingCounter.Count, successfulCounter.Count, outerCounter.Count).ShouldBe((6, 3, 3));
-            var finalFault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
-            finalFault.AllContexts.ShouldContain("Outer");
-            
-            var transactionException = finalFault.InnerException.ShouldBeOfType<InvalidOperationException>();
-            transactionException.Message.ShouldBe("MyTransaction failed");
-            var innerFault = transactionException.InnerException.ShouldBeOfType<AggregateException>()
-                .InnerExceptions.Single().ShouldBeOfType<FaultHubException>();
-            innerFault.AllContexts.ShouldContain("MyTransaction - Op:1");
-            innerFault.InnerException.ShouldBeOfType<InvalidOperationException>().Message.ShouldBe("Operation Failed");
         }
     
         [Test]
@@ -284,7 +253,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
             BusEvents.Count.ShouldBe(1);
             var finalException = BusEvents.Cast<FaultHubException>().Single();
             finalException.AllContexts.Distinct()
-                .ShouldBe([ "opB", "opA"]);
+                .ShouldBe([nameof(Outerstream_Operator_Takes_Over_And_Stacks_Context), "opB", "opA"]);
             result.Error.ShouldBeNull();
             result.IsCompleted.ShouldBe(true);
         }

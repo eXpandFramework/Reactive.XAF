@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Reactive.Linq;
-using System.Runtime.CompilerServices;
 using DevExpress.ExpressApp.Actions;
 using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.Reactive.Transform;
@@ -10,8 +9,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions {
         public static IObservable<T> When<TEventArgs, T>(this ActionBase action, string eventName,
             Func<TEventArgs, IObservable<T>> resilientSelector) where TEventArgs : EventArgs
             => action.ProcessEvent(eventName, resilientSelector, context: [action])
-                .TakeUntilDisposed(action)
-                .PushStackFrame();
+                .TakeUntilDisposed(action);
 
         public static IObservable<T> When<TEventArgs, T>(this IObservable<ActionBase> source, string eventName,
             Func<TEventArgs, IObservable<T>> resilientSelector) where TEventArgs : EventArgs

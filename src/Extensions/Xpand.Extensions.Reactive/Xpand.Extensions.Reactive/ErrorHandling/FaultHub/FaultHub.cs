@@ -16,6 +16,8 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
         public static readonly AsyncLocal<IReadOnlyList<LogicalStackFrame>> LogicalStackContext = new();
         internal static readonly AsyncLocal<List<Func<Exception, FaultAction?>>> HandlersContext = new();
         static readonly AsyncLocal<Guid?> Ctx = new();
+
+        internal static readonly IAsyncLocal[] All= [LogicalStackContext.Wrap(), HandlersContext.Wrap(), Ctx.Wrap()];
         public static readonly MemoryCache Seen = new(new MemoryCacheOptions { SizeLimit = 10000 });
         public static readonly ISubject<Exception> Bus = Subject.Synchronize(new Subject<Exception>());
         const string KeyCId = "CorrelationId";
@@ -24,7 +26,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
         private const string Key = "Origin";
 
         static FaultHub() => Logging = true;
-
+        public static bool Enabled { get; set; } = true;
         public static void Reset() {
             LogicalStackContext.Value = null;
             HandlersContext.Value = null;
@@ -121,12 +123,11 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
         }
 
 
-        public static IObservable<T> PublishFaults<T>(this IObservable<T> source) {
-            return source.Catch<T, Exception>(ex => {
+        public static IObservable<T> PublishFaults<T>(this IObservable<T> source) 
+            => Enabled ? source.Catch<T, Exception>(ex => {
                 Log(() => $"[HUB][PublishFaults] Caught final exception: {ex.GetType().Name}. Attempting to publish.");
                 return ex.Publish<T>();
-            });
-        }
+            }) : source;
 
         public static bool Logging { get; set; }
 

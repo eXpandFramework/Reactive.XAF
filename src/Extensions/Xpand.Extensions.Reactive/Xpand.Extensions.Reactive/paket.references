@@ -1,4 +1,3 @@
-akarnokd.reactive_extensions
 Fasterflect.Xpand
 System.CodeDom
 System.Reflection.Emit
@@ -14,3 +13,4 @@ System.Diagnostics.PerformanceCounter
 Microsoft.Extensions.DependencyInjection
 System.Management
 Microsoft.Extensions.Caching.Memory
+System.Reactive

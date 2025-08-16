@@ -21,7 +21,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             TestContext.Value = expectedContext;
 
             using var subscription = source
-                .FlowFaultContext()
+                .FlowFaultContext(TestContext.Wrap())
                 .Subscribe(
                     onNext: _ => contextOnNext = TestContext.Value,
                     onError: _ => { },
@@ -46,7 +46,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             TestContext.Value = expectedContext;
             
             using var subscription = source
-                .FlowFaultContext()
+                .FlowFaultContext(TestContext.Wrap())
                 .Subscribe(
                     onNext: _ => { },
                     onError: _ => contextOnError = TestContext.Value,
@@ -71,7 +71,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             TestContext.Value = expectedContext;
 
             using var subscription = source
-                .FlowFaultContext()
+                .FlowFaultContext(TestContext.Wrap())
                 .Subscribe(
                     onNext: _ => { },
                     onError: _ => { },

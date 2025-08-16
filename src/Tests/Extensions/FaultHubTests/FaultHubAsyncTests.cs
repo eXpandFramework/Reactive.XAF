@@ -82,8 +82,7 @@ public class FaultHubAsyncTests : FaultHubTestBase {
         var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
             
         var output = fault.ToString();
-            
-        output.ShouldContain("--- Stack Trace (from innermost fault context) ---");
+        
         output.ShouldContain(nameof(Preserves_Origin_StackTrace_For_Asynchronous_Exception_Without_StackTrace));
     }
 }
