@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Reactive.Linq;
-using System.Runtime.CompilerServices;
 using DevExpress.ExpressApp.Utils;
 using Xpand.Extensions.Reactive.Transform;
 
@@ -10,7 +9,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => source.Observe().ResultValueChanged(newValue);
 
         public static IObservable<(BoolList boolList, BoolValueChangedEventArgs e)> ResultValueChanged(
-            this IObservable<BoolList> source,bool? newValue=null,[CallerMemberName]string caller="") 
+            this IObservable<BoolList> source,bool? newValue=null) 
             => source.SelectMany(item => item.ProcessEvent<BoolValueChangedEventArgs>(nameof(BoolList.ResultValueChanged))
                     .Where(eventArgs => !newValue.HasValue || eventArgs.NewValue == newValue).InversePair(item));
     }

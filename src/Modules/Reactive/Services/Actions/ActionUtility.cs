@@ -25,24 +25,21 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions {
 
         public static IObservable<TAction> WhenControllerActivated<TAction>(this IObservable<TAction> source,Func<TAction,IObservable<Unit>> mergeSelector,bool emitWhenActive=false) where TAction : ActionBase 
             => source.MergeIgnored(a =>a.Controller.WhenActivated(emitWhenActive)
-                    // .TakeUntil(a.Controller.WhenDeactivated())
+                    .TakeUntil(a.Controller.WhenDeactivated())
                 .SelectManyItemResilient(_ => mergeSelector(a)).To(a) )
                 .PushStackFrame();
 
-        public static IObservable<T> CommitChanges<T>(this IObservable<T> source,[CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0) where T : ActionBaseEventArgs
-        // MODIFICATION: The entire manual SelectMany/Catch implementation has been replaced with the standard SelectManyItemResilient operator.
-        // This new implementation is more concise and consistent with the framework's resilience patterns.
+        public static IObservable<T> CommitChanges<T>(this IObservable<T> source) where T : ActionBaseEventArgs
             => source.SelectManyItemResilient(e => e.Observe()
-                        .Do(_ => e.Action.View()?.AsObjectView()?.ObjectSpace.CommitChanges()), 
-                    context: [memberName], memberName: memberName, filePath: filePath, lineNumber: lineNumber)
+                        .Do(_ => e.Action.View()?.AsObjectView()?.ObjectSpace.CommitChanges()))
                 .PushStackFrame();
         
-        public static IObservable<SingleChoiceAction> AddItems(this IObservable<SingleChoiceAction> source,Func<SingleChoiceAction,IObservable<Unit>> addItemsResilient,IScheduler scheduler=null,[CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0)
+        public static IObservable<SingleChoiceAction> AddItems(this IObservable<SingleChoiceAction> source,Func<SingleChoiceAction,IObservable<Unit>> addItemsResilient,IScheduler scheduler=null)
             => source.MergeIgnored(action => action.Controller.WhenActivated(emitWhenActive: true)
                 .SelectMany(_ => action.View().WhenCurrentObjectChanged().StartWith(action.View()).TakeUntilDisposed(action))
                 .WaitUntilInactive(1, scheduler: scheduler).ObserveOnContextMaybe()
                 .Do(_ => action.Items.Clear()).SelectManyItemResilient(_ => addItemsResilient(action)
-                    .PushStackFrame( memberName,filePath,lineNumber)).TakeUntilDisposed(action))
+                    .PushStackFrame( )).TakeUntilDisposed(action))
                 .PushStackFrame();
 
         public static IObservable<(TModule module, Frame frame)> Action<TModule>(
@@ -78,8 +75,8 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions {
             => source.TakeUntil(component.WhenDisposed());
 
         public static IObservable<(TAction action, BoolList boolList, BoolValueChangedEventArgs e)> ResultValueChanged<TAction>(
-                this TAction source, Func<TAction, BoolList> boolListSelector,[CallerMemberName]string caller="") where TAction : ActionBase 
-            => boolListSelector(source).Observe().ResultValueChanged(caller:caller).Select(tuple => (source, tuple.boolList, tuple.e));
+                this TAction source, Func<TAction, BoolList> boolListSelector) where TAction : ActionBase 
+            => boolListSelector(source).Observe().ResultValueChanged().Select(tuple => (source, tuple.boolList, tuple.e));
 
         public static IObservable<SingleChoiceAction> WhenSelectedItemChanged(this IObservable<SingleChoiceAction> source) 
             =>source.SelectMany(action => action.WhenSelectedItemChanged());

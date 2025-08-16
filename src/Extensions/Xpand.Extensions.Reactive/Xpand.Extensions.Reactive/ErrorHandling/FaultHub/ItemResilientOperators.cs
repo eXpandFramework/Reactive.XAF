@@ -1,19 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
+using Enumerable = System.Linq.Enumerable;
 
 namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
     public static class ItemResilientOperators {
         private static IObservable<T> ApplyItemResilience<T>(this IObservable<T> source, Func<IObservable<T>, IObservable<T>> retryStrategy, object[] context,
             string memberName, string filePath, int lineNumber)
-            => (retryStrategy != null ? retryStrategy(source) : source).PushStackFrame(memberName, filePath, lineNumber)
-                .Catch((Exception ex) => ex.ProcessFault(context.NewFaultContext(FaultHub.LogicalStackContext.Value, memberName, filePath, lineNumber)
-                    , proceedAction: enrichedException => {
+            => (retryStrategy != null ? retryStrategy(source) : source)
+                .Catch((Exception ex) => ex.ProcessFault(context.NewFaultContext(new[] { new LogicalStackFrame(memberName, filePath, lineNumber) }.ToList()
+                        .Concat(FaultHub.LogicalStackContext.Value ?? Enumerable.Empty<LogicalStackFrame>()).ToList(), memberName, filePath, lineNumber),
+                    proceedAction: enrichedException => {
                         enrichedException.Publish();
                         return Observable.Empty<T>();
                     }))

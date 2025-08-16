@@ -18,28 +18,28 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions {
             => singleChoiceAction.ProcessEvent(nameof(SingleChoiceAction.Execute),resilientSelector).TakeUntilDisposed(singleChoiceAction).PushStackFrame(memberName,filePath,lineNumber)
                 .PushStackFrame();
 
-        public static IObservable<T> WhenExecute<T>(this ParametrizedAction parametrizedAction,Func<ParametrizedActionExecuteEventArgs,IObservable<T>> resilientSelector, [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0) 
-            => parametrizedAction.ProcessEvent(nameof(ParametrizedAction.Execute),resilientSelector).TakeUntilDisposed(parametrizedAction).PushStackFrame(memberName,filePath,lineNumber)
+        public static IObservable<T> WhenExecute<T>(this ParametrizedAction parametrizedAction,Func<ParametrizedActionExecuteEventArgs,IObservable<T>> resilientSelector) 
+            => parametrizedAction.ProcessEvent(nameof(ParametrizedAction.Execute),resilientSelector).TakeUntilDisposed(parametrizedAction).PushStackFrame()
                 .PushStackFrame();
 
-        public static IObservable<T> WhenExecute<T>(this PopupWindowShowAction popupWindowShowAction,Func<PopupWindowShowActionExecuteEventArgs,IObservable<T>> resilientSelector, [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0) 
-            => popupWindowShowAction.ProcessEvent(nameof(PopupWindowShowAction.Execute),resilientSelector).TakeUntilDisposed(popupWindowShowAction).PushStackFrame(memberName,filePath,lineNumber)
+        public static IObservable<T> WhenExecute<T>(this PopupWindowShowAction popupWindowShowAction,Func<PopupWindowShowActionExecuteEventArgs,IObservable<T>> resilientSelector) 
+            => popupWindowShowAction.ProcessEvent(nameof(PopupWindowShowAction.Execute),resilientSelector).TakeUntilDisposed(popupWindowShowAction).PushStackFrame()
                 .PushStackFrame();
 
-        public static IObservable<T> WhenExecute<T>(this IObservable<SimpleAction> source,Func<SimpleActionExecuteEventArgs, IObservable<T>> resilientSelector,[CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0) 
-            => source.SelectMany(action => action.WhenExecute(resilientSelector).TakeUntilDeactivated(action.Controller)).PushStackFrame(memberName,filePath,lineNumber)
+        public static IObservable<T> WhenExecute<T>(this IObservable<SimpleAction> source,Func<SimpleActionExecuteEventArgs, IObservable<T>> resilientSelector) 
+            => source.SelectMany(action => action.WhenExecute(resilientSelector).TakeUntilDeactivated(action.Controller)).PushStackFrame()
                 .PushStackFrame();
         
-        public static IObservable<T> WhenExecute<T>(this IObservable<SingleChoiceAction> source,Func<SingleChoiceActionExecuteEventArgs, IObservable<T>> resilientSelector,[CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0) 
-            => source.SelectMany(action => action.WhenExecute(resilientSelector).TakeUntilDeactivated(action.Controller)).PushStackFrame(memberName,filePath,lineNumber)
+        public static IObservable<T> WhenExecute<T>(this IObservable<SingleChoiceAction> source,Func<SingleChoiceActionExecuteEventArgs, IObservable<T>> resilientSelector) 
+            => source.SelectMany(action => action.WhenExecute(resilientSelector).TakeUntilDeactivated(action.Controller)).PushStackFrame()
                 .PushStackFrame();
         
-        public static IObservable<T> WhenExecute<T>(this IObservable<ParametrizedAction> source,Func<ParametrizedActionExecuteEventArgs, IObservable<T>> resilientSelector,[CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0) 
-            => source.SelectMany( action => action.WhenExecute(resilientSelector).TakeUntilDeactivated(action.Controller)).PushStackFrame(memberName,filePath,lineNumber)
+        public static IObservable<T> WhenExecute<T>(this IObservable<ParametrizedAction> source,Func<ParametrizedActionExecuteEventArgs, IObservable<T>> resilientSelector) 
+            => source.SelectMany( action => action.WhenExecute(resilientSelector).TakeUntilDeactivated(action.Controller)).PushStackFrame()
                 .PushStackFrame();
         
-        public static IObservable<T> WhenExecute<T>(this IObservable<PopupWindowShowAction> source,Func<PopupWindowShowActionExecuteEventArgs, IObservable<T>> resilientSelector,[CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0) 
-            => source.SelectMany(action => action.WhenExecute(resilientSelector).TakeUntilDeactivated(action.Controller)).PushStackFrame(memberName,filePath,lineNumber)
+        public static IObservable<T> WhenExecute<T>(this IObservable<PopupWindowShowAction> source,Func<PopupWindowShowActionExecuteEventArgs, IObservable<T>> resilientSelector) 
+            => source.SelectMany(action => action.WhenExecute(resilientSelector).TakeUntilDeactivated(action.Controller)).PushStackFrame()
                 .PushStackFrame();
 
         public static IObservable<SimpleActionExecuteEventArgs> WhenExecute(this IObservable<SimpleAction> source) 

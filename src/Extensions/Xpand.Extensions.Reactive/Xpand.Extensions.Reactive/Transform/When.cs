@@ -12,7 +12,6 @@ namespace Xpand.Extensions.Reactive.Transform {
                 ? n.Exception.Throw<Notification<T>>() : n.Kind == kind ? Observable.Return(n) : Observable.Empty<Notification<T>>());
 
         public static IObservable<T[]> WhenCompleted<T>(this IObservable<T> source) 
-            // => source.When(NotificationKind.OnCompleted).Select(_ => Array.Empty<T>());
             => source.BufferUntilCompleted();
 
         public static IObservable<Exception> WhenError<T>(this IObservable<T> source) 

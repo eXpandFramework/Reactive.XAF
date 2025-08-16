@@ -83,8 +83,8 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions {
         public static IObservable<TAction> WhenActive<TAction>(this TAction simpleAction) where TAction : ActionBase 
             => simpleAction.Observe().WhenActive();
 
-       public static IObservable<TAction> WhenActivated<TAction>(this IObservable<TAction> source,string[] contexts=null,[CallerMemberName]string caller="") where TAction : ActionBase 
-            => source.SelectMany(a => a.WhenActivated(contexts,caller))
+       public static IObservable<TAction> WhenActivated<TAction>(this IObservable<TAction> source,string[] contexts=null) where TAction : ActionBase 
+            => source.SelectMany(a => a.WhenActivated(contexts))
                 .PushStackFrame();
        
        public static IObservable<TAction> WhenInActive<TAction>(this TAction simpleAction) where TAction : ActionBase 
@@ -94,8 +94,8 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions {
             => source.SelectMany(a => a.WhenDeactivated())
                 .PushStackFrame();
 
-        public static IObservable<TAction> WhenActivated<TAction>(this TAction simpleAction,string[] contexts=null,[CallerMemberName]string caller="") where TAction : ActionBase 
-            => simpleAction.ResultValueChanged(action => action.Active,caller:caller)
+        public static IObservable<TAction> WhenActivated<TAction>(this TAction simpleAction,string[] contexts=null) where TAction : ActionBase 
+            => simpleAction.ResultValueChanged(action => action.Active)
                 .SelectManyItemResilient(t => (contexts ??[]).Concat(Controller.ControllerActiveKey.YieldItem()).Select(context => (t,context))
                     .Where(t1 => t1.t.action.Active.ResultValue&&t1.t.action.Active.Contains(t1.context)&& t1.t.action.Active[t1.context])
                     .Select(t1 => t1.t.action))

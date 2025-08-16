@@ -134,9 +134,10 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
             var logicalStack = fault.LogicalStackTrace.ToList();
 
-            logicalStack.ShouldContain(frame => frame.MemberName == "SubscriptionContext", "The subscription context was lost.");
-            logicalStack.ShouldNotContain(frame => frame.MemberName == "FireEventContext", "The event firing context was incorrectly used.");
-            logicalStack.First().MemberName.ShouldBe("HandlerContext");
+            logicalStack.Count.ShouldBe(3);
+            logicalStack[0].MemberName.ShouldBe(nameof(ProcessEvent_Preserves_Subscription_Context_On_Event_Streams));
+            logicalStack[1].MemberName.ShouldBe("HandlerContext");
+            logicalStack[2].MemberName.ShouldBe("SubscriptionContext");
         }
 
     }

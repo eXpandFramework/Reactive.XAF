@@ -12,17 +12,16 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
     public static class ChainFaultContextService {
         internal static readonly AsyncLocal<IImmutableStack<object>> ContextStack = new();
 
-        public static IObservable<T> ChainFaultContext<T>(this IObservable<T> source, Func<IObservable<T>, IObservable<T>> retryStrategy,
-            object[] context = null, [CallerMemberName] string caller = "")
-            => source.ChainFaultContext(context ?? [], retryStrategy, caller);
+        public static IObservable<T> ChainFaultContext<T>(this IObservable<T> source, Func<IObservable<T>, IObservable<T>> retryStrategy, object[] context = null)
+            => source.ChainFaultContext(context ?? [], retryStrategy);
 
         public static IObservable<T> ChainFaultContext<T>(this IObservable<T> source, 
-            bool handleUpstreamRetries, object[] context = null, [CallerMemberName] string caller = "")
-            => !handleUpstreamRetries ? source.ChainFaultContext(context,null, caller)
-                : source.ChainFaultContext(errors => errors.Take(1).IgnoreElements(), context, caller);
+            bool handleUpstreamRetries, object[] context = null)
+            => !handleUpstreamRetries ? source.ChainFaultContext(context)
+                : source.ChainFaultContext(errors => errors.Take(1).IgnoreElements(), context);
 
-        public static IObservable<T> ChainFaultContext<T>(this IObservable<T> source, [CallerMemberName] string caller = "")
-            => source.ChainFaultContext([],null,caller);
+        public static IObservable<T> ChainFaultContext<T>(this IObservable<T> source)
+            => source.ChainFaultContext([]);
 
 
         public static IObservable<T> PushStackFrame<T>(this IObservable<T> source,object[] context,
@@ -33,76 +32,60 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
         public static IObservable<T> PushStackFrame<T>(this IObservable<T> source,
             [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0)
             => source.PushStackFrame( new LogicalStackFrame(memberName, filePath, lineNumber));
-
-// MODIFICATION: The operator is radically simplified. Its ONLY responsibility is to push a frame.
-// It no longer has any pop/cleanup logic. It relies entirely on a boundary operator like ChainFaultContext to manage the stack's lifecycle.
-        private static IObservable<T> PushStackFrame<T>(this IObservable<T> source, LogicalStackFrame frame) {
-            return Observable.Defer(() => {
+        
+        private static IObservable<T> PushStackFrame<T>(this IObservable<T> source, LogicalStackFrame frame) 
+            => Observable.Defer(() => {
                 var stackFromAbove = FaultHub.LogicalStackContext.Value;
                 var newStack = new[] { frame }.Concat(stackFromAbove ?? Enumerable.Empty<LogicalStackFrame>()).ToList();
                 FaultHub.LogicalStackContext.Value = newStack;
-                $"[HUB-STACK][Push]   '{frame.MemberName}'. Stack depth: {newStack.Count}".LogToConsole();
+                Log(() => $"[HUB-STACK][Push]   '{frame.MemberName}'. Stack depth: {newStack.Count}");
                 return source;
             });
-        }
-        
+
         private static void LogAsyncLocalState(this string step) {
             var handlerCount = FaultHub.HandlersContext.Value?.Count ?? -1;
             var nestingDepth = ContextStack.Value?.Count() ?? -1;
-            $"[HUB-DIAGNOSTIC][{step}] Handlers: {handlerCount}, Nesting: {nestingDepth}".LogToConsole();
+            Log(() => $"[HUB-DIAGNOSTIC][{step}] Handlers: {handlerCount}, Nesting: {nestingDepth}");
         }
 
-        internal static IReadOnlyList<LogicalStackFrame> LogicalStackFrames(this StackTrace trace) {
-            return trace.GetFrames()
+        internal static IReadOnlyList<LogicalStackFrame> LogicalStackFrames(this StackTrace trace) 
+            => trace.GetFrames()
                 .Select(frame => {
                     var method = frame.GetMethod();
                     var type = method?.DeclaringType;
-                    if (type == null) return default;
-                    var fileName = frame.GetFileName();
-                    var lineNumber = frame.GetFileLineNumber();
-                    return new LogicalStackFrame(method.Name, fileName, lineNumber);
+                    return type == null ? default : new LogicalStackFrame(method.Name, frame.GetFileName(), frame.GetFileLineNumber());
                 })
                 .WhereNotDefault()
                 .ToList();
-        }
 
 
-// MODIFICATION: This operator now takes full responsibility for the stack lifecycle.
-// It saves the stack state when it starts and restores it in a Finally block when it ends.
-// Crucially, it uses an inner Defer to RESET the stack on EACH retry attempt, preventing pollution.
-// MODIFICATION: The call to ex.ProcessFault has been restored. This is critical for allowing
-// high-priority handlers like CompleteOnFault and RethrowOnFault to function correctly
-// within the resilience boundary.
         public static IObservable<T> ChainFaultContext<T>(this IObservable<T> source, object[] context,
-            Func<IObservable<T>, IObservable<T>> retryStrategy = null, [CallerMemberName] string caller = "") {
-    
+            Func<IObservable<T>, IObservable<T>> retryStrategy = null) {
+            var contextName = context?.FirstOrDefault() ?? "UnnamedBoundary";
             return Observable.Defer(() => {
                 var stackFromAbove = FaultHub.LogicalStackContext.Value;
-                $"[HUB-TRACE][ChainFaultContext Defer] Boundary created. Saving stack with depth {stackFromAbove?.Count ?? 0}.".LogToConsole();
+                Log(() => $"[HUB-TRACE][ChainFaultContext Defer] Boundary created. Saving stack with depth {stackFromAbove?.Count ?? 0}.");
 
                 var sourceWithAttemptClearing = Observable.Defer(() => {
-                    // On each subscription/retry, reset the stack to a clean slate (null).
                     FaultHub.LogicalStackContext.Value = null;
-                    $"[HUB-TRACE][ChainFaultContext Attempt] New attempt started. Stack cleared.".LogToConsole();
+                    $"ChainFaultContext('{contextName}') - New attempt started".LogAsyncLocalState();
                     return source;
                 });
-
                 var effectiveSource = retryStrategy != null ? retryStrategy(sourceWithAttemptClearing) : sourceWithAttemptClearing;
-
                 return effectiveSource
                     .Catch((Exception ex) => {
-                        $"[HUB-TRACE][ChainFaultContext Catch] Boundary caught exception.".LogToConsole();
-                        var faultContext = context.NewFaultContext(FaultHub.LogicalStackContext.Value, caller);
-                        return ex.ProcessFault(faultContext, enrichedException => Observable.Throw<T>(enrichedException));
+                        Log(() => "[HUB-TRACE][ChainFaultContext Catch] Boundary caught exception.");
+                        var faultContext = context.NewFaultContext(FaultHub.LogicalStackContext.Value);
+                        return ex.ProcessFault(faultContext, Observable.Throw<T>);
                     })
                     .Finally(() => {
                         FaultHub.LogicalStackContext.Value = stackFromAbove;
-                        $"[HUB-TRACE][ChainFaultContext Finally] Boundary disposed. Ambient stack restored to depth {stackFromAbove?.Count ?? 0}.".LogToConsole();
+                        Log(() => $"[HUB-TRACE][ChainFaultContext Finally] Boundary disposed. Ambient stack restored to depth {stackFromAbove?.Count ?? 0}.");
                     });
             });
         }
-        public static void LogToConsole(this string message) {
-            if (FaultHub.Logging) Console.WriteLine(message);
+        public static void Log(this Func<string> messageSelector) {
+            if (FaultHub.Logging) Console.WriteLine(messageSelector());
         }
         public static IObservable<T> FlowFaultContext<T>(this IObservable<T> source) {
             return Observable.Create<T>(observer => {
@@ -118,7 +101,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
         }
         
         public static AmbientFaultContext NewFaultContext(this object[] context, IReadOnlyList<LogicalStackFrame> logicalStack, [CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0) {
-            $"[HUB-TRACE][NewFaultContext] Caller: '{memberName}', filePath: {filePath}, line: {lineNumber} Context: '{(context == null ? "null" : string.Join(", ", context))}'".LogToConsole();
+            Log(() => $"[HUB-TRACE][NewFaultContext] Caller: '{memberName}', filePath: {filePath}, line: {lineNumber} Context: '{(context == null ? "null" : string.Join(", ", context))}'");
             var finalContext = (context ?? []).Select(o => o).WhereNotDefault().Distinct().ToList();
             if (!finalContext.Any()) {
                 finalContext.Add(memberName);

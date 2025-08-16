@@ -1,26 +1,25 @@
 ﻿using System;
 using System.Reactive.Linq;
-using System.Runtime.CompilerServices;
 using DevExpress.ExpressApp.Actions;
 using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.Reactive.Transform;
 
 namespace Xpand.XAF.Modules.Reactive.Services.Actions {
     public static partial class ActionsService {
-        public static IObservable<T> WhenExecuteCompleted<T>(this SimpleAction action,Func<SimpleActionExecuteEventArgs, IObservable<T>> resilientSelector,[CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0)  
-            => action.ProcessEvent(nameof(ActionBase.ExecuteCompleted),resilientSelector).TakeUntilDisposed(action).PushStackFrame(memberName,filePath,lineNumber)
+        public static IObservable<T> WhenExecuteCompleted<T>(this SimpleAction action,Func<SimpleActionExecuteEventArgs, IObservable<T>> resilientSelector)  
+            => action.ProcessEvent(nameof(ActionBase.ExecuteCompleted),resilientSelector).TakeUntilDisposed(action).PushStackFrame()
                 .PushStackFrame();
         
-        public static IObservable<T> WhenExecuteCompleted<T>(this SingleChoiceAction action,Func<SingleChoiceActionExecuteEventArgs, IObservable<T>> resilientSelector,[CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0)  
-            => action.ProcessEvent(nameof(ActionBase.ExecuteCompleted),resilientSelector).TakeUntilDisposed(action).PushStackFrame(memberName,filePath,lineNumber)
+        public static IObservable<T> WhenExecuteCompleted<T>(this SingleChoiceAction action,Func<SingleChoiceActionExecuteEventArgs, IObservable<T>> resilientSelector)  
+            => action.ProcessEvent(nameof(ActionBase.ExecuteCompleted),resilientSelector).TakeUntilDisposed(action).PushStackFrame()
                 .PushStackFrame();
         
-        public static IObservable<T> WhenExecuteCompleted<T>(this ParametrizedAction action,Func<ParametrizedActionExecuteEventArgs, IObservable<T>> resilientSelector,[CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0)  
-            => action.ProcessEvent(nameof(ActionBase.ExecuteCompleted),resilientSelector).TakeUntilDisposed(action).PushStackFrame(memberName,filePath,lineNumber)
+        public static IObservable<T> WhenExecuteCompleted<T>(this ParametrizedAction action,Func<ParametrizedActionExecuteEventArgs, IObservable<T>> resilientSelector)  
+            => action.ProcessEvent(nameof(ActionBase.ExecuteCompleted),resilientSelector).TakeUntilDisposed(action).PushStackFrame()
                 .PushStackFrame();
         
-        public static IObservable<T> WhenExecuteCompleted<T>(this PopupWindowShowAction action,Func<PopupWindowShowActionExecuteEventArgs, IObservable<T>> resilientSelector,[CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0)  
-            => action.ProcessEvent(nameof(ActionBase.ExecuteCompleted),resilientSelector).TakeUntilDisposed(action).PushStackFrame(memberName,filePath,lineNumber)
+        public static IObservable<T> WhenExecuteCompleted<T>(this PopupWindowShowAction action,Func<PopupWindowShowActionExecuteEventArgs, IObservable<T>> resilientSelector)  
+            => action.ProcessEvent(nameof(ActionBase.ExecuteCompleted),resilientSelector).TakeUntilDisposed(action).PushStackFrame()
                 .PushStackFrame();
 
         public static IObservable<SingleChoiceActionExecuteEventArgs> WhenExecuteCompleted(this SingleChoiceAction action) 

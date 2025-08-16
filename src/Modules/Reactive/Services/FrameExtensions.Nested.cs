@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
-using System.Runtime.CompilerServices;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.Editors;
@@ -156,14 +155,13 @@ namespace Xpand.XAF.Modules.Reactive.Services;
         public static IObservable<T> WhenFrame<T>(this T frame, params string[] viewIds) where T : Frame 
             => frame.WhenViewChanged().To(frame).Where(_ => viewIds.Contains(frame.View.Id));
 
-        private static IObservable<T> WhenFrame<T>(this T frame, ViewType viewType, Type type,
-            [CallerMemberName] string caller = "") where T : Frame
-            => frame.WhenFrame(viewType,type, () => frame.Observe().Cast<T>(), caller);
+        private static IObservable<T> WhenFrame<T>(this T frame, ViewType viewType, Type type) where T : Frame
+            => frame.WhenFrame(viewType,type, () => frame.Observe().Cast<T>());
         
-        private static IObservable<TResult> WhenFrame<T,TResult>(this T frame,ViewType viewType, Type type,Func<IObservable<TResult>> resilientSelector,[CallerMemberName]string caller="") where T : Frame 
+        private static IObservable<TResult> WhenFrame<T,TResult>(this T frame,ViewType viewType, Type type,Func<IObservable<TResult>> resilientSelector) where T : Frame 
             => (frame.View != null ? frame.When(viewType) && frame.When(type) ? frame.Observe() : Observable.Empty<T>()
                 : frame.WhenViewChanged().Where(t => t.frame.When(viewType) && t.frame.When(type)).To(frame))
                 .SelectManyItemResilient(arg => resilientSelector()
-                    .TakeUntil(arg.View.WhenClosed()),[frame.View?.Id,type,viewType],caller);
+                    .TakeUntil(arg.View.WhenClosed()),[frame.View?.Id,type,viewType]);
 
     }

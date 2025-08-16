@@ -16,7 +16,18 @@ namespace Xpand.Extensions.Reactive.Utility {
         }
         public static IObservable<T> ObserveOnCurrent<T>(this IObservable<T> source) 
             => source.ObserveOn(System.Reactive.Concurrency.Scheduler.CurrentThread);
-
+        
+        public static IObservable<T> FinallyOnContext<T>(this IObservable<T> source, Action action) {
+            var context = SynchronizationContext.Current;
+            return source.Finally(() => {
+                if (context != null) {
+                    context.Post(_ => action(), null);
+                }
+                else {
+                    action();
+                }
+            });
+        }
         
         public static IObservable<T> ObserveOnContext<T>(this IObservable<T> source,SynchronizationContext context=null)
             => source.ObserveOn((context ?? SynchronizationContext.Current!));
