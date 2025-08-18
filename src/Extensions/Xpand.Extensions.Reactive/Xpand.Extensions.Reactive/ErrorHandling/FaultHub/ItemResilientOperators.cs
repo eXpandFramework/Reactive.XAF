@@ -24,23 +24,29 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
     public static class ItemResilientOperators {
         public static IAsyncLocal Wrap<T>(this AsyncLocal<T> asyncLocal) 
             => new AsyncLocalWrapper<T>(asyncLocal);
-
-        private static IObservable<T> ApplyItemResilience<T>(this IObservable<T> source, Func<IObservable<T>, IObservable<T>> retryStrategy, object[] context,
-            string memberName, string filePath, int lineNumber)
+        
+        private static IObservable<T> ApplyItemResilience<T>(this IObservable<T> source, Func<IObservable<T>, IObservable<T>> retryStrategy,
+            object[] context, string memberName, string filePath, int lineNumber,Func<Exception, IObservable<bool>> publishWhen=null)
             => FaultHub.Enabled ? (retryStrategy != null ? retryStrategy(source) : source)
                 .Catch((Exception ex) => ex.ProcessFault(context.NewFaultContext(
                         new[] { new LogicalStackFrame(memberName, filePath, lineNumber) }.ToList()
                             .Concat(FaultHub.LogicalStackContext.Value ?? Enumerable.Empty<LogicalStackFrame>())
                             .ToList(), memberName, filePath, lineNumber),
-                    proceedAction: enrichedException => {
-                        enrichedException.Publish();
-                        return Observable.Empty<T>();
-                    }))
-                .SafeguardSubscription(
-                    (ex, s) => ex.ExceptionToPublish(context.NewFaultContext(FaultHub.LogicalStackContext.Value, s))
-                        .Publish(), memberName)
-                : source;
-
+                    proceedAction: enrichedException => (publishWhen?.Invoke(enrichedException) ?? true.Observe())
+                        .SelectMany(shouldPublish => {
+                            if (shouldPublish) {
+                                enrichedException.Publish();
+                            }
+                            return Observable.Empty<T>();
+                        }))).SafeguardSubscription((ex, s) => 
+                    ex.ExceptionToPublish(context.NewFaultContext(FaultHub.LogicalStackContext.Value, s)).Publish(), memberName) :
+                source;
+        
+        public static IObservable<TEventArgs> ProcessEvent<TEventArgs>(this object source, string eventName,Func<TEventArgs, IObservable<TEventArgs>> resilientSelector, 
+            object[] context = null, [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0, 
+            IScheduler scheduler = null) where TEventArgs:EventArgs
+            => source.ProcessEvent<TEventArgs,TEventArgs>(eventName, resilientSelector, context, memberName, filePath, lineNumber, scheduler);
+        
         public static IObservable<T> ProcessEvent<TEventArgs, T>(this object source, string eventName, Func<TEventArgs, IObservable<T>> resilientSelector, 
             object[] context = null, [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0, 
             IScheduler scheduler = null) where TEventArgs : EventArgs
@@ -204,13 +210,9 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
             Func<IObservable<TResult>, IObservable<TResult>> retryStrategy=null, object[] context = null, [CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0)
             => source.SelectManySequentialItemResilient((sourceItem, _) => resilientSelector(sourceItem), retryStrategy, context, memberName,filePath,lineNumber);
         
-
-        public static IObservable<T> ContinueOnFault<T>(this IObservable<T> source, object[] context=null,[CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0) 
-            => source.ApplyItemResilience(null,context, memberName, filePath, lineNumber);
-
         
-        public static IObservable<T> ContinueOnFault<T>(this IObservable<T> source, Func<IObservable<T>, IObservable<T>> retryStrategy, object[] context = null,
-            [CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0)
-            => source.ApplyItemResilience(retryStrategy,  context, memberName, filePath, lineNumber);
+        public static IObservable<T> ContinueOnFault<T>(this IObservable<T> source, Func<IObservable<T>, IObservable<T>> retryStrategy = null,
+            object[] context = null,Func<Exception, IObservable<bool>> publishWhen = null, [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0)
+            => source.ApplyItemResilience(retryStrategy,  context, memberName, filePath, lineNumber,publishWhen);
     }
 }

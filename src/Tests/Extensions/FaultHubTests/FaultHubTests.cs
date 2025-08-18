@@ -183,7 +183,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
         [Test]
         public async Task RethrowOnFault_Overrides_Suppression_And_Terminates_Stream() {
             var stream = Observable.Throw<Unit>(new InvalidOperationException("Failure"))
-                .ContinueOnFault(["SuppressedContext"]) 
+                .ContinueOnFault(context:["SuppressedContext"]) 
                 .RethrowOnFault();
 
             var result = await stream.Capture();

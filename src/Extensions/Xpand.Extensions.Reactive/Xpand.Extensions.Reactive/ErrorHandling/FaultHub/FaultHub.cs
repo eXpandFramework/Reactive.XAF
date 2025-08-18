@@ -78,7 +78,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
 
         public static bool Publish(this Exception ex) {
             if (ex is FaultHubException fault) {
-                FaultHubLogger.Log(() => $"[HUB-TRACE][Publish] Publishing with final context: '{string.Join(", ", fault.Context.CustomContext)}'");
+                Log(() => $"[HUB-TRACE][Publish] Publishing with final context: '{string.Join(", ", fault.Context.CustomContext)}'");
             }
             var (action, correlationId) = ex.AccessData(data => {
                 if (data.Contains(PublishedKey)) {

@@ -5,7 +5,11 @@ namespace Xpand.Extensions.ObjectExtensions {
     public static partial class ObjectExtensions {
         public static string PrefixCaller(this object value, [CallerMemberName] string caller = "")
             => new[]{$"{value}",caller}.WhereNotNullOrEmpty().JoinCommaSpace();
+        public static string PrefixCallerWhenDefault(this object value, [CallerMemberName] string caller = "")
+            =>value.IsDefaultValue()? new[]{$"{value}",caller}.WhereNotNullOrEmpty().JoinCommaSpace():value.ToString();
         public static string SuffixCaller(this object value, [CallerMemberName] string caller = "")
             => new[]{caller,$"{value}"}.WhereNotNullOrEmpty().JoinCommaSpace();
+        public static string SuffixCallerWhenDefault(this object value, [CallerMemberName] string caller = "")
+            =>value.IsDefaultValue()? new[]{caller,$"{value}"}.WhereNotNullOrEmpty().JoinCommaSpace():value.ToString();
     }
 }

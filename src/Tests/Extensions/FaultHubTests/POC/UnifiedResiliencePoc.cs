@@ -21,7 +21,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.POC {
                 });
 
                 // Apply the item resilience primitive to the inner stream.
-                return itemStream.ContinueOnFault([i]);
+                return itemStream.ContinueOnFault(context:[i]);
             });
         }
 

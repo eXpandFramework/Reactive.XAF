@@ -15,7 +15,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.POC{
         private IObservable<int> GetFailingAsyncStreamWithResilience() {
             return Observable.Timer(TimeSpan.FromMilliseconds(50))
                 .SelectMany(_ => Observable.Throw<int>(new InvalidOperationException("Async Core Failure")))
-                .ContinueOnFault(["CoreContext"]);
+                .ContinueOnFault(context:["CoreContext"]);
         }
 
         [Test]

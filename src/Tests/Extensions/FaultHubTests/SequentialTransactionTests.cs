@@ -12,7 +12,7 @@ using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 
 namespace Xpand.Extensions.Tests.FaultHubTests {
-    public class ExecuteTransactionTests : FaultHubTestBase {
+    public class SequentialTransactionTests : FaultHubTestBase {
         [MethodImpl(MethodImplOptions.NoInlining)]
         private IObservable<string> FailingOperationWithContext(SubscriptionCounter failingCounter)
             => Observable.Throw<string>(new InvalidOperationException("Operation Failed"))
@@ -35,7 +35,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
                     FailingOperationWithContext(failingCounter),
                     SuccessfulOperationWithContext(successfulCounter)
                 }
-                .ExecuteTransaction(op => op.Retry(2), ["MyCustomContext"], false, "MyTransaction")
+                .SequentialTransaction(false, op => op.Retry(2), ["MyCustomContext"], "MyTransaction")
                 .TrackSubscriptions(outerCounter)
                 .ChainFaultContext(s => s.Retry(3), ["Outer"])
                 .PublishFaults().Capture();
@@ -64,7 +64,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
         }
 
         [Test]
-        public async Task ExecuteTransaction_Aborts_On_First_Failure_When_FailFast_Is_True() {
+        public async Task SequentialTransaction_Aborts_On_First_Failure_When_FailFast_Is_True() {
             var successfulOp1Counter = new SubscriptionCounter();
             var failingOpCounter = new SubscriptionCounter();
             var successfulOp2Counter = new SubscriptionCounter();
@@ -77,7 +77,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             };
 
             var result = await operations
-                .ExecuteTransaction(op => op.Retry(2), true, "FailFastTransaction")
+                .SequentialTransaction(true, op => op.Retry(2), transactionName: "FailFastTransaction")
                 .PublishFaults().Capture();
 
             result.IsCompleted.ShouldBe(true);
@@ -112,44 +112,37 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
                 Observable.Throw<Unit>(new InvalidOperationException("Inner Tx1 Failed"))
                     .TrackSubscriptions(innerTx1FailingOpCounter),
                 Unit.Default.Observe().TrackSubscriptions(innerTx1SkippedOpCounter)
-            }.ExecuteTransaction(op => op, true, "InnerTransaction1");
+            }.SequentialTransaction(true, op => op, transactionName: "InnerTransaction1");
 
             var innerTx2 = new object[] {
                 Unit.Default.Observe().TrackSubscriptions(innerTx2SuccessOpCounter)
-            }.ExecuteTransaction(op => op, false, "InnerTransaction2");
+            }.SequentialTransaction(false, op => op, transactionName: "InnerTransaction2");
 
             var outerOperations = new object[] { innerTx1, innerTx2 };
 
-            //Act
             await outerOperations
-                .ExecuteTransaction(op => op, true, "OuterTransaction")
+                .SequentialTransaction(true, op => op, transactionName: "OuterTransaction")
                 .PublishFaults().Capture();
 
-            //Assert
             BusEvents.Count.ShouldBe(1);
 
-            // Inner Transaction 1 (FailFast) asserts
-            innerTx1SuccessOpCounter.Count.ShouldBe(1); // The first op runs.
-            innerTx1FailingOpCounter.Count.ShouldBe(1); // The second op fails.
-            innerTx1SkippedOpCounter.Count.ShouldBe(0); // The third op is skipped.
+            innerTx1SuccessOpCounter.Count.ShouldBe(1);
+            innerTx1FailingOpCounter.Count.ShouldBe(1);
+            innerTx1SkippedOpCounter.Count.ShouldBe(0);
 
-            // Inner Transaction 2 asserts
-            innerTx2SuccessOpCounter.Count.ShouldBe(0); // The entire second transaction is skipped.
+            innerTx2SuccessOpCounter.Count.ShouldBe(0);
 
             var finalFault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
 
-            // 1. The Story of the Outer Transaction's Failure
             var outerTxException = finalFault.InnerException.ShouldBeOfType<InvalidOperationException>();
             outerTxException.Message.ShouldBe("OuterTransaction failed");
             finalFault.AllContexts.ShouldContain("OuterTransaction");
 
-            // 2. The Story of the Inner Transaction's Failure (the cause of the outer failure)
             var innerTxFault = outerTxException.InnerException.ShouldBeOfType<FaultHubException>();
             var innerTxException = innerTxFault.InnerException.ShouldBeOfType<InvalidOperationException>();
             innerTxException.Message.ShouldBe("InnerTransaction1 failed");
             innerTxFault.AllContexts.ShouldContain("InnerTransaction1");
 
-            // 3. The Story of the Original Operational Failure (the root cause)
             var originalOperationalFault = innerTxException.InnerException.ShouldBeOfType<FaultHubException>();
             originalOperationalFault.InnerException.ShouldBeOfType<InvalidOperationException>().Message
                 .ShouldBe("Inner Tx1 Failed");
@@ -165,25 +158,24 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
 
             var innerTx1 = new object[] {
                 Unit.Default.Observe().TrackSubscriptions(innerTx1SuccessOpCounter)
-            }.ExecuteTransaction(op => op, true, "InnerTransaction1");
+            }.SequentialTransaction(true, op => op, transactionName: "InnerTransaction1");
 
             var innerTx2 = new object[] {
                 Unit.Default.Observe().TrackSubscriptions(innerTx2SuccessOp1Counter),
                 Observable.Throw<Unit>(new InvalidOperationException("Inner Tx2 Failed"))
                     .TrackSubscriptions(innerTx2FailingOpCounter),
                 Unit.Default.Observe().TrackSubscriptions(innerTx2SuccessOp2Counter)
-            }.ExecuteTransaction(op => op, false, "InnerTransaction2");
+            }.SequentialTransaction(false, op => op, transactionName: "InnerTransaction2");
 
             var outerOperations = new object[] { innerTx1, innerTx2 };
 
-            //Act
             await outerOperations
-                .ExecuteTransaction(op => op, true, "OuterTransaction")
+                .SequentialTransaction(true, op => op, transactionName: "OuterTransaction")
                 .PublishFaults().Capture();
 
             BusEvents.Count.ShouldBe(1);
 
-            innerTx1SuccessOpCounter.Count.ShouldBe(1); // Runs and succeeds.
+            innerTx1SuccessOpCounter.Count.ShouldBe(1);
 
             innerTx2SuccessOp1Counter.Count.ShouldBe(1);
             innerTx2FailingOpCounter.Count.ShouldBe(1);
@@ -191,18 +183,15 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
 
             var finalFault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
 
-            // 1. The Story of the Outer Transaction's Failure
             var outerTxException = finalFault.InnerException.ShouldBeOfType<InvalidOperationException>();
             outerTxException.Message.ShouldBe("OuterTransaction failed");
             finalFault.AllContexts.ShouldContain("OuterTransaction");
 
-            // 2. The Story of the Inner Transaction's Failure (the cause of the outer failure)
             var innerTxFault = outerTxException.InnerException.ShouldBeOfType<FaultHubException>();
             var innerTxException = innerTxFault.InnerException.ShouldBeOfType<InvalidOperationException>();
             innerTxException.Message.ShouldBe("InnerTransaction2 failed");
             innerTxFault.AllContexts.ShouldContain("InnerTransaction2");
 
-            // 3. The Story of the Original Operational Failure (the root cause)
             var originalOperationalFault = innerTxException.InnerException.ShouldBeOfType<AggregateException>()
                 .InnerExceptions.Single().ShouldBeOfType<FaultHubException>();
 
@@ -212,7 +201,6 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
 
         [Test]
         public async Task RunToCompletionOuterTransaction_Aggregates_Failures_From_Nested_Transactions() {
-            //Arrange
             var innerTx1SuccessOpCounter = new SubscriptionCounter();
             var innerTx1FailingOpCounter = new SubscriptionCounter();
             var innerTx1SkippedOpCounter = new SubscriptionCounter();
@@ -221,78 +209,64 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             var innerTx2FailingOpCounter = new SubscriptionCounter();
             var innerTx2SuccessOp2Counter = new SubscriptionCounter();
 
-            // This inner transaction will fail fast.
             var innerTx1 = new object[] {
                 Unit.Default.Observe().TrackSubscriptions(innerTx1SuccessOpCounter),
                 Observable.Throw<Unit>(new InvalidOperationException("Inner Tx1 Failed"))
                     .TrackSubscriptions(innerTx1FailingOpCounter),
                 Unit.Default.Observe().TrackSubscriptions(innerTx1SkippedOpCounter)
-            }.ExecuteTransaction(op => op, true, "InnerTransaction1");
+            }.SequentialTransaction(true, op => op, transactionName: "InnerTransaction1");
 
-            // This inner transaction will run to completion.
             var innerTx2 = new object[] {
                 Unit.Default.Observe().TrackSubscriptions(innerTx2SuccessOp1Counter),
                 Observable.Throw<Unit>(new InvalidOperationException("Inner Tx2 Failed"))
                     .TrackSubscriptions(innerTx2FailingOpCounter),
                 Unit.Default.Observe().TrackSubscriptions(innerTx2SuccessOp2Counter)
-            }.ExecuteTransaction(op => op, false, "InnerTransaction2");
+            }.SequentialTransaction(false, op => op, transactionName: "InnerTransaction2");
 
             var outerOperations = new object[] { innerTx1, innerTx2 };
 
-            //Act
-            // The outer transaction is NOT failFast.
             await outerOperations
-                .ExecuteTransaction(op => op, false, "OuterTransaction")
+                .SequentialTransaction(false, op => op, transactionName: "OuterTransaction")
                 .PublishFaults().Capture();
 
-            //Assert
             BusEvents.Count.ShouldBe(1);
 
-            // Inner Transaction 1 (FailFast) asserts
-            innerTx1SuccessOpCounter.Count.ShouldBe(1); // The first op runs.
-            innerTx1FailingOpCounter.Count.ShouldBe(1); // The second op fails.
-            innerTx1SkippedOpCounter.Count.ShouldBe(0); // The third op is skipped.
+            innerTx1SuccessOpCounter.Count.ShouldBe(1);
+            innerTx1FailingOpCounter.Count.ShouldBe(1);
+            innerTx1SkippedOpCounter.Count.ShouldBe(0);
 
-            // Inner Transaction 2 (Run-to-Completion) asserts
-            innerTx2SuccessOp1Counter.Count.ShouldBe(1); // The first op runs.
-            innerTx2FailingOpCounter.Count.ShouldBe(1); // The second op fails.
-            innerTx2SuccessOp2Counter.Count.ShouldBe(1); // The third op ALSO runs.
+            innerTx2SuccessOp1Counter.Count.ShouldBe(1);
+            innerTx2FailingOpCounter.Count.ShouldBe(1);
+            innerTx2SuccessOp2Counter.Count.ShouldBe(1);
 
             var finalFault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
             var outerTxException = finalFault.InnerException.ShouldBeOfType<InvalidOperationException>();
             outerTxException.Message.ShouldBe("OuterTransaction failed");
 
-            // The outer transaction should have an AggregateException containing two distinct failures.
             var aggregateException = outerTxException.InnerException.ShouldBeOfType<AggregateException>();
             aggregateException.InnerExceptions.Count.ShouldBe(2);
 
-            // Verify the failure from the first inner transaction
             var failure1 = aggregateException.InnerExceptions.OfType<FaultHubException>()
                 .FirstOrDefault(ex => ex.AllContexts.Contains("OuterTransaction - Op:1"));
             failure1.ShouldNotBeNull();
 
-            // 1. The Story of the Inner Transaction's Failure
             var innerTxException1 = failure1.InnerException.ShouldBeOfType<InvalidOperationException>();
             innerTxException1.Message.ShouldBe("InnerTransaction1 failed");
             failure1.AllContexts.ShouldContain("InnerTransaction1");
 
-            // 2. The Story of the Original Operational Failure (the root cause)
             var originalOperationalFault1 = innerTxException1.InnerException.ShouldBeOfType<FaultHubException>();
             originalOperationalFault1.InnerException.ShouldBeOfType<InvalidOperationException>().Message
                 .ShouldBe("Inner Tx1 Failed");
             originalOperationalFault1.AllContexts.ShouldContain("InnerTransaction1 - Op:2");
 
-            // Verify the failure from the second inner transaction
             var failure2 = aggregateException.InnerExceptions.OfType<FaultHubException>()
                 .FirstOrDefault(ex => ex.AllContexts.Contains("OuterTransaction - Op:2"));
             failure2.ShouldNotBeNull();
 
-            // 1. The Story of the Inner Transaction's Failure
             var innerTxException2 = failure2.InnerException.ShouldBeOfType<InvalidOperationException>();
             innerTxException2.Message.ShouldBe("InnerTransaction2 failed");
             failure2.AllContexts.ShouldContain("InnerTransaction2");
 
-            // 2. The Story of the Original Operational Failure (the root cause)
             var originalOperationalFault2 = innerTxException2.InnerException.ShouldBeOfType<AggregateException>()
                 .InnerExceptions.Single().ShouldBeOfType<FaultHubException>();
             originalOperationalFault2.InnerException.ShouldBeOfType<InvalidOperationException>().Message
