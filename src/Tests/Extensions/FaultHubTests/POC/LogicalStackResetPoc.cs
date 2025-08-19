@@ -7,6 +7,7 @@ using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.Reactive.Utility;
+using Xpand.Extensions.Tests.FaultHubTests.POC.RX;
 
 namespace Xpand.Extensions.Tests.FaultHubTests.POC{
     [TestFixture]

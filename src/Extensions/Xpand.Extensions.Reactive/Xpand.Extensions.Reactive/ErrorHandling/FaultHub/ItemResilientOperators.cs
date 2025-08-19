@@ -5,26 +5,13 @@ using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
-using System.Threading;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Enumerable = System.Linq.Enumerable;
 
 namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
-    public interface IAsyncLocal {
-        object Value { get; set; }
-    }
-
-    internal class AsyncLocalWrapper<T>(AsyncLocal<T> asyncLocal) : IAsyncLocal {
-        public object Value {
-            get => asyncLocal.Value;
-            set => asyncLocal.Value = (T)value;
-        }
-    }
+    
     public static class ItemResilientOperators {
-        public static IAsyncLocal Wrap<T>(this AsyncLocal<T> asyncLocal) 
-            => new AsyncLocalWrapper<T>(asyncLocal);
-        
         private static IObservable<T> ApplyItemResilience<T>(this IObservable<T> source, Func<IObservable<T>, IObservable<T>> retryStrategy,
             object[] context, string memberName, string filePath, int lineNumber,Func<Exception, IObservable<bool>> publishWhen=null)
             => FaultHub.Enabled ? (retryStrategy != null ? retryStrategy(source) : source)
@@ -58,54 +45,6 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
                         .ApplyItemResilience(null, context.AddToContext(pattern.EventArgs), memberName, filePath,
                             lineNumber));
 
-        public static IObservable<T> FlowFaultContext<T>(this IObservable<T> source,params IAsyncLocal[] asyncLocals) 
-            => Observable.Create<T>(observer => {
-                var capturedValues = asyncLocals.Select(l => l.Value).ToArray();
-
-                return source.Subscribe(
-                    onNext: value => {
-                        var originalValues = asyncLocals.Select(l => l.Value).ToArray();
-                        try {
-                            for (int i = 0; i < asyncLocals.Length; i++) {
-                                asyncLocals[i].Value = capturedValues[i];
-                            }
-                            observer.OnNext(value);
-                        }
-                        finally {
-                            for (int i = 0; i < asyncLocals.Length; i++) {
-                                asyncLocals[i].Value = originalValues[i];
-                            }
-                        }
-                    },
-                    onError: error => {
-                        var originalValues = asyncLocals.Select(l => l.Value).ToArray();
-                        try {
-                            for (int i = 0; i < asyncLocals.Length; i++) {
-                                asyncLocals[i].Value = capturedValues[i];
-                            }
-                            observer.OnError(error);
-                        }
-                        finally {
-                            for (int i = 0; i < asyncLocals.Length; i++) {
-                                asyncLocals[i].Value = originalValues[i];
-                            }
-                        }
-                    },
-                    onCompleted: () => {
-                        var originalValues = asyncLocals.Select(l => l.Value).ToArray();
-                        try {
-                            for (int i = 0; i < asyncLocals.Length; i++) {
-                                asyncLocals[i].Value = capturedValues[i];
-                            }
-                            observer.OnCompleted();
-                        }
-                        finally {
-                            for (int i = 0; i < asyncLocals.Length; i++) {
-                                asyncLocals[i].Value = originalValues[i];
-                            }
-                        }
-                    });
-            });
     
         public static IObservable<T> DoItemResilient<T>(this IObservable<T> source, Action<T> action,
             object[] context = null, [CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0)

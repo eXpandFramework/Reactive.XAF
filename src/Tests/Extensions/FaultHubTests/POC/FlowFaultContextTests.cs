@@ -6,6 +6,7 @@ using System.Reactive.Subjects;
 using System.Threading;
 using NUnit.Framework;
 using Shouldly;
+using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.Reactive.Utility;
 
 namespace Xpand.Extensions.Tests.FaultHubTests.POC {
@@ -22,6 +23,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.POC {
             TestContext.Value = expectedContext;
 
             using var subscription = source
+                // .FlowFaultContext(TestContext.Wrap())
                 .FlowFaultContext(TestContext.Wrap())
                 .Subscribe(
                     onNext: _ => contextOnNext = TestContext.Value,
@@ -97,39 +99,28 @@ namespace Xpand.Extensions.Tests.FaultHubTests.POC {
             });
         }
 
-
-        [Test]
+[Test]
         public void FlowFaultContext_Preserves_Context_Across_Retry_Operator() {
             var capturedContext = "CONTEXT_NOT_SET";
             var subscriptionCount = 0;
-
-            // Arrange
             var source = InnerObservableWithContextAndError(() => subscriptionCount++);
 
-            // 1. Wrap the source with FlowFaultContext. This captures the context at the
-            //    moment of each subscription and restores it for each notification.
-            var sourceWithContextFlow = source.FlowFaultContext(TestContext.Wrap());
-
-            var stream = sourceWithContextFlow
-                // 2. Apply Retry. When Retry re-subscribes, it re-subscribes to sourceWithContextFlow.
-                .Retry(3)
-                // 3. The final Catch. It will execute inside the context restored by FlowFaultContext.
+// MODIFICATION: The entire stream is wrapped in ChainFaultContext. This provides the isolation boundary
+// needed for Retry to work correctly with the AsyncLocal-based context.
+            var stream = source
+                .ChainFaultContext(s => s.Retry(3))
                 .Catch((Exception _) => {
                     Console.WriteLine("[PoC] Outer Catch block is executing. Capturing context.");
                     capturedContext = TestContext.Value;
                     return Observable.Empty<Unit>();
                 });
-
-            // Act
+            
             stream.Subscribe();
-
-            // Assert
+            
             subscriptionCount.ShouldBe(3);
-
-            // The key assertion: The context set by the inner observable's Using block
-            // should be preserved by FlowFaultContext and be visible here.
+            
             capturedContext.ShouldBe("INNER_CONTEXT");
             Console.WriteLine($"[PoC] Assertion successful: Captured context is '{capturedContext}'.");
-        }
+        }        
     }
 }

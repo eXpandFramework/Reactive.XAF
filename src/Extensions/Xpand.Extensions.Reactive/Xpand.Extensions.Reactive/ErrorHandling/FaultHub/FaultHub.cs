@@ -10,14 +10,16 @@ using Microsoft.Extensions.Caching.Memory;
 using Xpand.Extensions.ExceptionExtensions;
 using Xpand.Extensions.MemoryCacheExtensions;
 using Xpand.Extensions.Reactive.Combine;
+using Xpand.Extensions.Reactive.Utility;
 using static Xpand.Extensions.Reactive.ErrorHandling.FaultHub.FaultHubLogger;
+
 namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
     public static class FaultHub {
         public static readonly AsyncLocal<IReadOnlyList<LogicalStackFrame>> LogicalStackContext = new();
         internal static readonly AsyncLocal<List<Func<Exception, FaultAction?>>> HandlersContext = new();
         static readonly AsyncLocal<Guid?> Ctx = new();
-
-        internal static readonly IAsyncLocal[] All= [LogicalStackContext.Wrap(), HandlersContext.Wrap(), Ctx.Wrap()];
+        internal static readonly AsyncLocal<FaultSnapshot> CurrentFaultSnapshot = new();
+        internal static readonly IAsyncLocal[] All= [LogicalStackContext.Wrap(), HandlersContext.Wrap(), Ctx.Wrap(), CurrentFaultSnapshot.Wrap()];
         public static readonly MemoryCache Seen = new(new MemoryCacheOptions { SizeLimit = 10000 });
         public static readonly ISubject<Exception> Bus = Subject.Synchronize(new Subject<Exception>());
         const string KeyCId = "CorrelationId";
@@ -30,6 +32,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
         public static void Reset() {
             LogicalStackContext.Value = null;
             HandlersContext.Value = null;
+            CurrentFaultSnapshot.Value=null;
             Ctx.Value = null;
             Seen.Clear();
             ChainFaultContextService.ContextStack.Value = null;
@@ -68,7 +71,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
             if (!handlerAction.HasValue) {
                 return (FaultResult.Proceed, false);
             }
-            ChainFaultContextService.Log(() => $"[HUB] A handler matched with action: {handlerAction.Value}.");
+            Log(() => $"[HUB] A handler matched with action: {handlerAction.Value}.");
             return handlerAction.Value switch {
                 FaultAction.Complete => (FaultResult.Complete, false),
                 FaultAction.Rethrow => (FaultResult.Rethrow, false),
@@ -264,4 +267,8 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
         Complete
     }
 
+    
+    internal class FaultSnapshot {
+        public IReadOnlyList<LogicalStackFrame> CapturedStack { get; set; }
+    }
 }

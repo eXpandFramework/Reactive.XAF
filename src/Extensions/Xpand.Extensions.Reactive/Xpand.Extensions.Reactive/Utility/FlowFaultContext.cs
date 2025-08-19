@@ -5,6 +5,7 @@ using System.Threading;
 
 namespace Xpand.Extensions.Reactive.Utility {
     public static partial class Utility {
+        
         public static IObservable<T> FlowFaultContext<T>(this IObservable<T> source, params IAsyncLocal[] asyncLocals)
             => Observable.Create<T>(observer => {
                 var capturedValues = asyncLocals.Select(l => l.Value).ToArray();

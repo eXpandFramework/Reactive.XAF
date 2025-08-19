@@ -4,11 +4,9 @@ using System.Collections.Generic;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using Xpand.Extensions.Reactive.Transform;
-using Xpand.Extensions.Reactive.Transform.System.Text.Json;
 
 namespace Xpand.Extensions.Reactive.Utility {
     public static partial class Utility {
-        
         public static IObservable<T2> Cache<T, T2,TKey>(this IObservable<T> source,
             ConcurrentDictionary<TKey, IConnectableObservable<object>> storage, TKey key,
             Func<T, IObservable<T2>> secondSelector, TimeSpan? interval) where T2 : class
