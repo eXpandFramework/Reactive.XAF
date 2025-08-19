@@ -30,7 +30,7 @@ namespace Xpand.Extensions.Reactive.Combine {
                 ? transaction.Catch((Exception ex) => Observable.Throw<Unit>(new InvalidOperationException($"{transactionName} failed", ex)))
                 : transaction;
 
-            return result.ChainFaultContext(context.AddToContext(transactionName));
+            return result;
         }
         
         public static IObservable<TSource[]> SequentialTransactionWithResults<TSource>(this IEnumerable<IObservable<TSource>> source,
@@ -56,7 +56,7 @@ namespace Xpand.Extensions.Reactive.Combine {
                 .SelectMany(allFailures => !allFailures.Any()
                     ? Unit.Default.Observe()
                     : Observable.Throw<Unit>(new AggregateException(allFailures)))
-                .ChainFaultContext(context.AddToContext(transactionName));
+                .PushStackFrame(context.AddToContext(transactionName));
         private static IEnumerable<IObservable<object>> Operations<TSource>(this IEnumerable<IObservable<TSource>> source, Func<IObservable<TSource>, IObservable<TSource>> resiliencePolicy, object[] context, bool failFast, string transactionName) 
             => source.Select((obs, i) => (resiliencePolicy?.Invoke(obs)??obs)
                     .ChainFaultContext((context??[]).AddToArray($"{transactionName} - Op:{i + 1}"))

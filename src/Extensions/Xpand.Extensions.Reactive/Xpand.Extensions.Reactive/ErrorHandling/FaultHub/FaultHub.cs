@@ -129,7 +129,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
         public static IObservable<T> PublishFaults<T>(this IObservable<T> source) 
             => Enabled ? source.Catch<T, Exception>(ex => {
                 Log(() => $"[HUB][PublishFaults] Caught final exception: {ex.GetType().Name}. Attempting to publish.");
-                return ex.Publish<T>();
+                return ex.ExceptionToPublish().Publish<T>();
             }) : source;
 
         public static bool Logging { get; set; }
@@ -224,11 +224,13 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
             return source.RegisterHandler(ex => predicate(ex) ? FaultAction.Rethrow : null);
         }
 
-        public static FaultHubException ExceptionToPublish(this Exception e, AmbientFaultContext contextToUse) {
+        public static FaultHubException ExceptionToPublish(this Exception e, AmbientFaultContext contextToUse=null) {
             Log(() => "[HUB-TRACE][ExceptionToPublish] Entered.");
             if (contextToUse == null) {
                 Log(() => "[HUB--TRACE][ExceptionToPublish] contextToUse is null, returning original exception.");
-                return e as FaultHubException ?? new FaultHubException("An exception occurred in a traced fault context.", e, new AmbientFaultContext());
+                var defaultContext = new object[] { }.NewFaultContext(new System.Diagnostics.StackTrace(true).LogicalStackFrames());
+                return e as FaultHubException ?? new FaultHubException("An exception occurred in a traced fault context.", e, defaultContext);
+
             }
 
             var incomingContextSummary = e is FaultHubException f ? $"'{string.Join(", ", f.Context.CustomContext)}'" : "(none)";
