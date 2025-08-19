@@ -49,7 +49,7 @@ namespace Xpand.Extensions.Reactive.Transform {
             [Obsolete]
             public IObservable<TValue> WhenRequest(TKey key, IObservable<TValue> responseSource) =>
                 _requests.Where(t => EqualityComparer<TKey>.Default.Equals(t.Key, key))
-                    .SelectMany(t =>                 // t contains (key, requestId)
+                    .SelectMany(t =>                 
                         responseSource.Take(1).Do(
                             v => {
                                 if (_pending.TryRemove((t.Key, t.RequestId), out var sink)) {

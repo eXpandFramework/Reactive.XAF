@@ -7,13 +7,13 @@ using System.Threading;
 
 namespace Xpand.Extensions.Reactive.Transform {
     public static partial class Transform {
-        /// <summary>
-        /// Projects each element of the source observable sequence to a subsequence,
-        /// and merges the resulting subsequences into one observable sequence.
-        /// The merged sequence completes when all the projected subsequences complete
-        /// on their own. Unlike the SelectMany operator, the subsequences are not
-        /// unsubscribed when an error occurs.
-        /// </summary>
+        
+        
+        
+        
+        
+        
+        
         public static IObservable<TResult> SelectManyUntilCompletion<TSource, TResult>(this IObservable<TSource> source,
             Func<TSource, CancellationToken, IObservable<TResult>> selector) 
             => Observable.Defer(() => {

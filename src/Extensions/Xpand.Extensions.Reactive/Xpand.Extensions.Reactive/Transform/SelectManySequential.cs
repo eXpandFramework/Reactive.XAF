@@ -35,7 +35,7 @@ namespace Xpand.Extensions.Reactive.Transform{
                 if (_semaphores.TryGetValue(key, out var semaphoreRef)) {
                     semaphoreRef.ReferenceCount--;
                     if (semaphoreRef.ReferenceCount == 0)
-                        // If idle, remove the semaphore to prevent memory leaks.
+                        
                         _semaphores.Remove(key);
                 }
             }

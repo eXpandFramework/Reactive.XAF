@@ -4,11 +4,11 @@ using System.Reactive.Subjects;
 
 namespace Xpand.Extensions.Reactive.Subjects {
 
-    /// <summary>
-    /// Subject with same semantics as <see cref="ValveSubject{T}"/>, but adding flushing out capability 
-    /// which allows clearing the valve of any remaining elements before closing.
-    /// </summary>
-    /// <typeparam name="T">Elements type</typeparam>
+    
+    
+    
+    
+    
     public class FlushableValveSubject<T> : IFlushableValveSubject<T> {
         private readonly BehaviorSubject<ValveSubject<T>> _valvesSubject = new(new ValveSubject<T>());
         private ValveSubject<T> CurrentValve => _valvesSubject.Value;
@@ -32,10 +32,10 @@ namespace Xpand.Extensions.Reactive.Subjects {
 
         public void Close() => CurrentValve.Close();
 
-        /// <summary>
-        /// Discards remaining elements in the valve and reset the valve into a closed state
-        /// </summary>
-        /// <returns>Replayable observable with any remaining elements</returns>
+        
+        
+        
+        
         public IObservable<T> FlushAndClose() {
             var previousValve = CurrentValve;
             _valvesSubject.OnNext(CreateClosedValve());

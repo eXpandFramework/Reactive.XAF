@@ -26,7 +26,7 @@ namespace Xpand.Extensions.Reactive.Transform{
                 dispose = true;
             }
 
-            // Keep track of the number of active operations
+            
             var activeCount = 0;
             var gate = new object();
 
@@ -34,7 +34,7 @@ namespace Xpand.Extensions.Reactive.Transform{
             {
                 if (semaphoreSlim.Wait(0))
                 {
-                    // Increment active count
+                    
                     lock (gate)
                     {
                         activeCount++;

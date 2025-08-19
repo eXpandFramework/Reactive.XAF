@@ -103,12 +103,12 @@ namespace Xpand.Extensions.Reactive.Transform {
         public static IObservable<TSource[]> BufferUntilCompleted<TSource>(this IObservable<TSource> source,bool skipEmpty=false) 
             => source.Buffer(Observable.Never<Unit>()).Where(sources => !skipEmpty || sources.Any()).Select(list => list.ToArray());
 
-        /// <summary>
-        /// Returns a connectable observable, that once connected, will start buffering data until the observer subscribes, at which time it will send all buffered data to the observer and then start sending new data.
-        /// Thus, the observer may subscribe late to a hot observable yet still see all the data.  Later observers will not see the buffered events.
-        /// </summary>
-        /// <param name="source"></param>
-        /// <returns></returns>
+        
+        
+        
+        
+        
+        
         public static IConnectableObservable<T> BufferUntilSubscribed<T>(this IObservable<T> source) => new BufferUntilSubscribedObservable<T>(source, ImmediateScheduler);
 
         class BufferUntilSubscribedObservable<T>(IObservable<T> source, IScheduler scheduler)
@@ -129,7 +129,7 @@ namespace Xpand.Extensions.Reactive.Transform {
                     var bufferedEvents =
                         GetBuffers().Concat()
                             .Finally(
-                                RemoveBuffer); // Finally clause to remove the buffer if the first observer stops listening.
+                                RemoveBuffer); 
                     return _liveEvents.Merge(bufferedEvents).Subscribe(observer);
                 }
             }
@@ -142,10 +142,10 @@ namespace Xpand.Extensions.Reactive.Transform {
                 }
             }
 
-            /// <summary>
-            /// Acquires a lock and checks the buffer.  If it is empty, then replaces it with null and returns null.  Else replaces it with an empty buffer and returns the old buffer.
-            /// </summary>
-            /// <returns></returns>
+            
+            
+            
+            
             private Queue<T> GetAndReplaceBuffer() {
                 lock (_gate) {
                     if (_buffer == null) {

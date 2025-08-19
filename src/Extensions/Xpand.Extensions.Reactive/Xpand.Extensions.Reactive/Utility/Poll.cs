@@ -6,14 +6,14 @@ using System.Reactive.Linq;
 
 namespace Xpand.Extensions.Reactive.Utility {
     public static partial class Utility {
-        /// <summary>
-        /// Periodically repeats the observable sequence exposing a responses or failures.
-        /// </summary>
-        /// <typeparam name="T">The type of the sequence response values.</typeparam>
-        /// <param name="source">The source observable sequence to re-subscribe to after each <paramref name="period"/>.</param>
-        /// <param name="period">The period of time to wait before subscribing to the <paramref name="source"/> sequence. Subsequent subscriptions will occur this period after the previous sequence completes.</param>
-        /// <param name="scheduler">The <see cref="IScheduler"/> to use to schedule the polling.</param>
-        /// <returns>Returns an infinite observable sequence of values or errors.</returns>
+        
+        
+        
+        
+        
+        
+        
+        
         public static IObservable<Try<T>> Poll<T>(this IObservable<T> source, TimeSpan period, IScheduler scheduler) 
             => Observable.Timer(period, scheduler)
                 .SelectMany(_ => source) 

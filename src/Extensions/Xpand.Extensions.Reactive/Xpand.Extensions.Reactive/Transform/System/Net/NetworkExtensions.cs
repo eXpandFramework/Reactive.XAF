@@ -57,8 +57,8 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net {
         public static HttpClient HttpClient { get; set; }=new();
         
         public static TimeSpan RetryAfter(this HttpResponseMessage responseMessage){
-            // var dateTime = !responseMessage.Headers.Contains("Date") ? DateTime.Now
-                // : DateTimeOffset.Parse(responseMessage.Headers.GetValues("Date").First()).LocalDateTime;
+            
+                
             var dateTime = DateTime.Now;
             var retryAfterDelta = responseMessage.Headers.RetryAfter?.Delta;
             DateTime? delay = null;
@@ -149,8 +149,8 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net {
         private static IObservable<(HttpResponseMessage[] objects, JsonDocument document)> WhenJsonDocument(this HttpResponseMessage message) 
             => Observable.FromAsync(() => message.Content.ReadAsStreamAsync()).WhenJsonDocument(document =>
                     new HttpResponseException(document.RootElement.ToString(), message).Throw<HttpResponseMessage>())
-                // .Catch<(HttpResponseMessage[] objects, JsonDocument document),Exception>(exception 
-                    // => new HttpResponseException($"{message.StatusCode}, {message.ReasonPhrase}, {exception}", message).Throw<(HttpResponseMessage[] objects, JsonDocument document)>())
+                
+                    
             ;
 
 

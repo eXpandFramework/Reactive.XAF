@@ -25,7 +25,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling {
                 return Resubscribe();
                 IObservable<T> Resubscribe() => source.Catch<T, Exception>(ex => {
                     Console.WriteLine(caller.PrefixCaller());
-                    // ex.TagCorrelation(newGuid);
+                    
                     if (ex is DoNotRetryWithBackoffException exception)
                         return exception.InnerException.Throw<T>();
                     if (retryCount.HasValue && ++attempt >= retryCount.Value)

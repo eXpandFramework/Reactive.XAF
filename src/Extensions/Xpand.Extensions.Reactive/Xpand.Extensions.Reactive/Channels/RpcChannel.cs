@@ -60,7 +60,7 @@ namespace Xpand.Extensions.Reactive {
                     .Where(response => response.CorrelationId == correlationId)
                     .Take(1)
                     .Select(response => response.Result)
-                    .Dematerialize() // Replaces the 'if/else' logic
+                    .Dematerialize() 
                     .Subscribe(observer);
 
                 _requests.OnNext(new RequestMessage(key, correlationId, request));

@@ -3,15 +3,15 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 
 namespace Xpand.Extensions.Reactive.Subjects {
-    /// <summary>
-    /// Subject offering Open() and Close() methods, with built-in buffering.
-    /// Note that closing the valve in the observer is supported.
-    /// </summary>
-    /// <remarks>As is the case with other Rx subjects, this class is not thread-safe, in that
-    /// order of elements in the output is in-deterministic in the case of concurrent operation 
-    /// of Open()/Close()/OnNext()/OnError(). To guarantee strict order of delivery even in the 
-    /// case of concurrent access, <see cref="ValveSubjectExtensions.Synchronize{T}(IValveSubject{T})"/> can be used.</remarks>
-    /// <typeparam name="T">Elements type</typeparam>
+    
+    
+    
+    
+    
+    
+    
+    
+    
     public class ValveSubject<T> : IValveSubject<T> {
         private enum Valve {
             Open,

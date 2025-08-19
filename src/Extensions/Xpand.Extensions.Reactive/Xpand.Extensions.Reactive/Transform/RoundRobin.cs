@@ -18,21 +18,21 @@ namespace Xpand.Extensions.Reactive.Transform{
 				return () => cache.ToObservable(global::System.Reactive.Concurrency.Scheduler.Default).Do(observer);
 			});
 		}
-		// public static IObservable<T> RoundRobin<T>(this IObservable<T> source){
-		// 	var subscribers = new BehaviorSubject<ImmutableList<IObserver<T>>>(ImmutableList<IObserver<T>>.Empty);
-		// 	ImmutableList<IObserver<T>> latest = ImmutableList<IObserver<T>>.Empty;
-		// 	subscribers.Subscribe(l => latest = l);
-		//
-		// 	var shared = source
-		// 		.Select((v, i) => (v, i))
-		// 		.WithLatestFrom(subscribers, (t, s) => (t.v, t.i, s))
-		// 		.Publish()
-		// 		.RefCount();
-		// 	return Observable.Create<T>(observer => {
-		// 		subscribers.OnNext(latest.Add(observer));
-		// 		var dispose = Disposable.Create(() => subscribers.OnNext(latest.Remove(observer)));
-		//
-		// 		var sub = shared
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
 		// 			.Where(t => t.i % t.s.Count == t.s.FindIndex(o => o == observer))
 		// 			.Select(t => t.v)
 		// 			.Subscribe(observer);

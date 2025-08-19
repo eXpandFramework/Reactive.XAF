@@ -63,12 +63,12 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
             return Observable.Defer(() => {
                 Log(() => $"[ChainCtx] Entering Defer for boundary '{memberName}'.");
                 
-                // 1. Create the snapshot for this boundary.
+                
                 var snapshot = new FaultSnapshot();
                 var originalSnapshot = FaultHub.CurrentFaultSnapshot.Value;
                 FaultHub.CurrentFaultSnapshot.Value = snapshot;
                 
-                // 2. Create the isolation boundary by capturing and clearing the ambient stack.
+                
                 var originalStack = FaultHub.LogicalStackContext.Value;
                 FaultHub.LogicalStackContext.Value = null;
                 Log(() => $"[ChainCtx] Cleared logical stack (was {originalStack?.Count ?? 0} frames).");
@@ -84,7 +84,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
                         return ex.ProcessFault(faultContext, Observable.Throw<T>);
                     })
                     .Finally(() => {
-                        // 3. Restore all original contexts when the stream terminates.
+                        
                         Log(() => $"[ChainCtx] Finally block entered for boundary '{memberName}'.");
                         FaultHub.CurrentFaultSnapshot.Value = originalSnapshot;
                         FaultHub.LogicalStackContext.Value = originalStack;

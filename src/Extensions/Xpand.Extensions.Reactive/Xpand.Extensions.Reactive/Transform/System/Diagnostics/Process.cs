@@ -35,7 +35,7 @@ namespace Xpand.Extensions.Reactive.Transform.System.Diagnostics{
 
         public static IObservable<string> WhenOutputDataReceived(this Process process)
             => process.ProcessEvent<DataReceivedEventArgs>(nameof(Process.OutputDataReceived))
-                // .TakeUntil(process.WhenExited())
+                
                 .Select(pattern => pattern.Data);
 
         public static IObservable<string> WhenErrorDataReceived(this Process process)
@@ -50,9 +50,9 @@ namespace Xpand.Extensions.Reactive.Transform.System.Diagnostics{
 
         private static IObservable<Process> WhenNewProcess(string processName,bool systemManagement=false){
             var processes = Process.GetProcessesByName(processName);
-            // return 1.ToSeconds().Interval().SelectMany(l
-            //     => Process.GetProcessesByName(processName).Where(process => process.ProcessName == processName)
-            //         .Except(processes));
+            
+            
+            
             return new ManagementEventWatcher($"SELECT * FROM Win32_ProcessStartTrace WHERE ProcessName = '{processName}.exe'")
                 .Use(watcher => {
                     watcher.Start();
