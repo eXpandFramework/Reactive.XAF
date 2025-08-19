@@ -23,10 +23,10 @@ namespace Xpand.Extensions.Tests.FaultHubTests.POC.RX {
     }
 
     public static class PocResilienceOperators {
-        public static IObservable<T> PushStackFrame<T>(this IObservable<T> source, string frameName) {
+        public static IObservable<T> PushStackFrame1<T>(this IObservable<T> source, string frameName) {
             return source.Catch((Exception ex) => {
                 var newFrame = new LogicalPocStackFrame(frameName);
-
+        
                 if (ex is not PocFaultHubException fault) {
                     var newStack = new[] { newFrame };
                     return Observable.Throw<T>(new PocFaultHubException("Error in resilient stream", ex, newStack));
@@ -45,17 +45,17 @@ namespace Xpand.Extensions.Tests.FaultHubTests.POC.RX {
         private IObservable<Unit> Level3_Work_On_Another_Thread()
             => Observable.Timer(TimeSpan.FromMilliseconds(20))
                 .SelectMany(_ => Observable.Throw<Unit>(new InvalidOperationException("Database disconnected")))
-                .PushStackFrame("Level3_Work_On_Another_Thread");
+                .PushStackFrame1("Level3_Work_On_Another_Thread");
 
         
         private IObservable<Unit> Level2_BusinessLogic()
             => Level3_Work_On_Another_Thread()
-                .PushStackFrame("Level2_BusinessLogic");
+                .PushStackFrame1("Level2_BusinessLogic");
 
         
         private IObservable<Unit> Level1_TopLevelOperation()
             => Level2_BusinessLogic()
-                .PushStackFrame("Level1_TopLevelOperation");
+                .PushStackFrame1("Level1_TopLevelOperation");
 
         [Test]
         public async Task CatchAndRethrow_Builds_Complete_StackTrace_Across_Async_Scheduler_Boundaries() {

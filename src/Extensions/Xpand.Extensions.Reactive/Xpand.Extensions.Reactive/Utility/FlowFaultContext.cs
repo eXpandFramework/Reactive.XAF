@@ -1,63 +1,46 @@
 ﻿using System;
+using System.Collections;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading;
 
 namespace Xpand.Extensions.Reactive.Utility {
     public static partial class Utility {
-        
-        public static IObservable<T> FlowFaultContext<T>(this IObservable<T> source, params IAsyncLocal[] asyncLocals)
+        public static IObservable<T> FlowContext<T>(this IObservable<T> source,Func<IObservable<T>,IObservable<T>> retrySelector=null, params IAsyncLocal[] context)
             => Observable.Create<T>(observer => {
-                var capturedValues = asyncLocals.Select(l => l.Value).ToArray();
-
-                return source.Subscribe(
-                    onNext: value => {
-                        var originalValues = asyncLocals.Select(l => l.Value).ToArray();
-                        try {
-                            for (int i = 0; i < asyncLocals.Length; i++) {
-                                asyncLocals[i].Value = capturedValues[i];
-                            }
-
-                            observer.OnNext(value);
-                        }
-                        finally {
-                            for (int i = 0; i < asyncLocals.Length; i++) {
-                                asyncLocals[i].Value = originalValues[i];
-                            }
-                        }
-                    },
-                    onError: error => {
-                        var originalValues = asyncLocals.Select(l => l.Value).ToArray();
-                        try {
-                            for (int i = 0; i < asyncLocals.Length; i++) {
-                                asyncLocals[i].Value = capturedValues[i];
-                            }
-
-                            observer.OnError(error);
-                        }
-                        finally {
-                            for (int i = 0; i < asyncLocals.Length; i++) {
-                                asyncLocals[i].Value = originalValues[i];
-                            }
-                        }
-                    },
-                    onCompleted: () => {
-                        var originalValues = asyncLocals.Select(l => l.Value).ToArray();
-                        try {
-                            for (int i = 0; i < asyncLocals.Length; i++) {
-                                asyncLocals[i].Value = capturedValues[i];
-                            }
-
-                            observer.OnCompleted();
-                        }
-                        finally {
-                            for (int i = 0; i < asyncLocals.Length; i++) {
-                                asyncLocals[i].Value = originalValues[i];
-                            }
-                        }
-                    });
+                var capturedValues = context.Select(l => l.Value).ToArray();
+                return (retrySelector?.Invoke(source.ErrorBus( context))??source)
+                    .Subscribe(onNext: value => context.FlowContext(() => observer.OnNext(value),capturedValues),
+                        onError: error => context.FlowContext(() => observer.OnError(error),capturedValues,error.Data),
+                    onCompleted: () => context.FlowContext(observer.OnCompleted,capturedValues));
             });
-        
+
+        private static IObservable<T> ErrorBus<T>(this IObservable<T> source, IAsyncLocal[] context) 
+            => source.Catch((Exception ex) => {
+                var objects = context.Select(l => l.Value).ToArray();
+                ex.Data[nameof(FlowContext)] = objects;
+                return Observable.Throw<T>(ex);
+            });
+
+        private static void FlowContext(this IAsyncLocal[] context,Action observerAction, object[] capturedValues,IDictionary errorData=null){
+            var originalValues = context.Select(l => l.Value).ToArray();
+            var hasFlowContextData = errorData?.Contains(nameof(FlowContext))??false;
+            try {
+                capturedValues=(object[])(hasFlowContextData?errorData[nameof(FlowContext)]:capturedValues);
+                for (int i = 0; i < context.Length; i++) {
+                    context[i].Value = capturedValues![i];
+                }
+                observerAction();
+            }
+            finally {
+                if (!hasFlowContextData) {
+                    for (int i = 0; i < context.Length; i++) {
+                        context[i].Value = originalValues[i];
+                    }    
+                }
+            }        
+        }
+
         public static IAsyncLocal Wrap<T>(this AsyncLocal<T> asyncLocal) 
             => new AsyncLocalWrapper<T>(asyncLocal);        
     }
@@ -69,7 +52,7 @@ namespace Xpand.Extensions.Reactive.Utility {
     internal class AsyncLocalWrapper<T>(AsyncLocal<T> asyncLocal) : IAsyncLocal {
         public object Value {
             get => asyncLocal.Value;
-            set => asyncLocal.Value = (T)value;
+            set => asyncLocal.Value = value is T val ? val : default;
         }
     }
 }

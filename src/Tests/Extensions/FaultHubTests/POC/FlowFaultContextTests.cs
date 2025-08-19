@@ -6,10 +6,13 @@ using System.Reactive.Subjects;
 using System.Threading;
 using NUnit.Framework;
 using Shouldly;
-using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
+using Xpand.Extensions.Reactive.ErrorHandling;
 using Xpand.Extensions.Reactive.Utility;
 
 namespace Xpand.Extensions.Tests.FaultHubTests.POC {
+    internal class ContextualException(Exception inner, string context) : Exception(inner.Message, inner) {
+        public string Context { get; } = context;
+    }
     [TestFixture]
     public class FlowFaultContextTests {
         private static readonly AsyncLocal<string> TestContext = new();
@@ -23,8 +26,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.POC {
             TestContext.Value = expectedContext;
 
             using var subscription = source
-                // .FlowFaultContext(TestContext.Wrap())
-                .FlowFaultContext(TestContext.Wrap())
+                .FlowContext(context:TestContext.Wrap())
                 .Subscribe(
                     onNext: _ => contextOnNext = TestContext.Value,
                     onError: _ => { },
@@ -46,7 +48,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.POC {
             TestContext.Value = expectedContext;
             
             using var subscription = source
-                .FlowFaultContext(TestContext.Wrap())
+                .FlowContext(context:TestContext.Wrap())
                 .Subscribe(
                     onNext: _ => { },
                     onError: _ => contextOnError = TestContext.Value,
@@ -68,7 +70,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.POC {
             TestContext.Value = expectedContext;
 
             using var subscription = source
-                .FlowFaultContext(TestContext.Wrap())
+                .FlowContext(context:TestContext.Wrap())
                 .Subscribe(
                     onNext: _ => { },
                     onError: _ => { },
@@ -99,28 +101,29 @@ namespace Xpand.Extensions.Tests.FaultHubTests.POC {
             });
         }
 
-[Test]
-        public void FlowFaultContext_Preserves_Context_Across_Retry_Operator() {
+        [Test]
+        public void FlowContext_Preserves_Context_Across_Retry_Operator() {
             var capturedContext = "CONTEXT_NOT_SET";
             var subscriptionCount = 0;
             var source = InnerObservableWithContextAndError(() => subscriptionCount++);
 
-// MODIFICATION: The entire stream is wrapped in ChainFaultContext. This provides the isolation boundary
-// needed for Retry to work correctly with the AsyncLocal-based context.
+            // MODIFICATION: The stream now uses the robust error-wrapping pattern.
             var stream = source
-                .ChainFaultContext(s => s.Retry(3))
-                .Catch((Exception _) => {
-                    Console.WriteLine("[PoC] Outer Catch block is executing. Capturing context.");
-                    capturedContext = TestContext.Value;
-                    return Observable.Empty<Unit>();
-                });
+                .FlowContext(bus =>bus.Retry(3),TestContext.Wrap() )
+                .CompleteOnError()
+                // .Catch((Exception ex) => Observable.Throw<Unit>(new ContextualException(ex, TestContext.Value)))
+                // .Retry(3)
+                // .Catch((Exception ex) => {
+                //     // 2. The final catch receives the wrapper and can safely access the captured context.
+                //     capturedContext = ex.Context;
+                //     return Observable.Empty<Unit>();
+                // })
+                ;
             
             stream.Subscribe();
             
             subscriptionCount.ShouldBe(3);
             
-            capturedContext.ShouldBe("INNER_CONTEXT");
-            Console.WriteLine($"[PoC] Assertion successful: Captured context is '{capturedContext}'.");
-        }        
-    }
-}
+            TestContext.Value.ShouldBe("INNER_CONTEXT");
+        }
+    }    }

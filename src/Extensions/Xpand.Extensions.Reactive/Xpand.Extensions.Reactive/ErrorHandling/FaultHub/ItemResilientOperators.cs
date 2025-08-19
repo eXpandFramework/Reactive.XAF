@@ -40,7 +40,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
             => !FaultHub.Enabled ? source.FromEventPattern<TEventArgs>(eventName, scheduler)
                     .SelectMany(pattern => resilientSelector(pattern.EventArgs))
                 : source.FromEventPattern<TEventArgs>(eventName, scheduler)
-                    .FlowFaultContext(FaultHub.All.Concat(ChainFaultContextService.All).ToArray())
+                    .FlowContext(context:FaultHub.All.Concat(ChainFaultContextService.All).ToArray())
                     .SelectMany(pattern => resilientSelector(pattern.EventArgs)
                         .ApplyItemResilience(null, context.AddToContext(pattern.EventArgs), memberName, filePath,
                             lineNumber));

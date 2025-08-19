@@ -47,7 +47,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.POC {
             var source = InnerObservableWithContextAndError(() => subscriptionCount++, executionLog);
 
             // We use the EXISTING FlowFaultContext operator.
-            var sourceWithContextFlow = source.FlowFaultContext(TestContext.Wrap());
+            var sourceWithContextFlow = source.FlowContext(context:TestContext.Wrap());
 
             var stream = sourceWithContextFlow
                 .Retry(3)
