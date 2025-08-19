@@ -33,7 +33,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.POC {
 
         [Test]
         public void Incomplete_Pattern_Fails_To_Handle_Exception_From_Disposal() {
-            // ARRANGE
+            
             // Create a resource that will throw an exception when Dispose() is called.
             var resource = new TestResource { OnDispose = () => throw new InvalidOperationException("Dispose Failed") };
             var sourceWithFailingDispose = Observable.Using(() => resource, _ => Observable.Return(42));
@@ -52,11 +52,11 @@ namespace Xpand.Extensions.Tests.FaultHubTests.POC {
 
         [Test]
         public void Complete_Pattern_With_SafeguardSubscription_Handles_Exception_From_Disposal() {
-            // ARRANGE
+            
             var resource = new TestResource { OnDispose = () => throw new InvalidOperationException("Dispose Failed") };
             var sourceWithFailingDispose = Observable.Using(() => resource, _ => Observable.Return(42));
             
-            // ACT
+            
             // We apply the complete pattern, which includes the safeguard.
             var stream = ApplyCompleteResiliencePattern(sourceWithFailingDispose);
             

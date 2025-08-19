@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using Xpand.Extensions.LinqExtensions;
 
+using static Xpand.Extensions.Reactive.ErrorHandling.FaultHub.FaultHubLogger;
+
 namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
     public sealed class FaultHubException : Exception {
         public FaultHubException(string message, Exception innerException, AmbientFaultContext context) 
@@ -14,10 +16,37 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
                 Data[key] = innerException.Data[key];
             }
         }
+        
 
-        public IEnumerable<LogicalStackFrame> LogicalStackTrace 
-            => Context.FromHierarchy(frame => frame.InnerContext).Select(frame => frame.LogicalStackTrace)
-                .FirstOrDefault(stack => stack != null && stack.Any()) ?? Enumerable.Empty<LogicalStackFrame>();
+        public IEnumerable<LogicalStackFrame> LogicalStackTrace {
+            get {
+                Log(() => "[TOSTRING_DIAG] --- Entering LogicalStackTrace Property ---");
+                var contextHierarchy = Context.FromHierarchy(frame => frame.InnerContext).ToList();
+                Log(() => $"[TOSTRING_DIAG] Context hierarchy contains {contextHierarchy.Count} frames.");
+
+                var stackTraces = contextHierarchy.Select((frame, i) => {
+                    Log(() => $"[TOSTRING_DIAG] Inspecting context frame {i} (Name: {frame.Name})");
+                    var stack = frame.LogicalStackTrace;
+                    if (stack != null && stack.Any()) {
+                        Log(() => $"[TOSTRING_DIAG]   - Found stack trace with {stack.Count()} frames. First frame: {stack.First().MemberName}");
+                    } else {
+                        Log(() => "[TOSTRING_DIAG]   - No stack trace found on this frame.");
+                    }
+                    return stack;
+                }).ToList();
+
+                var selectedStack = stackTraces.LastOrDefault(stack => stack != null && stack.Any());
+                
+                if (selectedStack != null) {
+                    Log(() => $"[TOSTRING_DIAG] --- Selected Innermost Stack Trace. First frame: {selectedStack.First().MemberName} ---");
+                } else {
+                    Log(() => "[TOSTRING_DIAG] --- No valid stack trace selected. ---");
+                }
+                
+                return selectedStack ?? Enumerable.Empty<LogicalStackFrame>();
+            }
+        }
+
 
         public IEnumerable<object> AllContexts 
             => Context.FromHierarchy(context => context.InnerContext)
@@ -27,19 +56,30 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
             => obj is Type or null ? $"Type: {obj}" :
                 obj.ToString() == obj.GetType().FullName ? null :
                 $"{(obj.GetType().IsValueType||obj is string ? "Context:" : obj.GetType().Name)} {obj}";
-
-        public override string ToString() {
+public override string ToString() {
             var builder = new StringBuilder();
-            var exception = InnerException ?? this;
-            builder.AppendLine($"{exception.GetType().Name}: {exception.Message}");
-
+            
+            var (faultChain, rootCause) = GetFlattenedExceptionInfo(this);
+            builder.AppendLine($"{rootCause.GetType().Name}: {rootCause.Message}");
+            
             builder.AppendLine("--- Logical Operation Stack ---");
-            var frames = Context.FromHierarchy(frame => frame.InnerContext).Reverse().ToList();
-            foreach (var frame in frames)
-                builder.AppendLine($"{frame.CustomContext.Select(FormatContextObject).WhereNotDefault().Join(" | ")}");
+            var contextFrames = faultChain.Select(ex => ex.Context.CustomContext).Where(c => c != null && c.Any()).Reverse();
+            foreach (var frame in contextFrames) {
+                var contextString = string.Join(" | ", frame.Where(o => o != null));
+                if (!string.IsNullOrEmpty(contextString)) {
+                    builder.AppendLine($"Context: {contextString}");
+                }
+            }
+            
 
-            var fullLogicalStack = LogicalStackTrace.ToList();
-            if (fullLogicalStack.Any()) {
+            var allLogicalFrames = faultChain
+                .SelectMany(fhEx => fhEx.Context.LogicalStackTrace ?? Enumerable.Empty<LogicalStackFrame>())
+                .ToList();
+
+            if (allLogicalFrames.Any()) {
+
+                var fullLogicalStack = allLogicalFrames.Distinct().ToList();
+                
                 var simplifiedStack = fullLogicalStack.DistinctBy(f => f.MemberName).ToList();
                 var wasSimplified = simplifiedStack.Count < fullLogicalStack.Count;
 
@@ -51,18 +91,46 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
                 builder.AppendLine(wasSimplified ? "--- Full Invocation Stack ---" : "--- Invocation Stack ---");
                 builder.AppendLine(string.Join(Environment.NewLine, fullLogicalStack.Select(f => $"  {f}").Reverse()));
             }
-
+            
             builder.AppendLine("--- End of Logical Operation Stack ---");
-
-            if (InnerException != null) {
+            
+            if (rootCause != this) {
                 builder.AppendLine();
                 builder.AppendLine("--- Original Exception Details ---");
-                builder.AppendLine(InnerException.ToString());
+                builder.AppendLine(rootCause.ToString());
                 builder.AppendLine("--- End of Original Exception Details ---");
             }
 
             return builder.ToString();
         }
+
+        private static (List<FaultHubException> chain, Exception rootCause) GetFlattenedExceptionInfo(Exception ex) {
+            var faultChain = new List<FaultHubException>();
+            var rootCause = ex;
+            
+            var queue = new Queue<Exception>();
+            queue.Enqueue(ex);
+
+            while (queue.Count > 0) {
+                var current = queue.Dequeue();
+                if (current is FaultHubException fhEx) {
+                    faultChain.Add(fhEx);
+                }
+
+                if (current.InnerException != null) {
+                    queue.Enqueue(current.InnerException);
+                }
+                else {
+                    rootCause = current;
+                }
+            }
+            
+            if (rootCause is FaultHubException finalFault && finalFault.InnerException != null) {
+                rootCause = finalFault.InnerException;
+            }
+
+            return (faultChain, rootCause);
+        }
     }
-    
-}
+
+    }

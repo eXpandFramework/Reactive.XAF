@@ -22,7 +22,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.POC {
 
         [Test]
         public async Task FromEventPattern_Does_Not_Capture_AsyncLocal_Context_At_Subscription_Time() {
-            // ARRANGE
+            
             var eventSource = new EventSource();
             string contextInsideHandler = "NOT_SET";
             
@@ -31,7 +31,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.POC {
                 handler => eventSource.MyEvent -= handler
             );
 
-            // ACT
+            
             // 1. Set the initial context. This is the value we hope would be captured.
             TestContext.Value = "VALUE_AT_SUBSCRIBE_TIME";
 
@@ -58,7 +58,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.POC {
 
         [Test]
         public void FlowFaultContext_Ensures_Event_Streams_Use_Subscription_Context() {
-            // ARRANGE
+            
             var eventSource = new EventSource();
             FaultHubException capturedFault = null;
             
@@ -69,7 +69,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.POC {
                 .SelectMany(_ => Observable.Throw<System.Reactive.Unit>(new Exception("test")))
                 .PushStackFrame("HandlerContext"); // This frame should be prepended to the subscription context.
 
-            // ACT
+            
             using (stream.Subscribe(_ => { }, ex => capturedFault = ex.ExceptionToPublish(
                        new object[]{}.NewFaultContext(FaultHub.LogicalStackContext.Value,"Boundary")))) {
                 

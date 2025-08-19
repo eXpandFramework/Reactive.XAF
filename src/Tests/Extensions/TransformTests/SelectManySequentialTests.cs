@@ -86,7 +86,7 @@ namespace Xpand.Extensions.Tests.TransformTests{
 
         [Test]
         public void SelectManySequential_Executes_Operations_In_Sequence() {
-            // ARRANGE
+            
             var eventLog = new System.Collections.Concurrent.ConcurrentQueue<string>();
             var source = new[] { 1, 2, 3 }.ToObservable();
             var operationDelay = TimeSpan.FromMilliseconds(100);
@@ -99,7 +99,7 @@ namespace Xpand.Extensions.Tests.TransformTests{
                     .Do(_ => eventLog.Enqueue($"End {i}"));
             };
 
-            // ACT
+            
             // We use TestObserver to run the stream and wait for it to complete.
             var testObserver = source.SelectManySequential(selector).Test();
             testObserver.AwaitDone(TimeSpan.FromSeconds(5));

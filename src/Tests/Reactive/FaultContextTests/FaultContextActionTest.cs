@@ -168,7 +168,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests.FaultContextTests {
 
         [Test]
         public async Task WhenExecuted_Resets_The_Logical_Stack() {
-            // ARRANGE
+            
             await using var application = Platform.Win.NewApplication<ReactiveModule>(handleExceptions: false);
             using var exceptionSubscription = application.WhenWin().WhenCustomHandleException()
                 .Do(t => t.handledEventArgs.Handled = true).Subscribe();
@@ -217,7 +217,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests.FaultContextTests {
 
         [Test]
         public async Task PushStackFrame_Builds_A_Coherent_Logical_StackTrace_For_Nested_Operations() {
-            // ARRANGE
+            
             await using var application = Platform.Win.NewApplication<ReactiveModule>(handleExceptions: true);
             using var exceptionSubscription = application.WhenWin().WhenCustomHandleException()
                 .Do(t => t.handledEventArgs.Handled = true).Subscribe();
@@ -232,7 +232,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests.FaultContextTests {
 
             DefaultReactiveModule(application);
 
-            // ACT
+            
             await application.StartWinTest(frame =>
                 FaultHub.Bus.Take(1).MergeToUnit(
                         frame.Action(nameof(PushStackFrame_Builds_A_Coherent_Logical_StackTrace_For_Nested_Operations))

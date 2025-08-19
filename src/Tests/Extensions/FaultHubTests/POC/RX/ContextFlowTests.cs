@@ -5,7 +5,7 @@ using System.Threading;
 using NUnit.Framework;
 using Shouldly;
 
-namespace Xpand.Extensions.Tests.FaultHubTests.POC{
+namespace Xpand.Extensions.Tests.FaultHubTests.POC.RX{
     public class RxContextFlowTests {
         private static readonly AsyncLocal<string> TestContext = new();
 

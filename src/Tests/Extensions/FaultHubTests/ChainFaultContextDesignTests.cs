@@ -27,11 +27,11 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             // PURPOSE: This test verifies that ChainFaultContext preserves the logical stack
             // from the specific async operation it is managing.
 
-            // ARRANGE
+            
             var stream = FailingAsyncOperation_WithLogicalStack()
                 .ChainFaultContext(["AsyncBoundary"]);
 
-            // ACT
+            
             await stream.PublishFaults().Capture();
 
             // ASSERT
@@ -61,14 +61,14 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             // It defines the "Story Boundary" behavior where ChainFaultContext clears any
             // upstream story and starts a new one.
 
-            // ARRANGE
+            
             var stream = Level2_BusinessLogic()
                 .ChainFaultContext(
                     source => source.Retry(2),
                     ["Level1_TransactionBoundary"]
                 );
 
-            // ACT
+            
             await stream.PublishFaults().Capture();
 
             // ASSERT
@@ -93,7 +93,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             // PURPOSE: This test verifies that when two independent streams fail concurrently,
             // their logical stacks and contexts remain isolated from each other.
 
-            // ARRANGE
+            
             var streamA = Observable.Timer(TimeSpan.FromMilliseconds(10))
                 .SelectMany(_ => Observable.Throw<Unit>(new Exception("Failure A")))
                 .PushStackFrame("StreamA_LogicalFrame")
@@ -104,7 +104,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
                 .PushStackFrame("StreamB_LogicalFrame")
                 .ChainFaultContext(["StreamB_Boundary"]);
 
-            // ACT
+            
             // We merge the two streams and let them fail concurrently.
             // The .PublishFaults() will catch both independent errors.
             await streamA.PublishFaults()
@@ -153,7 +153,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             // It proves that an inner boundary propagates its error to the outer boundary,
             // allowing the outer boundary's resilience policy (retries) to take precedence.
 
-            // ARRANGE
+            
             var innerCounter = new SubscriptionCounter();
             var outerCounter = new SubscriptionCounter();
 
@@ -179,7 +179,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
                     ["OuterBoundary_Context"]
                 );
 
-            // ACT
+            
             await outerBoundary.PublishFaults().Capture();
 
             // ASSERT
@@ -220,11 +220,11 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             // the Using-based PushStackFrame correctly preserves the logical context
             // long enough for the downstream ChainFaultContext's Catch block to observe it.
 
-            // ARRANGE
+            
             var stream = FailingAsyncOperationWithUpstreamStack()
                 .ChainFaultContext(new[] { "Boundary" });
 
-            // ACT
+            
             await stream.PublishFaults().Capture();
 
             // ASSERT
@@ -246,14 +246,14 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             // the Using-based PushStackFrame implementation correctly preserves the full logical stack
             // long enough for the downstream ChainFaultContext's Catch block to observe it.
 
-            // ARRANGE
+            
             var stream = Observable.Timer(TimeSpan.FromMilliseconds(20))
                 .SelectMany(_ => Observable.Throw<Unit>(new InvalidOperationException("Async Failure")))
                 .PushStackFrame("InnerFrame") // The inner frame in the chain
                 .PushStackFrame("OuterFrame") // The outer frame in the chain
                 .ChainFaultContext(["Boundary"]);
 
-            // ACT
+            
             await stream.PublishFaults().Capture();
 
             // ASSERT
@@ -273,7 +273,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             // should reset the logical stack on each retry attempt, resulting in a stack count of 1.
             // The current implementation will fail with a count of 3.
 
-            // ARRANGE
+            
             var attemptCounter = 0;
             var source = Observable.Defer(() => {
                 attemptCounter++;
@@ -284,7 +284,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
                 .PushStackFrame("OperationFrame")
                 .ChainFaultContext(s => s.Retry(3), ["RetryBoundary"]);
 
-            // ACT
+            
             await stream.PublishFaults().Capture();
 
             // ASSERT

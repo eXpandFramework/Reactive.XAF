@@ -35,19 +35,6 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
             => !FaultHub.Enabled ? source : source.PushStackFrame(new LogicalStackFrame(memberName, filePath, lineNumber));
 
 
-        private static IObservable<T> PushStackFrame<T>(this IObservable<T> source, LogicalStackFrame frame) 
-            => Observable.Defer(() => {
-                var stackFromAbove = FaultHub.LogicalStackContext.Value;
-                var topFrame = stackFromAbove?.FirstOrDefault();
-                if (topFrame?.MemberName == frame.MemberName) {
-                    return source;
-                }
-                var newStack = new[] { frame }.Concat(stackFromAbove ?? Enumerable.Empty<LogicalStackFrame>()).ToList();
-                FaultHub.LogicalStackContext.Value = newStack;
-                return source;
-            });
-
-
         private static void LogAsyncLocalState(this Func<string> step) {
             var handlerCount = FaultHub.HandlersContext.Value?.Count ?? -1;
             var nestingDepth = ContextStack.Value?.Count() ?? -1;
@@ -68,29 +55,27 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
         public static IObservable<T> ChainFaultContext<T>(this IObservable<T> source, object[] context, Func<IObservable<T>, IObservable<T>> retryStrategy = null,
             [CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0) {
             if (!FaultHub.Enabled)return source;
-            var contextName = context?.FirstOrDefault() ?? "UnnamedBoundary";
-            return Observable.Defer(() => {
-                var stackFromAbove = FaultHub.LogicalStackContext.Value;
-                Log(() => $"[HUB-TRACE][ChainFaultContext Defer] Boundary created. Saving stack with depth {stackFromAbove?.Count ?? 0}.");
+            
+            var resilientSource = retryStrategy != null ? retryStrategy(source) : source;
 
-                var sourceWithAttemptClearing = Observable.Defer(() => {
-                    FaultHub.LogicalStackContext.Value = null;
-                    LogAsyncLocalState(() => $"ChainFaultContext('{contextName}') - New attempt started");
-                    return source;
-                });
-                var effectiveSource = retryStrategy != null ? retryStrategy(sourceWithAttemptClearing) : sourceWithAttemptClearing;
-                return effectiveSource
-                    .Catch((Exception ex) => {
-                        Log(() => "[HUB-TRACE][ChainFaultContext Catch] Boundary caught exception.");
-                        var faultContext = context.NewFaultContext(FaultHub.LogicalStackContext.Value,memberName, filePath, lineNumber);
-                        return ex.ProcessFault(faultContext, Observable.Throw<T>);
-                    })
-                    .Finally(() => {
-                        FaultHub.LogicalStackContext.Value = stackFromAbove;
-                        Log(() => $"[HUB-TRACE][ChainFaultContext Finally] Boundary disposed. Ambient stack restored to depth {stackFromAbove?.Count ?? 0}.");
-                    });
+            return resilientSource.Catch((Exception ex) => {
+                var faultContext = context.NewFaultContext(FaultHub.LogicalStackContext.Value, memberName, filePath, lineNumber);
+                return ex.ProcessFault(faultContext, Observable.Throw<T>);
             });
         }
+
+        private static IObservable<T> PushStackFrame<T>(this IObservable<T> source, LogicalStackFrame frame) 
+            => Observable.Defer(() => {
+                var stackFromAbove = FaultHub.LogicalStackContext.Value;
+                var topFrame = stackFromAbove?.FirstOrDefault();
+                if (topFrame?.MemberName == frame.MemberName) {
+                    return source;
+                }
+                var newStack = new[] { frame }.Concat(stackFromAbove ?? Enumerable.Empty<LogicalStackFrame>()).ToList();
+                FaultHub.LogicalStackContext.Value = newStack;
+                return source;
+            });
+
         public static void Log(this Func<string> messageSelector) {
             if (FaultHub.Logging) Console.WriteLine(messageSelector());
         }

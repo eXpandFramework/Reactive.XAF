@@ -105,7 +105,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
 // MODIFICATION: The test is renamed to reflect its purpose and the operator it's testing.
         [Test]
         public void ProcessEvent_Preserves_Subscription_Context_On_Event_Streams() {
-            // ARRANGE
+            
             var eventSource = new EventSource();
     
             // 1. Set the initial context at the subscription site.
@@ -115,7 +115,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
                     _ => Observable.Throw<System.Reactive.Unit>(new Exception("test")).PushStackFrame("HandlerContext"))
                 ;
 
-            // ACT
+            
             // MODIFICATION: The Subscribe block is simplified. We no longer expect an error here
             // because ProcessEvent is an item-resilience operator that suppresses errors.
             using (stream.Subscribe()) {
