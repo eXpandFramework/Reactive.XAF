@@ -71,8 +71,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests.FaultContextTests {
         [MethodImpl(MethodImplOptions.NoInlining)]
         private IObservable<Unit> SubscribeToActionThatThrows_And_Assert_The_StackTrace(XafApplication application)
             => application.WhenApplicationModulesManager()
-                .SelectMany(manager
-                    => manager.RegisterViewSimpleAction(nameof(Can_Get_Correct_StackTrace_From_Nested_Method)))
+                .SelectMany(manager => manager.RegisterViewSimpleAction(nameof(Can_Get_Correct_StackTrace_From_Nested_Method)))
                 .PushStackFrame()
                 .WhenExecuted(_ => 100.Milliseconds().Timer()
                     .SelectMany(_
@@ -126,7 +125,9 @@ namespace Xpand.XAF.Modules.Reactive.Tests.FaultContextTests {
 
             logicalStack.ShouldContain(frame
                 => frame.MemberName == nameof(SubscribeToActionThatThrows_And_Assert_The_StackTrace));
-            logicalStack.ShouldContain(frame => frame.MemberName == nameof(ActionsService.WhenExecuted));
+            logicalStack.SelectMany(frame => frame.Context)
+                .ShouldContain(context => (string)context == nameof(ActionBase.Executed));
+            ;
         }
 
 
@@ -152,7 +153,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests.FaultContextTests {
             logicalStack.ShouldNotBeNull();
             logicalStack.Count.ShouldBeGreaterThanOrEqualTo(2);
             logicalStack.ShouldContain(frame => frame.MemberName == nameof(SubscribeToActionWithChainedHelpers));
-            logicalStack.ShouldContain(frame => frame.MemberName == nameof(ActionsService.WhenExecuted));
+            logicalStack.SelectMany(frame => frame.Context).ShouldContain(context => (string)context == nameof(ActionBase.Executed));
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -172,47 +173,41 @@ namespace Xpand.XAF.Modules.Reactive.Tests.FaultContextTests {
             await using var application = Platform.Win.NewApplication<ReactiveModule>(handleExceptions: false);
             using var exceptionSubscription = application.WhenWin().WhenCustomHandleException()
                 .Do(t => t.handledEventArgs.Handled = true).Subscribe();
-
-            // 1. Pollute the ambient logical stack to simulate a dirty context from startup.
+            
             FaultHub.LogicalStackContext.Value = new List<LogicalStackFrame> {
                 new("DirtyFrame_From_Startup", "startup.cs", 1)
             };
 
             var actionRegistered = application.WhenApplicationModulesManager()
                 .SelectMany(manager => manager.RegisterViewSimpleAction(nameof(WhenExecuted_Resets_The_Logical_Stack)));
-
-            // 2. The action subscription itself is an outer layer.
+            
             using var actionSubscription = actionRegistered
                 .WhenExecuted(_ =>
-                    // 3. The business logic that throws the exception.
                     Observable.Throw<Unit>(new InvalidOperationException("Action Failed"))
                         .PushStackFrame("Action_Business_Logic")
                 )
-                // 4. CRITICAL: This is the resilience boundary that MUST reset the stack.
                 .ChainFaultContext(["ActionExecutionStory"])
                 .Subscribe();
 
             DefaultReactiveModule(application);
-
-            // ACT: Start the app, find the action, and execute it to trigger the failure.
+            
             await application.StartWinTest(frame =>
                 FaultHub.Bus.Take(1)
                     .MergeToUnit(frame.Action(nameof(WhenExecuted_Resets_The_Logical_Stack))
                         .Observe().Do(a => a.DoTheExecute()).IgnoreElements())
             );
-
-            // ASSERT
+            
             BusEvents.Count.ShouldBe(1);
             var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
             var logicalStack = fault.LogicalStackTrace.ToArray();
-
-            // The logical stack should NOT contain the frame from the pre-existing, polluted context.
+            
             logicalStack.ShouldNotContain(frame => frame.MemberName == "DirtyFrame_From_Startup",
                 "The logical stack was not reset and contains frames from a previous context.");
 
-            // The stack should contain the frames from within the isolated action context.
+            
             logicalStack.ShouldContain(frame => frame.MemberName == "Action_Business_Logic");
-            logicalStack.ShouldContain(frame => frame.MemberName == nameof(ActionsService.WhenExecuted));
+            logicalStack.SelectMany(frame => frame.Context)
+                .ShouldContain(context => (string)context == nameof(ActionBase.Executed));
         }
 
         [Test]

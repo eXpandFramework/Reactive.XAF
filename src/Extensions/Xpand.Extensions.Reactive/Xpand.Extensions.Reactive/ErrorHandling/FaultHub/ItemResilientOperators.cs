@@ -16,7 +16,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
             object[] context, string memberName, string filePath, int lineNumber,Func<Exception, IObservable<bool>> publishWhen=null)
             => FaultHub.Enabled ? (retryStrategy != null ? retryStrategy(source) : source)
                 .Catch((Exception ex) => ex.ProcessFault(context.NewFaultContext(
-                        new[] { new LogicalStackFrame(memberName, filePath, lineNumber) }.ToList()
+                        new[] { new LogicalStackFrame(memberName, filePath, lineNumber,context) }.ToList()
                             .Concat(FaultHub.LogicalStackContext.Value ?? Enumerable.Empty<LogicalStackFrame>())
                             .ToList(), memberName, filePath, lineNumber),
                     proceedAction: enrichedException => (publishWhen?.Invoke(enrichedException) ?? true.Observe())
@@ -42,7 +42,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
                 : source.FromEventPattern<TEventArgs>(eventName, scheduler)
                     .FlowContext(context:FaultHub.All.Concat(ChainFaultContextService.All).ToArray())
                     .SelectMany(pattern => resilientSelector(pattern.EventArgs)
-                        .ApplyItemResilience(null, context.AddToContext(pattern.EventArgs), memberName, filePath,
+                        .ApplyItemResilience(null, context.AddToContext(eventName, pattern.EventArgs), memberName, filePath,
                             lineNumber));
 
     

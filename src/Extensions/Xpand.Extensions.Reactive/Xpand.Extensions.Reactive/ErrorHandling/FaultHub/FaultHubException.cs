@@ -56,7 +56,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
             => obj is Type or null ? $"Type: {obj}" :
                 obj.ToString() == obj.GetType().FullName ? null :
                 $"{(obj.GetType().IsValueType||obj is string ? "Context:" : obj.GetType().Name)} {obj}";
-public override string ToString() {
+        public override string ToString() {
             var builder = new StringBuilder();
             
             var (faultChain, rootCause) = GetFlattenedExceptionInfo(this);
@@ -65,25 +65,20 @@ public override string ToString() {
             builder.AppendLine("--- Logical Operation Stack ---");
             var contextFrames = faultChain.Select(ex => ex.Context.CustomContext).Where(c => c != null && c.Any()).Reverse();
             foreach (var frame in contextFrames) {
-                var contextString = string.Join(" | ", frame.Where(o => o != null));
+                var contextString = string.Join(" | ", frame.Where(o => o != null).Select(FormatContextObject).Where(s => s != null));
                 if (!string.IsNullOrEmpty(contextString)) {
-                    builder.AppendLine($"Context: {contextString}");
+                    builder.AppendLine(contextString);
                 }
             }
-            
-
             var allLogicalFrames = faultChain
                 .SelectMany(fhEx => fhEx.Context.LogicalStackTrace ?? Enumerable.Empty<LogicalStackFrame>())
                 .ToList();
-
             if (allLogicalFrames.Any()) {
-
                 var fullLogicalStack = allLogicalFrames.Distinct().ToList();
-                
                 var simplifiedStack = fullLogicalStack.DistinctBy(f => f.MemberName).ToList();
                 var wasSimplified = simplifiedStack.Count < fullLogicalStack.Count;
-
                 if (wasSimplified) {
+                    builder.AppendLine("");
                     builder.AppendLine("--- Simplified Invocation Stack (Unique Methods) ---");
                     builder.AppendLine(string.Join(Environment.NewLine, simplifiedStack.Select(f => $"  {f}").Reverse()));
                 }
@@ -125,7 +120,7 @@ public override string ToString() {
                 }
             }
             
-            if (rootCause is FaultHubException finalFault && finalFault.InnerException != null) {
+            if (rootCause is FaultHubException { InnerException: not null } finalFault) {
                 rootCause = finalFault.InnerException;
             }
 

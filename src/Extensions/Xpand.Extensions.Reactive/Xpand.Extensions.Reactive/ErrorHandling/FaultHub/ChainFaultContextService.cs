@@ -93,7 +93,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
             });
         }        
 
-        private static IObservable<T> PushStackFrame<T>(this IObservable<T> source, LogicalStackFrame frame)
+        private static IObservable<T> PushStackFrame<T>(this IObservable<T> source, LogicalStackFrame frame) 
             => Observable.Defer(() => {
                 LogAsyncLocalState(() => $"Before PushStackFrame '{frame.MemberName}'");
                 var originalStack = FaultHub.LogicalStackContext.Value;
@@ -114,9 +114,11 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
                         var snapshot = FaultHub.CurrentFaultSnapshot.Value;
                         if (snapshot != null) {
                             var currentStack = FaultHub.LogicalStackContext.Value;
-                            Log(() => $"[PushStackFrame] Current snapshot has {snapshot.CapturedStack?.Count ?? 0} frames. Current logical stack has {currentStack?.Count ?? 0} frames.");
+                            Log(()
+                                => $"[PushStackFrame] Current snapshot has {snapshot.CapturedStack?.Count ?? 0} frames. Current logical stack has {currentStack?.Count ?? 0} frames.");
                             if ((currentStack?.Count ?? 0) > (snapshot.CapturedStack?.Count ?? 0)) {
-                                Log(() => $"[PushStackFrame] Saving stack with {currentStack?.Count} frames to snapshot.");
+                                Log(()
+                                    => $"[PushStackFrame] Saving stack with {currentStack?.Count} frames to snapshot.");
                                 snapshot.CapturedStack = currentStack;
                             }
                             else {
@@ -129,13 +131,14 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
                     })
                     .Dematerialize()
                     .Finally(() => {
-                        Log(() => $"[PushStackFrame] Finally: Restoring original stack for '{frame.MemberName}' to {originalStack?.Count ?? 0} frames.");
+                        Log(()
+                            => $"[PushStackFrame] Finally: Restoring original stack for '{frame.MemberName}' to {originalStack?.Count ?? 0} frames.");
                         FaultHub.LogicalStackContext.Value = originalStack;
                         LogAsyncLocalState(() => $"After PushStackFrame '{frame.MemberName}'");
                     });
             });
-        
-        
+
+
         public static AmbientFaultContext NewFaultContext(this object[] context, IReadOnlyList<LogicalStackFrame> logicalStack, [CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0) {
             Log(() => $"[HUB-TRACE][NewFaultContext] Caller: '{memberName}', filePath: {filePath}, line: {lineNumber} Context: '{(context == null ? "null" : string.Join(", ", context))}'");
             var finalContext = (context ?? []).Select(o => o).WhereNotDefault().Prepend(memberName).Distinct().ToList();

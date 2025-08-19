@@ -216,8 +216,8 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
             return proceedAction(enrichedException);
         }
     
-        internal static object[] AddToContext<T>(this object[] context, T item) 
-            => new object[] { item }.Concat(context ?? Enumerable.Empty<object>()).ToArray();
+        internal static object[] AddToContext(this object[] context, params object[] items) 
+            => items.Concat(context ?? Enumerable.Empty<object>()).ToArray();
         
         public static IObservable<T> RethrowOnFault<T>(this IObservable<T> source, Func<Exception, bool> predicate = null) {
             predicate ??= _ => true;

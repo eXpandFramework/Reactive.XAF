@@ -14,23 +14,12 @@ namespace Xpand.Extensions.Reactive.Combine {
         public static IObservable<Unit> SequentialTransaction(this IEnumerable<object> source, bool failFast=false,
             Func<IObservable<object>, IObservable<object>> resiliencePolicy=null, object[] context = null, [CallerMemberName]string transactionName = null) 
             => source.ToObjectStreams().SequentialTransaction(failFast, resiliencePolicy, context, transactionName);
-        
-
-
 
         public static IObservable<Unit> SequentialTransaction<TSource>(this IEnumerable<IObservable<TSource>> source, bool failFast=false,
             Func<IObservable<TSource>, IObservable<TSource>> resiliencePolicy=null, object[] context=null, [CallerMemberName] string transactionName = null) {
-    
-
-
             var transaction = source.Operations( resiliencePolicy, context, failFast, transactionName)
-                .SequentialTransaction(context,transactionName.PrefixCallerWhenDefault());
-
-            var result = failFast
-                ? transaction.Catch((Exception ex) => Observable.Throw<Unit>(new InvalidOperationException($"{transactionName} failed", ex)))
-                : transaction;
-
-            return result;
+                .SequentialTransaction(context.AddToContext(transactionName.PrefixCallerWhenDefault()));
+            return failFast ? transaction.Catch((Exception ex) => Observable.Throw<Unit>(new InvalidOperationException($"{transactionName} failed", ex))) : transaction;
         }
         
         public static IObservable<TSource[]> SequentialTransactionWithResults<TSource>(this IEnumerable<IObservable<TSource>> source,
@@ -47,19 +36,21 @@ namespace Xpand.Extensions.Reactive.Combine {
                         : Observable.Throw<TSource[]>(new InvalidOperationException($"{transactionName} failed",
                             new AggregateException(exceptions)));
                 })
-                .ChainFaultContext(context.AddToContext(transactionName));
-
-
-        static IObservable<Unit> SequentialTransaction(this IEnumerable<IObservable<object>> source,object[] context, string transactionName ) 
+                .PushStackFrame(context.AddToContext(transactionName));
+        
+        static IObservable<Unit> SequentialTransaction(this IEnumerable<IObservable<object>> source,object[] context ) 
             => source.ToNowObservable().SelectManySequential(obs => obs.DefaultIfEmpty(new object())).BufferUntilCompleted()
                 .Select(results => results.OfType<Exception>().ToList())
                 .SelectMany(allFailures => !allFailures.Any()
                     ? Unit.Default.Observe()
                     : Observable.Throw<Unit>(new AggregateException(allFailures)))
-                .PushStackFrame(context.AddToContext(transactionName));
-        private static IEnumerable<IObservable<object>> Operations<TSource>(this IEnumerable<IObservable<TSource>> source, Func<IObservable<TSource>, IObservable<TSource>> resiliencePolicy, object[] context, bool failFast, string transactionName) 
+                .PushStackFrame(context);
+
+        private static IEnumerable<IObservable<object>> Operations<TSource>(this IEnumerable<IObservable<TSource>> source,
+            Func<IObservable<TSource>, IObservable<TSource>> resiliencePolicy, object[] context, bool failFast, string transactionName,
+            [CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0) 
             => source.Select((obs, i) => (resiliencePolicy?.Invoke(obs)??obs)
-                    .ChainFaultContext((context??[]).AddToArray($"{transactionName} - Op:{i + 1}"))
+                    .ChainFaultContext((context??[]).AddToArray($"{transactionName} - Op:{i + 1}"),null,memberName, filePath, lineNumber)
                     .Select(t => (object)t))
                 .Select(operation =>  failFast ? operation : operation.Catch((FaultHubException ex) => Observable.Return<object>(ex)));
         
