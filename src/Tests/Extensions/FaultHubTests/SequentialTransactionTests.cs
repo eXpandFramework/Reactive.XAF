@@ -35,7 +35,6 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
                     FailingOperationWithContext(failingCounter),
                     SuccessfulOperationWithContext(successfulCounter)
                 }
-                // MODIFICATION: The call to SequentialTransaction is simplified as the outer ChainFaultContext is gone.
                 .SequentialTransaction(false, op => op.Retry(2), ["MyCustomContext"], "MyTransaction")
                 .TrackSubscriptions(outerCounter)
                 .ChainFaultContext(s => s.Retry(3), ["Outer"])
@@ -48,11 +47,9 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
 
             var finalFault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
             finalFault.AllContexts.ShouldContain("Outer");
-    
-            // MODIFICATION: Assert against the LogicalStackTrace for the transaction name.
+            
             finalFault.LogicalStackTrace.ShouldContain(frame => frame.Context.Contains("MyTransaction"));
-
-            // MODIFICATION: The exception structure is simpler now. The AggregateException is the direct InnerException.
+            
             var aggregateException = finalFault.InnerException.ShouldBeOfType<AggregateException>();
             var innerFault = aggregateException.InnerExceptions.Single().ShouldBeOfType<FaultHubException>();
 
@@ -72,7 +69,6 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
 
             var finalFault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
             
-            // This is fail-fast, so we expect the InvalidOperationException wrapper.
             var txException = finalFault.InnerException.ShouldBeOfType<InvalidOperationException>();
             txException.Message.ShouldBe("FailFastTransaction failed");
 
@@ -87,7 +83,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
                 .SequentialTransaction(true, transactionName:"InnerTransaction1");
 
             var innerTx2 = new object[] { Observable.Return(Unit.Default) }
-                .SequentialTransaction(false, transactionName:"InnerTransaction2");
+                .SequentialTransaction(transactionName:"InnerTransaction2");
             
             await new object[] { innerTx1, innerTx2 }
                 .SequentialTransaction(true, transactionName:"OuterTransaction")
@@ -95,12 +91,10 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             
             var finalFault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
             
-            // Outer transaction is fail-fast, so we expect the InvalidOperationException wrapper.
             var outerTxException = finalFault.InnerException.ShouldBeOfType<InvalidOperationException>();
             outerTxException.Message.ShouldBe("OuterTransaction failed");
             
             var innerFault = outerTxException.InnerException.ShouldBeOfType<FaultHubException>();
-            // The inner exception is from the inner fail-fast transaction, so it also has the wrapper.
             var innerTxException = innerFault.InnerException.ShouldBeOfType<InvalidOperationException>();
             innerTxException.Message.ShouldBe("InnerTransaction1 failed");
             
@@ -115,7 +109,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
                 .SequentialTransaction(true, transactionName:"InnerTransaction1");
 
             var innerTx2 = new object[] { Unit.Default.Observe(), Observable.Throw<Unit>(new InvalidOperationException("Inner Tx2 Failed")) }
-                .SequentialTransaction(false, transactionName:"InnerTransaction2");
+                .SequentialTransaction(transactionName:"InnerTransaction2");
             
             await new object[] { innerTx1, innerTx2 }
                 .SequentialTransaction(true, transactionName:"OuterTransaction")
@@ -123,12 +117,10 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
 
             var finalFault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
             
-            // Outer transaction is fail-fast, so we expect the InvalidOperationException wrapper.
             var outerTxException = finalFault.InnerException.ShouldBeOfType<InvalidOperationException>();
             outerTxException.Message.ShouldBe("OuterTransaction failed");
             
             var innerFault = outerTxException.InnerException.ShouldBeOfType<FaultHubException>();
-            // The inner exception is from the inner run-to-completion transaction, so it should be an AggregateException.
             var aggregateException = innerFault.InnerException.ShouldBeOfType<AggregateException>();
             var originalOpFault = aggregateException.InnerExceptions.Single().ShouldBeOfType<FaultHubException>();
             
@@ -141,15 +133,14 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
                 .SequentialTransaction(true, transactionName:"InnerTransaction1");
             
             var innerTx2 = new object[] { Observable.Throw<Unit>(new InvalidOperationException("Inner Tx2 Failed")) }
-                .SequentialTransaction(false, transactionName:"InnerTransaction2");
+                .SequentialTransaction(transactionName:"InnerTransaction2");
             
             await new object[] { innerTx1, innerTx2 }
-                .SequentialTransaction(false, transactionName:"OuterTransaction")
+                .SequentialTransaction(transactionName:"OuterTransaction")
                 .PublishFaults().Capture();
             
             var finalFault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
             
-            // Outer transaction is run-to-completion, so we expect an AggregateException directly.
             var aggregateException = finalFault.InnerException.ShouldBeOfType<AggregateException>();
             aggregateException.InnerExceptions.Count.ShouldBe(2);
             

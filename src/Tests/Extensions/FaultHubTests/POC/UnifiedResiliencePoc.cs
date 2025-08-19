@@ -11,8 +11,8 @@ using Xpand.Extensions.Reactive.Utility;
 namespace Xpand.Extensions.Tests.FaultHubTests.POC {
     [TestFixture]
     public class UnifiedResiliencePoc : FaultHubTestBase {
-        // MODIFICATION: The helper is simplified by removing the redundant PushStackFrame.
-        // The ContinueOnFault primitive is now solely responsible for capturing the context.
+        
+        
         private IObservable<int> PocSelectItemResilient(IObservable<int> source) {
             return source.SelectMany(i => {
                 var itemStream = Observable.Defer(() => {
@@ -20,7 +20,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.POC {
                     return Observable.Return(i * 10);
                 });
 
-                // Apply the item resilience primitive to the inner stream.
+                
                 return itemStream.ContinueOnFault(context:[i]);
             });
         }
@@ -43,8 +43,8 @@ namespace Xpand.Extensions.Tests.FaultHubTests.POC {
 
             logicalStack.ShouldNotBeEmpty();
 
-            // MODIFICATION: The assertions are corrected to verify the new, correct behavior.
-            // The logical stack should contain a single frame from the method that calls the primitive.
+            
+            
             logicalStack.Count.ShouldBe(1);
             logicalStack[0].MemberName.ShouldBe(nameof(PocSelectItemResilient));
         }

@@ -104,9 +104,9 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             var result = await source.SelectItemResilient(_ => {
                 attemptCount++;
                 throw new InvalidOperationException();
-#pragma warning disable CS0162 // Unreachable code detected
+#pragma warning disable CS0162 
                 return Observable.Throw<int>(new InvalidOperationException("Selector Failed")).ToList();
-#pragma warning restore CS0162 // Unreachable code detected
+#pragma warning restore CS0162 
             }, s => s.Retry(3)).Capture();
             
             result.IsCompleted.ShouldBe(true);

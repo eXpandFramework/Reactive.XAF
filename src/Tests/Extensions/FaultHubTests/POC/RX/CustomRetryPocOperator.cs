@@ -8,6 +8,60 @@ using Shouldly;
 using Unit = System.Reactive.Unit;
 
 namespace Xpand.Extensions.Tests.FaultHubTests.POC.RX {
+    [TestFixture]
+    public class CustomRetryOperatorPoc {
+        private static readonly AsyncLocal<string> TestContext = new();
+
+        private static IObservable<Unit> InnerObservableWithContextAndError(Action subscriptionCounter,
+            List<string> log) {
+            return Observable.Defer(() => {
+                subscriptionCounter();
+                log.Add($"-- Attempt Start. Context before Using: '{TestContext.Value ?? "null"}'.");
+                return Observable.Using(
+                    () => {
+                        log.Add("   [Using] Factory entered. Setting context to 'INNER_CONTEXT'.");
+                        TestContext.Value = "INNER_CONTEXT";
+                        return Disposable.Create(log, list => {
+                            list.Add(
+                                $"   [Using] Dispose action running. Context is '{TestContext.Value ?? "null"}'. Clearing context.");
+                            TestContext.Value = null;
+                        });
+                    },
+                    _ => Observable.Throw<Unit>(new InvalidOperationException("Inner Failure"))
+                );
+            });
+        }
+
+        [Test]
+        public void CustomRetryOperator_Preserves_Context_And_Cleans_Up_Between_Attempts() {
+            var executionLog = new List<string>();
+            var subscriptionCount = 0;
+            var capturedContext = "CONTEXT_NOT_SET";
+
+            var source = InnerObservableWithContextAndError(() => subscriptionCount++, executionLog);
+
+            var stream = source
+                .RetryWithContext(3, TestContext, executionLog)
+                .Catch((Exception _) => {
+                    executionLog.Add($"--- OuterCatch Executing. Final context is '{TestContext.Value ?? "null"}'.");
+                    capturedContext = TestContext.Value;
+                    return Observable.Empty<Unit>();
+                });
+
+            stream.Subscribe();
+
+            Console.WriteLine("--- Execution Log ---");
+            Console.WriteLine(string.Join(Environment.NewLine, executionLog));
+            Console.WriteLine("---------------------");
+            
+            capturedContext.ShouldBe("INNER_CONTEXT");
+            subscriptionCount.ShouldBe(3);
+
+
+            executionLog.ShouldContain(log => log == "-- Attempt Start. Context before Using: 'null'.");
+        }
+    }
+
     public static class CustomRetryPocOperatorFixed {
         public static IObservable<T> RetryWithContext<T>(this IObservable<T> source, int retryCount,
             AsyncLocal<string> context, List<string> log) {
@@ -15,7 +69,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.POC.RX {
                 var attempts = 0;
                 
                 var serialDisposable = new SerialDisposable();
-                string lastCapturedContext = null;
+                string lastCapturedContext;
 
                 void SubscribeToSource() {
                     attempts++;
@@ -37,64 +91,8 @@ namespace Xpand.Extensions.Tests.FaultHubTests.POC.RX {
                 }
 
                 SubscribeToSource();
-                // MODIFICATION: Return the SerialDisposable itself.
                 return serialDisposable;
             });
-        }
-    }
-
-    [TestFixture]
-    public class CustomRetryOperatorPoc {
-        private static readonly AsyncLocal<string> TestContext = new();
-
-        private static IObservable<Unit> InnerObservableWithContextAndError(Action subscriptionCounter,
-            List<string> log) {
-            return Observable.Defer(() => {
-                subscriptionCounter();
-                log.Add($"-- Attempt Start. Context before Using: '{TestContext.Value ?? "null"}'.");
-                return Observable.Using(
-                    () => {
-                        log.Add("   [Using] Factory entered. Setting context to 'INNER_CONTEXT'.");
-                        TestContext.Value = "INNER_CONTEXT";
-                        return Disposable.Create(() => {
-                            log.Add(
-                                $"   [Using] Dispose action running. Context is '{TestContext.Value ?? "null"}'. Clearing context.");
-                            TestContext.Value = null;
-                        });
-                    },
-                    _ => Observable.Throw<Unit>(new InvalidOperationException("Inner Failure"))
-                );
-            });
-        }
-
-        [Test]
-        public void CustomRetryOperator_Preserves_Context_And_Cleans_Up_Between_Attempts() {
-            var executionLog = new List<string>();
-            var subscriptionCount = 0;
-            var capturedContext = "CONTEXT_NOT_SET";
-
-            var source = InnerObservableWithContextAndError(() => subscriptionCount++, executionLog);
-
-            var stream = source
-                .RetryWithContext(3, TestContext, executionLog)
-                .Catch((Exception ex) => {
-                    executionLog.Add($"--- OuterCatch Executing. Final context is '{TestContext.Value ?? "null"}'.");
-                    capturedContext = TestContext.Value;
-                    return Observable.Empty<Unit>();
-                });
-
-            stream.Subscribe();
-
-            Console.WriteLine("--- Execution Log ---");
-            Console.WriteLine(string.Join(Environment.NewLine, executionLog));
-            Console.WriteLine("---------------------");
-
-            // Assert
-            capturedContext.ShouldBe("INNER_CONTEXT");
-            subscriptionCount.ShouldBe(3);
-
-            // Assert that the context was cleared between attempts
-            executionLog.ShouldContain(log => log == "-- Attempt Start. Context before Using: 'null'.");
         }
     }
 }

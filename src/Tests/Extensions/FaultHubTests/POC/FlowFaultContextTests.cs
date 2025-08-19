@@ -103,21 +103,13 @@ namespace Xpand.Extensions.Tests.FaultHubTests.POC {
 
         [Test]
         public void FlowContext_Preserves_Context_Across_Retry_Operator() {
-            var capturedContext = "CONTEXT_NOT_SET";
             var subscriptionCount = 0;
             var source = InnerObservableWithContextAndError(() => subscriptionCount++);
-
-            // MODIFICATION: The stream now uses the robust error-wrapping pattern.
+            
             var stream = source
                 .FlowContext(bus =>bus.Retry(3),TestContext.Wrap() )
                 .CompleteOnError()
-                // .Catch((Exception ex) => Observable.Throw<Unit>(new ContextualException(ex, TestContext.Value)))
-                // .Retry(3)
-                // .Catch((Exception ex) => {
-                //     // 2. The final catch receives the wrapper and can safely access the captured context.
-                //     capturedContext = ex.Context;
-                //     return Observable.Empty<Unit>();
-                // })
+                
                 ;
             
             stream.Subscribe();

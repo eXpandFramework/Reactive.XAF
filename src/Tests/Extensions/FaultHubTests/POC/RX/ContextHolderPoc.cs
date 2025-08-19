@@ -9,20 +9,11 @@ using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Unit = System.Reactive.Unit;
 
 namespace Xpand.Extensions.Tests.FaultHubTests.POC.RX {
-    // --- Self-contained components for the PoC ---
-
+    
 
     [TestFixture]
     public class ContextHolderPoc {
-        // The main context we want to preserve (the logical stack).
         
-
-        // MODIFICATION: The extension methods are now in a private nested static class.
-
-        /// A custom disposable that saves the context to the provided holder on disposal.
-
-        // --- Test Setup ---
-
         private IObservable<Unit> Level1_FailingOperation(List<string> log)
             => Observable.Throw<Unit>(new InvalidOperationException("DB Failure"))
                 .PushStackFrameWithHolder("Level1_FailingOperation", log);
@@ -49,7 +40,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.POC.RX {
             Console.WriteLine(string.Join(Environment.NewLine, executionLog));
             Console.WriteLine("---------------------");
 
-            // Assert
+            
             finalStack.ShouldNotBeNull();
             finalStack.Count.ShouldBe(2);
             finalStack[1].MemberName.ShouldBe("Level2_BusinessLogic");
@@ -60,39 +51,31 @@ namespace Xpand.Extensions.Tests.FaultHubTests.POC.RX {
     static class PocOperators {
         private static readonly AsyncLocal<IReadOnlyList<LogicalStackFrame>> LogicalStackContext = new();
 
-        // The vehicle to pass the unique holder instance down the chain.
+        
         private static readonly AsyncLocal<ContextHolder> CurrentContextHolder = new();
-        private class ContextSavingDisposable : IDisposable {
-            private readonly ContextHolder _holder;
-            private readonly IReadOnlyList<LogicalStackFrame> _originalStack;
-            private readonly List<string> _log;
-
-            public ContextSavingDisposable(ContextHolder holder, IReadOnlyList<LogicalStackFrame> originalStack,
-                List<string> log) {
-                _holder = holder;
-                _originalStack = originalStack;
-                _log = log;
-            }
-
+        private class ContextSavingDisposable(
+            ContextHolder holder,
+            IReadOnlyList<LogicalStackFrame> originalStack,
+            List<string> log)
+            : IDisposable {
             public void Dispose() {
-                if (_holder != null) {
+                if (holder != null) {
                     var currentStack = LogicalStackContext.Value;
-                    // MODIFICATION: Only save the stack if it's deeper than what's already been captured.
-                    if ((currentStack?.Count ?? 0) > (_holder.CapturedStack?.Count ?? 0)) {
-                        _log.Add($"   [Dispose] New longest stack found ({currentStack.Count} frames). Saving to holder.");
-                        _holder.CapturedStack = currentStack;
+                    if ((currentStack?.Count ?? 0) > (holder.CapturedStack?.Count ?? 0)) {
+                        log.Add($"   [Dispose] New longest stack found ({currentStack?.Count} frames). Saving to holder.");
+                        holder.CapturedStack = currentStack;
                     } else {
-                        _log.Add($"   [Dispose] Current stack ({currentStack?.Count ?? 0} frames) is not longer than captured stack ({_holder.CapturedStack?.Count ?? 0}). Not overwriting.");
+                        log.Add($"   [Dispose] Current stack ({currentStack?.Count ?? 0} frames) is not longer than captured stack ({holder.CapturedStack?.Count ?? 0}). Not overwriting.");
                     }
                 }
 
-                _log.Add(
-                    $"   [Dispose] Clearing main logical stack. Restoring it to {_originalStack?.Count ?? 0} frames.");
-                LogicalStackContext.Value = _originalStack;
+                log.Add(
+                    $"   [Dispose] Clearing main logical stack. Restoring it to {originalStack?.Count ?? 0} frames.");
+                LogicalStackContext.Value = originalStack;
             }
         }
 
-        // Simulates PushStackFrame. It uses the CurrentContextHolder to create the specialized disposable.
+        
         public static IObservable<T> PushStackFrameWithHolder<T>(this IObservable<T> source, string frameName,
             List<string> log) {
             return Observable.Using(
@@ -114,7 +97,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.POC.RX {
             );
         }
 
-        // Simulates ChainFaultContext. It creates and manages the holder.
+
         public static IObservable<T> ChainFaultContextWithHolder<T>(this IObservable<T> source, int retryCount,
             List<string> log) {
             return Observable.Defer(() => {
@@ -128,8 +111,11 @@ namespace Xpand.Extensions.Tests.FaultHubTests.POC.RX {
                     .Catch((Exception ex) => {
                         log.Add(
                             $"[ChainCtx] Catch: Reading stack from holder. It has {holder.CapturedStack?.Count ?? 0} frames.");
-                        var enrichedException = new Exception("Final Error", ex);
-                        enrichedException.Data["stack"] = holder.CapturedStack;
+                        var enrichedException = new Exception("Final Error", ex) {
+                            Data = {
+                                ["stack"] = holder.CapturedStack
+                            }
+                        };
                         return Observable.Throw<T>(enrichedException);
                     })
                     .Finally(() => {

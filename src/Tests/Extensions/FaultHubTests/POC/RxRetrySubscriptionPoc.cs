@@ -22,7 +22,6 @@ public class RxRetrySubscriptionPoc {
         var streamWithMeter = Observable.Defer(() => {
             meterSubscriptions++;
             Console.WriteLine($"Meter was subscribed to. Count: {meterSubscriptions}");
-            // 3. The Composition: The meter is downstream from Retry.
             return source.Retry(3);
         });
 

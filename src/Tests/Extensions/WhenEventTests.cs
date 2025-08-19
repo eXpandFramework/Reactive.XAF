@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using NUnit.Framework;
@@ -37,24 +36,6 @@ namespace Xpand.Extensions.Tests {
             Assert.IsTrue(eventFired);
         }
 
-        [Test]
-        public void WhenEvent_ObjectSource_MultipleEventNames_ReturnsCombinedEventPattern() {
-            // var source = new SampleClass();
-            // var eventNames = new[] { "Event1", "Event2" };
-            // var eventsFired = new List<EventArgs>();
-            //
-            // var observable = source.WhenEvent(eventNames);
-            // observable.Subscribe(pattern => eventsFired.Add((EventArgs)pattern.EventArgs));
-            //
-            // var eventArgs1 = new EventArgs();
-            // source.InvokeEvent1(eventArgs1);
-            // var eventArgs2 = new EventArgs();
-            // source.InvokeEvent2(eventArgs2);
-            //
-            // Assert.AreEqual(2, eventsFired.Count);
-            // Assert.Contains(eventArgs1, eventsFired);
-            // Assert.Contains(eventArgs2, eventsFired);
-        }
 
         [Test]
         public void WhenEvent_TypeSource_SingleEventName_ReturnsEventPattern() {
@@ -85,22 +66,6 @@ namespace Xpand.Extensions.Tests {
             Assert.IsTrue(eventFired);
         }
 
-        [Test]
-        public void WhenEvent_GenericTypeSource_MultipleEventNames_ReturnsCombinedEventPattern() {
-            // var source = new GenericSampleClass<string>();
-            // var eventNames = new[] { "Event1", "Event2" };
-            // var eventsFired = new List<string>();
-            //
-            // var observable = source.WhenEvent<string>(eventNames);
-            // observable.Subscribe(pattern => eventsFired.Add(pattern));
-            //
-            // source.InvokeEvent1("Event1");
-            // source.InvokeEvent2("Event2");
-            //
-            // Assert.AreEqual(2, eventsFired.Count);
-            // Assert.Contains("Event1", eventsFired);
-            // Assert.Contains("Event2", eventsFired);
-        }
 
         [Test]
         public void WhenEvent_ObjectSource_GenericEventArgs_SingleEventName_ReturnsEventPattern() {
@@ -208,7 +173,7 @@ namespace Xpand.Extensions.Tests {
 
 
     public class CustomEventArgs : EventArgs {
-        // Add properties and logic as needed
+        
     }
 
     internal static class MyStaticClass {

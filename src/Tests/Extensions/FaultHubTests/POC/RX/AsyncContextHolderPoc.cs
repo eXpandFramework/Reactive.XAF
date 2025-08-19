@@ -55,7 +55,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.POC.RX {
             Console.WriteLine("--- [FIXED] Execution Log ---");
             Console.WriteLine(string.Join(Environment.NewLine, executionLog));
 
-            // Assert
+            
             finalStack.ShouldNotBeNull();
             finalStack.Count.ShouldBe(2);
             finalStack[1].MemberName.ShouldBe("Level2_BusinessLogic_Async");
@@ -65,10 +65,9 @@ namespace Xpand.Extensions.Tests.FaultHubTests.POC.RX {
         [Test]
         public async Task FaultSnapshotPattern_Fails_In_Async_Chain_Due_To_Timing() {
             var executionLog = new List<string>();
-            IReadOnlyList<LogicalStackFrame> finalStack = new List<LogicalStackFrame>(); // Default to non-null
+            IReadOnlyList<LogicalStackFrame> finalStack = new List<LogicalStackFrame>(); 
 
             var stream = Level2_BusinessLogic_Async(executionLog)
-                // Using retryCount: 1 to keep the log short and clear. The failure happens on the first attempt.
                 .ChainFaultContextWithHolder(1, executionLog)
                 .Catch((Exception ex) => {
                     if (ex.Data.Contains("stack")) finalStack = ex.Data["stack"] as IReadOnlyList<LogicalStackFrame>;
@@ -80,10 +79,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.POC.RX {
             Console.WriteLine("--- Execution Log ---");
             Console.WriteLine(string.Join(Environment.NewLine, executionLog));
             Console.WriteLine("---------------------");
-
-            // Assert: This assertion is expected to fail, proving the timing issue.
-            // The log will show that the 'Catch' block reads a 0-frame stack, while the
-            // 'Dispose' blocks save the 2-frame stack afterwards, when it is too late.
+            
             (finalStack?.Count ?? 0).ShouldBe(2);
         }
     }

@@ -91,7 +91,7 @@ namespace Xpand.Extensions.Tests.TransformTests{
             var source = new[] { 1, 2, 3 }.ToObservable();
             var operationDelay = TimeSpan.FromMilliseconds(100);
 
-            // This selector logs when an operation starts and when it ends.
+            
             Func<int, IObservable<int>> selector = i => {
                 eventLog.Enqueue($"Start {i}");
                 return Observable.Timer(operationDelay)
@@ -100,16 +100,16 @@ namespace Xpand.Extensions.Tests.TransformTests{
             };
 
             
-            // We use TestObserver to run the stream and wait for it to complete.
+            
             var testObserver = source.SelectManySequential(selector).Test();
             testObserver.AwaitDone(TimeSpan.FromSeconds(5));
 
-            // ASSERT
-            // The final values should be correct.
+            
+            
             testObserver.AssertResult(1, 2, 3);
 
-            // The event log must show that each operation started and ended
-            // before the next one began. This proves sequential execution.
+            
+            
             eventLog.ShouldBe(new[] { 
                 "Start 1", "End 1", 
                 "Start 2", "End 2", 

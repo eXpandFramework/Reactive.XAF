@@ -12,11 +12,11 @@ using Xpand.Extensions.Reactive.Utility;
 namespace Xpand.Extensions.Tests.FaultHubTests {
     [TestFixture]
     public class ChainFaultContextDesignTests : FaultHubTestBase {
-        // --- Test 1: Proving the "Mistake" ---
+        
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         private IObservable<int> FailingAsyncOperation_WithLogicalStack() {
-            // This stream simulates work on a background thread that creates a meaningful logical frame.
+            
             return Observable.Timer(TimeSpan.FromMilliseconds(20))
                 .SelectMany(_ => Observable.Throw<int>(new InvalidOperationException("Async Failure")))
                 .PushStackFrame("ImportantLogicalFrame");
@@ -24,8 +24,8 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
 
         [Test]
         public async Task ChainFaultContext_Should_Preserve_The_Logical_Stack_From_Async_Operation() {
-            // PURPOSE: This test verifies that ChainFaultContext preserves the logical stack
-            // from the specific async operation it is managing.
+            
+            
 
             
             var stream = FailingAsyncOperation_WithLogicalStack()
@@ -33,18 +33,16 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
 
             
             await stream.PublishFaults().Capture();
-
-            // ASSERT
+            
             var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
             var logicalStack = fault.LogicalStackTrace.ToList();
 
-// MODIFICATION: The assertion is corrected from ShouldNotContain back to ShouldContain.
-// This is the correct assertion for the now-restored, correct implementation.
+
             logicalStack.ShouldContain(
                 frame => frame.MemberName == "ImportantLogicalFrame",
                 "The logical stack from the async operation was discarded, but it should have been preserved.");
         }
-        // --- Test 2: Defining the "Storyteller" behavior ---
+
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         private IObservable<int> Level3_DetailWork() => Observable
@@ -53,13 +51,10 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         private IObservable<int> Level2_BusinessLogic() => Level3_DetailWork()
-            .PushStackFrame(); // Captures "Level2_BusinessLogic"
+            .PushStackFrame(); 
 
         [Test]
         public async Task ChainFaultContext_Should_Capture_The_Upstream_Logical_Story_Within_Its_Boundary() {
-// MODIFICATION: Test name and purpose updated to reflect the new "reset" behavior.
-            // It defines the "Story Boundary" behavior where ChainFaultContext clears any
-            // upstream story and starts a new one.
 
             
             var stream = Level2_BusinessLogic()
@@ -71,27 +66,25 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             
             await stream.PublishFaults().Capture();
 
-            // ASSERT
+            
             var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
             var logicalStack = fault.LogicalStackTrace.ToList();
             var allContexts = fault.AllContexts.ToArray();
 
-            // 1. The high-level context from the boundary should be present.
+            
             allContexts.ShouldContain("Level1_TransactionBoundary");
 
-// MODIFICATION: The assertions are inverted. We now verify that the logical stack from
-// the inner operations has been CLEARED by ChainFaultContext, as per the new design.
+
             logicalStack.SelectMany(frame => frame.Context).ShouldContain(f => (string)f == "Saving database record");
             logicalStack.ShouldContain(f => f.MemberName == nameof(Level2_BusinessLogic));
             logicalStack.ShouldContain(f => f.MemberName == nameof(Level3_DetailWork));
         }
 
-        // --- Test 3: Verifying Concurrent Isolation ---
+
 
         [Test]
         public async Task ChainFaultContext_Should_Isolate_Context_In_Concurrent_Operations() {
-            // PURPOSE: This test verifies that when two independent streams fail concurrently,
-            // their logical stacks and contexts remain isolated from each other.
+            
 
             
             var streamA = Observable.Timer(TimeSpan.FromMilliseconds(10))
@@ -105,69 +98,68 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
                 .ChainFaultContext(["StreamB_Boundary"]);
 
             
-            // We merge the two streams and let them fail concurrently.
-            // The .PublishFaults() will catch both independent errors.
+            
             await streamA.PublishFaults()
                 .Merge(streamB.PublishFaults())
                 .Capture();
 
-            // ASSERT
+            
             BusEvents.Count.ShouldBe(2);
             var faults = BusEvents.OfType<FaultHubException>().ToList();
 
-            // Isolate the exception from Stream A based on its unique context
+            
             var faultA = faults.Single(f => f.AllContexts.Contains("StreamA_Boundary"));
             var stackA = faultA.LogicalStackTrace.Select(f => f.MemberName).ToArray();
 
-            // Isolate the exception from Stream B based on its unique context
+            
             var faultB = faults.Single(f => f.AllContexts.Contains("StreamB_Boundary"));
             var stackB = faultB.LogicalStackTrace.Select(f => f.MemberName).ToArray();
 
-            // Verify Stream A's context is not polluted by Stream B
+            
             faultA.AllContexts.ShouldNotContain("StreamB_Boundary",
                 "Context from Stream B leaked into Stream A's error report.");
             stackA.ShouldNotContain("StreamB_LogicalFrame",
                 "Logical stack from Stream B leaked into Stream A's error report.");
 
-            // Verify Stream A does not pollute Stream B's context
+            
             faultB.AllContexts.ShouldNotContain("StreamA_Boundary",
                 "Context from Stream A leaked into Stream B's error report.");
             stackB.ShouldNotContain("StreamA_LogicalFrame",
                 "Logical stack from Stream A leaked into Stream B's error report.");
 
-// MODIFICATION: These assertions are now expected to pass because the logical frames
-// are created INSIDE their respective ChainFaultContext boundaries.
+
+
             stackA.ShouldContain("StreamA_LogicalFrame");
             stackB.ShouldContain("StreamB_LogicalFrame");
         }
 
-        // This is a new test we can add to a new or existing fixture.
+        
 
-// MODIFICATION: Test removed. The concept of "smart trimming" has been superseded by the "boundary"
-// behavior of ChainFaultContext, which achieves a clean stack by design. The behavior is now
-// implicitly tested by `ChainFaultContext_Should_Reset_And_Not_Wrap_The_Upstream_Logical_Story`.
+
+
+
 
         [Test]
         public async Task ChainFaultContext_Should_Yield_To_Outer_Resilience_Boundary() {
-            // PURPOSE: This test defines the hierarchical nature of ChainFaultContext.
-            // It proves that an inner boundary propagates its error to the outer boundary,
-            // allowing the outer boundary's resilience policy (retries) to take precedence.
+            
+            
+            
 
             
             var innerCounter = new SubscriptionCounter();
             var outerCounter = new SubscriptionCounter();
 
-            // 1. The innermost operation, which builds the initial logical story.
+            
             var innerMostOperation = Observable.Defer(() => {
                     innerCounter.Increment();
                     return Observable.Throw<Unit>(new Exception("Inner Failure"));
                 })
                 .PushStackFrame("InnerMost_LogicalFrame");
 
-            // 2. An inner resilience boundary with its own context and a retry policy that should be ignored.
+            
             var innerBoundary = innerMostOperation
                 .ChainFaultContext(
-                    source => source.Retry(5), // This retry count should NOT be used.
+                    source => source.Retry(5), 
                     ["InnerBoundary_Context"]
                 );
 

@@ -13,7 +13,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.POC {
     public class RetryWithExistingFlowContextPoc {
         private static readonly AsyncLocal<string> TestContext = new();
 
-        /// This helper simulates a method that uses PushStackFrame's pattern (Using + AsyncLocal) and then fails.
+        
         private static IObservable<Unit> InnerObservableWithContextAndError(Action subscriptionCounter,
             List<string> log) {
             return Observable.Defer(() => {
@@ -43,10 +43,10 @@ namespace Xpand.Extensions.Tests.FaultHubTests.POC {
             var subscriptionCount = 0;
             var capturedContext = "CONTEXT_NOT_SET";
 
-            // Arrange
+            
             var source = InnerObservableWithContextAndError(() => subscriptionCount++, executionLog);
 
-            // We use the EXISTING FlowFaultContext operator.
+            
             var sourceWithContextFlow = source.FlowContext(context:TestContext.Wrap());
 
             var stream = sourceWithContextFlow
@@ -57,16 +57,16 @@ namespace Xpand.Extensions.Tests.FaultHubTests.POC {
                     return Observable.Empty<Unit>();
                 });
 
-            // Act
+            
             stream.Subscribe();
 
-            // Print the log for analysis
+            
             Console.WriteLine("--- Execution Log ---");
             Console.WriteLine(string.Join(Environment.NewLine, executionLog));
             Console.WriteLine("---------------------");
 
-            // Assert
-            // The assertion proves that the existing FlowFaultContext does not solve the problem.
+            
+            
             capturedContext.ShouldBeNull();
             subscriptionCount.ShouldBe(3);
         }

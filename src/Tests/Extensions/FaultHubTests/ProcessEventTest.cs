@@ -102,34 +102,29 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             public event EventHandler MyEvent;
             public void FireEvent() => MyEvent?.Invoke(this, EventArgs.Empty);
         }
-// MODIFICATION: The test is renamed to reflect its purpose and the operator it's testing.
+
         [Test]
         public void ProcessEvent_Preserves_Subscription_Context_On_Event_Streams() {
             
             var eventSource = new EventSource();
     
-            // 1. Set the initial context at the subscription site.
+
             FaultHub.LogicalStackContext.Value = [new LogicalStackFrame("SubscriptionContext", "", 0)];
 
-            var stream = eventSource.ProcessEvent<EventArgs, System.Reactive.Unit>(nameof(EventSource.MyEvent),
-                    _ => Observable.Throw<System.Reactive.Unit>(new Exception("test")).PushStackFrame("HandlerContext"))
+            var stream = eventSource.ProcessEvent<EventArgs, Unit>(nameof(EventSource.MyEvent),
+                    _ => Observable.Throw<Unit>(new Exception("test")).PushStackFrame("HandlerContext"))
                 ;
 
             
-            // MODIFICATION: The Subscribe block is simplified. We no longer expect an error here
-            // because ProcessEvent is an item-resilience operator that suppresses errors.
+            
             using (stream.Subscribe()) {
-                // 2. Change the context on the thread that will fire the event.
                 FaultHub.LogicalStackContext.Value = [new LogicalStackFrame("FireEventContext", "", 0)];
                 eventSource.FireEvent();
             }
-
-            // 3. Clean up the context to not interfere with other tests.
+            
             FaultHub.LogicalStackContext.Value = null;
 
-            // ASSERT
-            // MODIFICATION: We now assert against the BusEvents list, which is the correct
-            // place to observe errors suppressed by an item-resilience operator.
+            
             BusEvents.Count.ShouldBe(1);
             var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
             var logicalStack = fault.LogicalStackTrace.ToList();

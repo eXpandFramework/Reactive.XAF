@@ -90,7 +90,7 @@ namespace Xpand.Extensions.Tests {
                 tries.ShouldBe(++@try);
             }
 
-            // we've reached the 3 minute maximum delay
+            
             for (var i = 0; i < 5; ++i) {
                 var time = TimeSpan.FromMinutes(3) - TimeSpan.FromMilliseconds(1);
                 scheduler.AdvanceBy(time.Ticks);
