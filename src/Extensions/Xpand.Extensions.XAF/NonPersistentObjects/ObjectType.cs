@@ -18,9 +18,9 @@ namespace Xpand.Extensions.XAF.NonPersistentObjects {
             Name = type?.Name.CompoundName();
         }
 
-        // [DevExpress.ExpressApp.Data.Key]
+        
         [VisibleInAllViews]
-        // [IgnoreDataMember]
+        
         public string Name {
             get => _name;
             set {

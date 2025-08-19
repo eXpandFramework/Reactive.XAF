@@ -6,11 +6,11 @@ using System.Text.RegularExpressions;
 
 namespace Xpand.TestsLib.Common.Win32{
     public class WindowFinder {
-        // Win32 constants.
+        
         const int WmGettext = 0x000D;
         const int WmGettextlength = 0x000E;
 
-        // Win32 functions that have all been used in previous blogs.
+        
         [DllImport("User32.Dll")]
         private static extern void GetClassName(int hWnd, StringBuilder s, int nMaxCount);
 
