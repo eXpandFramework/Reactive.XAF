@@ -25,7 +25,6 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
                 .TrackSubscriptions(successfulCounter)
                 .PushStackFrame();
 
-        // MODIFICATION: All tests below have been corrected to assert against the final, consistent error contract.
         [Test]
         public async Task Inner_Operation_Failure_Triggers_Outer_Transactional_Retry() {
             var failingCounter = new SubscriptionCounter();
@@ -36,6 +35,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
                     FailingOperationWithContext(failingCounter),
                     SuccessfulOperationWithContext(successfulCounter)
                 }
+                // MODIFICATION: The call to SequentialTransaction is simplified as the outer ChainFaultContext is gone.
                 .SequentialTransaction(false, op => op.Retry(2), ["MyCustomContext"], "MyTransaction")
                 .TrackSubscriptions(outerCounter)
                 .ChainFaultContext(s => s.Retry(3), ["Outer"])
@@ -48,15 +48,17 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
 
             var finalFault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
             finalFault.AllContexts.ShouldContain("Outer");
+    
+            // MODIFICATION: Assert against the LogicalStackTrace for the transaction name.
+            finalFault.LogicalStackTrace.ShouldContain(frame => frame.Context.Contains("MyTransaction"));
 
+            // MODIFICATION: The exception structure is simpler now. The AggregateException is the direct InnerException.
             var aggregateException = finalFault.InnerException.ShouldBeOfType<AggregateException>();
             var innerFault = aggregateException.InnerExceptions.Single().ShouldBeOfType<FaultHubException>();
 
-            finalFault.AllContexts.ShouldContain("MyTransaction");
             innerFault.AllContexts.ShouldNotContain("MyTransaction");
             innerFault.AllContexts.ShouldContain("MyTransaction - Op:1");
         }
-
         [Test]
         public async Task SequentialTransaction_Aborts_On_First_Failure_When_FailFast_Is_True() {
             var operations = new object[] {
