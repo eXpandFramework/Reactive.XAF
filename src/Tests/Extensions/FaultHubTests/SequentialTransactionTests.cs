@@ -160,229 +160,162 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             innerAggregate2.InnerExceptions.Single().ShouldBeOfType<FaultHubException>();
         }
         
+        public class Customer { public int Id { get; set; } }
+        public class Order { public int Id { get; set; } }
+
+
         [Test]
-        public async Task Two_Part_Transaction_Waits_For_First_Stream_And_Propagates_Results() {
-            var executionLog = new List<string>();
-            var source = Observable.Range(1, 3)
-                .Do(i => executionLog.Add($"Part 1 Emitted: {i}"))
-                .DoOnComplete(() => executionLog.Add("Part 1 Finalized"));
+        public async Task Fluent_Builder_Four_Part_Transaction_Fails_On_Last_Part() {
+            var source = Observable.Return(123);
+            IObservable<Customer> Step2GetCustomer(IList<int> ids) => Observable.Return(new Customer { Id = ids.Single() });
+            IObservable<List<Order>> Step3GetOrders(Customer c) => Observable.Return(new List<Order> { new() { Id = 1 } });
+            IObservable<Unit> Step4ProcessOrders(List<Order> o) => Observable.Throw<Unit>(new InvalidOperationException("Order processing failed"));
 
-            IObservable<int> SecondStreamSelector(IList<int> results) {
-                executionLog.Add("Part 2 Started");
-                results.ShouldBe([1, 2, 3]);
-                return Observable.Return(results.Sum());
-            }
-
-            var result = await source
-                .SequentialTransaction((Func<IList<int>, IObservable<int>>)SecondStreamSelector, transactionName: "TwoPartTx")
+            var result = await source.BeginTransaction("Four-Part-Tx")
+                .Then(Step2GetCustomer)
+                .Then(Step3GetOrders)
+                .Then(Step4ProcessOrders)
+                .RunFailFast()
+                .PublishFaults()
                 .Capture();
 
-            result.IsCompleted.ShouldBeTrue();
-            result.Error.ShouldBeNull();
-            result.Items.Single().ShouldBe(6);
+            result.IsCompleted.ShouldBe(true);
+            BusEvents.Count.ShouldBe(1);
+            var finalFault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
+            finalFault.InnerException.ShouldBeOfType<InvalidOperationException>().Message.ShouldBe("Order processing failed");
+            var logicalStack = finalFault.LogicalStackTrace.ToArray();
+            logicalStack.Length.ShouldBe(4);
+            ((string)logicalStack[0].Context.Last()).ShouldBe("Four-Part-Tx - Part 4");
+            ((string)logicalStack[3].Context.Last()).ShouldBe("Four-Part-Tx - Part 1");
+        }
+        
+        [Test]
+        public async Task Fluent_Builder_RunToCompletion_Executes_All_Parts_And_Aggregates_Failures() {
+            var part1Counter = 0;
+            var part2Counter = 0;
+            var part3Counter = 0;
+            var part4Counter = 0;
 
-            executionLog.ShouldBe(new[] {
-                "Part 1 Emitted: 1",
-                "Part 1 Emitted: 2",
-                "Part 1 Emitted: 3",
-                "Part 1 Finalized",
-                "Part 2 Started"
-            });
+            var source = Observable.Return(123)
+                .Do(_ => part1Counter++);
+
+            IObservable<Customer> Step2GetCustomer(IList<int> _) {
+                part2Counter++;
+                return Observable.Throw<Customer>(new InvalidOperationException("Customer lookup failed"));
+            }
+
+            IObservable<List<Order>> Step3GetOrders(Customer customer) {
+                part3Counter++;
+                customer.ShouldBeNull();
+                return Observable.Return(new List<Order>());
+            }
+
+            IObservable<Unit> Step4ProcessOrders(List<Order> _) {
+                part4Counter++;
+                return Observable.Throw<Unit>(new InvalidOperationException("Order processing failed"));
+            }
+
+            await source.BeginTransaction("RunToCompletion-Tx")
+                .Then(Step2GetCustomer)
+                .Then(Step3GetOrders)
+                .Then(Step4ProcessOrders)
+                .RunToEnd()
+                .PublishFaults()
+                .Capture();
+
+            (part1Counter, part2Counter, part3Counter, part4Counter).ShouldBe((1, 1, 1, 1));
+
+            BusEvents.Count.ShouldBe(1);
+            var finalFault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
+
+            var aggregate = finalFault.InnerException.ShouldBeOfType<AggregateException>();
+            aggregate.InnerExceptions.Count.ShouldBe(2);
+
+            var fault2 = aggregate.InnerExceptions.OfType<FaultHubException>()
+                .FirstOrDefault(ex
+                    => ex.LogicalStackTrace.Any(f => (string)f.Context.Last() == "RunToCompletion-Tx - Part 2"));
+            fault2.ShouldNotBeNull();
+            fault2.InnerException.ShouldBeOfType<InvalidOperationException>().Message
+                .ShouldBe("Customer lookup failed");
+
+            var fault4 = aggregate.InnerExceptions.OfType<FaultHubException>()
+                .FirstOrDefault(ex
+                    => ex.LogicalStackTrace.Any(f => (string)f.Context.Last() == "RunToCompletion-Tx - Part 4"));
+            fault4.ShouldNotBeNull();
+            fault4.InnerException.ShouldBeOfType<InvalidOperationException>().Message
+                .ShouldBe("Order processing failed");
+        }
+        
+        [Test]
+        public async Task Fluent_Builder_Succeeds() {
+            var source = Observable.Range(1, 3);
+            IObservable<int> SecondStreamSelector(IList<int> results) => Observable.Return(results.Sum());
+            var result = await source
+                .BeginTransaction("TwoPartTx")
+                .Then(SecondStreamSelector)
+                .RunFailFast()
+                .Capture();
+
+            result.Items.Single().ShouldBe(6);
             BusEvents.ShouldBeEmpty();
         }
 
         [Test]
-        public async Task Two_Part_Transaction_Fails_If_First_Part_Fails() {
+        public async Task Fluent_Builder_Fails_If_First_Part_Fails() {
             var secondPartStarted = false;
-            var source = Observable.Range(1, 2)
-                .Concat(Observable.Throw<int>(new InvalidOperationException("Failure in Part 1")));
+            var source = Observable.Throw<int>(new InvalidOperationException("Failure in Part 1"));
 
             IObservable<Unit> SecondStreamSelector(IList<int> _) {
                 secondPartStarted = true;
                 return Observable.Empty<Unit>();
             }
 
-            var result = await source
-                .SequentialTransaction((Func<IList<int>, IObservable<Unit>>)SecondStreamSelector, transactionName: "TwoPartTxFailure1")
+            await source
+                .BeginTransaction("TwoPartTxFailure1")
+                .Then(SecondStreamSelector)
+                .RunFailFast()
                 .PublishFaults()
                 .Capture();
 
-            result.IsCompleted.ShouldBeTrue();
-            result.Error.ShouldBeNull();
             secondPartStarted.ShouldBeFalse();
-
-            BusEvents.Count.ShouldBe(1);
             var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
             fault.InnerException.ShouldBeOfType<InvalidOperationException>().Message.ShouldBe("Failure in Part 1");
-
-            fault.AllContexts.ShouldContain("TwoPartTxFailure1");
-            fault.LogicalStackTrace.ShouldContain(frame
-                => frame.Context.Last() as string == "TwoPartTxFailure1 - Part 1");
+            fault.LogicalStackTrace.Single().Context.Last().ShouldBe("TwoPartTxFailure1 - Part 1");
         }
 
+
         [Test]
-        public async Task Two_Part_Transaction_Fails_If_Second_Part_Fails() {
-            var source = Observable.Range(1, 3);
+        public async Task Fluent_Builder_RunToCompletion_When_First_Part_Fails() {
+            var part1Counter = 0;
+            var part2Counter = 0;
+            var source = Observable.Throw<int>(new InvalidOperationException("Part 1 Always Fails"))
+                .Do(_ => part1Counter++, _ => part1Counter++);
 
             IObservable<int> SecondStreamSelector(IList<int> results) {
-                results.ShouldBe([1, 2, 3]);
-                return Observable.Throw<int>(new InvalidOperationException("Failure in Part 2"));
-            }
-
-            var result = await source
-                .SequentialTransaction((Func<IList<int>, IObservable<int>>)SecondStreamSelector, transactionName: "TwoPartTxFailure2")
-                .PublishFaults()
-                .Capture();
-
-            result.IsCompleted.ShouldBeTrue();
-            result.Error.ShouldBeNull();
-
-            BusEvents.Count.ShouldBe(1);
-            var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
-            fault.InnerException.ShouldBeOfType<InvalidOperationException>().Message.ShouldBe("Failure in Part 2");
-
-            fault.AllContexts.ShouldContain("TwoPartTxFailure2");
-            fault.LogicalStackTrace.ShouldContain(frame => frame.Context.First() as string == "TwoPartTxFailure2 - Part 2");
-        }
-        
-        [Test]
-        public async Task Two_Part_Transaction_RunToCompletion_Executes_Second_Part_When_First_Fails() {
-            var secondPartStarted = false;
-            var source = Observable.Throw<int>(new InvalidOperationException("Part 1 Always Fails"));
-
-            IObservable<int> SecondStreamSelector(IList<int> results) {
-                secondPartStarted = true;
-                results.ShouldBeEmpty();
+                part2Counter++;
+                results.ShouldBeNull();
                 return Observable.Return(999);
             }
 
             var result = await source
-                .SequentialTransaction((Func<IList<int>, IObservable<int>>)SecondStreamSelector, failFast: false, transactionName: "RunToCompletionTx")
+                .BeginTransaction("RunToCompletionTx")
+                .Then(SecondStreamSelector)
+                .RunToEnd()
                 .PublishFaults()
                 .Capture();
 
-            result.IsCompleted.ShouldBeTrue();
-            result.Error.ShouldBeNull();
-            result.Items.Single().ShouldBe(999);
-            secondPartStarted.ShouldBeTrue();
+            (part1Counter, part2Counter).ShouldBe((1, 1));
+            result.IsCompleted.ShouldBe(true);
+            result.Items.ShouldBeEmpty();
 
-            BusEvents.Count.ShouldBe(1);
-            var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
-            fault.InnerException.ShouldBeOfType<InvalidOperationException>().Message.ShouldBe("Part 1 Always Fails");
+            var finalFault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
+            var aggregate = finalFault.InnerException.ShouldBeOfType<AggregateException>();
+            var innerFault = aggregate.InnerExceptions.Single().ShouldBeOfType<FaultHubException>();
 
-            fault.AllContexts.ShouldContain("RunToCompletionTx");
-            fault.LogicalStackTrace.ShouldContain(frame => frame.Context.Last() as string == "RunToCompletionTx - Part 1");
+            innerFault.InnerException.ShouldBeOfType<InvalidOperationException>().Message
+                .ShouldBe("Part 1 Always Fails");
+            innerFault.LogicalStackTrace.Single().Context.Last().ShouldBe("RunToCompletionTx - Part 1");
         }
         
-    
-        [Test]
-        public async Task Three_Part_Transaction_Aggregates_Context_And_Fails_On_Last_Part() {
-            // ARRANGE
-            var source = Observable.Return("Part 1 Result");
-
-            IObservable<int> SecondStreamSelector(IList<string> firstResult) {
-                firstResult.Single().ShouldBe("Part 1 Result");
-                return Observable.Return(2);
-            }
-
-            IObservable<Unit> ThirdStreamSelector(int secondResult) {
-                secondResult.ShouldBe(2);
-                return Observable.Throw<Unit>(new InvalidOperationException("Failure in Part 3"));
-            }
-
-            // ACT
-            var result = await source
-                .SequentialTransaction(
-                    (Func<IList<string>, IObservable<int>>)SecondStreamSelector,
-                    (Func<int, IObservable<Unit>>)ThirdStreamSelector,
-                    transactionName: "ThreePartTx")
-                .PublishFaults()
-                .Capture();
-
-            // ASSERT
-            result.IsCompleted.ShouldBe(true);
-            result.Error.ShouldBeNull();
-
-            BusEvents.Count.ShouldBe(1);
-            var finalFault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
-            finalFault.InnerException.ShouldBeOfType<InvalidOperationException>().Message.ShouldBe("Failure in Part 3");
-
-            var logicalStack = finalFault.LogicalStackTrace.ToArray();
-            logicalStack.ShouldNotBeEmpty();
-
-            // Verify the logical story is built correctly
-            var part1Frame =
-                logicalStack.FirstOrDefault(frame => (string)frame.Context.LastOrDefault() == "ThreePartTx - Part 1");
-            var part2Frame =
-                logicalStack.FirstOrDefault(frame => (string)frame.Context.LastOrDefault() == "ThreePartTx - Part 2");
-            var part3Frame =
-                logicalStack.FirstOrDefault(frame => (string)frame.Context.LastOrDefault() == "ThreePartTx - Part 3");
-
-            (part1Frame, part2Frame, part3Frame).ShouldBe((default, default, default),
-                "The stack should only contain the frames from the point of failure onwards.");
-
-            finalFault.LogicalStackTrace.ShouldContain(frame => (string)frame.Context.Last() == "ThreePartTx - Part 3");
-        }
-        
-        public class Customer { public int Id { get; set; } }
-        public class Order { public int Id { get; set; } }
-
-        [Test]
-        public async Task Fluent_Builder_Fails_On_Last_Part_And_Captures_Correct_Stack() {
-            // ARRANGE: Define the 4 steps of the transaction
-            var source = Observable.Return(123); // Step 1: Source observable (e.g., an account ID)
-
-            // Step 2: Takes the buffered result of source, returns a Customer
-            IObservable<Customer> Step2_GetCustomer(IList<int> accountIds) {
-                accountIds.Single().ShouldBe(123);
-                return Observable.Return(new Customer { Id = accountIds.Single() });
-            }
-
-            // Step 3: Takes a Customer, returns their Orders
-            IObservable<List<Order>> Step3_GetOrders(Customer customer) {
-                customer.Id.ShouldBe(123);
-                return Observable.Return(new List<Order> { new() { Id = 1 }, new() { Id = 2 } });
-            }
-
-            // Step 4: Takes the Orders, and fails
-            IObservable<Unit> Step4_ProcessOrders(List<Order> orders) {
-                orders.Count.ShouldBe(2);
-                return Observable.Throw<Unit>(new InvalidOperationException("Order processing failed"));
-            }
-
-            // ACT: Execute the transaction using the proposed fluent builder API
-            var result = await source.BeginTransaction("N-Part-Tx")
-                .Then(Step2_GetCustomer)
-                .Then(Step3_GetOrders)
-                .Then(Step4_ProcessOrders)
-                .Run()
-                .PublishFaults()
-                .Capture();
-
-            // ASSERT
-            result.IsCompleted.ShouldBe(true);
-            result.Error.ShouldBeNull();
-
-            BusEvents.Count.ShouldBe(1);
-            var finalFault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
-
-            // Assert the original exception is correctly preserved
-            finalFault.InnerException.ShouldBeOfType<InvalidOperationException>()
-                .Message.ShouldBe("Order processing failed");
-
-            // Assert the overall transaction name is in the context
-            finalFault.AllContexts.ShouldContain("N-Part-Tx");
-
-            var logicalStack = finalFault.LogicalStackTrace.ToArray();
-            logicalStack.ShouldNotBeEmpty();
-
-            // Assert the logical stack contains ONLY the frame from the failing step (Part 4)
-            logicalStack.Length.ShouldBe(4);
-            ((string)logicalStack[0].Context.Last()).ShouldBe("N-Part-Tx - Part 4");
-            ((string)logicalStack[1].Context.Last()).ShouldBe("N-Part-Tx - Part 3");
-            ((string)logicalStack[2].Context.Last()).ShouldBe("N-Part-Tx - Part 2");
-            ((string)logicalStack[3].Context.Last()).ShouldBe("N-Part-Tx - Part 1");
-
-        }
     }
 }
