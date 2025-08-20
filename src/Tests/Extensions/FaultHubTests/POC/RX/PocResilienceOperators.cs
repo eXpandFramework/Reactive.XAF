@@ -22,8 +22,8 @@ namespace Xpand.Extensions.Tests.FaultHubTests.POC.RX {
         public IReadOnlyList<LogicalPocStackFrame> LogicalStackTrace { get; } = stack;
     }
 
-    public static class PocResilienceOperators {
-        public static IObservable<T> PushStackFrame1<T>(this IObservable<T> source, string frameName) {
+    internal static class PocResilienceOperators {
+        internal static IObservable<T> PushStackFrame1<T>(this IObservable<T> source, string frameName) {
             return source.Catch((Exception ex) => {
                 var newFrame = new LogicalPocStackFrame(frameName);
         

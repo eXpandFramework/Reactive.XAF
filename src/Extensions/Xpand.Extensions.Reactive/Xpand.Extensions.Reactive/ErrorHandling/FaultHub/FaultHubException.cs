@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Xpand.Extensions.LinqExtensions;
-
+using Xpand.Extensions.StringExtensions;
 using static Xpand.Extensions.Reactive.ErrorHandling.FaultHub.FaultHubLogger;
 
 namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
@@ -52,23 +52,21 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
             => Context.FromHierarchy(context => context.InnerContext)
                 .SelectMany(context => context.CustomContext).WhereNotDefault();
         public AmbientFaultContext Context { get; }
-        private static string FormatContextObject(object obj) 
+        private static string FormatContextObject(object obj, bool root) 
             => obj is Type or null ? $"Type: {obj}" :
                 obj.ToString() == obj.GetType().FullName ? null :
-                $"{(obj.GetType().IsValueType||obj is string ? "Context:" : obj.GetType().Name)} {obj}";
+                $"{(obj.GetType().IsValueType||obj is string ? (root?"<-":null) : obj.GetType().Name)} {obj}";
         public override string ToString() {
             var builder = new StringBuilder();
-            
             var (faultChain, rootCause) = GetFlattenedExceptionInfo(this);
-            builder.AppendLine($"{rootCause.GetType().Name}: {rootCause.Message}");
-            
-            builder.AppendLine("--- Logical Operation Stack ---");
-            var contextFrames = faultChain.Select(ex => ex.Context.CustomContext).Where(c => c != null && c.Any()).Reverse();
-            foreach (var frame in contextFrames) {
-                var contextString = string.Join(" | ", frame.Where(o => o != null).Select(FormatContextObject).Where(s => s != null));
-                if (!string.IsNullOrEmpty(contextString)) {
-                    builder.AppendLine(contextString);
-                }
+            builder.AppendLine(rootCause.Message);
+            var contextFrames = faultChain.Select(ex => ex.Context.CustomContext).Where(c => c != null && c.Length != 0).Reverse();
+            var contextString = contextFrames.Select(frame => {
+                var strings = frame.Where(o => o != null).Select((o, i) => FormatContextObject(o, i == 0)).Where(s => s != null).ToArray();
+                return $"{strings.FirstOrDefault()}{strings.Skip(1).JoinCommaSpace().EncloseParenthesis()}";
+            }).JoinSpace().TrimStart("<- ".ToCharArray());
+            if (!string.IsNullOrEmpty(contextString)) {
+                builder.AppendLine(contextString);
             }
             var allLogicalFrames = faultChain
                 .SelectMany(fhEx => fhEx.Context.LogicalStackTrace ?? Enumerable.Empty<LogicalStackFrame>())
@@ -87,7 +85,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
                 builder.AppendLine(string.Join(Environment.NewLine, fullLogicalStack.Select(f => $"  {f}").Reverse()));
             }
             
-            builder.AppendLine("--- End of Logical Operation Stack ---");
+            // builder.AppendLine("--- End of Logical Operation Stack ---");
             
             if (rootCause != this) {
                 builder.AppendLine();

@@ -21,7 +21,33 @@ namespace Xpand.Extensions.Tests.FaultHubTests.POC.RX {
         private IObservable<Unit> Level2_BusinessLogic(List<string> log)
             => Level1_FailingOperation(log)
                 .PushStackFrameWithHolder("Level2_BusinessLogic", log);
+        [Test]
+        public void Synchronous_SelectMany_Failure_Does_Not_Capture_Stack_In_Holder() {
+            var executionLog = new List<string>();
+            IReadOnlyList<LogicalStackFrame> finalStack = null;
 
+            var stream = Observable.Return(Unit.Default)
+                .SelectMany(_ => Observable.Throw<Unit>(new InvalidOperationException("Inner Failure"))
+                        .PushStackFrameWithHolder("InnerMostFrame", executionLog)
+                )
+                .ChainFaultContextWithHolder(1, executionLog);
+
+            stream.Catch((Exception ex) => {
+                if (ex.Data.Contains("stack")) {
+                    finalStack = ex.Data["stack"] as IReadOnlyList<LogicalStackFrame>;
+                }
+                return Observable.Empty<Unit>();
+            }).Subscribe();
+
+            Console.WriteLine("--- Synchronous POC Execution Log ---");
+            Console.WriteLine(string.Join(Environment.NewLine, executionLog));
+            Console.WriteLine("-----------------------------------");
+
+            finalStack.ShouldNotBeNull();
+            finalStack.ShouldNotBeEmpty();
+            finalStack.First().MemberName.ShouldBe("InnerMostFrame");
+        }
+        
         [Test]
         public void ContextHolderPattern_Preserves_Context_Across_Retries() {
             var executionLog = new List<string>();
@@ -124,6 +150,8 @@ namespace Xpand.Extensions.Tests.FaultHubTests.POC.RX {
                     });
             });
         }
+        
+        
     }
 
     public class ContextHolder {

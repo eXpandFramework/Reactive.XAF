@@ -102,11 +102,6 @@ namespace Xpand.Extensions.Reactive.Transform {
         
         public static IObservable<TSource[]> BufferUntilCompleted<TSource>(this IObservable<TSource> source,bool skipEmpty=false) 
             => source.Buffer(Observable.Never<Unit>()).Where(sources => !skipEmpty || sources.Any()).Select(list => list.ToArray());
-
-        
-        
-        
-        
         
         
         public static IConnectableObservable<T> BufferUntilSubscribed<T>(this IObservable<T> source) => new BufferUntilSubscribedObservable<T>(source, ImmediateScheduler);

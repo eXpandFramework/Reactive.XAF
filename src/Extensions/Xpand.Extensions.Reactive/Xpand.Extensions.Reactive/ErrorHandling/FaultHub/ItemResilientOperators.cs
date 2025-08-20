@@ -12,23 +12,33 @@ using Enumerable = System.Linq.Enumerable;
 namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
     
     public static class ItemResilientOperators {
-        private static IObservable<T> ApplyItemResilience<T>(this IObservable<T> source, Func<IObservable<T>, IObservable<T>> retryStrategy,
-            object[] context, string memberName, string filePath, int lineNumber,Func<Exception, IObservable<bool>> publishWhen=null)
-            => FaultHub.Enabled ? (retryStrategy != null ? retryStrategy(source) : source)
-                .Catch((Exception ex) => ex.ProcessFault(context.NewFaultContext(
-                        new[] { new LogicalStackFrame(memberName, filePath, lineNumber,context) }.ToList()
-                            .Concat(FaultHub.LogicalStackContext.Value ?? Enumerable.Empty<LogicalStackFrame>())
-                            .ToList(), memberName, filePath, lineNumber),
-                    proceedAction: enrichedException => (publishWhen?.Invoke(enrichedException) ?? true.Observe())
-                        .SelectMany(shouldPublish => {
-                            if (shouldPublish) {
-                                enrichedException.Publish();
-                            }
-                            return Observable.Empty<T>();
-                        }))).SafeguardSubscription((ex, s) => 
-                    ex.ExceptionToPublish(context.NewFaultContext(FaultHub.LogicalStackContext.Value, s)).Publish(), memberName) :
-                source;
-        
+private static IObservable<T> ApplyItemResilience<T>(this IObservable<T> source, Func<IObservable<T>, IObservable<T>> retryStrategy,
+    object[] context, string memberName, string filePath, int lineNumber,Func<Exception, IObservable<bool>> publishWhen=null)
+    => FaultHub.Enabled ? (retryStrategy != null ? retryStrategy(source) : source)
+        .Catch((Exception ex) => {
+            var currentFrame = new LogicalStackFrame(memberName, filePath, lineNumber, context);
+            if (ex is FaultHubException fhEx) {
+                var newStack = new[] { currentFrame }.Concat(fhEx.LogicalStackTrace ?? []).ToList();
+                var newContext = fhEx.Context with { LogicalStackTrace = newStack };
+                var newFaultException = new FaultHubException(fhEx.Message, fhEx.InnerException, newContext);
+                newFaultException.Publish();
+                return Observable.Empty<T>();
+            }
+
+            return ex.ProcessFault(context.NewFaultContext(
+                    new[] { currentFrame }.Concat(FaultHub.LogicalStackContext.Value ?? Enumerable.Empty<LogicalStackFrame>()).ToList(), 
+                    memberName, filePath, lineNumber),
+                proceedAction: enrichedException => (publishWhen?.Invoke(enrichedException) ?? true.Observe())
+                    .SelectMany(shouldPublish => {
+                        if (shouldPublish) {
+                            enrichedException.Publish();
+                        }
+                        return Observable.Empty<T>();
+                    }));
+        }).SafeguardSubscription((ex, s) => 
+            ex.ExceptionToPublish(context.NewFaultContext(FaultHub.LogicalStackContext.Value, s)).Publish(), memberName) :
+        source;
+
         public static IObservable<TEventArgs> ProcessEvent<TEventArgs>(this object source, string eventName,Func<TEventArgs, IObservable<TEventArgs>> resilientSelector, 
             object[] context = null, [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0, 
             IScheduler scheduler = null) where TEventArgs:EventArgs

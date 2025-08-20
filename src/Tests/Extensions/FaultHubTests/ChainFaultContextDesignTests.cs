@@ -25,9 +25,6 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
         [Test]
         public async Task ChainFaultContext_Should_Preserve_The_Logical_Stack_From_Async_Operation() {
             
-            
-
-            
             var stream = FailingAsyncOperation_WithLogicalStack()
                 .ChainFaultContext(["AsyncBoundary"]);
 
@@ -184,47 +181,37 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             // boundary is subscribed to 3 times by the outer boundary.
             outerCounter.Count.ShouldBe(3, "The outer retry policy did not take precedence.");
             innerCounter.Count.ShouldBe(15, "The inner operation was not retried correctly by the outer boundary.");
-
-            // 2. Assert Context Chaining: The high-level story should be complete.
+            
             allContexts.ShouldContain("OuterBoundary_Context");
             allContexts.ShouldContain("InnerBoundary_Context");
             Array.IndexOf(allContexts, "OuterBoundary_Context")
                 .ShouldBeLessThan(Array.IndexOf(allContexts, "InnerBoundary_Context"));
 
-// MODIFICATION: This assertion is changed to reflect that the innermost boundary ("InnerBoundary_Context")
-// will clear the upstream logical stack, so "InnerMost_LogicalFrame" will not be present in the final report.
+
             logicalStack.ShouldContain("InnerMost_LogicalFrame");
         }
         
         [MethodImpl(MethodImplOptions.NoInlining)]
         private IObservable<Unit> FailingAsyncOperationWithUpstreamStack() {
             return Observable.Timer(TimeSpan.FromMilliseconds(20))
-                // This SelectMany hops to a background thread, which is critical for replicating the issue.
                 .SelectMany(_ => Observable.Throw<Unit>(new InvalidOperationException("Async Failure")))
-                // This PushStackFrame is what gets torn down too early.
                 .PushStackFrame("BusinessLogicFrame");
         }
 
         [Test]
-        public async Task ChainFaultContext_Correctly_Captures_Stack_From_Single_Async_PushStackFrame()
-        {
-            // PURPOSE: This test verifies that for a single upstream async operation,
-            // the Using-based PushStackFrame correctly preserves the logical context
-            // long enough for the downstream ChainFaultContext's Catch block to observe it.
+        public async Task ChainFaultContext_Correctly_Captures_Stack_From_Single_Async_PushStackFrame() {
 
             
             var stream = FailingAsyncOperationWithUpstreamStack()
-                .ChainFaultContext(new[] { "Boundary" });
+                .ChainFaultContext(["Boundary"]);
 
             
             await stream.PublishFaults().Capture();
-
-            // ASSERT
+            
             BusEvents.Count.ShouldBe(1);
             var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
             var logicalStack = fault.LogicalStackTrace.ToList();
-
-            // This assertion will PASS, proving the operator works correctly in this simple case.
+            
             logicalStack.ShouldContain(
                 frame => frame.MemberName == "BusinessLogicFrame",
                 "The logical stack from the async operation should have been preserved."
@@ -232,40 +219,29 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
         }
         
         [Test]
-        public async Task ChainFaultContext_Captures_Full_Stack_From_Chained_Async_PushStackFrame_Operators()
-        {
-            // PURPOSE: This test verifies that for a chain of upstream async operations,
-            // the Using-based PushStackFrame implementation correctly preserves the full logical stack
-            // long enough for the downstream ChainFaultContext's Catch block to observe it.
+        public async Task ChainFaultContext_Captures_Full_Stack_From_Chained_Async_PushStackFrame_Operators() {
 
             
             var stream = Observable.Timer(TimeSpan.FromMilliseconds(20))
                 .SelectMany(_ => Observable.Throw<Unit>(new InvalidOperationException("Async Failure")))
-                .PushStackFrame("InnerFrame") // The inner frame in the chain
-                .PushStackFrame("OuterFrame") // The outer frame in the chain
+                .PushStackFrame("InnerFrame") 
+                .PushStackFrame("OuterFrame") 
                 .ChainFaultContext(["Boundary"]);
 
             
             await stream.PublishFaults().Capture();
-
-            // ASSERT
+            
             BusEvents.Count.ShouldBe(1);
             var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
             var logicalStack = fault.LogicalStackTrace.ToList();
 
-            // This assertion should PASS, proving that chaining PushStackFrame operators works correctly.
+            
             logicalStack.ShouldContain(frame => frame.MemberName == "InnerFrame");
             logicalStack.ShouldContain(frame => frame.MemberName == "OuterFrame");
         }
-        // MODIFICATION: Added a new test to reproduce the stack pollution issue with retries.
+        
         [Test]
         public async Task ChainFaultContext_With_Retry_Should_Reset_Logical_Stack_On_Each_Attempt() {
-            // PURPOSE: This test proves that the logical stack is polluted on retries.
-            // It is designed to FAIL with the current implementation. A correct implementation
-            // should reset the logical stack on each retry attempt, resulting in a stack count of 1.
-            // The current implementation will fail with a count of 3.
-
-            
             var attemptCounter = 0;
             var source = Observable.Defer(() => {
                 attemptCounter++;
@@ -278,15 +254,13 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
 
             
             await stream.PublishFaults().Capture();
-
-            // ASSERT
+            
             attemptCounter.ShouldBe(3);
             BusEvents.Count.ShouldBe(1);
             var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
             var logicalStack = fault.LogicalStackTrace.ToList();
-            
-            // This assertion will fail. It expects a clean stack with only one frame from the last attempt.
-            // The buggy implementation will produce a stack with three concatenated "OperationFrame" entries.
+
+
             logicalStack.Count.ShouldBe(1, "The logical stack should be reset for each retry attempt.");
             logicalStack.Single().MemberName.ShouldBe("OperationFrame");
         }

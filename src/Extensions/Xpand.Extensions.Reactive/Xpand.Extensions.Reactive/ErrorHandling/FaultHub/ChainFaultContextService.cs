@@ -54,29 +54,21 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
                 .ToList();
 
 
-        public static IObservable<T> ChainFaultContext<T>(this IObservable<T> source, object[] context,
-            Func<IObservable<T>, IObservable<T>> retryStrategy = null,
-            [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "",
-            [CallerLineNumber] int lineNumber = 0) {
+        public static IObservable<T> ChainFaultContext<T>(this IObservable<T> source, object[] context, Func<IObservable<T>, IObservable<T>> retryStrategy = null,
+            [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0) {
             if (!FaultHub.Enabled) return source;
-
             return Observable.Defer(() => {
                 Log(() => $"[ChainCtx] Entering Defer for boundary '{memberName}'.");
-                
-                
                 var snapshot = new FaultSnapshot();
                 var originalSnapshot = FaultHub.CurrentFaultSnapshot.Value;
                 FaultHub.CurrentFaultSnapshot.Value = snapshot;
-                
                 
                 var originalStack = FaultHub.LogicalStackContext.Value;
                 FaultHub.LogicalStackContext.Value = null;
                 Log(() => $"[ChainCtx] Cleared logical stack (was {originalStack?.Count ?? 0} frames).");
 
                 var resilientSource = retryStrategy != null ? retryStrategy(source) : source;
-
-                return resilientSource
-                    .Catch((Exception ex) => {
+                return resilientSource.Catch((Exception ex) => {
                         Log(() => $"[ChainCtx] Catch block entered for boundary '{memberName}'. Exception: {ex.GetType().Name}");
                         Log(() => $"[ChainCtx] Reading stack from snapshot. Found {snapshot.CapturedStack?.Count ?? 0} frames.");
                         var faultContext =
@@ -98,7 +90,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
                 LogAsyncLocalState(() => $"Before PushStackFrame '{frame.MemberName}'");
                 var originalStack = FaultHub.LogicalStackContext.Value;
 
-                if (originalStack?.FirstOrDefault().MemberName == frame.MemberName) {
+                if (originalStack?.FirstOrDefault().Equals(frame) ?? false) {
                     Log(() => $"[PushStackFrame] Skipping duplicate frame: {frame.MemberName}");
                     return source;
                 }
@@ -139,15 +131,22 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
             });
 
 
-        public static AmbientFaultContext NewFaultContext(this object[] context, IReadOnlyList<LogicalStackFrame> logicalStack, [CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0) {
+    public static AmbientFaultContext NewFaultContext(this object[] context, IReadOnlyList<LogicalStackFrame> logicalStack, [CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0) {
             Log(() => $"[HUB-TRACE][NewFaultContext] Caller: '{memberName}', filePath: {filePath}, line: {lineNumber} Context: '{(context == null ? "null" : string.Join(", ", context))}'");
-            var finalContext = (context ?? []).Select(o => o).WhereNotDefault().Prepend(memberName).Distinct().ToList();
+            Log(() => $"[NewFaultContext-Debug] ==> Initial state. memberName: '{memberName}', context contains {context?.Length ?? 0} items: [{string.Join(", ", context?.Select(c => c?.ToString() ?? "null") ?? [])}]");
+            var initialContext = (context ?? []).Select(o => o).WhereNotDefault().ToList();
+            Log(() => $"[NewFaultContext-Debug] Step 1: After WhereNotDefault. Context has {initialContext.Count} items: [{string.Join(", ", initialContext.Select(c => c?.ToString() ?? "null"))}]");
+            var prependedContext = initialContext.Prepend(memberName).ToList();
+            Log(() => $"[NewFaultContext-Debug] Step 2: After Prepend (before Distinct). Context has {prependedContext.Count} items: [{string.Join(", ", prependedContext.Select(c => $"'{c?.ToString() ?? "null"}'(HashCode:{c?.GetHashCode()})"))}]");
+            var distinctContext = prependedContext.Distinct().ToList();
+            Log(() => $"[NewFaultContext-Debug] Step 3: After Distinct. Context has {distinctContext.Count} items: [{string.Join(", ", distinctContext.Select(c => c?.ToString() ?? "null"))}]");
+            var finalContext = distinctContext;
+            Log(() => $"[NewFaultContext-Debug] ==> Final state. finalContext has {finalContext.Count} items: [{string.Join(", ", finalContext.Select(c => c?.ToString() ?? "null"))}]");
             return new AmbientFaultContext {
                 LogicalStackTrace = logicalStack,
                 CustomContext = finalContext.ToArray()
             };
         }
-
     }
     
 }

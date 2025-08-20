@@ -14,7 +14,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.POC {
         public string Context { get; } = context;
     }
     [TestFixture]
-    public class FlowFaultContextTests {
+    public class FlowContextTests {
         private static readonly AsyncLocal<string> TestContext = new();
 
         [Test]

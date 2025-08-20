@@ -231,5 +231,39 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             fault.InnerException.ShouldBeOfType<InvalidOperationException>().Message.ShouldBe("Failure on item 2");
             fault.AllContexts.ShouldContain(2);
         }
+
+        [Test]
+        public async Task Chained_ItemResilience_Operator_Adds_Its_Frame_To_The_Stack() {
+            var source = Observable.Throw<Unit>(new InvalidOperationException("Original failure"));
+
+            var chainedStream = source.ChainFaultContext(["UpstreamContext"]);
+            var resilientStream = chainedStream.ContinueOnFault();
+
+            await resilientStream.Capture();
+
+            BusEvents.Count.ShouldBe(1);
+            var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
+
+            fault.LogicalStackTrace.ShouldNotBeEmpty("The invocation stack should not be empty.");
+            fault.LogicalStackTrace.First().MemberName.ShouldBe(nameof(Chained_ItemResilience_Operator_Adds_Its_Frame_To_The_Stack));
+        }
+        [Test]
+        public async Task ItemResilience_Operator_Preserves_Upstream_FaultHubException_Context() {
+            var source = Observable.Throw<Unit>(new InvalidOperationException("Original failure"));
+
+            var chainedStream = source.ChainFaultContext(["UpstreamContext"]);
+            var resilientStream = chainedStream.ContinueOnFault(context: ["DownstreamContext"]);
+
+            await resilientStream.Capture();
+
+            BusEvents.Count.ShouldBe(1);
+            var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
+
+            fault.AllContexts.ShouldContain("UpstreamContext", 
+                "The upstream context from ChainFaultContext was lost.");
+
+            fault.AllContexts.ShouldNotContain("DownstreamContext",
+                "The downstream operator incorrectly overwrote the existing rich context.");
+        }
     }
 }

@@ -19,7 +19,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
         params object[] context)
         : IEquatable<LogicalStackFrame> {
         public bool Equals(LogicalStackFrame other) 
-            => MemberName == other.MemberName && FilePath == other.FilePath ;
+            => MemberName == other.MemberName && FilePath == other.FilePath && (Context ?? []).SequenceEqual(other.Context ?? []);
         
         public override bool Equals(object obj) 
             => obj is LogicalStackFrame other && Equals(other);
