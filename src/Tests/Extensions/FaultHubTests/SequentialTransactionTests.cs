@@ -274,6 +274,115 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             fault.LogicalStackTrace.ShouldContain(frame => frame.Context.Last() as string == "RunToCompletionTx - Part 1");
         }
         
+    
+        [Test]
+        public async Task Three_Part_Transaction_Aggregates_Context_And_Fails_On_Last_Part() {
+            // ARRANGE
+            var source = Observable.Return("Part 1 Result");
+
+            IObservable<int> SecondStreamSelector(IList<string> firstResult) {
+                firstResult.Single().ShouldBe("Part 1 Result");
+                return Observable.Return(2);
+            }
+
+            IObservable<Unit> ThirdStreamSelector(int secondResult) {
+                secondResult.ShouldBe(2);
+                return Observable.Throw<Unit>(new InvalidOperationException("Failure in Part 3"));
+            }
+
+            // ACT
+            var result = await source
+                .SequentialTransaction(
+                    (Func<IList<string>, IObservable<int>>)SecondStreamSelector,
+                    (Func<int, IObservable<Unit>>)ThirdStreamSelector,
+                    transactionName: "ThreePartTx")
+                .PublishFaults()
+                .Capture();
+
+            // ASSERT
+            result.IsCompleted.ShouldBe(true);
+            result.Error.ShouldBeNull();
+
+            BusEvents.Count.ShouldBe(1);
+            var finalFault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
+            finalFault.InnerException.ShouldBeOfType<InvalidOperationException>().Message.ShouldBe("Failure in Part 3");
+
+            var logicalStack = finalFault.LogicalStackTrace.ToArray();
+            logicalStack.ShouldNotBeEmpty();
+
+            // Verify the logical story is built correctly
+            var part1Frame =
+                logicalStack.FirstOrDefault(frame => (string)frame.Context.LastOrDefault() == "ThreePartTx - Part 1");
+            var part2Frame =
+                logicalStack.FirstOrDefault(frame => (string)frame.Context.LastOrDefault() == "ThreePartTx - Part 2");
+            var part3Frame =
+                logicalStack.FirstOrDefault(frame => (string)frame.Context.LastOrDefault() == "ThreePartTx - Part 3");
+
+            (part1Frame, part2Frame, part3Frame).ShouldBe((default, default, default),
+                "The stack should only contain the frames from the point of failure onwards.");
+
+            finalFault.LogicalStackTrace.ShouldContain(frame => (string)frame.Context.Last() == "ThreePartTx - Part 3");
+        }
         
+        public class Customer { public int Id { get; set; } }
+        public class Order { public int Id { get; set; } }
+
+        [Test]
+        public async Task Fluent_Builder_Fails_On_Last_Part_And_Captures_Correct_Stack() {
+            // ARRANGE: Define the 4 steps of the transaction
+            var source = Observable.Return(123); // Step 1: Source observable (e.g., an account ID)
+
+            // Step 2: Takes the buffered result of source, returns a Customer
+            IObservable<Customer> Step2_GetCustomer(IList<int> accountIds) {
+                accountIds.Single().ShouldBe(123);
+                return Observable.Return(new Customer { Id = accountIds.Single() });
+            }
+
+            // Step 3: Takes a Customer, returns their Orders
+            IObservable<List<Order>> Step3_GetOrders(Customer customer) {
+                customer.Id.ShouldBe(123);
+                return Observable.Return(new List<Order> { new() { Id = 1 }, new() { Id = 2 } });
+            }
+
+            // Step 4: Takes the Orders, and fails
+            IObservable<Unit> Step4_ProcessOrders(List<Order> orders) {
+                orders.Count.ShouldBe(2);
+                return Observable.Throw<Unit>(new InvalidOperationException("Order processing failed"));
+            }
+
+            // ACT: Execute the transaction using the proposed fluent builder API
+            var result = await source.BeginTransaction("N-Part-Tx")
+                .Then(Step2_GetCustomer)
+                .Then(Step3_GetOrders)
+                .Then(Step4_ProcessOrders)
+                .Run()
+                .PublishFaults()
+                .Capture();
+
+            // ASSERT
+            result.IsCompleted.ShouldBe(true);
+            result.Error.ShouldBeNull();
+
+            BusEvents.Count.ShouldBe(1);
+            var finalFault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
+
+            // Assert the original exception is correctly preserved
+            finalFault.InnerException.ShouldBeOfType<InvalidOperationException>()
+                .Message.ShouldBe("Order processing failed");
+
+            // Assert the overall transaction name is in the context
+            finalFault.AllContexts.ShouldContain("N-Part-Tx");
+
+            var logicalStack = finalFault.LogicalStackTrace.ToArray();
+            logicalStack.ShouldNotBeEmpty();
+
+            // Assert the logical stack contains ONLY the frame from the failing step (Part 4)
+            logicalStack.Length.ShouldBe(4);
+            ((string)logicalStack[0].Context.Last()).ShouldBe("N-Part-Tx - Part 4");
+            ((string)logicalStack[1].Context.Last()).ShouldBe("N-Part-Tx - Part 3");
+            ((string)logicalStack[2].Context.Last()).ShouldBe("N-Part-Tx - Part 2");
+            ((string)logicalStack[3].Context.Last()).ShouldBe("N-Part-Tx - Part 1");
+
+        }
     }
 }
