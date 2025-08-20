@@ -228,7 +228,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
             Log(() => "[HUB-TRACE][ExceptionToPublish] Entered.");
             if (contextToUse == null) {
                 Log(() => "[HUB--TRACE][ExceptionToPublish] contextToUse is null, returning original exception.");
-                var defaultContext = new object[] { }.NewFaultContext(new System.Diagnostics.StackTrace(true).LogicalStackFrames());
+                var defaultContext = new System.Diagnostics.StackTrace(true).LogicalStackFrames().NewFaultContext([]);
                 return e as FaultHubException ?? new FaultHubException("An exception occurred in a traced fault context.", e, defaultContext);
 
             }

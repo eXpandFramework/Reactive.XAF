@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Concurrency;
@@ -12,6 +13,31 @@ using Xpand.Extensions.Reactive.Transform;
 
 namespace Xpand.Extensions.Reactive.Combine {
     public static partial class Combine {
+        public static IObservable<T> ConcurrentTransaction<T>(this IEnumerable<IObservable<T>> source,
+            string transactionName, bool failFast = false, int maxConcurrency = 0, object[] context = null, IScheduler scheduler = null)
+            => Observable.Defer(() => {
+                    var scheduledSource = source.ToObservable(scheduler ?? Scheduler.Default);
+                    return failFast ? scheduledSource.ConcurrentFailFast(transactionName, maxConcurrency, context)
+                        : scheduledSource.ConcurrentRunToEnd(transactionName, maxConcurrency, context);
+                })
+                .ChainFaultContext(context, null, transactionName);
+
+        private static IObservable<T> ConcurrentRunToEnd<T>(this IObservable<IObservable<T>> source,string transactionName, int maxConcurrency, object[] context) 
+            => source.Select((obs, i) => obs
+                    .ChainFaultContext(context.AddToContext($"{transactionName} - Op:{i + 1}"))
+                    .Materialize())
+                .Merge(maxConcurrency > 0 ? maxConcurrency : int.MaxValue)
+                .ToList()
+                .SelectMany(notifications => {
+                    var exceptions = notifications.Where(n => n.Kind == NotificationKind.OnError).Select(n => n.Exception).ToList();
+                    var results = notifications.Where(n => n.Kind == NotificationKind.OnNext).Select(n => n.Value).ToList();
+                    return exceptions.Any() ? results.ToObservable().Concat(Observable.Throw<T>(new AggregateException(exceptions))) : results.ToObservable();
+                });
+
+        private static IObservable<T> ConcurrentFailFast<T>(this IObservable<IObservable<T>> source,string transactionName, int maxConcurrency, object[] context) 
+            => source.Select((obs, i) => obs.PushStackFrame(context.AddToContext($"{transactionName} - Op:{i + 1}")))
+                .Merge(maxConcurrency > 0 ? maxConcurrency : int.MaxValue);
+
         public static IObservable<Unit> SequentialTransaction(this IEnumerable<object> source, bool failFast = false,
             Func<IObservable<object>, IObservable<object>> resiliencePolicy = null, object[] context = null,
             [CallerMemberName] string transactionName = null, IScheduler scheduler = null)
@@ -72,6 +98,7 @@ namespace Xpand.Extensions.Reactive.Combine {
                     .Select(t => (object)t))
                 .Select(operation => failFast ? operation : operation.Catch((FaultHubException ex) => Observable.Return<object>(ex)));
         
+        [SuppressMessage("ReSharper", "UnusedTypeParameter")]
         public interface ITransactionBuilder<out TCurrentResult> { }
 
         internal class TransactionBuilder<TCurrentResult>(IObservable<object> initialStep, string transactionName, object[] context, IScheduler scheduler,
@@ -81,25 +108,31 @@ namespace Xpand.Extensions.Reactive.Combine {
             internal readonly string TransactionName = transactionName;
             internal readonly object[] Context = context;
             internal readonly IScheduler Scheduler = scheduler;
-
+            internal string CallerMemberName;
+            internal string CallerMemberPath;
+            internal int CallerMemberLine;
             public TransactionBuilder(IObservable<object> initialStep, string transactionName, object[] context,
-                IScheduler scheduler) : this(initialStep, transactionName, context, scheduler, new List<Func<object, IObservable<object>>>()) { }
+                IScheduler scheduler, string callerMemberName,string callerMemberPath,int callerMemberLine) : this(initialStep, transactionName, context, scheduler, new List<Func<object, IObservable<object>>>()) {
+                CallerMemberName = callerMemberName;
+                CallerMemberPath=callerMemberPath;
+                CallerMemberLine = callerMemberLine;
+            }
         }
 
-        public static ITransactionBuilder<IList<TSource>> BeginTransaction<TSource>(
-            this IObservable<TSource> source, string transactionName, object[] context = null,
-            IScheduler scheduler = null) {
-            var firstPart = source.BufferUntilCompleted().Select(list => (object)list);
-            return new TransactionBuilder<IList<TSource>>(firstPart, transactionName, context, scheduler);
-        }
+        public static ITransactionBuilder<IList<TSource>> BeginTransaction<TSource>(this IObservable<TSource> source, string transactionName=null, object[] context = null,
+            IScheduler scheduler = null, [CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0)
+            => new TransactionBuilder<IList<TSource>>(source.BufferUntilCompleted().Select(list => (object)list), transactionName??memberName, context, scheduler, memberName, filePath, lineNumber);
+
 
         public static ITransactionBuilder<TNext> Then<TCurrent, TNext>(
             this ITransactionBuilder<TCurrent> builder, Func<TCurrent, IObservable<TNext>> nextSelector) {
             var ib = (TransactionBuilder<TCurrent>)builder;
             return new TransactionBuilder<TNext>(ib.InitialStep, ib.TransactionName, ib.Context, ib.Scheduler,
-            [..ib.SubsequentSteps, currentResult => nextSelector((TCurrent)currentResult).Select(nextResult => (object)nextResult)]);
+                [..ib.SubsequentSteps, currentResult => nextSelector((TCurrent)currentResult).Select(nextResult => (object)nextResult)]) {
+                CallerMemberName = ib.CallerMemberName,CallerMemberPath = ib.CallerMemberPath,CallerMemberLine = ib.CallerMemberLine
+            };
         }
-
+        
         public static IObservable<TFinal> RunFailFast<TFinal>(this ITransactionBuilder<TFinal> builder)
             => builder.Run();
 
@@ -113,7 +146,7 @@ namespace Xpand.Extensions.Reactive.Combine {
             var transactionLogic = failFast ? ib.FailFast(allSteps) : ib.RunToCompletion( allSteps);
             var finalLogic = transactionLogic.Select(result => (TFinal)result);
             var scheduledTransaction = ib.Scheduler == null ? finalLogic : finalLogic.SubscribeOn(ib.Scheduler);
-            return scheduledTransaction.ChainFaultContext(ib.Context, null, ib.TransactionName);
+            return scheduledTransaction.ChainFaultContext(ib.Context, null, ib.CallerMemberName, ib.CallerMemberPath, ib.CallerMemberLine);
         }
 
         private static IObservable<object> RunToCompletion<TFinal>(this TransactionBuilder<TFinal> builder, List<Func<object, IObservable<object>>> allSteps) {
@@ -123,13 +156,11 @@ namespace Xpand.Extensions.Reactive.Combine {
                 var step = allSteps[i];
                 var partNumber = i + 1;
                 stepChain = stepChain.SelectMany(currentResult => Observable.Defer(() => step(currentResult))
-                    .PushStackFrame(builder.Context.AddToContext($"{builder.TransactionName} - Part {partNumber}"))
+                    .PushStackFrame(builder.Context.AddToContext($"{builder.TransactionName} - Part {partNumber}",builder.CallerMemberName,builder.CallerMemberPath,builder.CallerMemberLine))
                     .Materialize()
                     .Select(notification => {
                         if (notification.Kind != NotificationKind.OnError) return notification.Value;
-                        var faultContext = new object[] { }.NewFaultContext(FaultHub.LogicalStackContext.Value);
-                        var fault = notification.Exception.ExceptionToPublish(faultContext);
-                        allFailures.Add(fault);
+                        allFailures.Add(notification.Exception.ExceptionToPublish(FaultHub.LogicalStackContext.Value.NewFaultContext([])));
                         return null;
                     }));
             }

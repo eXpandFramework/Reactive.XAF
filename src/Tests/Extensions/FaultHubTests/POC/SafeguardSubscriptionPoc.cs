@@ -16,19 +16,18 @@ namespace Xpand.Extensions.Tests.FaultHubTests.POC {
 
         
         private IObservable<T> ApplyIncompleteResiliencePattern<T>(IObservable<T> source,
-            [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0) {
-            return source
+            [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0)
+            => source
                 .PushStackFrame(memberName, filePath, lineNumber)
                 .SuppressAndPublishOnFault(null, memberName, filePath, lineNumber);
-        }
-        
-        
+
+
         private IObservable<T> ApplyCompleteResiliencePattern<T>(IObservable<T> source,
             [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0) {
             return source
                 .PushStackFrame(memberName, filePath, lineNumber)
                 .SuppressAndPublishOnFault(null, memberName, filePath, lineNumber)
-                .SafeguardSubscription((ex, _) => ex.ExceptionToPublish(new object[]{}.NewFaultContext(FaultHub.LogicalStackContext.Value, memberName)).Publish());
+                .SafeguardSubscription((ex, _) => ex.ExceptionToPublish(FaultHub.LogicalStackContext.Value.NewFaultContext([],memberName)).Publish());
         }
 
         [Test]
@@ -78,7 +77,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.POC {
             => source.Materialize()
                 .Select(notification => {
                     if (notification.Kind != NotificationKind.OnError) return notification;
-                    var faultContext = context.NewFaultContext(FaultHub.LogicalStackContext.Value,memberName, filePath, lineNumber);
+                    var faultContext = FaultHub.LogicalStackContext.Value.NewFaultContext(context,memberName, filePath, lineNumber);
                     notification.Exception.ExceptionToPublish(faultContext).Publish();
                     return Notification.CreateOnCompleted<T>();
                 })

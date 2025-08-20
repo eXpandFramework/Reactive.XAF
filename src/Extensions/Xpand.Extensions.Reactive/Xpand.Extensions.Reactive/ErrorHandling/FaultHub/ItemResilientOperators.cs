@@ -25,9 +25,8 @@ private static IObservable<T> ApplyItemResilience<T>(this IObservable<T> source,
                 return Observable.Empty<T>();
             }
 
-            return ex.ProcessFault(context.NewFaultContext(
-                    new[] { currentFrame }.Concat(FaultHub.LogicalStackContext.Value ?? Enumerable.Empty<LogicalStackFrame>()).ToList(), 
-                    memberName, filePath, lineNumber),
+            return ex.ProcessFault(new[] { currentFrame }.Concat(FaultHub.LogicalStackContext.Value ?? Enumerable.Empty<LogicalStackFrame>()).ToList()
+                    .NewFaultContext(context, memberName, filePath, lineNumber),
                 proceedAction: enrichedException => (publishWhen?.Invoke(enrichedException) ?? true.Observe())
                     .SelectMany(shouldPublish => {
                         if (shouldPublish) {
@@ -36,7 +35,7 @@ private static IObservable<T> ApplyItemResilience<T>(this IObservable<T> source,
                         return Observable.Empty<T>();
                     }));
         }).SafeguardSubscription((ex, s) => 
-            ex.ExceptionToPublish(context.NewFaultContext(FaultHub.LogicalStackContext.Value, s)).Publish(), memberName) :
+            ex.ExceptionToPublish(FaultHub.LogicalStackContext.Value.NewFaultContext(context, s)).Publish(), memberName) :
         source;
 
         public static IObservable<TEventArgs> ProcessEvent<TEventArgs>(this object source, string eventName,Func<TEventArgs, IObservable<TEventArgs>> resilientSelector, 
@@ -69,7 +68,7 @@ private static IObservable<T> ApplyItemResilience<T>(this IObservable<T> source,
                         .ApplyItemResilience(retryStrategy, context.AddToContext(item), memberName, filePath, lineNumber)
                         .DefaultIfEmpty(item)
                 )
-                .SafeguardSubscription((ex, s) => ex.ExceptionToPublish(context.NewFaultContext(FaultHub.LogicalStackContext.Value, s)).Publish(), memberName);
+                .SafeguardSubscription((ex, s) => ex.ExceptionToPublish(FaultHub.LogicalStackContext.Value.NewFaultContext(context, s)).Publish(), memberName);
         
         public static IObservable<T> DeferItemResilient<T>(this object _, Func<IObservable<T>> factory,
             object[] context = null, [CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0)
@@ -110,7 +109,7 @@ private static IObservable<T> ApplyItemResilience<T>(this IObservable<T> source,
             object[] context = null, [CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0)
             => source.SelectMany(item => Observable.Defer(() => Observable.Return(selector(item)))
                     .ApplyItemResilience(retryStrategy, context.AddToContext(item), memberName, filePath, lineNumber))
-                .SafeguardSubscription((ex, s) => ex.ExceptionToPublish(context.NewFaultContext(FaultHub.LogicalStackContext.Value, s)).Publish(), memberName);
+                .SafeguardSubscription((ex, s) => ex.ExceptionToPublish(FaultHub.LogicalStackContext.Value.NewFaultContext(context, s)).Publish(), memberName);
             
         public static IObservable<TSource> UsingItemResilient<TSource, TResource>(this object o,Func<TResource> resourceFactory,
             Func<TResource, IObservable<TSource>> observableFactory, object[] context = null,
@@ -142,7 +141,7 @@ private static IObservable<T> ApplyItemResilience<T>(this IObservable<T> source,
             Func<TSource, int, IObservable<TResult>> resilientSelector, Func<IObservable<TResult>, IObservable<TResult>> retryStrategy,
             object[] context = null, [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0)
             => source.SelectMany((sourceItem, index) => resilientSelector(sourceItem, index).ApplyItemResilience(retryStrategy, context.AddToContext(sourceItem), memberName, filePath, lineNumber))
-                .SafeguardSubscription((ex, s) => ex.ExceptionToPublish(context.NewFaultContext(FaultHub.LogicalStackContext.Value, s)).Publish(), memberName);
+                .SafeguardSubscription((ex, s) => ex.ExceptionToPublish(FaultHub.LogicalStackContext.Value.NewFaultContext(context, s)).Publish(), memberName);
             
         public static IObservable<TResult> SelectManyItemResilient<TSource, TResult>(this IObservable<TSource> source,
             Func<TSource, IObservable<TResult>> resilientSelector, Func<IObservable<TResult>, IObservable<TResult>> retryStrategy,

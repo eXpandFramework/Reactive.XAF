@@ -60,7 +60,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.POC {
             return source
                 .PushStackFrame(memberName, filePath, lineNumber)
                 .Catch((Exception ex) => {
-                    ex.ExceptionToPublish(context.NewFaultContext(FaultHub.LogicalStackContext.Value, memberName,
+                    ex.ExceptionToPublish(FaultHub.LogicalStackContext.Value.NewFaultContext(context, memberName,
                         filePath, lineNumber)).Publish();
                     return Observable.Empty<T>();
                 });

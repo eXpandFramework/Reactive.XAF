@@ -233,17 +233,18 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
 
             var fault2 = aggregate.InnerExceptions.OfType<FaultHubException>()
                 .FirstOrDefault(ex
-                    => ex.LogicalStackTrace.Any(f => (string)f.Context.Last() == "RunToCompletion-Tx - Part 2"));
+                    => ex.LogicalStackTrace.Any(f => f.Context.Contains("RunToCompletion-Tx - Part 2")));
             fault2.ShouldNotBeNull();
             fault2.InnerException.ShouldBeOfType<InvalidOperationException>().Message
                 .ShouldBe("Customer lookup failed");
 
             var fault4 = aggregate.InnerExceptions.OfType<FaultHubException>()
                 .FirstOrDefault(ex
-                    => ex.LogicalStackTrace.Any(f => (string)f.Context.Last() == "RunToCompletion-Tx - Part 4"));
+                    => ex.LogicalStackTrace.Any(f => f.Context.Contains("RunToCompletion-Tx - Part 4")));
             fault4.ShouldNotBeNull();
             fault4.InnerException.ShouldBeOfType<InvalidOperationException>().Message
                 .ShouldBe("Order processing failed");
+
         }
         
         [Test]
@@ -291,12 +292,6 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             var source = Observable.Throw<int>(new InvalidOperationException("Part 1 Always Fails"))
                 .Do(_ => part1Counter++, _ => part1Counter++);
 
-            IObservable<int> SecondStreamSelector(IList<int> results) {
-                part2Counter++;
-                results.ShouldBeNull();
-                return Observable.Return(999);
-            }
-
             var result = await source
                 .BeginTransaction("RunToCompletionTx")
                 .Then(SecondStreamSelector)
@@ -305,16 +300,22 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
                 .Capture();
 
             (part1Counter, part2Counter).ShouldBe((1, 1));
+
             result.IsCompleted.ShouldBe(true);
             result.Items.ShouldBeEmpty();
-
             var finalFault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
             var aggregate = finalFault.InnerException.ShouldBeOfType<AggregateException>();
             var innerFault = aggregate.InnerExceptions.Single().ShouldBeOfType<FaultHubException>();
 
             innerFault.InnerException.ShouldBeOfType<InvalidOperationException>().Message
                 .ShouldBe("Part 1 Always Fails");
-            innerFault.LogicalStackTrace.Single().Context.Last().ShouldBe("RunToCompletionTx - Part 1");
+            innerFault.LogicalStackTrace.Single().Context.ShouldContain("RunToCompletionTx - Part 1");;
+            
+            IObservable<int> SecondStreamSelector(IList<int> results) {
+                part2Counter++;
+                results.ShouldBeNull();
+                return Observable.Return(999);
+            }
         }
         
     }

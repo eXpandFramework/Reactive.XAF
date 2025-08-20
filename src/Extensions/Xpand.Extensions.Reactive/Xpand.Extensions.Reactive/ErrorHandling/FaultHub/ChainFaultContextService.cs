@@ -71,8 +71,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
                 return resilientSource.Catch((Exception ex) => {
                         Log(() => $"[ChainCtx] Catch block entered for boundary '{memberName}'. Exception: {ex.GetType().Name}");
                         Log(() => $"[ChainCtx] Reading stack from snapshot. Found {snapshot.CapturedStack?.Count ?? 0} frames.");
-                        var faultContext =
-                            context.NewFaultContext(snapshot.CapturedStack, memberName, filePath, lineNumber);
+                        var faultContext = snapshot.CapturedStack.NewFaultContext(context,memberName, filePath, lineNumber);
                         return ex.ProcessFault(faultContext, Observable.Throw<T>);
                     })
                     .Finally(() => {
@@ -131,7 +130,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
             });
 
 
-    public static AmbientFaultContext NewFaultContext(this object[] context, IReadOnlyList<LogicalStackFrame> logicalStack, [CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0) {
+    public static AmbientFaultContext NewFaultContext(this  IReadOnlyList<LogicalStackFrame> logicalStack,object[] context, [CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0) {
             Log(() => $"[HUB-TRACE][NewFaultContext] Caller: '{memberName}', filePath: {filePath}, line: {lineNumber} Context: '{(context == null ? "null" : string.Join(", ", context))}'");
             Log(() => $"[NewFaultContext-Debug] ==> Initial state. memberName: '{memberName}', context contains {context?.Length ?? 0} items: [{string.Join(", ", context?.Select(c => c?.ToString() ?? "null") ?? [])}]");
             var initialContext = (context ?? []).Select(o => o).WhereNotDefault().ToList();

@@ -72,7 +72,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.POC {
 
             
             using (stream.Subscribe(_ => { }, ex => capturedFault = ex.ExceptionToPublish(
-                       new object[]{}.NewFaultContext(FaultHub.LogicalStackContext.Value,"Boundary")))) {
+                       FaultHub.LogicalStackContext.Value.NewFaultContext([],"Boundary")))) {
                 
                 
                 FaultHub.LogicalStackContext.Value = [new LogicalStackFrame("FireEventContext", "", 0)];
