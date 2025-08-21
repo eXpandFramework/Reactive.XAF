@@ -119,16 +119,20 @@ namespace Xpand.Extensions.Reactive.Combine {
             }
         }
 
-        public static ITransactionBuilder<IList<TSource>> BeginTransaction<TSource>(this IObservable<TSource> source, string transactionName=null, object[] context = null,
-            IScheduler scheduler = null, [CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0)
+        public static ITransactionBuilder<IList<TSource>> BeginTransaction<TSource>(this IObservable<TSource> source, object[] context = null,
+            string transactionName = null, IScheduler scheduler = null, [CallerMemberName] string memberName = "",
+            [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0)
             => new TransactionBuilder<IList<TSource>>(source.BufferUntilCompleted().Select(list => (object)list), transactionName??memberName, context, scheduler, memberName, filePath, lineNumber);
 
-
         public static ITransactionBuilder<TNext> Then<TCurrent, TNext>(
-            this ITransactionBuilder<TCurrent> builder, Func<TCurrent, IObservable<TNext>> nextSelector) {
+            this ITransactionBuilder<TCurrent> builder, Func<TCurrent[], IObservable<TNext>> nextSelector) {
             var ib = (TransactionBuilder<TCurrent>)builder;
             return new TransactionBuilder<TNext>(ib.InitialStep, ib.TransactionName, ib.Context, ib.Scheduler,
-                [..ib.SubsequentSteps, currentResult => nextSelector((TCurrent)currentResult).Select(nextResult => (object)nextResult)]) {
+                [..ib.SubsequentSteps, currentResult => {
+                        var currents =currentResult!=null? new[] { (TCurrent)currentResult }.WhereNotDefault().ToArray():[];
+                        return nextSelector(currents).Select(nextResult => (object)nextResult);
+                    }
+                ]) {
                 CallerMemberName = ib.CallerMemberName,CallerMemberPath = ib.CallerMemberPath,CallerMemberLine = ib.CallerMemberLine
             };
         }

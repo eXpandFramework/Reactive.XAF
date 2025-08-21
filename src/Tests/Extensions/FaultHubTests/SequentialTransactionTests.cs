@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -7,6 +8,7 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
+using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.Reactive.Transform;
@@ -171,10 +173,10 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             IObservable<List<Order>> Step3GetOrders(Customer c) => Observable.Return(new List<Order> { new() { Id = 1 } });
             IObservable<Unit> Step4ProcessOrders(List<Order> o) => Observable.Throw<Unit>(new InvalidOperationException("Order processing failed"));
 
-            var result = await source.BeginTransaction("Four-Part-Tx")
-                .Then(Step2GetCustomer)
-                .Then(Step3GetOrders)
-                .Then(Step4ProcessOrders)
+            var result = await source.BeginTransaction(transactionName: "Four-Part-Tx")
+                .Then(ints => Step2GetCustomer(ints.SelectArray()))
+                .Then(customers => customers.ToNowObservable().SelectMany(Step3GetOrders))
+                .Then(orders => orders.ToNowObservable().SelectMany(Step4ProcessOrders))
                 .RunFailFast()
                 .PublishFaults()
                 .Capture();
@@ -195,28 +197,11 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             var part2Counter = 0;
             var part3Counter = 0;
             var part4Counter = 0;
-
             var source = Observable.Return(123)
                 .Do(_ => part1Counter++);
-
-            IObservable<Customer> Step2GetCustomer(IList<int> _) {
-                part2Counter++;
-                return Observable.Throw<Customer>(new InvalidOperationException("Customer lookup failed"));
-            }
-
-            IObservable<List<Order>> Step3GetOrders(Customer customer) {
-                part3Counter++;
-                customer.ShouldBeNull();
-                return Observable.Return(new List<Order>());
-            }
-
-            IObservable<Unit> Step4ProcessOrders(List<Order> _) {
-                part4Counter++;
-                return Observable.Throw<Unit>(new InvalidOperationException("Order processing failed"));
-            }
-
-            await source.BeginTransaction("RunToCompletion-Tx")
-                .Then(Step2GetCustomer)
+            
+            await source.BeginTransaction(transactionName: "RunToCompletion-Tx")
+                .Then(ints => Step2GetCustomer(ints.SelectArray()))
                 .Then(Step3GetOrders)
                 .Then(Step4ProcessOrders)
                 .RunToEnd()
@@ -239,26 +224,43 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
                 .ShouldBe("Customer lookup failed");
 
             var fault4 = aggregate.InnerExceptions.OfType<FaultHubException>()
-                .FirstOrDefault(ex
-                    => ex.LogicalStackTrace.Any(f => f.Context.Contains("RunToCompletion-Tx - Part 4")));
+                .FirstOrDefault(ex => ex.LogicalStackTrace.Any(f => f.Context.Contains("RunToCompletion-Tx - Part 4")));
             fault4.ShouldNotBeNull();
             fault4.InnerException.ShouldBeOfType<InvalidOperationException>().Message
                 .ShouldBe("Order processing failed");
+
+            [SuppressMessage("ReSharper", "UnusedParameter.Local")]
+            IObservable<Customer> Step2GetCustomer(IList<int> _) {
+                part2Counter++;
+                return Observable.Throw<Customer>(new InvalidOperationException("Customer lookup failed"));
+            }
+
+            IObservable<List<Order>> Step3GetOrders(Customer[] customer) {
+                part3Counter++;
+                customer.ShouldBeEmpty();
+                return Observable.Return(new List<Order>());
+            }
+
+            IObservable<Unit> Step4ProcessOrders(List<Order>[] _) {
+                part4Counter++;
+                return Observable.Throw<Unit>(new InvalidOperationException("Order processing failed"));
+            }
 
         }
         
         [Test]
         public async Task Fluent_Builder_Succeeds() {
             var source = Observable.Range(1, 3);
-            IObservable<int> SecondStreamSelector(IList<int> results) => Observable.Return(results.Sum());
+
             var result = await source
-                .BeginTransaction("TwoPartTx")
-                .Then(SecondStreamSelector)
+                .BeginTransaction(transactionName: "TwoPartTx")
+                .Then(ints => SecondStreamSelector(ints.SelectArray()))
                 .RunFailFast()
                 .Capture();
 
             result.Items.Single().ShouldBe(6);
             BusEvents.ShouldBeEmpty();
+            IObservable<int> SecondStreamSelector(IList<int> results) => Observable.Return(results.Sum());
         }
 
         [Test]
@@ -266,19 +268,20 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             var secondPartStarted = false;
             var source = Observable.Throw<int>(new InvalidOperationException("Failure in Part 1"));
 
-            IObservable<Unit> SecondStreamSelector(IList<int> _) {
-                secondPartStarted = true;
-                return Observable.Empty<Unit>();
-            }
-
             await source
-                .BeginTransaction("TwoPartTxFailure1")
-                .Then(SecondStreamSelector)
+                .BeginTransaction(transactionName: "TwoPartTxFailure1")
+                .Then(ints => SecondStreamSelector(ints.SelectArray()))
                 .RunFailFast()
                 .PublishFaults()
                 .Capture();
 
             secondPartStarted.ShouldBeFalse();
+            [SuppressMessage("ReSharper", "UnusedParameter.Local")]
+            IObservable<Unit> SecondStreamSelector(IList<int> _) {
+                secondPartStarted = true;
+                return Observable.Empty<Unit>();
+            }
+
             var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
             fault.InnerException.ShouldBeOfType<InvalidOperationException>().Message.ShouldBe("Failure in Part 1");
             fault.LogicalStackTrace.Single().Context.Last().ShouldBe("TwoPartTxFailure1 - Part 1");
@@ -293,7 +296,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
                 .Do(_ => part1Counter++, _ => part1Counter++);
 
             var result = await source
-                .BeginTransaction("RunToCompletionTx")
+                .BeginTransaction(transactionName: "RunToCompletionTx")
                 .Then(SecondStreamSelector)
                 .RunToEnd()
                 .PublishFaults()
@@ -309,13 +312,44 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
 
             innerFault.InnerException.ShouldBeOfType<InvalidOperationException>().Message
                 .ShouldBe("Part 1 Always Fails");
-            innerFault.LogicalStackTrace.Single().Context.ShouldContain("RunToCompletionTx - Part 1");;
+            innerFault.LogicalStackTrace.Single().Context.ShouldContain("RunToCompletionTx - Part 1");
             
-            IObservable<int> SecondStreamSelector(IList<int> results) {
+            IObservable<int> SecondStreamSelector(IList<int>[] results) {
                 part2Counter++;
-                results.ShouldBeNull();
+                results.ShouldBeEmpty();
                 return Observable.Return(999);
             }
+        }
+        
+        [Test]
+        public async Task Fluent_Builder_Handles_Sync_Exception_In_Then_Selector() {
+            IObservable<string> source = Observable.Return<IList<string>>(new List<string>())
+                .SelectMany(_ => Observable.Throw<string>(new Exception("Outer")));
+            var part3Executed = false;
+
+            var result = await source.BeginTransaction(transactionName: "SyncException-Tx")
+                .Then(lists => lists.DeferAction(() => throw new NotImplementedException())
+                    .ConcatDeferToUnit(() => Observable.Return("This part is never reached")))
+                .Then(_ => {
+                    part3Executed = true;
+                    return Observable.Return(Unit.Default);
+                })
+                .RunToEnd()
+                .PublishFaults()
+                .Capture();
+
+            result.IsCompleted.ShouldBe(true);
+            result.Error.ShouldBeNull();
+            part3Executed.ShouldBeTrue();
+
+            BusEvents.Count.ShouldBe(1);
+            var finalFault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
+
+            var aggregate = finalFault.InnerException.ShouldBeOfType<AggregateException>();
+            aggregate.InnerExceptions.Count.ShouldBe(2);
+            var innerFault = aggregate.InnerExceptions.Last().ShouldBeOfType<FaultHubException>();
+
+            innerFault.LogicalStackTrace.ShouldContain(f => f.Context.Contains("SyncException-Tx - Part 2"));
         }
         
     }

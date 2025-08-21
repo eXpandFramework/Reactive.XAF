@@ -8,6 +8,8 @@ namespace Xpand.Extensions.LinqExtensions {
         
         public static IEnumerable<TSource> SelectMany<TSource>(this IEnumerable<IEnumerable<TSource>> source) 
             => source.SelectMany(sources => sources);
+        public static TSource[] SelectArray<TSource>(this IEnumerable<IEnumerable<TSource>> source) 
+            => source.SelectMany().ToArray();
         
         
     }
