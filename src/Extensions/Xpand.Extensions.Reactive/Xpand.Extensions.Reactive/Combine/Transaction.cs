@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -6,13 +7,21 @@ using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.Reactive.Transform;
+using static Xpand.Extensions.Reactive.ErrorHandling.FaultHub.FaultHubLogger;
 
 namespace Xpand.Extensions.Reactive.Combine {
     public static partial class Combine {
+        internal class StepDefinition {
+            public Func<object, IObservable<object>> Selector { get; init; }
+            public Func<Exception, object, IObservable<object>> FallbackSelector { get; init; }
+        }
+
+        private static readonly AsyncLocal<int> TransactionNestingLevel = new();
         public static IObservable<T> ConcurrentTransaction<T>(this IEnumerable<IObservable<T>> source,
             string transactionName, bool failFast = false, int maxConcurrency = 0, object[] context = null, IScheduler scheduler = null)
             => Observable.Defer(() => {
@@ -27,7 +36,7 @@ namespace Xpand.Extensions.Reactive.Combine {
                     .ChainFaultContext(context.AddToContext($"{transactionName} - Op:{i + 1}"))
                     .Materialize())
                 .Merge(maxConcurrency > 0 ? maxConcurrency : int.MaxValue)
-                .ToList()
+                .BufferUntilCompleted()
                 .SelectMany(notifications => {
                     var exceptions = notifications.Where(n => n.Kind == NotificationKind.OnError).Select(n => n.Exception).ToList();
                     var results = notifications.Where(n => n.Kind == NotificationKind.OnNext).Select(n => n.Value).ToList();
@@ -68,7 +77,7 @@ namespace Xpand.Extensions.Reactive.Combine {
                         .Select(item => (object)item)
                         .Catch((FaultHubException ex) => Observable.Return((object)ex));
                 })
-                .ToNowObservable().Concat().ToList()
+                .ToNowObservable().Concat().BufferUntilCompleted()
                 .SelectMany(results => {
                     var exceptions = results.OfType<Exception>().ToList();
                     return !exceptions.Any()
@@ -102,9 +111,9 @@ namespace Xpand.Extensions.Reactive.Combine {
         public interface ITransactionBuilder<out TCurrentResult> { }
 
         internal class TransactionBuilder<TCurrentResult>(IObservable<object> initialStep, string transactionName, object[] context, IScheduler scheduler,
-            List<Func<object, IObservable<object>>> subsequentSteps) : ITransactionBuilder<TCurrentResult> {
+            List<StepDefinition> subsequentSteps) : ITransactionBuilder<TCurrentResult> {
             internal readonly IObservable<object> InitialStep = initialStep;
-            internal readonly List<Func<object, IObservable<object>>> SubsequentSteps = subsequentSteps;
+            internal readonly List<StepDefinition> SubsequentSteps = subsequentSteps;
             internal readonly string TransactionName = transactionName;
             internal readonly object[] Context = context;
             internal readonly IScheduler Scheduler = scheduler;
@@ -112,69 +121,176 @@ namespace Xpand.Extensions.Reactive.Combine {
             internal string CallerMemberPath;
             internal int CallerMemberLine;
             public TransactionBuilder(IObservable<object> initialStep, string transactionName, object[] context,
-                IScheduler scheduler, string callerMemberName,string callerMemberPath,int callerMemberLine) : this(initialStep, transactionName, context, scheduler, new List<Func<object, IObservable<object>>>()) {
+                IScheduler scheduler, string callerMemberName,string callerMemberPath,int callerMemberLine) : this(initialStep, transactionName, context, scheduler, new List<StepDefinition>()) {
                 CallerMemberName = callerMemberName;
                 CallerMemberPath=callerMemberPath;
                 CallerMemberLine = callerMemberLine;
             }
         }
-
-        public static ITransactionBuilder<IList<TSource>> BeginTransaction<TSource>(this IObservable<TSource> source, object[] context = null,
-            string transactionName = null, IScheduler scheduler = null, [CallerMemberName] string memberName = "",
-            [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0)
-            => new TransactionBuilder<IList<TSource>>(source.BufferUntilCompleted().Select(list => (object)list), transactionName??memberName, context, scheduler, memberName, filePath, lineNumber);
+        public static ITransactionBuilder<TSource> BeginTransaction<TSource>(this IObservable<TSource> source, object[] context = null,
+                string transactionName = null, IScheduler scheduler = null, [CallerMemberName] string memberName = "",
+                [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0)
+            => new TransactionBuilder<TSource>(source.BufferUntilCompleted().Select(list => (object)list), transactionName??memberName, context, scheduler, memberName, filePath, lineNumber);
 
         public static ITransactionBuilder<TNext> Then<TCurrent, TNext>(
-            this ITransactionBuilder<TCurrent> builder, Func<TCurrent[], IObservable<TNext>> nextSelector) {
+            this ITransactionBuilder<TCurrent> builder, Func<TCurrent[], IObservable<TNext>> nextSelector)
+            => builder.Then(nextSelector, fallbackSelector: null);
+
+        public static ITransactionBuilder<TNext> Then<TCurrent, TNext>(
+            this ITransactionBuilder<TCurrent> builder, 
+            Func<TCurrent[], IObservable<TNext>> nextSelector,
+            Func<Exception, TCurrent[], IObservable<TNext>> fallbackSelector) {
+    
             var ib = (TransactionBuilder<TCurrent>)builder;
-            return new TransactionBuilder<TNext>(ib.InitialStep, ib.TransactionName, ib.Context, ib.Scheduler,
-                [..ib.SubsequentSteps, currentResult => {
-                        var currents =currentResult!=null? new[] { (TCurrent)currentResult }.WhereNotDefault().ToArray():[];
-                        return nextSelector(currents).Select(nextResult => (object)nextResult);
-                    }
-                ]) {
-                CallerMemberName = ib.CallerMemberName,CallerMemberPath = ib.CallerMemberPath,CallerMemberLine = ib.CallerMemberLine
+            TCurrent[] CreateInputArray(object currentResult) => currentResult switch {
+                null => [],
+                IEnumerable<TCurrent> collection => collection.ToArray(),
+                _ => [(TCurrent)currentResult]
             };
+            var step = new StepDefinition {
+                Selector = currentResult => nextSelector(CreateInputArray(currentResult)).Select(res => (object)res),
+                FallbackSelector = fallbackSelector != null 
+                    ? (ex, currentResult) => fallbackSelector(ex, CreateInputArray(currentResult)).Select(res => (object)res) 
+                    : null
+            };
+
+            return new TransactionBuilder<TNext>(ib.InitialStep, ib.TransactionName, ib.Context, ib.Scheduler,
+                    [..ib.SubsequentSteps, step]) 
+                { CallerMemberName = ib.CallerMemberName, CallerMemberPath = ib.CallerMemberPath, CallerMemberLine = ib.CallerMemberLine };
+
         }
-        
-        public static IObservable<TFinal> RunFailFast<TFinal>(this ITransactionBuilder<TFinal> builder)
+        public static IObservable<TFinal[]> RunFailFast<TFinal>(this ITransactionBuilder<TFinal> builder)
             => builder.Run();
 
-        public static IObservable<TFinal> RunToEnd<TFinal>(this ITransactionBuilder<TFinal> builder)
+        public static IObservable<TFinal[]> RunToEnd<TFinal>(this ITransactionBuilder<TFinal> builder)
             => builder.Run(false);
 
-        private static IObservable<TFinal> Run<TFinal>(this ITransactionBuilder<TFinal> builder, bool failFast = true) {
-            var ib = (TransactionBuilder<TFinal>)builder;
-            var allSteps = new List<Func<object, IObservable<object>>> { _ => ib.InitialStep };
-            allSteps.AddRange(ib.SubsequentSteps);
-            var transactionLogic = failFast ? ib.FailFast(allSteps) : ib.RunToCompletion( allSteps);
-            var finalLogic = transactionLogic.Select(result => (TFinal)result);
-            var scheduledTransaction = ib.Scheduler == null ? finalLogic : finalLogic.SubscribeOn(ib.Scheduler);
-            return scheduledTransaction.ChainFaultContext(ib.Context, null, ib.CallerMemberName, ib.CallerMemberPath, ib.CallerMemberLine);
+        private static IObservable<TFinal[]>
+            Run<TFinal>(this ITransactionBuilder<TFinal> builder, bool failFast = true) {
+            return Observable.Defer(() => {
+                var ib = (TransactionBuilder<TFinal>)builder;
+                Log(() => $"[Tx.DEBUG][Run] Called for '{ib.TransactionName}'.");
+
+                var isNested = TransactionNestingLevel.Value > 0;
+                TransactionNestingLevel.Value++;
+                Log(()
+                    => $"[Tx.DEBUG][Run] isNested: {isNested}. Nesting level incremented to: {TransactionNestingLevel.Value}");
+
+                var allSteps = new List<StepDefinition> { new() { Selector = _ => ib.InitialStep } };
+                allSteps.AddRange(ib.SubsequentSteps);
+
+                var transactionLogic = failFast ? ib.FailFast(allSteps) : ib.RunToCompletion(allSteps, isNested);
+                Log(() => $"[Tx.DEBUG][Run] Runner selected: {(failFast ? "FailFast" : "RunToCompletion")}");
+
+                var finalLogic = transactionLogic.Select(result => {
+                    Log(() => "[Tx.DEBUG][Run] Casting final result to array.");
+                    return ((IEnumerable<object>)result).Cast<TFinal>().ToArray();
+                });
+
+                var scheduledTransaction = ib.Scheduler == null ? finalLogic : finalLogic.SubscribeOn(ib.Scheduler);
+
+                var finalContext = ib.Context.AddToContext(ib.TransactionName);
+
+                var tracedScheduledTransaction = scheduledTransaction.Do(
+                    val => Log(()
+                        => $"[Tx.DEBUG][Run] <<-- NOTIFICATION TO CHAINFAULTCONTEXT: OnNext. Item count: {val?.Length ?? 0}"),
+                    err => Log(()
+                        => $"[Tx.DEBUG][Run] <<-- NOTIFICATION TO CHAINFAULTCONTEXT: OnError: {err.GetType().Name} - {err.Message}"),
+                    () => Log(() => "[Tx.DEBUG][Run] <<-- NOTIFICATION TO CHAINFAULTCONTEXT: OnCompleted.")
+                );
+
+                return tracedScheduledTransaction
+                    .ChainFaultContext(finalContext, null, ib.CallerMemberName, ib.CallerMemberPath,
+                        ib.CallerMemberLine)
+                    .Finally(() => {
+                        TransactionNestingLevel.Value--;
+                        Log(()
+                            => $"[Tx.DEBUG][Run] Finally block. Nesting level decremented to: {TransactionNestingLevel.Value}");
+                    });
+            });
         }
 
-        private static IObservable<object> RunToCompletion<TFinal>(this TransactionBuilder<TFinal> builder, List<Func<object, IObservable<object>>> allSteps) {
+
+        private static IObservable<object> RunToCompletion<TFinal>(this TransactionBuilder<TFinal> builder,
+            List<StepDefinition> allSteps, bool isNested) {
+            Log(() => $"[Tx.DEBUG][RunToCompletion] Entered for '{builder.TransactionName}'. isNested: {isNested}");
             var allFailures = new List<Exception>();
+            var allResults = new List<object>();
             var stepChain = Observable.Return((object)null);
+
             for (var i = 0; i < allSteps.Count; i++) {
                 var step = allSteps[i];
                 var partNumber = i + 1;
-                stepChain = stepChain.SelectMany(currentResult => Observable.Defer(() => step(currentResult))
-                    .PushStackFrame(builder.Context.AddToContext($"{builder.TransactionName} - Part {partNumber}",builder.CallerMemberName,builder.CallerMemberPath,builder.CallerMemberLine))
-                    .Materialize()
-                    .Select(notification => {
-                        if (notification.Kind != NotificationKind.OnError) return notification.Value;
-                        allFailures.Add(notification.Exception.ExceptionToPublish(FaultHub.LogicalStackContext.Value.NewFaultContext([])));
-                        return null;
-                    }));
+                stepChain = stepChain.SelectMany(currentResult => {
+                    Log(()
+                        => $"[Tx.DEBUG][RunToCompletion] Executing Part {partNumber} of '{builder.TransactionName}'. Input is: {currentResult?.GetType().Name ?? "null"}");
+                    var primaryObservable = Observable.Defer(() => step.Selector(currentResult));
+
+                    var resilientObservable = step.FallbackSelector != null
+                        ? primaryObservable.Catch((Exception ex) => step.FallbackSelector(ex, currentResult))
+                        : primaryObservable;
+
+                    return resilientObservable
+                        .PushStackFrame(builder.Context.AddToContext($"{builder.TransactionName} - Part {partNumber}",
+                            builder.CallerMemberName, builder.CallerMemberPath, builder.CallerMemberLine))
+                        .Materialize()
+                        .Do(n => Log(()
+                            => $"[Tx.DEBUG][RunToCompletion] Part {partNumber} - Materialized notification: {n.Kind}"))
+                        .Where(notification => notification.Kind != NotificationKind.OnCompleted)
+                        .Select(notification => {
+                            if (notification.Kind == NotificationKind.OnNext) {
+                                Log(()
+                                    => $"[Tx.DEBUG][RunToCompletion] Part {partNumber} - Got OnNext. Adding to allResults. Value: {notification.Value}");
+                                allResults.Add(notification.Value);
+                                return notification.Value;
+                            }
+
+                            Log(()
+                                => $"[Tx.DEBUG][RunToCompletion] Part {partNumber} - Got OnError. Adding to allFailures. Exception: {notification.Exception.GetType().Name}");
+                            allFailures.Add(
+                                notification.Exception.ExceptionToPublish(FaultHub.LogicalStackContext.Value
+                                    .NewFaultContext([])));
+                            return null;
+                        });
+                });
             }
 
-            return stepChain.SelectMany(lastResult => allFailures.Any() ? Observable.Throw<object>(new AggregateException(allFailures)) : Observable.Return(lastResult));
-        }
-        private static IObservable<object> FailFast<TFinal>(this TransactionBuilder<TFinal> builder,List<Func<object, IObservable<object>>> allSteps) 
-            => allSteps.Select((step, i) => new { Func = step, PartNumber = i + 1 }).Aggregate(Observable.Return((object)null), (currentObservable, stepInfo) => currentObservable
-                .SelectMany(currentResult => Observable.Defer(() => stepInfo.Func(currentResult))
-                    .PushStackFrame(builder.Context.AddToContext($"{builder.TransactionName} - Part {stepInfo.PartNumber}"))));
+            return stepChain
+                .Where(result => result != null)
+                .Do(
+                    res => Log(() => $"[Tx.DEBUG][RunToCompletion] Item passed 'Where' and is entering ToList: {res}"),
+                    ex => Log(() => $"[Tx.DEBUG][RunToCompletion] ToList source FAILED with: {ex.Message}"),
+                    () => Log(() => "[Tx.DEBUG][RunToCompletion] ToList source COMPLETED."))
+                .ToList()
+                .SelectMany(results => {
+                    Log(()
+                        => $"[Tx.DEBUG][RunToCompletion] Final SelectMany. 'allResults' count: {allResults.Count}. 'results' from ToList count: {results.Count}. 'allFailures': {allFailures.Count}");
+                    if (allFailures.Any()) {
+                        var aggregateException = new AggregateException(allFailures);
+                        if (isNested) {
+                            var finalTypedResults = allResults.OfType<TFinal>().Cast<object>().ToList();
+                            Log(()
+                                => $"[Tx.DEBUG][RunToCompletion] Nested failure. RETURNING: Observable.Return(list with {finalTypedResults.Count} items) THEN Observable.Throw.");
+                            return Observable.Return((object)finalTypedResults)
+                                .Concat(Observable.Throw<object>(aggregateException));
+                        }
 
+                        Log(() => "[Tx.DEBUG][RunToCompletion] Top-level failure. RETURNING: Observable.Throw.");
+                        return Observable.Throw<object>(aggregateException);
+                    }
+
+                    Log(()
+                        => $"[Tx.DEBUG][RunToCompletion] Success. RETURNING: Observable.Return(results from ToList with {results.Count} items).");
+                    return Observable.Return((object)results);
+                });
+        }
+private static IObservable<object> FailFast<TFinal>(this TransactionBuilder<TFinal> builder, List<StepDefinition> allSteps) 
+            => allSteps.Select((step, i) => new { Step = step, PartNumber = i + 1 })
+                .Aggregate(Observable.Return((object)null), (currentObservable, stepInfo) => 
+                    currentObservable.SelectMany(currentResult => 
+                        Observable.Defer(() => stepInfo.Step.Selector(currentResult))
+                            .PushStackFrame(builder.Context.AddToContext($"{builder.TransactionName} - Part {stepInfo.PartNumber}"))))
+                .BufferUntilCompleted()
+                .Select(list => (object)list);
     }
 }

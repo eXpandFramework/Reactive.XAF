@@ -50,9 +50,11 @@ namespace Xpand.Extensions.Tests {
         public async Task Should_Not_Complete_For_Never_Stream() {
             var source = Observable.Never<int>();
 
-            var task =await source.Capture();
+            var captureTask = source.Capture();
 
-            task.IsCompleted.ShouldBeFalse();
+            await Task.Delay(100);
+
+            captureTask.IsCompleted.ShouldBeFalse();
         }
 
         [Test]
