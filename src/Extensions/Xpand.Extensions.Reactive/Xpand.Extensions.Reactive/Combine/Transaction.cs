@@ -53,8 +53,7 @@ namespace Xpand.Extensions.Reactive.Combine {
             => source.ToObjectStreams()
                 .SequentialTransaction(failFast, resiliencePolicy, context, transactionName, scheduler);
 
-        public static IObservable<Unit> SequentialTransaction<TSource>(this IEnumerable<IObservable<TSource>> source,
-            bool failFast = false,
+        public static IObservable<Unit> SequentialTransaction<TSource>(this IEnumerable<IObservable<TSource>> source, bool failFast = false,
             Func<IObservable<TSource>, IObservable<TSource>> resiliencePolicy = null, object[] context = null,
             [CallerMemberName] string transactionName = null, IScheduler scheduler = null) {
             var transaction = source
@@ -148,10 +147,23 @@ namespace Xpand.Extensions.Reactive.Combine {
                 _ => [(TCurrent)currentResult]
             };
             var step = new StepDefinition {
-                Selector = currentResult => nextSelector(CreateInputArray(currentResult)).Select(res => (object)res),
-                FallbackSelector = fallbackSelector != null 
-                    ? (ex, currentResult) => fallbackSelector(ex, CreateInputArray(currentResult)).Select(res => (object)res) 
-                    : null
+                Selector = currentResult => {
+                    // MODIFICATION: Added deep logging to trace the input and execution path.
+                    Log(() => $"[Tx.Then.DEBUG] Selector invoked. Received currentResult of type: '{currentResult?.GetType().FullName ?? "null"}' with value: '{currentResult}'");
+                    var inputArray = CreateInputArray(currentResult);
+                    Log(() => $"[Tx.Then.DEBUG] CreateInputArray produced an array with {inputArray.Length} items.");
+                    Log(() => "[Tx.Then.DEBUG] Proceeding to call the primary nextSelector.");
+                    return nextSelector(inputArray).Select(res => (object)res);
+                },
+                FallbackSelector = fallbackSelector == null ? null 
+                    : (ex, currentResult) => {
+                        // MODIFICATION: Added logging to the fallback path.
+                        Log(() => $"[Tx.Then.DEBUG] FallbackSelector invoked due to error: {ex.GetType().Name}. Received currentResult of type: {currentResult?.GetType().Name ?? "null"}");
+                        var inputArray = CreateInputArray(currentResult);
+                        Log(() => $"[Tx.Then.DEBUG] CreateInputArray in fallback produced an array with {inputArray.Length} items.");
+                        Log(() => "[Tx.Then.DEBUG] Proceeding to call the fallbackSelector.");
+                        return fallbackSelector(ex, inputArray).Select(res => (object)res);
+                    }
             };
 
             return new TransactionBuilder<TNext>(ib.InitialStep, ib.TransactionName, ib.Context, ib.Scheduler,
@@ -222,6 +234,7 @@ namespace Xpand.Extensions.Reactive.Combine {
                 var step = allSteps[i];
                 var partNumber = i + 1;
                 stepChain = stepChain.SelectMany(currentResult => {
+// MODIFICATION: Added log to show the input for the current step.
                     Log(()
                         => $"[Tx.DEBUG][RunToCompletion] Executing Part {partNumber} of '{builder.TransactionName}'. Input is: {currentResult?.GetType().Name ?? "null"}");
                     var primaryObservable = Observable.Defer(() => step.Selector(currentResult));
@@ -234,23 +247,34 @@ namespace Xpand.Extensions.Reactive.Combine {
                         .PushStackFrame(builder.Context.AddToContext($"{builder.TransactionName} - Part {partNumber}",
                             builder.CallerMemberName, builder.CallerMemberPath, builder.CallerMemberLine))
                         .Materialize()
-                        .Do(n => Log(()
-                            => $"[Tx.DEBUG][RunToCompletion] Part {partNumber} - Materialized notification: {n.Kind}"))
-                        .Where(notification => notification.Kind != NotificationKind.OnCompleted)
-                        .Select(notification => {
-                            if (notification.Kind == NotificationKind.OnNext) {
+                        .BufferUntilCompleted()
+                        .SelectMany(notifications => {
+// MODIFICATION: Added extensive logging to trace the processing of buffered notifications.
+                            Log(()
+                                => $"[Tx.DEBUG][RunToCompletion] Part {partNumber} - Buffered notifications received. Total: {notifications.Length}.");
+                            var errors = notifications.Where(n => n.Kind == NotificationKind.OnError).ToList();
+                            var results = notifications.Where(n => n.Kind == NotificationKind.OnNext).ToList();
+                            Log(()
+                                => $"[Tx.DEBUG][RunToCompletion] Part {partNumber} - Parsed notifications. Results: {results.Count}, Errors: {errors.Count}.");
+
+                            if (errors.Any()) {
                                 Log(()
-                                    => $"[Tx.DEBUG][RunToCompletion] Part {partNumber} - Got OnNext. Adding to allResults. Value: {notification.Value}");
-                                allResults.Add(notification.Value);
-                                return notification.Value;
+                                    => $"[Tx.DEBUG][RunToCompletion] Part {partNumber} - Processing {errors.Count} error(s).");
+                                allFailures.AddRange(errors.Select(e
+                                    => e.Exception.ExceptionToPublish(
+                                        FaultHub.LogicalStackContext.Value.NewFaultContext([]))));
+                            }
+
+                            if (results.Any()) {
+                                Log(()
+                                    => $"[Tx.DEBUG][RunToCompletion] Part {partNumber} - Processing {results.Count} result(s). Adding to allResults. Propagating last value: '{results.Last().Value}'.");
+                                allResults.AddRange(results.Select(r => r.Value));
+                                return Observable.Return(results.Last().Value);
                             }
 
                             Log(()
-                                => $"[Tx.DEBUG][RunToCompletion] Part {partNumber} - Got OnError. Adding to allFailures. Exception: {notification.Exception.GetType().Name}");
-                            allFailures.Add(
-                                notification.Exception.ExceptionToPublish(FaultHub.LogicalStackContext.Value
-                                    .NewFaultContext([])));
-                            return null;
+                                => $"[Tx.DEBUG][RunToCompletion] Part {partNumber} - No results to propagate. Returning null to the chain.");
+                            return Observable.Return((object)null);
                         });
                 });
             }

@@ -503,5 +503,28 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             innerFault.InnerException?.Message.ShouldBe("Inner Failure");
         }
 
+        [Test]
+        public async Task RunToEnd_DoesNotExecuteNextStepTwice_WhenNestedStepEmitsAndFails() {
+            var step3ExecutionCounter = 0;
+
+            IObservable<string[]> Step2EmitsAndFails(object[] _)
+                => Observable.Return(new[] { "Partial Data" })
+                    .Concat(Observable.Throw<string[]>(new InvalidOperationException("Nested Step Failed")));
+
+            IObservable<Unit> Step3Counter(string[][] _) {
+                step3ExecutionCounter++;
+                return Unit.Default.Observe();
+            }
+
+            var transaction = Observable.Return(Array.Empty<object>())
+                .BeginTransaction(transactionName: "Outer-Tx")
+                .Then(Step2EmitsAndFails)
+                .Then(Step3Counter)
+                .RunToEnd();
+
+            await transaction.PublishFaults().Capture();
+
+            step3ExecutionCounter.ShouldBe(1, "The third step should only be executed once with the partial data from the second step.");
+        }
     }
 }
