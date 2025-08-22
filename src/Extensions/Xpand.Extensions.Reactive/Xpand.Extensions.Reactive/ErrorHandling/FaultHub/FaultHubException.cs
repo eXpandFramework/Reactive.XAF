@@ -58,18 +58,31 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
                 $"{(obj.GetType().IsValueType||obj is string ? (root?"<-":null) : obj.GetType().Name)} {obj}";
         public override string ToString() {
             var builder = new StringBuilder();
-            var (faultChain, rootCause) = GetFlattenedExceptionInfo(this);
+            var contextChain = Context.FromHierarchy(c => c.InnerContext).Reverse().ToList();
+            var faultChainForStack = contextChain.Select(c => new FaultHubException("", null, c)).ToList();
+    
+            var rootCause = InnerException;
+            while (rootCause is FaultHubException fhEx) {
+                rootCause = fhEx.InnerException;
+            }
+            rootCause ??= InnerException ?? this;
             builder.AppendLine(rootCause.Message);
-            var contextFrames = faultChain.Select(ex => ex.Context.CustomContext).Where(c => c != null && c.Length != 0).Reverse();
-            var contextString = contextFrames.Select(frame => {
+
+            var contextFrames = contextChain.Select(ctx => ctx.CustomContext).Where(c => c != null && c.Length != 0);
+            var formattedContexts = contextFrames.Select(frame => {
                 var strings = frame.Where(o => o != null).Select((o, i) => FormatContextObject(o, i == 0)).Where(s => s != null).ToArray();
                 return $"{strings.FirstOrDefault()}{strings.Skip(1).JoinCommaSpace().EncloseParenthesis()}";
-            }).JoinSpace().TrimStart("<- ".ToCharArray());
+            }).ToList();
+            var uniqueFormattedContexts = formattedContexts
+                .Where((item, index) => index == 0 || item != formattedContexts[index - 1]);
+            var contextString = uniqueFormattedContexts.JoinSpace().TrimStart("<- ".ToCharArray());
+
             if (!string.IsNullOrEmpty(contextString)) {
                 builder.AppendLine(contextString);
             }
-            var allLogicalFrames = faultChain
-                .SelectMany(fhEx => fhEx.Context.LogicalStackTrace ?? Enumerable.Empty<LogicalStackFrame>())
+
+            var allLogicalFrames = faultChainForStack
+                .SelectMany(fhEx => fhEx.LogicalStackTrace ?? [])
                 .ToList();
             if (allLogicalFrames.Any()) {
                 var fullLogicalStack = allLogicalFrames.Distinct().ToList();
@@ -97,33 +110,6 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
             return builder.ToString();
         }
 
-        private static (List<FaultHubException> chain, Exception rootCause) GetFlattenedExceptionInfo(Exception ex) {
-            var faultChain = new List<FaultHubException>();
-            var rootCause = ex;
-            
-            var queue = new Queue<Exception>();
-            queue.Enqueue(ex);
-
-            while (queue.Count > 0) {
-                var current = queue.Dequeue();
-                if (current is FaultHubException fhEx) {
-                    faultChain.Add(fhEx);
-                }
-
-                if (current.InnerException != null) {
-                    queue.Enqueue(current.InnerException);
-                }
-                else {
-                    rootCause = current;
-                }
-            }
-            
-            if (rootCause is FaultHubException { InnerException: not null } finalFault) {
-                rootCause = finalFault.InnerException;
-            }
-
-            return (faultChain, rootCause);
-        }
     }
 
     }

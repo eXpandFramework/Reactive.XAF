@@ -257,6 +257,38 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
             result.Error.ShouldBeNull();
             result.IsCompleted.ShouldBe(true);
         }
+        
+        // MODIFICATION: Added a new test to verify rich exception reporting from nested contexts.
+        [Test]
+        public async Task ToString_Report_Aggregates_Context_From_Nested_ChainFaultContext_Boundaries() {
+            // ARRANGE: Create a nested observable chain where each layer adds context.
+            var innermostOperation = Observable.Throw<Unit>(new InvalidOperationException("Deep Failure"))
+                .ChainFaultContext(["InnermostContext"]);
+    
+            var intermediateOperation = innermostOperation
+                .ChainFaultContext(["IntermediateContext"]);
+
+            var outermostOperation = intermediateOperation
+                .ChainFaultContext(["OutermostContext"]);
+
+            // ACT
+            await outermostOperation.PublishFaults().Capture();
+
+            // ASSERT
+            BusEvents.Count.ShouldBe(1);
+            var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
+    
+            // Get the full string representation of the exception.
+            var report = fault.ToString();
+
+            // Verify that the report contains the context from ALL levels of the chain.
+            report.ShouldContain("OutermostContext");
+            report.ShouldContain("IntermediateContext");
+            report.ShouldContain("InnermostContext");
+    
+            // Verify the original exception is still present at the core.
+            report.ShouldContain("Deep Failure");
+        }
     }
         
     }
