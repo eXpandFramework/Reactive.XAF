@@ -1,6 +1,6 @@
 <Project>
   <PropertyGroup >
-    <NoWarn>1701;1702;NU1701;CS8002;CS0618;CA1416;NU1903;NU1902</NoWarn>
+    <NoWarn>NU1701;CS8002;CA1416;NU1903;NU1902</NoWarn>
 	  <NuGetAudit>disable</NuGetAudit>
     <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
   </PropertyGroup>

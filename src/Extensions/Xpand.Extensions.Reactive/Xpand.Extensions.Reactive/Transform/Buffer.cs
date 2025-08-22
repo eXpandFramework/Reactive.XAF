@@ -26,7 +26,7 @@ namespace Xpand.Extensions.Reactive.Transform {
         }
         
         public static IObservable<IList<T>> BufferUntilInactive<T>(this IObservable<T> source, int seconds,IScheduler scheduler=null)
-            => source.BufferUntilInactive(seconds.Seconds());
+            => source.BufferUntilInactive(seconds.Seconds(),scheduler);
         
         public static IObservable<IEnumerable<T>> BufferWithInactivity<T>(this IObservable<T> source, TimeSpan inactivity, TimeSpan? maxBufferTime=null,IScheduler scheduler=null) {
             if (maxBufferTime.HasValue && maxBufferTime.Value < inactivity)
@@ -39,7 +39,7 @@ namespace Xpand.Extensions.Reactive.Transform {
                 var inactivityTimer = new SerialDisposable();
                 var maxTimeTimer = new SerialDisposable();
                 var subscription = new SerialDisposable();
-                scheduler ??= Scheduler.ThreadPool;
+                scheduler ??= Scheduler.Default;
                 void Dump() {
                     if (buffer.Count <= 0) return;
                     var items = buffer.ToArray();
@@ -157,11 +157,7 @@ namespace Xpand.Extensions.Reactive.Transform {
                     return result;
                 }
             }
-
-            /// <summary>
-            /// An enumerable of buffers that will complete when a call to GetAndReplaceBuffer() returns a null, e.g. when the observer has caught up with the incoming source data.
-            /// </summary>
-            /// <returns></returns>
+            
             private IEnumerable<IObservable<T>> GetBuffers() {
                 while (GetAndReplaceBuffer() is{ } buffer) {
                     yield return buffer.ToObservable(scheduler);

@@ -16,7 +16,7 @@
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-    <NoWarn>1701;1702;NU1701;CS8002;CS0618;MSB3277</NoWarn>
+    <NoWarn>NU1701;CS8002;MSB3277</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Xpand.Extensions">

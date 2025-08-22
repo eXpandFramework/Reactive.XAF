@@ -17,10 +17,10 @@
     <RootNamespace>Xpand.XAF.Modules.JobScheduler.Hangfire.Notification.Tests</RootNamespace>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-    <NoWarn>1701;1702;cs8002</NoWarn>
+    <NoWarn>cs8002</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <NoWarn>1701;1702;cs8002</NoWarn>
+    <NoWarn>cs8002</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\TestsLib.Blazor\Xpand.TestsLib.Blazor.csproj" />

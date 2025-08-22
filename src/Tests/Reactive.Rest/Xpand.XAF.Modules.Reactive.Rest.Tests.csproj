@@ -17,7 +17,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <WarningsAsErrors>;NU1605;SYSLIB0011</WarningsAsErrors>
-    <NoWarn>1701;1702;NU1608;RAZORSDK1006</NoWarn>
+    <NoWarn>NU1608;RAZORSDK1006</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\TestsLib.Blazor\Xpand.TestsLib.Blazor.csproj" />

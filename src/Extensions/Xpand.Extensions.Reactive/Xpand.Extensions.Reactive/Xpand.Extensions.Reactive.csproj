@@ -18,10 +18,10 @@
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-    <NoWarn>1701;1702;NU1701;CS8002;CS0618;IL2121;CA1416</NoWarn>
+    <NoWarn>NU1701;CS8002;IL2121;CA1416</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <NoWarn>1701;1702;NU1701;CS8002;CS0618;IL2121;CA1416</NoWarn>
+    <NoWarn>NU1701;CS8002;IL2121;CA1416</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Xpand.Extensions">

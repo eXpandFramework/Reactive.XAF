@@ -16,10 +16,10 @@
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-    <NoWarn>1701;1702;cs8002 </NoWarn>
+    <NoWarn>cs8002 </NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <NoWarn>1701;1702;cs8002 </NoWarn>
+    <NoWarn>cs8002 </NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\TestApplication.Blazor.Server\TestApplication.Blazor.Server.csproj" />

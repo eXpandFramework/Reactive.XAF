@@ -19,7 +19,7 @@
     <NuGetAudit>disable</NuGetAudit>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <NoWarn>1701;1702;NU1701;CS8002;CS0618;NU1902;CA1416</NoWarn>
+    <NoWarn>NU1701;CS8002;NU1902;CA1416</NoWarn>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\Xpand.key\xpand.snk</AssemblyOriginatorKeyFile>
@@ -30,7 +30,7 @@
     <OutputPath>..\..\..\bin\ReactiveLoggerClient</OutputPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <NoWarn>1701;1702;NU1701;CS8002;CS0618;NU1902;CA1416</NoWarn>
+    <NoWarn>NU1701;CS8002;NU1902;CA1416</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <AdditionalFiles Remove="app1.manifest" />

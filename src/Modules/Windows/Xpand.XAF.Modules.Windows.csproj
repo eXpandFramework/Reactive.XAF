@@ -19,7 +19,7 @@
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
   </PropertyGroup>
   <PropertyGroup>
-    <NoWarn>1701;1702;CA1416</NoWarn>
+    <NoWarn>CA1416</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Xpand.Extensions.Reactive">

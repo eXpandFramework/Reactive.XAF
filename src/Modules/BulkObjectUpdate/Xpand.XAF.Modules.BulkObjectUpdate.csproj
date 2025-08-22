@@ -17,10 +17,10 @@
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-    <NoWarn>1701;1702;CS8002</NoWarn>
+    <NoWarn>CS8002</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <NoWarn>1701;1702;CS8002</NoWarn>
+    <NoWarn>CS8002</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Xpand.Extensions.Reactive">
