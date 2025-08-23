@@ -23,17 +23,17 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
 
         public IEnumerable<LogicalStackFrame> LogicalStackTrace {
             get {
-                Log(() => "[TOSTRING_DIAG] --- Entering LogicalStackTrace Property ---");
+                // Log(() => "[TOSTRING_DIAG] --- Entering LogicalStackTrace Property ---");
                 var contextHierarchy = Context.FromHierarchy(frame => frame.InnerContext).ToList();
-                Log(() => $"[TOSTRING_DIAG] Context hierarchy contains {contextHierarchy.Count} frames.");
+                // Log(() => $"[TOSTRING_DIAG] Context hierarchy contains {contextHierarchy.Count} frames.");
 
                 var stackTraces = contextHierarchy.Select((frame, i) => {
-                    Log(() => $"[TOSTRING_DIAG] Inspecting context frame {i} (Name: {frame.Name})");
+                    // Log(() => $"[TOSTRING_DIAG] Inspecting context frame {i} (Name: {frame.Name})");
                     var stack = frame.LogicalStackTrace;
                     if (stack != null && stack.Any()) {
-                        Log(() => $"[TOSTRING_DIAG]   - Found stack trace with {stack.Count()} frames. First frame: {stack.First().MemberName}");
+                        // Log(() => $"[TOSTRING_DIAG]   - Found stack trace with {stack.Count()} frames. First frame: {stack.First().MemberName}");
                     } else {
-                        Log(() => "[TOSTRING_DIAG]   - No stack trace found on this frame.");
+                        // Log(() => "[TOSTRING_DIAG]   - No stack trace found on this frame.");
                     }
                     return stack;
                 }).ToList();
@@ -41,9 +41,9 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
                 var selectedStack = stackTraces.LastOrDefault(stack => stack != null && stack.Any());
                 
                 if (selectedStack != null) {
-                    Log(() => $"[TOSTRING_DIAG] --- Selected Innermost Stack Trace. First frame: {selectedStack.First().MemberName} ---");
+                    // Log(() => $"[TOSTRING_DIAG] --- Selected Innermost Stack Trace. First frame: {selectedStack.First().MemberName} ---");
                 } else {
-                    Log(() => "[TOSTRING_DIAG] --- No valid stack trace selected. ---");
+                    // Log(() => "[TOSTRING_DIAG] --- No valid stack trace selected. ---");
                 }
                 
                 return selectedStack ?? Enumerable.Empty<LogicalStackFrame>();

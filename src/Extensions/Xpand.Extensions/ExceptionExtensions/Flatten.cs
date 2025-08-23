@@ -22,7 +22,7 @@ namespace Xpand.Extensions.ExceptionExtensions {
             }
         }
 
-        public static IEnumerable<System.Exception> FailurePath(this System.Exception exception,System.Exception rootCause,Func<System.Exception, bool> exclude=null) {
+        public static IEnumerable<Exception> FailurePath(this Exception exception,Exception rootCause,Func<Exception, bool> exclude=null) {
             var current = rootCause;
             while (true) {
                 var parent = exception.Parent(current,exclude);
@@ -35,7 +35,7 @@ namespace Xpand.Extensions.ExceptionExtensions {
         }
 
 
-        public static System.Exception Parent(this System.Exception exception, System.Exception other, Func<System.Exception, bool> exclude=null) {
+        public static Exception Parent(this Exception exception, Exception other, Func<Exception, bool> exclude=null) {
             var allNodes = exception.SelectMany().Distinct().ToArray();
             var parent = allNodes.FirstOrDefault(p => p.InnerException == other || p is AggregateException ae && ae.InnerExceptions.Contains(other));
             if (exclude != null) {
