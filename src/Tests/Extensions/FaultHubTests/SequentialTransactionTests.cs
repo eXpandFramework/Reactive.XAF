@@ -124,7 +124,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             var finalFault = BusEvents.Single().ShouldBeOfType<TransactionAbortedException>();
             finalFault.Message.ShouldBe("OuterTransaction failed");
 
-            var innerFault = finalFault.InnerException.ShouldBeOfType<FaultHubException>();
+            var innerFault = finalFault.InnerException.ShouldBeOfType<TransactionAbortedException>();
             innerFault.Message.ShouldBe("InnerTransaction1 failed");
 
             var originalOpFault = innerFault.InnerException.ShouldBeOfType<FaultHubException>();
