@@ -79,7 +79,11 @@ namespace Xpand.Extensions.Reactive.Combine {
     
             return failFast
                 ? transaction.Catch((Exception ex)
-                    => Observable.Throw<Unit>(new InvalidOperationException($"{transactionName} failed", ex)))
+                    => {
+                    var faultException = ex as FaultHubException ?? ex.ExceptionToPublish(
+                        FaultHub.LogicalStackContext.Value.NewFaultContext(context, transactionName));
+                    return Observable.Throw<Unit>(new TransactionAbortedException($"{transactionName} failed", faultException));
+                })
                 : transaction;
         }
 
@@ -122,7 +126,9 @@ namespace Xpand.Extensions.Reactive.Combine {
             return failFast
                 ? transaction.Catch((Exception ex) => {
                     Log(() => $"[Tx.DEBUG][Concurrent.Builder] FAILFAST CATCH. Caught: '{ex.GetType().Name}'. Wrapping in InvalidOperationException.");
-                    return Observable.Throw<object>(new InvalidOperationException($"{transactionName} failed", ex));
+                    var faultException = ex as FaultHubException ?? ex.ExceptionToPublish(
+                        FaultHub.LogicalStackContext.Value.NewFaultContext(context, transactionName));
+                    return Observable.Throw<object>(new TransactionAbortedException($"{transactionName} failed", faultException));
                 })
                 : transaction;
         }
@@ -166,14 +172,9 @@ namespace Xpand.Extensions.Reactive.Combine {
             => source.Select((obs, i) => obs.ChainFaultContext(context.AddToContext($"{transactionName} - Op:{i + 1}")))
                 .Merge(maxConcurrency > 0 ? maxConcurrency : int.MaxValue);
 
-        public static IObservable<Unit> SequentialTransaction(
-            this IEnumerable<INamedStream> source,
-            bool failFast = false,
-            Func<IObservable<object>, IObservable<object>> resiliencePolicy = null,
-            object[] context = null,
-            [CallerMemberName] string transactionName = null,
-            IScheduler scheduler = null)
-        {
+        static IObservable<Unit> SequentialTransaction(this IEnumerable<INamedStream> source, bool failFast = false,
+            Func<IObservable<object>, IObservable<object>> resiliencePolicy = null, object[] context = null,
+            [CallerMemberName] string transactionName = null, IScheduler scheduler = null) {
             var namedStreams = source.Select(s => new NamedStream<object> { Name = s.Name, Source = s.Source }).ToList();
     
             return namedStreams.SequentialTransaction(failFast, resiliencePolicy, context, transactionName, scheduler);
@@ -187,31 +188,13 @@ namespace Xpand.Extensions.Reactive.Combine {
             var transaction = source.Operations(resiliencePolicy, context, failFast, transactionName, scheduler: scheduler)
                 .SequentialTransaction(context.AddToContext(transactionName.PrefixCallerWhenDefault()));
             return failFast ? transaction.Catch((Exception ex)
-                    => Observable.Throw<Unit>(new InvalidOperationException($"{transactionName} failed", ex))) : transaction;
+                    => {
+                var faultException = ex as FaultHubException ?? ex.ExceptionToPublish(
+                    FaultHub.LogicalStackContext.Value.NewFaultContext(context, transactionName));
+                return Observable.Throw<Unit>(new TransactionAbortedException($"{transactionName} failed", faultException));
+            }) : transaction;
         }
 
-        [Obsolete("This overload produces generic 'Op:X' diagnostics. Please use the .WithName() extension method on each observable and call the SequentialTransaction overload that accepts an IEnumerable<NamedStream> for improved diagnostics.", false)]
-        public static IObservable<TResult> SequentialTransaction<TSource, TResult>(
-            this IEnumerable<IObservable<TSource>> source, Func<TSource[], IObservable<TResult>> resultSelector,
-            Func<IObservable<TSource>, IObservable<TSource>> resiliencePolicy = null, object[] context = null,
-            [CallerMemberName] string transactionName = null, IScheduler scheduler = null)
-            => source.Select((obs, i) => {
-                    var operation = resiliencePolicy != null ? resiliencePolicy(obs) : obs;
-                    return operation.SubscribeOn(scheduler ?? Scheduler.Default)
-                        .ChainFaultContext((context ?? []).AddToArray($"{transactionName} - Op:{i + 1}"))
-                        .Select(item => (object)item)
-                        .Catch((FaultHubException ex) => Observable.Return((object)ex));
-                })
-                .ToNowObservable().Concat().BufferUntilCompleted()
-                .SelectMany(results => {
-                    var exceptions = results.OfType<Exception>().ToList();
-                    return !exceptions.Any()
-                        ? Observable.Return(results.Cast<TSource>().ToArray())
-                        : Observable.Throw<TSource[]>(new InvalidOperationException($"{transactionName} failed",
-                            new AggregateException(exceptions)));
-                })
-                .SelectMany(resultSelector)
-                .PushStackFrame(context.AddToContext(transactionName));
 
         public static IObservable<TResult> SequentialTransaction<TSource, TResult>(
             this IEnumerable<NamedStream<TSource>> source, Func<TSource[], IObservable<TResult>> resultSelector,
@@ -231,8 +214,9 @@ namespace Xpand.Extensions.Reactive.Combine {
                     var successfulResults = results.OfType<TSource>().ToArray();
                     return !exceptions.Any()
                         ? Observable.Return(successfulResults)
-                        : Observable.Throw<TSource[]>(new InvalidOperationException($"{transactionName} failed",
-                            new AggregateException(exceptions)));
+                        : Observable.Throw<TSource[]>(new FaultHubException($"{transactionName} failed",
+                            new AggregateException(exceptions),
+                            FaultHub.LogicalStackContext.Value.NewFaultContext(context, transactionName)));
                 })
                 .SelectMany(resultSelector)
                 .PushStackFrame(context.AddToContext(transactionName));
@@ -241,9 +225,16 @@ namespace Xpand.Extensions.Reactive.Combine {
             => source.ToNowObservable().SelectManySequential(obs => obs.DefaultIfEmpty(new object()))
                 .BufferUntilCompleted()
                 .Select(results => results.OfType<Exception>().ToList())
-                .SelectMany(allFailures => !allFailures.Any()
-                    ? Unit.Default.Observe()
-                    : Observable.Throw<Unit>(new AggregateException(allFailures)))
+                .SelectMany(allFailures => {
+                    if (!allFailures.Any()) {
+                        return Unit.Default.Observe();
+                    }
+
+                    var txName = context?.OfType<string>().FirstOrDefault() ?? "Transaction";
+                    return Observable.Throw<Unit>(new FaultHubException($"{txName} completed with errors",
+                        new AggregateException(allFailures),
+                        FaultHub.LogicalStackContext.Value.NewFaultContext(context)));
+                })
                 .PushStackFrame(context);
 
         private static IEnumerable<IObservable<object>> Operations<TSource>(this IEnumerable<NamedStream<TSource>> source,
@@ -448,5 +439,9 @@ namespace Xpand.Extensions.Reactive.Combine {
         public Func<Exception, object, IObservable<object>> FallbackSelector { get; set; }
         public string Name { get; set; }
     }
-
-}
+    
+    public sealed class TransactionAbortedException(string message, Exception innerException, AmbientFaultContext context)
+        : FaultHubException(message, innerException, context) {
+        public TransactionAbortedException(string message, FaultHubException innerException)
+            : this(message, innerException, innerException.Context) { }
+    };}

@@ -57,24 +57,26 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             innerFault.AllContexts.ShouldNotContain("MyTransaction");
             innerFault.AllContexts.ShouldContain("MyTransaction - FailingOperation(failingCounter)");
         }
+
         [Test]
         public async Task SequentialTransaction_Aborts_On_First_Failure_When_FailFast_Is_True() {
             await Observable.Return(Unit.Default)
                 .BeginBatchTransaction()
                 .Add(Observable.Throw<string>(new InvalidOperationException("Failing Operation")))
                 .Add(Observable.Return(Unit.Default))
-                .SequentialTransaction(true, transactionName:"FailFastTransaction")
+                .SequentialTransaction(true, transactionName: "FailFastTransaction")
                 .PublishFaults().Capture();
 
-            var finalFault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
-            
-            var txException = finalFault.InnerException.ShouldBeOfType<InvalidOperationException>();
-            txException.Message.ShouldBe("FailFastTransaction failed");
+// MODIFICATION: The assertions are updated to expect the new TransactionAbortedException,
+// which correctly wraps the underlying FaultHubException without the extra InvalidOperationException.
+            var finalFault = BusEvents.Single().ShouldBeOfType<TransactionAbortedException>();
+            finalFault.Message.ShouldBe("FailFastTransaction failed");
 
-            var originalFault = txException.InnerException.ShouldBeOfType<FaultHubException>();
+            var originalFault = finalFault.InnerException.ShouldBeOfType<FaultHubException>();
             originalFault.InnerException.ShouldBeOfType<InvalidOperationException>().Message
                 .ShouldBe("Failing Operation");
         }
+
         [Test]
         public async Task Can_Create_Transaction_From_IEnumerable_Of_Observables() {
             var result = await new[] { "Success1", "Failure1", "Success2" }
@@ -119,20 +121,17 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
                 .SequentialTransaction(true, transactionName:"OuterTransaction")
                 .PublishFaults().Capture();
             
-            var finalFault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
-            
-            var outerTxException = finalFault.InnerException.ShouldBeOfType<InvalidOperationException>();
-            outerTxException.Message.ShouldBe("OuterTransaction failed");
-            
-            var innerFault = outerTxException.InnerException.ShouldBeOfType<FaultHubException>();
-            var innerTxException = innerFault.InnerException.ShouldBeOfType<InvalidOperationException>();
-            innerTxException.Message.ShouldBe("InnerTransaction1 failed");
-            
-            var originalOpFault = innerTxException.InnerException.ShouldBeOfType<FaultHubException>();
+            var finalFault = BusEvents.Single().ShouldBeOfType<TransactionAbortedException>();
+            finalFault.Message.ShouldBe("OuterTransaction failed");
+
+            var innerFault = finalFault.InnerException.ShouldBeOfType<FaultHubException>();
+            innerFault.Message.ShouldBe("InnerTransaction1 failed");
+
+            var originalOpFault = innerFault.InnerException.ShouldBeOfType<FaultHubException>();
             originalOpFault.InnerException.ShouldBeOfType<InvalidOperationException>().Message
                 .ShouldBe("Inner Tx1 Failed");
 
-            innerFault.AllContexts.ShouldContain("OuterTransaction - innerTx1");
+            finalFault.AllContexts.ShouldContain("OuterTransaction - innerTx1");
             originalOpFault.AllContexts.ShouldContain("InnerTransaction1 - Observable.Throw<Unit>(new InvalidOperationException(\"Inner Tx1 Failed\"))");
         }
 
@@ -153,56 +152,57 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
                 .SequentialTransaction(true, transactionName:"OuterTransaction")
                 .PublishFaults().Capture();
 
-            var finalFault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
-    
-            var outerTxException = finalFault.InnerException.ShouldBeOfType<InvalidOperationException>();
-            outerTxException.Message.ShouldBe("OuterTransaction failed");
-    
-            var innerFault = outerTxException.InnerException.ShouldBeOfType<FaultHubException>();
+            var finalFault = BusEvents.Single().ShouldBeOfType<TransactionAbortedException>();
+            finalFault.Message.ShouldBe("OuterTransaction failed");
+
+            var innerFault = finalFault.InnerException.ShouldBeOfType<FaultHubException>();
+            innerFault.Message.ShouldBe("InnerTransaction2 completed with errors");
+
             var aggregateException = innerFault.InnerException.ShouldBeOfType<AggregateException>();
             var originalOpFault = aggregateException.InnerExceptions.Single().ShouldBeOfType<FaultHubException>();
-    
+
             originalOpFault.InnerException?.Message.ShouldBe("Inner Tx2 Failed");
 
-            innerFault.AllContexts.ShouldContain("OuterTransaction - innerTx2");
+            finalFault.AllContexts.ShouldContain("OuterTransaction - innerTx2");
             originalOpFault.AllContexts.ShouldContain("InnerTransaction2 - Observable.Throw<Unit>(new InvalidOperationException(\"Inner Tx2 Failed\"))");
         }
-        
+
         [Test]
         public async Task RunToCompletionOuterTransaction_Aggregates_Failures_From_Nested_Transactions() {
             var innerTx1 = Observable.Throw<Unit>(new InvalidOperationException("Inner Tx1 Failed"))
                 .BeginBatchTransaction()
-                .SequentialTransaction(true, transactionName:"InnerTransaction1");
+                .SequentialTransaction(true, transactionName: "InnerTransaction1");
 
             var innerTx2 = Observable.Throw<Unit>(new InvalidOperationException("Inner Tx2 Failed"))
                 .BeginBatchTransaction()
-                .SequentialTransaction(transactionName:"InnerTransaction2");
+                .SequentialTransaction(transactionName: "InnerTransaction2");
 
             await innerTx1
                 .BeginBatchTransaction()
                 .Add(innerTx2)
-                .SequentialTransaction(transactionName:"OuterTransaction")
+                .SequentialTransaction(transactionName: "OuterTransaction")
                 .PublishFaults().Capture();
-            
+
             var finalFault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
-            
+            finalFault.Message.ShouldBe("OuterTransaction completed with errors");
+
             var aggregateException = finalFault.InnerException.ShouldBeOfType<AggregateException>();
             aggregateException.InnerExceptions.Count.ShouldBe(2);
 
-            var failure1 = aggregateException.InnerExceptions.OfType<FaultHubException>()
-                .FirstOrDefault(ex => ex.AllContexts.Contains("OuterTransaction - innerTx1"));
-            failure1.ShouldNotBeNull();
-            
-            var innerException1 = failure1.InnerException.ShouldBeOfType<InvalidOperationException>();
-            innerException1.Message.ShouldBe("InnerTransaction1 failed");
+            var failure1 = aggregateException.InnerExceptions.OfType<TransactionAbortedException>().Single();
+            failure1.Message.ShouldBe("InnerTransaction1 failed");
+            failure1.InnerException.ShouldBeOfType<FaultHubException>()
+                .InnerException.ShouldBeOfType<InvalidOperationException>()
+                .Message.ShouldBe("Inner Tx1 Failed");
 
             var failure2 = aggregateException.InnerExceptions.OfType<FaultHubException>()
-                .FirstOrDefault(ex => ex.AllContexts.Contains("OuterTransaction - innerTx2"));
-            failure2.ShouldNotBeNull();
-
-            var innerAggregate2 = failure2.InnerException.ShouldBeOfType<AggregateException>();
-            innerAggregate2.InnerExceptions.Single().ShouldBeOfType<FaultHubException>();
-        }        
+                .Single(ex => ex is not TransactionAbortedException);
+            failure2.Message.ShouldBe("InnerTransaction2 completed with errors");
+            failure2.InnerException.ShouldBeOfType<AggregateException>()
+                .InnerExceptions.Single().ShouldBeOfType<FaultHubException>()
+                .InnerException.ShouldBeOfType<InvalidOperationException>()
+                .Message.ShouldBe("Inner Tx2 Failed");
+        }
         public class Customer { public int Id { get; set; } }
         public class Order { public int Id { get; set; } }
 

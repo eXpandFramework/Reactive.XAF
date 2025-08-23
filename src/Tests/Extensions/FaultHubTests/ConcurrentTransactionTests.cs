@@ -69,7 +69,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             result.IsCompleted.ShouldBe(false);
             result.Error.ShouldNotBeNull();
 
-            var outerTxException = result.Error.ShouldBeOfType<InvalidOperationException>();
+            var outerTxException = result.Error.ShouldBeOfType<TransactionAbortedException>();
             outerTxException.Message.ShouldBe("Concurrent-FailFast-Tx failed");
 
             var innerFault = outerTxException.InnerException.ShouldBeOfType<FaultHubException>();

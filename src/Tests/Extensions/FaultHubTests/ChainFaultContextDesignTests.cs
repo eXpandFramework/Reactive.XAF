@@ -139,10 +139,6 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
         [Test]
         public async Task ChainFaultContext_Should_Yield_To_Outer_Resilience_Boundary() {
             
-            
-            
-
-            
             var innerCounter = new SubscriptionCounter();
             var outerCounter = new SubscriptionCounter();
 

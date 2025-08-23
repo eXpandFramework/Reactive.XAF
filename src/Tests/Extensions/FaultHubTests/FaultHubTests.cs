@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
@@ -265,6 +266,24 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
 
             report.ShouldContain("Deep Failure");
         }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private IObservable<Unit> InnermostFailingOperation_WithFrame()
+            => Observable.Throw<Unit>(new InvalidOperationException("Deep Failure"))
+                .PushStackFrame("Innermost_FRAME");
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private IObservable<Unit> IntermediateOperation_WithFrame()
+            => InnermostFailingOperation_WithFrame()
+                .PushStackFrame("Intermediate_FRAME")
+                .ChainFaultContext(["IntermediateContext"]);
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private IObservable<Unit> OutermostOperation_WithFrame()
+            => IntermediateOperation_WithFrame()
+                .PushStackFrame("Outermost_FRAME")
+                .ChainFaultContext(["OutermostContext"]);
+
     }
         
     }

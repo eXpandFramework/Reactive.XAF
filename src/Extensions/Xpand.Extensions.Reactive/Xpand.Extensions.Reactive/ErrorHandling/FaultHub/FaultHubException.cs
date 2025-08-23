@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,7 +8,7 @@ using Xpand.Extensions.StringExtensions;
 using static Xpand.Extensions.Reactive.ErrorHandling.FaultHub.FaultHubLogger;
 
 namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
-    public sealed class FaultHubException : Exception {
+    public class FaultHubException : Exception {
         public FaultHubException(string message, Exception innerException, AmbientFaultContext context) 
             : base(message, innerException) {
             Context = context;
@@ -16,7 +17,9 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
                 Data[key] = innerException.Data[key];
             }
         }
-        
+
+        public sealed override IDictionary Data =>base.Data;
+
 
         public IEnumerable<LogicalStackFrame> LogicalStackTrace {
             get {
@@ -56,60 +59,147 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
             => obj is Type or null ? $"Type: {obj}" :
                 obj.ToString() == obj.GetType().FullName ? null :
                 $"{(obj.GetType().IsValueType||obj is string ? (root?"<-":null) : obj.GetType().Name)} {obj}";
+
         public override string ToString() {
             var builder = new StringBuilder();
-            var contextChain = Context.FromHierarchy(c => c.InnerContext).Reverse().ToList();
-            var faultChainForStack = contextChain.Select(c => new FaultHubException("", null, c)).ToList();
-    
-            var rootCause = InnerException;
-            while (rootCause is FaultHubException fhEx) {
-                rootCause = fhEx.InnerException;
-            }
-            rootCause ??= InnerException ?? this;
-            builder.AppendLine(rootCause.Message);
+            var rootCause = GetRootCause();
 
-            var contextFrames = contextChain.Select(ctx => ctx.CustomContext).Where(c => c != null && c.Length != 0);
-            var formattedContexts = contextFrames.Select(frame => {
-                var strings = frame.Where(o => o != null).Select((o, i) => FormatContextObject(o, i == 0)).Where(s => s != null).ToArray();
-                return $"{strings.FirstOrDefault()}{strings.Skip(1).JoinCommaSpace().EncloseParenthesis()}";
-            }).ToList();
-            var uniqueFormattedContexts = formattedContexts
-                .Where((item, index) => index == 0 || item != formattedContexts[index - 1]);
-            var contextString = uniqueFormattedContexts.JoinSpace().TrimStart("<- ".ToCharArray());
-
+            // Always print the message and logical context of the top-level exception.
+            builder.AppendLine(Message);
+            var contextString = GetFormattedContexts();
             if (!string.IsNullOrEmpty(contextString)) {
                 builder.AppendLine(contextString);
             }
 
-            var allLogicalFrames = faultChainForStack
-                .SelectMany(fhEx => fhEx.LogicalStackTrace ?? [])
-                .ToList();
-            if (allLogicalFrames.Any()) {
-                var fullLogicalStack = allLogicalFrames.Distinct().ToList();
-                var simplifiedStack = fullLogicalStack.DistinctBy(f => f.MemberName).ToList();
-                var wasSimplified = simplifiedStack.Count < fullLogicalStack.Count;
-                if (wasSimplified) {
-                    builder.AppendLine("");
-                    builder.AppendLine("--- Simplified Invocation Stack (Unique Methods) ---");
-                    builder.AppendLine(string.Join(Environment.NewLine, simplifiedStack.Select(f => $"  {f}").Reverse()));
-                }
+            // MODIFICATION: Search the entire inner exception chain for an AggregateException
+            // to ensure the custom formatter is always used for aggregate failures,
+            // regardless of how deeply it's nested.
+            var topAggregate = FindTopAggregate(this);
 
-                builder.AppendLine(wasSimplified ? "--- Full Invocation Stack ---" : "--- Invocation Stack ---");
-                builder.AppendLine(string.Join(Environment.NewLine, fullLogicalStack.Select(f => $"  {f}").Reverse()));
+            if (topAggregate != null) {
+                FormatAggregateException(builder, topAggregate);
             }
-            
-            // builder.AppendLine("--- End of Logical Operation Stack ---");
-            
-            if (rootCause != this) {
-                builder.AppendLine();
-                builder.AppendLine("--- Original Exception Details ---");
-                builder.AppendLine(rootCause.ToString());
-                builder.AppendLine("--- End of Original Exception Details ---");
+            else {
+                FormatSingleException(builder, rootCause);
             }
 
             return builder.ToString();
         }
 
+        private AggregateException FindTopAggregate(Exception ex) {
+            var current = ex;
+            while (current != null) {
+                if (current is AggregateException agg) return agg;
+                current = current.InnerException;
+            }
+            return null;
+        }
+        private Exception GetRootCause() {
+            var current = InnerException;
+            while (current is FaultHubException fhEx) {
+                current = fhEx.InnerException;
+            }
+            return current ?? InnerException ?? this;
+        }
+
+        private string GetFormattedContexts() {
+            var contextChain = Context.FromHierarchy(c => c.InnerContext).Reverse().ToList();
+            var contextFrames = contextChain.Select(ctx => ctx.CustomContext).Where(c => c != null && c.Any());
+            var formattedContexts = contextFrames.Select(frame => {
+                var strings = frame.Where(o => o != null).Select((o, i) => FormatContextObject(o, i == 0)).Where(s => s != null).ToArray();
+                return $"{strings.FirstOrDefault()}{strings.Skip(1).JoinCommaSpace().EncloseParenthesis()}";
+            });
+            var uniqueFormattedContexts = formattedContexts
+                .Where((item, index) => index == 0 || item != formattedContexts.ElementAt(index - 1));
+            return uniqueFormattedContexts.JoinSpace().TrimStart("<- ".ToCharArray());
+        }
+
+        private void FormatSingleException(StringBuilder builder, Exception rootCause) {
+            var allLogicalFrames = Context.FromHierarchy(c => c.InnerContext)
+                .SelectMany(context => context.LogicalStackTrace ?? Enumerable.Empty<LogicalStackFrame>())
+                .ToList();
+            
+            if (allLogicalFrames.Any()) {
+                builder.AppendLine();
+                builder.AppendLine("--- Invocation Stack ---");
+                builder.AppendLine(string.Join(Environment.NewLine, allLogicalFrames.Distinct().Select(f => $"  {f}")));
+            }
+
+            if (rootCause != this && rootCause != null) {
+                builder.AppendLine();
+                builder.AppendLine("--- Original Exception Details ---");
+                builder.AppendLine(rootCause.ToString());
+                builder.AppendLine("--- End of Original Exception Details ---");
+            }
+        }
+
+        private void FormatAggregateException(StringBuilder builder, AggregateException aggregate) {
+            var rootCauses = FindRootCauses(aggregate).ToList();
+            builder.AppendLine();
+            builder.AppendLine($"--- Root Causes ({rootCauses.Count}) ---");
+            for (var i = 0; i < rootCauses.Count; i++) {
+                builder.AppendLine($"[{i + 1}] {rootCauses[i].GetType().Name}: {rootCauses[i].Message}");
+            }
+
+            builder.AppendLine();
+            builder.AppendLine("--- Detailed Failure Paths ---");
+            var flatList = aggregate.Flatten().InnerExceptions;
+            for (var i = 0; i < flatList.Count; i++) {
+                BuildFailureTree(builder, flatList[i], "", i == flatList.Count - 1);
+            }
+        }
+
+        private static IEnumerable<Exception> FindRootCauses(Exception ex) {
+// MODIFICATION: The logic is now enhanced to recursively look inside FaultHubException wrappers,
+// in addition to AggregateExceptions. This ensures it finds the true underlying exceptions
+// instead of stopping at our framework's summary exceptions.
+            if (ex is AggregateException aggEx) {
+                foreach (var inner in aggEx.InnerExceptions) {
+                    foreach (var root in FindRootCauses(inner)) {
+                        yield return root;
+                    }
+                }
+            }
+            else if (ex is FaultHubException fhEx && fhEx.InnerException != null) {
+                foreach (var root in FindRootCauses(fhEx.InnerException)) {
+                    yield return root;
+                }
+            }
+            else {
+                yield return ex;
+            }
+        }
+        
+        private void BuildFailureTree(StringBuilder builder, Exception ex, string indent, bool isLast) {
+            var prefix = indent + (isLast ? "└─" : "├─");
+            var childIndent = indent + (isLast ? "   " : "│  ");
+
+            var faultHubException = ex as FaultHubException ?? new FaultHubException("Unrecognized Exception", ex, Context);
+            
+            builder.AppendLine($"{prefix} [FAIL] {faultHubException.GetFormattedContexts()}");
+            
+            var allLogicalFrames = faultHubException.Context.FromHierarchy(c => c.InnerContext)
+                .SelectMany(context => context.LogicalStackTrace ?? Enumerable.Empty<LogicalStackFrame>())
+                .ToList();
+
+            if (allLogicalFrames.Any()) {
+                builder.AppendLine($"{childIndent} --- Invocation Stack ---");
+                foreach (var frame in allLogicalFrames.Distinct()) {
+                    builder.AppendLine($"{childIndent}   {frame}");
+                }
+            }
+
+            var rootCause = faultHubException.GetRootCause();
+            if (rootCause is AggregateException aggEx) {
+                var innerExceptions = aggEx.Flatten().InnerExceptions;
+                for (var i = 0; i < innerExceptions.Count; i++) {
+                    BuildFailureTree(builder, innerExceptions[i], childIndent, i == innerExceptions.Count - 1);
+                }
+            } else if (rootCause != null) {
+                builder.AppendLine($"{childIndent} └─ Root Cause: {rootCause.GetType().Name}: {rootCause.Message}");
+            }
+        }
+    }
     }
 
-    }
+    

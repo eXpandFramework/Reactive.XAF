@@ -212,6 +212,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
 
         public static FaultHubException ExceptionToPublish(this Exception e, AmbientFaultContext contextToUse=null) {
             Log(() => "[HUB-TRACE][ExceptionToPublish] Entered.");
+            
             if (contextToUse == null) {
                 Log(() => "[HUB--TRACE][ExceptionToPublish] contextToUse is null, returning original exception.");
                 var defaultContext = new System.Diagnostics.StackTrace(true).LogicalStackFrames().NewFaultContext([]);
@@ -224,12 +225,14 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
 
             if (e is not FaultHubException faultHubException) {
                 Log(() => "[HUB-TRACE][ExceptionToPublish] Exception is not a FaultHubException. Creating new chain.");
-                return new FaultHubException("An exception occurred in a traced fault context.", e, contextToUse);
+                return new FaultHubException(e.Message, e, contextToUse);
             }
             Log(() => "[HUB-TRACE][ExceptionToPublish] Exception is already a FaultHubException. Chaining new context.");
             
             var newChainedContext = contextToUse with{ InnerContext = faultHubException.Context };
-            var newException = new FaultHubException(faultHubException.Message, faultHubException.InnerException, newChainedContext);
+            var newException = (FaultHubException)Activator.CreateInstance(faultHubException.GetType(),
+                faultHubException.Message, faultHubException.InnerException, newChainedContext);
+
             var finalContextSummary = $"'{string.Join(" | ", newException.Context.CustomContext)}' -> '{string.Join(" | ", newException.Context.InnerContext?.CustomContext ?? [])}'";
             Log(() => $"[HUB-TRACE][ExceptionToPublish] Created new FaultHubException. Final Context Chain: {finalContextSummary}");
     
