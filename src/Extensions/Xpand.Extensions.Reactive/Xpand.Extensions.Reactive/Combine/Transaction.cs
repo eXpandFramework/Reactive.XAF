@@ -40,6 +40,14 @@ namespace Xpand.Extensions.Reactive.Combine {
             Func<IObservable<object>, IObservable<object>> resiliencePolicy = null, object[] context = null,
             [CallerMemberName] string transactionName = null, IScheduler scheduler = null)
             => builder.Operations.SequentialTransaction(failFast, resiliencePolicy, context, transactionName, scheduler);
+        public static IObservable<Unit> SequentialRunToEndTransaction(this IBatchTransactionBuilder builder, 
+            Func<IObservable<object>, IObservable<object>> resiliencePolicy = null, object[] context = null,
+            [CallerMemberName] string transactionName = null, IScheduler scheduler = null)
+            => builder.SequentialTransaction(false,resiliencePolicy,context,transactionName,scheduler);
+        public static IObservable<Unit> SequentialFailFastTransaction(this IBatchTransactionBuilder builder, 
+            Func<IObservable<object>, IObservable<object>> resiliencePolicy = null, object[] context = null,
+            [CallerMemberName] string transactionName = null, IScheduler scheduler = null)
+            => builder.SequentialTransaction(true,resiliencePolicy,context,transactionName,scheduler);
 
         private class StepAction<TIn, TOut> {
             public Func<TIn[], IObservable<TOut>> Selector { get; init; }
@@ -284,12 +292,11 @@ namespace Xpand.Extensions.Reactive.Combine {
                 string transactionName ,object[] context = null, IScheduler scheduler = null, [CallerMemberName] string memberName = "",
                 [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0,[CallerArgumentExpression(nameof(source))] string sourceExpression = null) {
             var stepName = GetStepName(sourceExpression);
-            Log(() => $"[Tx.DEBUG][BeginTransaction] Captured sourceExpression: '{sourceExpression}'. Parsed InitialStepName: '{stepName}'.");
+            Log(() => $"[Tx.DEBUG][BeginWorkflow] Captured sourceExpression: '{sourceExpression}'. Parsed InitialStepName: '{stepName}'.");
             return new TransactionBuilder<TSource>(source.BufferUntilCompleted().Select(list => (object)list), transactionName??memberName, context, scheduler, memberName, filePath, lineNumber) {
                 InitialStepName = stepName
             };
         }
-
         
         public static ITransactionBuilder<TNext> Then<TCurrent, TNext>(this ITransactionBuilder<TCurrent> builder, Func<TCurrent[], IObservable<TNext>> selector,
             string stepName = null,

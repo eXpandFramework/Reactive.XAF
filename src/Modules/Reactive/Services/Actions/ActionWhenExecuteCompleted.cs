@@ -8,30 +8,20 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions {
     public static partial class ActionsService {
         public static IObservable<T> WhenExecuteCompleted<T>(this SimpleAction action,
             Func<SimpleActionExecuteEventArgs, IObservable<T>> resilientSelector)
-            => action.ProcessEvent(nameof(ActionBase.ExecuteCompleted), resilientSelector).TakeUntilDisposed(action)
-// MODIFICATION: Removed redundant PushStackFrame call to avoid duplicate entries in the logical stack trace.
-                // .PushStackFrame()
-            ;
+            => action.ProcessEvent(nameof(ActionBase.ExecuteCompleted), resilientSelector).TakeUntilDisposed(action);
 
         public static IObservable<T> WhenExecuteCompleted<T>(this SingleChoiceAction action,
             Func<SingleChoiceActionExecuteEventArgs, IObservable<T>> resilientSelector)
-            => action.ProcessEvent(nameof(ActionBase.ExecuteCompleted), resilientSelector).TakeUntilDisposed(action)
-// MODIFICATION: Removed redundant PushStackFrame call to avoid duplicate entries in the logical stack trace.
-                // .PushStackFrame()
-            ;
+            => action.ProcessEvent(nameof(ActionBase.ExecuteCompleted), resilientSelector).TakeUntilDisposed(action);
 
         public static IObservable<T> WhenExecuteCompleted<T>(this ParametrizedAction action,
             Func<ParametrizedActionExecuteEventArgs, IObservable<T>> resilientSelector)
             => action.ProcessEvent(nameof(ActionBase.ExecuteCompleted), resilientSelector).TakeUntilDisposed(action)
-// MODIFICATION: Removed redundant PushStackFrame call to avoid duplicate entries in the logical stack trace.
                 .PushStackFrame();
 
         public static IObservable<T> WhenExecuteCompleted<T>(this PopupWindowShowAction action,
             Func<PopupWindowShowActionExecuteEventArgs, IObservable<T>> resilientSelector)
-            => action.ProcessEvent(nameof(ActionBase.ExecuteCompleted), resilientSelector).TakeUntilDisposed(action)
-// MODIFICATION: Removed redundant PushStackFrame call to avoid duplicate entries in the logical stack trace.
-                // .PushStackFrame()
-            ;
+            => action.ProcessEvent(nameof(ActionBase.ExecuteCompleted), resilientSelector).TakeUntilDisposed(action);
 
         public static IObservable<SingleChoiceActionExecuteEventArgs> WhenExecuteCompleted(
             this SingleChoiceAction action)

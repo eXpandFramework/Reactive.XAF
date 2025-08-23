@@ -154,8 +154,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 objectSpace.WhenCommitingDetailed(objectType,objectModification, true,criteria));
 
         public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)> WhenCommitingDetailed<T>(
-            this IObjectSpace objectSpace, bool emitAfterCommit, ObjectModification objectModification, Func<T, bool> criteria,string[] modifiedProperties) where T:class 
-// MODIFICATION: Removed PushStackFrame from this low-level helper to prevent stack trace pollution. The top-level calling method is responsible for adding the frame.
+            this IObjectSpace objectSpace, bool emitAfterCommit, ObjectModification objectModification, Func<T, bool> criteria,string[] modifiedProperties) where T:class
             => (!modifiedProperties.Any() ? objectSpace.WhenCommitingDetailed(objectModification, emitAfterCommit, criteria)
                 : objectSpace.WhenModifiedObjects(typeof(T), modifiedProperties).Cast<T>().Where(criteria??(_ =>true) )
                     .Buffer(objectSpace.WhenCommitingDetailed(false, objectModification, criteria)).WhenNotEmpty()
@@ -166,15 +165,12 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                             .Select(_ => (objectSpace, details)) : (objectSpace, details).Observe();
                     }).Where(t => t.details.Any()));
 
-        public static
-            IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)>
-            WhenModifiedObjectsDetailed<T>(this IObjectSpace objectSpace) where T : class 
-// MODIFICATION: Removed PushStackFrame from this low-level helper to prevent stack trace pollution.
+        public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)>
+            WhenModifiedObjectsDetailed<T>(this IObjectSpace objectSpace) where T : class
             => objectSpace.WhenCommitingDetailed<T>(ObjectModification.All, false);
         
         public static IObservable<(IObjectSpace objectSpace, IEnumerable<T> objects)> WhenCommiting<T>(this IObjectSpace objectSpace, 
-            ObjectModification objectModification = ObjectModification.All,bool emitAfterCommit = false) 
-// MODIFICATION: Removed PushStackFrame from this low-level helper to prevent stack trace pollution.
+            ObjectModification objectModification = ObjectModification.All,bool emitAfterCommit = false)
             => objectSpace.WhenCommitingDetailed<T>(objectModification, emitAfterCommit)
                 .Select(t => (t.objectSpace,t.details.Select(t1 => t1.instance)));
 
@@ -245,9 +241,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<(T theObject, IObjectSpace objectSpace)> FindObject<T>(this XafApplication application,Func<IQueryable<T>,IQueryable<T>> query=null) 
             => Observable.Using(() => application.CreateObjectSpace(typeof(T)), space => space.ExistingObject(query).Select(arg => (arg,space))).PushStackFrame();
 
-        public static IObservable<T> WhenObjectCommitted<T>(this IObservable<T> source) where T:IObjectSpaceLink 
-// MODIFICATION: Removed PushStackFrame from this low-level helper to prevent stack trace pollution.
-            => source.SelectMany(link => link.ObjectSpace.WhenCommitted().Take(1).Select(_ => link));
+        public static IObservable<T> WhenObjectCommitted<T>(this IObservable<T> source) where T:IObjectSpaceLink => source.SelectMany(link => link.ObjectSpace.WhenCommitted().Take(1).Select(_ => link));
 
         public static IObservable<T> WhenNewObjectCommiting<T>(this IObjectSpace objectSpace) where T : class
             => objectSpace.WhenCommiting()
@@ -285,8 +279,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => objectSpace.WhenCommitted<T>(ObjectModification.All);
         
         public static IObservable<(IObjectSpace objectSpace, IEnumerable<T> objects)> WhenCommitted<T>(
-            this IObjectSpace objectSpace, ObjectModification objectModification) 
-// MODIFICATION: Removed PushStackFrame from this low-level helper to prevent stack trace pollution.
+            this IObjectSpace objectSpace, ObjectModification objectModification)
             => objectSpace.WhenCommitingDetailed<T>(objectModification, true)
                 .Select(t => (t.objectSpace,t.details.Select(t1 => t1.instance)));
 
@@ -295,8 +288,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => source.WhenCommitted(objectType,[],objectModification);
         
         public static IObservable<(IObjectSpace objectSpace, IEnumerable<object> objects)> WhenCommitted(
-            this IObservable<IObjectSpace> source,Type objectType,string[] modifiedProperties , ObjectModification objectModification = ObjectModification.All) 
-// MODIFICATION: Removed PushStackFrame from this low-level helper to prevent stack trace pollution.
+            this IObservable<IObjectSpace> source,Type objectType,string[] modifiedProperties , ObjectModification objectModification = ObjectModification.All)
             => source.SelectMany(objectSpace => objectSpace.WhenCommitingDetailed(objectType, objectModification, true,modifiedProperties)
                 .Select(t => (t.objectSpace,t.details.Select(t1 => t1.instance))));
 

@@ -507,7 +507,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
 
             var logicalStack = innerFault.LogicalStackTrace.ToArray();
             logicalStack.Length.ShouldBe(1);
-            logicalStack.Single().MemberName.ShouldBe("RunToCompletion");
+            logicalStack.Single().MemberName.ShouldBe("RunToEnd");
         }
 
         [TestCase]

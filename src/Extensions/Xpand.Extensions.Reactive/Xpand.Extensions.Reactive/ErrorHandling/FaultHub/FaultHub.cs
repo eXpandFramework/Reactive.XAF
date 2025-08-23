@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
@@ -9,7 +8,6 @@ using System.Threading;
 using Microsoft.Extensions.Caching.Memory;
 using Xpand.Extensions.ExceptionExtensions;
 using Xpand.Extensions.MemoryCacheExtensions;
-using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Utility;
 using static Xpand.Extensions.Reactive.ErrorHandling.FaultHub.FaultHubLogger;
 
@@ -174,19 +172,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
             Func<IObservable<TSource>, IObservable<TSource>> retryStrategy = null, object[] context = null)
             => source.ChainFaultContext(retryStrategy, context)
                 .Select(t => (TResult)(object)t).Catch(fallbackSelector);
-
-        public static IObservable<T> MergeResilient<T>(this IEnumerable<IObservable<T>> sources) 
-            => sources.Select(source => source.ContinueOnFault()).Merge();
-
-        public static IObservable<T> MergeResilient<T>(params IObservable<T>[] sources) 
-            => sources.AsEnumerable().MergeResilient();
-
-        [Obsolete("add to contract")]
-        public static IObservable<T> MergeResilient<T>(this IObservable<T> source ,IObservable<T> other) 
-            => source.ContinueOnFault().Merge(other.ContinueOnFault());
-        public static IObservable<Unit> MergeToUnitResilient<TSource,TValue>(this IObservable<TSource> source ,IObservable<TValue> other) 
-            => source.ContinueOnFault().MergeToUnit(other.ContinueOnFault());
-
+        
         internal static IObservable<T> ProcessFault<T>(this Exception ex, AmbientFaultContext faultContext, Func<FaultHubException, IObservable<T>> proceedAction) {
             Log(() => $"[HUB][{nameof(ProcessFault)}] Entered for context '{faultContext.Name}'.");
             var enrichedException = ex.ExceptionToPublish(faultContext);
