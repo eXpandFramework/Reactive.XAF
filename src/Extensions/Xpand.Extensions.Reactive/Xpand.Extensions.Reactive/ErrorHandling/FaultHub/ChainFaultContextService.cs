@@ -132,18 +132,10 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
 
     public static AmbientFaultContext NewFaultContext(this  IReadOnlyList<LogicalStackFrame> logicalStack,object[] context, [CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0) {
             Log(() => $"[HUB-TRACE][NewFaultContext] Caller: '{memberName}', filePath: {filePath}, line: {lineNumber} Context: '{(context == null ? "null" : string.Join(", ", context))}'");
-            Log(() => $"[NewFaultContext-Debug] ==> Initial state. memberName: '{memberName}', context contains {context?.Length ?? 0} items: [{string.Join(", ", context?.Select(c => c?.ToString() ?? "null") ?? [])}]");
-            var initialContext = (context ?? []).Select(o => o).WhereNotDefault().ToList();
-            Log(() => $"[NewFaultContext-Debug] Step 1: After WhereNotDefault. Context has {initialContext.Count} items: [{string.Join(", ", initialContext.Select(c => c?.ToString() ?? "null"))}]");
-            var prependedContext = initialContext.Prepend(memberName).ToList();
-            Log(() => $"[NewFaultContext-Debug] Step 2: After Prepend (before Distinct). Context has {prependedContext.Count} items: [{string.Join(", ", prependedContext.Select(c => $"'{c?.ToString() ?? "null"}'(HashCode:{c?.GetHashCode()})"))}]");
-            var distinctContext = prependedContext.Distinct().ToList();
-            Log(() => $"[NewFaultContext-Debug] Step 3: After Distinct. Context has {distinctContext.Count} items: [{string.Join(", ", distinctContext.Select(c => c?.ToString() ?? "null"))}]");
-            var finalContext = distinctContext;
-            Log(() => $"[NewFaultContext-Debug] ==> Final state. finalContext has {finalContext.Count} items: [{string.Join(", ", finalContext.Select(c => c?.ToString() ?? "null"))}]");
             return new AmbientFaultContext {
                 LogicalStackTrace = logicalStack,
-                CustomContext = finalContext.ToArray()
+                BoundaryName = memberName,
+                UserContext = context ?? []
             };
         }
     }

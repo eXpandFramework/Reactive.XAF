@@ -26,7 +26,7 @@ public class FaultHubAsyncTests : FaultHubTestBase {
         BusEvents.Count.ShouldBe(1);
 
         var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
-        fault.Context.CustomContext.ShouldContain("MainThreadContext");
+        fault.Context.UserContext.ShouldContain("MainThreadContext");
         fault.InnerException.ShouldBeOfType<InvalidOperationException>();
     }
         
@@ -46,8 +46,8 @@ public class FaultHubAsyncTests : FaultHubTestBase {
         var faults = BusEvents.OfType<FaultHubException>().ToArray();
         faults.Length.ShouldBe(2);
             
-        faults.SelectMany(f => f.Context.CustomContext).ShouldContain("ContextA");
-        faults.SelectMany(f => f.Context.CustomContext).ShouldContain("ContextB");
+        faults.SelectMany(f => f.Context.UserContext).ShouldContain("ContextA");
+        faults.SelectMany(f => f.Context.UserContext).ShouldContain("ContextB");
     }
         
     [Test]
@@ -67,7 +67,7 @@ public class FaultHubAsyncTests : FaultHubTestBase {
         BusEvents.Count.ShouldBe(1);
             
         var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
-        fault.Context.CustomContext.ShouldContain("AsyncRetryContext");
+        fault.Context.UserContext.ShouldContain("AsyncRetryContext");
         fault.InnerException.ShouldBeOfType<InvalidOperationException>();
     }
 

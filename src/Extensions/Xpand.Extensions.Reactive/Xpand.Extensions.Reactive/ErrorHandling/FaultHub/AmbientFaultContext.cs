@@ -7,9 +7,10 @@ using Xpand.Extensions.StringExtensions;
 namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
     public record AmbientFaultContext {
         public IReadOnlyList<LogicalStackFrame> LogicalStackTrace { get; init; }
-        public object[] CustomContext { get; init; }
+        public object[] UserContext { get; init; }
         public AmbientFaultContext InnerContext { get; init; }
-        public object Name => CustomContext.FirstOrDefault() ?? "Unknown";
+        public object Name => UserContext.FirstOrDefault()??BoundaryName ?? "Unknown";
+        public string BoundaryName { get; init; }
     }
     
     public readonly struct LogicalStackFrame(

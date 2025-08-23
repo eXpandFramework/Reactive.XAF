@@ -79,7 +79,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
 
         public static bool Publish(this Exception ex) {
             if (ex is FaultHubException fault) {
-                Log(() => $"[HUB-TRACE][Publish] Publishing with final context: '{string.Join(", ", fault.Context.CustomContext)}'");
+                Log(() => $"[HUB-TRACE][Publish] Publishing with final context: '{string.Join(", ", fault.Context.UserContext)}'");
             }
             var (action, correlationId) = ex.AccessData(data => {
                 if (data.Contains(PublishedKey)) {
@@ -220,8 +220,8 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
 
             }
 
-            var incomingContextSummary = e is FaultHubException f ? $"'{string.Join(", ", f.Context.CustomContext)}'" : "(none)";
-            Log(() => $"[HUB-TRACE][ExceptionToPublish] Wrapping exception '{e.GetType().Name}'. Incoming Context: {incomingContextSummary}, New Context: '{string.Join(", ", contextToUse.CustomContext)}'");
+            var incomingContextSummary = e is FaultHubException f ? $"'{string.Join(", ", f.Context.UserContext)}'" : "(none)";
+            Log(() => $"[HUB-TRACE][ExceptionToPublish] Wrapping exception '{e.GetType().Name}'. Incoming Context: {incomingContextSummary}, New Context: '{string.Join(", ", contextToUse.UserContext)}'");
 
             if (e is not FaultHubException faultHubException) {
                 Log(() => "[HUB-TRACE][ExceptionToPublish] Exception is not a FaultHubException. Creating new chain.");
@@ -233,7 +233,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
             var newException = (FaultHubException)Activator.CreateInstance(faultHubException.GetType(),
                 faultHubException.Message, faultHubException.InnerException, newChainedContext);
 
-            var finalContextSummary = $"'{string.Join(" | ", newException.Context.CustomContext)}' -> '{string.Join(" | ", newException.Context.InnerContext?.CustomContext ?? [])}'";
+            var finalContextSummary = $"'{string.Join(" | ", newException.Context.UserContext)}' -> '{string.Join(" | ", newException.Context.InnerContext?.UserContext ?? [])}'";
             Log(() => $"[HUB-TRACE][ExceptionToPublish] Created new FaultHubException. Final Context Chain: {finalContextSummary}");
     
             return newException;
