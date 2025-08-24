@@ -376,9 +376,8 @@ namespace Xpand.Extensions.Reactive.Combine {
                     var primaryObservable = Observable.Defer(() => step.Selector(currentResult));
                     var resilientObservable = step.FallbackSelector == null ? primaryObservable
                         : primaryObservable.Catch((Exception ex) => step.FallbackSelector(ex, currentResult));
-                    return resilientObservable
-                        .PushStackFrame()
-                        .ChainFaultContext(builder.Context.AddToContext($"{builder.TransactionName} - {stepName}",builder.CallerMemberName, builder.CallerMemberPath, builder.CallerMemberLine), memberName: stepName)
+                    return resilientObservable.PushStackFrame()
+                        .ChainFaultContext(builder.Context.AddToContext($"{builder.TransactionName} - {stepName}"), memberName: stepName)
                         .Materialize()
                         .BufferUntilCompleted()
                         .SelectMany(notifications => {
@@ -435,17 +434,20 @@ namespace Xpand.Extensions.Reactive.Combine {
             if (!string.IsNullOrEmpty(explicitName)) return explicitName;
             if (string.IsNullOrEmpty(expression)) return selector?.Method.Name;
 
-            var parts = expression.Split("=>");
-            var lastPart = parts.Last().Trim();
+            // Handle lambdas like "_ => MyMethod(...)" by taking the part after the arrow.
+            var codePart = expression.Split("=>").Last().Trim();
 
-            if (lastPart.EndsWith("()")) {
-                lastPart = lastPart.Substring(0, lastPart.Length - 2);
+            // Find the start of the argument list and take the substring before it.
+            var parenthesisIndex = codePart.IndexOf('(');
+            if (parenthesisIndex > 0) {
+                codePart = codePart.Substring(0, parenthesisIndex);
             }
 
-            var finalName = lastPart.Split('.').Last();
+            // Handle chained calls like "x.y.MyMethod" by taking the last part.
+            var finalName = codePart.Split('.').Last();
+    
             return string.IsNullOrEmpty(finalName) ? expression : finalName;
         }
-
         private static IObservable<object> FailFast<TFinal>(this TransactionBuilder<TFinal> builder, List<StepDefinition> allSteps) 
             => allSteps.Select((step, i) => new { Step = step, PartNumber = i + 1 })
                 .Aggregate(Observable.Return((object)null), (currentObservable, stepInfo) => currentObservable
@@ -455,8 +457,7 @@ namespace Xpand.Extensions.Reactive.Combine {
                             .PushStackFrame()
                             .ChainFaultContext(builder.Context.AddToContext($"{builder.TransactionName} - {stepName}"), memberName: stepName);
                     }))
-                .BufferUntilCompleted()
-                .Select(list => (object)list);
+                .BufferUntilCompleted();
     }
     
     internal class StepDefinition {

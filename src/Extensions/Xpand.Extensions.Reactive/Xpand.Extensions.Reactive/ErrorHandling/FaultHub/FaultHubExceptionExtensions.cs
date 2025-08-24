@@ -22,7 +22,10 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
                 Console.WriteLine($"[PARSER-DIAGNOSTIC] >> Building Path #{i + 1} for Root Cause: {root.Message}");
                 var exceptionPath = topException.FailurePath(root).Reverse().ToList();
                 Console.WriteLine($"[PARSER-DIAGNOSTIC]    FailurePath contains {exceptionPath.Count} total exceptions.");
-                var steps = exceptionPath.OfType<FaultHubException>().Select(ParseStep).ToList();
+                // This now correctly unpacks the nested contexts from each exception in the path.
+                var steps = exceptionPath.OfType<FaultHubException>()
+                    .SelectMany(UnpackContexts) 
+                    .Select(ParseStep).ToList();
                 Console.WriteLine($"[PARSER-DIAGNOSTIC]    Extracted {steps.Count} raw operation steps.");
                 
                 var logicalStack = exceptionPath.OfType<FaultHubException>().LastOrDefault()?.LogicalStackTrace.ToList() ?? [];
@@ -96,29 +99,34 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
     
             Console.WriteLine($"[PARSER-DIAGNOSTIC]      - Parsing Step from FH: '{fhEx.Message}'. BoundaryName: '{boundaryName ?? "null"}', UserContext Items: {userContext.Length}");
 
-            var name = boundaryName;
-            var boundaryNameNoSpace = name?.Replace(" ", "");
+            var dirtyName = boundaryName ?? "Unnamed Operation";
+            var parenthesisIndex = dirtyName.IndexOf('(');
+            if (parenthesisIndex > -1) {
+                dirtyName = dirtyName.Substring(0, parenthesisIndex);
+            }
+            var cleanName = dirtyName.Trim();
+            var cleanNameNoSpace = cleanName.Replace(" ", "");
 
             var contextData = userContext.Where(o => {
                 if (o is not string s) return true;
-                var sNoSpace = s.Replace(" ", "");
-                // Filter out any strings from the context that are the same as the BoundaryName
-                return sNoSpace != boundaryNameNoSpace;
+                // Filter out any string from the context that is the same as the clean name.
+                return s.Replace(" ", "") != cleanNameNoSpace;
             }).ToList();
 
-            // Secondary filter to remove the composite "Transaction - Step" name, which can be noisy.
-            if (contextData.Count > 1 && contextData.FirstOrDefault() is string firstString) {
-                if (firstString.Contains($" - {name}")) {
-                    contextData.RemoveAt(0);
-                }
-            }
 
-            var finalName = (name ?? "Unnamed Operation").CompoundName();
-    
+            var finalName = cleanName.CompoundName();
             Console.WriteLine($"[PARSER-DIAGNOSTIC]        ==> Extracted Name: '{finalName}', Context Items: {contextData.Count}");
             return new OperationStep(finalName, contextData);            
         }
         
+        private static IEnumerable<FaultHubException> UnpackContexts(FaultHubException fhEx) {
+            var context = fhEx.Context;
+            while (context != null) {
+                // We create a temporary FHE for each level of the context chain to pass to ParseStep
+                yield return new FaultHubException(fhEx.Message, fhEx.InnerException, context);
+                context = context.InnerContext;
+            }
+        }
         private static IEnumerable<Exception> FindRootCauses(Exception ex) {
             Console.WriteLine($"[PARSER-DIAGNOSTIC]   - FindRootCauses searching in: {ex?.GetType().Name ?? "null"} ('{ex?.Message}')");
 

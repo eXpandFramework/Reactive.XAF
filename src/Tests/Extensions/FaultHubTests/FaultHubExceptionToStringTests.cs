@@ -17,6 +17,10 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
     public class FaultHubExceptionToStringTests : FaultHubTestBase {
         public static FaultHubException LastReport { get; private set; }
         #region Operation Simulation
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+        private IObservable<Unit> StepWithArgs(string someNoisyArgument) => WhenExistingProjectPageParsed()
+            .PushStackFrame();
+
         private IObservable<Unit> StartParsing()
             => Observable.Throw<Unit>(new Exception("StartParsing"))
                 .PushStackFrame();
@@ -24,19 +28,21 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
         private IObservable<Unit> ProjectParseTransaction()
             => Unit.Default.Observe().BeginWorkflow("Project Parse Transaction")
                 .Then(_ => StartParsing(), "Start Parsing")
-                .RunToEnd().ToUnit();
+                .RunToEnd().ToUnit()
+                .PushStackFrame();
 
         private IObservable<Unit> WhenExistingProjectPageParsed()
             => Unit.Default.Observe().BeginWorkflow("When Existing Project Page Parsed")
                 .Then(_ => ProjectParseTransaction())
-                .RunToEnd().ToUnit() ;
-
-        private IObservable<Unit> ParseUpcomingProjects()
-            => Unit.Default.Observe().BeginWorkflow("Parse Upcoming Projects")
-                .Then(_ => WhenExistingProjectPageParsed())
                 .RunToEnd().ToUnit()
                 .PushStackFrame();
 
+        private IObservable<Unit> ParseUpcomingProjects()
+            => Unit.Default.Observe().BeginWorkflow("Parse Upcoming Projects")
+                .Then(_ => StepWithArgs("some noisy argument"))
+                .RunToEnd().ToUnit()
+                .PushStackFrame();
+        
         private IObservable<Unit> WhenUpcomingUrls()
             => Observable.Throw<Unit>(new Exception("Upcoming"))
                 .PushStackFrame();
@@ -45,12 +51,14 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             => Unit.Default.Observe().BeginWorkflow("Parse Up Coming")
                 .Then(_ => WhenUpcomingUrls())
                 .Then(_ => ParseUpcomingProjects())
-                .RunToEnd().ToUnit();
+                .RunToEnd().ToUnit()
+                .PushStackFrame();
         
         private IObservable<Unit> ScheduleLaunchPadParse()
             => Unit.Default.Observe().BeginWorkflow("Schedule Launch Pad Parse")
                 .Then(_ => ParseUpComing())
-                .RunToEnd().ToUnit();
+                .RunToEnd().ToUnit()
+                .PushStackFrame();
         #endregion
 
         
@@ -70,24 +78,25 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             reportString.ShouldContain("--- Failures (2) ---");
 
             reportString.ShouldContain("1. Failure Path:");
-            reportString.ShouldMatch(@"-\s+Operation: Schedule Launch Pad Parse");
-            reportString.ShouldMatch(@"\s+-\s+Operation: Parse Up Coming");
-            reportString.ShouldMatch(@"\s+-\s+Operation: When Upcoming Urls");
-            reportString.ShouldContain("Root Cause: System.Exception: Upcoming");
-            reportString.ShouldMatch(@"\(\) at WhenUpcomingUrls in .*Tests\\Extensions\\FaultHubTests\\FaultHubExceptionToStringTests.cs:line \d+");
+            reportString.ShouldContain("- Operation: Schedule Launch Pad Parse");
+            reportString.ShouldContain("  - Operation: Parse Up Coming");
+            reportString.ShouldContain("    - Operation: When Upcoming Urls");
+            reportString.ShouldContain("    Root Cause: System.Exception: Upcoming");
+            reportString.ShouldMatch(@"\(\) at WhenUpcomingUrls in .*FaultHubExceptionToStringTests.cs:line \d+");
     
             reportString.ShouldContain("2. Failure Path:");
-            reportString.ShouldMatch(@"-\s+Operation: Schedule Launch Pad Parse");
-            reportString.ShouldMatch(@"\s+-\s+Operation: Parse Up Coming");
-            reportString.ShouldMatch(@"\s+-\s+Operation: Parse Upcoming Projects");
-            reportString.ShouldMatch(@"\s+-\s+Operation: When Existing Project Page Parsed");
-            reportString.ShouldMatch(@"\s+-\s+Operation: Project Parse Transaction");
-            reportString.ShouldMatch(@"\s+-\s+Operation: Start Parsing");
-            reportString.ShouldContain("Root Cause: System.Exception: StartParsing");
-            reportString.ShouldMatch(@"\(\) at StartParsing in .*Tests\\Extensions\\FaultHubTests\\FaultHubExceptionToStringTests.cs:line \d+");
-
+            reportString.ShouldContain("- Operation: Schedule Launch Pad Parse");
+            reportString.ShouldContain("  - Operation: Parse Up Coming");
+            reportString.ShouldContain("    - Operation: Parse Upcoming Projects");
+            reportString.ShouldContain("      - Operation: Step With Args");
+            reportString.ShouldContain("        - Operation: When Existing Project Page Parsed");
+            reportString.ShouldContain("          - Operation: Project Parse Transaction");
+            reportString.ShouldContain("            - Operation: Start Parsing");
+            reportString.ShouldContain("            Root Cause: System.Exception: StartParsing");
+            reportString.ShouldMatch(@"\(\) at StartParsing in .*FaultHubExceptionToStringTests.cs:line \d+");
+    
             reportString.ShouldNotContain("as part of:");
-            // reportString.ShouldNotContain("C:\\");
+            reportString.ShouldNotContain("(some noisy argument)");        
             
         }
     }
