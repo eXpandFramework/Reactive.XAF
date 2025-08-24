@@ -26,9 +26,11 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
                 return this.Parse().Render();
             }
             catch (Exception e) {
-                return $"[FaultHub Report Generation Failed: {e.Message}] \n--- Base Exception Details ---\n{base.ToString()}";
-            }
-        }
+                return $"[!!! INTERNAL ToString() CRASH !!!]\n" +
+                       $"Message: {e.Message}\n" +
+                       $"StackTrace: {e.StackTrace}\n\n" +
+                       $"--- Base Exception Details ---\n{base.ToString()}";
+            }        }
 
 
         

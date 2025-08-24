@@ -219,9 +219,19 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
                 return e as FaultHubException ?? new FaultHubException("An exception occurred in a traced fault context.", e, defaultContext);
 
             }
-
-            var incomingContextSummary = e is FaultHubException f ? $"'{string.Join(", ", f.Context.UserContext)}'" : "(none)";
+            string incomingContextSummary;
+            if (e is FaultHubException f) {
+                incomingContextSummary = $"'{string.Join(", ", f.Context.UserContext)}'";
+                if (contextToUse.UserContext is not { Length: > 0 } && contextToUse.LogicalStackTrace is not { Count: > 0 }) {
+                    Log(() => $"[HUB-TRACE][ExceptionToPublish] Ignoring generic wrapper context '{contextToUse?.BoundaryName}'. Returning original FaultHubException.");
+                    return f;
+                }
+            }
+            else
+                incomingContextSummary = "(none)";
             Log(() => $"[HUB-TRACE][ExceptionToPublish] Wrapping exception '{e.GetType().Name}'. Incoming Context: {incomingContextSummary}, New Context: '{string.Join(", ", contextToUse.UserContext)}'");
+            
+            
 
             if (e is not FaultHubException faultHubException) {
                 Log(() => "[HUB-TRACE][ExceptionToPublish] Exception is not a FaultHubException. Creating new chain.");

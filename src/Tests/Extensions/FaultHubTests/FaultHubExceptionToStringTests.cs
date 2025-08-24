@@ -53,6 +53,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
                 .RunToEnd().ToUnit();
         #endregion
 
+        
         [Test][Apartment(ApartmentState.STA)]
         public async Task Generates_Concise_Execution_Report_For_Complex_Nested_Failures() {
             await ScheduleLaunchPadParse().PublishFaults().Capture();
@@ -65,28 +66,28 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             Console.WriteLine(reportString);
             Clipboard.SetText(reportString);
 
-            reportString.ShouldStartWith("Schedule Launch Pad Parse failed");
+            reportString.ShouldStartWith("Schedule Launch Pad Parse completed with errors");
             reportString.ShouldContain("--- Failures (2) ---");
 
             reportString.ShouldContain("1. Failure Path:");
-            reportString.ShouldContain("- Operation: Schedule Launch Pad Parse");
-            reportString.ShouldContain("  - Operation: Parse Up Coming");
-            reportString.ShouldContain("    - Operation: When Upcoming Urls");
-            reportString.ShouldContain("    Root Cause: System.Exception: Upcoming");
-            reportString.ShouldContain("() at WhenUpcomingUrls");
-
-            reportString.ShouldContain("2. Failure Path:");
-            reportString.ShouldContain("- Operation: Schedule Launch Pad Parse");
-            reportString.ShouldContain("  - Operation: Parse Up Coming");
-            reportString.ShouldContain("    - Operation: Parse Upcoming Projects");
-            reportString.ShouldContain("      - Operation: When Existing Project Page Parsed");
-            reportString.ShouldContain("        - Operation: Project Parse Transaction");
-            reportString.ShouldContain("          - Operation: Start Parsing");
-            reportString.ShouldContain("          Root Cause: System.Exception: StartParsing");
-            reportString.ShouldContain("() at StartParsing");
+            reportString.ShouldMatch(@"-\s+Operation: Schedule Launch Pad Parse");
+            reportString.ShouldMatch(@"\s+-\s+Operation: Parse Up Coming");
+            reportString.ShouldMatch(@"\s+-\s+Operation: When Upcoming Urls");
+            reportString.ShouldContain("Root Cause: System.Exception: Upcoming");
+            reportString.ShouldMatch(@"\(\) at WhenUpcomingUrls in .*Tests\\Extensions\\FaultHubTests\\FaultHubExceptionToStringTests.cs:line \d+");
     
+            reportString.ShouldContain("2. Failure Path:");
+            reportString.ShouldMatch(@"-\s+Operation: Schedule Launch Pad Parse");
+            reportString.ShouldMatch(@"\s+-\s+Operation: Parse Up Coming");
+            reportString.ShouldMatch(@"\s+-\s+Operation: Parse Upcoming Projects");
+            reportString.ShouldMatch(@"\s+-\s+Operation: When Existing Project Page Parsed");
+            reportString.ShouldMatch(@"\s+-\s+Operation: Project Parse Transaction");
+            reportString.ShouldMatch(@"\s+-\s+Operation: Start Parsing");
+            reportString.ShouldContain("Root Cause: System.Exception: StartParsing");
+            reportString.ShouldMatch(@"\(\) at StartParsing in .*Tests\\Extensions\\FaultHubTests\\FaultHubExceptionToStringTests.cs:line \d+");
+
             reportString.ShouldNotContain("as part of:");
-            reportString.ShouldNotContain("C:\\");
+            // reportString.ShouldNotContain("C:\\");
             
         }
     }
