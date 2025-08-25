@@ -74,22 +74,26 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             Console.WriteLine(reportString);
             Clipboard.SetText(reportString);
 
-            reportString.ShouldContain("1. Schedule Launch Pad Parse");
-            reportString.ShouldContain("   Parse Up Coming");
-            reportString.ShouldContain("     When Upcoming Urls");
-            reportString.ShouldContain("   • Root Cause: System.Exception: Upcoming");
+            reportString.ShouldMatch(@"\s+Schedule Launch Pad Parse");
+            reportString.ShouldMatch(@"\s+Parse Up Coming");
+
+            // Ensure top-level path is not numbered
+            reportString.ShouldNotContain("1. Schedule Launch Pad Parse");
+            reportString.ShouldNotContain("2. Schedule Launch Pad Parse");
+
+            // Divergent Path 1
+            reportString.ShouldMatch(@"\s+1\. When Upcoming Urls");
+            reportString.ShouldMatch(@"\s+• Root Cause: System\.Exception: Upcoming");
             reportString.ShouldMatch(@"\s+--- Invocation Stack ---\s+at WhenUpcomingUrls in FaultHubExceptionToStringTests.cs:line \d+");
             reportString.ShouldNotMatch(@"\s+\(\) at");
-
-            // -- Verify Path 2 --
-            reportString.ShouldContain("2. Schedule Launch Pad Parse");
-            reportString.ShouldContain("   Parse Up Coming");
-            reportString.ShouldContain("     Parse Upcoming Projects");
-            reportString.ShouldContain("       Step With Args");
-            reportString.ShouldContain("         When Existing Project Page Parsed");
-            reportString.ShouldContain("           Project Parse Transaction");
-            reportString.ShouldContain("             Start Parsing");
-            reportString.ShouldContain("   • Root Cause: System.Exception: StartParsing");
+    
+            // Divergent Path 2
+            reportString.ShouldMatch(@"\s+2\. Parse Upcoming Projects");
+            reportString.ShouldMatch(@"\s+Step With Args");
+            reportString.ShouldMatch(@"\s+When Existing Project Page Parsed");
+            reportString.ShouldMatch(@"\s+Project Parse Transaction");
+            reportString.ShouldMatch(@"\s+Start Parsing");
+            reportString.ShouldMatch(@"\s+• Root Cause: System\.Exception: StartParsing");
             reportString.ShouldMatch(@"\s+--- Invocation Stack ---\s+at StartParsing in FaultHubExceptionToStringTests.cs:line \d+");
         }
     }

@@ -78,21 +78,26 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             reportString.ShouldNotContain("Failure Path:");
             reportString.ShouldNotContain("Operation:");
 
-            reportString.ShouldContain("1. Schedule Launch Pad Parse (Kommunitas Kommunitas)");
-            
-            reportString.ShouldContain("   Parse Up Coming (LaunchPad kommunitas)");
-            reportString.ShouldContain("     When Upcoming Urls");
-            reportString.ShouldContain("    • Root Cause: System.Exception: Upcoming");
+            // Common Path
+            reportString.ShouldContain("  Schedule Launch Pad Parse (Kommunitas Kommunitas)");
+            reportString.ShouldContain("    Parse Up Coming (LaunchPad kommunitas)");
+    
+            // Divergent paths should be numbered, but the top-level common path should not.
+            reportString.ShouldNotContain("1. Schedule Launch Pad Parse");
+            reportString.ShouldNotContain("2. Schedule Launch Pad Parse");
+
+            // Divergent Path 1
+            reportString.ShouldMatch(@"\s+1\. When Upcoming Urls");
+            reportString.ShouldMatch(@"\s+• Root Cause: System\.Exception: Upcoming");
             reportString.ShouldMatch(@"\s+--- Invocation Stack ---\s+at WhenUpcomingUrls in LaunchPadProjectPageParseService\.cs:line 582");
             reportString.ShouldNotMatch(@"\s+\(.*\)\s+at WhenUpcomingUrls");
 
-            reportString.ShouldContain("2. Schedule Launch Pad Parse (Kommunitas Kommunitas)");
-            reportString.ShouldContain("   Parse Up Coming (LaunchPad kommunitas)");
-            reportString.ShouldContain("     Parse Upcoming Projects (LaunchPad kommunitas)");
-            reportString.ShouldContain("       When Existing Project Page Parsed");
-            reportString.ShouldContain("         Project Parse Transaction");
-            reportString.ShouldContain("           Start Parsing");
-            reportString.ShouldContain("    • Root Cause: System.Exception: StartParsing");
+            // Divergent Path 2
+            reportString.ShouldMatch(@"\s+2\. Parse Upcoming Projects \(LaunchPad kommunitas\)");
+            reportString.ShouldMatch(@"\s+When Existing Project Page Parsed");
+            reportString.ShouldMatch(@"\s+Project Parse Transaction");
+            reportString.ShouldMatch(@"\s+Start Parsing");
+            reportString.ShouldMatch(@"\s+• Root Cause: System\.Exception: StartParsing");
             reportString.ShouldMatch(@"\s+--- Invocation Stack ---\s+\(MyDynamicValue\) at StartParsing in LaunchPadProjectPageParseService\.cs:line 1228");
             #endregion
 
