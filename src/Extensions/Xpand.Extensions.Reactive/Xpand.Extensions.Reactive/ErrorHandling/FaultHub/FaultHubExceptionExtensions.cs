@@ -61,7 +61,15 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
             Console.WriteLine("\n[RENDER-DIAGNOSTIC] --- Begin Render ---");
             Console.WriteLine($"[RENDER-DIAGNOSTIC] Rendering report for '{model.TopMessage}' with {model.FailurePaths.Count} failure path(s).");
             var sb = new StringBuilder();
-            sb.AppendLine($"{model.TopMessage} ({model.FailurePaths.Count} times)");
+            var topMessagePrefix = "";
+            if (model.FailurePaths.Any() && model.FailurePaths[0].Steps.Any()) {
+                var firstStepContext = model.FailurePaths[0].Steps[0].ContextData;
+                if (firstStepContext.Any()) {
+                    topMessagePrefix = string.Join(" ", firstStepContext) + " ";
+                }
+            }
+            var rootCauseSummary = string.Join(" • ", model.FailurePaths.Select(p => p.RootCause.Message).Distinct());
+            sb.AppendLine($"{topMessagePrefix}{model.TopMessage} ({model.FailurePaths.Count} times{(string.IsNullOrEmpty(rootCauseSummary) ? "" : $" • {rootCauseSummary}")})");
 
             if (!model.FailurePaths.Any()) {
                 Console.WriteLine("[RENDER-DIAGNOSTIC] No failure paths to render. Exiting.");
@@ -84,37 +92,39 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
             for (var i = 0; i < commonPath.Count; i++) {
                 var step = commonPath[i];
                 var indent = new string(' ', (i + 1) * 2);
-                Console.WriteLine(
-                    $"[RENDER-DIAGNOSTIC]   - Rendering common step {i}: '{step.Name}' at indent level {i + 1}");
+                Console.WriteLine($"[RENDER-DIAGNOSTIC]   - Rendering common step {i}: '{step.Name}' at indent level {i + 1}");
                 sb.Append(indent).Append(step.Name);
-                if (step.ContextData.Any()) sb.Append(" (").Append(string.Join(", ", step.ContextData)).Append(")");
+                if (i > 0 && step.ContextData.Any()) {
+                    sb.Append(" (").Append(string.Join(", ", step.ContextData)).Append(")");
+                }
                 sb.AppendLine();
             }
 
             for (var i = 0; i < model.FailurePaths.Count; i++) {
                 var path = model.FailurePaths[i];
                 Console.WriteLine($"[RENDER-DIAGNOSTIC] >> Rendering Divergent Path #{i + 1}");
-                if (i > 0 && model.FailurePaths.Count > 1) sb.AppendLine();
-
                 var divergentSteps = path.Steps.Skip(commonPrefixLength).ToList();
 
                 for (var j = 0; j < divergentSteps.Count; j++) {
                     var step = divergentSteps[j];
                     var currentLevel = commonPrefixLength + j + 1;
                     var indent = new string(' ', currentLevel * 2);
-                    Console.WriteLine(
-                        $"[RENDER-DIAGNOSTIC]    - Rendering divergent step {j}: '{step.Name}' at indent level {currentLevel}");
+                    Console.WriteLine($"[RENDER-DIAGNOSTIC]    - Rendering divergent step {j}: '{step.Name}' at indent level {currentLevel}");
 
-                    if (j == 0)
+                    if (j == 0) {
                         sb.Append(indent).Append($"{i + 1}. ");
-                    else
+                    } else {
                         sb.Append(indent).Append("   ");
+                    }
 
                     sb.Append(step.Name);
-                    if (step.ContextData.Any()) sb.Append(" (").Append(string.Join(", ", step.ContextData)).Append(")");
+            
+                    var isFirstStepOfReport = commonPrefixLength == 0 && i == 0 && j == 0;
+                    if (!isFirstStepOfReport && step.ContextData.Any()) {
+                        sb.Append(" (").Append(string.Join(", ", step.ContextData)).Append(")");
+                    }
                     sb.AppendLine();
                 }
-
                 var detailsBaseLevel = commonPrefixLength + divergentSteps.Count();
                 var detailsIndent = new string(' ', detailsBaseLevel * 2 + 4);
 

@@ -74,6 +74,13 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             Console.WriteLine(reportString);
             Clipboard.SetText(reportString);
 
+            var topMessage = reportString.Split(Environment.NewLine)[0];
+            topMessage.ShouldStartWith("Schedule Launch Pad Parse completed with errors (2 times");
+            topMessage.ShouldContain("Upcoming");
+            topMessage.ShouldContain("StartParsing");
+            topMessage.ShouldEndWith(")");
+
+            // Common Path Assertions
             reportString.ShouldMatch(@"\s+Schedule Launch Pad Parse");
             reportString.ShouldMatch(@"\s+Parse Up Coming");
 

@@ -73,14 +73,15 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             #region ASSERT
 
             #region ASSERT
-            reportString.ShouldStartWith("Schedule Launch Pad Parse failed (2 times)");
+            reportString.ShouldStartWith("Kommunitas Kommunitas Schedule Launch Pad Parse failed (2 times • Upcoming • StartParsing)");
             reportString.ShouldNotContain("--- Failures");
             reportString.ShouldNotContain("Failure Path:");
             reportString.ShouldNotContain("Operation:");
 
             // Common Path
-            reportString.ShouldContain("  Schedule Launch Pad Parse (Kommunitas Kommunitas)");
-            reportString.ShouldContain("    Parse Up Coming (LaunchPad kommunitas)");
+            reportString.ShouldMatch(@"\s+Schedule Launch Pad Parse\s+");
+            reportString.ShouldNotMatch(@"\s+Schedule Launch Pad Parse \(Kommunitas Kommunitas\)");
+            reportString.ShouldMatch(@"\s+Parse Up Coming \(LaunchPad kommunitas\)");
     
             // Divergent paths should be numbered, but the top-level common path should not.
             reportString.ShouldNotContain("1. Schedule Launch Pad Parse");
