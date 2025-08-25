@@ -142,7 +142,7 @@ private static void RenderFailureDetails(FailurePath path, StringBuilder sb, str
                 sb.Append(detailsPrefix).Append("   --- Invocation Stack ---").AppendLine();
                 var stackPrefix = detailsPrefix + "     ";
                 foreach (var frame in path.LogicalStack) {
-                    var frameContext = frame.Context.Any() ? $"({string.Join(", ", frame.Context)}) " : "";
+                    var frameContext = frame.Context?.Any() == true ? $"({string.Join(", ", frame.Context)}) " : "";
                     sb.Append(stackPrefix).Append(frameContext).Append("at ").Append(frame.MemberName)
                         .Append(" in ").Append(Path.GetFileName(frame.FilePath)).Append(":line ")
                         .Append(frame.LineNumber).AppendLine();

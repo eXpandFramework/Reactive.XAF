@@ -346,7 +346,7 @@ namespace Xpand.Extensions.Reactive.Combine {
                         err => Log(() => $"[Tx.DEBUG][Run] <<-- NOTIFICATION TO CHAINFAULTCONTEXT: OnError: {err.GetType().Name} - {err.Message}"),
                         () => Log(() => "[Tx.DEBUG][Run] <<-- NOTIFICATION TO CHAINFAULTCONTEXT: OnCompleted.")
                     )
-                    .ChainFaultContext(ib.Context.AddToContext(ib.TransactionName), null, ib.CallerMemberName, ib.CallerMemberPath, ib.CallerMemberLine);
+                    .ChainFaultContext(ib.Context.AddToContext(ib.TransactionName, failFast ? "FailFast" : "RunToEnd"), null, ib.CallerMemberName, ib.CallerMemberPath, ib.CallerMemberLine);
                 var resultStream = failFast
                     ? chainedLogic.Catch((FaultHubException ex)
                         => Observable.Throw<TFinal[]>(new TransactionAbortedException($"{ib.TransactionName} failed", ex)))

@@ -18,7 +18,20 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
         public sealed override IDictionary Data => base.Data;
         public IEnumerable<LogicalStackFrame> LogicalStackTrace => Context.FromHierarchy(c => c.InnerContext)
             .Select(c => c.LogicalStackTrace).LastOrDefault(list => list != null && list.Any()) ?? Enumerable.Empty<LogicalStackFrame>();
-        public IEnumerable<object> AllContexts => Context.FromHierarchy(c => c.InnerContext).SelectMany(c => c.UserContext).WhereNotDefault();
+        public IEnumerable<object> AllContexts {
+            get {
+                var contexts = new List<object>();
+                var current = Context;
+                while (current != null) {
+                    if (current.BoundaryName != null) contexts.Add(current.BoundaryName);
+                    if (current.UserContext != null) contexts.AddRange(current.UserContext);
+                    current = current.InnerContext;
+                }
+
+                return contexts;
+            }
+        }
+
         public AmbientFaultContext Context { get; }
 
         public override string ToString() {
@@ -27,16 +40,11 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
             }
             catch (Exception e) {
                 return $"[!!! INTERNAL ToString() CRASH !!!]\n" +
+                       $"Crash Type: {e.GetType().FullName}\n" +
                        $"Message: {e.Message}\n" +
-                       $"StackTrace: {e.StackTrace}\n\n" +
+                       $"--- Crash StackTrace ---\n{e.StackTrace}\n\n" +
                        $"--- Base Exception Details ---\n{base.ToString()}";
-            }        }
-
-
-        
-        
-        
+            }
+        }
     }
-
-    
 }

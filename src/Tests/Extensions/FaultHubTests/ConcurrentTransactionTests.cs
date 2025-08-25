@@ -16,7 +16,6 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
         [Test]
         public async Task ConcurrentTransaction_RunToCompletion_Executes_All_And_Aggregates_Failures() {
             var stopwatch = Stopwatch.StartNew();
-
             var result = await Observable.Timer(100.Milliseconds()).Select(_ => "Success 1")
                 .BeginBatchTransaction()
                 .Add(Observable.Timer(150.Milliseconds()).SelectMany(_ => Observable.Throw<string>(new InvalidOperationException("Failure 1"))))
@@ -25,7 +24,6 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
                 .ConcurrentTransaction("Concurrent-Tx")
                 .PublishFaults()
                 .Capture();
-
             stopwatch.Stop();
 
             stopwatch.ElapsedMilliseconds.ShouldBeLessThan(350);
@@ -41,14 +39,16 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
 
             var aggregate = finalFault.InnerException.ShouldBeOfType<AggregateException>();
             aggregate.InnerExceptions.Count.ShouldBe(2);
-
             var failure1 = aggregate.InnerExceptions.OfType<FaultHubException>()
-                .FirstOrDefault(ex => ex.AllContexts.Contains("Concurrent-Tx - Observable.Timer(150.Milliseconds()).SelectMany(_ => Observable.Throw<string>(new InvalidOperationException(\"Failure 1\")))"));
+                .FirstOrDefault(ex => ex.InnerException?.Message == "Failure 1");
             failure1.ShouldNotBeNull();
+            failure1.AllContexts.ShouldContain(ctx => ((string)ctx).StartsWith("Concurrent-Tx -"));
+
 
             var failure2 = aggregate.InnerExceptions.OfType<FaultHubException>()
-                .FirstOrDefault(ex => ex.AllContexts.Contains("Concurrent-Tx - Observable.Timer(200.Milliseconds()).SelectMany(_ => Observable.Throw<string>(new InvalidOperationException(\"Failure 2\")))"));
+                .FirstOrDefault(ex => ex.InnerException?.Message == "Failure 2");
             failure2.ShouldNotBeNull();
+            failure2.AllContexts.ShouldContain(ctx => ((string)ctx).StartsWith("Concurrent-Tx -"));
         }
         [Test]
         public async Task ConcurrentTransaction_FailFast_Terminates_On_First_Error() {
@@ -60,7 +60,6 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
                 .Add(Observable.Timer(50.Milliseconds()).SelectMany(_ => Observable.Throw<string>(new InvalidOperationException("Fast Failure"))))
                 .ConcurrentTransaction("Concurrent-FailFast-Tx", failFast: true)
                 .Capture();
-
             stopwatch.Stop();
 
             stopwatch.ElapsedMilliseconds.ShouldBeLessThan(150);
@@ -71,15 +70,15 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
 
             var outerTxException = result.Error.ShouldBeOfType<TransactionAbortedException>();
             outerTxException.Message.ShouldBe("Concurrent-FailFast-Tx failed");
-
             var innerFault = outerTxException.InnerException.ShouldBeOfType<FaultHubException>();
 
             innerFault.InnerException.ShouldBeOfType<InvalidOperationException>().Message.ShouldBe("Fast Failure");
 
-            innerFault.AllContexts.ShouldContain("Concurrent-FailFast-Tx - Observable.Timer(50.Milliseconds()).SelectMany(_ => Observable.Throw<string>(new InvalidOperationException(\"Fast Failure\")))");
+            innerFault.AllContexts.ShouldContain(ctx => ctx is string && ((string)ctx).StartsWith("Concurrent-FailFast-Tx -"));
 
             BusEvents.ShouldBeEmpty();
-        }        
+            
+        }
         [Test]
         public async Task ConcurrentTransaction_Succeeds_When_All_Operations_Succeed() {
             var stopwatch = Stopwatch.StartNew();

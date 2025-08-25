@@ -73,6 +73,8 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             var reportLines = finalReport.ToString().ToLines().ToArray();
             
             var storeReportLines = GetType().Assembly.ReadManifestResources(nameof(Generates_Concise_Execution_report_is_correct_and_readable)).First().ToLines().ToArray();
+            Console.WriteLine("storeReport:");
+            Console.WriteLine(storeReportLines);
             for (int i = 0; i < storeReportLines.Length-1; i++) {
                 storeReportLines[i].ShouldBe(reportLines[i],$"Line {i+1}");
             }
@@ -134,5 +136,31 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
                 storeReportLine.ShouldBe(reportLines[i],$"Line {i+1}");
             }
         }
+        
+                [Test]
+        public async Task ToString_Report_Aggregates_Context_From_Nested_ChainFaultContext_Boundaries() {
+            var innermostOperation = Observable.Throw<Unit>(new InvalidOperationException("Deep Failure"))
+                .ChainFaultContext(["InnermostContext"]);
+    
+            var intermediateOperation = innermostOperation
+                .ChainFaultContext(["IntermediateContext"]);
+
+            var outermostOperation = intermediateOperation
+                .ChainFaultContext(["OutermostContext"]);
+
+            await outermostOperation.PublishFaults().Capture();
+
+            BusEvents.Count.ShouldBe(1);
+            var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
+
+            var report = fault.ToString();
+
+            report.ShouldContain("OutermostContext");
+            report.ShouldContain("IntermediateContext");
+            report.ShouldContain("InnermostContext");
+
+            report.ShouldContain("Deep Failure");
+        }
+
     }
 }
