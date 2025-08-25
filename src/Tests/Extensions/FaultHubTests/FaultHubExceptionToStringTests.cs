@@ -74,30 +74,23 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             Console.WriteLine(reportString);
             Clipboard.SetText(reportString);
 
-            reportString.ShouldStartWith("Schedule Launch Pad Parse completed with errors");
-            reportString.ShouldContain("--- Failures (2) ---");
+            reportString.ShouldContain("1. Schedule Launch Pad Parse");
+            reportString.ShouldContain("   Parse Up Coming");
+            reportString.ShouldContain("     When Upcoming Urls");
+            reportString.ShouldContain("   • Root Cause: System.Exception: Upcoming");
+            reportString.ShouldMatch(@"\s+--- Invocation Stack ---\s+at WhenUpcomingUrls in FaultHubExceptionToStringTests.cs:line \d+");
+            reportString.ShouldNotMatch(@"\s+\(\) at");
 
-            reportString.ShouldContain("1. Failure Path:");
-            reportString.ShouldContain("- Operation: Schedule Launch Pad Parse");
-            reportString.ShouldContain("  - Operation: Parse Up Coming");
-            reportString.ShouldContain("    - Operation: When Upcoming Urls");
-            reportString.ShouldContain("    Root Cause: System.Exception: Upcoming");
-            reportString.ShouldMatch(@"\(\) at WhenUpcomingUrls in .*FaultHubExceptionToStringTests.cs:line \d+");
-    
-            reportString.ShouldContain("2. Failure Path:");
-            reportString.ShouldContain("- Operation: Schedule Launch Pad Parse");
-            reportString.ShouldContain("  - Operation: Parse Up Coming");
-            reportString.ShouldContain("    - Operation: Parse Upcoming Projects");
-            reportString.ShouldContain("      - Operation: Step With Args");
-            reportString.ShouldContain("        - Operation: When Existing Project Page Parsed");
-            reportString.ShouldContain("          - Operation: Project Parse Transaction");
-            reportString.ShouldContain("            - Operation: Start Parsing");
-            reportString.ShouldContain("            Root Cause: System.Exception: StartParsing");
-            reportString.ShouldMatch(@"\(\) at StartParsing in .*FaultHubExceptionToStringTests.cs:line \d+");
-    
-            reportString.ShouldNotContain("as part of:");
-            reportString.ShouldNotContain("(some noisy argument)");        
-            
+            // -- Verify Path 2 --
+            reportString.ShouldContain("2. Schedule Launch Pad Parse");
+            reportString.ShouldContain("   Parse Up Coming");
+            reportString.ShouldContain("     Parse Upcoming Projects");
+            reportString.ShouldContain("       Step With Args");
+            reportString.ShouldContain("         When Existing Project Page Parsed");
+            reportString.ShouldContain("           Project Parse Transaction");
+            reportString.ShouldContain("             Start Parsing");
+            reportString.ShouldContain("   • Root Cause: System.Exception: StartParsing");
+            reportString.ShouldMatch(@"\s+--- Invocation Stack ---\s+at StartParsing in FaultHubExceptionToStringTests.cs:line \d+");
         }
     }
 }

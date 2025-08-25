@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -22,7 +23,6 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
                 Console.WriteLine($"[PARSER-DIAGNOSTIC] >> Building Path #{i + 1} for Root Cause: {root.Message}");
                 var exceptionPath = topException.FailurePath(root).Reverse().ToList();
                 Console.WriteLine($"[PARSER-DIAGNOSTIC]    FailurePath contains {exceptionPath.Count} total exceptions.");
-                // This now correctly unpacks the nested contexts from each exception in the path.
                 var steps = exceptionPath.OfType<FaultHubException>()
                     .SelectMany(UnpackContexts) 
                     .Select(ParseStep).ToList();
@@ -38,91 +38,105 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
             Console.WriteLine($"[PARSER-DIAGNOSTIC] --- End Parse --- (Found {paths.Count} paths)");
             return new FailureReport(topException.Message, paths);
         }
-
-        public static string Render(this FailureReport model) {
-            Console.WriteLine("\n[RENDER-DIAGNOSTIC] --- Begin Render ---");
-            Console.WriteLine($"[RENDER-DIAGNOSTIC] Rendering report for '{model.TopMessage}' with {model.FailurePaths.Count} failure path(s).");
+public static string Render(this FailureReport model) {
+    Console.WriteLine("\n[RENDER-DIAGNOSTIC] --- Begin Render ---");
+    Console.WriteLine(
+        $"[RENDER-DIAGNOSTIC] Rendering report for '{model.TopMessage}' with {model.FailurePaths.Count} failure path(s).");
     var sb = new StringBuilder();
-    sb.AppendLine(model.TopMessage);
-
-    if (model.FailurePaths.Any()) {
-        sb.AppendLine();
-        sb.AppendLine($"--- Failures ({model.FailurePaths.Count}) ---");
-    }
+    
+    sb.AppendLine($"{model.TopMessage} ({model.FailurePaths.Count} times)");
 
     for (var i = 0; i < model.FailurePaths.Count; i++) {
         var path = model.FailurePaths[i];
+        if (i > 0) sb.AppendLine();
+        
         Console.WriteLine($"[RENDER-DIAGNOSTIC] >> Rendering Path #{i + 1}");
-        sb.AppendLine();
-        sb.AppendLine($"{i + 1}. Failure Path:");
-        var indent = "  ";
-        foreach (var step in path.Steps) {
-            Console.WriteLine($"[RENDER-DIAGNOSTIC]    - Step: {step.Name} ({string.Join(", ", step.ContextData)})");
-            sb.Append(indent).Append("- Operation: ").Append(step.Name);
-            if (step.ContextData.Any()) {
-                sb.Append(" (").Append(string.Join(", ", step.ContextData)).Append(")");
-            }
-            sb.AppendLine();
-            indent += "  ";
-        }
 
+        for (var j = 0; j < path.Steps.Count; j++) {
+            var step = path.Steps[j];
+            
+            if (j == 0) {
+                sb.Append($"{i + 1}. ");
+            } else {
+                var indent = new string(' ', 3 + (j - 1) * 2);
+                sb.Append(indent);
+            }
+
+            sb.Append(step.Name);
+
+            if (step.ContextData.Any()) sb.Append(" (").Append(string.Join(", ", step.ContextData)).Append(")");
+            sb.AppendLine();
+        }
+        
+        var finalIndent = new string(' ', 4);
         Console.WriteLine($"[RENDER-DIAGNOSTIC]    Root Cause: {path.RootCause.Message}");
-        sb.Append(indent).Append("Root Cause: ").Append(path.RootCause.GetType().FullName).Append(": ").AppendLine(path.RootCause.Message);
+        
+        sb.Append(finalIndent).Append("• Root Cause: ").Append(path.RootCause.GetType().FullName).Append(": ")
+            .AppendLine(path.RootCause.Message);
 
         if (path.LogicalStack.Any()) {
             Console.WriteLine($"[RENDER-DIAGNOSTIC]    Invocation Stack ({path.LogicalStack.Count} frames)");
-            sb.Append(indent).AppendLine("--- Invocation Stack ---");
+            var sectionIndent = finalIndent + "  ";
+            sb.Append(sectionIndent).AppendLine("--- Invocation Stack ---");
             foreach (var frame in path.LogicalStack) {
-                var frameContext = frame.Context.Any() ?
-                    $"({string.Join(", ", frame.Context)})" : "()";
-                sb.Append(indent).Append("  ").Append(frameContext).Append(" at ").Append(frame.MemberName)
-                  .Append(" in ").Append(frame.FilePath).Append(":line ").Append(frame.LineNumber).AppendLine();
+                var frameContext = frame.Context.Any() ? $"({string.Join(", ", frame.Context)}) " : "";
+                sb.Append(sectionIndent).Append("  ").Append(frameContext).Append("at ").Append(frame.MemberName)
+                    .Append(" in ").Append(Path.GetFileName(frame.FilePath)).Append(":line ")
+                    .Append(frame.LineNumber).AppendLine();
             }
         }
 
         if (path.RootCause != null) {
-            sb.Append(indent).AppendLine("--- Original Exception Details ---");
-            sb.AppendLine(path.RootCause.ToString().Indent(indent.Length + 2));
+            var sectionIndent = finalIndent + "  ";
+            sb.Append(sectionIndent).AppendLine("--- Original Exception Details ---");
+            sb.AppendLine(path.RootCause.ToString().Indent(sectionIndent.Length + 2));
         }
     }
 
     Console.WriteLine($"[RENDER-DIAGNOSTIC] --- End Render (Final String Length: {sb.Length}) ---\n");
     return sb.ToString().Trim();
 }
+private static OperationStep ParseStep(FaultHubException fhEx) {
+    var ctx = fhEx.Context;
+    var boundaryName = ctx.BoundaryName ?? "Unnamed Operation";
+    var userContext = ctx.UserContext ?? [];
+    
+    // Extract parameter names from the BoundaryName, e.g., "driver", "padProject" from "MyMethod(driver, padProject)"
+    string[] paramNames = [];
+    var openParen = boundaryName.IndexOf('(');
+    if (openParen > -1) {
+        var closeParen = boundaryName.LastIndexOf(')');
+        if (closeParen > openParen) {
+            var paramString = boundaryName.Substring(openParen + 1, closeParen - openParen - 1);
+            paramNames = paramString.Split(',').Select(p => p.Trim()).ToArray();
+        }
+    }
+
+    var dirtyName = boundaryName;
+    if (openParen > -1) {
+        dirtyName = dirtyName.Substring(0, openParen);
+    }
+    var cleanName = dirtyName.Trim();
+    var cleanNameNoSpace = cleanName.Replace(" ", "");
+    
+    // Filter out both the step's own name and any extracted parameter names from the context
+    var contextData = userContext.Where(o => {
+        if (o is not string s) return true; // Keep non-string context
+        if (s.Replace(" ", "") == cleanNameNoSpace) return false; // Remove self-reference
+        if (paramNames.Contains(s)) return false; // Remove parameters
+        return true;
+    }).ToList();
+    
+    var finalName = cleanName.CompoundName();
+    return new OperationStep(finalName, contextData);            
+}
         #endregion
 
         #region Private Helpers
-        private static OperationStep ParseStep(FaultHubException fhEx) {
-            var ctx = fhEx.Context;
-            var boundaryName = ctx.BoundaryName;
-            var userContext = ctx.UserContext ?? [];
-    
-            Console.WriteLine($"[PARSER-DIAGNOSTIC]      - Parsing Step from FH: '{fhEx.Message}'. BoundaryName: '{boundaryName ?? "null"}', UserContext Items: {userContext.Length}");
-
-            var dirtyName = boundaryName ?? "Unnamed Operation";
-            var parenthesisIndex = dirtyName.IndexOf('(');
-            if (parenthesisIndex > -1) {
-                dirtyName = dirtyName.Substring(0, parenthesisIndex);
-            }
-            var cleanName = dirtyName.Trim();
-            var cleanNameNoSpace = cleanName.Replace(" ", "");
-
-            var contextData = userContext.Where(o => {
-                if (o is not string s) return true;
-                // Filter out any string from the context that is the same as the clean name.
-                return s.Replace(" ", "") != cleanNameNoSpace;
-            }).ToList();
-
-
-            var finalName = cleanName.CompoundName();
-            Console.WriteLine($"[PARSER-DIAGNOSTIC]        ==> Extracted Name: '{finalName}', Context Items: {contextData.Count}");
-            return new OperationStep(finalName, contextData);            
-        }
         
         private static IEnumerable<FaultHubException> UnpackContexts(FaultHubException fhEx) {
             var context = fhEx.Context;
             while (context != null) {
-                // We create a temporary FHE for each level of the context chain to pass to ParseStep
                 yield return new FaultHubException(fhEx.Message, fhEx.InnerException, context);
                 context = context.InnerContext;
             }

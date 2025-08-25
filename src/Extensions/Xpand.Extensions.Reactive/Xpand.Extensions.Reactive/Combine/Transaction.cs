@@ -376,7 +376,8 @@ namespace Xpand.Extensions.Reactive.Combine {
                     var primaryObservable = Observable.Defer(() => step.Selector(currentResult));
                     var resilientObservable = step.FallbackSelector == null ? primaryObservable
                         : primaryObservable.Catch((Exception ex) => step.FallbackSelector(ex, currentResult));
-                    return resilientObservable.PushStackFrame()
+                    return resilientObservable
+                        // .PushStackFrame()
                         .ChainFaultContext(builder.Context.AddToContext($"{builder.TransactionName} - {stepName}"), memberName: stepName)
                         .Materialize()
                         .BufferUntilCompleted()
@@ -454,7 +455,7 @@ namespace Xpand.Extensions.Reactive.Combine {
                     .SelectMany(currentResult => {
                         var stepName = stepInfo.Step.Name ?? $"Part {stepInfo.PartNumber}";
                         return Observable.Defer(() => stepInfo.Step.Selector(currentResult))
-                            .PushStackFrame()
+                            // .PushStackFrame()
                             .ChainFaultContext(builder.Context.AddToContext($"{builder.TransactionName} - {stepName}"), memberName: stepName);
                     }))
                 .BufferUntilCompleted();
