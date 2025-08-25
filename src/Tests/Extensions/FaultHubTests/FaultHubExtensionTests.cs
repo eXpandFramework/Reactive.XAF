@@ -1,166 +1,223 @@
 ﻿using System;
-using System.Diagnostics.CodeAnalysis;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Reactive;
-using System.Reactive.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using NUnit.Framework;
-using Shouldly;
-using Xpand.Extensions.AssemblyExtensions;
-using Xpand.Extensions.Reactive.Combine;
-using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
-using Xpand.Extensions.Reactive.Transform;
-using Xpand.Extensions.Reactive.Utility;
+using System.Text;
+using System.Text.RegularExpressions;
+using Xpand.Extensions.ExceptionExtensions;
 using Xpand.Extensions.StringExtensions;
 
-namespace Xpand.Extensions.Tests.FaultHubTests {
-    [TestFixture]
-    public class FaultHubExtensionTests:FaultHubTestBase {
+namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
+    public record FailureReport(string TopMessage, IReadOnlyList<FailurePath> FailurePaths);
+    public record FailurePath(IReadOnlyList<OperationStep> Steps, Exception RootCause, IReadOnlyList<LogicalStackFrame> LogicalStack);
+    public record OperationStep(string Name, IReadOnlyList<object> ContextData) : IEquatable<OperationStep> {
+        public virtual bool Equals(OperationStep other) {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return Name == other.Name && (ContextData ?? Enumerable.Empty<object>()).SequenceEqual(other.ContextData ?? Enumerable.Empty<object>());
+        }
 
-        #region Operation Simulation
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
-        [SuppressMessage("ReSharper", "UnusedParameter.Local")]
-        private IObservable<Unit> StepWithArgs(string someNoisyArgument) => WhenExistingProjectPageParsed()
-            .PushStackFrame();
+        public override int GetHashCode() {
+            var hashCode = new HashCode();
+            hashCode.Add(Name);
+            if (ContextData != null) {
+                foreach (var item in ContextData) {
+                    hashCode.Add(item);
+                }
+            }
+            return hashCode.ToHashCode();
+        }
+    }
 
-        private IObservable<Unit> StartParsing()
-            => Observable.Throw<Unit>(new Exception("StartParsing"))
-                .PushStackFrame();
-
-        private IObservable<Unit> ProjectParseTransaction()
-            => Unit.Default.Observe().BeginWorkflow("Project Parse Transaction")
-                .Then(_ => StartParsing(), "Start Parsing")
-                .RunToEnd().ToUnit()
-                .PushStackFrame();
-
-        private IObservable<Unit> WhenExistingProjectPageParsed()
-            => Unit.Default.Observe().BeginWorkflow("When Existing Project Page Parsed")
-                .Then(_ => ProjectParseTransaction())
-                .RunToEnd().ToUnit()
-                .PushStackFrame();
-
-        private IObservable<Unit> ParseUpcomingProjects()
-            => Unit.Default.Observe().BeginWorkflow("Parse Upcoming Projects")
-                .Then(_ => StepWithArgs("some noisy argument"))
-                .RunToEnd().ToUnit()
-                .PushStackFrame();
-        
-        private IObservable<Unit> WhenUpcomingUrls()
-            => Observable.Throw<Unit>(new Exception("Upcoming"))
-                .PushStackFrame();
-
-        private IObservable<Unit> ParseUpComing()
-            => Unit.Default.Observe().BeginWorkflow("Parse Up Coming")
-                .Then(_ => WhenUpcomingUrls())
-                .Then(_ => ParseUpcomingProjects())
-                .RunToEnd().ToUnit()
-                .PushStackFrame();
-        
-        private IObservable<Unit> ScheduleLaunchPadParse()
-            => Unit.Default.Observe().BeginWorkflow("Schedule Launch Pad Parse")
-                .Then(_ => ParseUpComing())
-                .RunToEnd().ToUnit()
-                .PushStackFrame();
-        #endregion
-        
-        [Test][Apartment(ApartmentState.STA)]
-        public async Task Generates_Concise_Execution_report_is_correct_and_readable() {
-            await ScheduleLaunchPadParse().PublishFaults().Capture();
-            BusEvents.Count.ShouldBe(1);
-            var finalReport = BusEvents.Single().ShouldBeOfType<FaultHubException>();
+    public static class FaultHubExceptionExtensions {
+        #region Public Extensions
+        public static FailureReport Parse(this FaultHubException topException) {
+            Console.WriteLine("\n[PARSER-DIAGNOSTIC] --- Begin Parse ---");
+            Console.WriteLine($"[PARSER-DIAGNOSTIC] Parsing top-level exception: '{topException.Message}'");
+            var rootCauses = FindRootCauses(topException).ToList();
             
-            var reportLines = finalReport.ToString().ToLines().ToArray();
+            var paths = rootCauses.Select((root, i) => {
+                Console.WriteLine($"[PARSER-DIAGNOSTIC] >> Building Path #{i + 1} for Root Cause: {root.Message}");
+                var exceptionPath = topException.FailurePath(root).Reverse().ToList();
+                var allExceptionsInPath = new List<Exception> { topException };
+                allExceptionsInPath.AddRange(exceptionPath);
+
+                var steps = allExceptionsInPath.OfType<FaultHubException>()
+                    .SelectMany(UnpackContexts) 
+                    .Select(ParseStep).ToList();
+                Console.WriteLine($"[PARSER-DIAGNOSTIC]    Extracted {steps.Count} raw operation steps.");
+                
+                var logicalStack = exceptionPath.OfType<FaultHubException>().LastOrDefault()?.LogicalStackTrace.ToList() ?? [];
+                var distinctSteps = steps.Distinct().ToList();
+
+                Console.WriteLine($"[PARSER-DIAGNOSTIC]    Deduplicated to {distinctSteps.Count} unique steps.");
+                return new FailurePath(distinctSteps, root, logicalStack);
+            }).ToList();
+
+            Console.WriteLine($"[PARSER-DIAGNOSTIC] --- End Parse --- (Found {paths.Count} paths)");
+            return new FailureReport(topException.Message, paths);
+        }
+
+        public static string Render(this FailureReport model) {
+            Console.WriteLine("\n[RENDER-DIAGNOSTIC] --- Begin Render ---");
+            var sb = new StringBuilder();
+
+            var rootCauseSummary = string.Join(" • ", model.FailurePaths.Select(p => p.RootCause.Message).Distinct());
+            sb.AppendLine($"{model.TopMessage} ({model.FailurePaths.Count} times{(string.IsNullOrEmpty(rootCauseSummary) ? "" : $" • {rootCauseSummary}")})");
             
-            var storeReportLines = GetType().Assembly.ReadManifestResources(nameof(Generates_Concise_Execution_report_is_correct_and_readable)).First().ToLines().ToArray();
-            Console.WriteLine("storeReport:");
-            Console.WriteLine(storeReportLines);
-            for (int i = 0; i < storeReportLines.Length-1; i++) {
-                storeReportLines[i].ShouldBe(reportLines[i],$"Line {i+1}");
+            if (!model.FailurePaths.Any()) {
+                return sb.ToString().Trim();
+            }
+
+            RenderPathsRecursively(model.FailurePaths.ToList(), 0, "", true, sb);
+            
+            Console.WriteLine($"[RENDER-DIAGNOSTIC] --- End Render (Final String Length: {sb.Length}) ---\n");
+            return sb.ToString().Trim();
+        }
+
+        private static void RenderPathsRecursively(List<FailurePath> paths, int level, string prefix, bool isRootLevel, StringBuilder sb) {
+            var groups = paths.Where(p => p.Steps.Count > level)
+                .GroupBy(p => p.Steps[level].Name)
+                .ToList();
+
+            for (var i = 0; i < groups.Count; i++) {
+                var group = groups[i];
+                var isLastGroup = i == groups.Count - 1;
+                var step = group.OrderByDescending(p => p.Steps.Count).First().Steps[level];
+
+                var connector = isLastGroup ? "└ " : "├ ";
+                sb.Append(prefix).Append(connector);
+
+                var stepText = new StringBuilder(step.Name);
+                if (!(isRootLevel && i == 0) && step.ContextData.Any()) {
+                    stepText.Append(" (").Append(string.Join(", ", step.ContextData)).Append(")");
+                }
+                sb.AppendLine(stepText.ToString());
+                
+                var subPaths = group.ToList();
+                var childPrefix = prefix + (isLastGroup ? "  " : "│ ");
+                var finishedPaths = subPaths.Where(p => p.Steps.Count == level + 1).ToList();
+                var hasContinuingPaths = subPaths.Any(p => p.Steps.Count > level + 1);
+                
+                if (finishedPaths.Any()) {
+                    RenderFailureDetails(finishedPaths.First(), sb, childPrefix);
+                }
+
+                if (hasContinuingPaths) {
+                    RenderPathsRecursively(subPaths, level + 1, childPrefix, false, sb);
+                }
+            }
+        }
+
+        private static void RenderFailureDetails(FailurePath path, StringBuilder sb, string prefix) {
+            sb.Append(prefix).Append("• Root Cause: ").Append(path.RootCause.GetType().FullName).Append(": ")
+                .AppendLine(path.RootCause.Message);
+            var hasStack = path.LogicalStack.Any();
+            var hasOriginal = path.RootCause != null;
+
+            var detailsPrefixBuilder = new StringBuilder();
+            foreach (var character in prefix) {
+                switch (character) {
+                    case '├':
+                    case '│':
+                        detailsPrefixBuilder.Append('│');
+                        break;
+                    case '└':
+                        detailsPrefixBuilder.Append(' ');
+                        break;
+                    default:
+                        detailsPrefixBuilder.Append(character);
+                        break;
+                }
+            }
+            var detailsPrefix = detailsPrefixBuilder.ToString();
+
+            if (hasStack) {
+                sb.Append(detailsPrefix).Append("   --- Invocation Stack ---").AppendLine();
+                var stackPrefix = detailsPrefix + "     ";
+                foreach (var frame in path.LogicalStack) {
+                    var frameContext = frame.Context?.Any() == true ? $"({string.Join(", ", frame.Context)}) " : "";
+                    sb.Append(stackPrefix).Append(frameContext).Append("at ").Append(frame.MemberName)
+                        .Append(" in ").Append(Path.GetFileName(frame.FilePath)).Append(":line ")
+                        .Append(frame.LineNumber).AppendLine();
+                }
+            }
+
+            if (hasOriginal) {
+                sb.Append(detailsPrefix).Append("   --- Original Exception Details ---").AppendLine();
+                var originalPrefix = detailsPrefix + "     ";
+                var exceptionLines = path.RootCause.ToString().Split(new[] { Environment.NewLine }, StringSplitOptions.None);
+                foreach (var line in exceptionLines) {
+                    sb.Append(originalPrefix).AppendLine(line);
+                }
             }
         }
         
-        [Test][Apartment(ApartmentState.STA)]
-        public void Traverses_Parses_And_Renders_Complex_Nested_Exception_Correctly() {
-            #region ARRANGE
-            var ctxSchedule = new AmbientFaultContext {
-                BoundaryName = "ScheduleLaunchPadParse()",
-                UserContext = ["Schedule Launch Pad Parse", "Kommunitas Kommunitas"]
-            };
-            var ctxParseUpcoming = new AmbientFaultContext
-                { BoundaryName = "ParseUpComing", UserContext = ["Parse Up Coming", "LaunchPad kommunitas"] };
-            var ctxWhenUpcoming = new AmbientFaultContext {
-                BoundaryName = "WhenUpcomingUrls(serviceModule, driver, launchPad)",
-                UserContext = ["When Upcoming Urls"],
-                LogicalStackTrace =
-                    [new LogicalStackFrame("WhenUpcomingUrls", @"Services\LaunchPadProjectPageParseService.cs", 582)]
-            };
-            var ctxParseProjects = new AmbientFaultContext {
-                BoundaryName = "ParseUpcomingProjects()",
-                UserContext = ["Parse Upcoming Projects", "LaunchPad kommunitas"]
-            };
-            var ctxWhenExisting = new AmbientFaultContext
-                { BoundaryName = "WhenExistingProjectPageParsed", UserContext = ["When Existing Project Page Parsed"] };
-            var ctxParseTx = new AmbientFaultContext
-                { BoundaryName = "ProjectParseTransaction()", UserContext = ["Project Parse Transaction"] };
-            var ctxStartParsing = new AmbientFaultContext {
-                BoundaryName = "StartParsing(driver, padProject)",
-                UserContext = ["Start Parsing", "driver", "padProject"],
-                LogicalStackTrace =
-                    [new LogicalStackFrame("StartParsing", @"Services\LaunchPadProjectPageParseService.cs", 1228, "MyDynamicValue")]
-            };
-            var rootCause1 = new Exception("Upcoming");
-            var fh1Upcoming = new FaultHubException("Upcoming", rootCause1, ctxWhenUpcoming);
-
-            var rootCause2 = new Exception("StartParsing");
-            var fh2StartParsing = new FaultHubException("StartParsing", rootCause2, ctxStartParsing);
-            var agg21 = new AggregateException(fh2StartParsing);
-            var fh2ParseTx = new FaultHubException("Project Parse Transaction failed", agg21, ctxParseTx);
-            var agg22 = new AggregateException(fh2ParseTx);
-            var fh2WhenExisting =
-                new FaultHubException("When Existing Project Page Parsed failed", agg22, ctxWhenExisting);
-            var agg23 = new AggregateException(fh2WhenExisting);
-            var fh2ParseProjects = new FaultHubException("Parse Upcoming Projects failed", agg23, ctxParseProjects);
-            var aggMid = new AggregateException(fh1Upcoming, fh2ParseProjects);
-            var fhParseUpcoming = new FaultHubException("Parse Up Coming failed", aggMid, ctxParseUpcoming);
-            var aggTop = new AggregateException(fhParseUpcoming);
-            var topLevelException = new FaultHubException("Schedule Launch Pad Parse failed", aggTop, ctxSchedule);
-            #endregion
-
-            var finalReport = topLevelException;
-            var reportLines = finalReport.ToString().ToLines().ToArray();
-
-            var storeReportLines = GetType().Assembly.ReadManifestResources(nameof(Traverses_Parses_And_Renders_Complex_Nested_Exception_Correctly)).First().ToLines().ToArray();
-            for (int i = 0; i < storeReportLines.Length-1; i++) {
-                var storeReportLine = storeReportLines[i];
-                storeReportLine.ShouldBe(reportLines[i],$"Line {i+1}");
-            }
-        }
-        
-                [Test]
-        public async Task ToString_Report_Aggregates_Context_From_Nested_ChainFaultContext_Boundaries() {
-            var innermostOperation = Observable.Throw<Unit>(new InvalidOperationException("Deep Failure"))
-                .ChainFaultContext(["InnermostContext"]);
+        private static OperationStep ParseStep(FaultHubException fhEx) {
+            var ctx = fhEx.Context;
+            var boundaryName = ctx.BoundaryName ?? "Unnamed Operation";
+            var userContext = ctx.UserContext ?? [];
     
-            var intermediateOperation = innermostOperation
-                .ChainFaultContext(["IntermediateContext"]);
+            string[] paramNames = [];
+            var openParen = boundaryName.IndexOf('(');
+            if (openParen > -1) {
+                var closeParen = boundaryName.LastIndexOf(')');
+                if (closeParen > openParen) {
+                    var paramString = boundaryName.Substring(openParen + 1, closeParen - openParen - 1);
+                    paramNames = paramString.Split(',').Select(p => p.Trim()).ToArray();
+                }
+            }
 
-            var outermostOperation = intermediateOperation
-                .ChainFaultContext(["OutermostContext"]);
+            var dirtyName = boundaryName;
+            if (openParen > -1) {
+                dirtyName = dirtyName.Substring(0, openParen);
+            }
+            var cleanName = dirtyName.Trim();
+            var cleanNameNoSpace = cleanName.Replace(" ", "");
+    
+            var contextData = userContext.Where(o => {
+                if (o is not string s) return true;
+                if (s.Replace(" ", "") == cleanNameNoSpace) return false;
+                if (paramNames.Contains(s)) return false;
+                return true;
+             }).ToList();
+    
+            var finalName = cleanName.CompoundName();
+            return new OperationStep(finalName, contextData);
+        }
+        #endregion
 
-            await outermostOperation.PublishFaults().Capture();
-
-            BusEvents.Count.ShouldBe(1);
-            var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
-
-            var report = fault.ToString();
-
-            report.ShouldContain("OutermostContext");
-            report.ShouldContain("IntermediateContext");
-            report.ShouldContain("InnermostContext");
-
-            report.ShouldContain("Deep Failure");
+        #region Private Helpers
+        
+        private static IEnumerable<FaultHubException> UnpackContexts(FaultHubException fhEx) {
+            var context = fhEx.Context;
+            while (context != null) {
+                yield return new FaultHubException(fhEx.Message, fhEx.InnerException, context);
+                context = context.InnerContext;
+            }
+        }
+        private static IEnumerable<Exception> FindRootCauses(Exception ex) {
+            Console.WriteLine($"[PARSER-DIAGNOSTIC]   - FindRootCauses searching in: {ex?.GetType().Name ?? "null"} ('{ex?.Message}')");
+            if (ex is AggregateException aggEx) {
+                Console.WriteLine("[PARSER-DIAGNOSTIC]     Type is AggregateException. Recursing into InnerExceptions.");
+                foreach (var inner in aggEx.InnerExceptions) {
+                    foreach (var root in FindRootCauses(inner)) {
+                        yield return root;
+                    }
+                }
+            } else if (ex is FaultHubException { InnerException: not null } fhEx) {
+                Console.WriteLine("[PARSER-DIAGNOSTIC]     Type is FaultHubException. Recursing into InnerException.");
+                foreach (var root in FindRootCauses(fhEx.InnerException)) {
+                    yield return root;
+                }
+            } else if (ex != null) {
+                Console.WriteLine($"[PARSER-DIAGNOSTIC]     ==> Found a Root Cause: {ex.Message}");
+                yield return ex;
+            }
         }
 
+        private static string CompoundName(this string s) 
+            => s == null ? null : Regex.Replace(s, @"(\B[A-Z])", " $1");
+        #endregion
     }
 }
