@@ -1,22 +1,86 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
+using System.Reactive;
+using System.Reactive.Linq;
 using System.Threading;
-using System.Windows.Forms;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
+using Xpand.Extensions.AssemblyExtensions;
+using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
-using Xpand.TestsLib.Common.Win32;
+using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.Reactive.Utility;
+using Xpand.Extensions.StringExtensions;
 
 namespace Xpand.Extensions.Tests.FaultHubTests {
     [TestFixture]
-    public class FaultHubExtensionTests {
+    public class FaultHubExtensionTests:FaultHubTestBase {
 
+        #region Operation Simulation
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+        [SuppressMessage("ReSharper", "UnusedParameter.Local")]
+        private IObservable<Unit> StepWithArgs(string someNoisyArgument) => WhenExistingProjectPageParsed()
+            .PushStackFrame();
+
+        private IObservable<Unit> StartParsing()
+            => Observable.Throw<Unit>(new Exception("StartParsing"))
+                .PushStackFrame();
+
+        private IObservable<Unit> ProjectParseTransaction()
+            => Unit.Default.Observe().BeginWorkflow("Project Parse Transaction")
+                .Then(_ => StartParsing(), "Start Parsing")
+                .RunToEnd().ToUnit()
+                .PushStackFrame();
+
+        private IObservable<Unit> WhenExistingProjectPageParsed()
+            => Unit.Default.Observe().BeginWorkflow("When Existing Project Page Parsed")
+                .Then(_ => ProjectParseTransaction())
+                .RunToEnd().ToUnit()
+                .PushStackFrame();
+
+        private IObservable<Unit> ParseUpcomingProjects()
+            => Unit.Default.Observe().BeginWorkflow("Parse Upcoming Projects")
+                .Then(_ => StepWithArgs("some noisy argument"))
+                .RunToEnd().ToUnit()
+                .PushStackFrame();
+        
+        private IObservable<Unit> WhenUpcomingUrls()
+            => Observable.Throw<Unit>(new Exception("Upcoming"))
+                .PushStackFrame();
+
+        private IObservable<Unit> ParseUpComing()
+            => Unit.Default.Observe().BeginWorkflow("Parse Up Coming")
+                .Then(_ => WhenUpcomingUrls())
+                .Then(_ => ParseUpcomingProjects())
+                .RunToEnd().ToUnit()
+                .PushStackFrame();
+        
+        private IObservable<Unit> ScheduleLaunchPadParse()
+            => Unit.Default.Observe().BeginWorkflow("Schedule Launch Pad Parse")
+                .Then(_ => ParseUpComing())
+                .RunToEnd().ToUnit()
+                .PushStackFrame();
+        #endregion
+        
+        [Test][Apartment(ApartmentState.STA)]
+        public async Task Generates_Concise_Execution_report_is_correct_and_readable() {
+            await ScheduleLaunchPadParse().PublishFaults().Capture();
+            BusEvents.Count.ShouldBe(1);
+            var finalReport = BusEvents.Single().ShouldBeOfType<FaultHubException>();
+            
+            var reportLines = finalReport.ToString().ToLines().ToArray();
+            
+            var storeReportLines = GetType().Assembly.ReadManifestResources(nameof(Generates_Concise_Execution_report_is_correct_and_readable)).First().ToLines().ToArray();
+            for (int i = 0; i < storeReportLines.Length-1; i++) {
+                storeReportLines[i].ShouldBe(reportLines[i],$"Line {i+1}");
+            }
+        }
+        
         [Test][Apartment(ApartmentState.STA)]
         public void Traverses_Parses_And_Renders_Complex_Nested_Exception_Correctly() {
             #region ARRANGE
-
-            #region ARRANGE
-
             var ctxSchedule = new AmbientFaultContext {
                 BoundaryName = "ScheduleLaunchPadParse()",
                 UserContext = ["Schedule Launch Pad Parse", "Kommunitas Kommunitas"]
@@ -43,7 +107,6 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
                 LogicalStackTrace =
                     [new LogicalStackFrame("StartParsing", @"Services\LaunchPadProjectPageParseService.cs", 1228, "MyDynamicValue")]
             };
-
             var rootCause1 = new Exception("Upcoming");
             var fh1Upcoming = new FaultHubException("Upcoming", rootCause1, ctxWhenUpcoming);
 
@@ -56,53 +119,20 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
                 new FaultHubException("When Existing Project Page Parsed failed", agg22, ctxWhenExisting);
             var agg23 = new AggregateException(fh2WhenExisting);
             var fh2ParseProjects = new FaultHubException("Parse Upcoming Projects failed", agg23, ctxParseProjects);
-
             var aggMid = new AggregateException(fh1Upcoming, fh2ParseProjects);
             var fhParseUpcoming = new FaultHubException("Parse Up Coming failed", aggMid, ctxParseUpcoming);
             var aggTop = new AggregateException(fhParseUpcoming);
             var topLevelException = new FaultHubException("Schedule Launch Pad Parse failed", aggTop, ctxSchedule);
-
             #endregion
 
-            #endregion
+            var finalReport = topLevelException;
+            var reportLines = finalReport.ToString().ToLines().ToArray();
 
-            var reportString = topLevelException.Parse().Render();
-
-            Console.WriteLine(reportString);
-            Clipboard.SetText(reportString);
-            #region ASSERT
-
-            #region ASSERT
-            reportString.ShouldStartWith("Kommunitas Kommunitas Schedule Launch Pad Parse failed (2 times • Upcoming • StartParsing)");
-            reportString.ShouldNotContain("--- Failures");
-            reportString.ShouldNotContain("Failure Path:");
-            reportString.ShouldNotContain("Operation:");
-
-            // Common Path
-            reportString.ShouldMatch(@"\s+Schedule Launch Pad Parse\s+");
-            reportString.ShouldNotMatch(@"\s+Schedule Launch Pad Parse \(Kommunitas Kommunitas\)");
-            reportString.ShouldMatch(@"\s+Parse Up Coming \(LaunchPad kommunitas\)");
-    
-            // Divergent paths should be numbered, but the top-level common path should not.
-            reportString.ShouldNotContain("1. Schedule Launch Pad Parse");
-            reportString.ShouldNotContain("2. Schedule Launch Pad Parse");
-
-            // Divergent Path 1
-            reportString.ShouldMatch(@"\s+1\. When Upcoming Urls");
-            reportString.ShouldMatch(@"\s+• Root Cause: System\.Exception: Upcoming");
-            reportString.ShouldMatch(@"\s+--- Invocation Stack ---\s+at WhenUpcomingUrls in LaunchPadProjectPageParseService\.cs:line 582");
-            reportString.ShouldNotMatch(@"\s+\(.*\)\s+at WhenUpcomingUrls");
-
-            // Divergent Path 2
-            reportString.ShouldMatch(@"\s+2\. Parse Upcoming Projects \(LaunchPad kommunitas\)");
-            reportString.ShouldMatch(@"\s+When Existing Project Page Parsed");
-            reportString.ShouldMatch(@"\s+Project Parse Transaction");
-            reportString.ShouldMatch(@"\s+Start Parsing");
-            reportString.ShouldMatch(@"\s+• Root Cause: System\.Exception: StartParsing");
-            reportString.ShouldMatch(@"\s+--- Invocation Stack ---\s+\(MyDynamicValue\) at StartParsing in LaunchPadProjectPageParseService\.cs:line 1228");
-            #endregion
-
-            #endregion
+            var storeReportLines = GetType().Assembly.ReadManifestResources(nameof(Traverses_Parses_And_Renders_Complex_Nested_Exception_Correctly)).First().ToLines().ToArray();
+            for (int i = 0; i < storeReportLines.Length-1; i++) {
+                var storeReportLine = storeReportLines[i];
+                storeReportLine.ShouldBe(reportLines[i],$"Line {i+1}");
+            }
         }
     }
 }

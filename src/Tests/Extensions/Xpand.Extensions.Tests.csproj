@@ -38,5 +38,9 @@
       <HintPath>..\..\..\bin\Xpand.TestsLib.dll</HintPath>
     </Reference>
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="FaultHubTests\Resources\Generates_Concise_Execution_report_is_correct_and_readable" />
+    <EmbeddedResource Include="FaultHubTests\Resources\Traverses_Parses_And_Renders_Complex_Nested_Exception_Correctly" />
+  </ItemGroup>
   <Import Project="..\..\..\.paket\Paket.Restore.targets" />
 </Project>

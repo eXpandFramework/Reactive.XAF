@@ -40,5 +40,6 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
             BusEvents = new List<Exception>();
             _busSubscription = FaultHub.Bus.Subscribe(BusEvents.Add);
         }
+        
     }
 }

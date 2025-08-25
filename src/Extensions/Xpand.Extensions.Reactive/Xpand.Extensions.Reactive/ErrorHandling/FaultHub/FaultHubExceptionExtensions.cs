@@ -5,17 +5,24 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using Xpand.Extensions.ExceptionExtensions;
-using Xpand.Extensions.StringExtensions;
 
 namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
     public record FailureReport(string TopMessage, IReadOnlyList<FailurePath> FailurePaths);
 
-    public record FailurePath(IReadOnlyList<OperationStep> Steps, Exception RootCause, IReadOnlyList<LogicalStackFrame> LogicalStack);
+    public record FailurePath(
+        IReadOnlyList<OperationStep> Steps,
+        Exception RootCause,
+        IReadOnlyList<LogicalStackFrame> LogicalStack);
 
     public record OperationStep(string Name, IReadOnlyList<object> ContextData) {
-        public virtual bool Equals(OperationStep other) 
-            => !ReferenceEquals(null, other) && (ReferenceEquals(this, other) || Name == other.Name &&
-                (ContextData ?? Enumerable.Empty<object>()).SequenceEqual(other.ContextData ?? Enumerable.Empty<object>()));
+        public virtual bool Equals(OperationStep other) {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return Name == other.Name &&
+                   (ContextData ?? Enumerable.Empty<object>()).SequenceEqual(other.ContextData ??
+                                                                             Enumerable.Empty<object>());
+        }
+
         public override int GetHashCode() {
             var hashCode = new HashCode();
             hashCode.Add(Name);
@@ -40,6 +47,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
                 var exceptionPath = topException.FailurePath(root).Reverse().ToList();
                 Console.WriteLine(
                     $"[PARSER-DIAGNOSTIC]    FailurePath contains {exceptionPath.Count} total exceptions.");
+
                 var steps = exceptionPath.OfType<FaultHubException>()
                     .SelectMany(UnpackContexts)
                     .Select(ParseStep).ToList();
@@ -47,7 +55,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
 
                 var logicalStack =
                     exceptionPath.OfType<FaultHubException>().LastOrDefault()?.LogicalStackTrace.ToList() ?? [];
-                var distinctSteps = steps.GroupBy(step => step.Name).Select(group => group.Last()).ToList();
+                var distinctSteps = steps.Distinct().ToList();
 
                 Console.WriteLine($"[PARSER-DIAGNOSTIC]    Deduplicated to {distinctSteps.Count} unique steps.");
                 return new FailurePath(distinctSteps, root, logicalStack);
@@ -59,101 +67,96 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
 
         public static string Render(this FailureReport model) {
             Console.WriteLine("\n[RENDER-DIAGNOSTIC] --- Begin Render ---");
-            Console.WriteLine($"[RENDER-DIAGNOSTIC] Rendering report for '{model.TopMessage}' with {model.FailurePaths.Count} failure path(s).");
+            Console.WriteLine(
+                $"[RENDER-DIAGNOSTIC] Rendering report for '{model.TopMessage}' with {model.FailurePaths.Count} failure path(s).");
             var sb = new StringBuilder();
-            var topMessagePrefix = "";
-            if (model.FailurePaths.Any() && model.FailurePaths[0].Steps.Any()) {
-                var firstStepContext = model.FailurePaths[0].Steps[0].ContextData;
-                if (firstStepContext.Any()) {
-                    topMessagePrefix = string.Join(" ", firstStepContext) + " ";
-                }
-            }
-            var rootCauseSummary = string.Join(" • ", model.FailurePaths.Select(p => p.RootCause.Message).Distinct());
-            sb.AppendLine($"{topMessagePrefix}{model.TopMessage} ({model.FailurePaths.Count} times{(string.IsNullOrEmpty(rootCauseSummary) ? "" : $" • {rootCauseSummary}")})");
 
+            var rootCauseSummary = string.Join(" • ", model.FailurePaths.Select(p => p.RootCause.Message).Distinct());
+            sb.AppendLine(
+                $"{model.TopMessage} ({model.FailurePaths.Count} times{(string.IsNullOrEmpty(rootCauseSummary) ? "" : $" • {rootCauseSummary}")})");
+            
             if (!model.FailurePaths.Any()) {
                 Console.WriteLine("[RENDER-DIAGNOSTIC] No failure paths to render. Exiting.");
                 return sb.ToString().Trim();
             }
 
-            var firstPathSteps = model.FailurePaths[0].Steps;
-            var commonPrefixLength = 0;
-            for (var i = 0; i < firstPathSteps.Count; i++) {
-                var currentStep = firstPathSteps[i];
-                if (model.FailurePaths.Skip(1).All(p => p.Steps.Count > i && p.Steps[i].Equals(currentStep)))
-                    commonPrefixLength++;
-                else
-                    break;
-            }
-
-            Console.WriteLine($"[RENDER-DIAGNOSTIC] Found common prefix of length: {commonPrefixLength}");
-
-            var commonPath = firstPathSteps.Take(commonPrefixLength).ToList();
-            for (var i = 0; i < commonPath.Count; i++) {
-                var step = commonPath[i];
-                var indent = new string(' ', (i + 1) * 2);
-                Console.WriteLine($"[RENDER-DIAGNOSTIC]   - Rendering common step {i}: '{step.Name}' at indent level {i + 1}");
-                sb.Append(indent).Append(step.Name);
-                if (i > 0 && step.ContextData.Any()) {
-                    sb.Append(" (").Append(string.Join(", ", step.ContextData)).Append(")");
-                }
-                sb.AppendLine();
-            }
-
-            for (var i = 0; i < model.FailurePaths.Count; i++) {
-                var path = model.FailurePaths[i];
-                Console.WriteLine($"[RENDER-DIAGNOSTIC] >> Rendering Divergent Path #{i + 1}");
-                var divergentSteps = path.Steps.Skip(commonPrefixLength).ToList();
-
-                for (var j = 0; j < divergentSteps.Count; j++) {
-                    var step = divergentSteps[j];
-                    var currentLevel = commonPrefixLength + j + 1;
-                    var indent = new string(' ', currentLevel * 2);
-                    Console.WriteLine($"[RENDER-DIAGNOSTIC]    - Rendering divergent step {j}: '{step.Name}' at indent level {currentLevel}");
-
-                    if (j == 0) {
-                        sb.Append(indent).Append($"{i + 1}. ");
-                    } else {
-                        sb.Append(indent).Append("   ");
-                    }
-
-                    sb.Append(step.Name);
-            
-                    var isFirstStepOfReport = commonPrefixLength == 0 && i == 0 && j == 0;
-                    if (!isFirstStepOfReport && step.ContextData.Any()) {
-                        sb.Append(" (").Append(string.Join(", ", step.ContextData)).Append(")");
-                    }
-                    sb.AppendLine();
-                }
-                var detailsBaseLevel = commonPrefixLength + divergentSteps.Count();
-                var detailsIndent = new string(' ', detailsBaseLevel * 2 + 4);
-
-                Console.WriteLine($"[RENDER-DIAGNOSTIC]    Root Cause: {path.RootCause.Message} at base indent level {detailsBaseLevel}");
-                sb.Append(detailsIndent).Append("• Root Cause: ").Append(path.RootCause.GetType().FullName).Append(": ")
-                    .AppendLine(path.RootCause.Message);
-
-                if (path.LogicalStack.Any()) {
-                    Console.WriteLine($"[RENDER-DIAGNOSTIC]    Invocation Stack ({path.LogicalStack.Count} frames)");
-                    var sectionIndent = detailsIndent + "  ";
-                    sb.Append(sectionIndent).AppendLine("--- Invocation Stack ---");
-                    foreach (var frame in path.LogicalStack) {
-                        var frameContext = frame.Context.Any() ? $"({string.Join(", ", frame.Context)}) " : "";
-                        sb.Append(sectionIndent).Append("  ").Append(frameContext).Append("at ")
-                            .Append(frame.MemberName)
-                            .Append(" in ").Append(Path.GetFileName(frame.FilePath)).Append(":line ")
-                            .Append(frame.LineNumber).AppendLine();
-                    }
-                }
-
-                if (path.RootCause != null) {
-                    var sectionIndent = detailsIndent + "  ";
-                    sb.Append(sectionIndent).AppendLine("--- Original Exception Details ---");
-                    sb.AppendLine(path.RootCause.ToString().Indent(sectionIndent.Length + 2));
-                }
-            }
-
+            RenderPathsRecursively(model.FailurePaths.ToList(), 0, "", true, sb);
             Console.WriteLine($"[RENDER-DIAGNOSTIC] --- End Render (Final String Length: {sb.Length}) ---\n");
             return sb.ToString().Trim();
+        }
+        private static void RenderPathsRecursively(List<FailurePath> paths, int level, string prefix, bool isRootLevel,
+            StringBuilder sb) {
+            var groups = paths.Where(p => p.Steps.Count > level)
+                .GroupBy(p => p.Steps[level])
+                .ToList();
+
+            for (var i = 0; i < groups.Count; i++) {
+                var group = groups[i];
+                var isLastGroup = i == groups.Count - 1;
+                var step = group.Key;
+
+                var connector = isLastGroup ? "└ " : "├ ";
+                sb.Append(prefix).Append(connector);
+
+                var stepText = new StringBuilder(step.Name);
+                if (!(isRootLevel && i == 0) && step.ContextData.Any())
+                    stepText.Append(" (").Append(string.Join(", ", step.ContextData)).Append(")");
+                sb.AppendLine(stepText.ToString());
+
+                var subPaths = group.ToList();
+                var childPrefix = prefix + (isLastGroup ? "  " : "│ ");
+
+                var finishedPaths = subPaths.Where(p => p.Steps.Count == level + 1).ToList();
+                var hasContinuingPaths = subPaths.Any(p => p.Steps.Count > level + 1);
+
+                if (finishedPaths.Any()) RenderFailureDetails(finishedPaths.First(), sb, childPrefix);
+
+                if (hasContinuingPaths) RenderPathsRecursively(subPaths, level + 1, childPrefix, false, sb);
+            }
+        }
+
+private static void RenderFailureDetails(FailurePath path, StringBuilder sb, string prefix) {
+            sb.Append(prefix).Append("• Root Cause: ").Append(path.RootCause.GetType().FullName).Append(": ")
+                .AppendLine(path.RootCause.Message);
+            var hasStack = path.LogicalStack.Any();
+            var hasOriginal = path.RootCause != null;
+
+            var detailsPrefixBuilder = new StringBuilder();
+            foreach (var character in prefix) {
+                switch (character) {
+                    case '├':
+                    case '│':
+                        detailsPrefixBuilder.Append('│');
+                        break;
+                    case '└':
+                        detailsPrefixBuilder.Append(' ');
+                        break;
+                    default:
+                        detailsPrefixBuilder.Append(character);
+                        break;
+                }
+            }
+            var detailsPrefix = detailsPrefixBuilder.ToString();
+
+            if (hasStack) {
+                sb.Append(detailsPrefix).Append("   --- Invocation Stack ---").AppendLine();
+                var stackPrefix = detailsPrefix + "     ";
+                foreach (var frame in path.LogicalStack) {
+                    var frameContext = frame.Context.Any() ? $"({string.Join(", ", frame.Context)}) " : "";
+                    sb.Append(stackPrefix).Append(frameContext).Append("at ").Append(frame.MemberName)
+                        .Append(" in ").Append(Path.GetFileName(frame.FilePath)).Append(":line ")
+                        .Append(frame.LineNumber).AppendLine();
+                }
+            }
+
+            if (hasOriginal) {
+                sb.Append(detailsPrefix).Append("   --- Original Exception Details ---").AppendLine();
+                var originalPrefix = detailsPrefix + "     ";
+                var exceptionLines = path.RootCause.ToString().Split([Environment.NewLine], StringSplitOptions.None);
+                foreach (var line in exceptionLines) {
+                    sb.Append(originalPrefix).AppendLine(line);
+                }
+            }
         }
 
         private static OperationStep ParseStep(FaultHubException fhEx) {
@@ -200,9 +203,12 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
         }
 
         private static IEnumerable<Exception> FindRootCauses(Exception ex) {
-            Console.WriteLine($"[PARSER-DIAGNOSTIC]   - FindRootCauses searching in: {ex?.GetType().Name ?? "null"} ('{ex?.Message}')");
+            Console.WriteLine(
+                $"[PARSER-DIAGNOSTIC]   - FindRootCauses searching in: {ex?.GetType().Name ?? "null"} ('{ex?.Message}')");
+
             if (ex is AggregateException aggEx) {
-                Console.WriteLine("[PARSER-DIAGNOSTIC]     Type is AggregateException. Recursing into InnerExceptions.");
+                Console.WriteLine(
+                    "[PARSER-DIAGNOSTIC]     Type is AggregateException. Recursing into InnerExceptions.");
                 foreach (var inner in aggEx.InnerExceptions)
                 foreach (var root in FindRootCauses(inner))
                     yield return root;

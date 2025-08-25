@@ -1,0 +1,22 @@
+Schedule Launch Pad Parse completed with errors (2 times • Upcoming • StartParsing)
+└ Schedule Launch Pad Parse
+  └ Parse Up Coming (Schedule Launch Pad Parse - ParseUpComing)
+    └ Parse Up Coming
+      ├ When Upcoming Urls (Parse Up Coming - WhenUpcomingUrls)
+      │ • Root Cause: System.Exception: Upcoming
+      │    --- Invocation Stack ---
+      │      at WhenUpcomingUrls in FaultHubExtensionTests.cs:line 51
+      │    --- Original Exception Details ---
+      │      System.Exception: Upcoming
+      └ Parse Upcoming Projects (Parse Up Coming - ParseUpcomingProjects)
+        └ Parse Upcoming Projects
+          └ Step With Args (Parse Upcoming Projects - StepWithArgs)
+            └ When Existing Project Page Parsed
+              └ Project Parse Transaction (When Existing Project Page Parsed - ProjectParseTransaction)
+                └ Project Parse Transaction
+                  └ Start Parsing (Project Parse Transaction - Start Parsing)
+                    • Root Cause: System.Exception: StartParsing
+                       --- Invocation Stack ---
+                         at StartParsing in FaultHubExtensionTests.cs:line 29
+                       --- Original Exception Details ---
+                         System.Exception: StartParsing

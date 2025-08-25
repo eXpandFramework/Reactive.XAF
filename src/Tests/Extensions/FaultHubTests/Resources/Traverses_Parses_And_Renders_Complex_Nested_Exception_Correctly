@@ -1,0 +1,18 @@
+Schedule Launch Pad Parse failed (2 times • Upcoming • StartParsing)
+└ Schedule Launch Pad Parse
+  └ Parse Up Coming (LaunchPad kommunitas)
+    ├ When Upcoming Urls
+    │ • Root Cause: System.Exception: Upcoming
+    │    --- Invocation Stack ---
+    │      at WhenUpcomingUrls in LaunchPadProjectPageParseService.cs:line 582
+    │    --- Original Exception Details ---
+    │      System.Exception: Upcoming
+    └ Parse Upcoming Projects (LaunchPad kommunitas)
+      └ When Existing Project Page Parsed
+        └ Project Parse Transaction
+          └ Start Parsing
+            • Root Cause: System.Exception: StartParsing
+               --- Invocation Stack ---
+                 (MyDynamicValue) at StartParsing in LaunchPadProjectPageParseService.cs:line 1228
+               --- Original Exception Details ---
+                 System.Exception: StartParsing
