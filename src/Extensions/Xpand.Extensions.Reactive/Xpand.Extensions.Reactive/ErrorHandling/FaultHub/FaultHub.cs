@@ -240,8 +240,8 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
             Log(() => "[HUB-TRACE][ExceptionToPublish] Exception is already a FaultHubException. Chaining new context.");
             
             var newChainedContext = contextToUse with{ InnerContext = faultHubException.Context };
-            var newException = (FaultHubException)Activator.CreateInstance(faultHubException.GetType(),
-                faultHubException.Message, faultHubException.InnerException, newChainedContext);
+            var newMessage = $"{contextToUse.Name} failed";
+            var newException = new FaultHubException(newMessage, faultHubException, newChainedContext);
 
             var finalContextSummary = $"'{string.Join(" | ", newException.Context.UserContext)}' -> '{string.Join(" | ", newException.Context.InnerContext?.UserContext ?? [])}'";
             Log(() => $"[HUB-TRACE][ExceptionToPublish] Created new FaultHubException. Final Context Chain: {finalContextSummary}");

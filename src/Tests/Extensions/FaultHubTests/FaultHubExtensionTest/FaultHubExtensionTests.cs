@@ -7,14 +7,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
-using Xpand.Extensions.AssemblyExtensions;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
-using Xpand.Extensions.StringExtensions;
 
-namespace Xpand.Extensions.Tests.FaultHubTests {
+namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest {
     [TestFixture]
     public class FaultHubExtensionTests:FaultHubTestBase {
 
@@ -70,14 +68,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             BusEvents.Count.ShouldBe(1);
             var finalReport = BusEvents.Single().ShouldBeOfType<FaultHubException>();
             
-            var reportLines = finalReport.ToString().ToLines().ToArray();
-            
-            var storeReportLines = GetType().Assembly.ReadManifestResources(nameof(Generates_Concise_Execution_report_is_correct_and_readable)).First().ToLines().ToArray();
-            Console.WriteLine("storeReport:");
-            Console.WriteLine(storeReportLines);
-            for (int i = 0; i < storeReportLines.Length-1; i++) {
-                storeReportLines[i].ShouldBe(reportLines[i],$"Line {i+1}");
-            }
+            AssertFaultExceptionReport(finalReport);
         }
         
         [Test][Apartment(ApartmentState.STA)]
@@ -126,18 +117,11 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             var aggTop = new AggregateException(fhParseUpcoming);
             var topLevelException = new FaultHubException("Schedule Launch Pad Parse failed", aggTop, ctxSchedule);
             #endregion
-
-            var finalReport = topLevelException;
-            var reportLines = finalReport.ToString().ToLines().ToArray();
-
-            var storeReportLines = GetType().Assembly.ReadManifestResources(nameof(Traverses_Parses_And_Renders_Complex_Nested_Exception_Correctly)).First().ToLines().ToArray();
-            for (int i = 0; i < storeReportLines.Length-1; i++) {
-                var storeReportLine = storeReportLines[i];
-                storeReportLine.ShouldBe(reportLines[i],$"Line {i+1}");
-            }
+            
+            AssertFaultExceptionReport(topLevelException);
         }
         
-                [Test]
+        [Test]
         public async Task ToString_Report_Aggregates_Context_From_Nested_ChainFaultContext_Boundaries() {
             var innermostOperation = Observable.Throw<Unit>(new InvalidOperationException("Deep Failure"))
                 .ChainFaultContext(["InnermostContext"]);
@@ -162,5 +146,6 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             report.ShouldContain("Deep Failure");
         }
 
+        
     }
 }

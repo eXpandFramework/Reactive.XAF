@@ -6,6 +6,7 @@ using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 using System.Threading;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.ObjectExtensions;
@@ -27,7 +28,7 @@ namespace Xpand.Extensions.Reactive.Combine {
             
             public List<INamedStream> Operations { get; } = new();
         }
-        public static IBatchTransactionBuilder BeginBatchTransaction<T>(this IObservable<T> source, [CallerArgumentExpression("source")] string sourceName = null)
+        public static IBatchTransactionBuilder BeginBatchTransaction<T>(this IObservable<T> source, [CallerArgumentExpression(nameof(source))] string sourceName = null)
             => new BatchTransactionBuilder(new NamedStream<object> { Name = GetStepName(sourceName), Source = source.Select(o => (object)o) });
 
         public static IBatchTransactionBuilder Add<T>(this IBatchTransactionBuilder builder, IObservable<T> step,
@@ -75,7 +76,7 @@ namespace Xpand.Extensions.Reactive.Combine {
                 new NamedStream<object> { Name = s.Name, Source = s.Source.Select(o => (object)o) });
     
             var operations = namedStreams.Operations(resiliencePolicy, context, failFast, transactionName, scheduler: scheduler);
-            var transaction = operations.SequentialTransaction(context.AddToContext(transactionName.PrefixCallerWhenDefault()));
+            var transaction = operations.SequentialTransaction(context.AddToContext(transactionName.PrefixCallerWhenDefault()),transactionName);
     
             return failFast
                 ? transaction.Catch((Exception ex)
@@ -185,14 +186,16 @@ namespace Xpand.Extensions.Reactive.Combine {
         public static IObservable<Unit> SequentialTransaction(this IEnumerable<NamedStream<object>> source, bool failFast = false,
             Func<IObservable<object>, IObservable<object>> resiliencePolicy = null, object[] context = null,
             [CallerMemberName] string transactionName = null, IScheduler scheduler = null) {
+            Console.WriteLine($"[DIAGNOSTIC] Inside SequentialTransaction, transactionName = '{transactionName ?? "null"}'");
             var transaction = source.Operations(resiliencePolicy, context, failFast, transactionName, scheduler: scheduler)
-                .SequentialTransaction(context.AddToContext(transactionName.PrefixCallerWhenDefault()));
-            return failFast ? transaction.Catch((Exception ex)
-                    => {
-                var faultException = ex as FaultHubException ?? ex.ExceptionToPublish(
-                    FaultHub.LogicalStackContext.Value.NewFaultContext(context, transactionName));
-                return Observable.Throw<Unit>(new TransactionAbortedException($"{transactionName} failed", faultException));
-            }) : transaction;
+                .SequentialTransaction(context, transactionName.PrefixCallerWhenDefault());
+            
+            return failFast ? transaction.Catch((Exception ex) => {
+                
+                var newContext = FaultHub.LogicalStackContext.Value.NewFaultContext(context, transactionName);
+                return Observable.Throw<Unit>(new TransactionAbortedException($"{transactionName} failed", ex, newContext));
+
+                    }) : transaction;
         }
 
 
@@ -221,7 +224,7 @@ namespace Xpand.Extensions.Reactive.Combine {
                 .SelectMany(resultSelector)
                 .PushStackFrame(context.AddToContext(transactionName));
         
-        static IObservable<Unit> SequentialTransaction(this IEnumerable<IObservable<object>> source, object[] context)
+        static IObservable<Unit> SequentialTransaction(this IEnumerable<IObservable<object>> source, object[] context,string transactionName)
             => source.ToNowObservable().SelectManySequential(obs => obs.DefaultIfEmpty(new object()))
                 .BufferUntilCompleted()
                 .Select(results => results.OfType<Exception>().ToList())
@@ -230,10 +233,10 @@ namespace Xpand.Extensions.Reactive.Combine {
                         return Unit.Default.Observe();
                     }
 
-                    var txName = context?.OfType<string>().FirstOrDefault() ?? "Transaction";
+                    var txName = transactionName ?? context?.OfType<string>().FirstOrDefault() ?? "Transaction";
                     return Observable.Throw<Unit>(new FaultHubException($"{txName} completed with errors",
                         new AggregateException(allFailures),
-                        FaultHub.LogicalStackContext.Value.NewFaultContext(context)));
+                        FaultHub.LogicalStackContext.Value.NewFaultContext(context,transactionName)));
                 })
                 .PushStackFrame(context);
 
@@ -244,9 +247,8 @@ namespace Xpand.Extensions.Reactive.Combine {
             => source.Select((op, _) => {
                     var objectSource = op.Source.Select(o => (object)o);
                     var operation = resiliencePolicy?.Invoke(objectSource) ?? objectSource;
-                    return operation
-                        .SubscribeOn(scheduler ?? Scheduler.Default)
-                        .ChainFaultContext(context.AddToContext($"{transactionName} - {op.Name}"), null, memberName, filePath, lineNumber);
+                    return operation.SubscribeOn(scheduler ?? Scheduler.Default)
+                        .ChainFaultContext(context, null, op.Name, filePath, lineNumber);
                 })
                 .Select(operation => failFast ? operation : operation.Catch((FaultHubException ex) => Observable.Return<object>(ex)));
 
@@ -329,6 +331,9 @@ namespace Xpand.Extensions.Reactive.Combine {
             => Observable.Defer(() => {
                 var ib = (TransactionBuilder<TFinal>)builder;
                 Log(() => $"[Tx.DEBUG][Run] Called for '{ib.TransactionName}'. Checking InitialStepName: '{ib.InitialStepName ?? "NULL"}'.");
+                Log(() => $"[CTX-TRACE][Run-Entry] Transaction '{ib.TransactionName}' starting. Preserved stack frame count: {FaultHub.LogicalStackContext.Value?.Count ?? 0}.");
+                
+                Log(() => $"[Tx.DEBUG][Run] Called for '{ib.TransactionName}'. Checking InitialStepName: '{ib.InitialStepName ?? "NULL"}'.");
                 var isNested = TransactionNestingLevel.Value > 0;
                 TransactionNestingLevel.Value++;
                 Log(() => $"[Tx.DEBUG][Run] isNested: {isNested}. Nesting level incremented to: {TransactionNestingLevel.Value}");
@@ -346,7 +351,7 @@ namespace Xpand.Extensions.Reactive.Combine {
                         err => Log(() => $"[Tx.DEBUG][Run] <<-- NOTIFICATION TO CHAINFAULTCONTEXT: OnError: {err.GetType().Name} - {err.Message}"),
                         () => Log(() => "[Tx.DEBUG][Run] <<-- NOTIFICATION TO CHAINFAULTCONTEXT: OnCompleted.")
                     )
-                    .ChainFaultContext(ib.Context.AddToContext(ib.TransactionName, failFast ? "FailFast" : "RunToEnd"), null, ib.CallerMemberName, ib.CallerMemberPath, ib.CallerMemberLine);
+                    .ChainFaultContext(ib.Context, null, ib.CallerMemberName, ib.CallerMemberPath, ib.CallerMemberLine);
                 var resultStream = failFast
                     ? chainedLogic.Catch((FaultHubException ex)
                         => Observable.Throw<TFinal[]>(new TransactionAbortedException($"{ib.TransactionName} failed", ex)))
@@ -355,7 +360,7 @@ namespace Xpand.Extensions.Reactive.Combine {
                     .Finally(() => {
                         TransactionNestingLevel.Value--;
                         Log(() => $"[Tx.DEBUG][Run] Finally block. Nesting level decremented to: {TransactionNestingLevel.Value}");
-                    });
+                    }) ;
             });
         
         public static IObservable<TFinal[]> RunToEnd<TFinal>(this ITransactionBuilder<TFinal> builder)
@@ -378,7 +383,7 @@ namespace Xpand.Extensions.Reactive.Combine {
                         : primaryObservable.Catch((Exception ex) => step.FallbackSelector(ex, currentResult));
                     return resilientObservable
                         // .PushStackFrame()
-                        .ChainFaultContext(builder.Context.AddToContext($"{builder.TransactionName} - {stepName}"), memberName: stepName)
+                        .ChainFaultContext(memberName: stepName)
                         .Materialize()
                         .BufferUntilCompleted()
                         .SelectMany(notifications => {
@@ -435,8 +440,14 @@ namespace Xpand.Extensions.Reactive.Combine {
             if (!string.IsNullOrEmpty(explicitName)) return explicitName;
             if (string.IsNullOrEmpty(expression)) return selector?.Method.Name;
 
+            var arrayMatch = Regex.Match(expression, @"new\s*\[\s*]\s*{\s*(?<content>.*?)\s*}");
+            if (arrayMatch.Success) {
+                expression = arrayMatch.Groups["content"].Value;
+            }
+
             // Handle lambdas like "_ => MyMethod(...)" by taking the part after the arrow.
             var codePart = expression.Split("=>").Last().Trim();
+
 
             // Find the start of the argument list and take the substring before it.
             var parenthesisIndex = codePart.IndexOf('(');
@@ -446,8 +457,12 @@ namespace Xpand.Extensions.Reactive.Combine {
 
             // Handle chained calls like "x.y.MyMethod" by taking the last part.
             var finalName = codePart.Split('.').Last();
-    
-            return string.IsNullOrEmpty(finalName) ? expression : finalName;
+
+            var stepName = string.IsNullOrEmpty(finalName) ? expression : finalName;
+            if (stepName.Contains("Sequ")) {
+                
+            }
+            return stepName;
         }
         private static IObservable<object> FailFast<TFinal>(this TransactionBuilder<TFinal> builder, List<StepDefinition> allSteps) 
             => allSteps.Select((step, i) => new { Step = step, PartNumber = i + 1 })
@@ -456,7 +471,7 @@ namespace Xpand.Extensions.Reactive.Combine {
                         var stepName = stepInfo.Step.Name ?? $"Part {stepInfo.PartNumber}";
                         return Observable.Defer(() => stepInfo.Step.Selector(currentResult))
                             // .PushStackFrame()
-                            .ChainFaultContext(builder.Context.AddToContext($"{builder.TransactionName} - {stepName}"), memberName: stepName);
+                            .ChainFaultContext(memberName: stepName);
                     }))
                 .BufferUntilCompleted();
     }

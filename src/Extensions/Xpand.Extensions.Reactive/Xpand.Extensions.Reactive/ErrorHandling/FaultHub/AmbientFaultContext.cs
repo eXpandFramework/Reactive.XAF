@@ -9,8 +9,20 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
         public IReadOnlyList<LogicalStackFrame> LogicalStackTrace { get; init; }
         public object[] UserContext { get; init; }
         public AmbientFaultContext InnerContext { get; init; }
-        public object Name => UserContext.FirstOrDefault()??BoundaryName ?? "Unknown";
+        public object Name {
+            get {
+                var userCtx = UserContext?.FirstOrDefault()?.ToString();
+                var boundary = BoundaryName;
+
+                if (!string.IsNullOrEmpty(userCtx) && !string.IsNullOrEmpty(boundary) &&
+                    userCtx.Replace(" ", "") != boundary.Replace(" ", "")) {
+                    return $"{userCtx} {boundary}";
+                }
+                return userCtx ?? boundary ?? "Unknown";
+            }
+        }
         public string BoundaryName { get; init; }
+        
     }
     
     public readonly struct LogicalStackFrame(

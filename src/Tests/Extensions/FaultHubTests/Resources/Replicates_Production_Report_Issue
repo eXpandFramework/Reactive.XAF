@@ -1,0 +1,23 @@
+LaunchPadName ScheduleLaunchPadParse failed (2 times • Upcoming • StartParsing)
+└ Schedule Launch Pad Parse
+  └ Parse Launch Pad
+    └ Parse Up Coming (UserName)
+      ├ When Upcoming Urls
+      │ └ Web Site Urls
+      │   • Root Cause: System.Exception: Upcoming
+      │      --- Invocation Stack ---
+      │        at SequentialTransaction in C:\Work\Reactive.XAF\src\Extensions\Xpand.Extensions.Reactive\Xpand.Extensions.Reactive\Combine\Transaction.cs:line 241
+      │        at ParseLaunchPad in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioTests.cs:line 59
+      │      --- Original Exception Details ---
+      │        System.Exception: Upcoming
+      └ Parse Upcoming Projects
+        └ Parse Up Coming Project
+          └ When Existing Project Page Parsed
+            └ Project Parse Transaction
+              └ Start Parsing
+                • Root Cause: System.Exception: StartParsing
+                   --- Invocation Stack ---
+                     at SequentialTransaction in C:\Work\Reactive.XAF\src\Extensions\Xpand.Extensions.Reactive\Xpand.Extensions.Reactive\Combine\Transaction.cs:line 241
+                     at ParseLaunchPad in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioTests.cs:line 59
+                   --- Original Exception Details ---
+                     System.Exception: StartParsing

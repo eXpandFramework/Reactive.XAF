@@ -52,7 +52,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
                     return !t.exception.IsSkipped() &&
                            (correlationId == null || Seen.TryAdd(correlationId.Value));
                 })
-                .SelectMany(t => t.originalException.Observe().SelectMany(exception => exception.Throw<Unit>())
+                .SelectMany(t => t.originalException.Observe().SelectMany(exception => Observable.Throw<Exception>(exception))
                     .TraceErrorLogger().CompleteOnError().WhenCompleted())
                 .ToUnit();
 

@@ -8,8 +8,8 @@ using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 namespace Xpand.Extensions.Reactive.ErrorHandling {
     public static partial class ErrorHandling {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("ReSharper", "ConvertToLambdaExpression")]
-        public static IObservable<T> Throw<T>(this Exception ex) 
-            => Observable.Defer(() => Observable.Throw<T>(ex.TagOrigin()));
+        public static IObservable<T> Throw<T>(this Exception ex,[CallerMemberName]string caller="") 
+            => Observable.Throw<T>(ex);
         
         public static IObservable<T> ThrowOnNext<T>(this IObservable<T> source, [CallerMemberName] string caller = "")
             => source.SelectMany(arg => new InvalidOperationException($"{arg} - {caller}").Throw<T>());

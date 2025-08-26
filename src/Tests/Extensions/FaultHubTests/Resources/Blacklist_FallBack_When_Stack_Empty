@@ -1,0 +1,35 @@
+LaunchPadName ScheduleLaunchPadParse failed (2 times • Upcoming • StartParsing)
+└ Schedule Launch Pad Parse
+  └ Parse Launch Pad
+    └ Parse Up Coming
+      ├ When Upcoming Urls
+      │ └ Web Site Urls
+      │   • Root Cause: System.Exception: Upcoming
+      │      --- Invocation Stack ---
+      │        at SequentialTransaction in C:\Work\Reactive.XAF\src\Extensions\Xpand.Extensions.Reactive\Xpand.Extensions.Reactive\Combine\Transaction.cs:line 241
+      │        at ParseUpComing in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 50
+      │        at ConnectLaunchPad in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 39
+      │        (LaunchPadName, UserName) at SequentialTransaction in C:\Work\Reactive.XAF\src\Extensions\Xpand.Extensions.Reactive\Xpand.Extensions.Reactive\Combine\Transaction.cs:line 241
+      │        at ScheduleLaunchPadParse in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 16
+      │        at ParseLaunchPad in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 28
+      │        ... (Fallback: All frames shown as the blacklist would hide the entire stack) ...
+      │      --- Original Exception Details ---
+      │        System.Exception: Upcoming
+      └ Parse Upcoming Projects
+        └ Parse Up Coming Project
+          └ When Existing Project Page Parsed
+            └ Project Parse Transaction
+              └ Start Parsing
+                • Root Cause: System.Exception: StartParsing
+                   --- Invocation Stack ---
+                     at SequentialTransaction in C:\Work\Reactive.XAF\src\Extensions\Xpand.Extensions.Reactive\Xpand.Extensions.Reactive\Combine\Transaction.cs:line 241
+                     at ParseUpComing in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 50
+                     at ConnectLaunchPad in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 39
+                     (LaunchPadName, UserName) at SequentialTransaction in C:\Work\Reactive.XAF\src\Extensions\Xpand.Extensions.Reactive\Xpand.Extensions.Reactive\Combine\Transaction.cs:line 241
+                     at ScheduleLaunchPadParse in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 16
+                     at ParseLaunchPad in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 28
+                     ... (Fallback: All frames shown as the blacklist would hide the entire stack) ...
+                   --- Original Exception Details ---
+                     System.Exception: StartParsing
+
+Blacklisted patterns applied: Xpand Framework

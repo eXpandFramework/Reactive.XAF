@@ -19,7 +19,6 @@ namespace Xpand.Extensions.Reactive.ErrorHandling {
             strategy ??= SecondsBackoffStrategy;
             scheduler ??= DefaultScheduler.Instance;
             retryOnError ??= _ => Unit.Default.Observe();
-            var newGuid = Guid.NewGuid();
             return Observable.Defer(() => {
                 var attempt = 0;
                 return Resubscribe();

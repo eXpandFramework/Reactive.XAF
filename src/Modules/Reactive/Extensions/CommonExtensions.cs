@@ -61,7 +61,7 @@ namespace Xpand.XAF.Modules.Reactive.Extensions{
 
 
         public static IObservable<T> Handle<T>(this Exception exception, Func<Exception, IObservable<T>> exceptionSelector = null) 
-            => exception is WarningException ? default(T).Observe() : exceptionSelector != null ? exceptionSelector(exception) : exception.Throw<T>();
+            => exception is WarningException ? default(T).Observe() : exceptionSelector != null ? exceptionSelector(exception) : Observable.Throw<T>(exception);
 
         
         public static IObservable<T> HandleException<T>(this IObservable<T> source,Func<Exception,IObservable<T>> exceptionSelector=null) 

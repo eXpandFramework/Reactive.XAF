@@ -37,6 +37,9 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
     public static class FaultHubExceptionExtensions {
         #region Public Extensions
 
+//MODIFICATION: The logic to find the logical stack has been updated.
+//Instead of only looking at the top-level exception, it now searches the
+//exception path from the root cause upwards to find the most relevant stack trace.
         public static FailureReport Parse(this FaultHubException topException) {
             Console.WriteLine("\n[PARSER-DIAGNOSTIC] --- Begin Parse ---");
             Console.WriteLine($"[PARSER-DIAGNOSTIC] Parsing top-level exception: '{topException.Message}'");
@@ -44,17 +47,19 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
 
             var paths = rootCauses.Select((root, i) => {
                 Console.WriteLine($"[PARSER-DIAGNOSTIC] >> Building Path #{i + 1} for Root Cause: {root.Message}");
-                var exceptionPath = topException.FailurePath(root).Reverse().ToList();
+                var exceptionPath = topException.Yield<Exception>().Concat(topException.FailurePath(root)).Reverse().ToList();
                 Console.WriteLine(
                     $"[PARSER-DIAGNOSTIC]    FailurePath contains {exceptionPath.Count} total exceptions.");
 
                 var steps = exceptionPath.OfType<FaultHubException>()
-                    .SelectMany(UnpackContexts)
-                    .Select(ParseStep).ToList();
+                    .Select(ParseStep)
+                    .ToList();
+
                 Console.WriteLine($"[PARSER-DIAGNOSTIC]    Extracted {steps.Count} raw operation steps.");
 
-                var logicalStack =
-                    exceptionPath.OfType<FaultHubException>().LastOrDefault()?.LogicalStackTrace.ToList() ?? [];
+                var logicalStack = exceptionPath.OfType<FaultHubException>()
+                    .FirstOrDefault(fhEx => fhEx.LogicalStackTrace.Any())?.LogicalStackTrace.ToList() 
+                                   ?? topException.LogicalStackTrace.ToList();
                 var distinctSteps = steps.Distinct().ToList();
 
                 Console.WriteLine($"[PARSER-DIAGNOSTIC]    Deduplicated to {distinctSteps.Count} unique steps.");
@@ -64,7 +69,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
             Console.WriteLine($"[PARSER-DIAGNOSTIC] --- End Parse --- (Found {paths.Count} paths)");
             return new FailureReport(topException.Message, paths);
         }
-
+//MODIFICATION: End of changes.
         public static string Render(this FailureReport model) {
             Console.WriteLine("\n[RENDER-DIAGNOSTIC] --- Begin Render ---");
             Console.WriteLine(
@@ -80,41 +85,64 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
                 return sb.ToString().Trim();
             }
 
-            RenderPathsRecursively(model.FailurePaths.ToList(), 0, "", true, sb);
+            var topOperationContext = model.FailurePaths.FirstOrDefault()?.Steps.FirstOrDefault()?.ContextData ?? Enumerable.Empty<object>();
+            var parentContexts = new HashSet<object>(topOperationContext);
+            var topOperationName = model.TopMessage.Split(' ')[0];
+            RenderPathsRecursively(model.FailurePaths.ToList(), 0, "", true, sb, null, topOperationName, parentContexts);
             Console.WriteLine($"[RENDER-DIAGNOSTIC] --- End Render (Final String Length: {sb.Length}) ---\n");
             return sb.ToString().Trim();
         }
-        private static void RenderPathsRecursively(List<FailurePath> paths, int level, string prefix, bool isRootLevel,
-            StringBuilder sb) {
-            var groups = paths.Where(p => p.Steps.Count > level)
-                .GroupBy(p => p.Steps[level])
-                .ToList();
+// File: Xpand.Extensions.Reactive\Xpand.Extensions.Reactive\ErrorHandling\FaultHub\FaultHubExceptionExtensions.cs
 
-            for (var i = 0; i < groups.Count; i++) {
-                var group = groups[i];
-                var isLastGroup = i == groups.Count - 1;
-                var step = group.Key;
-
-                var connector = isLastGroup ? "└ " : "├ ";
-                sb.Append(prefix).Append(connector);
-
-                var stepText = new StringBuilder(step.Name);
-                if (!(isRootLevel && i == 0) && step.ContextData.Any())
-                    stepText.Append(" (").Append(string.Join(", ", step.ContextData)).Append(")");
-                sb.AppendLine(stepText.ToString());
-
-                var subPaths = group.ToList();
-                var childPrefix = prefix + (isLastGroup ? "  " : "│ ");
-
-                var finishedPaths = subPaths.Where(p => p.Steps.Count == level + 1).ToList();
-                var hasContinuingPaths = subPaths.Any(p => p.Steps.Count > level + 1);
-
-                if (finishedPaths.Any()) RenderFailureDetails(finishedPaths.First(), sb, childPrefix);
-
-                if (hasContinuingPaths) RenderPathsRecursively(subPaths, level + 1, childPrefix, false, sb);
-            }
+private static void RenderPathsRecursively(List<FailurePath> paths, int level, string prefix, bool isRootLevel,
+    StringBuilder sb, OperationStep parentStep, string topOperationName, ISet<object> parentContexts) {
+    var groups = paths.Where(p => p.Steps.Count > level)
+        .GroupBy(p => p.Steps[level])
+        .ToList();
+    for (var i = 0; i < groups.Count; i++) {
+        var group = groups[i];
+        var isLastGroup = i == groups.Count - 1;
+        var step = group.Key;
+        var childPrefix = prefix + (isLastGroup ? "  " : "│ ");
+        bool hasContinuingPaths;
+        if (parentStep != null && step.Name == parentStep.Name) {
+            var subPaths = group.ToList();
+            
+            hasContinuingPaths = subPaths.Any(p => p.Steps.Count > level + 1);
+            if (hasContinuingPaths) RenderPathsRecursively(subPaths, level + 1, prefix, false, sb, step, topOperationName, parentContexts);
+            continue;
         }
 
+        if (isRootLevel && step.Name.Replace(" ", "") == topOperationName.Replace(" ", "")) {
+            var subPaths = group.ToList();
+            hasContinuingPaths = subPaths.Any(p => p.Steps.Count > level + 1);
+            if (hasContinuingPaths) RenderPathsRecursively(subPaths, level + 1, prefix, false, sb, step, topOperationName, parentContexts);
+            continue;
+        }
+
+        var connector = isLastGroup ? "└ " : "├ ";
+        sb.Append(prefix).Append(connector);
+
+        var stepText = new StringBuilder(step.Name);
+        
+        var newContextData = step.ContextData.Where(c => !parentContexts.Contains(c)).ToList();
+        if (newContextData.Any()) {
+            stepText.Append(" (").Append(string.Join(", ", newContextData)).Append(")");
+        }
+        
+        sb.AppendLine(stepText.ToString());
+
+        var childParentContexts = new HashSet<object>(parentContexts);
+        foreach (var ctx in step.ContextData) {
+            childParentContexts.Add(ctx);
+        }
+        
+        var finishedPaths = group.Where(p => p.Steps.Count == level + 1).ToList();
+        hasContinuingPaths = group.Any(p => p.Steps.Count > level + 1);
+        if (finishedPaths.Any()) RenderFailureDetails(finishedPaths.First(), sb, childPrefix);
+        if (hasContinuingPaths) RenderPathsRecursively(group.ToList(), level + 1, childPrefix, false, sb, step, topOperationName, childParentContexts);
+    }
+}
 private static void RenderFailureDetails(FailurePath path, StringBuilder sb, string prefix) {
             sb.Append(prefix).Append("• Root Cause: ").Append(path.RootCause.GetType().FullName).Append(": ")
                 .AppendLine(path.RootCause.Message);
@@ -144,7 +172,7 @@ private static void RenderFailureDetails(FailurePath path, StringBuilder sb, str
                 foreach (var frame in path.LogicalStack) {
                     var frameContext = frame.Context?.Any() == true ? $"({string.Join(", ", frame.Context)}) " : "";
                     sb.Append(stackPrefix).Append(frameContext).Append("at ").Append(frame.MemberName)
-                        .Append(" in ").Append(Path.GetFileName(frame.FilePath)).Append(":line ")
+                        .Append(" in ").Append(frame.FilePath).Append(":line ")
                         .Append(frame.LineNumber).AppendLine();
                 }
             }
@@ -159,37 +187,22 @@ private static void RenderFailureDetails(FailurePath path, StringBuilder sb, str
             }
         }
 
+// File: Xpand.Extensions.Reactive\Xpand.Extensions.Reactive\ErrorHandling\FaultHub\FaultHubExceptionExtensions.cs
+
         private static OperationStep ParseStep(FaultHubException fhEx) {
             var ctx = fhEx.Context;
             var boundaryName = ctx.BoundaryName ?? "Unnamed Operation";
             var userContext = ctx.UserContext ?? [];
-
-            string[] paramNames = [];
             var openParen = boundaryName.IndexOf('(');
-            if (openParen > -1) {
-                var closeParen = boundaryName.LastIndexOf(')');
-                if (closeParen > openParen) {
-                    var paramString = boundaryName.Substring(openParen + 1, closeParen - openParen - 1);
-                    paramNames = paramString.Split(',').Select(p => p.Trim()).ToArray();
-                }
-            }
-
             var dirtyName = boundaryName;
             if (openParen > -1) dirtyName = dirtyName.Substring(0, openParen);
             var cleanName = dirtyName.Trim();
-            var cleanNameNoSpace = cleanName.Replace(" ", "");
 
-            var contextData = userContext.Where(o => {
-                if (o is not string s) return true;
-                if (s.Replace(" ", "") == cleanNameNoSpace) return false;
-                if (paramNames.Contains(s)) return false;
-                return true;
-            }).ToList();
+            var contextData = userContext.ToList();
 
             var finalName = cleanName.CompoundName();
             return new OperationStep(finalName, contextData);
-        }
-
+        }        
         #endregion
 
         #region Private Helpers

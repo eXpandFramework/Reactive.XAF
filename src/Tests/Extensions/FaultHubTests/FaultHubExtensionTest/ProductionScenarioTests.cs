@@ -14,7 +14,7 @@ using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.StringExtensions;
 
-namespace Xpand.Extensions.Tests.FaultHubTests {
+namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest {
     [TestFixture]
     public class ProductionScenarioTests : FaultHubTestBase {
 
@@ -33,6 +33,9 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             var reportLines = finalReport.ToString().ToLines().ToArray();
 
             reportLines.ShouldNotContain(line => line.Contains("Sequential Transaction"));
+            
+            AssertFaultExceptionReport(finalReport.ToString());
+            
         }
         #endregion
 
