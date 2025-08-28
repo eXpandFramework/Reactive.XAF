@@ -34,7 +34,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
 			        TraceEventHub.Init();
 		        }
 		        else {
-			        typeof(GrpcEnvironment).WhenEvent(nameof(GrpcEnvironment.ShuttingDown)).IgnoreElements().ToUnit().Subscribe();
+			        typeof(GrpcEnvironment).ProcessEvent(nameof(GrpcEnvironment.ShuttingDown)).IgnoreElements().ToUnit().Subscribe();
 		        }
 		        var startServer = application.StartServer().Publish().RefCount();
 		        

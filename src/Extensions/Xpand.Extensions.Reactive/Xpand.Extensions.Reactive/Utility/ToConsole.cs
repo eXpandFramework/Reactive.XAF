@@ -7,22 +7,14 @@ using static System.Console;
 
 namespace Xpand.Extensions.Reactive.Utility {
     public static partial class Utility {
-        public static IObservable<T> ToConsole<T>(
-            this IObservable<T> source, 
-            RXAction action, 
-            Func<TimeSpan, T, object> nextSelector, 
-            [CallerMemberName] string caller = "") 
-        {
+        public static IObservable<T> ToConsole<T>(this IObservable<T> source, RXAction action, Func<TimeSpan, T, object> nextSelector, [CallerMemberName] string caller = "") {
             var stopwatch = new Stopwatch();
-    
-            return source
-                .DoOnSubscribe(() => {
-                    if (action.HasFlag(RXAction.Subscribe)) {
-                        stopwatch.Start();
-                        var value = $"{caller} - Subscribe";
-                        WriteLine(value); 
-                        Debug.WriteLine(value);
-                    }
+            return source.DoOnSubscribe(() => {
+                    if (!action.HasFlag(RXAction.Subscribe)) return;
+                    stopwatch.Start();
+                    var value = $"{caller} - Subscribe";
+                    WriteLine(value); 
+                    Debug.WriteLine(value);
                 })
                 .Finally(() => {
                     if (!action.HasFlag(RXAction.Dispose)) return;

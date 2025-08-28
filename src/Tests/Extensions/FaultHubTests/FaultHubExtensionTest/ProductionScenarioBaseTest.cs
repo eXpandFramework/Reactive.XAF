@@ -13,17 +13,18 @@ namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest{
         [MethodImpl(MethodImplOptions.NoInlining)]
         protected IObservable<Unit> ScheduleLaunchPadParse()
             => ParseLaunchPad().ChainFaultContext(["LaunchPadName"])
-                .PushStackFrame();
-        
+                .PushStackFrame()
+            ;
+
         [MethodImpl(MethodImplOptions.NoInlining)]
         private IObservable<Unit> ParseLaunchPad()
             => Observable.Return("serviceModule")
                 .SelectMany(_ => Observable.Return("pageParsed")) 
-                .SelectMany(_ =>
-                    ConnectLaunchPad()
-                        .BeginBatchTransaction()
-                        .Add(ParseUpComing())
-                        .SequentialTransaction(true)
+                .SelectMany(_ => ConnectLaunchPad()
+                        .BeginWorkflow()
+                        .Then(ParseUpComing())
+                        .RunFailFast()
+                        .ToUnit()
                 )
                 .PushStackFrame();
 
@@ -33,10 +34,10 @@ namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest{
         [MethodImpl(MethodImplOptions.NoInlining)]
         private IObservable<Unit> ConnectLaunchPad()
             => Observable.Return("navigated")
-                .BeginBatchTransaction()
-                .Add(ConnectWallet())
-                .SequentialFailFastTransaction(context:["LaunchPadName","UserName"])
-                .PushStackFrame()
+                .BeginWorkflow("ConnectLaunchPad", context:["LaunchPadName","UserName"])
+                .Then(ConnectWallet())
+                .RunFailFast()
+                .ToUnit()
         ;
         
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -47,7 +48,6 @@ namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest{
                 .Then(_ => ParseUpcomingProjects())
                 .RunToEnd()
                 .ToUnit()
-                .PushStackFrame()
         ;
         
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -63,15 +63,14 @@ namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest{
                 .Then(_ => WebSiteUrls())
                 .Then(ExistingUpcomingUrl)
                 .RunToEnd()
-                .SelectMany()
-                .PushStackFrame();
+                .SelectMany() ;
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         private IObservable<Unit> ParseUpcomingProjects()
             => new[] { ParseUpComingProject() }
-                .BeginBatchTransaction()
-                .SequentialTransaction()
-                .PushStackFrame();
+                .BeginWorkflow("ParseUpcomingProjects", TransactionMode.Sequential)
+                .RunToEnd()
+                .ToUnit() ;
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         private IObservable<Unit> ParseUpComingProject()
@@ -81,17 +80,15 @@ namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest{
         
         [MethodImpl(MethodImplOptions.NoInlining)]
         private IObservable<Unit> ParseUpComingProjectsPlural()
-            => WhenExistingProjectPageParsed()
-                .PushStackFrame();
+            => WhenExistingProjectPageParsed();
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         private IObservable<Unit> WhenExistingProjectPageParsed()
             => ProjectParseTransaction()
-                .BeginBatchTransaction()
-                .Add(NotifyingTransaction())
-                .SequentialTransaction()
-                .ToUnit()
-                .PushStackFrame();
+                .BeginWorkflow("WhenExistingProjectPageParsed")
+                .Then(NotifyingTransaction())
+                .RunToEnd()
+                .ToUnit() ;
         
         [MethodImpl(MethodImplOptions.NoInlining)]
         private IObservable<Unit> Validate() => Observable.Return(Unit.Default);
@@ -99,25 +96,26 @@ namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest{
         private IObservable<Unit> StartParsing() => Observable.Throw<Unit>(new Exception("StartParsing"));
         [MethodImpl(MethodImplOptions.NoInlining)]
         private IObservable<Unit> ParseNetwork() => Observable.Return(Unit.Default);
-        
+
         [MethodImpl(MethodImplOptions.NoInlining)]
         private IObservable<Unit> ProjectParseTransaction()
             => Validate()
-                .BeginBatchTransaction()
-                .Add(StartParsing())
-                .Add(ParseNetwork())
-                .SequentialTransaction();
+                .BeginWorkflow("ProjectParseTransaction")
+                .Then(StartParsing())
+                .Then(ParseNetwork())
+                .RunToEnd()
+                .ToUnit();
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         private IObservable<Unit> NotifyNewRounds() => Observable.Return(Unit.Default);
-        
+
         [MethodImpl(MethodImplOptions.NoInlining)]
         private IObservable<Unit> NotifyingTransaction()
             => Observable.Return(Unit.Default)
-                .BeginBatchTransaction()
-                .Add(NotifyNewRounds())
-                .SequentialRunToEndTransaction()
-                .PushStackFrame();
+                .BeginWorkflow("NotifyingTransaction")
+                .Then(NotifyNewRounds())
+                .RunToEnd()
+                .ToUnit() ;
         
         #endregion
     }

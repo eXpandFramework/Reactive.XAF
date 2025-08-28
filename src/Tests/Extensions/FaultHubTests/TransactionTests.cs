@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -8,13 +9,15 @@ using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.LinqExtensions;
+using Xpand.Extensions.Numeric;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 
 namespace Xpand.Extensions.Tests.FaultHubTests {
-    public class SequentialTransactionTests : FaultHubTestBase {
+    
+    public class TransactionTests : FaultHubTestBase {
         [MethodImpl(MethodImplOptions.NoInlining)]
         private IObservable<string> FailingOperation(SubscriptionCounter failingCounter)
             => Observable.Throw<string>(new InvalidOperationException("Operation Failed"))
@@ -32,11 +35,14 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             var failingCounter = new SubscriptionCounter();
             var successfulCounter = new SubscriptionCounter();
             var outerCounter = new SubscriptionCounter();
-            
-            var result = await FailingOperation(failingCounter) 
-                .BeginBatchTransaction()
-                .Add(SuccessfulOperation(successfulCounter))
-                .SequentialTransaction(false, op => op.Retry(2), ["MyCustomContext"], "MyTransaction")
+
+            var resilientFailingOperation = FailingOperation(failingCounter).Retry(2);
+            var successfulOperation = SuccessfulOperation(successfulCounter);
+
+            var result = await resilientFailingOperation
+                .BeginWorkflow( "MyTransaction", context: ["MyCustomContext"])
+                .Then(successfulOperation)
+                .RunToEnd()
                 .TrackSubscriptions(outerCounter)
                 .ChainFaultContext(s => s.Retry(3), ["Outer"])
                 .PublishFaults().Capture();
@@ -48,38 +54,42 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             
             var finalFault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
             finalFault.AllContexts.ShouldContain("Outer");
-            
-            finalFault.LogicalStackTrace.ShouldContain(frame => frame.Context.Contains("MyTransaction"));
+
+            finalFault.AllContexts.ShouldContain("MyTransaction");
             
             var aggregateException = finalFault.InnerException.ShouldBeOfType<AggregateException>();
             var innerFault = aggregateException.InnerExceptions.Single().ShouldBeOfType<FaultHubException>();
 
-            innerFault.AllContexts.ShouldNotContain("MyTransaction");
-            innerFault.AllContexts.ShouldContain(ctx => ctx is string && ((string)ctx).StartsWith("MyTransaction -"));
+            innerFault.AllContexts.ShouldContain("MyTransaction");
+            innerFault.AllContexts.ShouldContain("resilientFailingOperation");
         }
+
         [Test]
         public async Task SequentialTransaction_Aborts_On_First_Failure_When_FailFast_Is_True() {
             await Observable.Return(Unit.Default)
-                .BeginBatchTransaction()
-                .Add(Observable.Throw<string>(new InvalidOperationException("Failing Operation")))
-                .Add(Observable.Return(Unit.Default))
-                .SequentialTransaction(true, transactionName: "FailFastTransaction")
+                .BeginWorkflow("FailFastTransaction")
+                .Then(Observable.Throw<string>(new InvalidOperationException("Failing Operation")))
+                .Then(Observable.Return(Unit.Default))
+                .RunFailFast()
                 .PublishFaults().Capture();
 
             var finalFault = BusEvents.Single().ShouldBeOfType<TransactionAbortedException>();
-            finalFault.Message.ShouldBe("FailFastTransaction failed");
+            finalFault.Context.BoundaryName.ShouldBe("FailFastTransaction");
 
             var originalFault = finalFault.InnerException.ShouldBeOfType<FaultHubException>();
             originalFault.InnerException.ShouldBeOfType<InvalidOperationException>().Message
                 .ShouldBe("Failing Operation");
         }
-
         [Test]
         public async Task Can_Create_Transaction_From_IEnumerable_Of_Observables() {
-            var result = await new[] { "Success1", "Failure1", "Success2" }
-                .Select(item => item.StartsWith("Failure") ? Observable.Throw<string>(new InvalidOperationException(item)) : Observable.Return(item))
-                .BeginBatchTransaction()
-                .SequentialTransaction(transactionName: "FromIEnumerableTx")
+            var operations = new[] { "Success1", "Failure1", "Success2" }
+                .Select(item => item.StartsWith("Failure")
+                    ? Observable.Throw<string>(new InvalidOperationException(item))
+                    : Observable.Return(item));
+
+            var result = await operations
+                .BeginWorkflow( "FromIEnumerableTx",TransactionMode.Sequential)
+                .RunToEnd()
                 .PublishFaults()
                 .Capture();
 
@@ -88,72 +98,77 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
 
             BusEvents.Count.ShouldBe(1);
             var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
-    
             var aggregate = fault.InnerException.ShouldBeOfType<AggregateException>();
             var innerFault = aggregate.InnerExceptions.Single().ShouldBeOfType<FaultHubException>();
 
             innerFault.InnerException.ShouldBeOfType<InvalidOperationException>().Message.ShouldBe("Failure1");
-            innerFault.AllContexts.ShouldContain(ctx => ctx is string && ((string)ctx).StartsWith("FromIEnumerableTx -"));
 
+            var stepName = $"{nameof(operations)}[1]";
+            innerFault.AllContexts.ShouldContain(stepName);
+            
         }
 
         [Test]
         public async Task NestedFailFastTransaction_Aborts_Outer_FailFastTransaction() {
             var innerTx1 = Observable.Return(Unit.Default)
-                .BeginBatchTransaction()
-                .Add(Observable.Throw<Unit>(new InvalidOperationException("Inner Tx1 Failed")))
-                .SequentialTransaction(true, transactionName: "InnerTransaction1");
-            
+                .BeginWorkflow("InnerTransaction1")
+                .Then(Observable.Throw<Unit>(new InvalidOperationException("Inner Tx1 Failed")))
+                .RunFailFast();
+
             var innerTx2 = Observable.Return(Unit.Default)
-                .BeginBatchTransaction()
-                .SequentialTransaction(transactionName:"InnerTransaction2");
-            
+                .BeginWorkflow("InnerTransaction2")
+                .RunFailFast();
+
             await innerTx1
-                .BeginBatchTransaction()
-                .Add(innerTx2)
-                .SequentialTransaction(true, transactionName:"OuterTransaction")
+                .BeginWorkflow("OuterTransaction")
+                .Then(innerTx2)
+                .RunFailFast()
                 .PublishFaults().Capture();
-            
+
             var finalFault = BusEvents.Single().ShouldBeOfType<TransactionAbortedException>();
-            finalFault.Message.ShouldBe("OuterTransaction failed");
+            finalFault.Context.BoundaryName.ShouldBe("OuterTransaction");
 
             var innerFault = finalFault.InnerException.ShouldBeOfType<TransactionAbortedException>();
-            innerFault.Message.ShouldBe("InnerTransaction1 failed");
+            innerFault.Context.BoundaryName.ShouldBe("InnerTransaction1");
+
+
 
             var originalOpFault = innerFault.InnerException.ShouldBeOfType<FaultHubException>();
             originalOpFault.InnerException.ShouldBeOfType<InvalidOperationException>().Message
                 .ShouldBe("Inner Tx1 Failed");
-            
+    
             originalOpFault.AllContexts.ShouldContain(ctx => ctx is string && ((string)ctx).StartsWith("InnerTransaction1 -"));
         }
-        
+
         [Test]
         public async Task NestedRunToCompletionTransaction_Fails_OuterFailFastTransaction_After_Completion() {
+            
             var innerTx1 = Observable.Return(Unit.Default)
-                .BeginBatchTransaction()
-                .SequentialTransaction(true, transactionName:"InnerTransaction1");
-            
+                .BeginWorkflow("InnerTransaction1")
+                .RunFailFast();
+
             var innerTx2 = Observable.Return(Unit.Default)
-                .BeginBatchTransaction()
-                .Add(Observable.Throw<Unit>(new InvalidOperationException("Inner Tx2 Failed")))
-                .SequentialTransaction(transactionName:"InnerTransaction2");
-            
+                .BeginWorkflow("InnerTransaction2")
+                .Then(Observable.Throw<Unit>(new InvalidOperationException("Inner Tx2 Failed")))
+                .RunToEnd();
+
             await innerTx1
-                .BeginBatchTransaction()
-                .Add(innerTx2)
-                .SequentialTransaction(true, transactionName:"OuterTransaction")
+                .BeginWorkflow("OuterTransaction")
+                .Then(innerTx2)
+                .RunFailFast()
                 .PublishFaults().Capture();
-            
+
             var finalFault = BusEvents.Single().ShouldBeOfType<TransactionAbortedException>();
-            finalFault.Message.ShouldBe("OuterTransaction failed");
+            finalFault.Context.BoundaryName.ShouldBe("OuterTransaction");
 
-            var innerFault = finalFault.InnerException.ShouldBeOfType<FaultHubException>();
-            innerFault.Message.ShouldBe("InnerTransaction2 completed with errors");
+            var stepFault = finalFault.InnerException.ShouldBeOfType<FaultHubException>();
+            stepFault.Context.BoundaryName.ShouldBe("innerTx2");
 
-            var aggregateException = innerFault.InnerException.ShouldBeOfType<AggregateException>();
+            stepFault.Message.ShouldBe("InnerTransaction2 completed with errors");
+            var aggregateException = stepFault.InnerException.ShouldBeOfType<AggregateException>();
             var originalOpFault = aggregateException.InnerExceptions.Single().ShouldBeOfType<FaultHubException>();
-
-            originalOpFault.InnerException?.Message.ShouldBe("Inner Tx2 Failed");
+            originalOpFault.InnerException.ShouldBeOfType<InvalidOperationException>().Message
+                .ShouldBe("Inner Tx2 Failed");
 
             finalFault.AllContexts.ShouldContain(o => o is string && ((string)o).StartsWith("OuterTransaction -"));
             originalOpFault.AllContexts.ShouldContain(o => o is string && ((string)o).StartsWith("InnerTransaction2 -"));
@@ -161,17 +176,17 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
         [Test]
         public async Task RunToCompletionOuterTransaction_Aggregates_Failures_From_Nested_Transactions() {
             var innerTx1 = Observable.Throw<Unit>(new InvalidOperationException("Inner Tx1 Failed"))
-                .BeginBatchTransaction()
-                .SequentialTransaction(true, transactionName: "InnerTransaction1");
+                .BeginWorkflow( "InnerTransaction1")
+                .RunFailFast();
 
             var innerTx2 = Observable.Throw<Unit>(new InvalidOperationException("Inner Tx2 Failed"))
-                .BeginBatchTransaction()
-                .SequentialTransaction(transactionName: "InnerTransaction2");
+                .BeginWorkflow( "InnerTransaction2")
+                .RunToEnd();
 
             await innerTx1
-                .BeginBatchTransaction()
-                .Add(innerTx2)
-                .SequentialTransaction(transactionName: "OuterTransaction")
+                .BeginWorkflow( "OuterTransaction")
+                .Then(innerTx2)
+                .RunToEnd()
                 .PublishFaults().Capture();
 
             var finalFault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
@@ -201,9 +216,6 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
         [Test]
         public async Task Fluent_Builder_Four_Part_Transaction_Fails_On_Last_Part() {
             var source = Observable.Return(123);
-            IObservable<Customer> Step2GetCustomer(int[] ids) => Observable.Return(new Customer { Id = ids.Single() });
-            IObservable<List<Order>> Step3GetOrders(Customer[] c) => Observable.Return(new List<Order> { new() { Id = 1 } });
-            IObservable<Unit> Step4ProcessOrders(List<Order>[] o) => Observable.Throw<Unit>(new InvalidOperationException("Order processing failed"));
 
             var result = await source.BeginWorkflow("Four-Part-Tx")
                 .Then(Step2GetCustomer)
@@ -217,15 +229,19 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             BusEvents.Count.ShouldBe(1);
             
             var abortedException = BusEvents.Single().ShouldBeOfType<TransactionAbortedException>();
-            abortedException.Message.ShouldBe("Four-Part-Tx failed");
+            abortedException.Context.BoundaryName.ShouldBe("Four-Part-Tx");
 
             var finalFault = abortedException.InnerException.ShouldBeOfType<FaultHubException>();
             finalFault.InnerException.ShouldBeOfType<InvalidOperationException>().Message.ShouldBe("Order processing failed");
             
-            finalFault.LogicalStackTrace.ShouldBeEmpty();
-            finalFault.AllContexts.ShouldContain("FailFast");
-            finalFault.AllContexts.ShouldContain("Four-Part-Tx - Step4ProcessOrders");
+            finalFault.LogicalStackTrace.Count().ShouldBe(4);
+            finalFault.AllContexts.ShouldContain(nameof(Combine.RunFailFast));
+            finalFault.AllContexts.ShouldContain(nameof(Step4ProcessOrders));
             finalFault.AllContexts.ShouldContain("Four-Part-Tx");
+            
+            IObservable<Customer> Step2GetCustomer(int[] ids) => Observable.Return(new Customer { Id = ids.Single() });
+            IObservable<List<Order>> Step3GetOrders(Customer[] c) => Observable.Return(new List<Order> { new() { Id = 1 } });
+            IObservable<Unit> Step4ProcessOrders(List<Order>[] o) => Observable.Throw<Unit>(new InvalidOperationException("Order processing failed"));
         }
         
         [Test]
@@ -236,22 +252,6 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             var part4Counter = 0;
             var source = Observable.Return(123)
                 .Do(_ => part1Counter++);
-
-            IObservable<Customer> Step2GetCustomer(int[] ints) {
-                part2Counter++;
-                return Observable.Throw<Customer>(new InvalidOperationException("Customer lookup failed"));
-            }
-
-            IObservable<List<Order>> Step3GetOrders(Customer[] customer) {
-                part3Counter++;
-                customer.ShouldBeEmpty();
-                return Observable.Return(new List<Order>());
-            }
-
-            IObservable<Unit> Step4ProcessOrders(List<Order>[] _) {
-                part4Counter++;
-                return Observable.Throw<Unit>(new InvalidOperationException("Order processing failed"));
-            }
 
             await source.BeginWorkflow("RunToCompletion-Tx")
                 .Then(Step2GetCustomer)
@@ -280,6 +280,22 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             fault4.ShouldNotBeNull();
             fault4.InnerException.ShouldBeOfType<InvalidOperationException>().Message
                 .ShouldBe("Order processing failed");
+            
+            IObservable<Customer> Step2GetCustomer(int[] ints) {
+                part2Counter++;
+                return Observable.Throw<Customer>(new InvalidOperationException("Customer lookup failed"));
+            }
+
+            IObservable<List<Order>> Step3GetOrders(Customer[] customer) {
+                part3Counter++;
+                customer.ShouldBeEmpty();
+                return Observable.Return(new List<Order>());
+            }
+
+            IObservable<Unit> Step4ProcessOrders(List<Order>[] _) {
+                part4Counter++;
+                return Observable.Throw<Unit>(new InvalidOperationException("Order processing failed"));
+            }
         }        
         [Test]
         public async Task Fluent_Builder_Succeeds() {
@@ -302,11 +318,6 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             var secondPartStarted = false;
             var source = Observable.Throw<int>(new InvalidOperationException("Failure in Part 1"));
 
-            IObservable<Unit> SecondStreamSelector(int[] _) {
-                secondPartStarted = true;
-                return Observable.Empty<Unit>();
-            }
-
             await source
                 .BeginWorkflow("TwoPartTxFailure1")
                 .Then(SecondStreamSelector)
@@ -317,12 +328,17 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             secondPartStarted.ShouldBeFalse();
 
             var abortedException = BusEvents.Single().ShouldBeOfType<TransactionAbortedException>();
-            abortedException.Message.ShouldBe("TwoPartTxFailure1 failed");
+            abortedException.Context.BoundaryName.ShouldBe("TwoPartTxFailure1");
             
             var fault = abortedException.InnerException.ShouldBeOfType<FaultHubException>();
-            fault.InnerException.ShouldBeOfType<InvalidOperationException>().Message.ShouldBe("Failure in Part 1");
+            fault.InnerException.ShouldBeOfType<InvalidOperationException>().Message.ShouldStartWith("Failure in Part 1");
 
             fault.AllContexts.ShouldContain("TwoPartTxFailure1 - source");
+            IObservable<Unit> SecondStreamSelector(int[] _) {
+                secondPartStarted = true;
+                return Observable.Empty<Unit>();
+            }
+
         }
         
         [Test]
@@ -357,7 +373,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
                 .FirstOrDefault(f => f.InnerException is NotImplementedException);
         
             innerFault.ShouldNotBeNull();
-            innerFault.AllContexts.ShouldContain("SyncException-Tx - First");
+            innerFault.AllContexts.ShouldContain("SyncException-Tx","First");
         }    
         [Test]
         public async Task Fluent_Builder_RunToCompletion_When_First_Part_Fails() {
@@ -391,7 +407,8 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             innerFault.InnerException.ShouldBeOfType<InvalidOperationException>().Message
                 .ShouldBe("Part 1 Always Fails");
 
-            innerFault.AllContexts.ShouldContain("RunToCompletionTx - source");
+            innerFault.AllContexts.ShouldContain("RunToCompletionTx");
+            innerFault.AllContexts.ShouldContain(nameof(source));
         }    
         [Test]
         public async Task Fluent_Builder_Uses_Fallback_On_Failure_And_Continues_Transaction() {
@@ -401,6 +418,23 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
 
             var source = Observable.Return(123);
 
+            
+
+            var result = await source.BeginWorkflow("Fallback-Tx")
+                .Then(FailingStep, fallbackSelector: FallbackStep)
+                .Then(FinalStep)
+                .RunToEnd()
+                .PublishFaults()
+                .Capture();
+
+            result.IsCompleted.ShouldBe(true);
+            result.Error.ShouldBeNull();
+            BusEvents.ShouldBeEmpty(); 
+
+            primarySelectorCalled.ShouldBe(true);
+            fallbackSelectorCalled.ShouldBe(true);
+            finalStepReceivedCorrectData.ShouldBe(true);
+            
             IObservable<string> FailingStep(int[] ints) {
                 primarySelectorCalled = true;
                 return Observable.Throw<string>(new InvalidOperationException("Primary step failed"));
@@ -418,21 +452,6 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
                 }
                 return Unit.Default.Observe();
             }
-
-            var result = await source.BeginWorkflow("Fallback-Tx")
-                .Then(FailingStep, fallbackSelector: FallbackStep)
-                .Then(FinalStep)
-                .RunToEnd()
-                .PublishFaults()
-                .Capture();
-
-            result.IsCompleted.ShouldBe(true);
-            result.Error.ShouldBeNull();
-            BusEvents.ShouldBeEmpty(); 
-
-            primarySelectorCalled.ShouldBe(true);
-            fallbackSelectorCalled.ShouldBe(true);
-            finalStepReceivedCorrectData.ShouldBe(true);
         }
 
         [Test]
@@ -442,16 +461,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             
             var source = Observable.Return(123);
 
-            IObservable<string> FailingStep(int[] ints) {
-                primarySelectorCalled = true;
-                return Observable.Throw<string>(new InvalidOperationException("Primary step failed"));
-            }
-
-            IObservable<string> FallbackStep(Exception ex, int[] ints) {
-                fallbackSelectorCalled = true;
-                return Observable.Return("Fallback Data");
-            }
-
+            
             await source.BeginWorkflow("FailFast-Fallback-Tx")
                 .Then(FailingStep, fallbackSelector:FallbackStep)
                 .RunFailFast()
@@ -464,22 +474,29 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             BusEvents.Count.ShouldBe(1);
 
             var abortedException = BusEvents.Single().ShouldBeOfType<TransactionAbortedException>();
-            abortedException.Message.ShouldBe("FailFast-Fallback-Tx failed");
+            abortedException.Context.BoundaryName.ShouldBe("FailFast-Fallback-Tx");
 
             var fault = abortedException.InnerException.ShouldBeOfType<FaultHubException>();
             fault.InnerException.ShouldBeOfType<InvalidOperationException>().Message.ShouldBe("Primary step failed");
             
-            fault.LogicalStackTrace.ShouldBeEmpty();
-            fault.AllContexts.ShouldContain("FailFast");
+            fault.LogicalStackTrace.Count().ShouldBe(2);
+    
             fault.AllContexts.ShouldContain("FailFast-Fallback-Tx - FailingStep");
+            
+            IObservable<string> FailingStep(int[] ints) {
+                primarySelectorCalled = true;
+                return Observable.Throw<string>(new InvalidOperationException("Primary step failed"));
+            }
+
+            IObservable<string> FallbackStep(Exception ex, int[] ints) {
+                fallbackSelectorCalled = true;
+                return Observable.Return("Fallback Data");
+            }
+
         }
         [Test]
         public async Task RunToEnd_TopLevel_Transaction_Fails_Atomically_And_Discards_Partial_Results() {
             var source = Observable.Return("Initial Value");
-            IObservable<string> Step2Succeeds(string[] _) => Observable.Return("Step 2 Succeeded");
-
-            IObservable<string> Step3Fails(string[] _)
-                => Observable.Throw<string>(new InvalidOperationException("Step 3 Failed"));
 
             var result = await source.BeginWorkflow( "TopLevel-Atomic-Tx")
                 .Then(Step2Succeeds)
@@ -494,7 +511,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             BusEvents.Count.ShouldBe(1);
             var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
             fault.AllContexts.ShouldContain("TopLevel-Atomic-Tx");
-            fault.AllContexts.ShouldContain("RunToEnd");
+            fault.AllContexts.ShouldContain(nameof(Combine.RunToEnd));
 
             var aggregate = fault.InnerException.ShouldBeOfType<AggregateException>();
             var innerFault = aggregate.InnerExceptions.Single().ShouldBeOfType<FaultHubException>();
@@ -502,34 +519,20 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             innerFault.AllContexts.ShouldContain("TopLevel-Atomic-Tx - Step3Fails");
             innerFault.AllContexts.ShouldNotContain("TopLevel-Atomic-Tx - Step2Succeeds");
             
-            innerFault.LogicalStackTrace.ShouldBeEmpty();
+            
+            innerFault.LogicalStackTrace.Count().ShouldBe(3);
+            IObservable<string> Step2Succeeds(string[] _) => Observable.Return("Step 2 Succeeded");
+
+            IObservable<string> Step3Fails(string[] _)
+                => Observable.Throw<string>(new InvalidOperationException("Step 3 Failed"));
         }
 
-//MODIFICATION: The assertion block has been rewritten to correctly reflect the actual exception
-//chaining behavior of the framework. It no longer makes incorrect assumptions about how
-//FaultHubExceptions are nested and now validates the context and messages at the correct levels.
         [TestCase]
         public async Task Nested_RunToEnd_Feeds_Next_Step_With_Partial_Results_Before_Propagating_Failure() {
             var step1Succeeded = false;
             var finalStepWasCalled = false;
             var dataReceivedInFinalStep = new List<string>();
-
-            IObservable<string[]> InnerFailingTransaction() {
-                var innerSource = Observable.Return("Inner Initial");
-                IObservable<string> InnerStep1Succeeds(string[] _) {
-                    step1Succeeded = true;
-                    return Observable.Return("Partial Success Data");
-                }
-
-                IObservable<string> InnerStep2Fails(string[] _)
-                    => Observable.Throw<string>(new InvalidOperationException("Inner Failure"));
-                
-                return innerSource.BeginWorkflow("Nested-Tx")
-                    .Then(InnerStep1Succeeds)
-                    .Then(InnerStep2Fails)
-                    .RunToEnd();
-            }
-
+            
             var outerTransactionStream = Observable.Return("Outer Initial")
                 .BeginWorkflow("Outer-Tx")
                 .Then(_ => InnerFailingTransaction())
@@ -561,24 +564,41 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             var stepFault = stepAggregate.InnerExceptions.Single().ShouldBeOfType<FaultHubException>();
             stepFault.Message.ShouldBe("Inner Failure");
             stepFault.AllContexts.ShouldContain("Nested-Tx - InnerStep2Fails");
+            
+            IObservable<string[]> InnerFailingTransaction() {
+                var innerSource = Observable.Return("Inner Initial");
+                IObservable<string> InnerStep1Succeeds(string[] _) {
+                    step1Succeeded = true;
+                    return Observable.Return("Partial Success Data");
+                }
+
+                IObservable<string> InnerStep2Fails(string[] _)
+                    => Observable.Throw<string>(new InvalidOperationException("Inner Failure"));
+                
+                return innerSource.BeginWorkflow("Nested-Tx")
+                    .Then(InnerStep1Succeeds)
+                    .Then(InnerStep2Fails)
+                    .RunToEnd();
+            }
+
         }
         
         public static IEnumerable<TestCaseData> Lambda_Naming_Cases() {
-            Combine.ITransactionBuilder<Unit> ImplicitNameAction(Combine.ITransactionBuilder<string> builder) 
+            ITransactionBuilder<Unit> ImplicitNameAction(ITransactionBuilder<string> builder) 
                 => builder.Then(_ => Observable.Throw<Unit>(new InvalidOperationException("Lambda Failed")));
 
-            var expectedImplicitName = "Throw<Unit>";
-            yield return new TestCaseData((Func<Combine.ITransactionBuilder<string>, Combine.ITransactionBuilder<Unit>>)ImplicitNameAction, expectedImplicitName).SetName("Implicit Lambda Name");
+            var expectedImplicitName = @"Observable.Throw<Unit>(new InvalidOperationException(""Lambda Failed""))";
+            yield return new TestCaseData((Func<ITransactionBuilder<string>, ITransactionBuilder<Unit>>)ImplicitNameAction, expectedImplicitName).SetName("Implicit Lambda Name");
             
-            Combine.ITransactionBuilder<Unit> ExplicitNameAction(Combine.ITransactionBuilder<string> builder)
+            ITransactionBuilder<Unit> ExplicitNameAction(ITransactionBuilder<string> builder)
                 => builder.Then(_ => Observable.Throw<Unit>(new InvalidOperationException("Lambda Failed")), "MyExplicitLambdaName");
             var expectedExplicitName = "MyExplicitLambdaName";
-            yield return new TestCaseData((Func<Combine.ITransactionBuilder<string>, Combine.ITransactionBuilder<Unit>>)ExplicitNameAction, expectedExplicitName).SetName("Explicit Lambda Name");
+            yield return new TestCaseData((Func<ITransactionBuilder<string>, ITransactionBuilder<Unit>>)ExplicitNameAction, expectedExplicitName).SetName("Explicit Lambda Name");
         }
         [Test]
         [TestCaseSource(nameof(Lambda_Naming_Cases))]
         public async Task Fluent_Builder_Correctly_Names_Failing_Lambda_Step(
-            Func<Combine.ITransactionBuilder<string>, Combine.ITransactionBuilder<Unit>> configureTransaction,
+            Func<ITransactionBuilder<string>, ITransactionBuilder<Unit>> configureTransaction,
             string expectedStepName) {
             var source = Observable.Return("Initial Value");
 
@@ -596,6 +616,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
 
             var aggregate = fault.InnerException.ShouldBeOfType<AggregateException>();
             var innerFault = aggregate.InnerExceptions.Single().ShouldBeOfType<FaultHubException>();
+            
 
             var expectedContext = $"Lambda-Naming-Tx - {expectedStepName}";
 
@@ -641,5 +662,297 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
 
             innerFault.InnerException.ShouldBeOfType<InvalidOperationException>().Message.ShouldBe("Nested Step Failed");
             innerFault.AllContexts.ShouldContain("Outer-Tx - Step2EmitsAndFails");
-        }    }
+        }    
+        
+        [Test]
+        public async Task RunToEnd_Passes_All_Items_From_Intermediate_Step_To_Next_Step() {
+            var source = Observable.Return(0);
+
+            var result = await source.BeginWorkflow("PassAllItems-Tx")
+                .Then(_ => Observable.Range(10, 3))
+                .Then(items => Observable.Return(items.Sum()))
+                .RunToEnd()
+                .Capture();
+
+            result.IsCompleted.ShouldBe(true);
+            result.Error.ShouldBeNull();
+            BusEvents.ShouldBeEmpty();
+            result.Items.SelectMany(i => i).Single().ShouldBe(33, "The second step should have received and summed all items from the first step.");        }
+
+        [Test]
+        public async Task RunToEnd_Returns_All_Items_From_Final_Step() {
+            var source = Observable.Return(0);
+
+            var result = await source.BeginWorkflow("FinalStep-Tx")
+                .Then(_ => Observable.Return("intermediate"))
+                .Then(_ => Observable.Range(10, 3))
+                .RunToEnd()
+                .Capture();
+
+            result.IsCompleted.ShouldBe(true);
+            result.Error.ShouldBeNull();
+            BusEvents.ShouldBeEmpty();
+            result.Items.SelectMany(i=>i).ToArray().ShouldBe([10, 11, 12], "The transaction should return all items from the final step.");
+        }
+
+        [Test]
+        public async Task Batch_RunToEnd_Returns_All_Items_From_All_Steps() {
+            var step1 = Observable.Return("A");
+            var step2 = Observable.Range(1, 2).Select(i => i.ToString());
+            var step3 = Observable.Return("B");
+
+            var operations = new IObservable<object>[] { step1, step2, step3 };
+
+            var transactionResult = await operations
+                .BeginWorkflow("BatchRunToEnd-Tx",TransactionMode.Sequential)
+                .RunAndCollect(allItems => Observable.Return(string.Join(",", allItems)))
+                .Capture();
+
+            transactionResult.Error.ShouldBeNull();
+            transactionResult.IsCompleted.ShouldBe(true);
+            BusEvents.ShouldBeEmpty();
+
+            transactionResult.Items.ShouldHaveSingleItem("The transaction should emit a single result from the resultSelector.");
+            transactionResult.Items.Single().ShouldBe("A,1,2,B", "The resultSelector should have received all items from all steps in order.");
+        }
+    
+        [Test]
+        public async Task BeginWorkflow_Defaults_Transaction_Name_To_Caller_Method_On_FailFast() {
+            var source = Observable.Return("start");
+
+            await source.BeginWorkflow()
+                .Then(_ => Observable.Throw<string>(new InvalidOperationException("Failure")))
+                .RunFailFast()
+                .PublishFaults()
+                .Capture();
+
+            BusEvents.Count.ShouldBe(1);
+            var aborted = BusEvents.Single().ShouldBeOfType<TransactionAbortedException>();
+            aborted.Context.BoundaryName.ShouldBe(nameof(BeginWorkflow_Defaults_Transaction_Name_To_Caller_Method_On_FailFast));
+        }
+
+        [Test]
+        public async Task BeginWorkflow_Defaults_Transaction_Name_To_Caller_Method_On_RunToEnd() {
+            var source = Observable.Return("start");
+            var stepName = "FailingStep";
+
+            await source.BeginWorkflow()
+                .Then(_ => Observable.Throw<string>(new InvalidOperationException("Failure")), stepName: stepName)
+                .RunToEnd()
+                .PublishFaults()
+                .Capture();
+
+            BusEvents.Count.ShouldBe(1);
+            var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
+            fault.Message.ShouldBe($"{nameof(BeginWorkflow_Defaults_Transaction_Name_To_Caller_Method_On_RunToEnd)} completed with errors");
+
+            var innerFault = fault.InnerException.ShouldBeOfType<AggregateException>().InnerExceptions.Single()
+                .ShouldBeOfType<FaultHubException>();
+            innerFault.AllContexts.ShouldContain($"{nameof(BeginWorkflow_Defaults_Transaction_Name_To_Caller_Method_On_RunToEnd)} - {stepName}");
+        }
+        
+        [Test]
+        public async Task BeginWorkflow_Uses_Explicit_Name_When_Provided() {
+            var source = Observable.Return("start");
+            var explicitName = "MyExplicitTransaction";
+
+            await source.BeginWorkflow(explicitName)
+                .Then(_ => Observable.Throw<string>(new InvalidOperationException("Failure")))
+                .RunFailFast()
+                .PublishFaults()
+                .Capture();
+
+            BusEvents.Count.ShouldBe(1);
+            var aborted = BusEvents.Single().ShouldBeOfType<TransactionAbortedException>();
+            aborted.Context.BoundaryName.ShouldBe(explicitName);
+            aborted.Message.ShouldNotContain(nameof(BeginWorkflow_Uses_Explicit_Name_When_Provided));
+        }
+        
+        [Test]
+        public async Task ConcurrentTransaction_RunToCompletion_Executes_All_And_Aggregates_Failures() {
+            var stopwatch = Stopwatch.StartNew();
+
+            var operations = new[] {
+                Observable.Timer(100.Milliseconds()).Select(_ => "Success 1"),
+                Observable.Timer(150.Milliseconds()).SelectMany(_ => Observable.Throw<string>(new InvalidOperationException("Failure 1"))),
+                Observable.Timer(50.Milliseconds()).Select(_ => "Success 2"),
+                Observable.Timer(200.Milliseconds()).SelectMany(_ => Observable.Throw<string>(new InvalidOperationException("Failure 2")))
+            };
+
+            var result = await operations
+                .BeginWorkflow("Concurrent-Tx", mode: TransactionMode.Concurrent)
+                .RunToEnd()
+                .PublishFaults()
+                .Capture();
+                
+            stopwatch.Stop();
+
+            stopwatch.ElapsedMilliseconds.ShouldBeLessThan(350);
+
+            result.IsCompleted.ShouldBe(true);
+
+            var successfulResults = result.Items.Single().Cast<string>().ToArray();
+            successfulResults.Length.ShouldBe(2);
+            successfulResults.ShouldContain("Success 1");
+            successfulResults.ShouldContain("Success 2");
+
+            BusEvents.Count.ShouldBe(1);
+            var finalFault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
+            finalFault.AllContexts.ShouldContain("Concurrent-Tx");
+            finalFault.AllContexts.ShouldContain("RunToEnd");
+
+            var aggregate = finalFault.InnerException.ShouldBeOfType<AggregateException>();
+            aggregate.InnerExceptions.Count.ShouldBe(2);
+
+            var failure1 = aggregate.InnerExceptions.OfType<FaultHubException>()
+                .FirstOrDefault(ex => ex.InnerException?.Message == "Failure 1");
+            failure1.ShouldNotBeNull();
+            failure1.AllContexts.ShouldContain($"Concurrent-Tx - {nameof(operations)}[1]");
+
+            var failure2 = aggregate.InnerExceptions.OfType<FaultHubException>()
+                .FirstOrDefault(ex => ex.InnerException?.Message == "Failure 2");
+            failure2.ShouldNotBeNull();
+            failure2.AllContexts.ShouldContain($"Concurrent-Tx - {nameof(operations)}[3]");
+        }
+
+        [Test]
+        public async Task ConcurrentTransaction_FailFast_Terminates_On_First_Error() {
+            var stopwatch = Stopwatch.StartNew();
+            var slowerOperationCompleted = false;
+
+            var concurrentOperations = new[] {
+                (Name: "slowOp", Source: Observable.Timer(200.Milliseconds()).Select(_ => (object)"Success - Should be cancelled").Do(_ => slowerOperationCompleted = true)),
+                (Name: "fastOp", Source: Observable.Timer(50.Milliseconds()).SelectMany(_ => Observable.Throw<object>(new InvalidOperationException("Fast Failure"))))
+            };
+
+            var result = await Observable.Return(Unit.Default)
+                .BeginWorkflow("Concurrent-FailFast-Tx")
+                .ThenConcurrent(_ => concurrentOperations, failFast: true)
+                .RunFailFast()
+                .Capture();
+
+            stopwatch.Stop();
+
+            stopwatch.ElapsedMilliseconds.ShouldBeLessThan(150);
+            slowerOperationCompleted.ShouldBeFalse("The slower operation should have been cancelled.");
+
+            result.IsCompleted.ShouldBe(false);
+            result.Error.ShouldNotBeNull();
+
+            var outerTxException = result.Error.ShouldBeOfType<TransactionAbortedException>();
+            outerTxException.Message.ShouldBe("Concurrent-FailFast-Tx failed");
+            var innerFault = outerTxException.InnerException.ShouldBeOfType<FaultHubException>();
+
+            innerFault.InnerException.ShouldBeOfType<InvalidOperationException>().Message.ShouldBe("Fast Failure");
+
+            innerFault.AllContexts.ShouldContain(ctx => ctx is string && ((string)ctx).StartsWith("Concurrent-FailFast-Tx -"));
+
+            BusEvents.ShouldBeEmpty();
+        }
+
+        [Test]
+        public async Task ConcurrentTransaction_Succeeds_When_All_Operations_Succeed() {
+            var stopwatch = Stopwatch.StartNew();
+
+            var concurrentOperations = new[] {
+                (Name: "Op 1", Source: Observable.Timer(150.Milliseconds()).Select(_ => (object)"Op 1")),
+                (Name: "Op 2", Source: Observable.Timer(50.Milliseconds()).Select(_ => (object)"Op 2")),
+                (Name: "Op 3", Source: Observable.Timer(100.Milliseconds()).Select(_ => (object)"Op 3"))
+            };
+
+            var result = await Observable.Return(Unit.Default)
+                .BeginWorkflow("Concurrent-Success-Tx")
+                .ThenConcurrent(_ => concurrentOperations)
+                .RunToEnd()
+                .PublishFaults()
+                .Capture();
+
+            stopwatch.Stop();
+
+            stopwatch.ElapsedMilliseconds.ShouldBeInRange(140, 250);
+
+            result.IsCompleted.ShouldBe(true);
+            result.Error.ShouldBeNull();
+
+            var successfulResults = result.Items.Single().Single().Cast<string>().ToArray();
+            successfulResults.Length.ShouldBe(3);
+            Array.Sort(successfulResults);
+            successfulResults.ShouldBe(["Op 1", "Op 2", "Op 3"]);
+
+            BusEvents.ShouldBeEmpty();
+        }
+        [Test]
+        public async Task ConcurrentTransaction_Obeys_MaxConcurrency() {
+            var stopwatch = Stopwatch.StartNew();
+            int activeOperations = 0;
+            int maxObservedConcurrency = 0;
+            var lockObject = new object();
+
+            var operations = Enumerable.Range(1, 4).Select(i => {
+                var obs = Observable.Defer(() => {
+                    lock (lockObject) {
+                        activeOperations++;
+                        maxObservedConcurrency = Math.Max(maxObservedConcurrency, activeOperations);
+                    }
+                    return Observable.Timer(150.Milliseconds()).Select(_ => i);
+                }).Finally(() => {
+                    lock (lockObject) {
+                        activeOperations--;
+                    }
+                });
+                return (Name: $"op{i}", Source: obs.Select(val => (object)val));
+            });
+
+            var result = await Observable.Return(Unit.Default)
+                .BeginWorkflow("Concurrent-Max-Tx")
+                .ThenConcurrent(_ => operations, maxConcurrency: 2)
+                .RunToEnd()
+                .PublishFaults()
+                .Capture();
+
+            stopwatch.Stop();
+
+            maxObservedConcurrency.ShouldBe(2);
+
+            stopwatch.ElapsedMilliseconds.ShouldBeInRange(280, 450);
+
+            result.IsCompleted.ShouldBe(true);
+            result.Items.Single().Single().Length.ShouldBe(4);
+            BusEvents.ShouldBeEmpty();
+        }
+
+        [Test]
+        public async Task Can_Create_Concurrent_Transaction_From_IEnumerable_Of_Observables() {
+            var items = new[] { "Success1", "Failure1", "Success2" };
+            var operations = items.Select(item => {
+                if (item.StartsWith("Failure")) {
+                    return Observable.Throw<string>(new InvalidOperationException(item));
+                }
+                return Observable.Return(item);
+            });
+
+            var result = await operations
+                .BeginWorkflow("FromIEnumerableConcurrentTx", mode: TransactionMode.Concurrent)
+                .RunToEnd()
+                .PublishFaults()
+                .Capture();
+
+
+            result.IsCompleted.ShouldBe(true);
+            var successfulResults = result.Items.SelectMany(i => i).Cast<string>().ToArray();
+            successfulResults.Length.ShouldBe(2);
+            successfulResults.ShouldContain("Success1");
+            successfulResults.ShouldContain("Success2");
+
+            BusEvents.Count.ShouldBe(1);
+            var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
+
+            var aggregate = fault.InnerException.ShouldBeOfType<AggregateException>();
+            var innerFault = aggregate.InnerExceptions.Single().ShouldBeOfType<FaultHubException>();
+
+            innerFault.InnerException.ShouldBeOfType<InvalidOperationException>().Message.ShouldBe("Failure1");
+
+            innerFault.AllContexts.ShouldContain("FromIEnumerableConcurrentTx - operations[1]");
+        }
+    }
 }

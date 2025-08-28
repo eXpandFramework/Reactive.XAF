@@ -64,7 +64,7 @@ namespace Xpand.XAF.Modules.OneView.Tests{
         [XpandTest]
         [Apartment(ApartmentState.STA)]
         public async Task Exit_Application_On_View_Close(){
-	        using var application = OneViewModule().Application;
+	        await using var application = OneViewModule().Application;
 	        var closeView = application.WhenViewOnFrame(typeof(OV))
 		        .SelectMany(frame => frame.Template.WhenWindowsForm().When("Shown").To(frame).Select(frame1 => frame1))
 		        .Do(frame => frame.View.Close())
@@ -90,7 +90,7 @@ namespace Xpand.XAF.Modules.OneView.Tests{
 		        .TakeFirst()
 		        .SubscribeReplay();
 	        var testWinApplication = ((TestWinApplication) application);
-	        var editModel = testWinApplication.ModelEditorForm.SelectMany(form => form.WhenEvent(nameof(Form.Shown)).To(form))
+	        var editModel = testWinApplication.ModelEditorForm.SelectMany(form => form.ProcessEvent(nameof(Form.Shown)).To(form))
 		        .SelectMany(form => {
 			        form.Close();
 			        return form.WhenDisposed();

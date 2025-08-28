@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Xpand.Extensions.ExceptionExtensions;
 using Xpand.Extensions.LinqExtensions;
 
 namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
@@ -14,10 +15,14 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
                 Data[entry.Key] = entry.Value;
             }
         }
-        
+        public bool PreserveType { get; init; }
         public sealed override IDictionary Data => base.Data;
-        public IEnumerable<LogicalStackFrame> LogicalStackTrace => Context.FromHierarchy(c => c.InnerContext)
-            .Select(c => c.LogicalStackTrace).LastOrDefault(list => list != null && list.Any()) ?? Enumerable.Empty<LogicalStackFrame>();
+        public IEnumerable<LogicalStackFrame> LogicalStackTrace => this.SelectMany().OfType<FaultHubException>()
+            .SelectMany(fault => fault.Context.FromHierarchy(c => c.InnerContext).Reverse())
+            .Select(context => context.LogicalStackTrace)
+            .Where(stack => stack != null)
+            .SelectMany(stack => stack)
+            .Distinct();
         public IEnumerable<object> AllContexts {
             get {
                 var contexts = new List<object>();
@@ -36,7 +41,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
 
         public override string ToString() {
             try {
-                return this.Parse().Render();
+                return this.Render();
             }
             catch (Exception e) {
                 return $"[!!! INTERNAL ToString() CRASH !!!]\n" +

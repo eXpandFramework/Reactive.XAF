@@ -14,6 +14,7 @@
     <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
+    <ImplicitUsings>disable</ImplicitUsings>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <NoWarn>NU1701;CS8002;MSB3277</NoWarn>
@@ -43,6 +44,36 @@
     <EmbeddedResource Include="FaultHubTests\Resources\Traverses_Parses_And_Renders_Complex_Nested_Exception_Correctly" />
     <None Remove="FaultHubTests\Resources\Replicates_Production_Report_Issue" />
     <EmbeddedResource Include="FaultHubTests\Resources\Replicates_Production_Report_Issue" />
+    <None Remove="FaultHubTests\Resources\Blacklist_Filters_Framework_Noise_From_Invocation_Stack" />
+    <EmbeddedResource Include="FaultHubTests\Resources\Blacklist_Filters_Framework_Noise_From_Invocation_Stack" />
+    <None Remove="FaultHubTests\Resources\Blacklist_FallBack_When_Stack_Empty" />
+    <EmbeddedResource Include="FaultHubTests\Resources\Blacklist_FallBack_When_Stack_Empty" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="FaultHubTests\FaultHubExtensionTest\FaultHubExtensionsNewOperationTreeTests.cs">
+      <DependentUpon>FaultHubExtensionsTests.cs</DependentUpon>
+    </Compile>
+    <Compile Update="FaultHubTests\FaultHubExtensionTest\FaultHubExtensionTestBase.cs">
+      <DependentUpon>FaultHubExtensionsTests.cs</DependentUpon>
+    </Compile>
+    <Compile Update="FaultHubTests\FaultHubExtensionTest\FaultHubExtensionRenderTests.cs">
+      <DependentUpon>FaultHubExtensionTests.cs</DependentUpon>
+    </Compile>
+    <Compile Update="FaultHubTests\FaultHubExtensionTest\FaultHubExtensionsUnionTests.cs">
+      <DependentUpon>FaultHubExtensionsTests.cs</DependentUpon>
+    </Compile>
+    <Compile Update="FaultHubTests\FaultHubExtensionTest\ProductionScenario2Tests.cs">
+      <DependentUpon>ProductionScenarioTests.cs</DependentUpon>
+    </Compile>
+    <Compile Update="FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs">
+      <DependentUpon>ProductionScenarioTests.cs</DependentUpon>
+    </Compile>
+    <Compile Update="FaultHubTests\FaultHubExtensionTest\FaultHubExtensionOperationTreeRenderTests.cs">
+      <DependentUpon>FaultHubExtensionsTests.cs</DependentUpon>
+    </Compile>
+    <Compile Update="FaultHubTests\FaultHubExtensionTest\FaultHubExtensionsRenderStackTests.cs">
+      <DependentUpon>FaultHubExtensionsTests.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
   <Import Project="..\..\..\.paket\Paket.Restore.targets" />
 </Project>

@@ -27,10 +27,9 @@ namespace Xpand.Extensions.Tests.FaultHubTests.POC{
             BusEvents.Count.ShouldBe(1, "The exception was not published to the FaultHub bus.");
 
             var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
-            var output = fault.ToString();
 
             
-            output.ShouldContain(nameof(GetFailingAsyncStreamWithResilience));
+            fault.LogicalStackTrace.ShouldContain(frame => frame.MemberName == nameof(GetFailingAsyncStreamWithResilience));
             
         }        
         

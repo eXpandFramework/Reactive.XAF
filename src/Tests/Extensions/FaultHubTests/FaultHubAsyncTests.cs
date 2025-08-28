@@ -80,9 +80,7 @@ public class FaultHubAsyncTests : FaultHubTestBase {
             
         BusEvents.Count.ShouldBe(1);
         var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
-            
-        var output = fault.ToString();
         
-        output.ShouldContain(nameof(Preserves_Origin_StackTrace_For_Asynchronous_Exception_Without_StackTrace));
+        fault.LogicalStackTrace.ShouldContain(f => f.MemberName == nameof(Preserves_Origin_StackTrace_For_Asynchronous_Exception_Without_StackTrace));
     }
 }

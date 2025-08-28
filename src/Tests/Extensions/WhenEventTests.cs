@@ -8,6 +8,7 @@ namespace Xpand.Extensions.Tests {
     [SuppressMessage("ReSharper", "UseEventArgsEmptyField")]
     public class WhenEventTests {
         [Test]
+        [Obsolete("Obsolete")]
         public async Task StaticEvent() {
             var observable = typeof(MyStaticClass).WhenEvent("MyStaticEvent");
             var eventHandled = false;
@@ -23,6 +24,7 @@ namespace Xpand.Extensions.Tests {
         }
 
         [Test]
+        [Obsolete("Obsolete")]
         public void WhenEvent_ObjectSource_SingleEventName_ReturnsEventPattern() {
             var source = new SampleClass();
             var eventName = "Event1";
@@ -38,6 +40,7 @@ namespace Xpand.Extensions.Tests {
 
 
         [Test]
+        [Obsolete("Obsolete")]
         public void WhenEvent_TypeSource_SingleEventName_ReturnsEventPattern() {
             var source = typeof(SampleClass);
             var eventName = "StaticEvent1";
@@ -53,6 +56,7 @@ namespace Xpand.Extensions.Tests {
 
 
         [Test]
+        [Obsolete("Obsolete")]
         public void WhenEvent_GenericTypeSource_SingleEventName_ReturnsEventPattern() {
             var source = new GenericSampleClass<string>();
             var eventName = "Event1";
@@ -68,6 +72,7 @@ namespace Xpand.Extensions.Tests {
 
 
         [Test]
+        [Obsolete("Obsolete")]
         public void WhenEvent_ObjectSource_GenericEventArgs_SingleEventName_ReturnsEventPattern() {
             var source = new SampleClass();
             var eventName = "Event3";

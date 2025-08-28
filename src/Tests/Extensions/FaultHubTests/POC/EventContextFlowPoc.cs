@@ -58,6 +58,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.POC {
         
 
         [Test]
+        [Obsolete("Obsolete")]
         public void FlowFaultContext_Ensures_Event_Streams_Use_Subscription_Context() {
             
             var eventSource = new EventSource();
@@ -85,9 +86,10 @@ namespace Xpand.Extensions.Tests.FaultHubTests.POC {
 
             
             
-            logicalStack.ShouldNotContain(frame => frame.MemberName == "SubscriptionContext");
-            logicalStack.ShouldContain(frame => frame.MemberName == "FireEventContext");
-            logicalStack.First().MemberName.ShouldBe("FireEventContext");
+            
+            logicalStack.ShouldContain(frame => frame.MemberName == "SubscriptionContext");
+            logicalStack.ShouldNotContain(frame => frame.MemberName == "FireEventContext");
+            logicalStack.Last().MemberName.ShouldBe("SubscriptionContext");
         }
     }
     }

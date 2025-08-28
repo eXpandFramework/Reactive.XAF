@@ -1,23 +1,35 @@
-LaunchPadName ScheduleLaunchPadParse failed (2 times • Upcoming • StartParsing)
+Schedule Launch Pad Parse failed (2 times • Upcoming • StartParsing)
 └ Schedule Launch Pad Parse
   └ Parse Launch Pad
-    └ Parse Up Coming (UserName)
-      ├ When Upcoming Urls
-      │ └ Web Site Urls
-      │   • Root Cause: System.Exception: Upcoming
-      │      --- Invocation Stack ---
-      │        at SequentialTransaction in C:\Work\Reactive.XAF\src\Extensions\Xpand.Extensions.Reactive\Xpand.Extensions.Reactive\Combine\Transaction.cs:line 241
-      │        at ParseLaunchPad in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioTests.cs:line 59
-      │      --- Original Exception Details ---
-      │        System.Exception: Upcoming
-      └ Parse Upcoming Projects
-        └ Parse Up Coming Project
-          └ When Existing Project Page Parsed
-            └ Project Parse Transaction
-              └ Start Parsing
-                • Root Cause: System.Exception: StartParsing
-                   --- Invocation Stack ---
-                     at SequentialTransaction in C:\Work\Reactive.XAF\src\Extensions\Xpand.Extensions.Reactive\Xpand.Extensions.Reactive\Combine\Transaction.cs:line 241
-                     at ParseLaunchPad in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioTests.cs:line 59
-                   --- Original Exception Details ---
-                     System.Exception: StartParsing
+    └ Connect Launch Pad
+      └ Parse Up Coming
+        ├ When Upcoming Urls
+        │ └ Web Site Urls
+        │   • Root Cause: System.Exception: Upcoming
+        │     --- Invocation Stack ---
+        │       at WebSiteUrls in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 399
+        │       at WhenUpcomingUrls in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 401
+        │       at ParseUpComing in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 397
+        │       at ConnectLaunchPad in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 396
+        │       at ParseLaunchPad in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 393
+        │       at ScheduleLaunchPadParse in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 392
+        │     --- Original Exception Details ---
+        │       System.Exception: Upcoming
+        └ Parse Upcoming Projects
+          └ Parse Up Coming Project
+            └ Parse Up Coming Projects Plural
+              └ When Existing Project Page Parsed
+                └ Project Parse Transaction
+                  └ Validate
+                    └ Start Parsing
+                      • Root Cause: System.Exception: StartParsing
+                        --- Invocation Stack ---
+                          at StartParsing in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 407
+                          at Validate in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 406
+                          at ProjectParseTransaction in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 409
+                          at WhenExistingProjectPageParsed in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 405
+                          at ParseUpComingProjectsPlural in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 404
+                          at ParseUpComingProject in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 403
+                          at ParseUpcomingProjects in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 402
+                        --- Original Exception Details ---
+                          System.Exception: StartParsing

@@ -25,8 +25,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
         
     }
     
-    public readonly struct LogicalStackFrame(
-        string memberName,
+    public readonly struct LogicalStackFrame(string memberName,
         string filePath,
         int lineNumber,
         params object[] context)
@@ -45,7 +44,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
         public string FilePath => filePath;
 
         public int LineNumber => lineNumber;
-
+        
         public override string ToString() => $"{context.JoinCommaSpace().EncloseParenthesis()} at {memberName} in {filePath}:line {lineNumber}";
     }
 

@@ -24,7 +24,7 @@ namespace Xpand.XAF.Modules.Windows.Tests {
         [Apartment(ApartmentState.STA)]
         public async Task Enable() {
             var updated = NotifyIconService.NotifyIconUpdated.TakeFirst().SubscribeReplay();
-            using var application = Platform.Win.NewApplication<WindowsModule>();
+            await using var application = Platform.Win.NewApplication<WindowsModule>();
             application.SetupSecurity();
             application.AddModule<WindowsModule>();
             
@@ -42,7 +42,7 @@ namespace Xpand.XAF.Modules.Windows.Tests {
         [XpandTest]
         [Apartment(ApartmentState.STA)]
         public async Task ExitApplication() {
-            using var application = Platform.Win.NewApplication<WindowsModule>();
+            await using var application = Platform.Win.NewApplication<WindowsModule>();
             application.SetupSecurity();
             application.AddModule<WindowsModule>();
             
@@ -50,7 +50,7 @@ namespace Xpand.XAF.Modules.Windows.Tests {
             modelWindows.NotifyIcon.Enabled = true;
             application.CreateWindow(TemplateContext.ApplicationWindow, new List<Controller>(), true);
             var updated = NotifyIconService.NotifyIconUpdated
-                .Do(icon => icon.ContextMenuStrip.Items.Cast<ToolStripMenuItem>()
+                .Do(icon => icon.ContextMenuStrip?.Items.Cast<ToolStripMenuItem>()
                     .First(item => item.Text == modelWindows.NotifyIcon.ExitText).PerformClick())
                 .TakeFirst().SubscribeReplay();
             var whenExiting = application.WhenExiting().TakeFirst().SubscribeReplay();
@@ -67,7 +67,7 @@ namespace Xpand.XAF.Modules.Windows.Tests {
         [XpandTest]
         [Apartment(ApartmentState.STA)]
         public async Task LogOffApplication() {
-            using var application = Platform.Win.NewApplication<WindowsModule>();
+            await using var application = Platform.Win.NewApplication<WindowsModule>();
             application.SetupSecurity();
             application.AddModule<WindowsModule>();
             
@@ -75,7 +75,7 @@ namespace Xpand.XAF.Modules.Windows.Tests {
             modelWindows.NotifyIcon.Enabled = true;
             application.CreateWindow(TemplateContext.ApplicationWindow, new List<Controller>(), true);
             var updated = NotifyIconService.NotifyIconUpdated
-                .Do(icon => icon.ContextMenuStrip.Items.Cast<ToolStripMenuItem>()
+                .Do(icon => icon.ContextMenuStrip?.Items.Cast<ToolStripMenuItem>()
                     .First(item => item.Text == modelWindows.NotifyIcon.LogOffText).PerformClick())
                 .TakeFirst().SubscribeReplay();
             application.Logon();
@@ -90,8 +90,7 @@ namespace Xpand.XAF.Modules.Windows.Tests {
         [XpandTest]
         [Apartment(ApartmentState.STA)]
         public async Task HideApplication() {
-            
-            using var application = Platform.Win.NewApplication<WindowsModule>();
+            await using var application = Platform.Win.NewApplication<WindowsModule>();
             application.SetupSecurity();
             application.AddModule<WindowsModule>();
             
@@ -99,12 +98,12 @@ namespace Xpand.XAF.Modules.Windows.Tests {
             modelWindows.NotifyIcon.Enabled = true;
             application.CreateWindow(TemplateContext.ApplicationWindow, new List<Controller>(), true);
             var updated = NotifyIconService.NotifyIconUpdated
-                .Do(icon => icon.ContextMenuStrip.Items.Cast<ToolStripMenuItem>()
+                .Do(icon => icon.ContextMenuStrip?.Items.Cast<ToolStripMenuItem>()
                     .First(item => item.Text == modelWindows.NotifyIcon.HideText).PerformClick())
                 .TakeFirst().SubscribeReplay();
             application.Logon();
 
-            var visibleChanged = application.MainWindow.Template.WhenEvent(nameof(Form.VisibleChanged)).TakeFirst()
+            var visibleChanged = application.MainWindow.Template.ProcessEvent(nameof(Form.VisibleChanged)).TakeFirst()
                 .SubscribeReplay();
                 
             await updated;

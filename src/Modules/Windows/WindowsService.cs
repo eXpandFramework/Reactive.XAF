@@ -96,7 +96,7 @@ namespace Xpand.XAF.Modules.Windows{
             form.ControlBox = modelForm.ControlBox;
             form.ShowInTaskbar = modelForm.ShowInTaskbar;
             form.FormBorderStyle = modelForm.FormBorderStyle;
-            return modelForm.Text != null ? form.WhenEvent(nameof(Form.TextChanged))
+            return modelForm.Text != null ? form.ProcessEvent(nameof(Form.TextChanged))
                 .Where(_ => form.Text != modelForm.Text)
                 .Do(_ => form.Text = modelForm.Text).To(frame) : frame.Observe()
                 .TraceWindows();

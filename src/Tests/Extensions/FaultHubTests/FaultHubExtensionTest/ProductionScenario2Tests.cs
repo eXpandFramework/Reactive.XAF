@@ -17,53 +17,45 @@ namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest {
     public class FaultHubExtensionTests:FaultHubTestBase {
 
         #region Operation Simulation
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
-        [SuppressMessage("ReSharper", "UnusedParameter.Local")]
-        private IObservable<Unit> StepWithArgs(string someNoisyArgument) => WhenExistingProjectPageParsed()
-            .PushStackFrame();
 
         private IObservable<Unit> StartParsing()
-            => Observable.Throw<Unit>(new Exception("StartParsing"))
-                .PushStackFrame();
+            => Observable.Throw<Unit>(new Exception("StartParsing"));
 
         private IObservable<Unit> ProjectParseTransaction()
             => Unit.Default.Observe().BeginWorkflow("Project Parse Transaction")
                 .Then(_ => StartParsing(), "Start Parsing")
-                .RunToEnd().ToUnit()
-                .PushStackFrame();
+                .RunToEnd().ToUnit();
 
-        private IObservable<Unit> WhenExistingProjectPageParsed()
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+        [SuppressMessage("ReSharper", "UnusedParameter.Local")]
+        private IObservable<Unit> WhenExistingProjectPageParsed(string someNoisyArgument)
             => Unit.Default.Observe().BeginWorkflow("When Existing Project Page Parsed")
                 .Then(_ => ProjectParseTransaction())
-                .RunToEnd().ToUnit()
-                .PushStackFrame();
+                .RunToEnd().ToUnit();
 
         private IObservable<Unit> ParseUpcomingProjects()
             => Unit.Default.Observe().BeginWorkflow("Parse Upcoming Projects")
-                .Then(_ => StepWithArgs("some noisy argument"))
-                .RunToEnd().ToUnit()
-                .PushStackFrame();
+                .Then(_ => WhenExistingProjectPageParsed("some noisy argument"))
+                .RunToEnd().ToUnit();
         
         private IObservable<Unit> WhenUpcomingUrls()
-            => Observable.Throw<Unit>(new Exception("Upcoming"))
-                .PushStackFrame();
+            => Observable.Throw<Unit>(new Exception("Upcoming")) ;
 
         private IObservable<Unit> ParseUpComing()
             => Unit.Default.Observe().BeginWorkflow("Parse Up Coming")
                 .Then(_ => WhenUpcomingUrls())
                 .Then(_ => ParseUpcomingProjects())
-                .RunToEnd().ToUnit()
-                .PushStackFrame();
+                .RunToEnd().ToUnit();
         
         private IObservable<Unit> ScheduleLaunchPadParse()
             => Unit.Default.Observe().BeginWorkflow("Schedule Launch Pad Parse")
                 .Then(_ => ParseUpComing())
-                .RunToEnd().ToUnit()
-                .PushStackFrame();
+                .RunToEnd().ToUnit();
         #endregion
         
         [Test][Apartment(ApartmentState.STA)]
         public async Task Generates_Concise_Execution_report_is_correct_and_readable() {
+            
             await ScheduleLaunchPadParse().PublishFaults().Capture();
             BusEvents.Count.ShouldBe(1);
             var finalReport = BusEvents.Single().ShouldBeOfType<FaultHubException>();

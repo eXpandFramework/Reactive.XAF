@@ -262,7 +262,7 @@ namespace Xpand.TestsLib.Common{
                 .Do(_ => SynchronizationContext.SetSynchronizationContext((SynchronizationContext)AppDomain.CurrentDomain
                     .GetAssemblyType("System.Windows.Forms.WindowsFormsSynchronizationContext").CreateInstance()))
                 .SelectMany(frame => (frame.Template)
-                    .WhenEvent("Activated").Take(1).WaitUntilInactive(2.Seconds()).Take(1).ObserveOnContext()
+                    .ProcessEvent("Activated").Take(1).WaitUntilInactive(2.Seconds()).Take(1).ObserveOnContext()
                     .SelectMany(_ => test.BufferUntilCompleted().Do(_ => application.Exit()).SelectMany()))
                 .DoNotComplete(),delay);
         
@@ -279,7 +279,7 @@ namespace Xpand.TestsLib.Common{
                 // 3. Define the original test logic.
                 var testObservable = application.WhenFrame(Nesting.Root).Take(1)
                     .SelectMany(frame => (frame.Template)
-                        .WhenEvent("Activated").Take(1).WaitUntilInactive(2.Seconds()).Take(1).ObserveOnContext()
+                        .ProcessEvent("Activated").Take(1).WaitUntilInactive(2.Seconds()).Take(1).ObserveOnContext()
                         .SelectMany(_ => testFactory(frame).BufferUntilCompleted().Do(_ => application.Exit()).SelectMany()));
         
                 // 4. Use the Finally operator to GUARANTEE that the original context is restored
@@ -296,7 +296,7 @@ namespace Xpand.TestsLib.Common{
                 SynchronizationContext.SetSynchronizationContext((SynchronizationContext)winformsSyncContextType.CreateInstance());
                 return application.WhenFrame(Nesting.Root).Take(1)
                     .SelectMany(frame => (frame.Template)
-                        .WhenEvent("Activated").Take(1).WaitUntilInactive(2.Seconds()).Take(1).ObserveOnContext()
+                        .ProcessEvent("Activated").Take(1).WaitUntilInactive(2.Seconds()).Take(1).ObserveOnContext()
                         .SelectMany(_ => testFactory(frame).BufferUntilCompleted().Do(_ => application.Exit()).SelectMany()))
                     .Finally(() => SynchronizationContext.SetSynchronizationContext(originalSyncContext));
             }), delay);

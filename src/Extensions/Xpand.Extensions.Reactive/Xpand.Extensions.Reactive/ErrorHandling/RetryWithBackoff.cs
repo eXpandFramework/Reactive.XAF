@@ -23,8 +23,6 @@ namespace Xpand.Extensions.Reactive.ErrorHandling {
                 var attempt = 0;
                 return Resubscribe();
                 IObservable<T> Resubscribe() => source.Catch<T, Exception>(ex => {
-                    Console.WriteLine(caller.PrefixCaller());
-                    
                     if (ex is DoNotRetryWithBackoffException exception)
                         return exception.InnerException.Throw<T>();
                     if (retryCount.HasValue && ++attempt >= retryCount.Value)

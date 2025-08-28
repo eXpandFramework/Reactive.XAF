@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reactive;
 using System.Reactive.Linq;
 using Xpand.Extensions.ObjectExtensions;
-using Xpand.Extensions.Reactive.Transform;
 
 namespace Xpand.Extensions.Reactive.Combine {
     public static partial class Combine {

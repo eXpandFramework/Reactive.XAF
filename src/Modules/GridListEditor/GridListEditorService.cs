@@ -110,7 +110,7 @@ namespace Xpand.XAF.Modules.GridListEditor{
                 .WhenControlsCreated(true)
                 .Select(listView => listView.Editor).OfType<GridListEditor>()
                 .SelectMany(editor => editor.GridView.DataSource.Observe().WhenNotDefault()
-                    .SwitchIfEmpty(editor.GridView.WhenEvent(nameof(editor.GridView.DataSourceChanged)).Take(1))
+                    .SwitchIfEmpty(editor.GridView.ProcessEvent(nameof(editor.GridView.DataSourceChanged)).Take(1))
                     .SelectMany(_ => editor.GridView.Columns.Where(column => column.Visible).ToNowObservable()
                         .SelectManyItemResilient(column => {
                             var memberInfo = column.MemberInfo();
@@ -155,7 +155,7 @@ namespace Xpand.XAF.Modules.GridListEditor{
                 .ToObservable().ToUnit();
 
         private static IObservable<Unit> MoveFocus(this IModelGridListEditorFocusRow rule, GridView gridView) 
-            => gridView.WhenEvent("KeyDown").Where(p =>gridView.FocusedRowHandle==0&& p.EventArgs.GetPropertyValue("KeyCode").ToString()=="Up")
+            => gridView.ProcessEvent<EventArgs>("KeyDown").Where(eventArgs =>gridView.FocusedRowHandle==0&& eventArgs.GetPropertyValue("KeyCode").ToString()=="Up")
                 .SelectMany(_ => AppDomain.CurrentDomain.GridControlHandles().Where(info => info.Name == rule.UpArrowMoveToRowHandle)
                     .Select(info => info.GetValue(null))
                     .Do(o => gridView.FocusedRowHandle=(int)o)).ToUnit();
@@ -178,9 +178,11 @@ namespace Xpand.XAF.Modules.GridListEditor{
         public static IObservable<(RowCellCustomDrawEventArgs e, GridView gridView, Frame frame)> WhenCustomDrawGridViewCell(this XafApplication application, Type objectType, Nesting nesting) 
             => application.WhenFrame(objectType,ViewType.ListView,nesting)
                 .SelectMany(frame => frame.View.WhenControlsCreated(true).To(frame))
-                .SelectMany(frame => ((GridListEditor)frame.View.ToListView().Editor).GridView
-                    .WhenEvent(nameof(DevExpress.XtraGrid.Views.Grid.GridView.CustomDrawCell))
-                    .Select(pattern => (e:(RowCellCustomDrawEventArgs)pattern.EventArgs,gridView:(GridView)pattern.Sender,frame)));
+                .SelectMany(frame => {
+                    var gridView = ((GridListEditor)frame.View.ToListView().Editor).GridView;
+                    return gridView.ProcessEvent<EventArgs>(nameof(DevExpress.XtraGrid.Views.Grid.GridView.CustomDrawCell))
+                        .Select(eventArgs => (e: (RowCellCustomDrawEventArgs)eventArgs, gridView, frame));
+                });
 
         public static IObservable<(RowCellCustomDrawEventArgs e, GridView gridView, Frame frame)> WhenCustomDrawGridViewCell(this XafApplication application, Type objectType = null,
                 Nesting nesting = Nesting.Any, params Type[] columnsTypes) 
