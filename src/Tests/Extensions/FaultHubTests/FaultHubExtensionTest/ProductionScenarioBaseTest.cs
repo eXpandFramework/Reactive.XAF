@@ -19,9 +19,9 @@ namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest{
         [MethodImpl(MethodImplOptions.NoInlining)]
         private IObservable<Unit> ParseLaunchPad()
             => Observable.Return("serviceModule")
-                .SelectMany(_ => Observable.Return("pageParsed")) 
-                .SelectMany(_ => ConnectLaunchPad()
+                .SelectMany(_ => Observable.Return("pageParsed")
                         .BeginWorkflow()
+                        .Then(ConnectLaunchPad())
                         .Then(ParseUpComing())
                         .RunFailFast()
                         .ToUnit()

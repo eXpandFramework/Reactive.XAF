@@ -2,26 +2,18 @@
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Threading;
 
 namespace Xpand.Extensions.Tracing {
-    class RollingTextWriter : IDisposable {
+    class RollingTextWriter(string filePathTemplate) : IDisposable {
         const int MaxStreamRetries = 5;
 
         private string _currentPath;
         private TextWriter _currentWriter;
-        private readonly object _fileLock = new();
+        private readonly Lock _fileLock = new();
         private IFileSystem _fileSystem = new FileSystem();
         readonly TraceFormatter _traceFormatter = new();
 
-        public RollingTextWriter(string filePathTemplate) {
-            FilePathTemplate = filePathTemplate;
-        }
-
-        /// <summary>
-        /// Create RollingTextWriter with filePathTemplate which might contain 1 environment variable in front.
-        /// </summary>
-        /// <param name="filePathTemplate"></param>
-        /// <returns></returns>
         public static RollingTextWriter Create(string filePathTemplate) {
             var segments = filePathTemplate.Split('%');
             if (segments.Length > 3) {
@@ -35,8 +27,7 @@ namespace Xpand.Extensions.Tracing {
                 if (String.IsNullOrEmpty(rootFolder)) {
                     if (variableName.Equals("ProgramData", StringComparison.CurrentCultureIgnoreCase) &&
                         (Environment.OSVersion.Version.Major <=
-                         5)) //XP or below: https://msdn.microsoft.com/en-us/library/windows/desktop/ms724832%28v=vs.85%29.aspx
-                    { //So the host program could run well in XP and Windows 7 without changing the config file.
+                         5)) {
                         rootFolder = Path.Combine(Environment.GetEnvironmentVariable("AllUsersProfile")!,
                             "Application Data");
                     }
@@ -53,7 +44,7 @@ namespace Xpand.Extensions.Tracing {
             return new RollingTextWriter(filePathTemplate);
         }
 
-        public string FilePathTemplate { get; }
+        public string FilePathTemplate { get; } = filePathTemplate;
 
         public IFileSystem FileSystem {
             get => _fileSystem;
@@ -66,9 +57,7 @@ namespace Xpand.Extensions.Tracing {
 
         public void Flush() {
             lock (_fileLock) {
-                if (_currentWriter != null) {
-                    _currentWriter.Flush();
-                }
+                _currentWriter?.Flush();
             }
         }
 
@@ -89,7 +78,6 @@ namespace Xpand.Extensions.Tracing {
         }
 
         private void EnsureCurrentWriter(string path) {
-            // NOTE: This is called inside lock(_fileLock)
             if (_currentPath != path) {
                 if (_currentWriter != null) {
                     _currentWriter.Close();
@@ -167,7 +155,7 @@ namespace Xpand.Extensions.Tracing {
                             break;
                         default:
                             value = "{" + name + "}";
-                            return true;
+                            break;
                     }
 
                     return true;
@@ -182,9 +170,7 @@ namespace Xpand.Extensions.Tracing {
 
         protected virtual void Dispose(bool disposing) {
             if (disposing) {
-                if (_currentWriter != null) {
-                    _currentWriter.Dispose();
-                }
+                _currentWriter?.Dispose();
             }
         }
     }

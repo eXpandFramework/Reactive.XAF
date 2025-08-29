@@ -37,6 +37,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest {
         [Test]
         public void Render_Correctly_Formats_Production_Scenario_With_Multiple_Failures() {
             var exception = CreateProductionScenarioException();
+            
             var expected = string.Join(Environment.NewLine,
                 "Schedule Launch Pad Parse failed (2 times: Upcoming • StartParsing)",
                 "└ Parse Launch Pad",

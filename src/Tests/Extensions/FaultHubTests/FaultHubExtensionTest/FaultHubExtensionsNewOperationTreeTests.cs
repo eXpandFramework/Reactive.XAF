@@ -1,8 +1,13 @@
 ﻿using System;
 using System.Linq;
+using System.Reactive;
+using System.Reactive.Linq;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
+using Xpand.Extensions.Reactive.Utility;
 
 namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest{
     public class FaultHubExtensionsNewOperationTreeTests:FaultHubExtensionTestBase {
@@ -240,5 +245,101 @@ namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest{
             var expectedStack = innerStack.Concat(outerStack).ToList();
             logicalStack.ShouldBe(expectedStack);
         }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private IObservable<Unit> Level3_Fails() =>
+            Observable.Throw<Unit>(new InvalidOperationException("Root Cause"))
+                .PushStackFrame()
+                .ChainFaultContext();
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private IObservable<Unit> Level2_Calls_Level3() =>
+            Level3_Fails()
+                .PushStackFrame()
+                .ChainFaultContext();
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private IObservable<Unit> Level1_Calls_Level2() =>
+            Level2_Calls_Level3()
+                .PushStackFrame()
+                .ChainFaultContext();
+
+        [Test]
+        public void NewOperationTree_Builds_Full_Hierarchy_From_Live_ChainFaultContext_Operators() {
+            FaultHubException capturedFault = null;
+
+            Level1_Calls_Level2()
+                .Catch((FaultHubException ex) => {
+                    capturedFault = ex;
+                    return Observable.Empty<Unit>();
+                })
+                .Subscribe();
+
+            var fault = capturedFault.ShouldNotBeNull();
+            
+            var tree = fault.NewOperationTree();
+
+            tree.ShouldNotBeNull();
+            
+            tree.Name.ShouldBe(nameof(Level1_Calls_Level2));
+            
+            var nodeB = tree.Children.ShouldHaveSingleItem();
+            nodeB.Name.ShouldBe(nameof(Level2_Calls_Level3));
+
+            var nodeC = nodeB.Children.ShouldHaveSingleItem();
+            nodeC.Name.ShouldBe(nameof(Level3_Fails));
+            
+            nodeC.GetRootCause().ShouldBeOfType<InvalidOperationException>();
+        }
+        
+        //MODIFICATION:
+        [Test]
+        public void NewOperationTree_Handles_Nested_AggregateExceptions_And_Coalesces_Redundant_Nodes() {
+            // ARRANGE: Build a complex exception graph that mimics the production scenario's flaws.
+
+            // 1. A branch with redundant, nested nodes ("RedundantNode" -> "RedundantNode" -> "LeafA")
+            var exA = new InvalidOperationException("Failure A");
+            var ctxLeafA = new AmbientFaultContext { BoundaryName = "LeafA" };
+            var fhLeafA = new FaultHubException("A failed", exA, ctxLeafA);
+            
+            var ctxRedundant1 = new AmbientFaultContext { BoundaryName = "RedundantNode", InnerContext = fhLeafA.Context };
+            var fhRedundant1 = new FaultHubException("Redundant 1", fhLeafA, ctxRedundant1);
+
+            var ctxRedundant2 = new AmbientFaultContext { BoundaryName = "RedundantNode", InnerContext = fhRedundant1.Context };
+            var fhRedundant2 = new FaultHubException("Redundant 2", fhRedundant1, ctxRedundant2);
+
+            // 2. A simple second branch
+            var exB = new InvalidOperationException("Failure B");
+            var ctxLeafB = new AmbientFaultContext { BoundaryName = "LeafB" };
+            var fhLeafB = new FaultHubException("B failed", exB, ctxLeafB);
+
+            // 3. An AggregateException nested inside a top-level wrapper
+            var aggEx = new AggregateException(fhRedundant2, fhLeafB);
+            var ctxTop = new AmbientFaultContext { BoundaryName = "TopLevel" };
+            var topException = new FaultHubException("Top Level Failed", aggEx, ctxTop);
+
+            // ACT
+            var result = topException.NewOperationTree();
+
+            // ASSERT
+            result.ShouldNotBeNull();
+            result.Name.ShouldBe("TopLevel");
+
+            // It should find the nested AggregateException and produce a "Multiple Operations" node.
+            var multipleOpsNode = result.Children.ShouldHaveSingleItem();
+            multipleOpsNode.Name.ShouldBe("Multiple Operations");
+            multipleOpsNode.Children.Count.ShouldBe(2);
+
+            // The redundant nodes should be coalesced into a single node.
+            var branchA = multipleOpsNode.Children.Single(n => n.Name == "RedundantNode");
+            var leafA = branchA.Children.ShouldHaveSingleItem();
+            leafA.Name.ShouldBe("LeafA");
+            leafA.GetRootCause().ShouldBe(exA);
+
+            // The simple branch should be present.
+            var branchB = multipleOpsNode.Children.Single(n => n.Name == "LeafB");
+            branchB.GetRootCause().ShouldBe(exB);
+        }
+//MODIFICATION:
     }
 }

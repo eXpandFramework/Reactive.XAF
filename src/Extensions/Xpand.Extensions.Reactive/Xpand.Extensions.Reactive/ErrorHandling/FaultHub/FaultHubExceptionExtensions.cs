@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using Xpand.Extensions.ExceptionExtensions;
 using Xpand.Extensions.Reactive.Combine;
 
 namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
@@ -109,7 +110,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
             var contextDataString = "";
             if (includeDetails && node.ContextData.Any()) {
                 var filteredContext = node.ContextData
-                    .Where(c => c != null && !node.Name.Contains(c.ToString()))
+                    .Where(c => c != null && !node.Name.Contains($"{c}"))
                     .ToList();
                 if (filteredContext.Any()) {
                     contextDataString = $" ({string.Join(", ", filteredContext)})";
@@ -148,52 +149,108 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
         public static OperationNode GetChild(this OperationNode node, string name) 
             => node.Children.Single(c => c.Name == name);
 
+//MODIFICATION:
+//MODIFICATION:
         public static OperationNode NewOperationTree(this FaultHubException topException) {
-OperationNode UnionTree(IEnumerable<OperationNode> source) {
-                var nodes = source?.Where(n => n != null).ToList();
-                if (nodes == null || !nodes.Any()) return null;
-                if (nodes.Count == 1) return nodes.Single();
-                return new OperationNode("Multiple Operations", [], nodes);
-            }
+            FaultHubLogger.Log(() => "[Parser] Starting NewOperationTree parser...");
+            var contextLookup = topException.SelectMany().OfType<FaultHubException>()
+                .Where(ex => ex.Context != null).GroupBy(ex => ex.Context).ToDictionary(g => g.Key, g => g.First());
+            FaultHubLogger.Log(() => $"[Parser] Created context lookup dictionary with {contextLookup.Count} entries.");
 
-            OperationNode BuildNode(Exception ex, IReadOnlyList<LogicalStackFrame> parentStack) {
-                if (ex is AggregateException aggEx) {
-                    return UnionTree(aggEx.InnerExceptions.Select(inner => BuildNode(inner, parentStack)));
-                }
 
-                if (ex is not FaultHubException fhEx) {
-                    return null;
-                }
+            
+            OperationNode Collapse(OperationNode node) {
+                if (node == null) return null;
+                FaultHubLogger.Log(() => $"[Collapse] ==> Processing node '{node.Name}'");
+                var collapsedChildren = node.Children.Select(Collapse).Where(c => c != null).ToList();
 
-                if (fhEx.Context?.BoundaryName == null) {
-                    return BuildNode(fhEx.InnerException, parentStack);
+                if (collapsedChildren.Count == 1 && collapsedChildren[0].Name == node.Name) {
+                    FaultHubLogger.Log(() => $"[Collapse] Redundancy found! Collapsing child '{collapsedChildren[0].Name}' into parent '{node.Name}'. Returning child instead.");
+                    return collapsedChildren[0];
                 }
                 
-                var localStack = fhEx.Context.LogicalStackTrace ?? Enumerable.Empty<LogicalStackFrame>();
-                var fullStackForThisNode = localStack.Concat(parentStack).Distinct().ToList();
-
-                var name = fhEx.Context.BoundaryName;
-                var contextData = fhEx.Context.UserContext ?? [];
-                var children = new List<OperationNode>();
-
-                var childNode = BuildNode(fhEx.InnerException, fullStackForThisNode);
-                if (childNode != null) {
-                    if (childNode.Name == "Multiple Operations") {
-                        children.AddRange(childNode.Children);
+                var newChildren = new List<OperationNode>();
+                foreach (var child in collapsedChildren) {
+                    if (child.Name == node.Name) {
+                        FaultHubLogger.Log(() => $"[Collapse] Redundancy found! Absorbing children of '{child.Name}' into '{node.Name}'.");
+                        newChildren.AddRange(child.Children);
                     } else {
-                        children.Add(childNode);
+                        newChildren.Add(child);
+                    }
+                }
+
+                var finalNode = node with { Children = newChildren };
+                FaultHubLogger.Log(() => $"[Collapse] <== Returning node '{finalNode.Name}' with {finalNode.Children.Count} children.");
+                return finalNode;
+            }
+
+            var rawTree = topException.Context.BuildFromContext([],contextLookup);
+            FaultHubLogger.Log(() => "[Parser] Raw tree built. Starting collapse phase...");
+            var collapsedTree = Collapse(rawTree);
+            FaultHubLogger.Log(() => "[Parser] Collapse phase finished.");
+            return collapsedTree;
+        }
+
+        static OperationNode BuildFromGenericException(this Exception ex, IReadOnlyList<LogicalStackFrame> parentStack,
+            Dictionary<AmbientFaultContext, FaultHubException> contextLookup) {
+            FaultHubLogger.Log(() => $"[Parser.Generic] Processing generic exception: {ex?.GetType().Name}");
+            if (ex is not AggregateException aggEx) return ex is FaultHubException fhEx ? fhEx.Context.BuildFromContext(parentStack, contextLookup) : null;
+            var children = aggEx.InnerExceptions.Select(e => e.BuildFromGenericException( parentStack,contextLookup)).Where(n => n != null).ToList();
+            FaultHubLogger.Log(() => $"[Parser.Generic] Parsed AggregateException into {children.Count} children.");
+            return children.Count == 1 ? children.Single() : new OperationNode("Multiple Operations", [], children);
+
+        }
+
+        static OperationNode BuildFromContext(this AmbientFaultContext context,
+            IReadOnlyList<LogicalStackFrame> parentStack,
+            Dictionary<AmbientFaultContext, FaultHubException> contextLookup) {
+                if (context == null) return null;
+                FaultHubLogger.Log(() => $"[Parser.Context] ==> Processing context for: '{context.BoundaryName ?? "NULL"}'");
+
+                if (context.BoundaryName == null) {
+                    FaultHubLogger.Log(() => $"[Parser.Context] BoundaryName is null. Trying to build from generic inner exception.");
+                    if (contextLookup.TryGetValue(context, out var owner)) {
+                        return owner.InnerException.BuildFromGenericException(parentStack,contextLookup);
+                    }
+                    FaultHubLogger.Log(() => $"[Parser.Context] Could not find owner for nameless context. Returning null.");
+                    return null;
+                }
+                
+                var localStack = context.LogicalStackTrace ?? Enumerable.Empty<LogicalStackFrame>();
+                var fullStack = localStack.Concat(parentStack).Distinct().ToList();
+                var children = new List<OperationNode>();
+                
+                FaultHubLogger.Log(() => $"[Parser.Context] Recursing on InnerContext: '{context.InnerContext?.BoundaryName ?? "NULL"}'");
+                var hierarchicalChild = context.InnerContext.BuildFromContext(fullStack,contextLookup);
+                if (hierarchicalChild != null) {
+                    children.Add(hierarchicalChild);
+                }
+
+                Exception rootCause = null;
+                if (contextLookup.TryGetValue(context, out var contextOwner)) {
+                    if (context.InnerContext == null) {
+                        var errorNode = contextOwner.InnerException.BuildFromGenericException(fullStack,contextLookup);
+                        if (errorNode != null) {
+                            if (errorNode.Name == "Multiple Operations") children.AddRange(errorNode.Children);
+                            else children.Add(errorNode);
+                        }
+                        if (contextOwner.InnerException is not (null or FaultHubException or AggregateException)) {
+                            rootCause = contextOwner.InnerException;
+                        }
+                    } 
+                    else if (contextOwner.InnerException is AggregateException aggEx) {
+                        foreach (var innerEx in aggEx.InnerExceptions.OfType<FaultHubException>().Where(ex => ex.Context != context.InnerContext)) {
+                            var branchNode = innerEx.Context.BuildFromContext(fullStack,contextLookup);
+                            if (branchNode != null) children.Add(branchNode);
+                        }
                     }
                 }
                 
-                var rootCause = (fhEx.InnerException is null or FaultHubException or AggregateException) ? null : fhEx.InnerException;
-                
-                var stackToStore = (rootCause != null) ? fullStackForThisNode : null;
-
-                return new OperationNode(name, contextData, children, rootCause, stackToStore);
+                var resultNode = new OperationNode(context.BoundaryName, context.UserContext ?? [], children, rootCause, fullStack);
+                FaultHubLogger.Log(() => $"[Parser.Context] <== Created node for '{resultNode.Name}' with {resultNode.Children.Count} children.");
+                return resultNode;
             }
 
-            return BuildNode(topException, new List<LogicalStackFrame>());            
-        }
         private static IEnumerable<Exception> FindRootCauses(this Exception ex) {
             if (ex is AggregateException aggEx)
                 foreach (var inner in aggEx.InnerExceptions)
