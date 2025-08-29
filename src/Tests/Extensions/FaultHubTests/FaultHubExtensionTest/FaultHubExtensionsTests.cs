@@ -108,6 +108,44 @@ namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest {
 
             result.ShouldBe(expected);
         }
+        private FaultHubException CreateFaultWithLogicalStack(params LogicalStackFrame[] frames) {
+            var context = new AmbientFaultContext {
+                BoundaryName = "TestOperation",
+                LogicalStackTrace = frames
+            };
+            return new FaultHubException("Test Failure", new InvalidOperationException("Root Cause"), context);
+        }
+        [Test]
+        public void Render_Displays_Details_For_Childless_Root_Node() {
+            var exception = CreateFaultWithLogicalStack(
+                new LogicalStackFrame("MyMethod", @"C:\app\logic.cs", 10)
+            );
+
+            var report = exception.Render();
+            Console.WriteLine(report);
+            report.ShouldContain("Test Operation failed (1 times: Root Cause)");
+            report.ShouldContain("MyMethod");
+            report.ShouldContain("--- Invocation Stack ---");
+            report.ShouldContain("• Root Cause: System.InvalidOperationException: Root Cause");
+        }
         
+        [Test]
+        public void Render_Correctly_Handles_Top_Level_Exception_Wrapping_An_AggregateException() {
+            var leafEx = new InvalidOperationException("Root Cause");
+            var leafCtx = new AmbientFaultContext { BoundaryName = "LeafOperation" };
+            var fhLeaf = new FaultHubException("Leaf fail", leafEx, leafCtx);
+
+            var aggEx = new AggregateException(fhLeaf);
+
+            var topCtx = new AmbientFaultContext { BoundaryName = "TopLevelOperation" };
+            var fhTop = new FaultHubException("Top-level failure message", aggEx, topCtx);
+
+            var report = fhTop.Render();
+
+            report.ShouldStartWith("Top Level Operation failed");
+
+            report.ShouldContain("└ Leaf Operation");
+            report.ShouldContain("• Root Cause: System.InvalidOperationException: Root Cause");
+        }
     }
 }

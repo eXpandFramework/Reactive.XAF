@@ -13,7 +13,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest{
         [MethodImpl(MethodImplOptions.NoInlining)]
         protected IObservable<Unit> ScheduleLaunchPadParse()
             => ParseLaunchPad().ChainFaultContext(["LaunchPadName"])
-                .PushStackFrame()
+                .PushStackFrame(["Scheduled Context"])
             ;
 
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -26,7 +26,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest{
                         .RunFailFast()
                         .ToUnit()
                 )
-                .PushStackFrame();
+                .PushStackFrame(["LaunchPadName"]);
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         private IObservable<Unit> ConnectWallet() => Observable.Return(Unit.Default);

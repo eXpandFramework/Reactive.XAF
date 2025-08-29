@@ -10,9 +10,7 @@ using System.Windows.Forms;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.AssemblyExtensions;
-using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Numeric;
-using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.ErrorHandling;
 using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.StringExtensions;
@@ -21,11 +19,8 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
     public class FaultHubTestBase {
         protected List<Exception> BusEvents;
         private IDisposable _busSubscription;
-        private Dictionary<string, string> _regexes;
-        public FaultHubTestBase() {
-            FaultHub.Logging = true;
-            
-        }
+
+        public FaultHubTestBase() => FaultHub.Logging = true;
 
         protected class TestResource : IDisposable {
             public bool IsDisposed { get; private set; }
@@ -50,9 +45,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
         private static Func<IObservable<Unit>,IObservable<Unit>> RetrySelector=>source => source.Retry(3);
         private static Func<IObservable<Unit>,IObservable<Unit>> RetrySelectorWithBackoff=>source => source.RetryWithBackoff(3, strategy:_ => 50.Milliseconds());
         [SetUp]
-        public void Setup(){
-            
-            // FaultHub.BlacklistedFilePathRegexes.Add("Reactive\\.XAF\\\\src\\\\Extensions", "Test regex");
+        public virtual void Setup(){
             FaultHub.BlacklistedFilePathRegexes.Clear();
             FaultHub.Seen.Clear();  
             BusEvents = new List<Exception>();

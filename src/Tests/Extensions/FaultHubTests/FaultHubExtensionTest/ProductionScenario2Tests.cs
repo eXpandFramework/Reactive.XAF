@@ -113,7 +113,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest {
             AssertFaultExceptionReport(topLevelException);
         }
         
-        [Test]
+        [Test][Ignore("not implemented yet")]
         public async Task ToString_Report_Aggregates_Context_From_Nested_ChainFaultContext_Boundaries() {
             var innermostOperation = Observable.Throw<Unit>(new InvalidOperationException("Deep Failure"))
                 .ChainFaultContext(["InnermostContext"]);

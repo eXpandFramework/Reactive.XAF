@@ -1,18 +1,17 @@
-Schedule Launch Pad Parse failed (2 times • Upcoming • StartParsing)
-└ Schedule Launch Pad Parse
-  └ Parse Up Coming (Parse Up Coming, LaunchPad kommunitas)
-    ├ When Upcoming Urls (When Upcoming Urls)
-    │ • Root Cause: System.Exception: Upcoming
-    │    --- Invocation Stack ---
-    │      at WhenUpcomingUrls in Services\LaunchPadProjectPageParseService.cs:line 582
-    │    --- Original Exception Details ---
-    │      System.Exception: Upcoming
-    └ Parse Upcoming Projects (Parse Upcoming Projects)
-      └ When Existing Project Page Parsed (When Existing Project Page Parsed)
-        └ Project Parse Transaction (Project Parse Transaction)
-          └ Start Parsing (Start Parsing, driver, padProject)
-            • Root Cause: System.Exception: StartParsing
-               --- Invocation Stack ---
-                 (MyDynamicValue) at StartParsing in Services\LaunchPadProjectPageParseService.cs:line 1228
-               --- Original Exception Details ---
-                 System.Exception: StartParsing
+Schedule Launch Pad Parse failed [Schedule Launch Pad Parse, Kommunitas Kommunitas] (2 times: Upcoming • StartParsing)
+└ Parse Up Coming (Parse Up Coming, LaunchPad kommunitas)
+  ├ When Upcoming Urls(service Module, driver, launch Pad) (When Upcoming Urls)
+  │ • Root Cause: System.Exception: Upcoming
+  │   --- Invocation Stack ---
+  │     at WhenUpcomingUrls in Services\LaunchPadProjectPageParseService.cs:line 582
+  │   --- Original Exception Details ---
+  │     System.Exception: Upcoming
+  └ Parse Upcoming Projects (Parse Upcoming Projects, LaunchPad kommunitas)
+    └ When Existing Project Page Parsed (When Existing Project Page Parsed)
+      └ Project Parse Transaction (Project Parse Transaction)
+        └ Start Parsing(driver, pad Project) (Start Parsing, driver, padProject)
+          • Root Cause: System.Exception: StartParsing
+            --- Invocation Stack ---
+              (MyDynamicValue) at StartParsing in Services\LaunchPadProjectPageParseService.cs:line 1228
+            --- Original Exception Details ---
+              System.Exception: StartParsing

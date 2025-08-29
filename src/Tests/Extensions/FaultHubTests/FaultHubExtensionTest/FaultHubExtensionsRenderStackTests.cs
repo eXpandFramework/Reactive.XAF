@@ -7,13 +7,6 @@ using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 
 namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest{
     public class FaultHubExtensionsRenderStackTests : FaultHubExtensionTestBase {
-        private FaultHubException CreateFaultWithLogicalStack(params LogicalStackFrame[] frames) {
-            var context = new AmbientFaultContext {
-                BoundaryName = "TestOperation",
-                LogicalStackTrace = frames
-            };
-            return new FaultHubException("Test Failure", new InvalidOperationException("Root Cause"), context);
-        }
 
         [Test]
         public void RenderStack_Correctly_Formats_Logical_Stack() {
@@ -75,5 +68,107 @@ namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest{
 
             result.ShouldBeEmpty();
         }
+        
+        [Test]
+        public void RenderStack_Handles_Frames_With_And_Without_Context() {
+            var exception = CreateFaultWithLogicalStack(
+                new LogicalStackFrame("MethodA", "fileA.cs", 10, "My Context"),
+                new LogicalStackFrame("MethodB", "fileB.cs", 25)
+            );
+            var tree = exception.NewOperationTree();
+            var expected = string.Join(Environment.NewLine,
+                "--- Invocation Stack ---",
+                "  (My Context) at MethodA in fileA.cs:line 10",
+                "  at MethodB in fileB.cs:line 25"
+            );
+
+            var result = tree.RenderStack();
+
+            result.ShouldBe(expected);
+        }
+        
+         private FaultHubException CreateFaultWithLogicalStack(params LogicalStackFrame[] frames) {
+            var context = new AmbientFaultContext {
+                BoundaryName = "TestOperation",
+                LogicalStackTrace = frames
+            };
+            return new FaultHubException("Test Failure", new InvalidOperationException("Root Cause"), context);
+        }
+
+        [Test]
+        public void Render_Hides_Single_Blacklisted_Frame() {
+            FaultHub.BlacklistedFilePathRegexes.Add(@"framework\\", "Framework Internals");
+            var exception = CreateFaultWithLogicalStack(
+                new LogicalStackFrame("AppMethod", @"C:\app\logic.cs", 10),
+                new LogicalStackFrame("InternalMethod", @"C:\framework\internal.cs", 20)
+            );
+
+            var report = exception.Render();
+
+            report.ShouldContain("AppMethod");
+            report.ShouldNotContain("InternalMethod");
+            report.ShouldContain("... 1 frame(s) hidden ...");
+            FaultHub.BlacklistedFilePathRegexes.Clear();
+        }
+
+        [Test]
+        public void Render_Collapses_Consecutive_Blacklisted_Frames() {
+            FaultHub.BlacklistedFilePathRegexes.Add(@"framework\\", "Framework Internals");
+            var exception = CreateFaultWithLogicalStack(
+                new LogicalStackFrame("AppMethod1", @"C:\app\ui.cs", 10),
+                new LogicalStackFrame("InternalMethod1", @"C:\framework\core.cs", 20),
+                new LogicalStackFrame("InternalMethod2", @"C:\framework\utils.cs", 30),
+                new LogicalStackFrame("AppMethod2", @"C:\app\data.cs", 40)
+            );
+
+            var report = exception.Render();
+
+            report.ShouldContain("AppMethod1");
+            report.ShouldContain("AppMethod2");
+            report.ShouldNotContain("InternalMethod1");
+            report.ShouldNotContain("InternalMethod2");
+            report.ShouldContain("... 2 frame(s) hidden ...");
+            FaultHub.BlacklistedFilePathRegexes.Clear();
+        }
+
+        [Test]
+        public void Render_Handles_Non_Consecutive_Blacklisted_Frames() {
+            FaultHub.BlacklistedFilePathRegexes.Add(@"framework\\", "Framework Internals");
+            var exception = CreateFaultWithLogicalStack(
+                new LogicalStackFrame("InternalMethod1", @"C:\framework\core.cs", 10),
+                new LogicalStackFrame("AppMethod1", @"C:\app\ui.cs", 20),
+                new LogicalStackFrame("InternalMethod2", @"C:\framework\utils.cs", 30),
+                new LogicalStackFrame("AppMethod2", @"C:\app\data.cs", 40)
+            );
+
+            var report = exception.Render();
+
+            report.ShouldContain("AppMethod1");
+            report.ShouldContain("AppMethod2");
+            report.ShouldNotContain("InternalMethod1");
+            report.ShouldNotContain("InternalMethod2");
+            
+            var lines = report.Split([Environment.NewLine], StringSplitOptions.RemoveEmptyEntries);
+            lines.Count(l => l.Contains("... 1 frame(s) hidden ...")).ShouldBe(2);
+            FaultHub.BlacklistedFilePathRegexes.Clear();
+        }
+
+        [Test]
+        public void Render_Falls_Back_When_Blacklist_Would_Hide_All_Frames() {
+            FaultHub.BlacklistedFilePathRegexes.Add(@"framework\\", "Framework Internals");
+            var exception = CreateFaultWithLogicalStack(
+                new LogicalStackFrame("InternalMethod1", @"C:\framework\core.cs", 20),
+                new LogicalStackFrame("InternalMethod2", @"C:\framework\utils.cs", 30)
+            );
+
+            var report = exception.Render();
+
+            report.ShouldContain("InternalMethod1");
+            report.ShouldContain("InternalMethod2");
+            report.ShouldContain("... (Fallback: All frames shown as the blacklist would hide the entire stack) ...");
+            FaultHub.BlacklistedFilePathRegexes.Clear();
+        }
+    
+        
     }
 }

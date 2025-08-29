@@ -1,7 +1,6 @@
 ﻿using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
@@ -12,34 +11,6 @@ using TransactionAbortedException = Xpand.Extensions.Reactive.Combine.Transactio
 namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest {
     [TestFixture]
     public class ProductionScenarioTests : ProductionScenarioBaseTest {
-        [Test][Apartment(ApartmentState.STA)]
-        public async Task Blacklist_Filters_Framework_Noise_From_Invocation_Stack() {
-            
-            await ScheduleLaunchPadParse().PublishFaults().Capture();
-            
-            BusEvents.Count.ShouldBe(1);
-            var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
-            var report = fault.ToString();
-            
-            Clipboard.SetText(report);
-
-            AssertFaultExceptionReport(report);
-
-        }
-        
-        [Test][Apartment(ApartmentState.STA)]
-        public async Task Blacklist_FallBack_When_Stack_Empty() {
-            await ScheduleLaunchPadParse().PublishFaults().Capture();
-            
-            BusEvents.Count.ShouldBe(1);
-            var fault = BusEvents.Single().ShouldBeOfType<TransactionAbortedException>();
-            var report = fault.ToString();
-            
-            Clipboard.SetText(report);
-            
-            AssertFaultExceptionReport(report);
-        }
-        
         
         [Test][Apartment(ApartmentState.STA)]
         public async Task Replicates_Production_Report_Issue() {
