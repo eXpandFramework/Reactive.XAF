@@ -47,8 +47,8 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
             }).ToList();
         
         public static IObservable<T> ChainFaultContext<T>(this IObservable<T> source, object[] context, Func<IObservable<T>, IObservable<T>> retryStrategy = null,
-            [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0) {
-return Observable.Defer(() => {
+            [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0)
+            => Observable.Defer(() => {
                 Log(() => $"[ChainCtx] Entering Defer for boundary '{memberName}'.");
                 var snapshot = new FaultSnapshot();
                 var originalSnapshot = FaultHub.CurrentFaultSnapshot.Value;
@@ -57,13 +57,10 @@ return Observable.Defer(() => {
                 var originalStack = FaultHub.LogicalStackContext.Value;
                 FaultHub.LogicalStackContext.Value = null;
                 Log(() => $"[ChainCtx] Cleared logical stack (was {originalStack?.Count ?? 0} frames).");
-                var resilientSource = retryStrategy != null ?
- retryStrategy(source) : source;
+                var resilientSource = retryStrategy != null ? retryStrategy(source) : source;
                 return resilientSource.Catch((Exception ex) => {
                         Log(() => $"[ChainCtx] Catch block entered for boundary '{memberName}'. Exception: {ex.GetType().Name}");
                         Log(() => $"[ChainCtx] Reading stack from snapshot. Found {snapshot.CapturedStack?.Count ?? 0} frames.");
-                        
-//MODIFICATION:
                         var fullStack = (snapshot.CapturedStack ?? Enumerable.Empty<LogicalStackFrame>()).ToList();
                         var stackTraceForLog = string.Join(" -> ", fullStack.Select(f => f.MemberName));
                         Log(()=> $"[CTX-TRACE][ChainCtx-Catch] Reassembled stack. Inner: {snapshot.CapturedStack?.Count ?? 0}, Parent: {originalStack?.Count ?? 0}, Total: {fullStack.Count}. Stack: [{stackTraceForLog}]");
@@ -77,11 +74,9 @@ return Observable.Defer(() => {
                         Log(() => $"[ChainCtx] Restored logical stack to {originalStack?.Count ?? 0} frames.");
                     }).FlowContext(context:FaultHub.All.Concat(All).ToArray());
             });
-            
-        }        
 
-        private static IObservable<T> PushStackFrame<T>(this IObservable<T> source, LogicalStackFrame frame) {
-return Observable.Defer(() => {
+        private static IObservable<T> PushStackFrame<T>(this IObservable<T> source, LogicalStackFrame frame) 
+            => Observable.Defer(() => {
                 LogAsyncLocalState(() => $"Before PushStackFrame '{frame.MemberName}'");
                 var originalStack = FaultHub.LogicalStackContext.Value;
                 if (originalStack?.FirstOrDefault().Equals(frame) ?? false) {
@@ -102,7 +97,7 @@ return Observable.Defer(() => {
                         var snapshot = FaultHub.CurrentFaultSnapshot.Value;
                         if (snapshot != null) {
                             var currentStack = FaultHub.LogicalStackContext.Value;
-                      
+                          
                             Log(() => $"[PushStackFrame] Current snapshot has {snapshot.CapturedStack?.Count ?? 0} frames. Current logical stack has {currentStack?.Count ?? 0} frames.");
                             if ((currentStack?.Count ?? 0) > (snapshot.CapturedStack?.Count ?? 0)) {
                                 Log(() => $"[PushStackFrame] Saving stack with {currentStack?.Count} frames to snapshot.");
@@ -119,14 +114,13 @@ return Observable.Defer(() => {
                     .Dematerialize()
                     .Finally(() => {
                         Log(() => $"[PushStackFrame] Finally: Restoring original stack for '{frame.MemberName}' to {originalStack?.Count ?? 0} frames.");
-                 
+                     
                         FaultHub.LogicalStackContext.Value = originalStack;
                         LogAsyncLocalState(() => $"After PushStackFrame '{frame.MemberName}'");
                     })
                     .FlowContext(context:FaultHub.All.Concat(All).ToArray());
-            });            
-        }
-        
+            });
+
         public static AmbientFaultContext NewFaultContext(this  IReadOnlyList<LogicalStackFrame> logicalStack,object[] context, [CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0) {
             Log(() => $"[HUB-TRACE][NewFaultContext] Caller: '{memberName}', filePath: {filePath}, line: {lineNumber} Context: '{(context == null ? "null" : string.Join(", ", context))}'");
             return new AmbientFaultContext { LogicalStackTrace = logicalStack, BoundaryName = memberName, UserContext = context ?? [] };

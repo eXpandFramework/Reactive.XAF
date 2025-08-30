@@ -9,7 +9,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions {
         public static IObservable<T> When<TEventArgs, T>(this ActionBase action, string eventName,
             Func<TEventArgs, IObservable<T>> resilientSelector) where TEventArgs : EventArgs
             => action.ProcessEvent(eventName, resilientSelector, context: [action])
-                .TakeUntilDisposed(action);
+                .TakeUntilDisposed(action) ;
 
         public static IObservable<T> When<TEventArgs, T>(this IObservable<ActionBase> source, string eventName,
             Func<TEventArgs, IObservable<T>> resilientSelector) where TEventArgs : EventArgs

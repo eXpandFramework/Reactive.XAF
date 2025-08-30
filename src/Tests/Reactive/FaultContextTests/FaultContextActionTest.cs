@@ -127,7 +127,6 @@ namespace Xpand.XAF.Modules.Reactive.Tests.FaultContextTests {
                 => frame.MemberName == nameof(SubscribeToActionThatThrows_And_Assert_The_StackTrace));
             logicalStack.SelectMany(frame => frame.Context)
                 .ShouldContain(context => (string)context == nameof(ActionBase.Executed));
-            ;
         }
 
 
@@ -222,7 +221,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests.FaultContextTests {
                 .SelectMany(manager
                     => manager.RegisterViewSimpleAction(
                         nameof(PushStackFrame_Builds_A_Coherent_Logical_StackTrace_For_Nested_Operations)))
-                .SelectMany(action => action.WhenExecuted(_ => TopLevel_Operation()))
+                .WhenExecuted(_ => TopLevel_Operation())
                 .Subscribe(findModule);
 
             DefaultReactiveModule(application);
@@ -256,7 +255,8 @@ namespace Xpand.XAF.Modules.Reactive.Tests.FaultContextTests {
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         private IObservable<Unit> TopLevel_Operation()
-            => MidLevel_Helper().PushStackFrame();
+            => MidLevel_Helper().PushStackFrame()
+                .ChainFaultContext();
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         private IObservable<Unit> MidLevel_Helper()

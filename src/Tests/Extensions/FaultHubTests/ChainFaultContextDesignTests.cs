@@ -290,5 +290,97 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             level3Index.ShouldBeLessThan(level2Index, "Innermost async frame (Level3) should come before the middle frame (Level2).");
             level2Index.ShouldBeLessThan(level1Index, "Middle frame (Level2) should come before the outer frame (Level1).");
         }
+        
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private IObservable<Unit> LowLevel_For_Boundary_Test()
+            => Observable.Throw<Unit>(new InvalidOperationException("Failure")).PushStackFrame();
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private IObservable<Unit> MidLevel_For_Boundary_Test()
+            => LowLevel_For_Boundary_Test().PushStackFrame();
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private IObservable<Unit> TopLevel_For_Boundary_Test()
+            => MidLevel_For_Boundary_Test().PushStackFrame();
+        
+        [Test]
+        public async Task PushStackFrame_Requires_ChainFaultContext_Boundary_To_Capture_Logical_Stack() {
+            var streamWithoutBoundary = TopLevel_For_Boundary_Test().PublishFaults();
+            await streamWithoutBoundary.Capture();
+
+            BusEvents.Count.ShouldBe(1);
+            var faultWithoutBoundary = BusEvents.Single().ShouldBeOfType<FaultHubException>();
+            var stackWithoutBoundary = faultWithoutBoundary.LogicalStackTrace.Select(f => f.MemberName).ToArray();
+            
+            stackWithoutBoundary.ShouldNotContain(nameof(TopLevel_For_Boundary_Test), "The stack from the nested calls was captured, but it should have been lost without a boundary.");
+            stackWithoutBoundary.ShouldNotContain(nameof(MidLevel_For_Boundary_Test));
+            stackWithoutBoundary.ShouldNotContain(nameof(LowLevel_For_Boundary_Test));
+
+            TearDown();
+            Setup();
+
+            var streamWithBoundary = TopLevel_For_Boundary_Test()
+                .ChainFaultContext(["BoundaryForTest"])
+                .PublishFaults();
+            await streamWithBoundary.Capture();
+
+            BusEvents.Count.ShouldBe(1);
+            var faultWithBoundary = BusEvents.Single().ShouldBeOfType<FaultHubException>();
+            var stackWithBoundary = faultWithBoundary.LogicalStackTrace.Select(f => f.MemberName).ToArray();
+            
+            stackWithBoundary.ShouldContain(nameof(TopLevel_For_Boundary_Test));
+            stackWithBoundary.ShouldContain(nameof(MidLevel_For_Boundary_Test));
+            stackWithBoundary.ShouldContain(nameof(LowLevel_For_Boundary_Test));
+        }
+        
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private IObservable<Unit> InnerFailingOperation_WithFrame() =>
+            Observable.Throw<Unit>(new InvalidOperationException("Inner Failure"))
+                .PushStackFrame("InnerFrame");
+
+        [Test]
+        public async Task ChainFaultContext_Captures_Full_Upstream_Stack_Built_During_Subscription() {
+            var stream = Observable.Return(Unit.Default)
+                .PushStackFrame("OuterFrame")
+                .SelectMany(_ => InnerFailingOperation_WithFrame())
+                .ChainFaultContext(["Boundary"]);
+
+            await stream.PublishFaults().Capture();
+
+            BusEvents.Count.ShouldBe(1);
+            var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
+            var logicalStack = fault.LogicalStackTrace.ToArray();
+
+            logicalStack.Length.ShouldBe(2, "The logical stack should contain frames from both operators upstream of the boundary.");
+
+            logicalStack.ShouldContain(frame => frame.MemberName == "InnerFrame");
+            logicalStack.ShouldContain(frame => frame.MemberName == "OuterFrame");
+
+            var innerFrameIndex = Array.FindIndex(logicalStack, frame => frame.MemberName == "InnerFrame");
+            var outerFrameIndex = Array.FindIndex(logicalStack, frame => frame.MemberName == "OuterFrame");
+
+            innerFrameIndex.ShouldBeLessThan(outerFrameIndex, "The InnerFrame, which is subscribed to last, should appear before the OuterFrame in the stack.");
+            
+        }
+        
+        
+
+        [Test]
+        public async Task PushStackFrame_After_ChainFaultContext_Is_Ignored() {
+            var stream = InnerFailingOperation_WithFrame()
+                .ChainFaultContext(["Boundary"])
+                .PushStackFrame("OuterFrame_ToBeIgnored");
+
+            await stream.PublishFaults().Capture();
+
+            BusEvents.Count.ShouldBe(1);
+            var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
+            var logicalStack = fault.LogicalStackTrace.ToArray();
+
+            logicalStack.Length.ShouldBe(1, "The logical stack should only contain the frame captured by ChainFaultContext.");
+            logicalStack.ShouldContain(frame => frame.MemberName == "InnerFrame");
+            logicalStack.ShouldNotContain(frame => frame.MemberName == "OuterFrame_ToBeIgnored",
+                "The frame from PushStackFrame after the boundary should have been ignored.");
+        }
     }
-}
+    }
