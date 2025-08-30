@@ -23,7 +23,6 @@ namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest {
 
             var reportLines = finalReport.ToString().ToLines().ToArray();
 
-
             AssertFaultExceptionReport(finalReport.ToString());
             reportLines.ShouldNotContain(line => line.Contains("Sequential Transaction"));
 

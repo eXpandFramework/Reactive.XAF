@@ -234,19 +234,16 @@ namespace Xpand.XAF.Modules.Reactive.Tests.FaultContextTests {
                             .Observe().Do(a => a.DoTheExecute()).IgnoreElements())
             );
 
-            // ASSERT
             BusEvents.Count.ShouldBe(1);
             var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
             var logicalStack = fault.LogicalStackTrace.Select(f => f.MemberName).ToArray();
 
             logicalStack.ShouldNotBeNull();
 
-            // Verify that the business logic frames are present
             logicalStack.ShouldContain(nameof(TopLevel_Operation));
             logicalStack.ShouldContain(nameof(MidLevel_Helper));
             logicalStack.ShouldContain(nameof(LowLevel_Error_Source));
 
-            // Verify that they appear in the correct hierarchical order
             var topLevelIndex = Array.IndexOf(logicalStack, nameof(TopLevel_Operation));
             var midLevelIndex = Array.IndexOf(logicalStack, nameof(MidLevel_Helper));
             var lowLevelIndex = Array.IndexOf(logicalStack, nameof(LowLevel_Error_Source));

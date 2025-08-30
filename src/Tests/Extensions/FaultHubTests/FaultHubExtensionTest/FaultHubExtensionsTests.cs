@@ -39,7 +39,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest {
             var exception = CreateProductionScenarioException();
             
             var expected = string.Join(Environment.NewLine,
-                "Schedule Launch Pad Parse failed (2 times: Upcoming • StartParsing)",
+                "Schedule Launch Pad Parse completed with errors (2 times: Upcoming • StartParsing)",
                 "└ Parse Launch Pad",
                 "  └ Connect Launch Pad",
                 "    └ Parse Up Coming",
@@ -74,7 +74,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest {
             var exception = new FaultHubException("Outer fail", fhInner, outerCtx);
             
             var expected = string.Join(Environment.NewLine,
-                "Outer Operation failed (1 times: Root Cause)",
+                "Outer Operation completed with errors (1 times: Root Cause)",
                 "└ Inner Operation",
                 "  • Root Cause: System.InvalidOperationException: Root Cause",
                 "    --- Original Exception Details ---",
@@ -123,7 +123,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest {
 
             var report = exception.Render();
             Console.WriteLine(report);
-            report.ShouldContain("Test Operation failed (1 times: Root Cause)");
+            report.ShouldContain("Test Operation completed with errors (1 times: Root Cause)");
             report.ShouldContain("MyMethod");
             report.ShouldContain("--- Invocation Stack ---");
             report.ShouldContain("• Root Cause: System.InvalidOperationException: Root Cause");
@@ -142,10 +142,57 @@ namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest {
 
             var report = fhTop.Render();
 
-            report.ShouldStartWith("Top Level Operation failed");
+            report.ShouldStartWith("Top Level Operation completed with errors");
 
             report.ShouldContain("└ Leaf Operation");
             report.ShouldContain("• Root Cause: System.InvalidOperationException: Root Cause");
         }
+        
+        [TestCase("Schedule Launch Pad Parse")]
+        [TestCase("ScheduleLaunchPadParse")]
+        public void Render_Removes_Redundant_BoundaryName_From_Root_Context(string context) {
+            var innerEx = new InvalidOperationException("Root Cause");
+            var innerCtx = new AmbientFaultContext { BoundaryName = "InnerOperation" };
+            var fhInner = new FaultHubException("Inner fail", innerEx, innerCtx);
+
+            var outerCtx = new AmbientFaultContext {
+                BoundaryName = "Schedule Launch Pad Parse",
+                UserContext = [context, "Kommunitas Kommunitas"],
+                InnerContext = fhInner.Context
+            };
+            var exception = new FaultHubException("Outer fail", fhInner, outerCtx);
+
+            var expectedHeaderStart = "Schedule Launch Pad Parse completed with errors [Kommunitas Kommunitas]";
+
+            var result = exception.Render();
+
+            result.ShouldStartWith(expectedHeaderStart);
+            result.ShouldNotContain($"[{context}, Kommunitas Kommunitas]");
+        }
+        
+        [Test]
+        public void Render_Removes_Redundant_Context_From_Node_With_Method_Signature_BoundaryName() {
+            var rootCause = new InvalidOperationException("Failure");
+            var childCtx = new AmbientFaultContext {
+                BoundaryName = "MyMethod(string arg1, int arg2)",
+                UserContext = ["MyMethod"]
+            };
+            var fhChild = new FaultHubException("Child fail", rootCause, childCtx);
+
+            var rootCtx = new AmbientFaultContext {
+                BoundaryName = "RootOperation",
+                InnerContext = fhChild.Context
+            };
+            var exception = new FaultHubException("Root fail", fhChild, rootCtx);
+
+            var result = exception.Render();
+
+            result.ShouldStartWith("Root Operation completed with errors");
+
+            result.ShouldContain("└ My Method");
+
+            result.ShouldNotContain("(MyMethod)");
+        }
+        
     }
 }

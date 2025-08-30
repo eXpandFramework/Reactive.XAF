@@ -5,6 +5,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.Reactive.Combine;
@@ -98,23 +99,23 @@ namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest {
             var rootCause2 = new Exception("StartParsing");
             var fh2StartParsing = new FaultHubException("StartParsing", rootCause2, ctxStartParsing);
             var agg21 = new AggregateException(fh2StartParsing);
-            var fh2ParseTx = new FaultHubException("Project Parse Transaction failed", agg21, ctxParseTx);
+            var fh2ParseTx = new FaultHubException("Project Parse Transaction completed with errors", agg21, ctxParseTx);
             var agg22 = new AggregateException(fh2ParseTx);
             var fh2WhenExisting =
-                new FaultHubException("When Existing Project Page Parsed failed", agg22, ctxWhenExisting);
+                new FaultHubException("When Existing Project Page Parsed completed with errors", agg22, ctxWhenExisting);
             var agg23 = new AggregateException(fh2WhenExisting);
-            var fh2ParseProjects = new FaultHubException("Parse Upcoming Projects failed", agg23, ctxParseProjects);
+            var fh2ParseProjects = new FaultHubException("Parse Upcoming Projects completed with errors", agg23, ctxParseProjects);
             var aggMid = new AggregateException(fh1Upcoming, fh2ParseProjects);
-            var fhParseUpcoming = new FaultHubException("Parse Up Coming failed", aggMid, ctxParseUpcoming);
+            var fhParseUpcoming = new FaultHubException("Parse Up Coming completed with errors", aggMid, ctxParseUpcoming);
             var aggTop = new AggregateException(fhParseUpcoming);
-            var topLevelException = new FaultHubException("Schedule Launch Pad Parse failed", aggTop, ctxSchedule);
+            var topLevelException = new FaultHubException("Schedule Launch Pad Parse completed with errors", aggTop, ctxSchedule);
             #endregion
             
             AssertFaultExceptionReport(topLevelException);
         }
         
-        [Test][Ignore("not implemented yet")]
-        public async Task ToString_Report_Aggregates_Context_From_Nested_ChainFaultContext_Boundaries() {
+        [Test][Apartment(ApartmentState.STA)]
+        public async Task Report_Aggregates_Context_From_Nested_ChainFaultContext_Boundaries() {
             var innermostOperation = Observable.Throw<Unit>(new InvalidOperationException("Deep Failure"))
                 .ChainFaultContext(["InnermostContext"]);
     
@@ -130,7 +131,9 @@ namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest {
             var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
 
             var report = fault.ToString();
-
+            Console.WriteLine(report);
+            Clipboard.SetText(report);
+            
             report.ShouldContain("OutermostContext");
             report.ShouldContain("IntermediateContext");
             report.ShouldContain("InnermostContext");

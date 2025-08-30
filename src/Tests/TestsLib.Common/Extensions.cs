@@ -198,7 +198,6 @@ namespace Xpand.TestsLib.Common{
                 (ModuleBase) instance
             }
             .Concat(modules)
-            // .Concat(new []{new ReactiveLoggerModule()})
             .ToList();
 
             if (((ITestApplication) application).TransmitMessage){
@@ -269,21 +268,16 @@ namespace Xpand.TestsLib.Common{
         [Obsolete]
         public static TestObserver<T> StartWinTest2<T>(this XafApplication application, Func<Frame,IObservable<T>> testFactory,int delay = 200) {
             var testWithProperContext = Observable.Defer(() => {
-                // 1. Save the original context provided by the test runner.
                 var originalSyncContext = SynchronizationContext.Current;
-        
-                // 2. Set the required WindowsFormsSynchronizationContext.
+
                 var winformsSyncContextType = AppDomain.CurrentDomain.GetAssemblyType("System.Windows.Forms.WindowsFormsSynchronizationContext");
                 SynchronizationContext.SetSynchronizationContext((SynchronizationContext)winformsSyncContextType.CreateInstance());
 
-                // 3. Define the original test logic.
                 var testObservable = application.WhenFrame(Nesting.Root).Take(1)
                     .SelectMany(frame => (frame.Template)
                         .ProcessEvent("Activated").Take(1).WaitUntilInactive(2.Seconds()).Take(1).ObserveOnContext()
                         .SelectMany(_ => testFactory(frame).BufferUntilCompleted().Do(_ => application.Exit()).SelectMany()));
-        
-                // 4. Use the Finally operator to GUARANTEE that the original context is restored
-                //    when the test completes, fails, or is disposed.
+
                 return testObservable.Finally(() => SynchronizationContext.SetSynchronizationContext(originalSyncContext));
             });
 
@@ -302,17 +296,12 @@ namespace Xpand.TestsLib.Common{
             }), delay);
 
         public static TestObserver<T> Start2<T>(this XafApplication application,IObservable<T> test,int delay=200) {
-            var testObserver = test
-                // .AsyncFinally(async () => await Task.Delay(delay).ToObservable().Do(_ => application.Exit()).ToTask())
-                .Test();
+            var testObserver = test.Test();
             application.CallMethod("Start");
             return testObserver;
         }
         public static IObservable<T> Start<T>(this XafApplication application,IObservable<T> test,int delay=200) {
-            var testObserver = test
-                // .AsyncFinally(async () => await Task.Delay(delay).ToObservable().Do(_ => application.Exit()).ToTask())
-                // .Test()
-                ;
+            var testObserver = test;
             
             return testObserver.Merge(application.DeferAction(_ => application.CallMethod("Start")).To<T>().IgnoreElements());
         }
@@ -464,9 +453,8 @@ namespace Xpand.TestsLib.Common{
 		        throw new NotSupportedException(
 			        "if implemented make sure all tests pass with TestExplorer and live testing");
 	        }
-	        // application.Title = TestContext.CurrentContext.Test.FullName.CleanCodeName().Truncate(255);
-            
-	        return application;
+
+            return application;
         }
 
         static void MockEditorsFactory(this XafApplication application){
@@ -621,8 +609,7 @@ namespace Xpand.TestsLib.Common{
 
     public interface ITestApplication{
         bool TransmitMessage{ get; }
-        // IObservable<Unit> TraceClientBroadcast{ get; set; }
-        // IObservable<Unit> TraceClientConnected{ get; set; }
+
         Type SUTModule{ get; }
     }
 

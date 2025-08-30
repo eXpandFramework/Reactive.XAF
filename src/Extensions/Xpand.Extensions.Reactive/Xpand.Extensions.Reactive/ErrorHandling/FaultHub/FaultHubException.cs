@@ -15,7 +15,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
                 Data[entry.Key] = entry.Value;
             }
         }
-        public bool PreserveType { get; init; }
+        public virtual bool PreserveType =>GetType()!=typeof(FaultHubException);
         public sealed override IDictionary Data => base.Data;
         public IEnumerable<LogicalStackFrame> LogicalStackTrace => this.SelectMany().OfType<FaultHubException>()
             .SelectMany(fault => fault.Context.FromHierarchy(c => c.InnerContext).Reverse())
@@ -38,6 +38,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
         }
 
         public AmbientFaultContext Context { get; }
+        public virtual string ErrorStatus=> "completed with errors";
 
         public override string ToString() {
             try {

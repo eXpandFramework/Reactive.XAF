@@ -353,10 +353,7 @@ namespace Xpand.Extensions.Reactive.Combine {
         
         [SuppressMessage("ReSharper", "UnusedTypeParameter")]
         public interface ITransactionBuilder<out TCurrentResult> { }
-        public sealed class TransactionAbortedException : FaultHubException {
-            public TransactionAbortedException(string message, FaultHubException innerException)
-                : this(message, innerException, innerException.Context) { }
-
-            public TransactionAbortedException(string message, Exception innerException, AmbientFaultContext context) : base(message, innerException, context) => PreserveType = true;
-        };
+        public sealed class TransactionAbortedException(string message, Exception innerException, AmbientFaultContext context) : FaultHubException(message, innerException, context) {
+            public override string ErrorStatus=>"failed" ;
+        }
 }
