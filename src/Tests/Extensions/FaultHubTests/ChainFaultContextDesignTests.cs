@@ -82,8 +82,6 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
         [Test]
         public async Task ChainFaultContext_Should_Isolate_Context_In_Concurrent_Operations() {
             
-
-            
             var streamA = Observable.Timer(TimeSpan.FromMilliseconds(10))
                 .SelectMany(_ => Observable.Throw<Unit>(new Exception("Failure A")))
                 .PushStackFrame("StreamA_LogicalFrame")
@@ -93,8 +91,6 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
                 .SelectMany(_ => Observable.Throw<Unit>(new Exception("Failure B")))
                 .PushStackFrame("StreamB_LogicalFrame")
                 .ChainFaultContext(["StreamB_Boundary"]);
-
-            
             
             await streamA.PublishFaults()
                 .Merge(streamB.PublishFaults())
@@ -156,25 +152,19 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
                     ["InnerBoundary_Context"]
                 );
 
-            // 3. The outermost resilience boundary, whose retry policy should take precedence.
             var outerBoundary = innerBoundary
                 .TrackSubscriptions(outerCounter)
                 .ChainFaultContext(
-                    source => source.Retry(3), // This is the controlling retry policy.
-                    ["OuterBoundary_Context"]
+                    source => source.Retry(3), ["OuterBoundary_Context"]
                 );
 
             
             await outerBoundary.PublishFaults().Capture();
 
-            // ASSERT
             var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
             var logicalStack = fault.LogicalStackTrace.Select(f => f.MemberName).ToArray();
             var allContexts = fault.AllContexts.ToArray();
 
-            // 1. Assert Policy Precedence: The outer retry policy (3) should have been used.
-            // The inner operation is subscribed to once by the inner boundary, and the inner
-            // boundary is subscribed to 3 times by the outer boundary.
             outerCounter.Count.ShouldBe(3, "The outer retry policy did not take precedence.");
             innerCounter.Count.ShouldBe(15, "The inner operation was not retried correctly by the outer boundary.");
             
@@ -259,6 +249,46 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
 
             logicalStack.Count.ShouldBe(1, "The logical stack should be reset for each retry attempt.");
             logicalStack.Single().MemberName.ShouldBe("OperationFrame");
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private IObservable<Unit> PoC_Level3_Fails_Async()
+            => Observable.Timer(TimeSpan.FromMilliseconds(20))
+                .SelectMany(_ => Observable.Throw<Unit>(new InvalidOperationException("Async Failure")))
+                .PushStackFrame();
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private IObservable<Unit> PoC_Level2_Calls_Level3()
+            => PoC_Level3_Fails_Async()
+                .PushStackFrame();
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private IObservable<Unit> PoC_Level1_Calls_Level2()
+            => PoC_Level2_Calls_Level3()
+                .PushStackFrame();
+
+        [Test]
+        public async Task ChainFaultContext_Should_Preserve_Correct_Order_For_Nested_Async_PushStackFrame() {
+    
+            var stream = PoC_Level1_Calls_Level2()
+                .ChainFaultContext(["Boundary"]);
+    
+            await stream.PublishFaults().Capture();
+    
+            BusEvents.Count.ShouldBe(1);
+            var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
+            var logicalStack = fault.LogicalStackTrace.Select(f => f.MemberName).ToArray();
+
+            var level1Index = Array.IndexOf(logicalStack, nameof(PoC_Level1_Calls_Level2));
+            var level2Index = Array.IndexOf(logicalStack, nameof(PoC_Level2_Calls_Level3));
+            var level3Index = Array.IndexOf(logicalStack, nameof(PoC_Level3_Fails_Async));
+    
+            level3Index.ShouldNotBe(-1,"Level3 frame not found");
+            level2Index.ShouldNotBe(-1,"Level2 frame not found");
+            level1Index.ShouldNotBe(-1,"Level1 frame not found");
+
+            level3Index.ShouldBeLessThan(level2Index, "Innermost async frame (Level3) should come before the middle frame (Level2).");
+            level2Index.ShouldBeLessThan(level1Index, "Middle frame (Level2) should come before the outer frame (Level1).");
         }
     }
 }

@@ -12,9 +12,9 @@ namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest{
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         protected IObservable<Unit> ScheduleLaunchPadParse()
-            => ParseLaunchPad().ChainFaultContext(["LaunchPadName"])
+            => ParseLaunchPad()
                 .PushStackFrame(["Scheduled Context"])
-            ;
+                .ChainFaultContext(["LaunchPadName"]);
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         private IObservable<Unit> ParseLaunchPad()

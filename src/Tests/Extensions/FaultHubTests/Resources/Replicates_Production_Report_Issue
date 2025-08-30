@@ -11,8 +11,8 @@ Schedule Launch Pad Parse failed [LaunchPadName] (2 times: Upcoming • StartPar
     │       at ParseUpComing in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 25
     │       at ConnectLaunchPad in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 24
     │       at Observable.Return("pageParsed") in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 23
-    │       (Scheduled Context) at ScheduleLaunchPadParse in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 16
     │       (LaunchPadName) at ParseLaunchPad in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 29
+    │       (Scheduled Context) at ScheduleLaunchPadParse in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 16
     │     --- Original Exception Details ---
     │       System.Exception: Upcoming
     └ Parse Upcoming Projects (RunToEnd, UserName)
@@ -32,7 +32,7 @@ Schedule Launch Pad Parse failed [LaunchPadName] (2 times: Upcoming • StartPar
                 at ParseUpComing in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 25
                 at ConnectLaunchPad in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 24
                 at Observable.Return("pageParsed") in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 23
-                (Scheduled Context) at ScheduleLaunchPadParse in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 16
                 (LaunchPadName) at ParseLaunchPad in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 29
+                (Scheduled Context) at ScheduleLaunchPadParse in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 16
               --- Original Exception Details ---
                 System.Exception: StartParsing
