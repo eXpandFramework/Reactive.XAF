@@ -5,15 +5,11 @@ using NUnit.Framework;
 using Shouldly;
 
 namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest {
-
-    // 1. Simple, isolated data structures to mimic the real ones.
     public record PocNode(string Name, IReadOnlyList<PocNode> Children, Exception Cause = null);
     public class PocException(string name, Exception inner = null) : Exception(name, inner);
 
     [TestFixture]
     public class RecursiveParserPocTests {
-
-        // 2. The parser logic, working only with our simple PoC types.
         private static PocNode Parse(Exception ex) {
             PocNode Union(IEnumerable<PocNode> source) {
                 var nodes = source?.Where(n => n != null).ToList();
@@ -45,10 +41,8 @@ namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest {
             return new PocNode(pocEx.Message, children, rootCause);
         }
 
-        // 3. The test to verify the parser logic against a complex structure.
         [Test]
         public void Poc_Parser_Correctly_Builds_Branched_Tree() {
-            // ARRANGE: Build a nested exception structure identical to the production scenario.
             var upcomingEx = new InvalidOperationException("Upcoming");
             var pocUpcoming = new PocException("When Upcoming Urls", new PocException("Web Site Urls", upcomingEx));
 
@@ -59,10 +53,8 @@ namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest {
             var aggEx = new AggregateException(pocUpcoming, pocParseProjects);
             var pocRoot = new PocException("Parse Up Coming", aggEx);
 
-            // ACT
             var result = Parse(pocRoot);
 
-            // ASSERT
             result.Name.ShouldBe("Parse Up Coming");
             result.Children.Count.ShouldBe(2);
 

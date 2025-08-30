@@ -265,5 +265,26 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             fault.AllContexts.ShouldNotContain("DownstreamContext",
                 "The downstream operator incorrectly overwrote the existing rich context.");
         }
+        
+        [Test]
+        public async Task ItemResilience_Correctly_Wraps_Existing_FaultHubException_Without_Reprocessing_Stack() {
+            var upstreamStack = new[] { new LogicalStackFrame("UpstreamWork", "", 0) };
+            var upstreamContext = new AmbientFaultContext { BoundaryName = "UpstreamBoundary", LogicalStackTrace = upstreamStack };
+            var upstreamFault = new FaultHubException("Upstream Failure", new InvalidOperationException("Root"), upstreamContext);
+            var source = Observable.Throw<Unit>(upstreamFault);
+
+            var resilientStream = source.ContinueOnFault(context: ["DownstreamBoundary"]);
+            await resilientStream.PublishFaults().Capture();
+
+            BusEvents.Count.ShouldBe(1);
+            var finalFault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
+
+            finalFault.Context.InnerContext.ShouldBe(upstreamContext, "The original context from the upstream fault should have been preserved as the InnerContext.");
+
+            finalFault.Context.LogicalStackTrace.Count.ShouldBe(1, 
+                "The new context's stack should only contain its own frame, not the entire re-processed upstream stack.");
+            finalFault.Context.LogicalStackTrace.Single().MemberName
+                .ShouldBe(nameof(ItemResilience_Correctly_Wraps_Existing_FaultHubException_Without_Reprocessing_Stack));
+        }
     }
 }

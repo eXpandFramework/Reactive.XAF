@@ -14,6 +14,7 @@ using static Xpand.Extensions.Reactive.ErrorHandling.FaultHub.FaultHubLogger;
 
 namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
     public static class FaultHub {
+        internal const string CapturedStackKey = "FaultHub.CapturedStack";
         public static readonly AsyncLocal<IReadOnlyList<LogicalStackFrame>> LogicalStackContext = new();
         internal static readonly AsyncLocal<List<Func<Exception, FaultAction?>>> HandlersContext = new();
         static readonly AsyncLocal<Guid?> Ctx = new();
@@ -243,6 +244,9 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
             context.Add(handler);
             return Disposable.Create(context, list => list.Remove(handler));
         }
+
+        public static IReadOnlyList<LogicalStackFrame> CapturedStack(this Exception exception) 
+            => exception.Data.Contains(CapturedStackKey) ? (IReadOnlyList<LogicalStackFrame>)exception.Data[CapturedStackKey] : null;
     }
 
     public enum FaultResult {

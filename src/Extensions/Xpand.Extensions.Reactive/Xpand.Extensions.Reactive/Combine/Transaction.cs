@@ -237,10 +237,18 @@ namespace Xpand.Extensions.Reactive.Combine {
 
         private static IEnumerable<FaultHubException> CollectErrors<TFinal>(this List<StepDefinition> allSteps, TransactionBuilder<TFinal> builder, List<Notification<object>> errors, StepDefinition step) {
             if (!errors.Any()) return [];
-            var stepNameForContext = !string.IsNullOrEmpty(step.Name) ? step.Name : $"Part {allSteps.IndexOf(step) + 1}";
-            return errors.Select(e => e.Exception.ExceptionToPublish(FaultHub.LogicalStackContext.Value.NewFaultContext(
+    
+            var stepNameForContext = !string.IsNullOrEmpty(step.Name) 
+                ? step.Name 
+                : $"Part {allSteps.IndexOf(step) + 1}";
+
+            return errors.Select(e => {
+                var stack = e.Exception.CapturedStack();
+                var capturedStack = stack ?? FaultHub.LogicalStackContext.Value;
+                return e.Exception.ExceptionToPublish(capturedStack.NewFaultContext(
                     builder.Context.AddToContext(builder.TransactionName, nameof(RunToEnd),
-                        $"{builder.TransactionName} - {stepNameForContext}"), stepNameForContext)));
+                        $"{builder.TransactionName} - {stepNameForContext}"), stepNameForContext));
+            });
         }
         
         private static IObservable<object> ResilientBus(this StepDefinition step,

@@ -323,7 +323,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest{
             branchB.GetRootCause().ShouldBe(exB);
         }
         
-        [Test][Ignore("not implemented yet")]
+        [Test]
         public void NewOperationTree_Creates_Root_Node_With_Stack_But_No_Children_From_Single_Boundary() {
             var rootCause = new InvalidOperationException("DB Failure");
             var logicalStack = new[] {
@@ -346,6 +346,41 @@ namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest{
 
             var resultStack = result.GetLogicalStack();
             resultStack.ShouldBe(logicalStack);
+        }
+        
+        [Test]
+        public void NewOperationTree_Does_Not_Pollute_Parallel_Branches_With_Parent_Stack() {
+            var exA = new InvalidOperationException("Failure A");
+            var fhA = new FaultHubException("A failed", exA, new AmbientFaultContext {
+                BoundaryName = "BranchA",
+                LogicalStackTrace = [new LogicalStackFrame("FrameA", "", 0)]
+            });
+
+            var exB = new InvalidOperationException("Failure B");
+            var fhB = new FaultHubException("B failed", exB, new AmbientFaultContext {
+                BoundaryName = "BranchB",
+                LogicalStackTrace = [new LogicalStackFrame("FrameB", "", 0)]
+            });
+
+            var aggEx = new AggregateException(fhA, fhB);
+            var topException = new FaultHubException("Root failed", aggEx, new AmbientFaultContext {
+                BoundaryName = "RootOperation",
+                LogicalStackTrace = [new LogicalStackFrame("RootFrame", "", 0)]
+            });
+
+            var result = topException.NewOperationTree();
+
+            var branchA = result.Children.Single(c => c.Name == "BranchA");
+            var branchAStack = branchA.GetLogicalStack();
+            branchAStack.ShouldNotContain(f => f.MemberName == "RootFrame",
+                "The stack for Branch A was polluted by the root's stack frame.");
+            branchAStack.ShouldContain(f => f.MemberName == "FrameA");
+
+            var branchB = result.Children.Single(c => c.Name == "BranchB");
+            var branchBStack = branchB.GetLogicalStack();
+            branchBStack.ShouldNotContain(f => f.MemberName == "RootFrame",
+                "The stack for Branch B was polluted by the root's stack frame.");
+            branchBStack.ShouldContain(f => f.MemberName == "FrameB");
         }
     }
 }

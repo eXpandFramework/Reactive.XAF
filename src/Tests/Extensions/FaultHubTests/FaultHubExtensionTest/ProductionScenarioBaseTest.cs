@@ -51,7 +51,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest{
         ;
         
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private IObservable<string> WebSiteUrls() => Observable.Throw<string>(new Exception("Upcoming"));
+        private IObservable<string> WebSiteUrls() => Observable.Timer(TimeSpan.FromMilliseconds(240)).SelectMany(_ => Observable.Throw<string>(new Exception("Upcoming")));
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         private IObservable<string[]> ExistingUpcomingUrl(string[] _) => Observable.Return(Array.Empty<string>());
@@ -93,7 +93,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest{
         [MethodImpl(MethodImplOptions.NoInlining)]
         private IObservable<Unit> Validate() => Observable.Return(Unit.Default);
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private IObservable<Unit> StartParsing() => Observable.Throw<Unit>(new Exception("StartParsing"));
+        private IObservable<Unit> StartParsing() => Observable.Timer(TimeSpan.FromMilliseconds(200)).SelectMany(_ => Observable.Throw<Unit>(new Exception("StartParsing")));
         [MethodImpl(MethodImplOptions.NoInlining)]
         private IObservable<Unit> ParseNetwork() => Observable.Return(Unit.Default);
 

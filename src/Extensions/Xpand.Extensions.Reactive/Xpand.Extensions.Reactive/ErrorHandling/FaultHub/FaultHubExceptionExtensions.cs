@@ -345,7 +345,8 @@ private static string ContextData(this List<OperationNode> ancestors,OperationNo
             Dictionary<AmbientFaultContext, FaultHubException> contextLookup) {
             Log(() => $"[Parser.Generic] Processing generic exception: {ex?.GetType().Name}");
             if (ex is not AggregateException aggEx) return ex is FaultHubException fhEx ? fhEx.Context.BuildFromContext(parentStack, contextLookup) : null;
-            var children = aggEx.InnerExceptions.Select(e => e.BuildFromGenericException( parentStack,contextLookup)).Where(n => n != null).ToList();
+            
+            var children = aggEx.InnerExceptions.Select(e => e.BuildFromGenericException( [],contextLookup)).Where(n => n != null).ToList();
             Log(() => $"[Parser.Generic] Parsed AggregateException into {children.Count} children.");
             return children.Count == 1 ? children.Single() : new OperationNode("Multiple Operations", [], children);
         }

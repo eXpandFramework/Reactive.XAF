@@ -91,12 +91,18 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
                 return source.Materialize()
                     .Do(notification => {
                         if (notification.Kind != NotificationKind.OnError) return;
+                        var currentStack = FaultHub.LogicalStackContext.Value;
+                        if (currentStack != null) {
+                            notification.Exception!.Data[FaultHub.CapturedStackKey] = currentStack;
+                            var currentStackCount = currentStack.Count;
+                            Log(() => $"[PushStackFrame] Attached stack with {currentStackCount} frames to Exception.Data.");
+                        }
                         Log(() => $"[CTX-TRACE][PushStackFrame-OnError] Frame '{frame.MemberName}'. Stack Frames: {FaultHub.LogicalStackContext.Value?.Count ?? 0}. Is Snapshot null? {FaultHub.CurrentFaultSnapshot.Value == null}.");
                         Log(() => 
                             $"[PushStackFrame] OnError detected in '{frame.MemberName}'.");
                         var snapshot = FaultHub.CurrentFaultSnapshot.Value;
                         if (snapshot != null) {
-                            var currentStack = FaultHub.LogicalStackContext.Value;
+                            currentStack = FaultHub.LogicalStackContext.Value;
                           
                             Log(() => $"[PushStackFrame] Current snapshot has {snapshot.CapturedStack?.Count ?? 0} frames. Current logical stack has {currentStack?.Count ?? 0} frames.");
                             if ((currentStack?.Count ?? 0) > (snapshot.CapturedStack?.Count ?? 0)) {

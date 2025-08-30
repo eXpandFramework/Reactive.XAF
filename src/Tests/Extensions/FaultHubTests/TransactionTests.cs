@@ -954,5 +954,122 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
 
             innerFault.AllContexts.ShouldContain("FromIEnumerableConcurrentTx - operations[1]");
         }
+        
+        
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private IObservable<Unit> FailingStep1()
+            => Observable.Throw<Unit>(new InvalidOperationException("Failure 1"))
+                .PushStackFrame("Frame_From_Step1");
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private IObservable<Unit> FailingStep2()
+            => Observable.Throw<Unit>(new InvalidOperationException("Failure 2"))
+                .PushStackFrame("Frame_From_Step2");
+
+        [Test]
+        public async Task RunToEnd_Correctly_Isolates_Context_Between_Failing_Steps() {
+            var transaction = Observable.Return(Unit.Default)
+                .BeginWorkflow("IsolationTest")
+                .Then(_ => FailingStep1())
+                .Then(_ => FailingStep2())
+                .RunToEnd();
+
+            await transaction.PublishFaults().Capture();
+
+            BusEvents.Count.ShouldBe(1);
+            var finalFault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
+            var aggregate = finalFault.InnerException.ShouldBeOfType<AggregateException>();
+    
+            aggregate.InnerExceptions.Count.ShouldBe(2);
+
+            var step2Fault = aggregate.InnerExceptions.OfType<FaultHubException>()
+                .Single(ex => ex.InnerException?.Message == "Failure 2");
+    
+            var step2Stack = step2Fault.LogicalStackTrace.Select(f => f.MemberName).ToArray();
+
+            step2Stack.ShouldContain("Frame_From_Step2");
+
+            step2Stack.ShouldNotContain("Frame_From_Step1", 
+                "The stack for Step 2 should have been clean, but it was polluted by Step 1.");
+        }
+        
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private IObservable<Unit> FailingStep1_Async()
+            => Observable.Timer(TimeSpan.FromMilliseconds(10))
+                .SelectMany(_ => Observable.Throw<Unit>(new InvalidOperationException("Failure 1")))
+                .PushStackFrame("Frame_From_Step1");
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private IObservable<Unit> FailingStep2_Async()
+            => Observable.Timer(TimeSpan.FromMilliseconds(10))
+                .SelectMany(_ => Observable.Throw<Unit>(new InvalidOperationException("Failure 2")))
+                .PushStackFrame("Frame_From_Step2");
+
+        [Test]
+        public async Task RunToEnd_Correctly_Isolates_Context_Between_Failing_Async_Steps() {
+            var transaction = Observable.Return(Unit.Default)
+                .BeginWorkflow("AsyncIsolationTest")
+                .Then(_ => FailingStep1_Async())
+                .Then(_ => FailingStep2_Async())
+                .RunToEnd();
+
+            await transaction.PublishFaults().Capture();
+
+            BusEvents.Count.ShouldBe(1);
+            var finalFault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
+            var aggregate = finalFault.InnerException.ShouldBeOfType<AggregateException>();
+    
+            aggregate.InnerExceptions.Count.ShouldBe(2);
+
+            var step2Fault = aggregate.InnerExceptions.OfType<FaultHubException>()
+                .Single(ex => ex.InnerException?.Message == "Failure 2");
+        
+            var step2Stack = step2Fault.LogicalStackTrace.Select(f => f.MemberName).ToArray();
+
+            step2Stack.ShouldNotContain("Frame_From_Step1", 
+                "The stack for Step 2 should have been clean, but it was polluted by the asynchronous Step 1.");
+        }
+        
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private IObservable<Unit> Inner_Failing_Step()
+            => Observable.Throw<Unit>(new InvalidOperationException("Inner Failure"))
+                .PushStackFrame("Frame_From_Inner_Failure");
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private IObservable<Unit[]> Nested_Failing_Transaction()
+            => Observable.Return(Unit.Default)
+                .BeginWorkflow("Nested_Tx")
+                .Then(_ => Inner_Failing_Step())
+                .RunToEnd();
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private IObservable<Unit> Outer_Failing_Step()
+            => Observable.Throw<Unit>(new InvalidOperationException("Outer Failure"))
+                .PushStackFrame("Frame_From_Outer_Step");
+
+        [Test]
+        public async Task RunToEnd_Isolates_Context_After_Failing_Nested_Transaction() {
+            var transaction = Observable.Return(Unit.Default)
+                .BeginWorkflow("Outer_Tx")
+                .Then(_ => Nested_Failing_Transaction())
+                .Then(_ => Outer_Failing_Step())
+                .RunToEnd();
+
+            await transaction.PublishFaults().Capture();
+
+            BusEvents.Count.ShouldBe(1);
+            var finalFault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
+            var aggregate = finalFault.InnerException.ShouldBeOfType<AggregateException>();
+
+            aggregate.InnerExceptions.Count.ShouldBe(2);
+
+            var outerStepFault = aggregate.InnerExceptions.OfType<FaultHubException>()
+                .Single(ex => ex.InnerException?.Message == "Outer Failure");
+        
+            var outerStepStack = outerStepFault.LogicalStackTrace.Select(f => f.MemberName).ToArray();
+
+            outerStepStack.ShouldNotContain("Frame_From_Inner_Failure", 
+                "The stack for the outer step was polluted by the failed nested transaction.");
+        }
     }
 }

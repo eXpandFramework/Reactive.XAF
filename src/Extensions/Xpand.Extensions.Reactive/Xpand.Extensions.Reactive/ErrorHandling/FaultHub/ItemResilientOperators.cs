@@ -12,35 +12,25 @@ using Enumerable = System.Linq.Enumerable;
 namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
     
     public static class ItemResilientOperators {
-private static IObservable<T> ApplyItemResilience<T>(this IObservable<T> source, Func<IObservable<T>, IObservable<T>> retryStrategy,
-    object[] context, string memberName, string filePath, int lineNumber,Func<Exception, IObservable<bool>> publishWhen=null)
-    => FaultHub.Enabled ? (retryStrategy != null ? retryStrategy(source) : source)
-        .Catch((Exception ex) => {
-            var currentFrame = new LogicalStackFrame(memberName, filePath, lineNumber, context);
-            if (ex is FaultHubException fhEx) {
-                var newStack = new[] { currentFrame }.Concat(fhEx.LogicalStackTrace ?? []).ToList();
-                var newContext = fhEx.Context with { LogicalStackTrace = newStack };
-                var newFaultException = new FaultHubException(fhEx.Message, fhEx.InnerException, newContext);
-                newFaultException.Publish();
-                return Observable.Empty<T>();
-            }
+        private static IObservable<T> ApplyItemResilience<T>(this IObservable<T> source, Func<IObservable<T>, IObservable<T>> retryStrategy,
+            object[] context, string memberName, string filePath, int lineNumber,Func<Exception, IObservable<bool>> publishWhen=null)
+            => FaultHub.Enabled ? (retryStrategy != null ? retryStrategy(source) : source)
+                .Catch((Exception e) => e.ProcessFault(e.CreateNewFaultContext(context, memberName, filePath, lineNumber), 
+                    proceedAction: enrichedException => (publishWhen?.Invoke(enrichedException) ?? true.Observe())
+                        .SelectMany(shouldPublish => {
+                            if (shouldPublish) enrichedException.Publish();
+                            return Observable.Empty<T>();
+                        }))).SafeguardSubscription((ex, s) => ex.ExceptionToPublish(FaultHub.LogicalStackContext.Value.NewFaultContext(context, s)).Publish(), memberName) : source;
 
-            return ex.ProcessFault(new[] { currentFrame }.Concat(FaultHub.LogicalStackContext.Value ?? Enumerable.Empty<LogicalStackFrame>()).ToList()
-                    .NewFaultContext(context, memberName, filePath, lineNumber),
-                proceedAction: enrichedException => (publishWhen?.Invoke(enrichedException) ?? true.Observe())
-                    .SelectMany(shouldPublish => {
-                        if (shouldPublish) {
-                            enrichedException.Publish();
-                        }
-                        return Observable.Empty<T>();
-                    }));
-        }).SafeguardSubscription((ex, s) => 
-            ex.ExceptionToPublish(FaultHub.LogicalStackContext.Value.NewFaultContext(context, s)).Publish(), memberName) :
-        source;
+        private static AmbientFaultContext CreateNewFaultContext(this Exception e,object[] context, string memberName, string filePath, int lineNumber){
+            var currentFrame = new LogicalStackFrame(memberName, filePath, lineNumber, context);
+            return e is FaultHubException?new[] { currentFrame }.NewFaultContext([], memberName, filePath, lineNumber):
+                new[] { currentFrame }.Concat(FaultHub.LogicalStackContext.Value ?? Enumerable.Empty<LogicalStackFrame>()).ToList()
+                    .NewFaultContext(context, memberName, filePath, lineNumber);
+        }
 
         public static IObservable<TEventArgs> ProcessEvent<TEventArgs>(this object source, string eventName,Func<TEventArgs, IObservable<TEventArgs>> resilientSelector, 
-            object[] context = null, [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0, 
-            IScheduler scheduler = null) where TEventArgs:EventArgs
+            object[] context = null, [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0, IScheduler scheduler = null) where TEventArgs:EventArgs
             => source.ProcessEvent<TEventArgs,TEventArgs>(eventName, resilientSelector, context, memberName, filePath, lineNumber, scheduler);
         
         public static IObservable<T> ProcessEvent<TEventArgs, T>(this object source, string eventName, Func<TEventArgs, IObservable<T>> resilientSelector, 
