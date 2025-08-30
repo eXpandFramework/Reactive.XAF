@@ -1,6 +1,6 @@
-Schedule Launch Pad Parse completed with errors (2 times: Upcoming • StartParsing)
-└ Parse Up Coming (RunToEnd)
-  ├ When Upcoming Urls (RunToEnd)
+Transaction Sequential RunToEnd: Schedule Launch Pad Parse completed with errors (2 times: Upcoming • StartParsing)
+└ Step: Parse Up Coming 
+  ├ Step: When Upcoming Urls 
   │ • Root Cause: System.Exception: Upcoming
   │   --- Invocation Stack ---
   │     at WhenUpcomingUrls in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenario2Tests.cs:line 47
@@ -8,10 +8,10 @@ Schedule Launch Pad Parse completed with errors (2 times: Upcoming • StartPars
   │     at ParseUpComing in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenario2Tests.cs:line 53
   │   --- Original Exception Details ---
   │     System.Exception: Upcoming
-  └ Parse Upcoming Projects (RunToEnd)
-    └ When Existing Project Page Parsed (RunToEnd)
-      └ Project Parse Transaction (RunToEnd)
-        └ Start Parsing (RunToEnd)
+  └ Step: Parse Upcoming Projects
+    └ Step: When Existing Project Page Parsed
+      └ Step: Project Parse Transaction
+        └ Step: Start Parsing
           • Root Cause: System.Exception: StartParsing
             --- Invocation Stack ---
               at Start Parsing in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenario2Tests.cs:line 27

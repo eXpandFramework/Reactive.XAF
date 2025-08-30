@@ -16,7 +16,6 @@ using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 
 namespace Xpand.Extensions.Tests.FaultHubTests {
-    
     public class TransactionTests : FaultHubTestBase {
         [MethodImpl(MethodImplOptions.NoInlining)]
         private IObservable<string> FailingOperation(SubscriptionCounter failingCounter)
@@ -235,7 +234,6 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             finalFault.InnerException.ShouldBeOfType<InvalidOperationException>().Message.ShouldBe("Order processing failed");
             
             finalFault.LogicalStackTrace.Count().ShouldBe(4);
-            finalFault.AllContexts.ShouldContain(nameof(Combine.RunFailFast));
             finalFault.AllContexts.ShouldContain(nameof(Step4ProcessOrders));
             finalFault.AllContexts.ShouldContain("Four-Part-Tx");
             
@@ -511,7 +509,6 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             BusEvents.Count.ShouldBe(1);
             var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
             fault.AllContexts.ShouldContain("TopLevel-Atomic-Tx");
-            fault.AllContexts.ShouldContain(nameof(Combine.RunToEnd));
 
             var aggregate = fault.InnerException.ShouldBeOfType<AggregateException>();
             var innerFault = aggregate.InnerExceptions.Single().ShouldBeOfType<FaultHubException>();
@@ -557,7 +554,6 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             var nestedTxStepFault = outerAggregate.InnerExceptions.Single().ShouldBeOfType<FaultHubException>();
 
             nestedTxStepFault.Message.ShouldBe("Nested-Tx completed with errors");
-            nestedTxStepFault.AllContexts.ShouldContain("RunToEnd");
             nestedTxStepFault.AllContexts.ShouldContain("Outer-Tx - InnerFailingTransaction");
 
             var stepAggregate = nestedTxStepFault.InnerException.ShouldBeOfType<AggregateException>();
@@ -799,7 +795,6 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             BusEvents.Count.ShouldBe(1);
             var finalFault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
             finalFault.AllContexts.ShouldContain("Concurrent-Tx");
-            finalFault.AllContexts.ShouldContain("RunToEnd");
 
             var aggregate = finalFault.InnerException.ShouldBeOfType<AggregateException>();
             aggregate.InnerExceptions.Count.ShouldBe(2);

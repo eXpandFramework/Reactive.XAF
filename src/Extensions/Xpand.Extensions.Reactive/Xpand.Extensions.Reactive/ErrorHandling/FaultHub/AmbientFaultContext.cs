@@ -6,6 +6,7 @@ using Xpand.Extensions.StringExtensions;
 
 namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
     public record AmbientFaultContext {
+        public IReadOnlyList<string> Tags { get; init; }
         public IReadOnlyList<LogicalStackFrame> LogicalStackTrace { get; init; }
         public object[] UserContext { get; init; }
         
@@ -16,7 +17,8 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
             return Equals(InnerContext, other.InnerContext) &&
                    string.Equals(BoundaryName, other.BoundaryName) &&
                    (LogicalStackTrace ?? Enumerable.Empty<LogicalStackFrame>()).SequenceEqual(other.LogicalStackTrace ?? Enumerable.Empty<LogicalStackFrame>()) &&
-                   (UserContext ?? Enumerable.Empty<object>()).SequenceEqual(other.UserContext ?? Enumerable.Empty<object>());
+                   (UserContext ?? Enumerable.Empty<object>()).SequenceEqual(other.UserContext ?? Enumerable.Empty<object>())&&
+                   (Tags??Enumerable.Empty<object>()).SequenceEqual(other.Tags ?? Enumerable.Empty<object>());
         }
 
         public override int GetHashCode() {
@@ -35,7 +37,12 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
                     hashCode.Add(item);
                 }
             }
-        
+
+            if (Tags != null) {
+                foreach (var item in Tags) {
+                    hashCode.Add(item);
+                }
+            }
             return hashCode.ToHashCode();
         }
 

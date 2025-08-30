@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
@@ -193,6 +194,37 @@ namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest {
 
             result.ShouldNotContain("(MyMethod)");
         }
-        
+    
+        [Test]
+        public void Render_Correctly_Applies_Prefixes_And_Filters_Tags_From_Context() {
+            var stepEx = new InvalidOperationException("Step Failure");
+            var stepCtx = new AmbientFaultContext {
+                BoundaryName = "MyNestedStep",
+                UserContext = ["Step", "SomeStepData"],
+                Tags = ["Step"]
+            };
+            var fhStep = new FaultHubException("Step failed", stepEx, stepCtx);
+
+            var txCtx = new AmbientFaultContext {
+                BoundaryName = "MyTransaction",
+                UserContext = ["Transaction", "RunToEnd", "SomeTxData"],
+                Tags = ["Transaction", "RunToEnd"],
+                InnerContext = fhStep.Context
+            };
+            var fhTx = new FaultHubException("Transaction failed", fhStep, txCtx);
+
+            var report = fhTx.Render();
+            var reportLines = report.Split([Environment.NewLine], StringSplitOptions.None);
+
+            var txLine = reportLines.FirstOrDefault(l => l.Contains("My Transaction"));
+            txLine.ShouldNotBeNull();
+            txLine.Trim().ShouldStartWith("Transaction RunToEnd: My Transaction");
+            txLine.ShouldContain("[SomeTxData]");
+
+            var stepLine = reportLines.FirstOrDefault(l => l.Contains("My Nested Step"));
+            stepLine.ShouldNotBeNull();
+            stepLine.Trim().ShouldContain("Step: My Nested Step");
+            stepLine.ShouldContain("(SomeStepData)");
+        }
     }
 }

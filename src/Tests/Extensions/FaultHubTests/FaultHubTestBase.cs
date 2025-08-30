@@ -91,7 +91,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
                     }
                 }
 
-                finalStoreLine.ShouldBe(finalReportLine, $"Line {i + 1}");
+                finalStoreLine.TrimEnd().ShouldBe(finalReportLine.TrimEnd(), $"Line {i + 1}");
             }
         }
 

@@ -21,11 +21,13 @@ namespace Xpand.Extensions.Reactive.Combine {
     }
     public static partial class Combine {
         private static readonly AsyncLocal<int> TransactionNestingLevel = new();
-
+        public const string TransactionNodeTag = "Transaction";
+        public const string StepNodeTag = "Step";
         public static ITransactionBuilder<TSource> BeginWorkflow<TSource>(this IObservable<TSource> source,
             string transactionName, object[] context = null, IScheduler scheduler = null, [CallerMemberName] string memberName = "",
             [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0, [CallerArgumentExpression(nameof(source))] string sourceExpression = null)
-            => new TransactionBuilder<TSource>(source.BufferUntilCompleted().Select(list => (object)list), transactionName ?? memberName, context, scheduler, memberName, filePath, lineNumber) {
+            => new TransactionBuilder<TSource>(source.BufferUntilCompleted()
+                .Select(list => (object)list), transactionName ?? memberName, context, scheduler, memberName, filePath, lineNumber,[TransactionNodeTag,nameof(TransactionMode.Sequential)]) {
                 InitialStepName = GetStepName(sourceExpression)
             };
 
@@ -33,8 +35,40 @@ namespace Xpand.Extensions.Reactive.Combine {
             object[] context = null, IScheduler scheduler = null, [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0,
             [CallerArgumentExpression(nameof(sources))] string sourceExpression = null)
             => new TransactionBuilder<object>(sources.ToArray().Select((obs, i) => (Name: GetStepName($"{sourceExpression}[{i}]"), Source: obs.Select(o => (object) o))).ToList(),
-                    mode, transactionName, context, scheduler, memberName, filePath, lineNumber) { InitialStepName = sourceExpression };
+                    mode, transactionName, context, scheduler, memberName, filePath, lineNumber,[TransactionNodeTag,mode.ToString()]) { InitialStepName = sourceExpression };
+        
+        public static ITransactionBuilder<TSource> BeginWorkflow<TSource>(this IObservable<TSource> source, object[] context = null,
+            string transactionName = null, IScheduler scheduler = null, [CallerMemberName] string memberName = "",
+            [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0,[CallerArgumentExpression(nameof(source))] string sourceExpression = null)
+            => new TransactionBuilder<TSource>(source.BufferUntilCompleted()
+                .Select(list => (object)list), transactionName??memberName, context, scheduler, memberName, filePath, lineNumber) {
+                InitialStepName = GetStepName(sourceExpression)
+            };
+        
+        public static ITransactionBuilder<TSource> BeginWorkflow<TSource>(this IEnumerable<IObservable<TSource>> sources,
+            string transactionName, object[] context = null, IScheduler scheduler = null,
+            [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0,
+            [CallerArgumentExpression(nameof(sources))] string sourceExpression = null) {
+            var sourcesList = sources.ToList();
+            if (!sourcesList.Any())
+                return Observable.Empty<TSource>().BeginWorkflow(context, transactionName, scheduler, memberName, filePath, lineNumber);
+            var firstStepExpression = $"{sourceExpression}[0]";
+            var builder = sourcesList.First().BeginWorkflow(transactionName, context: context, scheduler: scheduler,
+                memberName: memberName, filePath: filePath, lineNumber: lineNumber, sourceExpression: firstStepExpression);
+            for (int i = 1; i < sourcesList.Count; i++) {
+                var currentStepName = $"{sourceExpression}[{i}]";
+                builder = builder.Then(sourcesList[i], stepName: currentStepName);
+            }
+            return builder;
+        }
 
+        private static ITransactionBuilder<TNext> Then<TCurrent, TNext>(this ITransactionBuilder<TCurrent> builder, StepAction<TCurrent, TNext> stepAction) {
+            var ib = (TransactionBuilder<TCurrent>)builder;
+            return new TransactionBuilder<TNext>(ib.InitialStep, ib.TransactionName, ib.Context, ib.Scheduler, [..ib.SubsequentSteps, stepAction.StepDefinition()], ib.Tags) {
+                CallerMemberName = ib.CallerMemberName, CallerMemberPath = ib.CallerMemberPath, CallerMemberLine = ib.CallerMemberLine, InitialStepName = ib.InitialStepName,
+                Mode = ib.Mode, BatchedSources = ib.BatchedSources
+            };
+        }
         public static ITransactionBuilder<TNext> Then<TCurrent, TNext>(this ITransactionBuilder<TCurrent> builder, IObservable<TNext> step,
             string stepName = null, Func<Exception, TCurrent[], IObservable<TNext>> fallbackSelector = null, [CallerArgumentExpression(nameof(step))] string selectorExpression = null,
             [CallerArgumentExpression(nameof(fallbackSelector))] string fallbackSelectorExpression = null,[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0) 
@@ -66,10 +100,18 @@ namespace Xpand.Extensions.Reactive.Combine {
                 return failFast?scheduledLogic.Catch((FaultHubException ex) => {
                     Log(() => $"[INSTRUMENTATION][Transaction.Run] Creating TransactionAbortedException for transaction '{ib.TransactionName}'.");
                     return Observable.Throw<TFinal[]>(new TransactionAbortedException($"{ib.TransactionName} failed", ex, new AmbientFaultContext {
-                        BoundaryName = ib.TransactionName, UserContext = ib.Context, InnerContext = ex.Context
+                        BoundaryName = ib.TransactionName, UserContext = ib.Context, InnerContext = ex.Context, Tags = ib.Tags.Concat([TransactionNodeTag,ib.Mode.ToString(),nameof(RunFailFast)]).ToList()
                     }));
-                }):scheduledLogic.ChainFaultContext(ib.Context, null, ib.CallerMemberName, ib.CallerMemberPath, ib.CallerMemberLine);
+                }):scheduledLogic.ChainFaultContext(ib.Context, null, ib.CallerMemberName, ib.CallerMemberPath, ib.CallerMemberLine,
+                    ib.UpdateTags(collectAllResults));
             });
+
+        private static List<string> UpdateTags<TFinal>(this TransactionBuilder<TFinal> ib,bool collectAllResults) {
+            if (ib.Tags.Contains(StepNodeTag)) {
+                return ib.Tags.ToList();
+            }
+            return ib.Tags.Concat([collectAllResults ? nameof(RunAndCollect) : nameof(RunToEnd)]).ToList();
+        }
 
         private static IObservable<TFinal[]> ScheduledLogic<TFinal>(this TransactionBuilder<TFinal> builder,bool failFast, bool collectAllResults){
             var finalLogic = (builder.Mode == TransactionMode.Concurrent && builder.BatchedSources != null?builder.TransactionLogic(failFast):builder.TransactionLogic(failFast, collectAllResults))
@@ -120,13 +162,6 @@ namespace Xpand.Extensions.Reactive.Combine {
                         }).PushStackFrame(stepName);
             }, stepName: stepName);
         }        
-        private static ITransactionBuilder<TNext> Then<TCurrent, TNext>(this ITransactionBuilder<TCurrent> builder, StepAction<TCurrent, TNext> stepAction) {
-            var ib = (TransactionBuilder<TCurrent>)builder;
-            return new TransactionBuilder<TNext>(ib.InitialStep, ib.TransactionName, ib.Context, ib.Scheduler, [..ib.SubsequentSteps, stepAction.StepDefinition()]) {
-                CallerMemberName = ib.CallerMemberName, CallerMemberPath = ib.CallerMemberPath, CallerMemberLine = ib.CallerMemberLine, InitialStepName = ib.InitialStepName,
-                Mode = ib.Mode, BatchedSources = ib.BatchedSources
-            };
-        }
 
         private static IObservable<(List<object> Results, FaultHubException Fault)> ConcurrentRunToEnd(this IObservable<(string Name, IObservable<object> Source)> source, string transactionName, int maxConcurrency, object[] context) 
             => source.Select(op => op.Source.PushStackFrame(op.Name)
@@ -136,33 +171,10 @@ namespace Xpand.Extensions.Reactive.Combine {
                     var exceptions = notifications.Where(n => n.Kind == NotificationKind.OnError).Select(n => n.Exception).ToList();
                     return (Results: notifications.Where(n => n.Kind == NotificationKind.OnNext).Select(n => n.Value).ToList(), Fault: exceptions.Any()
                             ? new FaultHubException($"{transactionName} completed with errors", new AggregateException(exceptions),
-                                FaultHub.LogicalStackContext.Value.NewFaultContext(context.AddToContext(transactionName, nameof(RunToEnd)), transactionName)) : null);
+                                FaultHub.LogicalStackContext.Value.NewFaultContext(context.AddToContext(transactionName), memberName:transactionName)) : null);
                 });
         
-        public static ITransactionBuilder<TSource> BeginWorkflow<TSource>(this IObservable<TSource> source, object[] context = null,
-                string transactionName = null, IScheduler scheduler = null, [CallerMemberName] string memberName = "",
-                [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0,[CallerArgumentExpression(nameof(source))] string sourceExpression = null)
-             => new TransactionBuilder<TSource>(source.BufferUntilCompleted()
-                 .Select(list => (object)list), transactionName??memberName, context, scheduler, memberName, filePath, lineNumber) {
-                    InitialStepName = GetStepName(sourceExpression)
-            };
         
-        public static ITransactionBuilder<TSource> BeginWorkflow<TSource>(this IEnumerable<IObservable<TSource>> sources,
-            string transactionName, object[] context = null, IScheduler scheduler = null,
-            [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0,
-            [CallerArgumentExpression(nameof(sources))] string sourceExpression = null) {
-            var sourcesList = sources.ToList();
-            if (!sourcesList.Any())
-                return Observable.Empty<TSource>().BeginWorkflow(context, transactionName, scheduler, memberName, filePath, lineNumber);
-            var firstStepExpression = $"{sourceExpression}[0]";
-            var builder = sourcesList.First().BeginWorkflow(transactionName, context: context, scheduler: scheduler,
-                    memberName: memberName, filePath: filePath, lineNumber: lineNumber, sourceExpression: firstStepExpression);
-            for (int i = 1; i < sourcesList.Count; i++) {
-                var currentStepName = $"{sourceExpression}[{i}]";
-                builder = builder.Then(sourcesList[i], stepName: currentStepName);
-            }
-            return builder;
-        }
 
         private static StepDefinition StepDefinition<TCurrent, TNext>(this StepAction<TCurrent, TNext> stepAction){
             var step = new StepDefinition {
@@ -210,8 +222,7 @@ namespace Xpand.Extensions.Reactive.Combine {
                     var message = $"{builder.TransactionName} completed with errors";
                     var finalContext = (builder.Context ?? []).ToList();
                     finalContext.Add(builder.TransactionName);
-                    finalContext.Add(collectAllResults ? nameof(RunAndCollect) : nameof(RunToEnd));
-                    var faultContext = FaultHub.LogicalStackContext.Value.NewFaultContext(finalContext.ToArray(), builder.CallerMemberName, builder.CallerMemberPath, builder.CallerMemberLine);
+                    var faultContext = FaultHub.LogicalStackContext.Value.NewFaultContext(finalContext.ToArray(), memberName:builder.CallerMemberName,filePath: builder.CallerMemberPath, lineNumber:builder.CallerMemberLine);
                     var faultException = new FaultHubException(message, aggregateException, faultContext);
                     if (!isNested) return Observable.Throw<object>(faultException);
                     var finalTypedResults = t.allResults.OfType<TFinal>().Cast<object>().ToList();
@@ -246,8 +257,8 @@ namespace Xpand.Extensions.Reactive.Combine {
                 var stack = e.Exception.CapturedStack();
                 var capturedStack = stack ?? FaultHub.LogicalStackContext.Value;
                 return e.Exception.ExceptionToPublish(capturedStack.NewFaultContext(
-                    builder.Context.AddToContext(builder.TransactionName, nameof(RunToEnd),
-                        $"{builder.TransactionName} - {stepNameForContext}"), stepNameForContext));
+                    builder.Context.AddToContext(builder.TransactionName,
+                        $"{builder.TransactionName} - {stepNameForContext}"), tags: [StepNodeTag], memberName: stepNameForContext));
             });
         }
         
@@ -259,9 +270,6 @@ namespace Xpand.Extensions.Reactive.Combine {
         }
 
         internal static string GetStepName(string expression, string explicitName = null, Delegate selector = null) {
-            if (expression.Contains("ParseUpComingProject")) {
-                
-            }
             if (!string.IsNullOrEmpty(explicitName)) return explicitName;
             if (string.IsNullOrEmpty(expression)) return selector?.Method.Name;
             var codePart = expression.Split("=>").Last().Trim();
@@ -288,7 +296,7 @@ namespace Xpand.Extensions.Reactive.Combine {
                                 Log(() => $"[Tx:{builder.TransactionName}][Step:{stepName}] FailFast: Catch block executed for exception {ex.GetType().Name}.");
                                 if (ex is TransactionAbortedException) return Observable.Throw<object>(ex);
                                 var faultContext = FaultHub.LogicalStackContext.Value
-                                    .NewFaultContext(builder.Context.AddToContext(builder.TransactionName,nameof(RunFailFast),$"{builder.TransactionName} - {stepName}"), stepName);
+                                    .NewFaultContext(builder.Context.AddToContext(builder.TransactionName,$"{builder.TransactionName} - {stepName}"),[StepNodeTag], memberName:stepName);
                                 var newFaultHubException = ex.ExceptionToPublish(faultContext);
                                 return Observable.Throw<object>(newFaultHubException);
                             });
@@ -317,6 +325,7 @@ namespace Xpand.Extensions.Reactive.Combine {
         }
 
         internal class TransactionBuilder<TCurrentResult> : ITransactionBuilder<TCurrentResult> {
+            internal readonly IReadOnlyList<string> Tags;
             internal readonly IObservable<object> InitialStep;
             internal readonly List<StepDefinition> SubsequentSteps;
             internal readonly string TransactionName;
@@ -330,17 +339,18 @@ namespace Xpand.Extensions.Reactive.Combine {
             internal TransactionMode Mode { get; init; } = TransactionMode.Sequential;
             internal List<(string Name, IObservable<object> Source)> BatchedSources { get; init; }
 
-            internal TransactionBuilder(IObservable<object> initialStep, string transactionName, object[] context, IScheduler scheduler, List<StepDefinition> subsequentSteps) {
+            internal TransactionBuilder(IObservable<object> initialStep, string transactionName, object[] context, IScheduler scheduler, List<StepDefinition> subsequentSteps,IReadOnlyList<string> tags = null) {
                 InitialStep = initialStep;
                 TransactionName = transactionName;
                 Context = context;
                 Scheduler = scheduler;
                 SubsequentSteps = subsequentSteps;
+                Tags=tags??[];
             }
 
             public TransactionBuilder(IObservable<object> initialStep, string transactionName, object[] context,
-                IScheduler scheduler, string callerMemberName, string callerMemberPath, int callerMemberLine) 
-                : this(initialStep, transactionName, context, scheduler, new List<StepDefinition>()) {
+                IScheduler scheduler, string callerMemberName, string callerMemberPath, int callerMemberLine,IReadOnlyList<string> tags = null) 
+                : this(initialStep, transactionName, context, scheduler, new List<StepDefinition>(),tags) {
                 Log(() => $"[Tx.DEBUG][BUILDER][SEQ] Constructor called for transaction: '{transactionName}'.");
                 CallerMemberName = callerMemberName;
                 CallerMemberPath = callerMemberPath;
@@ -348,8 +358,8 @@ namespace Xpand.Extensions.Reactive.Combine {
             }
 
             public TransactionBuilder(List<(string Name, IObservable<object> Source)> batchedSources, TransactionMode mode,
-                string transactionName, object[] context, IScheduler scheduler, string callerMemberName, string callerMemberPath, int callerMemberLine)
-                : this(null, transactionName, context, scheduler, new List<StepDefinition>()) {
+                string transactionName, object[] context, IScheduler scheduler, string callerMemberName, string callerMemberPath, int callerMemberLine,IReadOnlyList<string> tags = null)
+                : this(null, transactionName, context, scheduler, new List<StepDefinition>(),tags) {
                 Log(() => $"[Tx.DEBUG][BUILDER][BATCH] Constructor called for transaction: '{transactionName}'. Mode: {mode}.");
                 BatchedSources = batchedSources;
                 Mode = mode;

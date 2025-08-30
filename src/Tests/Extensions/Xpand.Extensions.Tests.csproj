@@ -74,6 +74,9 @@
     <Compile Update="FaultHubTests\FaultHubExtensionTest\FaultHubExtensionsRenderStackTests.cs">
       <DependentUpon>FaultHubExtensionsTests.cs</DependentUpon>
     </Compile>
+    <Compile Update="FaultHubTests\TransactionTaggingTests.cs">
+      <DependentUpon>TransactionTests.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
   <Import Project="..\..\..\.paket\Paket.Restore.targets" />
 </Project>

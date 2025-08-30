@@ -1,8 +1,8 @@
 Schedule Launch Pad Parse failed [LaunchPadName] (2 times: Upcoming • StartParsing)
-└ Parse Launch Pad
-  └ Parse Up Coming (RunFailFast)
-    ├ When Upcoming Urls (RunToEnd, UserName)
-    │ └ Web Site Urls (RunToEnd)
+└ Transaction Sequential RunFailFast: Parse Launch Pad
+  └ Step: Parse Up Coming
+    ├ Step: When Upcoming Urls (UserName)
+    │ └ Step: Web Site Urls
     │   • Root Cause: System.Exception: Upcoming
     │     --- Invocation Stack ---
     │       at WebSiteUrls in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 63
@@ -15,11 +15,11 @@ Schedule Launch Pad Parse failed [LaunchPadName] (2 times: Upcoming • StartPar
     │       (Scheduled Context) at ScheduleLaunchPadParse in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 16
     │     --- Original Exception Details ---
     │       System.Exception: Upcoming
-    └ Parse Upcoming Projects (RunToEnd, UserName)
-      └ Parse Up Coming Project (RunToEnd)
-        ├ When Existing Project Page Parsed (RunToEnd)
-        └ Project Parse Transaction (RunToEnd)
-          └ Start Parsing (RunToEnd)
+    └ Step: Parse Upcoming Projects (UserName)
+      └ Step: Parse Up Coming Project 
+        ├ Transaction Sequential RunToEnd: When Existing Project Page Parsed
+        └ Step: Project Parse Transaction
+          └ Step: Start Parsing
             • Root Cause: System.Exception: StartParsing
               --- Invocation Stack ---
                 at StartParsing in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 104

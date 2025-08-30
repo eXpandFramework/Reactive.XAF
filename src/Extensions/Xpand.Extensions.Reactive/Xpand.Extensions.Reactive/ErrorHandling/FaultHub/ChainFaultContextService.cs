@@ -47,7 +47,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
             }).ToList();
         
         public static IObservable<T> ChainFaultContext<T>(this IObservable<T> source, object[] context, Func<IObservable<T>, IObservable<T>> retryStrategy = null,
-            [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0)
+            [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0,IReadOnlyList<string> tags = null)
             => Observable.Defer(() => {
                 Log(() => $"[ChainCtx] Entering Defer for boundary '{memberName}'.");
                 var snapshot = new FaultSnapshot();
@@ -64,7 +64,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
                         var fullStack = (snapshot.CapturedStack ?? Enumerable.Empty<LogicalStackFrame>()).ToList();
                         var stackTraceForLog = string.Join(" -> ", fullStack.Select(f => f.MemberName));
                         Log(()=> $"[CTX-TRACE][ChainCtx-Catch] Reassembled stack. Inner: {snapshot.CapturedStack?.Count ?? 0}, Parent: {originalStack?.Count ?? 0}, Total: {fullStack.Count}. Stack: [{stackTraceForLog}]");
-                        var faultContext = fullStack.NewFaultContext(context,memberName, filePath, lineNumber);
+                        var faultContext = fullStack.NewFaultContext(context,tags,memberName, filePath, lineNumber);
                         return ex.ProcessFault(faultContext, Observable.Throw<T>);
                     })
                     .Finally(() => {
@@ -127,9 +127,9 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
                     .FlowContext(context:FaultHub.All.Concat(All).ToArray());
             });
 
-        public static AmbientFaultContext NewFaultContext(this  IReadOnlyList<LogicalStackFrame> logicalStack,object[] context, [CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0) {
+        public static AmbientFaultContext NewFaultContext(this  IReadOnlyList<LogicalStackFrame> logicalStack,object[] context,IReadOnlyList<string> tags = null, [CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0) {
             Log(() => $"[HUB-TRACE][NewFaultContext] Caller: '{memberName}', filePath: {filePath}, line: {lineNumber} Context: '{(context == null ? "null" : string.Join(", ", context))}'");
-            return new AmbientFaultContext { LogicalStackTrace = logicalStack, BoundaryName = memberName, UserContext = context ?? [] };
+            return new AmbientFaultContext { LogicalStackTrace = logicalStack, BoundaryName = memberName, UserContext = context ?? [],Tags = tags??[]};
         }
     }
 }

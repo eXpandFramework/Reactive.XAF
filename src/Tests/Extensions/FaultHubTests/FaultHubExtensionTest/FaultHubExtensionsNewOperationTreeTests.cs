@@ -382,5 +382,25 @@ namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest{
                 "The stack for Branch B was polluted by the root's stack frame.");
             branchBStack.ShouldContain(f => f.MemberName == "FrameB");
         }
+        
+        [Test]
+        public void Parses_Tags_From_Nested_Contexts_Correctly() {
+            var stepEx = new InvalidOperationException("Step Failure");
+            var stepCtx = new AmbientFaultContext { BoundaryName = "MyStep", Tags = ["Step"] };
+            var fhStep = new FaultHubException("Step failed", stepEx, stepCtx);
+
+            var txCtx = new AmbientFaultContext { BoundaryName = "MyTransaction", Tags = ["Transaction", "RunToEnd"], InnerContext = fhStep.Context };
+            var fhTx = new FaultHubException("Transaction failed", fhStep, txCtx);
+
+            var result = fhTx.NewOperationTree();
+
+            result.ShouldNotBeNull();
+            result.Name.ShouldBe("MyTransaction");
+            result.Tags.ShouldBe(["Transaction", "RunToEnd"]);
+
+            var stepNode = result.Children.ShouldHaveSingleItem();
+            stepNode.Name.ShouldBe("MyStep");
+            stepNode.Tags.ShouldBe(["Step"]);
+        }
     }
 }

@@ -27,7 +27,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.POC {
             return source
                 .PushStackFrame(memberName, filePath, lineNumber)
                 .SuppressAndPublishOnFault(null, memberName, filePath, lineNumber)
-                .SafeguardSubscription((ex, _) => ex.ExceptionToPublish(FaultHub.LogicalStackContext.Value.NewFaultContext([],memberName)).Publish());
+                .SafeguardSubscription((ex, _) => ex.ExceptionToPublish(FaultHub.LogicalStackContext.Value.NewFaultContext([],null,memberName)).Publish());
         }
 
         [Test]
@@ -77,7 +77,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.POC {
             => source.Materialize()
                 .Select(notification => {
                     if (notification.Kind != NotificationKind.OnError) return notification;
-                    var faultContext = FaultHub.LogicalStackContext.Value.NewFaultContext(context,memberName, filePath, lineNumber);
+                    var faultContext = FaultHub.LogicalStackContext.Value.NewFaultContext(context,null,memberName, filePath, lineNumber);
                     notification.Exception.ExceptionToPublish(faultContext).Publish();
                     return Notification.CreateOnCompleted<T>();
                 })
