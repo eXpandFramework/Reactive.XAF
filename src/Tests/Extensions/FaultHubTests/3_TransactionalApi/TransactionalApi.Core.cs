@@ -9,14 +9,13 @@ using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.LinqExtensions;
-using Xpand.Extensions.Numeric;
-using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
-namespace Xpand.Extensions.Tests.FaultHubTests {
+
+namespace Xpand.Extensions.Tests.FaultHubTests._3_TransactionalApi {
     internal class Url { public string Href { get; set; } }
-    public class TransactionTests : FaultHubTestBase {
+    public class TransactionalApi_Core_Tests  : FaultHubTestBase {
         [MethodImpl(MethodImplOptions.NoInlining)]
         private IObservable<string> FailingOperation(SubscriptionCounter failingCounter)
             => Observable.Throw<string>(new InvalidOperationException("Operation Failed"))
