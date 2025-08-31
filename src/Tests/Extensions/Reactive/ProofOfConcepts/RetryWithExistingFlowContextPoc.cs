@@ -8,7 +8,7 @@ using Shouldly;
 using Xpand.Extensions.Reactive.Utility;
 using Unit = System.Reactive.Unit;
 
-namespace Xpand.Extensions.Tests.FaultHubTests.POC {
+namespace Xpand.Extensions.Tests.Reactive.ProofOfConcepts {
     [TestFixture]
     public class RetryWithExistingFlowContextPoc {
         private static readonly AsyncLocal<string> TestContext = new();

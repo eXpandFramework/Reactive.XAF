@@ -4,7 +4,7 @@ using System.Reactive.Linq;
 using NUnit.Framework;
 using Shouldly;
 
-namespace Xpand.Extensions.Tests.FaultHubTests.POC.RX {
+namespace Xpand.Extensions.Tests.Reactive.ProofOfConcepts {
     [TestFixture]
     public class FinallyCatchOrderPoc {
         [Test]

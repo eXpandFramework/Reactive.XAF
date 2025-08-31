@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
 
-namespace Xpand.Extensions.Tests.FaultHubTests.POC{
+namespace Xpand.Extensions.Tests.Reactive.ProofOfConcepts{
     [TestFixture]
     public class SelectManyRetryPoc
     {

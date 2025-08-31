@@ -7,7 +7,7 @@ using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.Reactive.Utility;
 
-namespace Xpand.Extensions.Tests.FaultHubTests.POC {
+namespace Xpand.Extensions.Tests.Reactive.ProofOfConcepts {
     [TestFixture]
     public class FlowContextTimingPocTests {
         private static readonly AsyncLocal<string> TestContext = new();

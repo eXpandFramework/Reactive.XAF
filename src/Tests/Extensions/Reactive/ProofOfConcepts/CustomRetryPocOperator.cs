@@ -7,7 +7,7 @@ using NUnit.Framework;
 using Shouldly;
 using Unit = System.Reactive.Unit;
 
-namespace Xpand.Extensions.Tests.FaultHubTests.POC.RX {
+namespace Xpand.Extensions.Tests.Reactive.ProofOfConcepts {
     [TestFixture]
     public class CustomRetryOperatorPoc {
         private static readonly AsyncLocal<string> TestContext = new();

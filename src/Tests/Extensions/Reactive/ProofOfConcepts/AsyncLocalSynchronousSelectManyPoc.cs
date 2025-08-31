@@ -6,7 +6,7 @@ using Shouldly;
 using Xpand.Extensions.Reactive.Utility;
 using Unit = System.Reactive.Unit;
 
-namespace Xpand.Extensions.Tests.FaultHubTests.POC.RX {
+namespace Xpand.Extensions.Tests.Reactive.ProofOfConcepts {
     [TestFixture]
     public class AsyncLocalSynchronousSelectManyPoc {
         private static readonly AsyncLocal<string> PocContext = new();

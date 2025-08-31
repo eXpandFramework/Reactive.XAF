@@ -9,7 +9,7 @@ using Shouldly;
 using Xpand.Extensions.Reactive.ErrorHandling;
 using Xpand.Extensions.Reactive.Utility;
 
-namespace Xpand.Extensions.Tests.FaultHubTests.POC {
+namespace Xpand.Extensions.Tests.Reactive.ProofOfConcepts {
     internal class ContextualException(Exception inner, string context) : Exception(inner.Message, inner) {
         public string Context { get; } = context;
     }

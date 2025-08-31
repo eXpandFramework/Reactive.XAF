@@ -7,7 +7,7 @@ using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.Reactive.Utility;
 
-namespace Xpand.Extensions.Tests.FaultHubTests.POC.RX {
+namespace Xpand.Extensions.Tests.Reactive.ProofOfConcepts {
     
     [TestFixture]
     public class AsyncLocalFlowInSelectManyPoc {

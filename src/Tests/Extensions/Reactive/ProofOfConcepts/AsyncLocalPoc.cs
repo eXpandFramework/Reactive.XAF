@@ -12,7 +12,7 @@ using Shouldly;
 using Xpand.Extensions.Numeric;
 using Xpand.TestsLib.Common;
 
-namespace Xpand.Extensions.Tests.FaultHubTests.POC{
+namespace Xpand.Extensions.Tests.Reactive.ProofOfConcepts{
     [TestFixture]
     public class AsyncLocalPoc {
         public static readonly AsyncLocal<string> TestContext = new();
@@ -131,7 +131,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.POC{
                 () => {
                     var originalContext = AsyncLocalPoc.TestContext.Value;
                     AsyncLocalPoc.TestContext.Value = context;
-                    return Disposable.Create(() => AsyncLocalPoc.TestContext.Value = originalContext);
+                    return Disposable.Create(AsyncLocalPoc.TestContext,local => local.Value=originalContext);
                 },
                 _ => source
             );

@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
 
-namespace Xpand.Extensions.Tests.FaultHubTests.POC {
+namespace Xpand.Extensions.Tests.Reactive.ProofOfConcepts {
     public static class EagerVsLazyPocExtensions {
         public static IObservable<string> PushStackFrameLazy(this IObservable<string> source, string frame,
             AsyncLocal<string> context) {

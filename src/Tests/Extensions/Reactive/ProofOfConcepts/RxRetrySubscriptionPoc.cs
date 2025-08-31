@@ -3,7 +3,7 @@ using System.Reactive.Linq;
 using NUnit.Framework;
 using Shouldly;
 
-namespace Xpand.Extensions.Tests.FaultHubTests.POC;
+namespace Xpand.Extensions.Tests.Reactive.ProofOfConcepts;
 [TestFixture]
 public class RxRetrySubscriptionPoc {
     [Test]

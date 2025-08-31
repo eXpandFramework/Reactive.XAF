@@ -6,7 +6,7 @@ using System.Threading;
 using NUnit.Framework;
 using Shouldly;
 
-namespace Xpand.Extensions.Tests.FaultHubTests.POC {
+namespace Xpand.Extensions.Tests.Reactive.ProofOfConcepts {
     public class RxExceptionStackTraceTests {
         private class DeliberateRxException : Exception { }
 
