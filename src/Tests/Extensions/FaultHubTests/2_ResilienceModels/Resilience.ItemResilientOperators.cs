@@ -8,9 +8,9 @@ using Shouldly;
 using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.Reactive.Utility;
 
-namespace Xpand.Extensions.Tests.FaultHubTests {
+namespace Xpand.Extensions.Tests.FaultHubTests._2_ResilienceModels {
     [TestFixture]
-    public class ItemResilientOperatorsTests : FaultHubTestBase {
+    public class Resilience_ItemResilientOperators_Tests  : FaultHubTestBase {
 
         [Test]
         public async Task DoItemResilient_Executes_Action_And_Passes_Item_Through_On_Success() {
