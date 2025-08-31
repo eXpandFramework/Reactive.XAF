@@ -3,9 +3,12 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
+using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
+using Xpand.Extensions.Reactive.Utility;
 
 namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest{
     public class FaultHubExtensionsNewOperationTreeTests:FaultHubExtensionTestBase {
@@ -402,5 +405,66 @@ namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest{
             stepNode.Name.ShouldBe("MyStep");
             stepNode.Tags.ShouldBe(["Step"]);
         }
+        
+        [Test]
+        public void NewOperationTree_Correctly_Collapses_Nodes_With_Prefixed_Names() {
+            var innerEx = new InvalidOperationException("Root Cause");
+            var innerCtx = new AmbientFaultContext { BoundaryName = "ParseUpComing" };
+            var fhInner = new FaultHubException("Inner fail", innerEx, innerCtx);
+
+            var outerCtx = new AmbientFaultContext { BoundaryName = "serviceModule.ParseUpComing", InnerContext = fhInner.Context };
+            var fhOuter = new FaultHubException("Outer fail", fhInner, outerCtx);
+
+            var result = fhOuter.NewOperationTree();
+
+            result.ShouldNotBeNull();
+            result.Name.ShouldBe("serviceModule.ParseUpComing");
+            result.Children.ShouldBeEmpty("The child node 'ParseUpComing' should have been collapsed into its parent 'serviceModule.ParseUpComing'.");
+            result.GetRootCause().ShouldBe(innerEx);
+        }
+        
+        [Test]
+        public void NewOperationTree_Collapses_Inferred_Prefixed_Step_Name() {
+            var innerEx = new InvalidOperationException("Inner Failure");
+            var innerCtx = new AmbientFaultContext { BoundaryName = "InnerOperation" };
+            var fhInner = new FaultHubException("Inner fail", innerEx, innerCtx);
+
+            var outerCtx = new AmbientFaultContext { BoundaryName = "service.InnerOperation", InnerContext = fhInner.Context };
+            var fhOuter = new FaultHubException("Step fail", fhInner, outerCtx);
+
+            var result = fhOuter.NewOperationTree();
+
+            result.ShouldNotBeNull();
+            result.Name.ShouldBe("service.InnerOperation");
+            result.Children.ShouldBeEmpty("The child node 'InnerOperation' should have been collapsed into its parent 'service.InnerOperation'.");
+            result.GetRootCause().ShouldBe(innerEx);
+        }
+        
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private IObservable<Unit[]> InnerFailingTransaction_For_Tagging()
+            => Observable.Throw<Unit>(new InvalidOperationException("Inner Failure"))
+                .BeginWorkflow("InnerTx")
+                .RunToEnd();
+        
+
+        [Test]
+        public async Task Nested_Transaction_As_Step_Is_Tagged_As_Both_Step_And_Transaction() {
+            var transaction = Observable.Return(Unit.Default)
+                .BeginWorkflow("OuterTx")
+                .Then(_ => InnerFailingTransaction_For_Tagging())
+                .RunToEnd();
+
+            await transaction.PublishFaults().Capture();
+            var finalFault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
+
+            var tree = finalFault.NewOperationTree();
+
+            var nestedNode = tree.Children.ShouldHaveSingleItem();
+            nestedNode.Name.ShouldBe(nameof(InnerFailingTransaction_For_Tagging));
+
+            nestedNode.Tags.ShouldContain(Combine.StepNodeTag, "The node should be tagged as a Step because it was used in a .Then() clause.");
+            nestedNode.Tags.ShouldContain(Combine.TransactionNodeTag, "The node should be tagged as a Transaction because it was created with BeginWorkflow().");
+        }
+
     }
 }

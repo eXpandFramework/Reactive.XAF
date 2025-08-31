@@ -169,6 +169,18 @@ namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest{
             FaultHub.BlacklistedFilePathRegexes.Clear();
         }
     
-        
+    
+        [Test]
+        public void RenderStack_Does_Not_Show_Empty_Parentheses_For_Null_Context() {
+            var exception = CreateFaultWithLogicalStack(
+                new LogicalStackFrame("MethodA", "fileA.cs", 10, null)
+            );
+            var tree = exception.NewOperationTree();
+
+            var result = tree.RenderStack();
+
+            result.ShouldNotContain("()");
+            result.ShouldContain("at MethodA in fileA.cs:line 10");
+        }
     }
 }

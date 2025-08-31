@@ -89,7 +89,11 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
 
         public int LineNumber => lineNumber;
         
-        public override string ToString() => $"{(context.Any() ? $"{context.JoinCommaSpace().EncloseParenthesis()} " : "")}at {memberName} in {filePath}:line {lineNumber}";
+        public override string ToString() {
+            var validContexts = context?.Where(c => c is not null && !string.IsNullOrWhiteSpace(c.ToString())).ToArray();
+            var contextPrefix = (validContexts?.Length > 0) ? $"{validContexts.JoinCommaSpace().EncloseParenthesis()} " : "";
+            return $"{contextPrefix}at {memberName} in {filePath}:line {lineNumber}";
+        }
     }
 
 }

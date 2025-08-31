@@ -75,7 +75,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest {
             var exception = new FaultHubException("Outer fail", fhInner, outerCtx);
             
             var expected = string.Join(Environment.NewLine,
-                "Outer Operation completed with errors (1 times: Root Cause)",
+                "Outer Operation completed with errors (Root Cause)",
                 "└ Inner Operation",
                 "  • Root Cause: System.InvalidOperationException: Root Cause",
                 "    --- Original Exception Details ---",
@@ -124,7 +124,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest {
 
             var report = exception.Render();
             Console.WriteLine(report);
-            report.ShouldContain("Test Operation completed with errors (1 times: Root Cause)");
+            report.ShouldContain("Test Operation completed with errors (Root Cause)");
             report.ShouldContain("MyMethod");
             report.ShouldContain("--- Invocation Stack ---");
             report.ShouldContain("• Root Cause: System.InvalidOperationException: Root Cause");
@@ -226,5 +226,40 @@ namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest {
             stepLine.Trim().ShouldContain("Step: My Nested Step");
             stepLine.ShouldContain("(SomeStepData)");
         }
+        
+        [TestCase(1, true, TestName = "Render_Uses_Simplified_Summary_For_Single_Failure")]
+        [TestCase(2, true, TestName = "Render_Shows_Full_Summary_For_Multiple_Failures")]
+        public void Render_Correctly_Formats_Error_Summary(int errorCount, bool shouldShowSummary) {
+            FaultHubException exception;
+            if (errorCount == 1) {
+                exception = CreateNestedFault(("SinglePath", null));
+            }
+            else {
+                var exA = new InvalidOperationException("Failure A");
+                var fhA = new FaultHubException("A failed", exA, new AmbientFaultContext { BoundaryName = "BranchA" });
+        
+                var exB = new InvalidOperationException("Failure B");
+                var fhB = new FaultHubException("B failed", exB, new AmbientFaultContext { BoundaryName = "BranchB" });
+
+                var aggEx = new AggregateException(fhA, fhB);
+                exception = new FaultHubException("Root failed", aggEx, new AmbientFaultContext { BoundaryName = "RootOperation" });
+            }
+
+            var result = exception.Render();
+
+            if (errorCount == 1) {
+                result.ShouldContain("(Innermost failure)");
+                result.ShouldNotContain("1 times:");
+            }
+            else if (shouldShowSummary) {
+                var summaryText = $"{errorCount} times:";
+                result.ShouldContain(summaryText);
+            }
+            else {
+                result.ShouldNotContain("times:");
+                result.ShouldContain(exception.ErrorStatus);
+            }
+        }
+        
     }
 }

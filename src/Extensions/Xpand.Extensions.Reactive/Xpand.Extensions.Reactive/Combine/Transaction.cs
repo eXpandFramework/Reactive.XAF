@@ -22,26 +22,31 @@ namespace Xpand.Extensions.Reactive.Combine {
     public static partial class Combine {
         private static readonly AsyncLocal<int> TransactionNestingLevel = new();
         public const string TransactionNodeTag = "Transaction";
+        public const string NestedTransactionNodeTag = "Nested";
         public const string StepNodeTag = "Step";
         public static ITransactionBuilder<TSource> BeginWorkflow<TSource>(this IObservable<TSource> source,
             string transactionName, object[] context = null, IScheduler scheduler = null, [CallerMemberName] string memberName = "",
             [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0, [CallerArgumentExpression(nameof(source))] string sourceExpression = null)
             => new TransactionBuilder<TSource>(source.BufferUntilCompleted()
-                .Select(list => (object)list), transactionName ?? memberName, context, scheduler, memberName, filePath, lineNumber,[TransactionNodeTag,nameof(TransactionMode.Sequential)]) {
+                    .Select(list => (object)list), transactionName ?? memberName, context, scheduler, memberName, filePath, lineNumber,
+                new List<string> { TransactionNodeTag, nameof(TransactionMode.Sequential) }.AddNestedTag()) {
                 InitialStepName = GetStepName(sourceExpression)
             };
+
+        private static List<string> AddNestedTag(this ICollection<string> tags) 
+            => TransactionNestingLevel.Value <= 0 ? tags.ToList() : tags.AddToArray(NestedTransactionNodeTag).ToList();
 
         public static ITransactionBuilder<object> BeginWorkflow<TSource>(this IEnumerable<IObservable<TSource>> sources, string transactionName, TransactionMode mode = TransactionMode.Sequential,
             object[] context = null, IScheduler scheduler = null, [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0,
             [CallerArgumentExpression(nameof(sources))] string sourceExpression = null)
             => new TransactionBuilder<object>(sources.ToArray().Select((obs, i) => (Name: GetStepName($"{sourceExpression}[{i}]"), Source: obs.Select(o => (object) o))).ToList(),
-                    mode, transactionName, context, scheduler, memberName, filePath, lineNumber,[TransactionNodeTag,mode.ToString()]) { InitialStepName = sourceExpression };
+                    mode, transactionName, context, scheduler, memberName, filePath, lineNumber,new[]{TransactionNodeTag,mode.ToString()}.AddNestedTag()) { InitialStepName = sourceExpression };
         
         public static ITransactionBuilder<TSource> BeginWorkflow<TSource>(this IObservable<TSource> source, object[] context = null,
             string transactionName = null, IScheduler scheduler = null, [CallerMemberName] string memberName = "",
             [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0,[CallerArgumentExpression(nameof(source))] string sourceExpression = null)
             => new TransactionBuilder<TSource>(source.BufferUntilCompleted()
-                .Select(list => (object)list), transactionName??memberName, context, scheduler, memberName, filePath, lineNumber) {
+                .Select(list => (object)list), transactionName??memberName, context, scheduler, memberName, filePath, lineNumber,new []{TransactionNodeTag,nameof(TransactionMode.Sequential)}.AddNestedTag()) {
                 InitialStepName = GetStepName(sourceExpression)
             };
         
@@ -100,7 +105,7 @@ namespace Xpand.Extensions.Reactive.Combine {
                 return failFast?scheduledLogic.Catch((FaultHubException ex) => {
                     Log(() => $"[INSTRUMENTATION][Transaction.Run] Creating TransactionAbortedException for transaction '{ib.TransactionName}'.");
                     return Observable.Throw<TFinal[]>(new TransactionAbortedException($"{ib.TransactionName} failed", ex, new AmbientFaultContext {
-                        BoundaryName = ib.TransactionName, UserContext = ib.Context, InnerContext = ex.Context, Tags = ib.Tags.Concat([TransactionNodeTag,ib.Mode.ToString(),nameof(RunFailFast)]).ToList()
+                        BoundaryName = ib.TransactionName, UserContext = ib.Context, InnerContext = ex.Context, Tags = ib.Tags.Concat([TransactionNodeTag,ib.Mode.ToString(),nameof(RunFailFast)]).Distinct().ToList()
                     }));
                 }):scheduledLogic.ChainFaultContext(ib.Context, null, ib.CallerMemberName, ib.CallerMemberPath, ib.CallerMemberLine,
                     ib.UpdateTags(collectAllResults));
@@ -239,6 +244,10 @@ namespace Xpand.Extensions.Reactive.Combine {
                         .PushFrameConditionally(!string.IsNullOrEmpty(step.Name) ? step.Name : $"Part {allSteps.IndexOf(step) + 1}",step.FilePath,step.LineNumber)
                         .Materialize().BufferUntilCompleted()
                         .Select(notifications => {
+                            var errorNotifications = notifications.Where(n => n.Kind == NotificationKind.OnError).ToList();
+                            if (errorNotifications.Any()) {
+                                Log(() => $"[INSTRUMENTATION][StepChain] Step '{step.Name}' failed. Captured {errorNotifications.Count} error notifications. First error type: {errorNotifications.First().Exception!.GetType().Name}");
+                            }
                             var results = notifications.Where(n => n.Kind == NotificationKind.OnNext).Select(n => n.Value).ToList();
                             acc.allResults.AddRange(results);
                             acc.failures.AddRange(allSteps.CollectErrors(builder, notifications.Where(n => n.Kind == NotificationKind.OnError).ToList(), step));
@@ -256,9 +265,12 @@ namespace Xpand.Extensions.Reactive.Combine {
             return errors.Select(e => {
                 var stack = e.Exception.CapturedStack();
                 var capturedStack = stack ?? FaultHub.LogicalStackContext.Value;
-                return e.Exception.ExceptionToPublish(capturedStack.NewFaultContext(
+                var contextForStep = capturedStack.NewFaultContext(
                     builder.Context.AddToContext(builder.TransactionName,
-                        $"{builder.TransactionName} - {stepNameForContext}"), tags: [StepNodeTag], memberName: stepNameForContext));
+                        $"{builder.TransactionName} - {stepNameForContext}"), tags: [StepNodeTag], memberName: stepNameForContext);
+        
+                Log(() => $"[INSTRUMENTATION][CollectErrors] Creating context for step '{stepNameForContext}'. Tags are: [{string.Join(", ", contextForStep.Tags)}]");
+                return e.Exception.ExceptionToPublish(contextForStep);
             });
         }
         
@@ -269,21 +281,29 @@ namespace Xpand.Extensions.Reactive.Combine {
                 : primaryBus.Catch((Exception ex) => step.FallbackSelector(ex, acc.results));
         }
 
-        internal static string GetStepName(string expression, string explicitName = null, Delegate selector = null) {
+        public static string GetStepName(string expression, string explicitName = null, Delegate selector = null) {
             if (!string.IsNullOrEmpty(explicitName)) return explicitName;
             if (string.IsNullOrEmpty(expression)) return selector?.Method.Name;
+
             var codePart = expression.Split("=>").Last().Trim();
+
             var arrayMatch = System.Text.RegularExpressions.Regex.Match(codePart, @"^new\s*\[\s*\]\s*{\s*(?<content>.*?)\s*}(?<accessor>\[\d+\])?\s*$");
             if (arrayMatch.Success) {
                 codePart = arrayMatch.Groups["content"].Value.Trim();
             }
 
-            if (!codePart.Contains('.')) {
-                var parenthesisIndex = codePart.IndexOf('(');
-                if (parenthesisIndex > 0) {
-                    codePart = codePart.Substring(0, parenthesisIndex);
-                }
+            var indexerMatch = System.Text.RegularExpressions.Regex.Match(codePart, @"^(.*?)\[.*\]\s*$");
+            if (indexerMatch.Success) {
+                codePart = indexerMatch.Groups[1].Value.Trim();
             }
+
+            var parenthesisIndex = codePart.IndexOf('(');
+            if (parenthesisIndex > 0) {
+                codePart = codePart.Substring(0, parenthesisIndex);
+            }
+
+            codePart = codePart.TrimEnd(')');
+
             return string.IsNullOrEmpty(codePart) ? expression : codePart;
         }
         private static IObservable<object> FailFast<TFinal>(this  List<StepDefinition> allSteps,TransactionBuilder<TFinal> builder) 

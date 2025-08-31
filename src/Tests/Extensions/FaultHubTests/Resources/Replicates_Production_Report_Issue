@@ -1,23 +1,22 @@
 Schedule Launch Pad Parse failed [LaunchPadName] (2 times: Upcoming • StartParsing)
 └ Transaction Sequential RunFailFast: Parse Launch Pad
-  └ Step: Parse Up Coming
-    ├ Step: When Upcoming Urls (UserName)
+  └ Step: Parse Up Coming (UserName)
+    ├ Step: When Upcoming Urls
     │ └ Step: Web Site Urls
     │   • Root Cause: System.Exception: Upcoming
     │     --- Invocation Stack ---
     │       at WebSiteUrls in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 63
-    │       at Observable.Return(new object[1]) in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 62
+    │       at Observable.Return in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 62
     │       at WhenUpcomingUrls in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 47
     │       at ParseUpComing in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 25
     │       at ConnectLaunchPad in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 24
-    │       at Observable.Return("pageParsed") in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 23
     │       (LaunchPadName) at ParseLaunchPad in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 29
     │       (Scheduled Context) at ScheduleLaunchPadParse in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 16
     │     --- Original Exception Details ---
     │       System.Exception: Upcoming
-    └ Step: Parse Upcoming Projects (UserName)
-      └ Step: Parse Up Coming Project 
-        ├ Transaction Sequential RunToEnd: When Existing Project Page Parsed
+    └ Step: Parse Upcoming Projects
+      └ Step: Parse Up Coming Project
+        ├ Transaction Sequential Nested RunToEnd: When Existing Project Page Parsed
         └ Step: Project Parse Transaction
           └ Step: Start Parsing
             • Root Cause: System.Exception: StartParsing
@@ -28,10 +27,9 @@ Schedule Launch Pad Parse failed [LaunchPadName] (2 times: Upcoming • StartPar
                 at ParseUpComingProject in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 71
                 at ParseUpcomingProjects in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 48
                 at WhenUpcomingUrls in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 47
-                at Observable.Return(new object[1]) in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 46
+                at Observable.Return in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 46
                 at ParseUpComing in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 25
                 at ConnectLaunchPad in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 24
-                at Observable.Return("pageParsed") in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 23
                 (LaunchPadName) at ParseLaunchPad in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 29
                 (Scheduled Context) at ScheduleLaunchPadParse in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 16
               --- Original Exception Details ---

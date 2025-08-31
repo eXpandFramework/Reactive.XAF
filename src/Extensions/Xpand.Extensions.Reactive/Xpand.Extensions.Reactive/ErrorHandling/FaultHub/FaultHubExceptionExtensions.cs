@@ -58,12 +58,14 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
             if (node?.Tags != null && node.Tags.Any()) {
                 prefix = string.Join(" ", node.Tags.Select(s => s.FirstCharacterToUpper())) + ": ";
             }
-            var summaryPart = allRootCauses.Any() ?
-                $" ({allRootCauses.Count} times: {summary})" : "";
-            return $"{prefix}{title} {exception.ErrorStatus}{rootContext}{summaryPart}";
-            
-        }   
 
+            var summaryPart = allRootCauses.Count switch {
+                0 => "",
+                1 => $" ({summary})",
+                _ => $" ({allRootCauses.Count} times: {summary})"
+            };
+            return $"{prefix}{title} {exception.ErrorStatus}{rootContext}{summaryPart}";
+        }
         private static void RenderChildNodes(this OperationNode mergedTree,object[] rootContextItems,  StringBuilder sb){
             Log(()=>$"[RenderChildNodes] Rendering {mergedTree.Children.Count} children for node '{mergedTree.Name}'.");
             var titleContextItems = new HashSet<object>(rootContextItems);
@@ -207,9 +209,15 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
         private static void RenderNode(this OperationNode node, OperationNode parent, List<OperationNode> ancestors, HashSet<object> titleContextItems, StringBuilder sb, string prefix, bool isLast, bool includeDetails) {
             var contextData = ancestors.ContextData(node, parent,  titleContextItems, includeDetails);
             var connector = isLast ? "└ " : "├ ";
+            
             var nodePrefix = "";
             if (node.Tags != null && node.Tags.Any()) {
-                nodePrefix = string.Join(" ", node.Tags.Select(s => s.FirstCharacterToUpper())) + ": ";
+                if (node.Tags.Contains(Combine.Combine.StepNodeTag)) {
+                    nodePrefix = "Step: ";
+                }
+                else {
+                    nodePrefix = string.Join(" ", node.Tags.Select(s => s.FirstCharacterToUpper())) + ": ";
+                }
             }
             Log(() => $"[RenderNode] Rendering '{node.Name}' with prefix '{prefix}', context '{contextData}'.");
    
@@ -244,15 +252,18 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
             }
         }
 
-        private static string ContextData(this List<OperationNode> ancestors,OperationNode node, OperationNode parent, HashSet<object> titleContextItems, bool includeDetails){
+        private static string ContextData(this List<OperationNode> ancestors, OperationNode node, OperationNode parent, HashSet<object> titleContextItems, bool includeDetails){
             var contextDataString = "";
             if (includeDetails && node.ContextData.Any()) {
                 var knownTags = new HashSet<string>(node.Tags ?? Enumerable.Empty<string>());
                 var filteredContext = node.ContextData
                     .Where(c => {
                         if (c == null) return false;
-                        if (titleContextItems.Contains(c)) 
+                        if (ancestors.Any(a => a.ContextData.Contains(c))) {
+                            Log(() => $"[ContextData.Filter] Suppressing inherited context '{c}' from node '{node.Name}'.");
                             return false;
+                        }
+                        if (titleContextItems.Contains(c)) return false;
                         if (c is not string contextString) {
                             Log(() => $"[ContextData.Filter] Keeping non-string context '{c}'.");
                             return true;
@@ -328,45 +339,38 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
 
         static OperationNode Collapse(this OperationNode node) {
             if (node == null) return null;
-            Log(() => $"[Collapse] ==> Processing node '{node.Name}'");
-            var collapsedChildren = node.Children.Select(Collapse).Where(c => c != null).ToList();
-            Log(() => {
-                var parentName = node.Name ?? "NULL";
-                var parentCompoundName = node.Name.CompoundName() ?? "NULL";
-                var sb = new StringBuilder();
-                sb.AppendLine(
-                    $"[Collapse.DEBUG] ==> Processing Node: '{parentName}' (Compound: '{parentCompoundName}') with {collapsedChildren.Count} children.");
-                foreach (var child in collapsedChildren) {
-                    var childName = child.Name ?? "NULL";
-                    var childCompoundName = child.Name.CompoundName() ?? "NULL";
-                    sb.AppendLine($"  - Child: '{childName}' (Compound: '{childCompoundName}')");
-                    sb.AppendLine($"    - Raw Match: {parentName == childName}");
-                    sb.AppendLine($"    - Compound Match: {parentCompoundName == childCompoundName}");
-                }
+            Log(() => $"[Collapse] ==> Processing node '{node.Name}' with {node.Children.Count} children.");
+            
+            var currentNode = node;
+            var finalChildren = new List<OperationNode>();
 
-                return sb.ToString().TrimEnd();
-            });
-            if (collapsedChildren.Count == 1 && (collapsedChildren[0].Name.CompoundName() == node.Name.CompoundName())) {
-                var child = collapsedChildren[0];
-                Log(() => $"[Collapse] Redundancy found! Merging child '{child.Name}' into parent '{node.Name}'.");
-                var mergedContext = node.ContextData.Concat(child.ContextData).Distinct().ToArray();
-                var mergedStack = (node.LogicalStack ?? Enumerable.Empty<LogicalStackFrame>()).Concat(child.LogicalStack ?? Enumerable.Empty<LogicalStackFrame>()).Distinct().ToList();
-                var mergedTags = (node.Tags ?? Array.Empty<string>()).Concat(child.Tags ?? Array.Empty<string>()).Distinct().ToList();
-                return node with { Children = child.Children, ContextData = mergedContext, LogicalStack = mergedStack, Tags = mergedTags };
-            }
+            var collapsedChildren = node.Children.Select(c => c.Collapse()).Where(c => c != null);
 
-            var newChildren = new List<OperationNode>();
             foreach (var child in collapsedChildren) {
-                if (child.Name == node.Name) {
-                    Log(() => $"[Collapse] Redundancy found! Absorbing children of '{child.Name}' into '{node.Name}'.");
-                    newChildren.AddRange(child.Children);
+                var currentNodeName = currentNode.Name;
+                if (currentNodeName.Split('.').Last() == child.Name.Split('.').Last()) {
+                    Log(() => $"[Collapse] Redundancy found! Merging child '{child.Name}' into parent '{currentNodeName}'.");
+                    
+                    var mergedTags = (currentNode.Tags ?? []).Concat(child.Tags ?? []).Distinct().ToList();
+                    var mergedContext = currentNode.ContextData.Concat(child.ContextData).Distinct().ToArray();
+                    var mergedStack = (currentNode.LogicalStack ?? Enumerable.Empty<LogicalStackFrame>()).Concat(child.LogicalStack ?? Enumerable.Empty<LogicalStackFrame>()).Distinct().ToList();
+                    var mergedRootCause = currentNode.RootCause ?? child.RootCause;
+                    
+                    currentNode = currentNode with { 
+                        Tags = mergedTags, 
+                        ContextData = mergedContext, 
+                        LogicalStack = mergedStack, 
+                        RootCause = mergedRootCause 
+                    };
+
+                    finalChildren.AddRange(child.Children);
                 } else {
-                    newChildren.Add(child);
+                    finalChildren.Add(child);
                 }
             }
-
-            var finalNode = node with { Children = newChildren };
-            Log(() => $"[Collapse] <== Returning node '{finalNode.Name}' with {finalNode.Children.Count} children.");
+            
+            var finalNode = currentNode with { Children = finalChildren.Distinct().ToList() };
+            Log(() => $"[Collapse] <== Returning node '{finalNode.Name}' with {finalNode.Children.Count} children. Tags: [{(finalNode.Tags != null ? string.Join(", ", finalNode.Tags) : "null")}]");
             return finalNode;
         }
 
@@ -400,12 +404,14 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
                 var children = new List<OperationNode>();
                 
                 Log(() => $"[Parser.Context] Recursing on InnerContext: '{context.InnerContext?.BoundaryName ?? "NULL"}'");
+                
                 var hierarchicalChild = context.InnerContext.BuildFromContext(fullStack,contextLookup);
                 if (hierarchicalChild != null) {
                     children.Add(hierarchicalChild);
                 }
                 
                 var resultNode = new OperationNode(context.BoundaryName, context.UserContext ?? [], children, context.RootCause( contextLookup, fullStack, children), fullStack, context.Tags);
+                Log(() => $"[INSTRUMENTATION][BuildFromContext] Created node '{resultNode.Name}' with Tags: [{(resultNode.Tags != null ? string.Join(", ", resultNode.Tags) : "null")}]");
                 Log(() => $"[Parser.Context] <== Created node for '{resultNode.Name}' with {resultNode.Children.Count} children.");
                 return resultNode;
         }

@@ -22,7 +22,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
 
             var finalFault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
             finalFault.Context.Tags.ShouldContain(TransactionNodeTag);
-            finalFault.Context.Tags.ShouldContain(TransactionMode.Sequential.ToString());
+            finalFault.Context.Tags.ShouldContain(nameof(TransactionMode.Sequential));
             finalFault.Context.Tags.ShouldContain(nameof(Combine.RunToEnd));
         }
 
@@ -36,7 +36,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             var abortedException = BusEvents.Single().ShouldBeOfType<TransactionAbortedException>();
             abortedException.Context.Tags.ShouldContain(TransactionNodeTag);
             abortedException.Context.Tags.ShouldContain(nameof(Combine.RunFailFast));
-            abortedException.Context.Tags.ShouldContain(TransactionMode.Sequential.ToString());
+            abortedException.Context.Tags.ShouldContain(nameof(TransactionMode.Sequential));
         }
 
         [Test]
@@ -49,7 +49,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
 
             var finalFault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
             finalFault.Context.Tags.ShouldContain(TransactionNodeTag);
-            finalFault.Context.Tags.ShouldContain(TransactionMode.Concurrent.ToString());
+            finalFault.Context.Tags.ShouldContain(nameof(TransactionMode.Concurrent));
         }
 
         [Test]
@@ -67,14 +67,6 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
         [MethodImpl(MethodImplOptions.NoInlining)]
         private IObservable<Unit> Failing_Step_For_Tag_Test()
             => Observable.Throw<Unit>(new InvalidOperationException("Step Failure"));
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private IObservable<Unit[]> Nested_Transaction_With_Failing_Step()
-            => Observable.Return(Unit.Default)
-                .BeginWorkflow("InnerTx")
-                .Then(_ => Failing_Step_For_Tag_Test())
-                .RunToEnd();
-
 
         [Test]
         public async Task BeginWorkflow_Adds_Transaction_Tag() {
@@ -101,6 +93,33 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             var aggregate = finalFault.InnerException.ShouldBeOfType<AggregateException>();
             var stepFault = aggregate.InnerExceptions.Single().ShouldBeOfType<FaultHubException>();
             stepFault.Context.Tags.ShouldContain(StepNodeTag, "The failing step's context was not tagged correctly.");
+        }
+        
+        
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private IObservable<Unit[]> InnerFailingNestedTransaction()
+            => Observable.Throw<Unit>(new InvalidOperationException("Inner Failure"))
+                .BeginWorkflow("InnerTx")
+                .RunToEnd();
+
+        [Test]
+        public async Task Nested_Transaction_Is_Tagged_As_Nested() {
+            var transaction = Observable.Return(Unit.Default)
+                .BeginWorkflow("OuterTx")
+                .Then(_ => InnerFailingNestedTransaction())
+                .RunToEnd();
+
+            await transaction.PublishFaults().Capture();
+            var finalFault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
+
+            var aggregate = finalFault.InnerException.ShouldBeOfType<AggregateException>();
+            var stepFault = aggregate.InnerExceptions.Single().ShouldBeOfType<FaultHubException>();
+
+            var innerTxContext = stepFault.Context.InnerContext;
+            innerTxContext.ShouldNotBeNull("The context from the inner transaction was not preserved.");
+
+            innerTxContext.Tags.ShouldContain(TransactionNodeTag);
+            innerTxContext.Tags.ShouldContain(NestedTransactionNodeTag);
         }
     }
 }

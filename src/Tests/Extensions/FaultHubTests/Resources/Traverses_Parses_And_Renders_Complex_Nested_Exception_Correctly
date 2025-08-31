@@ -6,7 +6,7 @@ Schedule Launch Pad Parse completed with errors [Kommunitas Kommunitas] (2 times
   │     at WhenUpcomingUrls in Services\LaunchPadProjectPageParseService.cs:line 582
   │   --- Original Exception Details ---
   │     System.Exception: Upcoming
-  └ Parse Upcoming Projects (LaunchPad kommunitas)
+  └ Parse Upcoming Projects
     └ When Existing Project Page Parsed
       └ Project Parse Transaction
         └ Start Parsing (driver, padProject)

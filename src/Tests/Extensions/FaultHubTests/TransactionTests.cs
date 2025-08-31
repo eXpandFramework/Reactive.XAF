@@ -102,8 +102,8 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
 
             innerFault.InnerException.ShouldBeOfType<InvalidOperationException>().Message.ShouldBe("Failure1");
 
-            var stepName = $"{nameof(operations)}[1]";
-            innerFault.AllContexts.ShouldContain(stepName);
+            
+            innerFault.AllContexts.ShouldContain(nameof(operations));
             
         }
 
@@ -583,7 +583,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             ITransactionBuilder<Unit> ImplicitNameAction(ITransactionBuilder<string> builder) 
                 => builder.Then(_ => Observable.Throw<Unit>(new InvalidOperationException("Lambda Failed")));
 
-            var expectedImplicitName = @"Observable.Throw<Unit>(new InvalidOperationException(""Lambda Failed""))";
+            var expectedImplicitName = @"Observable.Throw<Unit>";
             yield return new TestCaseData((Func<ITransactionBuilder<string>, ITransactionBuilder<Unit>>)ImplicitNameAction, expectedImplicitName).SetName("Implicit Lambda Name");
             
             ITransactionBuilder<Unit> ExplicitNameAction(ITransactionBuilder<string> builder)
@@ -802,12 +802,12 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             var failure1 = aggregate.InnerExceptions.OfType<FaultHubException>()
                 .FirstOrDefault(ex => ex.InnerException?.Message == "Failure 1");
             failure1.ShouldNotBeNull();
-            failure1.AllContexts.ShouldContain($"Concurrent-Tx - {nameof(operations)}[1]");
+            failure1.AllContexts.ShouldContain(nameof(operations));
 
             var failure2 = aggregate.InnerExceptions.OfType<FaultHubException>()
                 .FirstOrDefault(ex => ex.InnerException?.Message == "Failure 2");
             failure2.ShouldNotBeNull();
-            failure2.AllContexts.ShouldContain($"Concurrent-Tx - {nameof(operations)}[3]");
+            failure2.AllContexts.ShouldContain(nameof(operations));
         }
 
         [Test]
@@ -947,7 +947,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
 
             innerFault.InnerException.ShouldBeOfType<InvalidOperationException>().Message.ShouldBe("Failure1");
 
-            innerFault.AllContexts.ShouldContain("FromIEnumerableConcurrentTx - operations[1]");
+            innerFault.AllContexts.ShouldContain("operations");
         }
         
         
