@@ -6,10 +6,8 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
-using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.Reactive.Utility;
-using static Xpand.Extensions.Reactive.Combine.Combine;
 
 namespace Xpand.Extensions.Tests.FaultHubTests {
     public class TransactionTaggingTests : FaultHubTestBase {
@@ -21,9 +19,9 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             await transaction.PublishFaults().Capture();
 
             var finalFault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
-            finalFault.Context.Tags.ShouldContain(TransactionNodeTag);
+            finalFault.Context.Tags.ShouldContain(Transaction.TransactionNodeTag);
             finalFault.Context.Tags.ShouldContain(nameof(TransactionMode.Sequential));
-            finalFault.Context.Tags.ShouldContain(nameof(Combine.RunToEnd));
+            finalFault.Context.Tags.ShouldContain(nameof(Transaction.RunToEnd));
         }
 
         [Test]
@@ -34,8 +32,8 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             await transaction.PublishFaults().Capture();
 
             var abortedException = BusEvents.Single().ShouldBeOfType<TransactionAbortedException>();
-            abortedException.Context.Tags.ShouldContain(TransactionNodeTag);
-            abortedException.Context.Tags.ShouldContain(nameof(Combine.RunFailFast));
+            abortedException.Context.Tags.ShouldContain(Transaction.TransactionNodeTag);
+            abortedException.Context.Tags.ShouldContain(nameof(Transaction.RunFailFast));
             abortedException.Context.Tags.ShouldContain(nameof(TransactionMode.Sequential));
         }
 
@@ -48,7 +46,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             await transaction.PublishFaults().Capture();
 
             var finalFault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
-            finalFault.Context.Tags.ShouldContain(TransactionNodeTag);
+            finalFault.Context.Tags.ShouldContain(Transaction.TransactionNodeTag);
             finalFault.Context.Tags.ShouldContain(nameof(TransactionMode.Concurrent));
         }
 
@@ -60,8 +58,8 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             await transaction.PublishFaults().Capture();
 
             var finalFault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
-            finalFault.Context.Tags.ShouldContain(TransactionNodeTag);
-            finalFault.Context.Tags.ShouldContain(nameof(Combine.RunAndCollect));
+            finalFault.Context.Tags.ShouldContain(Transaction.TransactionNodeTag);
+            finalFault.Context.Tags.ShouldContain(nameof(Transaction.RunAndCollect));
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -76,7 +74,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             await transaction.PublishFaults().Capture();
 
             var finalFault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
-            finalFault.Context.Tags.ShouldContain(TransactionNodeTag,
+            finalFault.Context.Tags.ShouldContain(Transaction.TransactionNodeTag,
                 "The top-level transaction's context was not tagged correctly.");
         }
 
@@ -92,7 +90,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             var finalFault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
             var aggregate = finalFault.InnerException.ShouldBeOfType<AggregateException>();
             var stepFault = aggregate.InnerExceptions.Single().ShouldBeOfType<FaultHubException>();
-            stepFault.Context.Tags.ShouldContain(StepNodeTag, "The failing step's context was not tagged correctly.");
+            stepFault.Context.Tags.ShouldContain(Transaction.StepNodeTag, "The failing step's context was not tagged correctly.");
         }
         
         
@@ -118,8 +116,8 @@ namespace Xpand.Extensions.Tests.FaultHubTests {
             var innerTxContext = stepFault.Context.InnerContext;
             innerTxContext.ShouldNotBeNull("The context from the inner transaction was not preserved.");
 
-            innerTxContext.Tags.ShouldContain(TransactionNodeTag);
-            innerTxContext.Tags.ShouldContain(NestedTransactionNodeTag);
+            innerTxContext.Tags.ShouldContain(Transaction.TransactionNodeTag);
+            innerTxContext.Tags.ShouldContain(Transaction.NestedTransactionNodeTag);
         }
     }
 }

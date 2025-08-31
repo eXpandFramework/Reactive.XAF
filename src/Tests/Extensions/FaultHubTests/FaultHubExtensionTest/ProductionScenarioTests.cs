@@ -8,7 +8,7 @@ using Shouldly;
 using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.StringExtensions;
-using TransactionAbortedException = Xpand.Extensions.Reactive.Combine.TransactionAbortedException;
+using TransactionAbortedException = Xpand.Extensions.Reactive.ErrorHandling.FaultHub.TransactionAbortedException;
 
 namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest {
     [TestFixture]

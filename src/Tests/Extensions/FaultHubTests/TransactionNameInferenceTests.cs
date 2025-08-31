@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using NUnit.Framework;
 using Shouldly;
-using Xpand.Extensions.Reactive.Combine;
+using Transaction = Xpand.Extensions.Reactive.ErrorHandling.FaultHub.Transaction;
 
 namespace Xpand.Extensions.Tests.FaultHubTests;
 [TestFixture]
@@ -27,7 +27,7 @@ public class TransactionNameInferenceTests {
 
     [Test, TestCaseSource(nameof(GetStepName_Source))]
     public void Should_Correctly_Infer_Step_Name(string expression, string explicitName, string expected) {
-        var result = Combine.GetStepName(expression, explicitName);
+        var result = Transaction.GetStepName(expression, explicitName);
         result.ShouldBe(expected);
     }
 }

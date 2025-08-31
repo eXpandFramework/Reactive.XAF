@@ -1,14 +1,13 @@
 ﻿using System;
-using System.Linq;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
-using System.Text.RegularExpressions;
+using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 
 namespace Xpand.Extensions.Reactive.Utility {
     public static partial class Utility {
         public static INamedStream ToNamedStream<T>(this IObservable<T> source, [CallerArgumentExpression(nameof(source))] string name = null,
             [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0)
-            => new NamedStream<T> { Name = Combine.Combine.GetStepName(name), Source = source, FilePath = filePath, LineNumber = lineNumber };
+            => new NamedStream<T> { Name = Transaction.GetStepName(name), Source = source, FilePath = filePath, LineNumber = lineNumber };
     }
     
     public class NamedStream<T>:INamedStream {

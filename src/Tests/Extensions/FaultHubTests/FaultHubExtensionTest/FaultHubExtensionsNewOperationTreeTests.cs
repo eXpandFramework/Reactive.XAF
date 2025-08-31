@@ -6,7 +6,6 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
-using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.Reactive.Utility;
 namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest{
@@ -434,8 +433,8 @@ namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest{
 
             var nestedNode = tree.Children.ShouldHaveSingleItem();
             nestedNode.Name.ShouldBe(nameof(InnerFailingTransaction_For_Tagging));
-            nestedNode.Tags.ShouldContain(Combine.StepNodeTag, "The node should be tagged as a Step because it was used in a .Then() clause.");
-            nestedNode.Tags.ShouldContain(Combine.TransactionNodeTag, "The node should be tagged as a Transaction because it was created with BeginWorkflow().");
+            nestedNode.Tags.ShouldContain(Transaction.StepNodeTag, "The node should be tagged as a Step because it was used in a .Then() clause.");
+            nestedNode.Tags.ShouldContain(Transaction.TransactionNodeTag, "The node should be tagged as a Transaction because it was created with BeginWorkflow().");
         }
 
     }
