@@ -12,52 +12,45 @@ using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
-
 namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest {
     [TestFixture]
-    public class FaultHubExtensionTests:FaultHubTestBase {
+    public class ProductionScenario2Tests:FaultHubTestBase {
 
         #region Operation Simulation
 
-        private IObservable<Unit> StartParsing()
-            => Observable.Throw<Unit>(new Exception("StartParsing"));
-
-        private IObservable<Unit> ProjectParseTransaction()
-            => Unit.Default.Observe().BeginWorkflow("Project Parse Transaction")
-                .Then(_ => StartParsing(), "Start Parsing")
+        private IObservable<Unit> ExtractContent()
+            => Observable.Throw<Unit>(new Exception("Failed to extract content"));
+        private IObservable<Unit> DataExtractionTransaction()
+            => Unit.Default.Observe().BeginWorkflow("Data Extraction Transaction")
+                .Then(_ => ExtractContent(), "Extract Content")
                 .RunToEnd().ToUnit();
-
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
         [SuppressMessage("ReSharper", "UnusedParameter.Local")]
-        private IObservable<Unit> WhenExistingProjectPageParsed(string someNoisyArgument)
-            => Unit.Default.Observe().BeginWorkflow("When Existing Project Page Parsed")
-                .Then(_ => ProjectParseTransaction())
+        private IObservable<Unit> WhenLinkScraped(string someNoisyArgument)
+            => Unit.Default.Observe().BeginWorkflow("When Link Scraped")
+                .Then(_ => DataExtractionTransaction())
                 .RunToEnd().ToUnit();
-
-        private IObservable<Unit> ParseUpcomingProjects()
-            => Unit.Default.Observe().BeginWorkflow("Parse Upcoming Projects")
-                .Then(_ => WhenExistingProjectPageParsed("some noisy argument"))
+        private IObservable<Unit> ScrapeDataFromLinks()
+            => Unit.Default.Observe().BeginWorkflow("Scrape Data From Links")
+                .Then(_ => WhenLinkScraped("some noisy argument"))
                 .RunToEnd().ToUnit();
-        
-        private IObservable<Unit> WhenUpcomingUrls()
-            => Observable.Throw<Unit>(new Exception("Upcoming")) ;
-
-        private IObservable<Unit> ParseUpComing()
-            => Unit.Default.Observe().BeginWorkflow("Parse Up Coming")
-                .Then(_ => WhenUpcomingUrls())
-                .Then(_ => ParseUpcomingProjects())
+        private IObservable<Unit> GetPageLinks()
+            => Observable.Throw<Unit>(new Exception("Failed to get links")) ;
+        private IObservable<Unit> ExtractAndProcessLinks()
+            => Unit.Default.Observe().BeginWorkflow("Extract And Process Links")
+                .Then(_ => GetPageLinks())
+                .Then(_ => ScrapeDataFromLinks())
                 .RunToEnd().ToUnit();
-        
-        private IObservable<Unit> ScheduleLaunchPadParse()
-            => Unit.Default.Observe().BeginWorkflow("Schedule Launch Pad Parse")
-                .Then(_ => ParseUpComing())
+        private IObservable<Unit> ScheduleWebScraping()
+            => Unit.Default.Observe().BeginWorkflow("Schedule Web Scraping")
+                .Then(_ => ExtractAndProcessLinks())
                 .RunToEnd().ToUnit();
         #endregion
         
         [Test][Apartment(ApartmentState.STA)]
-        public async Task Generates_Concise_Execution_report_is_correct_and_readable() {
+        public async Task Generates_Concise_Execution_Report_For_Web_Scraping_Scenario() {
             
-            await ScheduleLaunchPadParse().PublishFaults().Capture();
+            await ScheduleWebScraping().PublishFaults().Capture();
             BusEvents.Count.ShouldBe(1);
             var finalReport = BusEvents.Single().ShouldBeOfType<FaultHubException>();
             
@@ -68,47 +61,47 @@ namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest {
         public void Traverses_Parses_And_Renders_Complex_Nested_Exception_Correctly() {
             #region ARRANGE
             var ctxSchedule = new AmbientFaultContext {
-                BoundaryName = "ScheduleLaunchPadParse()",
-                UserContext = ["Schedule Launch Pad Parse", "Kommunitas Kommunitas"]
+                BoundaryName = "ScheduleWebScraping()",
+                UserContext = ["Schedule Web Scraping", "Example.com"]
             };
-            var ctxParseUpcoming = new AmbientFaultContext
-                { BoundaryName = "ParseUpComing", UserContext = ["Parse Up Coming", "LaunchPad kommunitas"] };
-            var ctxWhenUpcoming = new AmbientFaultContext {
-                BoundaryName = "WhenUpcomingUrls(serviceModule, driver, launchPad)",
-                UserContext = ["When Upcoming Urls"],
+            var ctxExtractAndProcess = new AmbientFaultContext
+                { BoundaryName = "ExtractAndProcessLinks", UserContext = ["Extract And Process Links", "Main Site"] };
+            var ctxGetPageLinks = new AmbientFaultContext {
+                BoundaryName = "GetPageLinks(scraperService, browser, page)",
+                UserContext = ["Get Page Links"],
                 LogicalStackTrace =
-                    [new LogicalStackFrame("WhenUpcomingUrls", @"Services\LaunchPadProjectPageParseService.cs", 582)]
+                    [new LogicalStackFrame("GetPageLinks", @"Services\WebScrapingService.cs", 582)]
             };
-            var ctxParseProjects = new AmbientFaultContext {
-                BoundaryName = "ParseUpcomingProjects()",
-                UserContext = ["Parse Upcoming Projects", "LaunchPad kommunitas"]
+            var ctxScrapeData = new AmbientFaultContext {
+                BoundaryName = "ScrapeDataFromLinks()",
+                UserContext = ["Scrape Data From Links", "Main Site"]
             };
-            var ctxWhenExisting = new AmbientFaultContext
-                { BoundaryName = "WhenExistingProjectPageParsed", UserContext = ["When Existing Project Page Parsed"] };
-            var ctxParseTx = new AmbientFaultContext
-                { BoundaryName = "ProjectParseTransaction()", UserContext = ["Project Parse Transaction"] };
-            var ctxStartParsing = new AmbientFaultContext {
-                BoundaryName = "StartParsing(driver, padProject)",
-                UserContext = ["Start Parsing", "driver", "padProject"],
+            var ctxWhenLinkScraped = new AmbientFaultContext
+                { BoundaryName = "WhenLinkScraped", UserContext = ["When Link Scraped"] };
+            var ctxDataExtractionTx = new AmbientFaultContext
+                { BoundaryName = "DataExtractionTransaction()", UserContext = ["Data Extraction Transaction"] };
+            var ctxExtractContent = new AmbientFaultContext {
+                BoundaryName = "ExtractContent(browser, pageContent)",
+                UserContext = ["Extract Content", "browser", "pageContent"],
                 LogicalStackTrace =
-                    [new LogicalStackFrame("StartParsing", @"Services\LaunchPadProjectPageParseService.cs", 1228, "MyDynamicValue")]
+                    [new LogicalStackFrame("ExtractContent", @"Services\WebScrapingService.cs", 1228, "MyDynamicValue")]
             };
-            var rootCause1 = new Exception("Upcoming");
-            var fh1Upcoming = new FaultHubException("Upcoming", rootCause1, ctxWhenUpcoming);
+            var rootCause1 = new Exception("Failed to get links");
+            var fh1GetLinks = new FaultHubException("Failed to get links", rootCause1, ctxGetPageLinks);
 
-            var rootCause2 = new Exception("StartParsing");
-            var fh2StartParsing = new FaultHubException("StartParsing", rootCause2, ctxStartParsing);
-            var agg21 = new AggregateException(fh2StartParsing);
-            var fh2ParseTx = new FaultHubException("Project Parse Transaction completed with errors", agg21, ctxParseTx);
-            var agg22 = new AggregateException(fh2ParseTx);
-            var fh2WhenExisting =
-                new FaultHubException("When Existing Project Page Parsed completed with errors", agg22, ctxWhenExisting);
-            var agg23 = new AggregateException(fh2WhenExisting);
-            var fh2ParseProjects = new FaultHubException("Parse Upcoming Projects completed with errors", agg23, ctxParseProjects);
-            var aggMid = new AggregateException(fh1Upcoming, fh2ParseProjects);
-            var fhParseUpcoming = new FaultHubException("Parse Up Coming completed with errors", aggMid, ctxParseUpcoming);
-            var aggTop = new AggregateException(fhParseUpcoming);
-            var topLevelException = new FaultHubException("Schedule Launch Pad Parse completed with errors", aggTop, ctxSchedule);
+            var rootCause2 = new Exception("Failed to extract content");
+            var fh2ExtractContent = new FaultHubException("Failed to extract content", rootCause2, ctxExtractContent);
+            var agg21 = new AggregateException(fh2ExtractContent);
+            var fh2DataExtractionTx = new FaultHubException("Data Extraction Transaction completed with errors", agg21, ctxDataExtractionTx);
+            var agg22 = new AggregateException(fh2DataExtractionTx);
+            var fh2WhenLinkScraped =
+                new FaultHubException("When Link Scraped completed with errors", agg22, ctxWhenLinkScraped);
+            var agg23 = new AggregateException(fh2WhenLinkScraped);
+            var fh2ScrapeData = new FaultHubException("Scrape Data From Links completed with errors", agg23, ctxScrapeData);
+            var aggMid = new AggregateException(fh1GetLinks, fh2ScrapeData);
+            var fhExtractAndProcess = new FaultHubException("Extract And Process Links completed with errors", aggMid, ctxExtractAndProcess);
+            var aggTop = new AggregateException(fhExtractAndProcess);
+            var topLevelException = new FaultHubException("Schedule Web Scraping completed with errors", aggTop, ctxSchedule);
             #endregion
             
             AssertFaultExceptionReport(topLevelException);
@@ -118,13 +111,10 @@ namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest {
         public async Task Report_Aggregates_Context_From_Nested_ChainFaultContext_Boundaries() {
             var innermostOperation = Observable.Throw<Unit>(new InvalidOperationException("Deep Failure"))
                 .ChainFaultContext(["InnermostContext"]);
-    
             var intermediateOperation = innermostOperation
                 .ChainFaultContext(["IntermediateContext"]);
-
             var outermostOperation = intermediateOperation
                 .ChainFaultContext(["OutermostContext"]);
-
             await outermostOperation.PublishFaults().Capture();
 
             BusEvents.Count.ShouldBe(1);

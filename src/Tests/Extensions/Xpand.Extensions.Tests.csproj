@@ -40,7 +40,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="FaultHubTests\Resources\Generates_Concise_Execution_report_is_correct_and_readable" />
+    <EmbeddedResource Include="FaultHubTests\Resources\Generates_Concise_Execution_Report_For_Web_Scraping_Scenario" />
     <EmbeddedResource Include="FaultHubTests\Resources\Traverses_Parses_And_Renders_Complex_Nested_Exception_Correctly" />
     <None Remove="FaultHubTests\Resources\Replicates_Production_Report_Issue" />
     <EmbeddedResource Include="FaultHubTests\Resources\Replicates_Production_Report_Issue" />

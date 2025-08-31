@@ -1,36 +1,36 @@
-Schedule Launch Pad Parse failed [LaunchPadName] (2 times: Upcoming • StartParsing)
-└ Transaction Sequential RunFailFast: Parse Launch Pad
-  └ Step: Parse Up Coming (UserName)
-    ├ Step: When Upcoming Urls
-    │ └ Step: Web Site Urls
-    │   • Root Cause: System.Exception: Upcoming
+Schedule Web Scraping failed [HomePageUrl] (2 times: Failed to fetch URLs • Failed to extract content)
+└ Transaction Sequential RunFailFast: Parse Home Page
+  └ Step: Extract And Process Links (UserAgent)
+    ├ Step: Get Page Links
+    │ └ Step: Fetch Initial Urls
+    │   • Root Cause: System.Exception: Failed to fetch URLs
     │     --- Invocation Stack ---
-    │       at WebSiteUrls in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 63
-    │       at Observable.Return in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 62
-    │       at WhenUpcomingUrls in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 47
-    │       at ParseUpComing in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 25
-    │       at ConnectLaunchPad in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 24
-    │       (LaunchPadName) at ParseLaunchPad in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 29
-    │       (Scheduled Context) at ScheduleLaunchPadParse in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 16
+    │       at FetchInitialUrls in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 57
+    │       at Observable.Return in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 56
+    │       at GetPageLinks in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 43
+    │       at ExtractAndProcessLinks in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 24
+    │       at NavigateToHomePage in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 22
+    │       (HomePageUrl) at ParseHomePage in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 28
+    │       (Scheduled Context) at ScheduleWebScraping in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 15
     │     --- Original Exception Details ---
-    │       System.Exception: Upcoming
-    └ Step: Parse Upcoming Projects
-      └ Step: Parse Up Coming Project
-        ├ Transaction Sequential Nested RunToEnd: When Existing Project Page Parsed
-        └ Step: Project Parse Transaction
-          └ Step: Start Parsing
-            • Root Cause: System.Exception: StartParsing
+    │       System.Exception: Failed to fetch URLs
+    └ Step: Scrape Data From Links
+      └ Step: Scrape Data From Link
+        ├ Transaction Sequential Nested RunToEnd: When Link Scraped
+        └ Step: Data Extraction Transaction
+          └ Step: Extract Content
+            • Root Cause: System.Exception: Failed to extract content
               --- Invocation Stack ---
-                at StartParsing in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 104
-                at Validate in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 103
-                at ProjectParseTransaction in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 88
-                at ParseUpComingProject in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 71
-                at ParseUpcomingProjects in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 48
-                at WhenUpcomingUrls in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 47
-                at Observable.Return in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 46
-                at ParseUpComing in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 25
-                at ConnectLaunchPad in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 24
-                (LaunchPadName) at ParseLaunchPad in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 29
-                (Scheduled Context) at ScheduleLaunchPadParse in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 16
+                at ExtractContent in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 94
+                at ValidatePage in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 93
+                at DataExtractionTransaction in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 80
+                at ScrapeDataFromLink in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 66
+                at ScrapeDataFromLinks in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 44
+                at GetPageLinks in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 43
+                at Observable.Return in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 42
+                at ExtractAndProcessLinks in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 24
+                at NavigateToHomePage in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 22
+                (HomePageUrl) at ParseHomePage in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 28
+                (Scheduled Context) at ScheduleWebScraping in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 15
               --- Original Exception Details ---
-                System.Exception: StartParsing
+                System.Exception: Failed to extract content

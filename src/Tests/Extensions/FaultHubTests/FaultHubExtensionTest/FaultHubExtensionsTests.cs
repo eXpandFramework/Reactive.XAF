@@ -3,59 +3,58 @@ using System.Linq;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
-
 namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest {
     public class FaultHubExtensionsRenderTests : FaultHubExtensionTestBase {
-        private FaultHubException CreateProductionScenarioException() {
-            var upcomingEx = new InvalidOperationException("Upcoming");
-            var ctxWebSite = new AmbientFaultContext { BoundaryName = "WebSiteUrls" };
-            var fhWebSite = new FaultHubException("WebSiteUrls failed", upcomingEx, ctxWebSite);
-            var ctxWhenUpcoming = new AmbientFaultContext { BoundaryName = "WhenUpcomingUrls", InnerContext = fhWebSite.Context };
-            var fhWhenUpcoming = new FaultHubException("WhenUpcomingUrls failed", fhWebSite, ctxWhenUpcoming);
+        private FaultHubException CreateWebScrapingScenarioException() {
+            var upcomingEx = new InvalidOperationException("Failed to fetch URLs");
+            var ctxWebSite = new AmbientFaultContext { BoundaryName = "FetchInitialUrls" };
+            var fhWebSite = new FaultHubException("FetchInitialUrls failed", upcomingEx, ctxWebSite);
+            var ctxWhenUpcoming = new AmbientFaultContext { BoundaryName = "GetPageLinks", InnerContext = fhWebSite.Context };
+            var fhWhenUpcoming = new FaultHubException("GetPageLinks failed", fhWebSite, ctxWhenUpcoming);
 
-            var startParsingEx = new InvalidOperationException("StartParsing");
-            var ctxStartParsing = new AmbientFaultContext { BoundaryName = "StartParsing" };
-            var fhStartParsing = new FaultHubException("StartParsing failed", startParsingEx, ctxStartParsing);
-            var ctxProjectTx = new AmbientFaultContext { BoundaryName = "ProjectParseTransaction", InnerContext = fhStartParsing.Context };
-            var fhProjectTx = new FaultHubException("ProjectParseTransaction failed", fhStartParsing, ctxProjectTx);
-            var ctxWhenExisting = new AmbientFaultContext { BoundaryName = "WhenExistingProjectPageParsed", InnerContext = fhProjectTx.Context };
-            var fhWhenExisting = new FaultHubException("WhenExisting... failed", fhProjectTx, ctxWhenExisting);
-            var ctxParseProjects = new AmbientFaultContext { BoundaryName = "ParseUpcomingProjects", InnerContext = fhWhenExisting.Context };
-            var fhParseProjects = new FaultHubException("ParseUpcomingProjects failed", fhWhenExisting, ctxParseProjects);
+            var startParsingEx = new InvalidOperationException("Failed to extract content");
+            var ctxStartParsing = new AmbientFaultContext { BoundaryName = "ExtractContent" };
+            var fhStartParsing = new FaultHubException("ExtractContent failed", startParsingEx, ctxStartParsing);
+            var ctxProjectTx = new AmbientFaultContext { BoundaryName = "DataExtractionTransaction", InnerContext = fhStartParsing.Context };
+            var fhProjectTx = new FaultHubException("DataExtractionTransaction failed", fhStartParsing, ctxProjectTx);
+            var ctxWhenExisting = new AmbientFaultContext { BoundaryName = "WhenLinkScraped", InnerContext = fhProjectTx.Context };
+            var fhWhenExisting = new FaultHubException("WhenLinkScraped... failed", fhProjectTx, ctxWhenExisting);
+            var ctxParseProjects = new AmbientFaultContext { BoundaryName = "ScrapeDataFromLinks", InnerContext = fhWhenExisting.Context };
+            var fhParseProjects = new FaultHubException("ScrapeDataFromLinks failed", fhWhenExisting, ctxParseProjects);
 
             var aggEx = new AggregateException(fhWhenUpcoming, fhParseProjects);
-            var ctxParseUpcoming = new AmbientFaultContext { BoundaryName = "ParseUpComing" };
-            var fhParseUpcoming = new FaultHubException("ParseUpComing failed", aggEx, ctxParseUpcoming);
-            var ctxConnect = new AmbientFaultContext { BoundaryName = "ConnectLaunchPad", InnerContext = fhParseUpcoming.Context };
-            var fhConnect = new FaultHubException("Connect... failed", fhParseUpcoming, ctxConnect);
-            var ctxParseLaunchPad = new AmbientFaultContext { BoundaryName = "ParseLaunchPad", InnerContext = fhConnect.Context };
-            var fhParseLaunchPad = new FaultHubException("ParseLaunchPad failed", fhConnect, ctxParseLaunchPad);
-            var ctxSchedule = new AmbientFaultContext { BoundaryName = "ScheduleLaunchPadParse", InnerContext = fhParseLaunchPad.Context };
-            
-            return new FaultHubException("ScheduleLaunchPadParse failed", fhParseLaunchPad, ctxSchedule);
+            var ctxParseUpcoming = new AmbientFaultContext { BoundaryName = "ExtractAndProcessLinks" };
+            var fhParseUpcoming = new FaultHubException("ExtractAndProcessLinks failed", aggEx, ctxParseUpcoming);
+            var ctxConnect = new AmbientFaultContext { BoundaryName = "NavigateToPage", InnerContext = fhParseUpcoming.Context };
+            var fhConnect = new FaultHubException("Navigate... failed", fhParseUpcoming, ctxConnect);
+            var ctxParseLaunchPad = new AmbientFaultContext { BoundaryName = "ParseHomePage", InnerContext = fhConnect.Context };
+            var fhParseLaunchPad = new FaultHubException("ParseHomePage failed", fhConnect, ctxParseLaunchPad);
+            var ctxSchedule = new AmbientFaultContext { BoundaryName = "ScheduleWebScraping", InnerContext = fhParseLaunchPad.Context };
+            return new FaultHubException("ScheduleWebScraping failed", fhParseLaunchPad, ctxSchedule);
         }
 
         [Test]
-        public void Render_Correctly_Formats_Production_Scenario_With_Multiple_Failures() {
-            var exception = CreateProductionScenarioException();
-            
+        public void Render_Correctly_Formats_Web_Scraping_Scenario_With_Multiple_Failures() {
+            var exception = CreateWebScrapingScenarioException();
             var expected = string.Join(Environment.NewLine,
-                "Schedule Launch Pad Parse completed with errors (2 times: Upcoming • StartParsing)",
-                "└ Parse Launch Pad",
-                "  └ Connect Launch Pad",
-                "    └ Parse Up Coming",
-                "      ├ When Upcoming Urls",
-                "      │ └ Web Site Urls",
-                "      │   • Root Cause: System.InvalidOperationException: Upcoming",
+                "Schedule Web Scraping completed with errors (2 times: Failed to fetch URLs • Failed to extract content)",
+                "└ Parse Home Page",
+                "  └ Navigate To Page",
+                "    └ Extract And Process Links",
+       
+                     "      ├ Get Page Links",
+                "      │ └ Fetch Initial Urls",
+                "      │   • Root Cause: System.InvalidOperationException: Failed to fetch URLs",
                 "      │     --- Original Exception Details ---",
-                "      │       System.InvalidOperationException: Upcoming",
-                "      └ Parse Upcoming Projects",
-                "        └ When Existing Project Page Parsed",
-                "          └ Project Parse Transaction",
-                "            └ Start Parsing",
-                "              • Root Cause: System.InvalidOperationException: StartParsing",
+                "      │       System.InvalidOperationException: Failed to fetch URLs",
+                "      └ Scrape Data From Links",
+                "        └ When Link Scraped",
+            
+                 "          └ Data Extraction Transaction",
+                "            └ Extract Content",
+                "              • Root Cause: System.InvalidOperationException: Failed to extract content",
                 "                --- Original Exception Details ---",
-                "                  System.InvalidOperationException: StartParsing"
+                "                  System.InvalidOperationException: Failed to extract content"
             );
             var result = exception.Render();
 
@@ -70,7 +69,6 @@ namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest {
             var innerEx = new InvalidOperationException("Root Cause");
             var innerCtx = new AmbientFaultContext { BoundaryName = "InnerOperation" };
             var fhInner = new FaultHubException("Inner fail", innerEx, innerCtx);
-            
             var outerCtx = new AmbientFaultContext { BoundaryName = "OuterOperation", InnerContext = fhInner.Context };
             var exception = new FaultHubException("Outer fail", fhInner, outerCtx);
             
@@ -79,9 +77,9 @@ namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest {
                 "└ Inner Operation",
                 "  • Root Cause: System.InvalidOperationException: Root Cause",
                 "    --- Original Exception Details ---",
-                "      System.InvalidOperationException: Root Cause"
+  
+                               "      System.InvalidOperationException: Root Cause"
             );
-
             var result = exception.Render();
 
             var resultWithoutStackTrace = System.Text.RegularExpressions.Regex.Replace(result, @"at .*", "...");
@@ -95,7 +93,6 @@ namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest {
             var path2 = new OperationNode("RootNode", [], [new OperationNode("CommonChild", [], [new OperationNode("LeafB", [], [])])]);
             var path3 = new OperationNode("RootNode", [], [new OperationNode("DifferentChild", [], [])]);
             var source = new[] { path1, path2, path3 };
-
             var expected = string.Join(Environment.NewLine,
                 "└ Root Node",
                 "  ├ Common Child",
@@ -121,7 +118,6 @@ namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest {
             var exception = CreateFaultWithLogicalStack(
                 new LogicalStackFrame("MyMethod", @"C:\app\logic.cs", 10)
             );
-
             var report = exception.Render();
             Console.WriteLine(report);
             report.ShouldContain("Test Operation completed with errors (Root Cause)");
@@ -135,7 +131,6 @@ namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest {
             var leafEx = new InvalidOperationException("Root Cause");
             var leafCtx = new AmbientFaultContext { BoundaryName = "LeafOperation" };
             var fhLeaf = new FaultHubException("Leaf fail", leafEx, leafCtx);
-
             var aggEx = new AggregateException(fhLeaf);
 
             var topCtx = new AmbientFaultContext { BoundaryName = "TopLevelOperation" };
@@ -144,31 +139,28 @@ namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest {
             var report = fhTop.Render();
 
             report.ShouldStartWith("Top Level Operation completed with errors");
-
             report.ShouldContain("└ Leaf Operation");
             report.ShouldContain("• Root Cause: System.InvalidOperationException: Root Cause");
         }
         
-        [TestCase("Schedule Launch Pad Parse")]
-        [TestCase("ScheduleLaunchPadParse")]
+        [TestCase("Schedule Web Scraping")]
+        [TestCase("ScheduleWebScraping")]
         public void Render_Removes_Redundant_BoundaryName_From_Root_Context(string context) {
             var innerEx = new InvalidOperationException("Root Cause");
             var innerCtx = new AmbientFaultContext { BoundaryName = "InnerOperation" };
             var fhInner = new FaultHubException("Inner fail", innerEx, innerCtx);
-
             var outerCtx = new AmbientFaultContext {
-                BoundaryName = "Schedule Launch Pad Parse",
-                UserContext = [context, "Kommunitas Kommunitas"],
+                BoundaryName = "Schedule Web Scraping",
+                UserContext = [context, "Example.com Scrape"],
                 InnerContext = fhInner.Context
             };
             var exception = new FaultHubException("Outer fail", fhInner, outerCtx);
 
-            var expectedHeaderStart = "Schedule Launch Pad Parse completed with errors [Kommunitas Kommunitas]";
-
+            var expectedHeaderStart = "Schedule Web Scraping completed with errors [Example.com Scrape]";
             var result = exception.Render();
 
             result.ShouldStartWith(expectedHeaderStart);
-            result.ShouldNotContain($"[{context}, Kommunitas Kommunitas]");
+            result.ShouldNotContain($"[{context}, Example.com Scrape]");
         }
         
         [Test]
@@ -191,7 +183,6 @@ namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest {
             result.ShouldStartWith("Root Operation completed with errors");
 
             result.ShouldContain("└ My Method");
-
             result.ShouldNotContain("(MyMethod)");
         }
     
@@ -210,17 +201,16 @@ namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest {
                 UserContext = ["Transaction", "RunToEnd", "SomeTxData"],
                 Tags = ["Transaction", "RunToEnd"],
                 InnerContext = fhStep.Context
+            
             };
             var fhTx = new FaultHubException("Transaction failed", fhStep, txCtx);
 
             var report = fhTx.Render();
             var reportLines = report.Split([Environment.NewLine], StringSplitOptions.None);
-
             var txLine = reportLines.FirstOrDefault(l => l.Contains("My Transaction"));
             txLine.ShouldNotBeNull();
             txLine.Trim().ShouldStartWith("Transaction RunToEnd: My Transaction");
             txLine.ShouldContain("[SomeTxData]");
-
             var stepLine = reportLines.FirstOrDefault(l => l.Contains("My Nested Step"));
             stepLine.ShouldNotBeNull();
             stepLine.Trim().ShouldContain("Step: My Nested Step");
@@ -246,7 +236,6 @@ namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest {
             }
 
             var result = exception.Render();
-
             if (errorCount == 1) {
                 result.ShouldContain("(Innermost failure)");
                 result.ShouldNotContain("1 times:");

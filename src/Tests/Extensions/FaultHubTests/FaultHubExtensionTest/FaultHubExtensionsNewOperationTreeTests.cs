@@ -9,7 +9,6 @@ using Shouldly;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.Reactive.Utility;
-
 namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest{
     public class FaultHubExtensionsNewOperationTreeTests:FaultHubExtensionTestBase {
          [Test]
@@ -21,7 +20,6 @@ namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest{
             var fhB = new FaultHubException("B failed", fhC, ctxB);
             var ctxA = new AmbientFaultContext { BoundaryName = "ApiLayer" };
             var fhA = new FaultHubException("A failed", fhB, ctxA);
-
             var result = fhA.NewOperationTree();
 
             result.Name.ShouldBe("ApiLayer");
@@ -39,7 +37,6 @@ namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest{
             var exA = new InvalidOperationException("Failure A");
             var ctxA = new AmbientFaultContext { BoundaryName = "BranchA" };
             var fhA = new FaultHubException("A failed", exA, ctxA);
-
             var exB = new InvalidOperationException("Failure B");
             var ctxB = new AmbientFaultContext { BoundaryName = "BranchB" };
             var fhB = new FaultHubException("B failed", exB, ctxB);
@@ -47,7 +44,6 @@ namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest{
             var aggEx = new AggregateException(fhA, fhB);
             var ctxRoot = new AmbientFaultContext { BoundaryName = "RootOperation" };
             var fhRoot = new FaultHubException("Root failed", aggEx, ctxRoot);
-
             var result = fhRoot.NewOperationTree();
 
             result.Name.ShouldBe("RootOperation");
@@ -55,37 +51,33 @@ namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest{
 
             var branchA = result.Children.Single(c => c.Name == "BranchA");
             branchA.GetRootCause().ShouldBe(exA);
-
             var branchB = result.Children.Single(c => c.Name == "BranchB");
             branchB.GetRootCause().ShouldBe(exB);
         }
 
         [Test]
-        public void Parses_Production_Scenario_Structure_Correctly() {
-            var exception = CreateProductionScenarioException();
-
+        public void Parses_Web_Scraping_Scenario_Structure_Correctly() {
+            var exception = CreateWebScrapingScenarioException();
             var result = exception.NewOperationTree();
 
-            result.Name.ShouldBe("ScheduleLaunchPadParse");
-            var parseLaunchPad = result.Children.Single();
-            parseLaunchPad.Name.ShouldBe("ParseLaunchPad");
-            var connect = parseLaunchPad.Children.Single();
-            connect.Name.ShouldBe("ConnectLaunchPad");
-            var parseUpcoming = connect.Children.Single();
-            parseUpcoming.Name.ShouldBe("ParseUpComing");
+            result.Name.ShouldBe("ScheduleWebScraping");
+            var parseHomePage = result.Children.Single();
+            parseHomePage.Name.ShouldBe("ParseHomePage");
+            var navigateToPage = parseHomePage.Children.Single();
+            navigateToPage.Name.ShouldBe("NavigateToPage");
+            var extractAndProcess = navigateToPage.Children.Single();
+            extractAndProcess.Name.ShouldBe("ExtractAndProcessLinks");
+            extractAndProcess.Children.Count.ShouldBe(2);
 
-            parseUpcoming.Children.Count.ShouldBe(2);
-
-            var whenUrls = parseUpcoming.Children.Single(c => c.Name == "WhenUpcomingUrls");
-            var webSite = whenUrls.Children.Single();
-            webSite.Name.ShouldBe("WebSiteUrls");
-            webSite.GetRootCause().Message.ShouldBe("Upcoming");
-
-            var parseProjects = parseUpcoming.Children.Single(c => c.Name == "ParseUpcomingProjects");
-            var startParsing = parseProjects.GetChild("WhenExistingProjectPageParsed")
-                                            .GetChild("ProjectParseTransaction")
-                                            .GetChild("StartParsing");
-            startParsing.GetRootCause().Message.ShouldBe("StartParsing");
+            var getPageLinks = extractAndProcess.Children.Single(c => c.Name == "GetPageLinks");
+            var fetchUrls = getPageLinks.Children.Single();
+            fetchUrls.Name.ShouldBe("FetchInitialUrls");
+            fetchUrls.GetRootCause().Message.ShouldBe("Failed to fetch URLs");
+            var scrapeData = extractAndProcess.Children.Single(c => c.Name == "ScrapeDataFromLinks");
+            var extractContent = scrapeData.GetChild("WhenLinkScraped")
+                                            .GetChild("DataExtractionTransaction")
+                                            .GetChild("ExtractContent");
+            extractContent.GetRootCause().Message.ShouldBe("Failed to extract content");
         }
 
         [Test]
@@ -97,7 +89,6 @@ namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest{
             var fhNoName = new FaultHubException("NoName failed", fhC, ctxNoName);
             var ctxA = new AmbientFaultContext { BoundaryName = "FirstStep" };
             var fhA = new FaultHubException("A failed", fhNoName, ctxA);
-
             var result = fhA.NewOperationTree();
 
             result.Name.ShouldBe("FirstStep");
@@ -107,34 +98,33 @@ namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest{
             finalStep.GetRootCause().ShouldBe(rootCause);
         }
 
-        private FaultHubException CreateProductionScenarioException() {
-            var upcomingEx = new InvalidOperationException("Upcoming");
-            var ctxWebSite = new AmbientFaultContext { BoundaryName = "WebSiteUrls" };
-            var fhWebSite = new FaultHubException("WebSiteUrls failed", upcomingEx, ctxWebSite);
-            var ctxWhenUpcoming = new AmbientFaultContext { BoundaryName = "WhenUpcomingUrls" };
-            var fhWhenUpcoming = new FaultHubException("WhenUpcomingUrls failed", fhWebSite, ctxWhenUpcoming);
-            
-            var startParsingEx = new InvalidOperationException("StartParsing");
+        private FaultHubException CreateWebScrapingScenarioException() {
+            var urlsEx = new InvalidOperationException("Failed to fetch URLs");
+            var ctxFetchUrls = new AmbientFaultContext { BoundaryName = "FetchInitialUrls" };
+            var fhFetchUrls = new FaultHubException("FetchInitialUrls failed", urlsEx, ctxFetchUrls);
+            var ctxGetPageLinks = new AmbientFaultContext { BoundaryName = "GetPageLinks" };
+            var fhGetPageLinks = new FaultHubException("GetPageLinks failed", fhFetchUrls, ctxGetPageLinks);
+            var extractContentEx = new InvalidOperationException("Failed to extract content");
 
-            var ctxStartParsing = new AmbientFaultContext { BoundaryName = "StartParsing" };
-            var fhStartParsing = new FaultHubException("StartParsing failed", startParsingEx, ctxStartParsing);
-            var ctxProjectTx = new AmbientFaultContext { BoundaryName = "ProjectParseTransaction" };
-            var fhProjectTx = new FaultHubException("ProjectParseTransaction failed", fhStartParsing, ctxProjectTx);
-            var ctxWhenExisting = new AmbientFaultContext { BoundaryName = "WhenExistingProjectPageParsed" };
-            var fhWhenExisting = new FaultHubException("WhenExisting... failed", fhProjectTx, ctxWhenExisting);
-            var ctxParseProjects = new AmbientFaultContext { BoundaryName = "ParseUpcomingProjects" };
-            var fhParseProjects = new FaultHubException("ParseUpcomingProjects failed", fhWhenExisting, ctxParseProjects);
+            var ctxExtractContent = new AmbientFaultContext { BoundaryName = "ExtractContent" };
+            var fhExtractContent = new FaultHubException("ExtractContent failed", extractContentEx, ctxExtractContent);
+            var ctxDataExtractionTx = new AmbientFaultContext { BoundaryName = "DataExtractionTransaction" };
+            var fhDataExtractionTx = new FaultHubException("DataExtractionTransaction failed", fhExtractContent, ctxDataExtractionTx);
+            var ctxWhenLinkScraped = new AmbientFaultContext { BoundaryName = "WhenLinkScraped" };
+            var fhWhenLinkScraped = new FaultHubException("WhenLinkScraped... failed", fhDataExtractionTx, ctxWhenLinkScraped);
+            var ctxScrapeData = new AmbientFaultContext { BoundaryName = "ScrapeDataFromLinks" };
+            var fhScrapeData = new FaultHubException("ScrapeDataFromLinks failed", fhWhenLinkScraped, ctxScrapeData);
 
-            var aggEx = new AggregateException(fhWhenUpcoming, fhParseProjects);
-            var ctxParseUpcoming = new AmbientFaultContext { BoundaryName = "ParseUpComing" };
-            var fhParseUpcoming = new FaultHubException("ParseUpComing failed", aggEx, ctxParseUpcoming);
-            var ctxConnect = new AmbientFaultContext { BoundaryName = "ConnectLaunchPad" };
-            var fhConnect = new FaultHubException("Connect... failed", fhParseUpcoming, ctxConnect);
-            var ctxParseLaunchPad = new AmbientFaultContext { BoundaryName = "ParseLaunchPad" };
-            var fhParseLaunchPad = new FaultHubException("ParseLaunchPad failed", fhConnect, ctxParseLaunchPad);
-            var ctxSchedule = new AmbientFaultContext { BoundaryName = "ScheduleLaunchPadParse" };
+            var aggEx = new AggregateException(fhGetPageLinks, fhScrapeData);
+            var ctxExtractAndProcess = new AmbientFaultContext { BoundaryName = "ExtractAndProcessLinks" };
+            var fhExtractAndProcess = new FaultHubException("ExtractAndProcessLinks failed", aggEx, ctxExtractAndProcess);
+            var ctxNavigateToPage = new AmbientFaultContext { BoundaryName = "NavigateToPage" };
+            var fhNavigateToPage = new FaultHubException("Navigate... failed", fhExtractAndProcess, ctxNavigateToPage);
+            var ctxParseHomePage = new AmbientFaultContext { BoundaryName = "ParseHomePage" };
+            var fhParseHomePage = new FaultHubException("ParseHomePage failed", fhNavigateToPage, ctxParseHomePage);
+            var ctxSchedule = new AmbientFaultContext { BoundaryName = "ScheduleWebScraping" };
             
-            return new FaultHubException("ScheduleLaunchPadParse failed", fhParseLaunchPad, ctxSchedule);
+            return new FaultHubException("ScheduleWebScraping failed", fhParseHomePage, ctxSchedule);
         }
         [Test]
         public void RootCause_Returns_Exception_When_Called_From_Root_Node() {
@@ -163,7 +153,8 @@ namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest{
                 ("Level 1 Operation", null),
                 ("Level 2 Business Logic", null),
                 ("Level 3 Data Access", null)
-            );
+       
+             );
 
             var result = exception.NewOperationTree();
 
@@ -186,7 +177,6 @@ namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest{
                 ("Process Order", ["OrderID: 123"]),
                 ("Validate Customer", ["CustomerID: 456", true])
             );
-
             var result = exception.NewOperationTree();
 
             result.ShouldNotBeNull();
@@ -203,7 +193,6 @@ namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest{
             var exception = CreateNestedFault(
                 ("Single Operation", ["Data"])
             );
-
             var result = exception.NewOperationTree();
 
             result.ShouldNotBeNull();
@@ -240,7 +229,6 @@ namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest{
             
             var innerNode = result.Children.ShouldHaveSingleItem();
             innerNode.Name.ShouldBe("InnerBoundary");
-
             var logicalStack = innerNode.GetLogicalStack();
 
             var expectedStack = innerStack.Concat(outerStack).ToList();
@@ -252,30 +240,25 @@ namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest{
             Observable.Throw<Unit>(new InvalidOperationException("Root Cause"))
                 .PushStackFrame()
                 .ChainFaultContext();
-
         [MethodImpl(MethodImplOptions.NoInlining)]
         private IObservable<Unit> Level2_Calls_Level3() =>
             Level3_Fails()
                 .PushStackFrame()
                 .ChainFaultContext();
-
         [MethodImpl(MethodImplOptions.NoInlining)]
         private IObservable<Unit> Level1_Calls_Level2() =>
             Level2_Calls_Level3()
                 .PushStackFrame()
                 .ChainFaultContext();
-
         [Test]
         public void NewOperationTree_Builds_Full_Hierarchy_From_Live_ChainFaultContext_Operators() {
             FaultHubException capturedFault = null;
-
             Level1_Calls_Level2()
                 .Catch((FaultHubException ex) => {
                     capturedFault = ex;
                     return Observable.Empty<Unit>();
                 })
                 .Subscribe();
-
             var fault = capturedFault.ShouldNotBeNull();
             
             var tree = fault.NewOperationTree();
@@ -289,7 +272,6 @@ namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest{
 
             var nodeC = nodeB.Children.ShouldHaveSingleItem();
             nodeC.Name.ShouldBe(nameof(Level3_Fails));
-            
             nodeC.GetRootCause().ShouldBeOfType<InvalidOperationException>();
         }
 
@@ -317,7 +299,6 @@ namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest{
             result.Name.ShouldBe("TopLevel");
 
             result.Children.Count.ShouldBe(2);
-
             var branchA = result.Children.Single(n => n.Name == "RedundantNode");
             var leafA = branchA.Children.ShouldHaveSingleItem();
             leafA.Name.ShouldBe("LeafA");
@@ -358,19 +339,16 @@ namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest{
                 BoundaryName = "BranchA",
                 LogicalStackTrace = [new LogicalStackFrame("FrameA", "", 0)]
             });
-
             var exB = new InvalidOperationException("Failure B");
             var fhB = new FaultHubException("B failed", exB, new AmbientFaultContext {
                 BoundaryName = "BranchB",
                 LogicalStackTrace = [new LogicalStackFrame("FrameB", "", 0)]
             });
-
             var aggEx = new AggregateException(fhA, fhB);
             var topException = new FaultHubException("Root failed", aggEx, new AmbientFaultContext {
                 BoundaryName = "RootOperation",
                 LogicalStackTrace = [new LogicalStackFrame("RootFrame", "", 0)]
             });
-
             var result = topException.NewOperationTree();
 
             var branchA = result.Children.Single(c => c.Name == "BranchA");
@@ -409,17 +387,16 @@ namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest{
         [Test]
         public void NewOperationTree_Correctly_Collapses_Nodes_With_Prefixed_Names() {
             var innerEx = new InvalidOperationException("Root Cause");
-            var innerCtx = new AmbientFaultContext { BoundaryName = "ParseUpComing" };
+            var innerCtx = new AmbientFaultContext { BoundaryName = "ExtractAndProcessLinks" };
             var fhInner = new FaultHubException("Inner fail", innerEx, innerCtx);
-
-            var outerCtx = new AmbientFaultContext { BoundaryName = "serviceModule.ParseUpComing", InnerContext = fhInner.Context };
+            var outerCtx = new AmbientFaultContext { BoundaryName = "scraperService.ExtractAndProcessLinks", InnerContext = fhInner.Context };
             var fhOuter = new FaultHubException("Outer fail", fhInner, outerCtx);
 
             var result = fhOuter.NewOperationTree();
 
             result.ShouldNotBeNull();
-            result.Name.ShouldBe("serviceModule.ParseUpComing");
-            result.Children.ShouldBeEmpty("The child node 'ParseUpComing' should have been collapsed into its parent 'serviceModule.ParseUpComing'.");
+            result.Name.ShouldBe("scraperService.ExtractAndProcessLinks");
+            result.Children.ShouldBeEmpty("The child node 'ExtractAndProcessLinks' should have been collapsed into its parent 'scraperService.ExtractAndProcessLinks'.");
             result.GetRootCause().ShouldBe(innerEx);
         }
         
@@ -428,7 +405,6 @@ namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest{
             var innerEx = new InvalidOperationException("Inner Failure");
             var innerCtx = new AmbientFaultContext { BoundaryName = "InnerOperation" };
             var fhInner = new FaultHubException("Inner fail", innerEx, innerCtx);
-
             var outerCtx = new AmbientFaultContext { BoundaryName = "service.InnerOperation", InnerContext = fhInner.Context };
             var fhOuter = new FaultHubException("Step fail", fhInner, outerCtx);
 
@@ -445,15 +421,12 @@ namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest{
             => Observable.Throw<Unit>(new InvalidOperationException("Inner Failure"))
                 .BeginWorkflow("InnerTx")
                 .RunToEnd();
-        
-
         [Test]
         public async Task Nested_Transaction_As_Step_Is_Tagged_As_Both_Step_And_Transaction() {
             var transaction = Observable.Return(Unit.Default)
                 .BeginWorkflow("OuterTx")
                 .Then(_ => InnerFailingTransaction_For_Tagging())
                 .RunToEnd();
-
             await transaction.PublishFaults().Capture();
             var finalFault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
 
@@ -461,7 +434,6 @@ namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest{
 
             var nestedNode = tree.Children.ShouldHaveSingleItem();
             nestedNode.Name.ShouldBe(nameof(InnerFailingTransaction_For_Tagging));
-
             nestedNode.Tags.ShouldContain(Combine.StepNodeTag, "The node should be tagged as a Step because it was used in a .Then() clause.");
             nestedNode.Tags.ShouldContain(Combine.TransactionNodeTag, "The node should be tagged as a Transaction because it was created with BeginWorkflow().");
         }

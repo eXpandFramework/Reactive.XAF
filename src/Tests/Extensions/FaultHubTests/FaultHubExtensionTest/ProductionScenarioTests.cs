@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿// --- Full File: C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioTests.cs ---
+
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using NUnit.Framework;
@@ -15,8 +17,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest {
         [Test][Apartment(ApartmentState.STA)]
         public async Task Replicates_Production_Report_Issue() {
             
-            await ScheduleLaunchPadParse().PublishFaults().Capture();
-
+            await ScheduleWebScraping().PublishFaults().Capture();
             BusEvents.Count.ShouldBe(1);
             var abortedException = BusEvents.Single().ShouldBeOfType<TransactionAbortedException>();
             var finalReport = abortedException;
@@ -25,7 +26,6 @@ namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest {
 
             AssertFaultExceptionReport(finalReport.ToString());
             reportLines.ShouldNotContain(line => line.Contains("Sequential Transaction"));
-
         }
 
         

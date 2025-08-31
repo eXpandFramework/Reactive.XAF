@@ -5,118 +5,107 @@ using System.Runtime.CompilerServices;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.Reactive.Transform;
-
 namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest{
     public abstract class ProductionScenarioBaseTest:FaultHubTestBase {
-        #region Mock Production Methods (Refactored without WithName)
+        #region Mock Production Methods (Refactored)
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        protected IObservable<Unit> ScheduleLaunchPadParse()
-            => ParseLaunchPad()
+        protected IObservable<Unit> ScheduleWebScraping()
+            => ParseHomePage()
                 .PushStackFrame(["Scheduled Context"])
-                .ChainFaultContext(["LaunchPadName"]);
-
+                .ChainFaultContext(["HomePageUrl"]);
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private IObservable<Unit> ParseLaunchPad()
+        private IObservable<Unit> ParseHomePage()
             => Observable.Return("serviceModule")
                 .SelectMany(_ => Observable.Return("pageParsed")
                         .BeginWorkflow()
-                        .Then(ConnectLaunchPad())
-                        .Then(ParseUpComing())
+                        .Then(NavigateToHomePage())
+           
+                     .Then(ExtractAndProcessLinks())
                         .RunFailFast()
                         .ToUnit()
                 )
-                .PushStackFrame(["LaunchPadName"]);
-
+                .PushStackFrame(["HomePageUrl"]);
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private IObservable<Unit> ConnectWallet() => Observable.Return(Unit.Default);
-
+        private IObservable<Unit> AcceptCookies() => Observable.Return(Unit.Default);
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private IObservable<Unit> ConnectLaunchPad()
+        private IObservable<Unit> NavigateToHomePage()
             => Observable.Return("navigated")
-                .BeginWorkflow("ConnectLaunchPad", context:["LaunchPadName","UserName"])
-                .Then(ConnectWallet())
+                .BeginWorkflow("NavigateToHomePage", context:["HomePageUrl","UserAgent"])
+                .Then(AcceptCookies())
                 .RunFailFast()
                 .ToUnit()
         ;
-        
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private IObservable<Unit> ParseUpComing()
+        private IObservable<Unit> ExtractAndProcessLinks()
             => Observable.Return(new object[1])
-                .BeginWorkflow(context:["LaunchPadName","UserName"])
-                .Then(_ => WhenUpcomingUrls())
-                .Then(_ => ParseUpcomingProjects())
+                .BeginWorkflow(context:["HomePageUrl","UserAgent"])
+                .Then(_ => GetPageLinks())
+                .Then(_ => ScrapeDataFromLinks())
                 .RunToEnd()
-                .ToUnit()
-        ;
         
+                 .ToUnit()
+        ;
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private IObservable<string> WebSiteUrls() => Observable.Timer(TimeSpan.FromMilliseconds(240)).SelectMany(_ => Observable.Throw<string>(new Exception("Upcoming")));
-
+        private IObservable<string> FetchInitialUrls() => Observable.Timer(TimeSpan.FromMilliseconds(240)).SelectMany(_ => Observable.Throw<string>(new Exception("Failed to fetch URLs")));
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private IObservable<string[]> ExistingUpcomingUrl(string[] _) => Observable.Return(Array.Empty<string>());
-
+        private IObservable<string[]> FilterExistingUrls(string[] _) => Observable.Return(Array.Empty<string>());
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private IObservable<string[]> WhenUpcomingUrls()
+        private IObservable<string[]> GetPageLinks()
             => Observable.Return(new object[1])
                 .BeginWorkflow()
-                .Then(_ => WebSiteUrls())
-                .Then(ExistingUpcomingUrl)
+                .Then(_ => FetchInitialUrls())
+                .Then(FilterExistingUrls)
                 .RunToEnd()
-                .SelectMany() ;
+          
+               .SelectMany() ;
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private IObservable<Unit> ParseUpcomingProjects()
-            => new[] { ParseUpComingProject() }
-                .BeginWorkflow("ParseUpcomingProjects", TransactionMode.Sequential)
+        private IObservable<Unit> ScrapeDataFromLinks()
+            => new[] { ScrapeDataFromLink() }
+                .BeginWorkflow("ScrapeDataFromLinks", TransactionMode.Sequential)
                 .RunToEnd()
                 .ToUnit() ;
-
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private IObservable<Unit> ParseUpComingProject()
-            => Observable.Return("project")
-                .SelectMany(_ => ParseUpComingProjectsPlural())
+        private IObservable<Unit> ScrapeDataFromLink()
+            => Observable.Return("content")
+                .SelectMany(_ => ScrapeAllLinks())
                 .BufferUntilCompleted().SelectMany();
-        
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private IObservable<Unit> ParseUpComingProjectsPlural()
-            => WhenExistingProjectPageParsed();
-
+        private IObservable<Unit> ScrapeAllLinks()
+            => WhenLinkScraped();
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private IObservable<Unit> WhenExistingProjectPageParsed()
-            => ProjectParseTransaction()
-                .BeginWorkflow("WhenExistingProjectPageParsed")
-                .Then(NotifyingTransaction())
+        private IObservable<Unit> WhenLinkScraped()
+            => DataExtractionTransaction()
+                .BeginWorkflow("WhenLinkScraped")
+                .Then(NotificationTransaction())
                 .RunToEnd()
                 .ToUnit() ;
-        
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private IObservable<Unit> Validate() => Observable.Return(Unit.Default);
+        private IObservable<Unit> ValidatePage() => Observable.Return(Unit.Default);
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private IObservable<Unit> StartParsing() => Observable.Timer(TimeSpan.FromMilliseconds(200)).SelectMany(_ => Observable.Throw<Unit>(new Exception("StartParsing")));
+        private IObservable<Unit> ExtractContent() => Observable.Timer(TimeSpan.FromMilliseconds(200)).SelectMany(_ => Observable.Throw<Unit>(new Exception("Failed to extract content")));
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private IObservable<Unit> ParseNetwork() => Observable.Return(Unit.Default);
-
+        private IObservable<Unit> ParseMetadata() => Observable.Return(Unit.Default);
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private IObservable<Unit> ProjectParseTransaction()
-            => Validate()
-                .BeginWorkflow("ProjectParseTransaction")
-                .Then(StartParsing())
-                .Then(ParseNetwork())
+        private IObservable<Unit> DataExtractionTransaction()
+            => ValidatePage()
+                .BeginWorkflow("DataExtractionTransaction")
+                .Then(ExtractContent())
+                .Then(ParseMetadata())
                 .RunToEnd()
-                .ToUnit();
+             
+                   .ToUnit();
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private IObservable<Unit> NotifyNewRounds() => Observable.Return(Unit.Default);
-
+        private IObservable<Unit> NotifyNewData() => Observable.Return(Unit.Default);
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private IObservable<Unit> NotifyingTransaction()
+        private IObservable<Unit> NotificationTransaction()
             => Observable.Return(Unit.Default)
-                .BeginWorkflow("NotifyingTransaction")
-                .Then(NotifyNewRounds())
+                .BeginWorkflow("NotificationTransaction")
+                .Then(NotifyNewData())
                 .RunToEnd()
                 .ToUnit() ;
-        
         #endregion
     }
 }

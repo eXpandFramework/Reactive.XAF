@@ -1,17 +1,17 @@
-Schedule Launch Pad Parse completed with errors [Kommunitas Kommunitas] (2 times: Upcoming • StartParsing)
-└ Parse Up Coming (LaunchPad kommunitas)
-  ├ When Upcoming Urls
-  │ • Root Cause: System.Exception: Upcoming
+Schedule Web Scraping completed with errors [Example.com] (2 times: Failed to get links • Failed to extract content)
+└ Extract And Process Links (Main Site)
+  ├ Get Page Links
+  │ • Root Cause: System.Exception: Failed to get links
   │   --- Invocation Stack ---
-  │     at WhenUpcomingUrls in Services\LaunchPadProjectPageParseService.cs:line 582
+  │     at GetPageLinks in Services\WebScrapingService.cs:line 582
   │   --- Original Exception Details ---
-  │     System.Exception: Upcoming
-  └ Parse Upcoming Projects
-    └ When Existing Project Page Parsed
-      └ Project Parse Transaction
-        └ Start Parsing (driver, padProject)
-          • Root Cause: System.Exception: StartParsing
+  │     System.Exception: Failed to get links
+  └ Scrape Data From Links
+    └ When Link Scraped
+      └ Data Extraction Transaction
+        └ Extract Content (browser, pageContent)
+          • Root Cause: System.Exception: Failed to extract content
             --- Invocation Stack ---
-              (MyDynamicValue) at StartParsing in Services\LaunchPadProjectPageParseService.cs:line 1228
+              (MyDynamicValue) at ExtractContent in Services\WebScrapingService.cs:line 1228
             --- Original Exception Details ---
-              System.Exception: StartParsing
+              System.Exception: Failed to extract content
