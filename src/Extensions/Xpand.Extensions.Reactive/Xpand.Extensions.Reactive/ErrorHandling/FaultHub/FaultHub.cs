@@ -84,16 +84,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
             if (ex is FaultHubException fault) {
                 Log(() => $"[HUB-TRACE][Publish] Publishing with final context: '{fault.Context.UserContext.JoinCommaSpace()}'");
             }
-            var (action, correlationId) = ex.AccessData(data => {
-                if (data.Contains(PublishedKey)) return (PublishAction.StopAndReturnTrue, Guid.Empty);
-                data[PublishedKey] = new object();
-                if (!data.Contains(KeyCId) && Ctx.Value.HasValue) {
-                    data[KeyCId] = Ctx.Value;
-                }
-                if (data.Contains(SkipKey)) return (PublishAction.StopAndReturnFalse, Guid.Empty);
-                ex.TagOrigin();
-                return (PublishAction.Continue, (data[KeyCId] as Guid? ?? Guid.Empty));
-            });
+            var (action, correlationId) = ex.EvaluatePublishCriteria();
             switch (action) {
                 case PublishAction.StopAndReturnTrue: return true;
                 case PublishAction.StopAndReturnFalse: return false;
@@ -109,6 +100,15 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
             }
             return true;
         }
+
+        private static (PublishAction action, Guid correlationId) EvaluatePublishCriteria(this Exception ex) => ex.AccessData(data => {
+            if (data.Contains(PublishedKey)) return (PublishAction.StopAndReturnTrue, Guid.Empty);
+            data[PublishedKey] = new object();
+            if (!data.Contains(KeyCId) && Ctx.Value.HasValue) data[KeyCId] = Ctx.Value;
+            if (data.Contains(SkipKey)) return (PublishAction.StopAndReturnFalse, Guid.Empty);
+            ex.TagOrigin();
+            return (PublishAction.Continue, (data[KeyCId] as Guid? ?? Guid.Empty));
+        });
 
         public static IObservable<T> Publish<T>(this Exception ex) {
             var publish = ex.Publish();
@@ -179,30 +179,35 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
             var enrichedException = ex.ExceptionToPublish(faultContext);
             var (localAction, muteOnRethrow) = ex.GetFaultResult();
             Log(() => $"[HUB][{nameof(ProcessFault)}] Local handler check resulted in action: '{(localAction, muteOnRethrow)}'.");
-
             if (ex.IsSkipped()) {
                 Log(() => $"[HUB][{nameof(ProcessFault)}] {nameof(MuteForBus)} '{faultContext.Name}'.");
                 enrichedException.MuteForBus();
             }
-
-            if (localAction == FaultResult.Complete) {
-                Log(() => $"[HUB][{nameof(ProcessFault)}] Honoring local 'Complete' action.");
-                if (!enrichedException.IsSkipped()) {
-                    enrichedException.Publish();
-                }
-                return Observable.Empty<T>();
-            }
-
-            if (localAction == FaultResult.Rethrow) {
-                Log(() => $"[HUB][{nameof(ProcessFault)}] Honoring local 'Rethrow' action.");
-                if (muteOnRethrow) {
-                    enrichedException.MuteForBus();
-                }
-                return Observable.Throw<T>(enrichedException);
-            }
-            return proceedAction(enrichedException);
+            return enrichedException.ProcessFault(proceedAction, localAction,  muteOnRethrow);
         }
-    
+
+        private static IObservable<T> ProcessFault<T>(this FaultHubException e,Func<FaultHubException, IObservable<T>> proceedAction, FaultResult localAction, bool muteOnRethrow){
+            switch (localAction) {
+                case FaultResult.Complete:
+                    Log(() => $"[HUB][{nameof(ProcessFault)}] Honoring local 'Complete' action.");
+                    if (!e.IsSkipped()) {
+                        e.Publish();
+                    }
+                    return Observable.Empty<T>();
+
+                case FaultResult.Rethrow:
+                    Log(() => $"[HUB][{nameof(ProcessFault)}] Honoring local 'Rethrow' action.");
+                    if (muteOnRethrow) {
+                        e.MuteForBus();
+                    }
+                    return Observable.Throw<T>(e);
+
+                case FaultResult.Proceed:
+                default:
+                    return proceedAction(e);
+            }
+        }
+
         internal static object[] AddToContext(this object[] context, params object[] items) 
             => items.Concat(context ?? Enumerable.Empty<object>()).ToArray();
         

@@ -13,7 +13,6 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
         public virtual bool Equals(AmbientFaultContext other) {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
-
             return Equals(InnerContext, other.InnerContext) &&
                    string.Equals(BoundaryName, other.BoundaryName) &&
                    (LogicalStackTrace ?? Enumerable.Empty<LogicalStackFrame>()).SequenceEqual(other.LogicalStackTrace ?? Enumerable.Empty<LogicalStackFrame>()) &&
@@ -25,24 +24,9 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
             var hashCode = new HashCode();
             hashCode.Add(InnerContext);
             hashCode.Add(BoundaryName);
-
-            if (LogicalStackTrace != null) {
-                foreach (var frame in LogicalStackTrace) {
-                    hashCode.Add(frame);
-                }
-            }
-
-            if (UserContext != null) {
-                foreach (var item in UserContext) {
-                    hashCode.Add(item);
-                }
-            }
-
-            if (Tags != null) {
-                foreach (var item in Tags) {
-                    hashCode.Add(item);
-                }
-            }
+            LogicalStackTrace?.Do(hashCode.Add).Enumerate();
+            UserContext?.Do(hashCode.Add).Enumerate();
+            Tags?.Do(hashCode.Add).Enumerate();
             return hashCode.ToHashCode();
         }
 
@@ -50,13 +34,9 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
         public object Name {
             get {
                 var userCtx = UserContext?.FirstOrDefault()?.ToString();
-                var boundary = BoundaryName;
-
-                if (!string.IsNullOrEmpty(userCtx) && !string.IsNullOrEmpty(boundary) &&
-                    userCtx.Replace(" ", "") != boundary.Replace(" ", "")) {
-                    return $"{userCtx} {boundary}";
-                }
-                return userCtx ?? boundary ?? "Unknown";
+                return !string.IsNullOrEmpty(userCtx) && !string.IsNullOrEmpty(BoundaryName) &&
+                       userCtx.Remove(" ") != BoundaryName.Remove(" ")
+                    ? $"{userCtx} {BoundaryName}" : userCtx ?? BoundaryName ?? "Unknown";
             }
         }
         public string BoundaryName { get; init; }
@@ -74,11 +54,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
             var hashCode = new HashCode();
             hashCode.Add(MemberName);
             hashCode.Add(FilePath);
-            if (context != null) {
-                foreach (var item in context) {
-                    hashCode.Add(item);
-                }
-            }
+            context?.Do(hashCode.Add).Enumerate();
             return hashCode.ToHashCode();
         }
         
