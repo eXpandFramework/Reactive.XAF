@@ -8,9 +8,9 @@ using Shouldly;
 using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.Reactive.Utility;
 
-namespace Xpand.Extensions.Tests.FaultHubTests._2_ResilienceModels {
+namespace Xpand.Extensions.Tests.FaultHubTests.ResilienceModels {
     [TestFixture]
-    public class Resilience_ContinueOnFault_Tests  : FaultHubTestBase {
+    public class ContinueOnFaultTests  : FaultHubTestBase {
         [Test]
         public async Task Suppresses_Error_Publishes_To_Bus_And_Captures_Caller_Context_Synchronously() {
             var source = Observable.Throw<int>(new InvalidOperationException("Sync Failure"));

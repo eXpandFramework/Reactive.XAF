@@ -10,9 +10,9 @@ using Shouldly;
 using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.Reactive.Utility;
 
-namespace Xpand.Extensions.Tests.FaultHubTests._1_Core {
+namespace Xpand.Extensions.Tests.FaultHubTests.Core {
     [TestFixture]
-    public class CorePushStackFrameTests : FaultHubTestBase {
+    public class PushStackFrameTests : FaultHubTestBase {
         [Test]
         public void PushStackFrame_Correctly_Appends_To_Existing_Logical_Stack() {
             

@@ -9,7 +9,7 @@ using Shouldly;
 using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.Reactive.Utility;
 
-namespace Xpand.Extensions.Tests.FaultHubTests.POC {
+namespace Xpand.Extensions.Tests.FaultHubTests.ProofOfConcepts {
     [TestFixture]
     public class ChainedItemResiliencePocTest : FaultHubTestBase {
         [MethodImpl(MethodImplOptions.NoInlining)]

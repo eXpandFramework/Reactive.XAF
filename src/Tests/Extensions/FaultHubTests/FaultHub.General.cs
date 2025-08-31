@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading.Tasks;
@@ -14,9 +15,80 @@ using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 
-namespace Xpand.Extensions.Tests.FaultHubTests{
-    public class FaultHubTests : FaultHubTestBase {
-        [Test]
+namespace Xpand.Extensions.Tests.FaultHubTests {
+[TestFixture]
+public class FaultHub_General : FaultHubTestBase {
+    [Test]
+    public async Task FaultHub_Context_Flows_Across_Schedulers() {
+        var asyncStream = Observable.Throw<Unit>(new InvalidOperationException("Async Error"))
+            .SubscribeOn(TaskPoolScheduler.Default);
+            
+        var streamWithContext = asyncStream.ChainFaultContext(["MainThreadContext"]);
+            
+        await streamWithContext.PublishFaults().Capture();
+            
+        BusEvents.Count.ShouldBe(1);
+
+        var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
+        fault.Context.UserContext.ShouldContain("MainThreadContext");
+        fault.InnerException.ShouldBeOfType<InvalidOperationException>();
+    }
+        
+    [Test]
+    public async Task FaultHub_Context_Is_Isolated_In_Concurrent_Operations() {
+        var streamA = Observable.Throw<Unit>(new InvalidOperationException("Error A"));
+        var streamB = Observable.Throw<Unit>(new InvalidOperationException("Error B"));
+        var resilientStreamA = streamA.ChainFaultContext(["ContextA"]).PublishFaults();
+        var resilientStreamB = streamB.ChainFaultContext(["ContextB"]).PublishFaults();
+
+        var mergedStream = resilientStreamA.Merge(resilientStreamB);
+            
+        await mergedStream.Capture();
+            
+        BusEvents.Count.ShouldBe(2);
+
+        var faults = BusEvents.OfType<FaultHubException>().ToArray();
+        faults.Length.ShouldBe(2);
+            
+        faults.SelectMany(f => f.Context.UserContext).ShouldContain("ContextA");
+        faults.SelectMany(f => f.Context.UserContext).ShouldContain("ContextB");
+    }
+        
+    [Test]
+    public async Task FaultHub_Context_Is_Preserved_During_Async_Retries() {
+        var attemptCount = 0;
+        var failingStream = Observable.Defer(() => {
+            attemptCount++;
+            return Observable.Throw<Unit>(new InvalidOperationException("Retryable Error"));
+        });
+            
+        var streamWithContext = failingStream.ChainFaultContext(source=>source.RetryWithBackoff(3, _ => 10.Milliseconds()), ["AsyncRetryContext"]);
+            
+        await streamWithContext.PublishFaults().Capture();
+            
+        attemptCount.ShouldBe(3);
+            
+        BusEvents.Count.ShouldBe(1);
+            
+        var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
+        fault.Context.UserContext.ShouldContain("AsyncRetryContext");
+        fault.InnerException.ShouldBeOfType<InvalidOperationException>();
+    }
+
+    [Test]
+    public async Task Preserves_Origin_StackTrace_For_Asynchronous_Exception_Without_StackTrace() {
+        var source = Observable.Timer(TimeSpan.FromMilliseconds(20))
+            .SelectMany(_ => Observable.Throw<Unit>(new InvalidOperationException("Async stackless fail")));
+            
+        await source.ContinueOnFault().Capture();
+            
+        BusEvents.Count.ShouldBe(1);
+        var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
+        
+        fault.LogicalStackTrace.ShouldContain(f => f.MemberName == nameof(Preserves_Origin_StackTrace_For_Asynchronous_Exception_Without_StackTrace));
+    }
+    
+            [Test]
         public async Task Exceptions_emitted_from_FaultHub() {
             var stream = Observable.Throw<Unit>(new Exception()).ContinueOnFault().PublishFaults();
             var result = await stream.Capture();
@@ -195,51 +267,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
             BusEvents.ShouldBeEmpty();
         }
         
-        [Test]
-        public async Task Nested_ChainFaultContext_Correctly_Stacks_Context() {
-            var innerOperation = Observable.Throw<Unit>(new InvalidOperationException("Failure"))
-                .ChainFaultContext(["InnerContext"]);
-            
-            var fullOperation = innerOperation.ChainFaultContext(["OuterContext"]);
-            
-            var result = await fullOperation.PublishFaults().Capture();
-            
-            result.IsCompleted.ShouldBe(true);
-            result.Error.ShouldBeNull();
-
-            
-            BusEvents.Count.ShouldBe(1);
-            var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
-            
-            var allContexts = fault.AllContexts.ToArray();
-            var expectedContexts = new Object[] {
-                nameof(Nested_ChainFaultContext_Correctly_Stacks_Context),"OuterContext",
-                nameof(Nested_ChainFaultContext_Correctly_Stacks_Context),"InnerContext"
-            };
-            allContexts.ShouldBe(expectedContexts);
-        }
     
         
-        [Test]
-        public async Task Outerstream_Operator_Takes_Over_And_Stacks_Context() {
-            var opAAttemptCounter = 0;
-            var opA = Observable.Defer(() => {
-                    opAAttemptCounter++;
-                    return Observable.Throw<int>(new InvalidOperationException("opA failed"));
-                })
-                .ChainFaultContext(source => source.Retry(2), ["opA"]);
-            var fullChain = opA.ChainFaultContext(["opB"]);
 
-            var result = await fullChain.PublishFaults().Capture();
-
-            opAAttemptCounter.ShouldBe(2);
-            BusEvents.Count.ShouldBe(1);
-            var finalException = BusEvents.Cast<FaultHubException>().Single();
-            finalException.AllContexts.Distinct()
-                .ShouldBe([nameof(Outerstream_Operator_Takes_Over_And_Stacks_Context), "opB", "opA"]);
-            result.Error.ShouldBeNull();
-            result.IsCompleted.ShouldBe(true);
-        }
-    }
-        
-    }
+}}

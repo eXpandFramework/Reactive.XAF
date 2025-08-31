@@ -9,9 +9,9 @@ using Shouldly;
 using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.Reactive.Utility;
 
-namespace Xpand.Extensions.Tests.FaultHubTests._1_Core {
+namespace Xpand.Extensions.Tests.FaultHubTests.Core {
     [TestFixture]
-    public class CoreChainFaultContextTests  : FaultHubTestBase {
+    public class ChainFaultContextTests  : FaultHubTestBase {
         
 
         [MethodImpl(MethodImplOptions.NoInlining)]

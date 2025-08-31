@@ -9,8 +9,8 @@ using Shouldly;
 using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.Reactive.Utility;
 
-namespace Xpand.Extensions.Tests.FaultHubTests._3_TransactionalApi {
-    public class TransactionalApi_Tagging_Tests  : FaultHubTestBase {
+namespace Xpand.Extensions.Tests.FaultHubTests.TransactionalApi {
+    public class TransactionalApiTaggingTests  : FaultHubTestBase {
         [Test]
         public async Task RunToEnd_Adds_Sequential_And_RunToEnd_Tags() {
             var transaction = Observable.Throw<Unit>(new InvalidOperationException("test"))

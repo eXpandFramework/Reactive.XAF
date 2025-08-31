@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -11,8 +10,8 @@ using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest;
 
-namespace Xpand.Extensions.Tests.FaultHubTests._4_Diagnostics {
-    public class Diagnostics_NewOPerationTree_Tests:FaultHubExtensionTestBase {
+namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics {
+    public class DiagnosticsNewOperationTreeTests:FaultHubExtensionTestBase {
          [Test]
         public void Parses_Simple_Linear_Chain_Correctly() {
             var rootCause = new InvalidOperationException("DB Error");

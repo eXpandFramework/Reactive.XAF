@@ -8,10 +8,9 @@ using Shouldly;
 using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.Reactive.Transform;
 
-namespace Xpand.Extensions.Tests.FaultHubTests {
-    [TestFixture]
-    public class ProcessEventTest : FaultHubTestBase {
-        private class TestEventSource {
+namespace Xpand.Extensions.Tests.FaultHubTests.Integrations {
+    public class IntegrationsProcessEvent:FaultHubTestBase {
+                private class TestEventSource {
             public event EventHandler<EventArgs> MyEvent;
 
             public void RaiseEvent() {

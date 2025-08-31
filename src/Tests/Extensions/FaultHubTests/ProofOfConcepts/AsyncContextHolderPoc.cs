@@ -10,7 +10,7 @@ using Xpand.Extensions.Numeric;
 using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.TestsLib.Common;
 
-namespace Xpand.Extensions.Tests.FaultHubTests.POC.RX {
+namespace Xpand.Extensions.Tests.FaultHubTests.ProofOfConcepts {
     [TestFixture]
     public class AsyncContextHolderPoc {
         #region Asynchronous Failing Operations

@@ -1,13 +1,13 @@
 ﻿using System;
+using System.Reactive;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.Reactive.Utility;
-using System.Reactive;
 
-namespace Xpand.Extensions.Tests.FaultHubTests.POC {
+namespace Xpand.Extensions.Tests.FaultHubTests.ProofOfConcepts {
     [TestFixture]
     public class SafeguardSubscriptionPoc : FaultHubTestBase {
         

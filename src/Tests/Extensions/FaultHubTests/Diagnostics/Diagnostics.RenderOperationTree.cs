@@ -5,9 +5,9 @@ using Shouldly;
 using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest;
 
-namespace Xpand.Extensions.Tests.FaultHubTests._4_Diagnostics {
+namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics {
     [TestFixture]
-    public class Diagnostics_RenderOperationTree_Tests : FaultHubExtensionTestBase {
+    public class DiagnosticsRenderOperationTreeTests : FaultHubExtensionTestBase {
         [Test]
         public void Render_Correctly_Formats_Linear_Tree() {
             var exception = CreateNestedFault(

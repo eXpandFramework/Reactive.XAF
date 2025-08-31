@@ -6,8 +6,8 @@ using Shouldly;
 using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest;
 
-namespace Xpand.Extensions.Tests.FaultHubTests._4_Diagnostics {
-    public class Diagnostics_Union_Tests : FaultHubExtensionTestBase {
+namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics {
+    public class DiagnosticsUnionTests : FaultHubExtensionTestBase {
         [Test]
         public void Union_Merges_Two_Simple_Diverging_Paths() {
             var path1 = new OperationNode("Root", [], [new OperationNode("ChildA", [], [])
@@ -65,15 +65,14 @@ namespace Xpand.Extensions.Tests.FaultHubTests._4_Diagnostics {
         
         [Test]
         public void Union_Creates_Virtual_Root_When_Roots_Are_Different() {
-            // ARRANGE
-            var tree1 = new OperationNode("RootA", Array.Empty<object>(), Array.Empty<OperationNode>());
-            var tree2 = new OperationNode("RootB", Array.Empty<object>(), Array.Empty<OperationNode>());
+            var tree1 = new OperationNode("RootA", [], []);
+            var tree2 = new OperationNode("RootB", [], []
+                
+                );
             var source = new[] { tree1, tree2 };
 
-            // ACT
             var result = source.Union();
 
-            // ASSERT
             result.ShouldNotBeNull();
             result.Name.ShouldBe("Multiple Operations");
             result.Children.Count.ShouldBe(2);

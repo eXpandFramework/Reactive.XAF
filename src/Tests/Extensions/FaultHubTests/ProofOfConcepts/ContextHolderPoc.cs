@@ -8,7 +8,7 @@ using Shouldly;
 using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Unit = System.Reactive.Unit;
 
-namespace Xpand.Extensions.Tests.FaultHubTests.POC.RX {
+namespace Xpand.Extensions.Tests.FaultHubTests.ProofOfConcepts {
     
 
     [TestFixture]

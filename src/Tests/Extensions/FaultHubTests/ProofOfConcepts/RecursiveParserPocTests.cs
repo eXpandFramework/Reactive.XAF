@@ -4,7 +4,7 @@ using System.Linq;
 using NUnit.Framework;
 using Shouldly;
 
-namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest {
+namespace Xpand.Extensions.Tests.FaultHubTests.ProofOfConcepts {
     public record PocNode(string Name, IReadOnlyList<PocNode> Children, Exception Cause = null);
     public class PocException(string name, Exception inner = null) : Exception(name, inner);
     [TestFixture]

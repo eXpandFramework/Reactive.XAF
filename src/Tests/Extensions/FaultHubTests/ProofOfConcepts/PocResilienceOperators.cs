@@ -11,7 +11,7 @@ using Xpand.Extensions.Numeric;
 using Xpand.TestsLib.Common;
 using Unit = System.Reactive.Unit;
 
-namespace Xpand.Extensions.Tests.FaultHubTests.POC.RX {
+namespace Xpand.Extensions.Tests.FaultHubTests.ProofOfConcepts {
     
 
     [SuppressMessage("ReSharper", "NotAccessedPositionalProperty.Global")]

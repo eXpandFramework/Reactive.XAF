@@ -3,9 +3,9 @@ using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 
-namespace Xpand.Extensions.Tests.FaultHubTests._3_TransactionalApi {
+namespace Xpand.Extensions.Tests.FaultHubTests.TransactionalApi {
     [TestFixture]
-    public class TransactionalApi_NameInference_Tests  {
+    public class TransactionalApiNameInferenceTests  {
         public static IEnumerable<TestCaseData> GetStepName_Source() {
             yield return new TestCaseData("ignored", "ExplicitName", "ExplicitName")
                 .SetName("Explicit Name");

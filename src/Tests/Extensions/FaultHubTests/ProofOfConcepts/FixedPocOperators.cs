@@ -6,7 +6,7 @@ using System.Reactive.Linq;
 using System.Threading;
 using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 
-namespace Xpand.Extensions.Tests.FaultHubTests.POC.RX{
+namespace Xpand.Extensions.Tests.FaultHubTests.ProofOfConcepts{
 
         static class FixedPocOperators {
             internal static readonly AsyncLocal<IReadOnlyList<LogicalStackFrame>> LogicalStackContext = new();

@@ -5,8 +5,8 @@ using Shouldly;
 using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest;
 
-namespace Xpand.Extensions.Tests.FaultHubTests._4_Diagnostics {
-    public class Diagnostics_Render_Tests  : FaultHubExtensionTestBase {
+namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics {
+    public class DiagnosticsRenderTests  : FaultHubExtensionTestBase {
         private FaultHubException CreateWebScrapingScenarioException() {
             var upcomingEx = new InvalidOperationException("Failed to fetch URLs");
             var ctxWebSite = new AmbientFaultContext { BoundaryName = "FetchInitialUrls" };
