@@ -4,9 +4,10 @@ using System.Linq;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
+using Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest;
 
-namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest{
-    public class FaultHubExtensionsRenderStackTests : FaultHubExtensionTestBase {
+namespace Xpand.Extensions.Tests.FaultHubTests._4_Diagnostics {
+    public class Diagnostics_RenderStack_Tests : FaultHubExtensionTestBase {
 
         [Test]
         public void RenderStack_Correctly_Formats_Logical_Stack() {

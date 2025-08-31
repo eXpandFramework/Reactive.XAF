@@ -3,10 +3,11 @@ using System.Diagnostics.CodeAnalysis;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
+using Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest;
 
-namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest{
+namespace Xpand.Extensions.Tests.FaultHubTests._4_Diagnostics {
     [TestFixture]
-    public class FaultHubExtensionOperationTreeRenderTests : FaultHubExtensionTestBase {
+    public class Diagnostics_RenderOperationTree_Tests : FaultHubExtensionTestBase {
         [Test]
         public void Render_Correctly_Formats_Linear_Tree() {
             var exception = CreateNestedFault(

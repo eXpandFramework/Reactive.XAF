@@ -3,8 +3,10 @@ using System.Linq;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
-namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest {
-    public class FaultHubExtensionsRenderTests : FaultHubExtensionTestBase {
+using Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest;
+
+namespace Xpand.Extensions.Tests.FaultHubTests._4_Diagnostics {
+    public class Diagnostics_Render_Tests  : FaultHubExtensionTestBase {
         private FaultHubException CreateWebScrapingScenarioException() {
             var upcomingEx = new InvalidOperationException("Failed to fetch URLs");
             var ctxWebSite = new AmbientFaultContext { BoundaryName = "FetchInitialUrls" };
@@ -249,6 +251,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest {
                 result.ShouldContain(exception.ErrorStatus);
             }
         }
+    
         
     }
 }

@@ -50,29 +50,8 @@
     <EmbeddedResource Include="FaultHubTests\Resources\Blacklist_FallBack_When_Stack_Empty" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="FaultHubTests\FaultHubExtensionTest\FaultHubExtensionsNewOperationTreeTests.cs">
-      <DependentUpon>FaultHubExtensionsTests.cs</DependentUpon>
-    </Compile>
-    <Compile Update="FaultHubTests\FaultHubExtensionTest\FaultHubExtensionTestBase.cs">
-      <DependentUpon>FaultHubExtensionsTests.cs</DependentUpon>
-    </Compile>
     <Compile Update="FaultHubTests\FaultHubExtensionTest\FaultHubExtensionRenderTests.cs">
       <DependentUpon>FaultHubExtensionTests.cs</DependentUpon>
-    </Compile>
-    <Compile Update="FaultHubTests\FaultHubExtensionTest\FaultHubExtensionsUnionTests.cs">
-      <DependentUpon>FaultHubExtensionsTests.cs</DependentUpon>
-    </Compile>
-    <Compile Update="FaultHubTests\FaultHubExtensionTest\ProductionScenario2Tests.cs">
-      <DependentUpon>ProductionScenarioTests.cs</DependentUpon>
-    </Compile>
-    <Compile Update="FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs">
-      <DependentUpon>ProductionScenarioTests.cs</DependentUpon>
-    </Compile>
-    <Compile Update="FaultHubTests\FaultHubExtensionTest\FaultHubExtensionOperationTreeRenderTests.cs">
-      <DependentUpon>FaultHubExtensionsTests.cs</DependentUpon>
-    </Compile>
-    <Compile Update="FaultHubTests\FaultHubExtensionTest\FaultHubExtensionsRenderStackTests.cs">
-      <DependentUpon>FaultHubExtensionsTests.cs</DependentUpon>
     </Compile>
   </ItemGroup>
   <Import Project="..\..\..\.paket\Paket.Restore.targets" />

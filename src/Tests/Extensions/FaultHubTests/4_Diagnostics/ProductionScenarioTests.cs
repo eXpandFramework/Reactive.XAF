@@ -10,7 +10,7 @@ using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.StringExtensions;
 using TransactionAbortedException = Xpand.Extensions.Reactive.ErrorHandling.FaultHub.TransactionAbortedException;
 
-namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest {
+namespace Xpand.Extensions.Tests.FaultHubTests._4_Diagnostics {
     [TestFixture]
     public class ProductionScenarioTests : ProductionScenarioBaseTest {
         

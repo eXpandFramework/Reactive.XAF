@@ -2,10 +2,10 @@
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
-using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.Reactive.Transform;
-namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest{
+
+namespace Xpand.Extensions.Tests.FaultHubTests._4_Diagnostics{
     public abstract class ProductionScenarioBaseTest:FaultHubTestBase {
         #region Mock Production Methods (Refactored)
 

@@ -4,9 +4,10 @@ using System.Linq;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
+using Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest;
 
-namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest{
-    public class FaultHubExtensionsUnionTests : FaultHubExtensionTestBase {
+namespace Xpand.Extensions.Tests.FaultHubTests._4_Diagnostics {
+    public class Diagnostics_Union_Tests : FaultHubExtensionTestBase {
         [Test]
         public void Union_Merges_Two_Simple_Diverging_Paths() {
             var path1 = new OperationNode("Root", [], [new OperationNode("ChildA", [], [])
