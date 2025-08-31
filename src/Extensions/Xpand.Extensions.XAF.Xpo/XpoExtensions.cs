@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.SqlClient;
 using System.Linq;
 using System.Linq.Expressions;
 using DevExpress.Data.Filtering;
@@ -15,6 +14,7 @@ using DevExpress.Xpo.Helpers;
 using DevExpress.Xpo.Metadata;
 using DevExpress.Xpo.Providers;
 using Fasterflect;
+using Microsoft.Data.SqlClient;
 using Swordfish.NET.Collections.Auxiliary;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.LinqExtensions;
@@ -53,7 +53,7 @@ namespace Xpand.Extensions.XAF.Xpo {
                 });
 
         private static void CreateXpAttributeValueAttributes(){
-            new[]{ nameof(SingleObjectAttribute), nameof(PropertyConcatAttribute) }.ToArray().ForEach(attributeName => {
+            new[]{ nameof(SingleObjectAttribute), nameof(PropertyConcatAttribute) }.ForEach(attributeName => {
                 var lastObjectAttributeType =
                     AppDomain.CurrentDomain.GetAssemblyType($"Xpand.Extensions.XAF.Xpo.Attributes.{attributeName}");
                 lastObjectAttributeType?.Method("Configure", Flags.StaticAnyVisibility).Call(null);

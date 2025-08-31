@@ -1,6 +1,7 @@
-﻿using System.Data.SqlClient;
-using DevExpress.ExpressApp;
+﻿using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.MultiTenancy;
+using SqlCommand = Microsoft.Data.SqlClient.SqlCommand;
+using SqlConnection = Microsoft.Data.SqlClient.SqlConnection;
 
 namespace Xpand.Extensions.XAF.XafApplicationExtensions {
     public static partial class XafApplicationExtensions {

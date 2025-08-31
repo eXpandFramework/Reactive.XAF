@@ -61,7 +61,7 @@ namespace Xpand.XAF.Modules.Blazor {
         }
 
         public static IObservable<FrameTemplate> WhenViewChanged(this FrameTemplate frameTemplate) 
-            => frameTemplate.WhenEvent(nameof(FrameTemplate.ViewChanged)).To(frameTemplate);
+            => frameTemplate.ProcessEvent(nameof(FrameTemplate.ViewChanged)).To(frameTemplate);
         
         public static IObservable<TArgs> WhenCallback<TArgs>(this object source, string callbackName) 
             => new Subject<TArgs>().Use(subject => {

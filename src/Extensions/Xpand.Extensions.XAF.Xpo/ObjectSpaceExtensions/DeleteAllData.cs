@@ -1,6 +1,6 @@
 ﻿using System.Data;
-using System.Data.SqlClient;
 using DevExpress.ExpressApp;
+using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 

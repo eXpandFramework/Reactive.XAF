@@ -28,8 +28,8 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests{
         [Test][XpandTest()]
         public void ImportStyles_should_lookup_classes_that_have_a_byte_array_property(){
             using var application=DocumentStyleManagerModule().Application;
-	        var modelDocumentStyleManager = application.Model.DocumentStyleManager();
-	        var item = modelDocumentStyleManager.ImportStyles.AddNode<IModelImportStylesItem>();
+            var modelDocumentStyleManager = application.Model.DocumentStyleManager();
+            var item = modelDocumentStyleManager.ImportStyles.AddNode<IModelImportStylesItem>();
 	        item.ModelClass = application.Model.BOModel.GetClass(typeof(DataObject));
             var modelListViews = modelDocumentStyleManager.DocumentProviders.ToArray();
             
@@ -39,8 +39,8 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests{
         [Test][XpandTest()]
         public void ImportStylesMember_default_value_should_be_the_first_byte_array_property(){
             using var application=DocumentStyleManagerModule().Application;
-	        var modelDocumentStyleManager = application.Model.DocumentStyleManager();
-	        var item = modelDocumentStyleManager.ImportStyles.AddNode<IModelImportStylesItem>();
+            var modelDocumentStyleManager = application.Model.DocumentStyleManager();
+            var item = modelDocumentStyleManager.ImportStyles.AddNode<IModelImportStylesItem>();
 	        item.ModelClass = application.Model.BOModel.GetClass(typeof(DataObject));
             
 	        item.Member.ShouldNotBeNull();
@@ -51,8 +51,8 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests{
         [Test][XpandTest()]
         public void Default_DefaultPropertiesProvider_should_be_the_ImportStylesModelClass(){
             using var application=DocumentStyleManagerModule().Application;
-	        var modelDocumentStyleManager = application.Model.DocumentStyleManager();
-	        var item = modelDocumentStyleManager.ImportStyles.AddNode<IModelImportStylesItem>();
+            var modelDocumentStyleManager = application.Model.DocumentStyleManager();
+            var item = modelDocumentStyleManager.ImportStyles.AddNode<IModelImportStylesItem>();
 	        item.ModelClass = application.Model.BOModel.GetClass(typeof(DataObject));
 	        
 	        modelDocumentStyleManager.DefaultPropertiesProvider.ShouldBe(item.ModelClass);
@@ -61,8 +61,8 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests{
         [Test][XpandTest()]
         public void Default_DefaultPropertiesProviderModelMember_should_be_the_ImportStylesModelMember(){
             using var application=DocumentStyleManagerModule().Application;
-	        var modelDocumentStyleManager = application.Model.DocumentStyleManager();
-	        var item = modelDocumentStyleManager.ImportStyles.AddNode<IModelImportStylesItem>();
+            var modelDocumentStyleManager = application.Model.DocumentStyleManager();
+            var item = modelDocumentStyleManager.ImportStyles.AddNode<IModelImportStylesItem>();
 	        item.ModelClass = application.Model.BOModel.GetClass(typeof(DataObject));
 	        
 	        modelDocumentStyleManager.DefaultPropertiesProviderMember.ShouldBe(item.Member);
@@ -71,8 +71,8 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests{
         [Test][XpandTest()]
         public void Default_DefaultPropertiesProviderModelMember_should_be_the_first_byte_array_property(){
             using var application=DocumentStyleManagerModule().Application;
-	        var modelDocumentStyleManager = application.Model.DocumentStyleManager();
-	        modelDocumentStyleManager.DefaultPropertiesProvider = application.Model.BOModel.GetClass(typeof(DataObject));
+            var modelDocumentStyleManager = application.Model.DocumentStyleManager();
+            modelDocumentStyleManager.DefaultPropertiesProvider = application.Model.BOModel.GetClass(typeof(DataObject));
 
 	        modelDocumentStyleManager.DefaultPropertiesProviderMember.ShouldNotBeNull();
 	        modelDocumentStyleManager.DefaultPropertiesProviderMember.Id().ShouldBe(nameof(DataObject.Content));
@@ -94,8 +94,8 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests{
         [Test][XpandTest()]
         public void TemplateListViews_should_lookup_ListViews_that_have_a_byte_array_property(){
             using var application=DocumentStyleManagerModule().Application;
-	        var modelDocumentStyleManager = application.Model.DocumentStyleManager();
-	        var item = modelDocumentStyleManager.ApplyTemplateListViews.AddNode<IModelApplyTemplateListViewItem>();
+            var modelDocumentStyleManager = application.Model.DocumentStyleManager();
+            var item = modelDocumentStyleManager.ApplyTemplateListViews.AddNode<IModelApplyTemplateListViewItem>();
 	        
 	        var modelListViews = item.ListViews.ToArray();
 

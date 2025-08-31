@@ -27,7 +27,7 @@ using Xpand.XAF.Modules.Reactive.Services;
 namespace Xpand.TestsLib {
     public static class Extensions {
         public static IObservable<ConfirmationDialogClosedEventArgs> WhenConfirmationDialogClosed(this Messaging messaging)
-            => typeof(Messaging).WhenEvent<ConfirmationDialogClosedEventArgs>(nameof(Messaging.ConfirmationDialogClosed));
+            => typeof(Messaging).ProcessEvent<ConfirmationDialogClosedEventArgs>(nameof(Messaging.ConfirmationDialogClosed));
 
         public static bool ShowDialog() => false;
 
@@ -65,7 +65,7 @@ namespace Xpand.TestsLib {
         private static IObservable<T> Start<T>(this IObservable<T> test,WinApplication application, string user, SynchronizationContext context) 
             => (user==null?application.WhenLoggedOn().ToFirst(): application.WhenLoggedOn(user)).Take(1).IgnoreElements().To<T>()
                 .Merge(test.DoOnComplete(() => application.Terminate(context)).Publish(obs => application.GetRequiredService<IValidator>().RuleSet
-                    .WhenEvent<ValidationCompletedEventArgs>(nameof(RuleSet.ValidationCompleted))
+                    .ProcessEvent<ValidationCompletedEventArgs>(nameof(RuleSet.ValidationCompleted))
                         .DoWhen(e => !e.Successful,e => e.Exception.ThrowCaptured()).To<T>().TakeUntilCompleted(obs)
                         .Merge(obs)));
 

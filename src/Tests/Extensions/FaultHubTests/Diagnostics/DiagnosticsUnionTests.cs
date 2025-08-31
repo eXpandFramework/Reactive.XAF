@@ -4,7 +4,6 @@ using System.Linq;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
-using Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest;
 
 namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics {
     public class DiagnosticsUnionTests : FaultHubExtensionTestBase {

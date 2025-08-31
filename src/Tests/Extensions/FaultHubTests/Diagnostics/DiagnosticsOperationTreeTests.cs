@@ -8,10 +8,9 @@ using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.Reactive.Utility;
-using Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest;
 
 namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics {
-    public class DiagnosticsNewOperationTreeTests:FaultHubExtensionTestBase {
+    public class DiagnosticsOperationTreeTests:FaultHubExtensionTestBase {
          [Test]
         public void Parses_Simple_Linear_Chain_Correctly() {
             var rootCause = new InvalidOperationException("DB Error");
@@ -21,7 +20,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics {
             var fhB = new FaultHubException("B failed", fhC, ctxB);
             var ctxA = new AmbientFaultContext { BoundaryName = "ApiLayer" };
             var fhA = new FaultHubException("A failed", fhB, ctxA);
-            var result = fhA.NewOperationTree();
+            var result = fhA.OperationTree();
 
             result.Name.ShouldBe("ApiLayer");
             result.Children.ShouldHaveSingleItem();
@@ -45,7 +44,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics {
             var aggEx = new AggregateException(fhA, fhB);
             var ctxRoot = new AmbientFaultContext { BoundaryName = "RootOperation" };
             var fhRoot = new FaultHubException("Root failed", aggEx, ctxRoot);
-            var result = fhRoot.NewOperationTree();
+            var result = fhRoot.OperationTree();
 
             result.Name.ShouldBe("RootOperation");
             result.Children.Count.ShouldBe(2);
@@ -59,7 +58,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics {
         [Test]
         public void Parses_Web_Scraping_Scenario_Structure_Correctly() {
             var exception = CreateWebScrapingScenarioException();
-            var result = exception.NewOperationTree();
+            var result = exception.OperationTree();
 
             result.Name.ShouldBe("ScheduleWebScraping");
             var parseHomePage = result.Children.Single();
@@ -90,7 +89,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics {
             var fhNoName = new FaultHubException("NoName failed", fhC, ctxNoName);
             var ctxA = new AmbientFaultContext { BoundaryName = "FirstStep" };
             var fhA = new FaultHubException("A failed", fhNoName, ctxA);
-            var result = fhA.NewOperationTree();
+            var result = fhA.OperationTree();
 
             result.Name.ShouldBe("FirstStep");
             result.Children.ShouldHaveSingleItem();
@@ -130,7 +129,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics {
         [Test]
         public void RootCause_Returns_Exception_When_Called_From_Root_Node() {
             var exception = CreateNestedFault(("Level 1", null), ("Level 2", null));
-            var tree = exception.NewOperationTree();
+            var tree = exception.OperationTree();
 
             var rootCause = tree.GetRootCause();
 
@@ -157,7 +156,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics {
        
              );
 
-            var result = exception.NewOperationTree();
+            var result = exception.OperationTree();
 
             result.ShouldNotBeNull();
             result.Name.ShouldBe("Level 1 Operation");
@@ -178,7 +177,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics {
                 ("Process Order", ["OrderID: 123"]),
                 ("Validate Customer", ["CustomerID: 456", true])
             );
-            var result = exception.NewOperationTree();
+            var result = exception.OperationTree();
 
             result.ShouldNotBeNull();
             result.Name.ShouldBe("Process Order");
@@ -194,7 +193,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics {
             var exception = CreateNestedFault(
                 ("Single Operation", ["Data"])
             );
-            var result = exception.NewOperationTree();
+            var result = exception.OperationTree();
 
             result.ShouldNotBeNull();
             result.Name.ShouldBe("Single Operation");
@@ -207,7 +206,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics {
             var context = new AmbientFaultContext { BoundaryName = null, UserContext = null };
             var exception = new FaultHubException("Test", new Exception(), context);
 
-            var result = exception.NewOperationTree();
+            var result = exception.OperationTree();
 
             result.ShouldBeNull();
         }
@@ -223,7 +222,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics {
             var outerCtx = new AmbientFaultContext { BoundaryName = "OuterBoundary", LogicalStackTrace = outerStack, InnerContext = fhInner.Context};
             var fhOuter = new FaultHubException("Outer fail", fhInner, outerCtx);
 
-            var result = fhOuter.NewOperationTree();
+            var result = fhOuter.OperationTree();
 
             result.ShouldNotBeNull();
             result.Name.ShouldBe("OuterBoundary");
@@ -262,7 +261,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics {
                 .Subscribe();
             var fault = capturedFault.ShouldNotBeNull();
             
-            var tree = fault.NewOperationTree();
+            var tree = fault.OperationTree();
 
             tree.ShouldNotBeNull();
             
@@ -294,7 +293,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics {
             var ctxTop = new AmbientFaultContext { BoundaryName = "TopLevel" };
             var topException = new FaultHubException("Top Level Failed", aggEx, ctxTop);
 
-            var result = topException.NewOperationTree();
+            var result = topException.OperationTree();
 
             result.ShouldNotBeNull();
             result.Name.ShouldBe("TopLevel");
@@ -322,7 +321,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics {
             };
             var exception = new FaultHubException("Operation Failed", rootCause, context);
 
-            var result = exception.NewOperationTree();
+            var result = exception.OperationTree();
 
             result.ShouldNotBeNull();
             result.Name.ShouldBe("FetchOperation");
@@ -350,7 +349,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics {
                 BoundaryName = "RootOperation",
                 LogicalStackTrace = [new LogicalStackFrame("RootFrame", "", 0)]
             });
-            var result = topException.NewOperationTree();
+            var result = topException.OperationTree();
 
             var branchA = result.Children.Single(c => c.Name == "BranchA");
             var branchAStack = branchA.GetLogicalStack();
@@ -374,7 +373,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics {
             var txCtx = new AmbientFaultContext { BoundaryName = "MyTransaction", Tags = ["Transaction", "RunToEnd"], InnerContext = fhStep.Context };
             var fhTx = new FaultHubException("Transaction failed", fhStep, txCtx);
 
-            var result = fhTx.NewOperationTree();
+            var result = fhTx.OperationTree();
 
             result.ShouldNotBeNull();
             result.Name.ShouldBe("MyTransaction");
@@ -393,7 +392,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics {
             var outerCtx = new AmbientFaultContext { BoundaryName = "scraperService.ExtractAndProcessLinks", InnerContext = fhInner.Context };
             var fhOuter = new FaultHubException("Outer fail", fhInner, outerCtx);
 
-            var result = fhOuter.NewOperationTree();
+            var result = fhOuter.OperationTree();
 
             result.ShouldNotBeNull();
             result.Name.ShouldBe("scraperService.ExtractAndProcessLinks");
@@ -409,7 +408,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics {
             var outerCtx = new AmbientFaultContext { BoundaryName = "service.InnerOperation", InnerContext = fhInner.Context };
             var fhOuter = new FaultHubException("Step fail", fhInner, outerCtx);
 
-            var result = fhOuter.NewOperationTree();
+            var result = fhOuter.OperationTree();
 
             result.ShouldNotBeNull();
             result.Name.ShouldBe("service.InnerOperation");
@@ -431,7 +430,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics {
             await transaction.PublishFaults().Capture();
             var finalFault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
 
-            var tree = finalFault.NewOperationTree();
+            var tree = finalFault.OperationTree();
 
             var nestedNode = tree.Children.ShouldHaveSingleItem();
             nestedNode.Name.ShouldBe(nameof(InnerFailingTransaction_For_Tagging));

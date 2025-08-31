@@ -21,7 +21,7 @@ namespace Xpand.TestsLib{
 
         public TestWinApplication(Type sutModule, bool transmitMessage = true, bool handleExceptions=true) {
             // SettingUp += (_, args) => ((ExportedTypeCollection)args.SetupParameters.DomainComponents).Add(typeof(TraceEvent));
-            Modules.Add((ModuleBase)sutModule.CreateInstance());
+            // Modules.Add((ModuleBase)sutModule.CreateInstance());
             _transmitMessage = transmitMessage;
             SUTModule = sutModule;
             CustomHandleException += (_, e) => {

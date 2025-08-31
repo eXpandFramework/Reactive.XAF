@@ -30,6 +30,7 @@ using Xpand.Extensions.XAF.Xpo.ConnectionProviders;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.StoreToDisk.BusinessObjects;
 using static Xpand.XAF.Modules.StoreToDisk.StoreToDiskModule;
+#pragma warning disable CS0618 // Type or member is obsolete
 
 namespace Xpand.XAF.Modules.StoreToDisk{
     public interface IStoreToDiskAutoCreate {

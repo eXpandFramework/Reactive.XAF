@@ -97,7 +97,6 @@
       <DependentUpon>AttributesExtensions.cs</DependentUpon>
     </Compile>
   </ItemGroup>
-
   <ItemGroup>
     <Reference Include="Xpand.Extensions">
       <HintPath>..\..\..\bin\Xpand.Extensions.dll</HintPath>

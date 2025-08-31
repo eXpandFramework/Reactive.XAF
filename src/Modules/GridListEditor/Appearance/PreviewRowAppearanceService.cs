@@ -30,15 +30,15 @@ namespace Xpand.XAF.Modules.GridListEditor.Appearance {
                 .ToUnit();
 
         private static IObservable<Unit> PreviewAppearance(this AppearanceController controller,GridView gridView) 
-            => gridView.WhenEvent<RowObjectCustomDrawEventArgs>(nameof(gridView.CustomDrawRowPreview))
-                .WithLatestFrom(controller.WhenEvent<CollectAppearanceRulesEventArgs>(nameof(AppearanceController.CollectAppearanceRules)),
+            => gridView.ProcessEvent<RowObjectCustomDrawEventArgs>(nameof(gridView.CustomDrawRowPreview))
+                .WithLatestFrom(controller.ProcessEvent<CollectAppearanceRulesEventArgs>(nameof(AppearanceController.CollectAppearanceRules)),
                     (drawEventArgs, rulesEventArgs) => (drawEventArgs, rulesEventArgs))
                 .Do(t => {
                     if (t.drawEventArgs.RowHandle < 0) return;
                     var obj = gridView.GetRow(t.drawEventArgs.RowHandle);
                     var previewProperty = gridView.PreviewFieldName;
                     var rule = t.rulesEventArgs.AppearanceRules.Where(properties
-                            => properties.AppearanceItemType == AppearanceItemType.ViewItem.ToString()
+                            => properties.AppearanceItemType == nameof(AppearanceItemType.ViewItem)
                                && properties.TargetItems.Split(';').Any(x => string.Equals(x.Trim(), previewProperty, StringComparison.OrdinalIgnoreCase)))
                         .FirstOrDefault(ruleProperties => controller.View.ObjectSpace.IsObjectFitForCriteria( ruleProperties.Criteria,obj));
                     if (rule != null) {

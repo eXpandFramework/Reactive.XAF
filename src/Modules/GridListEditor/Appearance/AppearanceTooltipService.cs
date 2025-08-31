@@ -42,7 +42,7 @@ namespace Xpand.XAF.Modules.GridListEditor.Appearance{
         private static IObservable<ToolTipControllerGetActiveObjectInfoEventArgs> WhenActiveObjectInfo(this ListView listView){
             var gridControl = ((DevExpress.ExpressApp.Win.Editors.GridListEditor)listView.Editor).Grid;
             gridControl.ToolTipController=new ToolTipController();
-            return gridControl.ToolTipController.WhenEvent<ToolTipControllerGetActiveObjectInfoEventArgs>(nameof(ToolTipController.GetActiveObjectInfo));
+            return gridControl.ToolTipController.ProcessEvent<ToolTipControllerGetActiveObjectInfoEventArgs>(nameof(ToolTipController.GetActiveObjectInfo));
         }
 
         private static IObservable<Dictionary<string, string>> Cache(this IObservable<(AppearanceItemToolTip toolTipItem, GridViewRowCellStyleEventArgsAppearanceAdapter adapter)> source)
@@ -62,7 +62,7 @@ namespace Xpand.XAF.Modules.GridListEditor.Appearance{
                 .Select(x => (x.ToolTipItem,x.Adapter));
         
         private static IObservable<ApplyAppearanceEventArgs> WhenAppearanceApplied(this AppearanceController controller) 
-            => controller.WhenEvent<ApplyAppearanceEventArgs>(nameof(AppearanceController.AppearanceApplied));
+            => controller.ProcessEvent<ApplyAppearanceEventArgs>(nameof(AppearanceController.AppearanceApplied));
 
     }
 }

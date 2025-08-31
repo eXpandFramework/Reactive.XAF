@@ -12,7 +12,7 @@ using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 
-namespace Xpand.Extensions.Tests.FaultHubTests._4_Diagnostics {
+namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics {
     [TestFixture]
     public class ProductionScenario2Tests:FaultHubTestBase {
 

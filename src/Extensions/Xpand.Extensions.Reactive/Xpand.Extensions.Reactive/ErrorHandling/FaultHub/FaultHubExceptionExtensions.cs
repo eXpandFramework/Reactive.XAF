@@ -19,7 +19,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
                 return string.Empty;
             }
 
-            var mergedTree = exception.NewOperationTree();
+            var mergedTree = exception.OperationTree();
             if (mergedTree == null) {
                 var message = exception.InnerException?.ToString() ?? exception.Message;
                 Log(() => $"[Render] Merged tree is null. Returning base exception message: {message}");
@@ -302,7 +302,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
         }
         public static OperationNode GetChild(this OperationNode node, string name) 
             => node.Children.Single(c => c.Name == name);
-        public static OperationNode NewOperationTree(this FaultHubException topException) {
+        public static OperationNode OperationTree(this FaultHubException topException) {
             Log(() => "[Parser] Starting NewOperationTree parser...");
             var contextLookup = topException.FaultHubExceptions();
             var rawTree = topException.Context.BuildFromContext([],contextLookup);

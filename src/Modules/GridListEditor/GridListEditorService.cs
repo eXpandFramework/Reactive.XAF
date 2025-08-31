@@ -74,7 +74,7 @@ namespace Xpand.XAF.Modules.GridListEditor{
             var gridView = listView.Editor.GridView<GridView>();
             gridView.OptionsBehavior.AllowPartialGroups = DefaultBoolean.True;
             gridView.Columns.Where(x => x.GroupIndex >= 0).Do(x => x.SortMode = ColumnSortMode.Custom).Enumerate();
-            return gridView.WhenEvent<CustomColumnSortEventArgs>(nameof(gridView.CustomColumnSort)).Do(e => {
+            return gridView.ProcessEvent<CustomColumnSortEventArgs>(nameof(gridView.CustomColumnSort)).Do(e => {
                 if (e.Column.GroupIndex < 0) return;
                 var objs = gridView.Objects();
                 e.Column.SortOrder = ColumnSortOrder.Ascending;
@@ -209,7 +209,7 @@ namespace Xpand.XAF.Modules.GridListEditor{
                 .Cast<RepositoryItem>().OfType<TRepositoryItem>().ToNowObservable()
                 .SelectMany(edit => (customize(edit.CreateEditor())).Select(e => (edit,e)))
                 .CombineLatestWhenFirstEmits(frame.View.ToListView().Editor.GridView<GridView>()
-                    .WhenEvent<CustomRowCellEditEventArgs>(nameof(DevExpress.XtraGrid.Views.Grid.GridView.CustomRowCellEdit)),(t, e) =>(t.edit,showBrowserrArgs:t.e,cellEditArgs:e) )
+                    .ProcessEvent<CustomRowCellEditEventArgs>(nameof(DevExpress.XtraGrid.Views.Grid.GridView.CustomRowCellEdit)),(t, e) =>(t.edit,showBrowserrArgs:t.e,cellEditArgs:e) )
                 .Where(t => t.edit==t.cellEditArgs.RepositoryItem));
     }
 }

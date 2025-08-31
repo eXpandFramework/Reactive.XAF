@@ -15,7 +15,9 @@ param(
     [switch]$SkipVersioning,
     $DXLicense
 )
+
 if ($DXLicense){
+    $env:DevExpress_License=$DXLicense
     $licensePath = "$env:APPDATA\DevExpress\DevExpress_License.txt"
     Write-Host "Starting DevExpress license setup"
     $dir = Split-Path $licensePath

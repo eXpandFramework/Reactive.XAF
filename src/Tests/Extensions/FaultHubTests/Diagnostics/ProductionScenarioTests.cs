@@ -1,6 +1,4 @@
-﻿// --- Full File: C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioTests.cs ---
-
-using System.Linq;
+﻿using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using NUnit.Framework;
@@ -10,7 +8,7 @@ using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.StringExtensions;
 using TransactionAbortedException = Xpand.Extensions.Reactive.ErrorHandling.FaultHub.TransactionAbortedException;
 
-namespace Xpand.Extensions.Tests.FaultHubTests._4_Diagnostics {
+namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics {
     [TestFixture]
     public class ProductionScenarioTests : ProductionScenarioBaseTest {
         

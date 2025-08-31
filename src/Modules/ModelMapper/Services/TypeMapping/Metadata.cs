@@ -89,8 +89,10 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         }
 
         private static PropertyInfo[] PropertyInfos(this Type type){
+#pragma warning disable CS0618 // Type or member is obsolete
             return type.PublicProperties()
                 .GetItems<PropertyInfo>(_ => _.PropertyType.GetRealType().PublicProperties(), info => info.PropertyType)
+#pragma warning restore CS0618 // Type or member is obsolete
                 .ToArray();
         }
         

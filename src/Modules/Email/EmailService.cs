@@ -91,7 +91,7 @@ namespace Xpand.XAF.Modules.Email{
 
         private static IObservable<(IModelEmailViewRecipient recipient,object o)> SendEmail(this MailMessage message,IModelEmailViewRecipient recipient,  object o) {
             var customizeSend = message.NewSmtpClient(o, recipient);
-            return customizeSend.client.WhenEvent<AsyncCompletedEventArgs>(nameof(customizeSend.client.SendCompleted))
+            return customizeSend.client.ProcessEvent<AsyncCompletedEventArgs>(nameof(customizeSend.client.SendCompleted))
                 .SelectMany(e => e.Error != null ? Observable.Throw<(IModelEmailViewRecipient,object)>(e.Error)
                         : Observable.Empty<(IModelEmailViewRecipient,object)>())
                 .Merge(customizeSend.client.SendMailAsync(customizeSend.message).ToObservable().Select(_ => (recipient,o)))

@@ -2,7 +2,7 @@
 using System.Linq;
 using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 
-namespace Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest{
+namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics{
     public abstract class FaultHubExtensionTestBase:FaultHubTestBase {
         protected FaultHubException CreateNestedFault(params (string Name, object[] Context)[] operations) {
             if (operations == null || !operations.Any()) {

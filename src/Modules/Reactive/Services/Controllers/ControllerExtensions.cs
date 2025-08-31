@@ -78,11 +78,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Controllers{
                 .TraceRX(controller => controller.Name)
                 .PushStackFrame();
 
-        public static IObservable<T> WhenDeactivated<T>(this T controller) where T : Controller {
-            return Observable.Empty<T>();
-            return controller.ProcessEvent(nameof(Controller.Deactivated)).To(controller).TakeUntilDisposed(controller)
-                .PushStackFrame();
-        }
+        public static IObservable<T> WhenDeactivated<T>(this T controller) where T : Controller => controller.ProcessEvent(nameof(Controller.Deactivated)).To(controller).TakeUntilDisposed(controller);
 
         public static IObservable<T> Deactivated<T>(this IObservable<T> controllers) where T : Controller 
             => controllers.SelectMany(controller => controller.WhenDeactivated());

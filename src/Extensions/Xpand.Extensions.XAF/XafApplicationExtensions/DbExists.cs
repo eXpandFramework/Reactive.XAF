@@ -1,7 +1,8 @@
 using System;
 using System.Data;
-using System.Data.SqlClient;
 using DevExpress.ExpressApp;
+using SqlConnection = Microsoft.Data.SqlClient.SqlConnection;
+using SqlConnectionStringBuilder = Microsoft.Data.SqlClient.SqlConnectionStringBuilder;
 
 namespace Xpand.Extensions.XAF.XafApplicationExtensions {
     public static partial class XafApplicationExtensions {

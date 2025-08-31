@@ -3,7 +3,6 @@ using System.Diagnostics.CodeAnalysis;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
-using Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest;
 
 namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics {
     [TestFixture]
@@ -15,7 +14,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics {
                 ("MidLevelLogic", null),
                 ("LowLevelData", null)
             );
-            var tree = exception.NewOperationTree();
+            var tree = exception.OperationTree();
             var expected = string.Join(Environment.NewLine,
                 "└ Top Level Operation",
                 "  └ Mid Level Logic",

@@ -9,20 +9,20 @@ specific_version : false
 framework:net9.0,net9.0-windows
 
 
-nuget DevExpress.ExpressApp.Office 25.1.3
-nuget DevExpress.ExpressApp.Office.Win 25.1.3
-nuget DevExpress.ExpressApp.Win 25.1.3
-nuget DevExpress.Utils 25.1.3
-nuget DevExpress.ExpressApp.Core.All 25.1.3
-nuget DevExpress.ExpressApp.Win.All 25.1.3
-nuget DevExpress.ExpressApp.Web.All 25.1.3
-nuget DevExpress.ExpressApp.Blazor.All 25.1.3
-nuget DevExpress.ExpressApp.Blazor 25.1.3
-nuget DevExpress.ExpressApp.Validation.Blazor 25.1.3
-nuget DevExpress.EasyTest 25.1.3 
-nuget DevExpress.ExpressApp.EasyTest.WinAdapter 25.1.3  
-nuget DevExpress.ExpressApp.Security.Xpo 25.1.3  
-nuget DevExpress.Win.SpellChecker 25.1.3  
+nuget DevExpress.ExpressApp.Office 25.1.4
+nuget DevExpress.ExpressApp.Office.Win 25.1.4
+nuget DevExpress.ExpressApp.Win 25.1.4
+nuget DevExpress.Utils 25.1.4
+nuget DevExpress.ExpressApp.Core.All 25.1.4
+nuget DevExpress.ExpressApp.Win.All 25.1.4
+nuget DevExpress.ExpressApp.Web.All 25.1.4
+nuget DevExpress.ExpressApp.Blazor.All 25.1.4
+nuget DevExpress.ExpressApp.Blazor 25.1.4
+nuget DevExpress.ExpressApp.Validation.Blazor 25.1.4
+nuget DevExpress.EasyTest 25.1.4 
+nuget DevExpress.ExpressApp.EasyTest.WinAdapter 25.1.4  
+nuget DevExpress.ExpressApp.Security.Xpo 25.1.4  
+nuget DevExpress.Win.SpellChecker 25.1.4  
 nuget ZString 2.5.0
 nuget System.CodeDom 9.0.0
 nuget System.Text.Json == 9.0.0
@@ -65,7 +65,7 @@ nuget FasterFlect.Xpand 2.0.7
 nuget akarnokd.reactive_extensions 0.0.27-alpha
 nuget Microsoft.AspNetCore.Razor.Runtime 2.2
 nuget Microsoft.AspNetCore.Hosting 2.2.7
-nuget Microsoft.IdentityModel.Protocols.OpenIdConnect 8.2.0
+nuget Microsoft.IdentityModel.Protocols.OpenIdConnect 8.14.0
 nuget System.Reflection.Metadata 9.0.0
 nuget System.Formats.Asn1 9.0.0
 nuget System.Interactive 6.0.1

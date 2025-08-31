@@ -190,7 +190,7 @@ namespace Xpand.XAF.Modules.TenantManager{
             => application.WhenFrameCreated(TemplateContext.ApplicationWindow)
 	            .Where(frame => !frame.Application.IsTenantManager())
                 .ToController<ShowNavigationItemController>()
-                .SelectMany(controller => controller.ShowNavigationItemAction.Items.GetItems<ChoiceActionItem>(item => item.Items)
+                .SelectMany(controller => controller.ShowNavigationItemAction.Items.SelectManyRecursive(item => item.Items)
 	                .Where(IsOrganizationItem).ToNowObservable()
 	                .Do(args => args.Active[nameof(TenantManagerService)]=false))
                 .TraceTenantManager()

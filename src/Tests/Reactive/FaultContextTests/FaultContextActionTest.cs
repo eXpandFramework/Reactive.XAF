@@ -216,13 +216,13 @@ namespace Xpand.XAF.Modules.Reactive.Tests.FaultContextTests {
             using var exceptionSubscription = application.WhenWin().WhenCustomHandleException()
                 .Do(t => t.handledEventArgs.Handled = true).Subscribe();
 
-            var findModule = application.Modules.FindModule<ReactiveModule>();
+            
             using var actionSubscription = application.WhenApplicationModulesManager()
                 .SelectMany(manager
                     => manager.RegisterViewSimpleAction(
                         nameof(PushStackFrame_Builds_A_Coherent_Logical_StackTrace_For_Nested_Operations)))
                 .WhenExecuted(_ => TopLevel_Operation())
-                .Subscribe(findModule);
+                .Subscribe(application);
 
             DefaultReactiveModule(application);
 

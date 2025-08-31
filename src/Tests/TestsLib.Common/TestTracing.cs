@@ -32,7 +32,7 @@ namespace Xpand.TestsLib.Common{
                 .Select(exception => exception.ToTestException(caller)).AsObservable();
 
         public static IObservable<Tracing> Use() 
-            => typeof(Tracing).WhenEvent<CreateCustomTracerEventArgs>(nameof(CreateCustomTracer))
+            => typeof(Tracing).ProcessEvent<CreateCustomTracerEventArgs>(nameof(CreateCustomTracer))
                 .Select(e => e.Tracer = new TestTracing()).Take(1).Cast<Tracing>()
                 .Merge(Unit.Default.DeferAction(_ => Initialize()).IgnoreElements().To<Tracing>());
 

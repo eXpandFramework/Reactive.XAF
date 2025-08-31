@@ -15,7 +15,7 @@ namespace Xpand.XAF.Modules.Blazor.Services {
             => application.WhenWeb().Do(api => api.Redirect(uri, endResponse)).ToUnit();
 
         public static IObservable<LocationChangedEventArgs> WhenLocationChanged(this NavigationManager navManager)
-            => navManager.WhenEvent<LocationChangedEventArgs>(nameof(NavigationManager.LocationChanged));
+            => navManager.ProcessEvent<LocationChangedEventArgs>(nameof(NavigationManager.LocationChanged));
 
         public static string QueryStringItemValue(this NavigationManager navManager, string key) 
             => QueryHelpers.ParseQuery(navManager.ToAbsoluteUri(navManager.Uri).Query)

@@ -90,7 +90,7 @@ namespace Xpand.TestsLib.Common{
                 exception => exception.DeferAction(exception.ThrowCaptured).To<Exception>());
         
         public static IObservable<Exception> WhenException(this TestTracing tracing) 
-            => typeof(Tracing).WhenEvent<CreateCustomTracerEventArgs>(nameof(Tracing.CreateCustomTracer)).TakeFirst()
+            => typeof(Tracing).ProcessEvent<CreateCustomTracerEventArgs>(nameof(Tracing.CreateCustomTracer)).TakeFirst()
                 .SelectMany(eventArgs => {
                     eventArgs.Tracer=tracing;
                     return tracing.Exceptions;

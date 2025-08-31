@@ -4,7 +4,6 @@ using System.Linq;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
-using Xpand.Extensions.Tests.FaultHubTests.FaultHubExtensionTest;
 
 namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics {
     public class DiagnosticsRenderStackTests : FaultHubExtensionTestBase {
@@ -15,7 +14,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics {
                 new LogicalStackFrame("MethodA", "fileA.cs", 10),
                 new LogicalStackFrame("MethodB", "fileB.cs", 25)
             );
-            var tree = exception.NewOperationTree();
+            var tree = exception.OperationTree();
             var expected = string.Join(Environment.NewLine,
                 "--- Invocation Stack ---",
                 "  at MethodA in fileA.cs:line 10",
@@ -36,8 +35,8 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics {
             var ex1 = CreateFaultWithLogicalStack(frame1, frame2);
             var ex2 = CreateFaultWithLogicalStack(frame1, frame3);
 
-            var tree1 = ex1.NewOperationTree();
-            var tree2 = ex2.NewOperationTree();
+            var tree1 = ex1.OperationTree();
+            var tree2 = ex2.OperationTree();
 
             var unionedTree = new[] { tree1, tree2 }.Union();
 
@@ -53,7 +52,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics {
         [Test]
         public void RenderStack_Returns_Empty_String_When_No_Logical_Stack_Is_Present() {
             var exception = CreateFaultWithLogicalStack();
-            var tree = exception.NewOperationTree();
+            var tree = exception.OperationTree();
 
             var result = tree.RenderStack();
 
@@ -76,7 +75,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics {
                 new LogicalStackFrame("MethodA", "fileA.cs", 10, "My Context"),
                 new LogicalStackFrame("MethodB", "fileB.cs", 25)
             );
-            var tree = exception.NewOperationTree();
+            var tree = exception.OperationTree();
             var expected = string.Join(Environment.NewLine,
                 "--- Invocation Stack ---",
                 "  (My Context) at MethodA in fileA.cs:line 10",
@@ -176,7 +175,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics {
             var exception = CreateFaultWithLogicalStack(
                 new LogicalStackFrame("MethodA", "fileA.cs", 10, null)
             );
-            var tree = exception.NewOperationTree();
+            var tree = exception.OperationTree();
 
             var result = tree.RenderStack();
 

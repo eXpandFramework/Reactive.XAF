@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Data;
-using System.Data.SqlClient;
 using System.IO;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Reactive.Threading.Tasks;
 using DevExpress.EasyTest.Framework;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Blazor;
@@ -80,9 +78,9 @@ namespace Xpand.TestsLib.Blazor {
                     .MergeToUnit(Observable.FromAsync(() => host.RunAsync()))));
 
         
-        public static (Guid id, string connectionString) GetTenant(this SqlConnection connection, string user){
+        public static (Guid id, string connectionString) GetTenant(this Microsoft.Data.SqlClient.SqlConnection connection, string user){
             var query = "SELECT ID, ConnectionString FROM Tenant WHERE Name = @Name";
-            using var command = new SqlCommand(query, connection);
+            using var command = new Microsoft.Data.SqlClient.SqlCommand(query, connection);
             command.Parameters.AddWithValue("@Name", user.Split('@')[1]);
             if (connection.State!=ConnectionState.Open) connection.Open();
             using var reader = command.ExecuteReader();
@@ -103,8 +101,8 @@ namespace Xpand.TestsLib.Blazor {
                     application.DeleteModelDiffs(connectionString);
                 }
                 else{
-                    if (!new SqlConnectionStringBuilder(connectionString).DBExist()) return;
-                    using var sqlConnection = new SqlConnection(connectionString);
+                    if (!new Microsoft.Data.SqlClient.SqlConnectionStringBuilder(connectionString).DBExist()) return;
+                    using var sqlConnection = new Microsoft.Data.SqlClient.SqlConnection(connectionString);
                     var tenant = sqlConnection.GetTenant(user);
                     tenantProvider.TenantId = tenant.id;
                     application.DeleteModelDiffs(tenant.connectionString);
@@ -113,11 +111,11 @@ namespace Xpand.TestsLib.Blazor {
 
         
         public static bool DbExist(this XafApplication application,string connectionString=null) {
-            var builder = new SqlConnectionStringBuilder(connectionString??application.ConnectionString);
+            var builder = new Microsoft.Data.SqlClient.SqlConnectionStringBuilder(connectionString??application.ConnectionString);
             var initialCatalog = "Initial catalog";
             var databaseName = builder[initialCatalog].ToString();
             builder.Remove(initialCatalog);
-            using var sqlConnection = new SqlConnection(builder.ConnectionString);
+            using var sqlConnection = new Microsoft.Data.SqlClient.SqlConnection(builder.ConnectionString);
             return sqlConnection.DbExists(databaseName);
         }
         public static bool DbExists(this IDbConnection dbConnection, string databaseName=null){
@@ -129,16 +127,16 @@ namespace Xpand.TestsLib.Blazor {
             return dbCommand.ExecuteScalar() != DBNull.Value;
         }
 
-        public static bool DBExist(this SqlConnectionStringBuilder builder) {
+        public static bool DBExist(this Microsoft.Data.SqlClient.SqlConnectionStringBuilder builder) {
             var initialCatalog = builder.InitialCatalog;
             builder.Remove("Initial catalog");
-            using var sqlConnection = new SqlConnection(builder.ConnectionString);
+            using var sqlConnection = new Microsoft.Data.SqlClient.SqlConnection(builder.ConnectionString);
             return sqlConnection.DbExists(initialCatalog);
         }
         public static void DeleteModelDiffs(this XafApplication application,string connectionString=null) {
             connectionString ??= application.ConnectionString;
             if (!application.DbExist(connectionString)) return;
-            using var sqlConnection = new SqlConnection(connectionString);
+            using var sqlConnection = new Microsoft.Data.SqlClient.SqlConnection(connectionString);
             sqlConnection.Open();
             using var sqlCommand = sqlConnection.CreateCommand();
             // sqlCommand.CommandText=new []{typeof(ModelDifference),typeof(ModelDifferenceAspect)}

@@ -17,7 +17,7 @@ using Xpand.Extensions.Reactive.Utility;
 
 namespace Xpand.Extensions.Tests.FaultHubTests {
 [TestFixture]
-public class FaultHub_General : FaultHubTestBase {
+public class FaultHubGeneral : FaultHubTestBase {
     [Test]
     public async Task FaultHub_Context_Flows_Across_Schedulers() {
         var asyncStream = Observable.Throw<Unit>(new InvalidOperationException("Async Error"))

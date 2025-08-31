@@ -6,4 +6,4 @@ Xpand.Collections
 DevExpress.Xpo
 System.Reactive
 System.Threading.Tasks.Dataflow
-System.Data.SqlClient
+Microsoft.Data.SqlClient
