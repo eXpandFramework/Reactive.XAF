@@ -1008,5 +1008,29 @@ namespace Xpand.Extensions.Tests.FaultHubTests.TransactionalApi {
             aggregate.InnerExceptions.Any(ex => (ex as FaultHubException)?.InnerException?.Message == "Failure 1").ShouldBeTrue();
             aggregate.InnerExceptions.Any(ex => (ex as FaultHubException)?.InnerException?.Message == "Failure 2").ShouldBeTrue();
         }
+
+        
+        [Test]
+        public async Task RunToEnd_Continues_After_Nested_TransactionAbortedException() {
+            var step2ExecutionCount = 0;
+
+            var innerFault = new FaultHubException("Inner Failure", new InvalidOperationException(), new AmbientFaultContext { BoundaryName = "InnerTx" });
+            var failingStep = Observable.Throw<Unit>(new TransactionAbortedException("Aborted", innerFault, new AmbientFaultContext { BoundaryName = "AbortingTx" }));
+
+            IObservable<Unit> SucceedingStep(object[] objects) {
+                step2ExecutionCount++;
+                return Observable.Return(Unit.Default);
+            }
+
+            await new[] { failingStep }
+                .BeginWorkflow("TestRunToEnd-Tx", TransactionMode.Sequential)
+                .Then(SucceedingStep)
+                .RunToEnd()
+                .PublishFaults()
+                .Capture();
+
+            step2ExecutionCount.ShouldBe(1, "RunToEnd should have continued to the second step after the first failed with TransactionAbortedException.");
+        }
+        
     }
 }
