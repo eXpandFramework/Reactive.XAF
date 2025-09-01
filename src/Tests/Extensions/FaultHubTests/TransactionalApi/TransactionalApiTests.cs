@@ -980,5 +980,33 @@ namespace Xpand.Extensions.Tests.FaultHubTests.TransactionalApi {
             outerStepStack.ShouldNotContain("Frame_From_Inner_Failure", 
                 "The stack for the outer step was polluted by the failed nested transaction.");
         }
+        [Test]
+        public async Task NestedRunToEnd_Aggregates_All_Failures_Before_Failing_Outer_FailFast() {
+            var nestedTx = Observable.Return(Unit.Default)
+                .BeginWorkflow("NestedRunToEnd-Tx")
+                .Then(_ => FailingStep1())
+                .Then(_ => FailingStep2())
+                .RunToEnd();
+
+            await Observable.Return(Unit.Default)
+                .BeginWorkflow("OuterFailFast-Tx")
+                .Then(_ => nestedTx)
+                .RunFailFast()
+                .PublishFaults()
+                .Capture();
+
+            BusEvents.Count.ShouldBe(1);
+            var abortedException = BusEvents.Single().ShouldBeOfType<TransactionAbortedException>();
+            abortedException.Context.BoundaryName.ShouldBe("OuterFailFast-Tx");
+
+            var nestedFault = abortedException.InnerException.ShouldBeOfType<FaultHubException>();
+            nestedFault.Message.ShouldBe("NestedRunToEnd-Tx completed with errors");
+
+            var aggregate = nestedFault.InnerException.ShouldBeOfType<AggregateException>();
+            aggregate.InnerExceptions.Count.ShouldBe(2);
+
+            aggregate.InnerExceptions.Any(ex => (ex as FaultHubException)?.InnerException?.Message == "Failure 1").ShouldBeTrue();
+            aggregate.InnerExceptions.Any(ex => (ex as FaultHubException)?.InnerException?.Message == "Failure 2").ShouldBeTrue();
+        }
     }
 }
