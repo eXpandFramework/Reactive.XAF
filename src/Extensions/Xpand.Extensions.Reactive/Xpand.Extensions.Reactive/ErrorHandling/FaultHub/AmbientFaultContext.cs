@@ -68,7 +68,8 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
         public override string ToString() {
             var validContexts = context?.Where(c => c is not null && !string.IsNullOrWhiteSpace(c.ToString())).ToArray();
             var contextPrefix = (validContexts?.Length > 0) ? $"{validContexts.JoinCommaSpace().EncloseParenthesis()} " : "";
-            return $"{contextPrefix}at {memberName} in {filePath}:line {lineNumber}";
+            var cleanedMemberName = memberName.ParseMemberName();
+            return $"{contextPrefix}at {cleanedMemberName} in {filePath}:line {lineNumber}";
         }
     }
 

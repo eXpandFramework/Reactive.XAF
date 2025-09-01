@@ -68,13 +68,11 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
             }
 
             codePart = codePart.TrimEnd(')');
-
             return string.IsNullOrEmpty(codePart) ? expression : codePart;
         }
-
     }
     
-        internal class StepAction<TIn, TOut> {
+    internal class StepAction<TIn, TOut> {
         public Func<TIn[], IObservable<TOut>> Selector { get; init; }
         public Func<Exception, TIn[], IObservable<TOut>> FallbackSelector { get; init; }
         public string SelectorExpression { get; init; }

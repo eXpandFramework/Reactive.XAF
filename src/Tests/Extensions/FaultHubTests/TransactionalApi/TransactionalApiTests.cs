@@ -101,7 +101,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.TransactionalApi {
             innerFault.InnerException.ShouldBeOfType<InvalidOperationException>().Message.ShouldBe("Failure1");
 
             
-            innerFault.AllContexts.ShouldContain(nameof(operations));
+            innerFault.AllContexts.ShouldContain($"{nameof(operations)}[1]");
         }
 
         [Test]
@@ -741,12 +741,12 @@ namespace Xpand.Extensions.Tests.FaultHubTests.TransactionalApi {
             var failure1 = aggregate.InnerExceptions.OfType<FaultHubException>()
                 .FirstOrDefault(ex => ex.InnerException?.Message == "Failure 1");
             failure1.ShouldNotBeNull();
-            failure1.AllContexts.ShouldContain(nameof(operations));
+            failure1.AllContexts.ShouldContain($"{nameof(operations)}[1]");
 
             var failure2 = aggregate.InnerExceptions.OfType<FaultHubException>()
                 .FirstOrDefault(ex => ex.InnerException?.Message == "Failure 2");
             failure2.ShouldNotBeNull();
-            failure2.AllContexts.ShouldContain(nameof(operations));
+            failure2.AllContexts.ShouldContain($"{nameof(operations)}[3]");
         }
 
         [Test]
@@ -877,7 +877,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.TransactionalApi {
 
             innerFault.InnerException.ShouldBeOfType<InvalidOperationException>().Message.ShouldBe("Failure1");
 
-            innerFault.AllContexts.ShouldContain("operations");
+            innerFault.AllContexts.ShouldContain("operations[1]");
         }
         
         
@@ -980,6 +980,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.TransactionalApi {
             outerStepStack.ShouldNotContain("Frame_From_Inner_Failure", 
                 "The stack for the outer step was polluted by the failed nested transaction.");
         }
+        
         [Test]
         public async Task NestedRunToEnd_Aggregates_All_Failures_Before_Failing_Outer_FailFast() {
             var nestedTx = Observable.Return(Unit.Default)
@@ -1052,6 +1053,34 @@ namespace Xpand.Extensions.Tests.FaultHubTests.TransactionalApi {
             var messages = aggregate.InnerExceptions.OfType<FaultHubException>().Select(f => f.InnerException?.Message).ToHashSet();
             messages.ShouldContain("Failure1");
             messages.ShouldContain("Failure2");
+        }
+    
+        [Test]
+        public async Task BeginWorkflow_From_IEnumerable_Creates_Distinct_Steps_For_Sequential_Mode() {
+            var step1 = Observable.Throw<Unit>(new InvalidOperationException("Failure 1"));
+            var step2 = Observable.Throw<Unit>(new InvalidOperationException("Failure 2"));
+            var operations = new[] { step1, step2 };
+
+            await operations
+                .BeginWorkflow("MultiStepTx", TransactionMode.Sequential)
+                .RunToEnd()
+                .PublishFaults()
+                .Capture();
+
+            BusEvents.Count.ShouldBe(1);
+            var finalFault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
+            var aggregate = finalFault.InnerException.ShouldBeOfType<AggregateException>();
+            aggregate.InnerExceptions.Count.ShouldBe(2);
+
+            var failure1 = aggregate.InnerExceptions.OfType<FaultHubException>()
+                .FirstOrDefault(ex => ex.InnerException?.Message == "Failure 1");
+            failure1.ShouldNotBeNull();
+            failure1.AllContexts.ShouldContain("MultiStepTx - operations[0]", "The first failure did not have the context of the first step.");
+
+            var failure2 = aggregate.InnerExceptions.OfType<FaultHubException>()
+                .FirstOrDefault(ex => ex.InnerException?.Message == "Failure 2");
+            failure2.ShouldNotBeNull();
+            failure2.AllContexts.ShouldContain("MultiStepTx - operations[1]", "The second failure did not have the context of the second step.");
         }
     }
 }

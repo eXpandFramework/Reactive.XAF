@@ -19,7 +19,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
         public static ITransactionBuilder<object> BeginWorkflow<TSource>(this IEnumerable<IObservable<TSource>> sources, string transactionName=null, TransactionMode mode = TransactionMode.Sequential,
             object[] context = null, IScheduler scheduler = null, [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0,
             [CallerArgumentExpression(nameof(sources))] string sourceExpression = null)
-            => new TransactionBuilder<object>(sources.ToArray().Select((obs, i) => (Name: GetStepName($"{sourceExpression}[{i}]"), Source: obs.Select(o => (object) o))).ToList(),
+            => new TransactionBuilder<object>(sources.ToArray().Select((obs, i) => (Name: $"{sourceExpression}[{i}]", Source: obs.Select(o => (object) o))).ToList(),
                 mode, transactionName, context, scheduler, memberName, filePath, lineNumber,new[]{TransactionNodeTag,mode.ToString()}.AddNestedTag()) { InitialStepName = sourceExpression };
         
         public static ITransactionBuilder<TSource> BeginWorkflow<TSource>(this IObservable<TSource> source, object[] context = null,

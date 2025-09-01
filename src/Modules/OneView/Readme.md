@@ -50,18 +50,18 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |<!-- -->|<!-- -->
 |----|----
 |**DevExpress.ExpressApp.Win**|**Any**
-|Xpand.Extensions|4.242.9
- |Xpand.Extensions.Reactive|4.242.9
- |Xpand.Extensions.XAF|4.242.9
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.242.9
- |System.Reactive|6.0.0
+|Xpand.Extensions|4.251.5
+ |Xpand.Extensions.Reactive|4.251.5
+ |Xpand.Extensions.XAF|4.251.5
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.251.5
+ |System.Reactive|6.0.1
  |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
  |Microsoft.CodeAnalysis|4.12.0
  |Microsoft.Extensions.DependencyInjection.Abstractions|9.0.0
  |Microsoft.Extensions.Options|9.0.0
  |Microsoft.Extensions.Configuration.Abstractions|9.0.0
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.242.9
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.242.9
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.251.5
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.251.5
 
 ## Issues-Debugging-Troubleshooting
 

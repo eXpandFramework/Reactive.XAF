@@ -52,11 +52,8 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
             var title = mergedTree.Name.CompoundName();
 
             var rootContextItems = mergedTree.ContextData
-                .Where(o => {
-                    if (o is not string s) return o is not OperationNode;
-                    if (mergedTree.Tags?.Contains(s) ?? false) return false;
-                    return s.CompoundName() != title && s != title;
-                })
+                .Where(o => o is not string s ? o is not OperationNode
+                    : !(mergedTree.Tags?.Contains(s) ?? false) && s.CompoundName() != title && s != title)
                 .ToArray();
 
             var rootContext = rootContextItems.Any() ? $" [{string.Join(", ", rootContextItems)}]" : "";
@@ -218,8 +215,32 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
             return new OperationNode("Multiple Operations", [], nodes);
         }
         private static string CompoundName(this string s) 
-            => s == null ? null : Regex.Replace(s.Split('(').First().Replace("()", "").Replace('_', ' '), @"(\B[A-Z])", " $1");
+            => s == null ? null : Regex.Replace(s.ParseMemberName().Replace('_', ' '), @"(\B[A-Z])", " $1");
 
+        internal static string ParseMemberName(this string s) {
+            if (s == null) return null;
+
+            var codePart = s.Split("=>").Last().Trim();
+            
+            var arrayMatch = System.Text.RegularExpressions.Regex.Match(codePart, @"^new\s*\[\s*\]\s*{\s*(?<content>.*?)\s*}(?<accessor>\[\d+\])?\s*$");
+            if (arrayMatch.Success) {
+                codePart = arrayMatch.Groups["content"].Value.Trim();
+            }
+            
+            var indexerMatch = System.Text.RegularExpressions.Regex.Match(codePart, @"^(.*?)\[.*\]\s*$");
+            if (indexerMatch.Success) {
+                codePart = indexerMatch.Groups[1].Value.Trim();
+            }
+
+            var parenthesisIndex = codePart.IndexOf('(');
+            if (parenthesisIndex > 0) {
+                codePart = codePart.Substring(0, parenthesisIndex);
+            }
+            codePart = codePart.TrimEnd(')');
+            var baseName = string.IsNullOrEmpty(codePart) ? s : codePart;
+
+            return baseName.Split('(').First().Replace("()", "");
+        }
         private static void RenderNode(this OperationNode node, OperationNode parent, List<OperationNode> ancestors, HashSet<object> titleContextItems, StringBuilder sb, string prefix, bool isLast, bool includeDetails) {
             var contextData = ancestors.ContextData(node, parent,  titleContextItems, includeDetails);
             var connector = isLast ? "└ " : "├ ";
@@ -452,16 +473,11 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
                 processedBoundaries.Add(branchNode.Name);
             }
         }
-        private static IEnumerable<Exception> FindRootCauses(this Exception ex) {
-            Log(() => $"[FindRootCauses] Traversing exception: {ex?.GetType().Name}");
-            if (ex is AggregateException aggEx)
-                foreach (var inner in aggEx.InnerExceptions)
-                foreach (var root in inner.FindRootCauses())
-                    yield return root;
-            else if (ex is FaultHubException { InnerException: not null } fhEx)
-                foreach (var root in fhEx.InnerException.FindRootCauses())
-                    yield return root;
-            else if (ex != null) yield return ex;
+
+        public static IEnumerable<Exception> FindRootCauses(this FaultHubException e) {
+            Log(() => $"[FindRootCauses] Traversing exception: {e?.GetType().Name}");
+            return e.SelectMany()
+                .Where(ex => ex is not AggregateException && ex is not FaultHubException { InnerException: not null });
         }
 
         
