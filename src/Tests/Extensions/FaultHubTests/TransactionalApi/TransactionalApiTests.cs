@@ -1032,5 +1032,26 @@ namespace Xpand.Extensions.Tests.FaultHubTests.TransactionalApi {
             step2ExecutionCount.ShouldBe(1, "RunToEnd should have continued to the second step after the first failed with TransactionAbortedException.");
         }
         
+        [Test]
+        public async Task RunToEnd_Aggregates_All_Failures_From_Lazy_IEnumerable_Source() {
+            var items = new[] { "Failure1", "Failure2" };
+            var operations = items.Select(item => Observable.Throw<string>(new InvalidOperationException(item)));
+
+            await operations
+                .BeginWorkflow("PocLazySequenceTx", TransactionMode.Sequential)
+                .RunToEnd()
+                .PublishFaults()
+                .Capture();
+
+            BusEvents.Count.ShouldBe(1);
+            var finalFault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
+            var aggregate = finalFault.InnerException.ShouldBeOfType<AggregateException>();
+            
+            aggregate.InnerExceptions.Count.ShouldBe(2, "The transaction should have aggregated both failures from the lazy sequence.");
+            
+            var messages = aggregate.InnerExceptions.OfType<FaultHubException>().Select(f => f.InnerException?.Message).ToHashSet();
+            messages.ShouldContain("Failure1");
+            messages.ShouldContain("Failure2");
+        }
     }
 }
