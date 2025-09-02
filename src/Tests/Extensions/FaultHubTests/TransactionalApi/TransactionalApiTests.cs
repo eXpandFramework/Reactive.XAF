@@ -1082,5 +1082,88 @@ namespace Xpand.Extensions.Tests.FaultHubTests.TransactionalApi {
             failure2.ShouldNotBeNull();
             failure2.AllContexts.ShouldContain("MultiStepTx - operations[1]", "The second failure did not have the context of the second step.");
         }
+        
+        [Test]
+        public async Task RunToEnd_Correctly_Buffers_Multi_Emission_From_IEnumerable_Source() {
+            var selectorInvocations = 0;
+            var source = Observable.Range(1, 3).Select(i => i.ToString());
+
+            var transactionResult = await new[] { source }
+                .BeginWorkflow("MultiEmitSource-Tx", TransactionMode.Sequential)
+                .RunAndCollect(allItems => {
+                    selectorInvocations++;
+                    allItems.ShouldBe(["1", "2", "3"]);
+                    return Observable.Return(string.Join(",", allItems));
+                })
+                .Capture();
+
+            transactionResult.Error.ShouldBeNull();
+            transactionResult.IsCompleted.ShouldBe(true);
+            selectorInvocations.ShouldBe(1, "The result selector should have been invoked only once with all items.");
+            transactionResult.Items.ShouldHaveSingleItem();
+            transactionResult.Items.Single().ShouldBe("1,2,3");
+        }
+        
+        [Test]
+        public async Task RunToEnd_Buffers_Multi_Emission_Step_Before_Passing_To_Nested_Transaction_Step() {
+            var nestedTransactionInvocations = 0;
+            
+            IObservable<Unit[]> NestedTransactionStep(string[] items) {
+                nestedTransactionInvocations++;
+                items.Length.ShouldBe(3);
+                items.ShouldBe(["A", "B", "C"]);
+
+                return new[] { Observable.Return(Unit.Default) }
+                    .BeginWorkflow("Nested-Tx-For-Test",null)
+                    .RunToEnd();
+            }
+
+            var result = await Observable.Return("Start")
+                .BeginWorkflow("Parent-Tx")
+                .Then(_ => new[] { "A", "B", "C" }.ToObservable())
+                .Then(NestedTransactionStep)
+                .RunToEnd()
+                .Capture();
+            
+            result.Error.ShouldBeNull();
+            result.IsCompleted.ShouldBe(true);
+            nestedTransactionInvocations.ShouldBe(1, "The step with the nested transaction should have been invoked only once.");
+        }
+        
+        private int _finalStepInvocationCount;
+        private List<int[]> _receivedItemsInFinalStep;
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private IObservable<int> Step2_Emits_Multiple_Items(Unit[] _) 
+            => Observable.Range(1, 3);
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private IObservable<Unit> FinalStep_Aggregates(int[] items) {
+            _finalStepInvocationCount++;
+            _receivedItemsInFinalStep.Add(items);
+            return Unit.Default.Observe();
+        }
+
+        [TestCase(false)]
+        [TestCase(true)]
+        public async Task Then_Step_Buffers_Previous_Multi_Item_Step_Before_Executing(bool failfast) {
+            _finalStepInvocationCount = 0;
+            _receivedItemsInFinalStep = new List<int[]>();
+            
+            var result = await Observable.Return(Unit.Default)
+                .BeginWorkflow("BufferingTest-Tx")
+                .Then(_ => Step2_Emits_Multiple_Items(null))
+                .Then(FinalStep_Aggregates).Run(failfast)
+                .PublishFaults()
+                .Capture();
+
+            result.IsCompleted.ShouldBe(true);
+            result.Error.ShouldBeNull();
+            BusEvents.ShouldBeEmpty();
+
+            _finalStepInvocationCount.ShouldBe(1, "The final step should have been invoked only once with all items buffered.");
+            _receivedItemsInFinalStep.Count.ShouldBe(1);
+            _receivedItemsInFinalStep.Single().ShouldBe([1, 2, 3], "The final step did not receive the correctly buffered items.");
+        }
     }
-}
+    }

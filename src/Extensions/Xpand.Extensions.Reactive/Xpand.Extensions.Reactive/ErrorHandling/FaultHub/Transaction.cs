@@ -78,18 +78,24 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
                 .Merge(maxConcurrency > 0 ? maxConcurrency : int.MaxValue);
         
         private static IObservable<object> ResilientBus(this StepDefinition step,
-            (object results, List<Exception> failures, List<object> allResults) acc){
+            (object results, List<Exception> failures, List<object> allResults) acc, bool failFast){
             var primaryBus = Observable.Defer(() => step.Selector(acc.results));
-            return step.FallbackSelector == null ? primaryBus
-                : primaryBus.Catch((Exception ex) => step.FallbackSelector(ex, acc.results));
+            if (failFast || step.FallbackSelector == null) {
+                return primaryBus;
+            }
+            return primaryBus.Catch((Exception ex) => step.FallbackSelector(ex, acc.results));
         }
-
-        private static IObservable<(object finalStepResult, List<Exception> allFailures, List<object> allResults)> StepChain<TFinal>(this List<StepDefinition> allSteps, TransactionBuilder<TFinal> builder) 
+        
+        private static IObservable<(object finalStepResult, List<Exception> allFailures, List<object> allResults)> StepChain<TFinal>(this List<StepDefinition> allSteps, TransactionBuilder<TFinal> builder, bool failFast) 
             => allSteps.Aggregate(Observable.Return((results: (object)new List<object>(), failures: new List<Exception>(), allResults: new List<object>())), 
                     (accObservable, step) => accObservable.SelectMany(acc => {
+                        if (failFast && acc.failures.Any()) {
+                            Log(() => $"[Tx-FORNSC:{builder.TransactionName}][StepChain] ==> SKIPPING step '{step.Name}' due to prior failure in FailFast mode.");
+                            return Observable.Return(acc);
+                        }
                         var accFailures = acc.failures.Any() ? string.Join(", ", acc.failures.Select(f => f.GetType().Name)) : "empty";
                         Log(() => $"[Tx-FORNSC:{builder.TransactionName}][StepChain] ==> ENTERING step '{step.Name}'. Accumulator has {acc.failures.Count} failure(s): [{accFailures}]");
-                        return step.ResilientBus(acc)
+                        return step.ResilientBus(acc, failFast)
                             .PushFrameConditionally(!string.IsNullOrEmpty(step.Name) ? step.Name : $"Part {allSteps.IndexOf(step) + 1}",step.FilePath,step.LineNumber)
                             .Materialize().BufferUntilCompleted()
                             .Select(notifications => {
@@ -106,29 +112,9 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
                                 return acc with { results = results };
                             });                    }))
                 .Select(acc => (acc.results, acc.failures, acc.allResults));
-        
-        private static IEnumerable<FaultHubException> CollectErrors<TFinal>(this List<StepDefinition> allSteps, TransactionBuilder<TFinal> builder, List<Notification<object>> errors, StepDefinition step) {
-            if (!errors.Any()) return [];
-            Log(() => $"[Tx:{builder.TransactionName}][CollectErrors] Collecting {errors.Count} error(s) for step '{step.Name}'.");
-            var stepNameForContext = !string.IsNullOrEmpty(step.Name) 
-                ? step.Name 
-                : $"Part {allSteps.IndexOf(step) + 1}";
-
-            return errors.Select(e => {
-                var stack = e.Exception.CapturedStack();
-                var capturedStack = stack ?? FaultHub.LogicalStackContext.Value;
-                var contextForStep = capturedStack.NewFaultContext(
-                    builder.Context.AddToContext(builder.TransactionName,
-                        $"{builder.TransactionName} - {stepNameForContext}"), tags: [StepNodeTag], memberName: stepNameForContext);
-        
-                Log(() => $"[INSTRUMENTATION][CollectErrors] Creating context for step '{stepNameForContext}'. Tags are: [{string.Join(", ", contextForStep.Tags)}]");
-                return e.Exception.ExceptionToPublish(contextForStep);
-            });
-        }
-
 
         private static IObservable<object> RunToEnd<TFinal>(this TransactionBuilder<TFinal> builder, List<StepDefinition> allSteps, bool isNested,bool collectAllResults)
-            => allSteps.StepChain(builder)
+            => allSteps.StepChain(builder, false)
                 .SelectMany(t => {
                     if (!t.allFailures.Any()) {
                         Log(() => $"[Tx:{builder.TransactionName}] RunToEnd: No failures. CollectAllResults={collectAllResults}, IsNested={isNested}");
@@ -146,23 +132,27 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
                     return Observable.Return((object)finalTypedResults).Concat(Observable.Throw<object>(faultException));
                 });
 
+        private static IEnumerable<FaultHubException> CollectErrors<TFinal>(this List<StepDefinition> allSteps, TransactionBuilder<TFinal> builder, List<Notification<object>> errors, StepDefinition step) {
+            if (!errors.Any()) return [];
+            Log(() => $"[Tx:{builder.TransactionName}][CollectErrors] Collecting {errors.Count} error(s) for step '{step.Name}'.");
+            var stepNameForContext = !string.IsNullOrEmpty(step.Name) ? step.Name : $"Part {allSteps.IndexOf(step) + 1}";
+            return errors.Select(e => {
+                var stack = e.Exception.CapturedStack();
+                var capturedStack = stack ?? FaultHub.LogicalStackContext.Value;
+                var contextForStep = capturedStack.NewFaultContext(
+                    builder.Context.AddToContext(builder.TransactionName,
+                        $"{builder.TransactionName} - {stepNameForContext}"), tags: [StepNodeTag], memberName: stepNameForContext);
+                if (e.Exception is TransactionAbortedException abortedException) {
+                    contextForStep = contextForStep with { BoundaryName = abortedException.Context.BoundaryName };
+                }
+                Log(() => $"[INSTRUMENTATION][CollectErrors] Creating context for step '{stepNameForContext}'. Tags are: [{string.Join(", ", contextForStep.Tags)}]");
+                return e.Exception.ExceptionToPublish(contextForStep);
+            });
+        }
+
         private static IObservable<object> FailFast<TFinal>(this  List<StepDefinition> allSteps,TransactionBuilder<TFinal> builder) 
-            => allSteps.Aggregate(Observable.Return((object)null), (currentObservable, step) => currentObservable
-                    .SelectMany(currentResult => {
-                        var stepName = !string.IsNullOrEmpty(step.Name) ? step.Name : $"Part {allSteps.IndexOf(step) + 1}";
-                        return Observable.Defer(() => step.Selector(currentResult))
-                            .PushFrameConditionally(stepName,step.FilePath,step.LineNumber)
-                            .Catch((Exception ex) => {
-                                Log(() => $"[Tx:{builder.TransactionName}][Step:{stepName}] FailFast: Catch block executed for exception {ex.GetType().Name}.");
-                                if (ex is TransactionAbortedException) return Observable.Throw<object>(ex);
-                                var faultContext = FaultHub.LogicalStackContext.Value
-                                    .NewFaultContext(builder.Context.AddToContext(builder.TransactionName,$"{builder.TransactionName} - {stepName}"),[StepNodeTag], memberName:stepName);
-                                var newFaultHubException = ex.ExceptionToPublish(faultContext);
-                                return Observable.Throw<object>(newFaultHubException);
-                            });
-                    }))
-                .SelectMany(CreateInputArray<object>)
-                .BufferUntilCompleted();
+            => allSteps.StepChain(builder,true)
+                .SelectMany(t => t.allFailures.Any() ? Observable.Throw<object>(t.allFailures.First()) : Observable.Return(t.finalStepResult));
 
     }
 
