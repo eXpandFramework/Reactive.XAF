@@ -6,11 +6,9 @@ using System.Runtime.CompilerServices;
 namespace Xpand.Extensions.Reactive.Utility {
     
     public static partial class Utility {
-        public static IObservable<TResult> Use<T, TResult>(this T source, Func<T, IObservable<TResult>> selector,Func<IObservable<TResult>, IObservable<TResult>> retrySelector = null) where T : IDisposable {
-            var baseSequence = selector(source);
-            var resilientSequence = retrySelector != null ? retrySelector(baseSequence) : baseSequence;
-            return resilientSequence.Finally(source.Dispose);
-        }
+        [Obsolete("Use Observable.Using instead")]
+        public static IObservable<TResult> Use<T, TResult>(this T source, Func<T, IObservable<TResult>> selector) where T : IDisposable 
+            => selector(source).Finally(source.Dispose);
 
         public static IObservable<T> RunSideEffect<T, TSide>(this IObservable<T> source, IObservable<TSide> sideEffect, bool propagateSideEffectError = false) => source.Publish(bus => {
             var safeSideEffect = propagateSideEffectError ? sideEffect
@@ -18,11 +16,7 @@ namespace Xpand.Extensions.Reactive.Utility {
             return bus.TakeUntil(bus.LastOrDefaultAsync()
                 .Zip(safeSideEffect.LastOrDefaultAsync()));
         });
-
-        public static IObservable<TResult> Using<TResource, TResult>(this object _,
-            Func<TResource> resourceFactory, Func<TResource, IObservable<TResult>> busFactory) where TResource : IDisposable 
-            => Observable.Using(resourceFactory, busFactory);
-
+        
         public static IObservable<T> SafeguardSubscription<T>(this IObservable<T> source,Action<Exception,string> onError, [CallerMemberName] string caller = "")
             => Observable.Create<T>(observer => {
                 IDisposable subscription;

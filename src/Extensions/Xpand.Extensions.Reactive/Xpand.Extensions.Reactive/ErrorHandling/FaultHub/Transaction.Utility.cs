@@ -11,17 +11,16 @@ using static Xpand.Extensions.Reactive.ErrorHandling.FaultHub.FaultHubLogger;
 
 namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
     public static partial class Transaction {
-                private static readonly AsyncLocal<int> TransactionNestingLevel = new();
+        private static readonly AsyncLocal<int> TransactionNestingLevel = new();
         public const string TransactionNodeTag = "Transaction";
         public const string NestedTransactionNodeTag = "Nested";
         public const string StepNodeTag = "Step";
+        
         private static List<string> AddNestedTag(this ICollection<string> tags) 
             => TransactionNestingLevel.Value <= 0 ? tags.ToList() : tags.AddToArray(NestedTransactionNodeTag).ToList();
         
-        private static List<string> UpdateTags<TFinal>(this TransactionBuilder<TFinal> ib,bool collectAllResults) 
+        private static List<string> UpdateRunTags<TFinal>(this TransactionBuilder<TFinal> ib,bool collectAllResults) 
             => ib.Tags.Contains(StepNodeTag) ? ib.Tags.ToList() : ib.Tags.Concat([collectAllResults ? nameof(RunAndCollect) : nameof(RunToEnd)]).ToList();
-        
-
 
         static TCurrent[] CreateInputArray<TCurrent>(object currentResult) => currentResult switch {
             null => [], TCurrent[] typedArray => typedArray,

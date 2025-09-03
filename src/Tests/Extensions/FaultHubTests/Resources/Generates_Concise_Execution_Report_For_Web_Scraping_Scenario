@@ -1,6 +1,6 @@
-Transaction Sequential RunToEnd: Schedule Web Scraping completed with errors (2 times: Failed to get links • Failed to extract content)
-└ Step: Extract And Process Links 
-  ├ Step: Get Page Links 
+Schedule Web Scraping completed with errors [Transaction, Sequential, RunToEnd] <2 times: Failed to get links • Failed to extract content>
+└ Extract And Process Links [Step, Transaction, Sequential, Nested, RunToEnd] 
+  ├ Get Page Links [Step] 
   │ • Root Cause: System.Exception: Failed to get links
   │   --- Invocation Stack ---
   │     at GetPageLinks in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenario2Tests.cs:line 41
@@ -8,10 +8,10 @@ Transaction Sequential RunToEnd: Schedule Web Scraping completed with errors (2 
   │     at ExtractAndProcessLinks in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenario2Tests.cs:line 46
   │   --- Original Exception Details ---
   │     System.Exception: Failed to get links
-  └ Step: Scrape Data From Links
-    └ Step: When Link Scraped
-      └ Step: Data Extraction Transaction
-        └ Step: Extract Content
+  └ Scrape Data From Links [Step, Transaction, Sequential, Nested, RunToEnd]
+    └ When Link Scraped [Step, Transaction, Sequential, Nested, RunToEnd]
+      └ Data Extraction Transaction [Step, Transaction, Sequential, Nested, RunToEnd]
+        └ Extract Content [Step]
           • Root Cause: System.Exception: Failed to extract content
             --- Invocation Stack ---
               at Extract Content in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenario2Tests.cs:line 25

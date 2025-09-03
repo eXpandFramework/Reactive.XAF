@@ -754,7 +754,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         
         public static IObservable<TResult> UseObject<TSource, TResult>(this XafApplication application,
             TSource instance, Func<TSource, IObservable<TResult>> selector, bool useObjectSpaceProvider = false)
-            => application.Using(() => application.CreateObjectSpace(useObjectSpaceProvider, typeof(TSource)),
+            => Observable.Using(() => application.CreateObjectSpace(useObjectSpaceProvider, typeof(TSource)),
                 space => selector(space.GetObjectFromKey(instance)));
 
         public static IObservable<TResult> UseArray<TSource,TResult>(this XafApplication application,TSource[] instance,Func<TSource[],IObservable<TResult>> selector,bool useObjectSpaceProvider=false) 
@@ -769,7 +769,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<T> UseProviderObjectSpace<T>(this XafApplication application,Func<IObjectSpace,IObservable<T>> factory,Type objectType=null) {
             if (application.IsDisposed())return Observable.Empty<T>();
             var type =objectType?? typeof(T).RealType();
-            return application.Using(() => application.CreateObjectSpace(true, type),factory);
+            return Observable.Using(() => application.CreateObjectSpace(true, type),factory);
         }
         public static IObservable<Unit> UseProviderObjectSpace<T>(this XafApplication application,Action<IObjectSpace> factory) 
             => application.UseProviderObjectSpace(space => {

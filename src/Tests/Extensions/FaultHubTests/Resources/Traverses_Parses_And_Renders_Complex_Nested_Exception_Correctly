@@ -1,4 +1,4 @@
-Schedule Web Scraping completed with errors [Example.com] (2 times: Failed to get links • Failed to extract content)
+Schedule Web Scraping completed with errors (Example.com) <2 times: Failed to get links • Failed to extract content>
 └ Extract And Process Links (Main Site)
   ├ Get Page Links
   │ • Root Cause: System.Exception: Failed to get links

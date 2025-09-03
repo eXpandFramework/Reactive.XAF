@@ -1,8 +1,8 @@
-Schedule Web Scraping failed [HomePageUrl] (2 times: Failed to fetch URLs • Failed to extract content)
-└ Transaction Sequential RunFailFast: Parse Home Page
-  └ Step: Extract And Process Links (UserAgent)
-    ├ Step: Get Page Links
-    │ └ Step: Fetch Initial Urls
+Schedule Web Scraping failed (HomePageUrl) <2 times: Failed to fetch URLs • Failed to extract content>
+└ Parse Home Page [Transaction, Sequential, RunFailFast]
+  └ Extract And Process Links [Step, Transaction, Sequential, RunToEnd] (UserAgent)
+    ├ Get Page Links [Step, Transaction, Sequential, Nested, RunToEnd]
+    │ └ Fetch Initial Urls [Step]
     │   • Root Cause: System.Exception: Failed to fetch URLs
     │     --- Invocation Stack ---
     │       at FetchInitialUrls in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 57
@@ -14,11 +14,11 @@ Schedule Web Scraping failed [HomePageUrl] (2 times: Failed to fetch URLs • Fa
     │       (Scheduled Context) at ScheduleWebScraping in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 15
     │     --- Original Exception Details ---
     │       System.Exception: Failed to fetch URLs
-    └ Step: Scrape Data From Links
-      └ Step: Scrape Data From Link
-        ├ Transaction Sequential Nested RunToEnd: When Link Scraped
-        └ Step: Data Extraction Transaction
-          └ Step: Extract Content
+    └ Scrape Data From Links [Step, Transaction, Sequential, Nested, RunToEnd]
+      └ Scrape Data From Link [Step]
+        ├ When Link Scraped [Transaction, Sequential, Nested, RunToEnd]
+        └ Data Extraction Transaction [Step, Transaction, Sequential, Nested, RunToEnd]
+          └ Extract Content [Step]
             • Root Cause: System.Exception: Failed to extract content
               --- Invocation Stack ---
                 at ExtractContent in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 94

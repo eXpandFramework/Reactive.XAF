@@ -38,7 +38,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics {
         public void Render_Correctly_Formats_Web_Scraping_Scenario_With_Multiple_Failures() {
             var exception = CreateWebScrapingScenarioException();
             var expected = string.Join(Environment.NewLine,
-                "Schedule Web Scraping completed with errors (2 times: Failed to fetch URLs • Failed to extract content)",
+                "Schedule Web Scraping completed with errors <2 times: Failed to fetch URLs • Failed to extract content>",
                 "└ Parse Home Page",
                 "  └ Navigate To Page",
                 "    └ Extract And Process Links",
@@ -74,7 +74,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics {
             var exception = new FaultHubException("Outer fail", fhInner, outerCtx);
             
             var expected = string.Join(Environment.NewLine,
-                "Outer Operation completed with errors (Root Cause)",
+                "Outer Operation completed with errors <Root Cause>",
                 "└ Inner Operation",
                 "  • Root Cause: System.InvalidOperationException: Root Cause",
                 "    --- Original Exception Details ---",
@@ -121,7 +121,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics {
             );
             var report = exception.Render();
             Console.WriteLine(report);
-            report.ShouldContain("Test Operation completed with errors (Root Cause)");
+            report.ShouldContain("Test Operation completed with errors <Root Cause>");
             report.ShouldContain("MyMethod");
             report.ShouldContain("--- Invocation Stack ---");
             report.ShouldContain("• Root Cause: System.InvalidOperationException: Root Cause");
@@ -157,11 +157,11 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics {
             };
             var exception = new FaultHubException("Outer fail", fhInner, outerCtx);
 
-            var expectedHeaderStart = "Schedule Web Scraping completed with errors [Example.com Scrape]";
+            var expectedHeaderStart = "Schedule Web Scraping completed with errors (Example.com Scrape) <Root Cause>";
             var result = exception.Render();
 
             result.ShouldStartWith(expectedHeaderStart);
-            result.ShouldNotContain($"[{context}, Example.com Scrape]");
+            result.ShouldNotContain($"({context}, Example.com Scrape)");
         }
         
         [Test]
@@ -187,36 +187,6 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics {
             result.ShouldNotContain("(MyMethod)");
         }
     
-        [Test]
-        public void Render_Correctly_Applies_Prefixes_And_Filters_Tags_From_Context() {
-            var stepEx = new InvalidOperationException("Step Failure");
-            var stepCtx = new AmbientFaultContext {
-                BoundaryName = "MyNestedStep",
-                UserContext = ["Step", "SomeStepData"],
-                Tags = ["Step"]
-            };
-            var fhStep = new FaultHubException("Step failed", stepEx, stepCtx);
-
-            var txCtx = new AmbientFaultContext {
-                BoundaryName = "MyTransaction",
-                UserContext = ["Transaction", "RunToEnd", "SomeTxData"],
-                Tags = ["Transaction", "RunToEnd"],
-                InnerContext = fhStep.Context
-            
-            };
-            var fhTx = new FaultHubException("Transaction failed", fhStep, txCtx);
-
-            var report = fhTx.Render();
-            var reportLines = report.Split([Environment.NewLine], StringSplitOptions.None);
-            var txLine = reportLines.FirstOrDefault(l => l.Contains("My Transaction"));
-            txLine.ShouldNotBeNull();
-            txLine.Trim().ShouldStartWith("Transaction RunToEnd: My Transaction");
-            txLine.ShouldContain("[SomeTxData]");
-            var stepLine = reportLines.FirstOrDefault(l => l.Contains("My Nested Step"));
-            stepLine.ShouldNotBeNull();
-            stepLine.Trim().ShouldContain("Step: My Nested Step");
-            stepLine.ShouldContain("(SomeStepData)");
-        }
         
         [TestCase(1, true, TestName = "Render_Uses_Simplified_Summary_For_Single_Failure")]
         [TestCase(2, true, TestName = "Render_Shows_Full_Summary_For_Multiple_Failures")]
@@ -238,7 +208,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics {
 
             var result = exception.Render();
             if (errorCount == 1) {
-                result.ShouldContain("(Innermost failure)");
+                result.ShouldContain("<Innermost failure>");
                 result.ShouldNotContain("1 times:");
             }
             else if (shouldShowSummary) {
@@ -251,6 +221,58 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics {
             }
         }
     
+        [Test]
+        public void Render_Correctly_Combines_Step_And_Transaction_Tags() {
+            var innerEx = new InvalidOperationException("Failure");
+            var multiRoleCtx = new AmbientFaultContext {
+                BoundaryName = "MultiRoleOperation",
+                Tags = [Transaction.StepNodeTag, Transaction.TransactionNodeTag, nameof(Transaction.RunToEnd)]
+            };
+            var fhMultiRole = new FaultHubException("Multi-role failed", innerEx, multiRoleCtx);
+            var rootCtx = new AmbientFaultContext {
+                BoundaryName = "RootTransaction",
+                InnerContext = fhMultiRole.Context
+            };
+            var finalFault = new FaultHubException("Root failed", fhMultiRole, rootCtx);
+
+            var report = finalFault.Render();
+            var reportLines = report.Split([Environment.NewLine], StringSplitOptions.None);
+
+            var multiRoleLine = reportLines.FirstOrDefault(l => l.Contains("Multi Role Operation"));
+            multiRoleLine.ShouldNotBeNull();
+            multiRoleLine.Trim().ShouldBe("└ Multi Role Operation [Step, Transaction, RunToEnd]");
+        }
+        [Test]
+        public void Render_Correctly_Applies_Prefixes_And_Filters_Tags_From_Context() {
+            var stepEx = new InvalidOperationException("Step Failure");
+            var stepCtx = new AmbientFaultContext {
+                BoundaryName = "MyNestedStep",
+                UserContext = ["Step", "SomeStepData"],
+                Tags = ["Step"]
+            };
+            var fhStep = new FaultHubException("Step failed", stepEx, stepCtx);
+
+            var txCtx = new AmbientFaultContext {
+                BoundaryName = "MyTransaction",
+                UserContext = ["Transaction", "RunToEnd", "SomeTxData"],
+                Tags = ["Transaction", "RunToEnd"],
+                InnerContext = fhStep.Context
+            
+            };
+            var fhTx = new FaultHubException("Transaction failed", fhStep, txCtx);
+
+            var report = fhTx.Render();
+            var reportLines = report.Split([Environment.NewLine], StringSplitOptions.None);
+            var txLine = reportLines.First(l => l.Contains("My Transaction"));
+            txLine.ShouldNotBeNull();
+            txLine.Trim().ShouldStartWith("My Transaction completed with errors");
+            txLine.ShouldContain("(SomeTxData)");
+            txLine.ShouldContain("[Transaction, RunToEnd]");
+
+            var stepLine = reportLines.First(l => l.Contains("My Nested Step"));
+            stepLine.ShouldNotBeNull();
+            stepLine.Trim().ShouldEndWith("My Nested Step [Step] (SomeStepData)");
+        }
         
     }
 }

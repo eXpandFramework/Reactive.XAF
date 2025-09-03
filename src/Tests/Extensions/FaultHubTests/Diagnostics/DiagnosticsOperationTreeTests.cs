@@ -438,5 +438,67 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics {
             nestedNode.Tags.ShouldContain(Transaction.TransactionNodeTag, "The node should be tagged as a Transaction because it was created with BeginWorkflow().");
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private IObservable<Unit> Inner_Failing_Step()
+            => Observable.Throw<Unit>(new InvalidOperationException("Inner Failure"))
+                .PushStackFrame("Frame_From_Inner_Failure");
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private IObservable<Unit[]> Nested_Failing_Transaction()
+            => Observable.Return(Unit.Default)
+                .BeginWorkflow("Nested_Tx")
+                .Then(_ => Inner_Failing_Step())
+                .RunToEnd();
+
+        [Test]
+        public async Task OperationTree_Correctly_Nests_Aggregated_Failure_From_Nested_Transaction() {
+            var transaction = Observable.Return(Unit.Default)
+                .BeginWorkflow("Outer_Tx")
+                .Then(_ => Nested_Failing_Transaction())
+                .RunToEnd();
+        
+            await transaction.PublishFaults().Capture();
+
+            BusEvents.Count.ShouldBe(1);
+            var finalFault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
+            
+            var tree = finalFault.OperationTree();
+            
+            tree.Name.ShouldBe("Outer_Tx");
+            var nestedTxStep = tree.Children.ShouldHaveSingleItem();
+            nestedTxStep.Name.ShouldBe(nameof(Nested_Failing_Transaction));
+
+            var nestedTxNode = nestedTxStep.Children.ShouldHaveSingleItem("The nested transaction itself should be a child of the step that called it.");
+            nestedTxNode.Name.ShouldBe("Nested_Tx");
+            
+            var innerStepNode = nestedTxNode.Children.ShouldHaveSingleItem("The failing inner step should be a child of the nested transaction.");
+            innerStepNode.Name.ShouldBe(nameof(Inner_Failing_Step));
+            innerStepNode.GetRootCause().ShouldBeOfType<InvalidOperationException>();
+        }
+        
+        [Test]
+        public void OperationTree_Does_Not_Unwrap_Manually_Tagged_NonTransactional_Chain() {
+            var innerEx = new InvalidOperationException("Innermost failure");
+
+            var innerCtx = new AmbientFaultContext {
+                BoundaryName = "InnerOperation",
+                Tags = [Transaction.TransactionNodeTag]
+            };
+            var fhInner = new FaultHubException("Inner failed", innerEx, innerCtx);
+
+            var outerCtx = new AmbientFaultContext {
+                BoundaryName = "OuterWrapper",
+                Tags = [Transaction.TransactionNodeTag],
+                InnerContext = fhInner.Context
+            };
+            var fhOuter = new FaultHubException("Outer failed", fhInner, outerCtx);
+
+            var tree = fhOuter.OperationTree();
+
+            tree.ShouldNotBeNull();
+            tree.Name.ShouldBe("OuterWrapper");
+            var childNode = tree.Children.ShouldHaveSingleItem();
+            childNode.Name.ShouldBe("InnerOperation");
+        }
     }
 }

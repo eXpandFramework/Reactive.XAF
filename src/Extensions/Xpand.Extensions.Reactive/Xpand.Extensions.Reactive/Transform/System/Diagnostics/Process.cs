@@ -50,19 +50,20 @@ namespace Xpand.Extensions.Reactive.Transform.System.Diagnostics{
 
         private static IObservable<Process> WhenNewProcess(string processName,bool systemManagement=false){
             var processes = Process.GetProcessesByName(processName);
-            
-            
-            
-            return new ManagementEventWatcher($"SELECT * FROM Win32_ProcessStartTrace WHERE ProcessName = '{processName}.exe'")
-                .Use(watcher => {
+            return Observable.Using(
+                () => new ManagementEventWatcher(
+                    $"SELECT * FROM Win32_ProcessStartTrace WHERE ProcessName = '{processName}.exe'"), watcher => {
                     watcher.Start();
                     return watcher.ProcessEvent<EventArrivedEventArgs>(nameof(watcher.EventArrived))
-                        .SelectMany(e => Observable.Defer(() => Process.GetProcessById(Convert.ToInt32((UInt32)e.NewEvent.Properties["ProcessID"].Value)).Observe())
+                        .SelectMany(e => Observable
+                            .Defer(() => Process
+                                .GetProcessById(Convert.ToInt32((UInt32)e.NewEvent.Properties["ProcessID"].Value))
+                                .Observe())
                             .OnErrorResumeNext(Observable.Empty<Process>()).CompleteOnError())
                         .Where(process => !processes.Contains(process))
                         .Select(eventArgs => eventArgs)
                         .Merge(watcher.WhenDisposed().Do(_ => watcher.Stop()).IgnoreElements().To<Process>())
-                        .DoOnComplete(() => {});
+                        .DoOnComplete(() => { });
                 });
         }
 

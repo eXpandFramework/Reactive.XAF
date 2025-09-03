@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -37,6 +38,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Notification {
             => application.IsInternal() ? Observable.Empty<(JobWorker worker, T[] objects)>()
                 : application.WhenNotification(typeof(T)).Select(t => (t.worker,t.objects.Cast<T>().ToArray()));
         
+        [SuppressMessage("ReSharper", "UnusedParameter.Global")]
         public static IObservable<(JobWorker worker, object[] objects)> WhenNotification(this XafApplication application,Type objectType=null) {
             objectType ??= typeof(object);
             return NotificationSubject.Select(e => (e.worker,e.objects.Where(o => objectType.IsInstanceOfType(o)).ToArray()));
@@ -82,7 +84,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Notification {
         }
         
         private static IObservable<object> WhenNotificationJobModification(this XafApplication application, NotificationType[] modelNotificationTypes) 
-            => application.Using(() => application.CreateNonSecuredObjectSpace(typeof(ObjectStateNotification)),objectSpace => objectSpace.SaveIndexes(modelNotificationTypes))
+            => Observable.Using(() => application.CreateNonSecuredObjectSpace(typeof(ObjectStateNotification)),objectSpace => objectSpace.SaveIndexes(modelNotificationTypes))
                 .Merge(application.WhenCommittedDetailed<ObjectStateNotification>(ObjectModification.All)
                     .SelectManyItemResilient(t => application.SaveIndexes(t.details.Select(t1 =>t1.instance ).ToArray(),modelNotificationTypes)
                             .TraceNotificationModule(job => $"{ObjectModification.NewOrUpdated}-{job}")));
