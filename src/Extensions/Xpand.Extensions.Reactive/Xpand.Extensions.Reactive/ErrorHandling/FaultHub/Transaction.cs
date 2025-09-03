@@ -125,7 +125,9 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
                     var message = $"{builder.TransactionName} completed with errors";
                     var finalContext = (builder.Context ?? []).ToList();
                     finalContext.Add(builder.TransactionName);
-                    var faultContext = FaultHub.LogicalStackContext.Value.NewFaultContext(finalContext.ToArray(), memberName:builder.CallerMemberName,filePath: builder.CallerMemberPath, lineNumber:builder.CallerMemberLine);
+                    var faultContext = FaultHub.LogicalStackContext.Value.NewFaultContext(finalContext.ToArray(),
+                        builder.UpdateRunTags(collectAllResults), builder.CallerMemberName, builder.CallerMemberPath,
+                        builder.CallerMemberLine);
                     var faultException = new FaultHubException(message, aggregateException, faultContext);
                     if (!isNested) return Observable.Throw<object>(faultException);
                     var finalTypedResults = t.allResults.OfType<TFinal>().Cast<object>().ToList();

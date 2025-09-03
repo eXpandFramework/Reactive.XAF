@@ -47,8 +47,8 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics {
         public void Union_Preserves_RootCauses_On_Diverging_Leaf_Nodes() {
             var ex1 = new InvalidOperationException("Failure A");
             var ex2 = new InvalidOperationException("Failure B");
-            var path1 = new OperationNode("Root", [], [new OperationNode("FailingChildA", [], [], ex1)]);
-            var path2 = new OperationNode("Root", [], [new OperationNode("FailingChildB", [], [], ex2)]);
+            var path1 = new OperationNode("Root", [], [new OperationNode("FailingChildA", [], RootCause:ex1,Children: [])]);
+            var path2 = new OperationNode("Root", [], [new OperationNode("FailingChildB", [], RootCause:ex2, Children:[])]);
             var source = new[] { path1, path2 };
 
             var result = source.Union();

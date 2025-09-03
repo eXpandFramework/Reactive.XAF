@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -26,6 +27,7 @@ using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.TestsLib {
     public static class Extensions {
+        [SuppressMessage("ReSharper", "UnusedParameter.Global")]
         public static IObservable<ConfirmationDialogClosedEventArgs> WhenConfirmationDialogClosed(this Messaging messaging)
             => typeof(Messaging).ProcessEvent<ConfirmationDialogClosedEventArgs>(nameof(Messaging.ConfirmationDialogClosed));
 
@@ -45,8 +47,8 @@ namespace Xpand.TestsLib {
         }
 
         public static IObservable<Unit> StartWinTest(this IObservable<WinApplication> source, Func<WinApplication,IObservable<Unit>> test,TimeSpan timeout) 
-            => source.SelectMany(application => application.Use(winApplication => winApplication.StartWinTest(test(winApplication)
-                        .Timeout(timeout)))).FirstAsync();
+            => source.SelectMany(application => Observable.Using(() => application,winApplication => winApplication.StartWinTest(test(winApplication)
+                .Timeout(timeout)))).FirstAsync();
 
         public static IObservable<T> StartWinTest<T>(this WinApplication application, IObservable<T> test, string user=null) 
             => SynchronizationContext.Current.Observe()
