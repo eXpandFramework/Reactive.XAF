@@ -1,4 +1,4 @@
-Schedule Web Scraping failed (HomePageUrl) <2 times: Failed to fetch URLs • Failed to extract content>
+Schedule Web Scraping failed (HomePageUrl) [Transaction, Sequential, RunFailFast] <2 times: Failed to fetch URLs • Failed to extract content>
 └ Parse Home Page [Transaction, Sequential, RunFailFast]
   └ Extract And Process Links [Step, Transaction, Sequential, RunToEnd] (UserAgent)
     ├ Get Page Links [Step, Transaction, Sequential, Nested, RunToEnd]

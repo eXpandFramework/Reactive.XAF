@@ -691,20 +691,69 @@ namespace Xpand.Extensions.Tests.FaultHubTests.TransactionalApi {
             innerFault.AllContexts.ShouldContain($"{nameof(BeginWorkflow_Defaults_Transaction_Name_To_Caller_Method_On_RunToEnd)} - {stepName}");
         }
         
-        [Test]
-        public async Task BeginWorkflow_Uses_Explicit_Name_When_Provided() {
+        protected static IEnumerable<TestCaseData> RunSelectors() {
+            yield return new TestCaseData(RunFailFast).SetName(nameof(RunFailFast));
+            yield return new TestCaseData(RunToEnd).SetName(nameof(RunToEnd)); 
+            yield return new TestCaseData(RunAndCollect).SetName(nameof(RunAndCollect));
+        }
+        private static Func<ITransactionBuilder<string>,IObservable<string[]>> RunFailFast=>builder => builder.RunFailFast();
+        private static Func<ITransactionBuilder<string>,IObservable<string[]>> RunToEnd=>builder => builder.RunToEnd();
+        private static Func<ITransactionBuilder<string>, IObservable<string[]>> RunAndCollect =>
+            builder => builder.Then(stringArray => stringArray.Cast<object>().ToObservable())
+                .RunAndCollect(allItems => Observable.Return(allItems.OfType<string>().ToArray()));
+        
+        [TestCaseSource(nameof(RunSelectors))]
+        public async Task Run_Methods_Report_BoundaryName_From_Explicit_Transaction_Name(Func<ITransactionBuilder<string>,IObservable<string[]>> runSelector) {
             var source = Observable.Return("start");
             var explicitName = "MyExplicitTransaction";
 
-            await source.BeginWorkflow(explicitName)
-                .Then(_ => Observable.Throw<string>(new InvalidOperationException("Failure")))
-                .RunFailFast()
+            await runSelector(source.BeginWorkflow(explicitName)
+                    .Then(_ => Observable.Throw<string>(new InvalidOperationException("Failure"))))
                 .PublishFaults()
                 .Capture();
             BusEvents.Count.ShouldBe(1);
-            var aborted = BusEvents.Single().ShouldBeOfType<TransactionAbortedException>();
-            aborted.Context.BoundaryName.ShouldBe(explicitName);
-            aborted.Message.ShouldNotContain(nameof(BeginWorkflow_Uses_Explicit_Name_When_Provided));
+            var faultHubException = BusEvents.ShouldHaveSingleItem() as FaultHubException;
+            faultHubException.ShouldNotBeNull();
+            faultHubException.Message.ShouldContain(explicitName);
+            faultHubException.Message.ShouldNotContain(nameof(Run_Methods_Report_BoundaryName_From_Explicit_Transaction_Name));
+            if (runSelector.Method.Name.Contains(nameof(RunFailFast))) {
+                var abortedException = faultHubException.ShouldBeOfType<TransactionAbortedException>();
+                abortedException.Context.BoundaryName.ShouldBe(explicitName);
+                abortedException.Context.InnerContext.ShouldNotBeNull();
+                abortedException.Context.InnerContext.BoundaryName.ShouldBe("Observable.Throw<string>");
+            }
+            else {
+                faultHubException.Context.BoundaryName.ShouldBe(explicitName);
+                faultHubException.Context.InnerContext.ShouldBeNull("RunToEnd/RunAndCollect created a polluted, nested context.");
+            }
+        }
+        
+        [TestCaseSource(nameof(RunSelectors))]
+        public async Task Run_Methods_Infer_BoundaryName_From_Caller_When_Transaction_Is_Unnamed(Func<ITransactionBuilder<string>,IObservable<string[]>> runSelector) {
+            var source = Observable.Return("start");
+            
+            await runSelector(source.BeginWorkflow()
+                    .Then(_ => Observable.Throw<string>(new InvalidOperationException("Failure"))))
+                .PublishFaults()
+                .Capture();
+            BusEvents.Count.ShouldBe(1);
+            var faultHubException = BusEvents.ShouldHaveSingleItem() as FaultHubException;
+            faultHubException.ShouldNotBeNull();
+            faultHubException.Context.BoundaryName.ShouldBe(nameof(Run_Methods_Infer_BoundaryName_From_Caller_When_Transaction_Is_Unnamed));
+            faultHubException.Message.ShouldContain(nameof(Run_Methods_Infer_BoundaryName_From_Caller_When_Transaction_Is_Unnamed));
+            var expectedName = nameof(Run_Methods_Infer_BoundaryName_From_Caller_When_Transaction_Is_Unnamed);
+            faultHubException.Message.ShouldContain(expectedName);
+            
+            if (runSelector.Method.Name.Contains(nameof(RunFailFast))) {
+                var abortedException = faultHubException.ShouldBeOfType<TransactionAbortedException>();
+                abortedException.Context.BoundaryName.ShouldBe(expectedName);
+                abortedException.Context.InnerContext.ShouldNotBeNull();
+                abortedException.Context.InnerContext.BoundaryName.ShouldBe("Observable.Throw<string>");
+            }
+            else {
+                faultHubException.Context.BoundaryName.ShouldBe(expectedName);
+                faultHubException.Context.InnerContext.ShouldBeNull("RunToEnd/RunAndCollect created a polluted, nested context.");
+            }
         }
         
         [Test]

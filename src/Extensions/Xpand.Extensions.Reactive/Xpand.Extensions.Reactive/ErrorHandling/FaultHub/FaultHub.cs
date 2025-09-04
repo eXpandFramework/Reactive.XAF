@@ -225,11 +225,14 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
                 return e as FaultHubException ?? new FaultHubException("An exception occurred in a traced fault context.", e, new System.Diagnostics.StackTrace(true).LogicalStackFrames().NewFaultContext([]));
             }
             if (e is not FaultHubException faultHubException) {
+                var message = e is AggregateException ? $"{contextToUse.BoundaryName} completed with errors" : e.Message;
                 Log(() => "[FaultHub.ExceptionToPublish] Path: Raw exception. Wrapping in new FaultHubException.");
-                return new FaultHubException(e.Message, e, contextToUse);
+                return new FaultHubException(message, e, contextToUse);
             }
             Log(() => "[FaultHub.ExceptionToPublish] Path: Existing FaultHubException. Chaining context.");
-            var newChainedContext = contextToUse with{ InnerContext = faultHubException.Context };
+            var mergedTags = (contextToUse.Tags ?? Enumerable.Empty<string>())
+                .Concat(faultHubException.Context.Tags ?? Enumerable.Empty<string>()).Distinct().ToArray();
+            var newChainedContext = contextToUse with{ InnerContext = faultHubException.Context, Tags = mergedTags};
             if (faultHubException.PreserveType) {
                 Log(() => $"[FaultHub.ExceptionToPublish] Path: PreserveType is true for {faultHubException.GetType().Name}. Re-creating instance.");
                 return (FaultHubException)Activator.CreateInstance(faultHubException.GetType(),

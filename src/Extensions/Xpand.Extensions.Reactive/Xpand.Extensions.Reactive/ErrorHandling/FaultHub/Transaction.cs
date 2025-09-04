@@ -11,8 +11,6 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
     public static partial class Transaction {
         public static IObservable<TFinal[]> RunFailFast<TFinal>(this ITransactionBuilder<TFinal> builder) => builder.Run();
         
-        
-
         public static IObservable<TFinal> RunAndCollect<TFinal>(this ITransactionBuilder<object> builder, Func<object[], IObservable<TFinal>> resultSelector)
             => builder.Run(false,true).SelectMany(objects => resultSelector(objects.SelectMany(o => o as IEnumerable<object> ?? [o]).ToArray()));
 
@@ -26,7 +24,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
                     return Observable.Throw<TFinal[]>(new TransactionAbortedException($"{ib.TransactionName} failed", ex, new AmbientFaultContext {
                         BoundaryName = ib.TransactionName, UserContext = ib.Context, InnerContext = ex.Context, Tags = ib.Tags.Concat([TransactionNodeTag,ib.Mode.ToString(),nameof(RunFailFast)]).Distinct().ToList()
                     }));
-                }):scheduledLogic.ChainFaultContext(ib.Context, null, ib.CallerMemberName, ib.CallerMemberPath, ib.CallerMemberLine,
+                }):scheduledLogic.ChainFaultContext(ib.Context, null, ib.TransactionName, ib.CallerMemberPath, ib.CallerMemberLine,
                     ib.UpdateRunTags(collectAllResults));
             });
         
@@ -122,16 +120,9 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
                     }
                     Log(() => $"[Tx:{builder.TransactionName}] RunToEnd: Completed with {t.allFailures.Count} failure(s). Creating final aggregate exception.");
                     var aggregateException = new AggregateException(t.allFailures);
-                    var message = $"{builder.TransactionName} completed with errors";
-                    var finalContext = (builder.Context ?? []).ToList();
-                    finalContext.Add(builder.TransactionName);
-                    var faultContext = FaultHub.LogicalStackContext.Value.NewFaultContext(finalContext.ToArray(),
-                        builder.UpdateRunTags(collectAllResults), builder.CallerMemberName, builder.CallerMemberPath,
-                        builder.CallerMemberLine);
-                    var faultException = new FaultHubException(message, aggregateException, faultContext);
-                    if (!isNested) return Observable.Throw<object>(faultException);
+                    if (!isNested) return Observable.Throw<object>(aggregateException);
                     var finalTypedResults = t.allResults.OfType<TFinal>().Cast<object>().ToList();
-                    return Observable.Return((object)finalTypedResults).Concat(Observable.Throw<object>(faultException));
+                    return Observable.Return((object)finalTypedResults).Concat(Observable.Throw<object>(aggregateException));
                 });
 
         private static IEnumerable<FaultHubException> CollectErrors<TFinal>(this List<StepDefinition> allSteps, TransactionBuilder<TFinal> builder, List<Notification<object>> errors, StepDefinition step) {
@@ -141,8 +132,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
             return errors.Select(e => {
                 var stack = e.Exception.CapturedStack();
                 var capturedStack = stack ?? FaultHub.LogicalStackContext.Value;
-                var contextForStep = capturedStack.NewFaultContext(
-                    builder.Context.AddToContext(builder.TransactionName,
+                var contextForStep = capturedStack.NewFaultContext(builder.Context.AddToContext(builder.TransactionName,
                         $"{builder.TransactionName} - {stepNameForContext}"), tags: [StepNodeTag], memberName: stepNameForContext);
                 if (e.Exception is TransactionAbortedException abortedException) {
                     contextForStep = contextForStep with { BoundaryName = abortedException.Context.BoundaryName };
