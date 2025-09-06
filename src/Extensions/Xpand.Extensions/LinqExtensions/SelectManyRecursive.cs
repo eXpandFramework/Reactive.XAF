@@ -6,6 +6,10 @@ using System.Linq;
 namespace Xpand.Extensions.LinqExtensions{
     public static partial class LinqExtensions{
 
+        public static IEnumerable<T> SelectManyRecursive<T>(this T source, Func<T, IEnumerable<T>> childrenSelector)
+            => source is IEnumerable<T> enumerable ? enumerable.SelectMany(childrenSelector)
+                : childrenSelector(source).SelectManyRecursive(childrenSelector).Prepend(source);
+
         public static IEnumerable<T> SelectManyRecursive<T>(this IEnumerable<T> source, Func<T, IEnumerable<T>> childrenSelector){
             foreach (var i in source){
                 yield return i;

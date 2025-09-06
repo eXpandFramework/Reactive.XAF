@@ -9,9 +9,9 @@ using Shouldly;
 using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.Reactive.Utility;
 
-namespace Xpand.Extensions.Tests.FaultHubTests.ProofOfConcepts {
+namespace Xpand.Extensions.Tests.FaultHubTests.ResilienceModels {
     [TestFixture]
-    public class ChainedItemResiliencePocTest : FaultHubTestBase {
+    public class ChainedItemResilienceTest : FaultHubTestBase {
         [MethodImpl(MethodImplOptions.NoInlining)]
         private IObservable<Unit> Level3_InnerMostOperation() 
             => Observable.Timer(TimeSpan.FromMilliseconds(20))

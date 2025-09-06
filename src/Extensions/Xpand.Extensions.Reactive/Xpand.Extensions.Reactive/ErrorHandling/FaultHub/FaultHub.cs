@@ -7,7 +7,6 @@ using System.Reactive.Subjects;
 using System.Threading;
 using Microsoft.Extensions.Caching.Memory;
 using Xpand.Extensions.ExceptionExtensions;
-using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.MemoryCacheExtensions;
 using Xpand.Extensions.Reactive.Utility;
 using static Xpand.Extensions.Reactive.ErrorHandling.FaultHub.FaultHubLogger;
@@ -21,7 +20,8 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
         public static readonly AsyncLocal<FaultSnapshot> CurrentFaultSnapshot = new();
         internal static readonly IAsyncLocal[] All= [LogicalStackContext.Wrap(), HandlersContext.Wrap(), Ctx.Wrap(), CurrentFaultSnapshot.Wrap()];
         public static readonly MemoryCache Seen = new(new MemoryCacheOptions { SizeLimit = 10000 });
-        public static readonly ISubject<Exception> Bus = Subject.Synchronize(new Subject<Exception>());
+        static readonly ISubject<FaultHubException> BusSubject = Subject.Synchronize(new Subject<FaultHubException>());
+        public static readonly IObservable<FaultHubException> Bus = BusSubject.AsObservable();
         public static Dictionary<string, string> BlacklistedFilePathRegexes { get; } = new() {
             [@"Reactive.XAF"] = "Xpand Framework"
         };
@@ -80,10 +80,8 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
             };
         }
 
-        public static bool Publish(this Exception ex) {
-            if (ex is FaultHubException fault) {
-                Log(() => $"[HUB-TRACE][Publish] Publishing with final context: '{fault.Context.UserContext.JoinCommaSpace()}'");
-            }
+        public static bool Publish(this FaultHubException ex) {
+            
             var (action, correlationId) = ex.EvaluatePublishCriteria();
             switch (action) {
                 case PublishAction.StopAndReturnTrue: return true;
@@ -91,7 +89,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
             }
             if (correlationId != Guid.Empty && !Seen.TryAdd($"{correlationId}:{ex.GetType().FullName}:{ex.Message}")) return false;
             try {
-                Bus.OnNext(ex);
+                BusSubject.OnNext(ex);
                 Log(() => $"[DIAGNOSTIC][Publish] ==> Bus.OnNext(ex) completed successfully.");
             }
             catch (Exception busEx) {
@@ -110,7 +108,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
             return (PublishAction.Continue, (data[KeyCId] as Guid? ?? Guid.Empty));
         });
 
-        public static IObservable<T> Publish<T>(this Exception ex) {
+        public static IObservable<T> Publish<T>(this FaultHubException ex) {
             var publish = ex.Publish();
             Log(() => $"[HUB][Publish<T>] Publish() returned: {publish}.");
             return publish ? Observable.Empty<T>() : Observable.Throw<T>(ex);
@@ -171,14 +169,13 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
         
         public static IObservable<TResult> SwitchOnFault<TSource, TResult>(this IObservable<TSource> source, Func<FaultHubException, IObservable<TResult>> fallbackSelector, 
             Func<IObservable<TSource>, IObservable<TSource>> retryStrategy = null, object[] context = null)
-            => source.ChainFaultContext(retryStrategy, context)
-                .Select(t => (TResult)(object)t).Catch(fallbackSelector);
+            => source.ChainFaultContext(retryStrategy, context).Select(t => (TResult)(object)t).Catch(fallbackSelector);
         
         internal static IObservable<T> ProcessFault<T>(this Exception ex, AmbientFaultContext faultContext, Func<FaultHubException, IObservable<T>> proceedAction) {
             Log(() => $"[HUB][{nameof(ProcessFault)}] Entered for context '{faultContext.Name}'.");
             var enrichedException = ex.ExceptionToPublish(faultContext);
             var (localAction, muteOnRethrow) = ex.GetFaultResult();
-            Log(() => $"[HUB][{nameof(ProcessFault)}] Local handler check resulted in action: '{(localAction, muteOnRethrow)}'.");
+            LogFast($"[HUB][{nameof(ProcessFault)}] Local handler check resulted in action: '{(localAction, muteOnRethrow)}'.");
             if (ex.IsSkipped()) {
                 Log(() => $"[HUB][{nameof(ProcessFault)}] {nameof(MuteForBus)} '{faultContext.Name}'.");
                 enrichedException.MuteForBus();
@@ -230,17 +227,18 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
                 return new FaultHubException(message, e, contextToUse);
             }
             Log(() => "[FaultHub.ExceptionToPublish] Path: Existing FaultHubException. Chaining context.");
-            var mergedTags = (contextToUse.Tags ?? Enumerable.Empty<string>())
-                .Concat(faultHubException.Context.Tags ?? Enumerable.Empty<string>()).Distinct().ToArray();
-            var newChainedContext = contextToUse with{ InnerContext = faultHubException.Context, Tags = mergedTags};
+            
+            var newChainedContext = contextToUse with{ InnerContext = faultHubException.Context };
+            
             if (faultHubException.PreserveType) {
                 Log(() => $"[FaultHub.ExceptionToPublish] Path: PreserveType is true for {faultHubException.GetType().Name}. Re-creating instance.");
                 return (FaultHubException)Activator.CreateInstance(faultHubException.GetType(),
-                    faultHubException.Message, faultHubException.InnerException, newChainedContext);
+                    faultHubException.Message, faultHubException, newChainedContext);
             }
             
+            
             Log(() => "[FaultHub.ExceptionToPublish] Path: PreserveType is false. Creating standard FaultHubException wrapper.");
-            var newException = new FaultHubException(faultHubException.Message, faultHubException.InnerException, newChainedContext);
+            var newException = new FaultHubException(faultHubException.Message, faultHubException, newChainedContext);
             var finalContextSummary = $"'{string.Join(" | ", newException.Context.UserContext)}' -> '{string.Join(" | ", newException.Context.InnerContext?.UserContext ?? [])}'";
             Log(() => $"[FaultHub.ExceptionToPublish] Created new FaultHubException. Final Context Chain: {finalContextSummary}");
             return newException;
@@ -255,7 +253,9 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
 
         public static IReadOnlyList<LogicalStackFrame> CapturedStack(this Exception exception) 
             => exception.Data.Contains(CapturedStackKey) ? (IReadOnlyList<LogicalStackFrame>)exception.Data[CapturedStackKey] : null;
+
     }
+    
 
     public enum FaultResult {
         Proceed,

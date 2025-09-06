@@ -50,17 +50,19 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
 
         private static IObservable<object> TransactionLogic<TFinal>(this TransactionBuilder<TFinal> builder,bool failFast){
             var concurrentSources = builder.BatchedSources.ToObservable(builder.Scheduler ?? Scheduler.Default);
-            return failFast? concurrentSources.ConcurrentFailFast(builder.TransactionName, 0, builder.Context)
-                .ToList().Select(list => (object)list):concurrentSources.ConcurrentRunToEnd(builder.TransactionName, 0, builder.Context)
+            return failFast? concurrentSources.ConcurrentFailFast(builder.TransactionName, 0, builder.Context, builder.CallerMemberPath, builder.CallerMemberLine)
+                .ToList().Select(list => (object)list):concurrentSources.ConcurrentRunToEnd(builder.TransactionName, 0, builder.Context, builder.CallerMemberPath, builder.CallerMemberLine)
                 .SelectMany(resultTuple => {
                     var resultStream = Observable.Return(resultTuple.Results);
                     return resultTuple.Fault == null ? resultStream : resultStream.Concat(Observable.Throw<object>(resultTuple.Fault));
+        
                 });
         }
-        private static IObservable<(List<object> Results, FaultHubException Fault)> ConcurrentRunToEnd(this IObservable<(string Name, IObservable<object> Source)> source, string transactionName, int maxConcurrency, object[] context) 
-            => source.Select(op => op.Source.PushStackFrame(op.Name)
+        private static IObservable<(List<object> Results, FaultHubException Fault)> ConcurrentRunToEnd(this IObservable<(string Name, IObservable<object> Source)> source, string transactionName, int maxConcurrency, object[] context,string filePath,int lineNumber) 
+            => source.Select(op => op.Source.PushStackFrame(op.Name, filePath, lineNumber)
                     .ChainFaultContext(context:context.AddToContext($"{transactionName} - {op.Name}"),null, op.Name).Materialize())
                 .Merge(maxConcurrency > 0 ? maxConcurrency : int.MaxValue).BufferUntilCompleted()
+     
                 .Select(notifications => {
                     var exceptions = notifications.Where(n => n.Kind == NotificationKind.OnError).Select(n => n.Exception).ToList();
                     return (Results: notifications.Where(n => n.Kind == NotificationKind.OnNext).Select(n => n.Value).ToList(), Fault: exceptions.Any()
@@ -68,8 +70,8 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
                             FaultHub.LogicalStackContext.Value.NewFaultContext(context.AddToContext(transactionName), memberName:transactionName)) : null);
                 });
         
-        private static IObservable<object> ConcurrentFailFast(this IObservable<(string Name, IObservable<object> Source)> source, string transactionName, int maxConcurrency, object[] context) 
-            => source.Select(op => op.Source.PushStackFrame(op.Name)
+        private static IObservable<object> ConcurrentFailFast(this IObservable<(string Name, IObservable<object> Source)> source, string transactionName, int maxConcurrency, object[] context,string filePath,int lineNumber) 
+            => source.Select(op => op.Source.PushStackFrame(op.Name, filePath, lineNumber)
                     .ChainFaultContext(context:context.AddToContext($"{transactionName} - {op.Name}"),null, op.Name))
                 .Merge(maxConcurrency > 0 ? maxConcurrency : int.MaxValue);
         
@@ -92,7 +94,8 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
                         return step.ExecuteStep(acc, failFast)
                             .PushFrameConditionally(!string.IsNullOrEmpty(step.Name) ? step.Name : $"Part {allSteps.IndexOf(step) + 1}",step.FilePath,step.LineNumber)
                             .Materialize().BufferUntilCompleted()
-                            .Select(notifications => allSteps.CollectStepErrors( builder, notifications, step, acc));                    }))
+                            .Select(notifications => allSteps.CollectStepErrors( builder, notifications, step, acc));                    
+                    }))
                 .Select(acc => (acc.results, acc.failures, acc.allResults));
 
         private static (object results, List<Exception> failures, List<object> allResults) CollectStepErrors<TFinal>(this List<StepDefinition> allSteps,

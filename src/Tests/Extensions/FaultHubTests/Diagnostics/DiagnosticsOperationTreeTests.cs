@@ -353,14 +353,14 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics {
 
             var branchA = result.Children.Single(c => c.Name == "BranchA");
             var branchAStack = branchA.GetLogicalStack();
-            branchAStack.ShouldNotContain(f => f.MemberName == "RootFrame",
-                "The stack for Branch A was polluted by the root's stack frame.");
+            branchAStack.ShouldContain(f => f.MemberName == "RootFrame",
+                "The stack for Branch A should have inherited the root's stack frame.");
             branchAStack.ShouldContain(f => f.MemberName == "FrameA");
 
             var branchB = result.Children.Single(c => c.Name == "BranchB");
             var branchBStack = branchB.GetLogicalStack();
-            branchBStack.ShouldNotContain(f => f.MemberName == "RootFrame",
-                "The stack for Branch B was polluted by the root's stack frame.");
+            branchBStack.ShouldContain(f => f.MemberName == "RootFrame",
+                "The stack for Branch B should have inherited the root's stack frame.");
             branchBStack.ShouldContain(f => f.MemberName == "FrameB");
         }
         
@@ -432,10 +432,12 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics {
 
             var tree = finalFault.OperationTree();
 
-            var nestedNode = tree.Children.ShouldHaveSingleItem();
-            nestedNode.Name.ShouldBe(nameof(InnerFailingTransaction_For_Tagging));
-            nestedNode.Tags.ShouldContain(Transaction.StepNodeTag, "The node should be tagged as a Step because it was used in a .Then() clause.");
-            nestedNode.Tags.ShouldContain(Transaction.TransactionNodeTag, "The node should be tagged as a Transaction because it was created with BeginWorkflow().");
+            var stepNode = tree.Children.ShouldHaveSingleItem();
+            stepNode.Name.ShouldBe(nameof(InnerFailingTransaction_For_Tagging));
+            stepNode.Tags.ShouldContain(Transaction.StepNodeTag, "The node should be tagged as a Step because it was used in a .Then() clause.");
+
+            var transactionNode = stepNode.Children.ShouldHaveSingleItem();
+            transactionNode.Tags.ShouldContain(Transaction.TransactionNodeTag, "The node should be tagged as a Transaction because it was created with BeginWorkflow().");
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -452,6 +454,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics {
 
         [Test]
         public async Task OperationTree_Correctly_Nests_Aggregated_Failure_From_Nested_Transaction() {
+            
             var transaction = Observable.Return(Unit.Default)
                 .BeginWorkflow("Outer_Tx")
                 .Then(_ => Nested_Failing_Transaction())

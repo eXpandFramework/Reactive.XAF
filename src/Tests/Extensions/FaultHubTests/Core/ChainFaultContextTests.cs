@@ -3,7 +3,9 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
@@ -267,7 +269,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Core {
             => PoC_Level2_Calls_Level3()
                 .PushStackFrame();
 
-        [Test]
+        [Test][Apartment(ApartmentState.STA)]
         public async Task ChainFaultContext_Should_Preserve_Correct_Order_For_Nested_Async_PushStackFrame() {
     
             var stream = PoC_Level1_Calls_Level2()
@@ -277,6 +279,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Core {
     
             BusEvents.Count.ShouldBe(1);
             var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
+            Clipboard.SetText(BusEvents.First().ToString());
             var logicalStack = fault.LogicalStackTrace.Select(f => f.MemberName).ToArray();
 
             var level1Index = Array.IndexOf(logicalStack, nameof(PoC_Level1_Calls_Level2));

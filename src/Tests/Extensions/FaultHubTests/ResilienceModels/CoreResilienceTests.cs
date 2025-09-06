@@ -8,7 +8,7 @@ using Shouldly;
 using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.Reactive.Utility;
 
-namespace Xpand.Extensions.Tests.FaultHubTests.ProofOfConcepts{
+namespace Xpand.Extensions.Tests.FaultHubTests.ResilienceModels{
     public class CoreResilienceTests : FaultHubTestBase {
 
         [MethodImpl(MethodImplOptions.NoInlining)]

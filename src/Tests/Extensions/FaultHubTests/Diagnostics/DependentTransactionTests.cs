@@ -25,7 +25,7 @@ public class DependentTransactionTests {
             : Unit.Default.Observe()).RetryWithBackoff(2, _ => 1.Milliseconds());
     [Test][Apartment(ApartmentState.STA)]
     public async Task Nested_RunToEnd_With_Failures_Aborts_Outer_FailFast_Transaction() {
-        var transaction = NavigateToHomePage()
+        var transaction = MapsToHomePage()
             .BeginWorkflow("LoginProcess")
             .Then(_ => Authenticate())
             .Then(_ => ParseData())
@@ -42,7 +42,7 @@ public class DependentTransactionTests {
         transactionAbortedException.FindRootCauses().Count().ShouldBe(2);
     }
 
-    private IObservable<Unit> NavigateToHomePage() => Observable.Defer(() => Unit.Default.Observe()).RetryWithBackoff(2, _ => 1.Seconds());
+    private IObservable<Unit> MapsToHomePage() => Observable.Defer(() => Unit.Default.Observe()).RetryWithBackoff(2, _ => 1.Seconds());
     private IObservable<Unit> Authenticate() => Unit.Default.Observe();
     private IObservable<string> ParseData() => Observable.Defer(() => new[] { "http://example.com/page1", "http://example.com/page2" }.ToNowObservable());
     private IObservable<Unit> OperationB() => Observable.Defer(() => Unit.Default.Observe()).RetryWithBackoff(2);

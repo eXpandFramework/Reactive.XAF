@@ -116,6 +116,7 @@ public class FaultHubGeneral : FaultHubTestBase {
             result.Error.ShouldBeNull();
             result.IsCompleted.ShouldBeTrue();
             BusEvents.Count.ShouldBe(1);
+            
         }
 
         [Test]
@@ -268,6 +269,18 @@ public class FaultHubGeneral : FaultHubTestBase {
         }
         
     
-        
+        [Test]
+        public async Task PublishOnFault_Publishes_To_Bus_And_Completes_Stream() {
+            var source = Observable.Throw<Unit>(new InvalidOperationException("Failure to be published"));
+            
+            var result = await source.ContinueOnFault().PublishOnFault().Capture();
+
+            result.Error.ShouldBeNull();
+            result.IsCompleted.ShouldBeTrue();
+
+            BusEvents.Count.ShouldBe(1);
+            var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
+            fault.InnerException.ShouldBeOfType<InvalidOperationException>()
+                .Message.ShouldBe("Failure to be published");        }        
 
 }}

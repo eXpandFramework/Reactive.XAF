@@ -7,7 +7,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
-using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp;
 using Microsoft.Reactive.Testing;
 using NUnit.Framework;
@@ -139,7 +138,7 @@ namespace Xpand.TestsLib.Common{
 
         public static TraceSource TraceSource{ get; }
         
-        protected TestObserver<Exception> BusObserver = null!;
+        
         protected List<Exception> BusEvents = null!;
         
         private IDisposable _busSubscription = null!;
@@ -149,14 +148,13 @@ namespace Xpand.TestsLib.Common{
         public virtual void Setup() {
             TestContext.Out.Write(TestContext.CurrentContext.Test.FullName);
             FaultHub.Seen.Clear();  
-            BusObserver = FaultHub.Bus.Test();
+            
             BusEvents = new List<Exception>();
             _busSubscription = FaultHub.Bus.Subscribe(BusEvents.Add);
         }
 
         [TearDown]
         public virtual void Dispose() {
-            BusObserver.Dispose();
             _busSubscription.Dispose();
             ResetXAF();
             try{

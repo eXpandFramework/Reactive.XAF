@@ -75,5 +75,30 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Core {
             stackWithBoundary.ShouldContain(nameof(MidLevel_For_Boundary_Test));
             stackWithBoundary.ShouldContain(nameof(LowLevel_For_Boundary_Test));
         }
+        
+        [Test]
+        public async Task PushStackFrame_Prevents_Consecutive_Duplicate_Frames() {
+            IObservable<Unit> RecursiveMethodWithSameFrame(int depth) {
+                if (depth <= 0) {
+                    return Observable.Throw<Unit>(new InvalidOperationException("Base case reached"));
+                }
+
+                return RecursiveMethodWithSameFrame(depth - 1)
+                    .PushStackFrame(memberName: "RecursiveMethodWithSameFrame", filePath: "test.cs", lineNumber: 1, context: ["StaticContext"]);
+            }
+
+            var stream = RecursiveMethodWithSameFrame(2)
+                .ChainFaultContext(["Boundary"])
+                .PublishFaults();
+
+            await stream.Capture();
+
+            BusEvents.Count.ShouldBe(1);
+            var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
+            var logicalStack = fault.LogicalStackTrace.ToList();
+
+            logicalStack.Count(f => f.MemberName == "RecursiveMethodWithSameFrame").ShouldBe(1);
+        }
+        
     }
 }

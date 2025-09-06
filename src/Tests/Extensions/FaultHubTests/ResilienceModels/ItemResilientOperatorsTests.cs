@@ -286,5 +286,91 @@ namespace Xpand.Extensions.Tests.FaultHubTests.ResilienceModels {
             finalFault.Context.LogicalStackTrace.Single().MemberName
                 .ShouldBe(nameof(ItemResilience_Correctly_Wraps_Existing_FaultHubException_Without_Reprocessing_Stack));
         }
+        [Test]
+        public async Task SelectManyItemResilient_Preserves_Upstream_FaultHubException_Context() {
+            var source = Observable.Return(Unit.Default);
+            var failingInnerStream = Observable.Throw<Unit>(new InvalidOperationException("Original failure"))
+                                             .ChainFaultContext(["UpstreamContext"]);
+
+            var resilientStream = source.SelectManyItemResilient(_ => failingInnerStream, context: ["DownstreamContext"]);
+
+            await resilientStream.Capture();
+
+            BusEvents.Count.ShouldBe(1);
+            var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
+
+            fault.AllContexts.ShouldContain("UpstreamContext", "The upstream context from ChainFaultContext was lost.");
+            fault.AllContexts.ShouldNotContain("DownstreamContext", "The downstream operator incorrectly used the new context for the wrapper.");
+        }
+
+        [Test]
+        public async Task DoItemResilient_Preserves_Upstream_FaultHubException_Context() {
+            var source = Observable.Return(Unit.Default);
+            var failingInnerStream = Observable.Throw<Unit>(new InvalidOperationException("Original failure"))
+                                             .ChainFaultContext(["UpstreamContext"]);
+            
+            var upstreamFault = await failingInnerStream.Materialize().Select(n => n.Exception).FirstAsync();
+
+            var resilientStream = source.DoItemResilient(_ => throw upstreamFault, context: ["DownstreamContext"]);
+
+            await resilientStream.Capture();
+
+            BusEvents.Count.ShouldBe(1);
+            var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
+
+            fault.AllContexts.ShouldContain("UpstreamContext");
+            fault.AllContexts.ShouldNotContain("DownstreamContext");
+        }
+
+        [Test]
+        public async Task SelectItemResilient_Preserves_Upstream_FaultHubException_Context() {
+            var source = Observable.Return(Unit.Default);
+            var failingInnerStream = Observable.Throw<Unit>(new InvalidOperationException("Original failure"))
+                                             .ChainFaultContext(["UpstreamContext"]);
+
+            var upstreamFault = await failingInnerStream.Materialize().Select(n => n.Exception).FirstAsync();
+
+            var resilientStream = source.SelectItemResilient<Unit, Unit>(_ => throw upstreamFault, context: ["DownstreamContext"]);
+
+            await resilientStream.Capture();
+
+            BusEvents.Count.ShouldBe(1);
+            var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
+
+            fault.AllContexts.ShouldContain("UpstreamContext");
+            fault.AllContexts.ShouldNotContain("DownstreamContext");
+        }
+
+        [Test]
+        public async Task DeferItemResilient_Preserves_Upstream_FaultHubException_Context() {
+            var failingInnerStream = Observable.Throw<Unit>(new InvalidOperationException("Original failure"))
+                                             .ChainFaultContext(["UpstreamContext"]);
+
+            var resilientStream = this.DeferItemResilient(() => failingInnerStream, context: ["DownstreamContext"]);
+
+            await resilientStream.Capture();
+
+            BusEvents.Count.ShouldBe(1);
+            var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
+
+            fault.AllContexts.ShouldContain("UpstreamContext", "The upstream context from ChainFaultContext was lost.");
+            fault.AllContexts.ShouldNotContain("DownstreamContext", "The downstream operator incorrectly used the new context for the wrapper.");
+        }
+
+        [Test]
+        public async Task UsingItemResilient_Preserves_Upstream_FaultHubException_Context() {
+            var failingInnerStream = Observable.Throw<Unit>(new InvalidOperationException("Original failure"))
+                                             .ChainFaultContext(["UpstreamContext"]);
+
+            var resilientStream = this.UsingItemResilient(() => System.Reactive.Disposables.Disposable.Empty, _ => failingInnerStream, context: ["DownstreamContext"]);
+
+            await resilientStream.Capture();
+
+            BusEvents.Count.ShouldBe(1);
+            var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
+
+            fault.AllContexts.ShouldContain("UpstreamContext", "The upstream context from ChainFaultContext was lost.");
+            fault.AllContexts.ShouldNotContain("DownstreamContext", "The downstream operator incorrectly used the new context for the wrapper.");
+        }
     }
 }

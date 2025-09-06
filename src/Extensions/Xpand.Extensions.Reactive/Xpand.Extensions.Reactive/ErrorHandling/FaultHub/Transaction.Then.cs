@@ -47,15 +47,15 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
         
         public static ITransactionBuilder<object[]> ThenConcurrent<TCurrent>(this ITransactionBuilder<TCurrent> builder,
             Func<TCurrent[], IEnumerable<(string Name, IObservable<object> Source)>> concurrentSelector, 
-            bool failFast = false, int maxConcurrency = 0, [CallerArgumentExpression(nameof(concurrentSelector))] string selectorExpression = null) {
+            bool failFast = false, int maxConcurrency = 0, [CallerArgumentExpression(nameof(concurrentSelector))] string selectorExpression = null,[CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0) {
             var tb = (TransactionBuilder<TCurrent>)builder;
             var stepName = GetStepName(selectorExpression);
             return builder.Then(previousResults => {
                 Log(() => $"[Tx:{tb.TransactionName}][Step:{stepName}] Executing concurrent batch. FailFast={failFast}, MaxConcurrency={maxConcurrency}");
                 var operations = concurrentSelector(previousResults).ToObservable();
-                return failFast ? operations.ConcurrentFailFast(tb.TransactionName, maxConcurrency, tb.Context).ToList()
+                return failFast ? operations.ConcurrentFailFast(tb.TransactionName, maxConcurrency, tb.Context,filePath, lineNumber).ToList()
                         .Select(list => list.ToArray()).PushStackFrame(stepName)
-                    : operations.ConcurrentRunToEnd(tb.TransactionName, maxConcurrency, tb.Context)
+                    : operations.ConcurrentRunToEnd(tb.TransactionName, maxConcurrency, tb.Context,filePath, lineNumber)
                         .SelectMany(resultTuple => {
                             var resultStream = Observable.Return(resultTuple.Results.ToArray());
                             return resultTuple.Fault == null ? resultStream : resultStream.Concat(Observable.Throw<object[]>(resultTuple.Fault));

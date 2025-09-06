@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using Xpand.Extensions.ExceptionExtensions;
+using Xpand.Extensions.LinqExtensions;
 using static Xpand.Extensions.Reactive.ErrorHandling.FaultHub.FaultHubLogger;
 
 namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
@@ -11,6 +12,8 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
         Exception RootCause = null, IReadOnlyList<LogicalStackFrame> LogicalStack = null,IReadOnlyList<string> Tags = null
     );
     public static class FaultHubExceptionExtensions {
+        public static IEnumerable<OperationNode> Descendants(this OperationNode root) 
+            => root.SelectManyRecursive(node => node.Children);
         public static string Render(this FaultHubException exception) {
             Log(() => "[Render] Starting exception rendering.");
             if (exception == null) {
@@ -60,7 +63,12 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
             return rootContextItems;
         }
         private static string GenerateErrorMessage(this FaultHubException exception, OperationNode node, string title, List<Exception> allRootCauses, string rootContext, string summary) {
-            var tagsPart = (node?.Tags != null && node.Tags.Any()) ? $" [{string.Join(", ", node.Tags)}]" : "";
+            var tags = node?.Tags;
+            if (tags == null || !tags.Any()) {
+                tags = exception.SelectMany().OfType<FaultHubException>()
+                    .FirstOrDefault(fh => fh.Context.Tags is { Count: > 0 })?.Context.Tags;
+            }
+            var tagsPart = (tags is { Count: > 0 }) ? $" [{string.Join(", ", tags)}]" : "";
             var summaryPart = allRootCauses.Count switch {
                 0 => "",
                 1 => $" <{summary}>",
@@ -323,20 +331,26 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
         }
 
         private static Dictionary<AmbientFaultContext, FaultHubException> FaultHubExceptions(this FaultHubException topException){
-            var contextLookup = topException.SelectMany().OfType<FaultHubException>()
-                .Where(ex => ex.Context != null).GroupBy(ex => ex.Context)
-                .ToDictionary(g => g.Key, g => g.First());
-            if (contextLookup.Count == 1) {
-                var singleFault = contextLookup.Values.First();
-                var currentCtx = singleFault.Context?.InnerContext;
-                while (currentCtx != null) {
-                    contextLookup.TryAdd(currentCtx, singleFault);
-                    currentCtx = currentCtx.InnerContext;
+            var allFaults = topException.SelectMany().OfType<FaultHubException>().ToList();
+            Log(() => $"[VALIDATION] Items from SelectMany():\n" + string.Join("\n", 
+                allFaults.Select(f => $"  - Fault Msg: '{f.Message}', Context Boundary: '{f.Context?.BoundaryName}', Context Hash: {f.Context?.GetHashCode()}")));
+            var lookup = new Dictionary<AmbientFaultContext, FaultHubException>();
+            var queue = new Queue<Exception>();
+            if (topException != null) queue.Enqueue(topException);
+            var visited = new HashSet<Exception>();
+            while (queue.Count > 0) {
+                var ex = queue.Dequeue();
+                if (!visited.Add(ex)) continue;
+                if (ex is FaultHubException { Context: not null } fhEx) lookup.TryAdd(fhEx.Context, fhEx);
+                if (ex.InnerException != null) queue.Enqueue(ex.InnerException);
+                if (ex is not AggregateException aggEx) continue;
+                foreach (var inner in aggEx.InnerExceptions) {
+                    queue.Enqueue(inner);
                 }
             }
-            Log(() => $"[Parser] Created context lookup dictionary with {contextLookup.Count} entries.");
-            Log(()=>$"[VALIDATION] ContextLookup Keys: [{string.Join(", ", contextLookup.Keys.Select(c => c.BoundaryName ?? "NULL"))}]");
-            return contextLookup;
+            Log(() => $"[Parser] Created context lookup dictionary with {lookup.Count} entries.");
+            Log(()=>$"[VALIDATION] ContextLookup Keys: [{string.Join(", ", lookup.Keys.Select(c => c.BoundaryName ?? "NULL"))}]");
+            return lookup;
         }
 
         static OperationNode Collapse(this OperationNode node) {
@@ -358,7 +372,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
 
         private static OperationNode FindMergableChild(this OperationNode node, IReadOnlyList<OperationNode> processedChildren) 
             => processedChildren.FirstOrDefault(c =>
-                c.Name == node.Name || node.Name.EndsWith($".{c.Name}") || c.Name.EndsWith($".{node.Name}"));
+                c.Name.CompoundName() == node.Name.CompoundName() || node.Name.CompoundName().EndsWith($".{c.Name.CompoundName()}") || c.Name.CompoundName().EndsWith($".{node.Name.CompoundName()}"));
 
         private static OperationNode MergeWithChild(this OperationNode node, OperationNode childToMerge, IReadOnlyList<OperationNode> allProcessedChildren) {
             Log(() => $"[Collapse] Merging child '{childToMerge.Name}' into parent '{node.Name}'.");
@@ -384,7 +398,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
             Log(() => $"[VALIDATION][BuildFromGenericException] ==> ENTER. Exception Type: '{ex?.GetType().Name}', Message: '{ex?.Message}'");
             if (ex is not AggregateException aggEx) return ex is FaultHubException fhEx ? fhEx.Context.BuildFromContext(parentStack, contextLookup) : null;
             
-            var children = aggEx.InnerExceptions.Select(e => e.BuildFromGenericException( [],contextLookup)).Where(n => n != null).ToList();
+            var children = aggEx.InnerExceptions.Select(e => e.BuildFromGenericException(parentStack, contextLookup)).Where(n => n != null).ToList();
             Log(() => $"[Parser.Generic] Parsed AggregateException into {children.Count} children.");
             return children.Count == 1 ? children.Single() : new OperationNode("Multiple Operations", [], children);
         }
@@ -401,7 +415,13 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
             var children = new List<OperationNode>();
             Log(() => $"[Parser.Context] Recursing on InnerContext: '{context.InnerContext?.BoundaryName ?? "NULL"}'");
             var hierarchicalChild = context.InnerContext.BuildFromContext(fullStack, contextLookup);
-            if (hierarchicalChild != null) children.Add(hierarchicalChild);
+            if (hierarchicalChild != null) {
+                if (hierarchicalChild.Name == "Multiple Operations") {
+                    children.AddRange(hierarchicalChild.Children);
+                } else {
+                    children.Add(hierarchicalChild);
+                }
+            }
             var rootCause = context.RootCause(contextLookup, fullStack, children);
             Log(() => $"[Parser.DIAGNOSTIC] After RootCause call for '{context.BoundaryName}', children count is: {children.Count}.");
             var resultNode = new OperationNode(context.BoundaryName, context.UserContext ?? [], children, rootCause, fullStack, context.Tags);
@@ -425,6 +445,10 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
         
         private static Exception ProcessLeafContext(this FaultHubException contextOwner, List<LogicalStackFrame> fullStack, Dictionary<AmbientFaultContext, FaultHubException> contextLookup, List<OperationNode> children) {
             Log(() => "[RootCause] No inner context. Building from owner's inner exception.");
+            if (contextOwner.InnerException is FaultHubException { Context: not null } innerFhEx && contextOwner.Context.InnerContext == innerFhEx.Context) {
+                Log(() => $"[Parser.DIAGNOSTIC] Child node for '{innerFhEx.Context.BoundaryName}' is already being created via InnerContext traversal. Skipping redundant InnerException parse.");
+                return innerFhEx.FindRootCauses().FirstOrDefault();
+            }
             var errorNode = contextOwner.InnerException.BuildFromGenericException(fullStack, contextLookup);
             if (contextOwner.Context.BoundaryName == "Nested_Tx") {
                 Log(() => $"[VALIDATION][ProcessLeafContext] For 'Nested_Tx', the generated errorNode is: '{errorNode?.Name ?? "null"}'");

@@ -7,6 +7,7 @@ using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.Reactive.Utility;
 
 namespace Xpand.Extensions.Tests.FaultHubTests.Integrations {
     public class IntegrationsProcessEvent:FaultHubTestBase {
@@ -134,5 +135,31 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Integrations {
             logicalStack[2].MemberName.ShouldBe("SubscriptionContext");
         }
 
+        [Test]
+        public async Task RethrowOnFault_In_Selector_Overrides_ProcessEvent_Resilience_And_Terminates_Stream() {
+            var eventSource = new TestEventSource();
+            var eventCounter = 0;
+
+            var stream = eventSource.ProcessEvent<EventArgs, Unit>(nameof(TestEventSource.MyEvent), _ => {
+                eventCounter++;
+                return Observable.Throw<Unit>(new InvalidOperationException("Handler failed intentionally"))
+                    .RethrowOnFault();
+            });
+
+            var captureTask = stream.Capture();
+            
+            eventSource.RaiseEvent(); 
+            eventSource.RaiseEvent();
+
+            var result = await captureTask;
+
+            result.Error.ShouldNotBeNull();
+            result.Error.ShouldBeOfType<FaultHubException>();
+            result.Error.InnerException.ShouldBeOfType<InvalidOperationException>()
+                .Message.ShouldBe("Handler failed intentionally");
+            
+            eventCounter.ShouldBe(1);
+
+            BusEvents.ShouldBeEmpty();        }
     }
 }

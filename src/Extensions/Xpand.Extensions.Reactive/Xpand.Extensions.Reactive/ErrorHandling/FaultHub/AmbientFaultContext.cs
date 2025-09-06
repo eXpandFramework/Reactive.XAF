@@ -31,14 +31,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
         }
 
         public AmbientFaultContext InnerContext { get; init; }
-        public object Name {
-            get {
-                var userCtx = UserContext?.FirstOrDefault()?.ToString();
-                return !string.IsNullOrEmpty(userCtx) && !string.IsNullOrEmpty(BoundaryName) &&
-                       userCtx.Remove(" ") != BoundaryName.Remove(" ")
-                    ? $"{userCtx} {BoundaryName}" : userCtx ?? BoundaryName ?? "Unknown";
-            }
-        }
+        public object Name => BoundaryName ?? UserContext?.FirstOrDefault()?.ToString() ?? "Unknown";
         public string BoundaryName { get; init; }
         
     }
