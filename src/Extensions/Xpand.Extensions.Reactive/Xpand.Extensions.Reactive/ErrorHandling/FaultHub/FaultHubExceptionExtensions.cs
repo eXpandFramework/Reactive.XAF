@@ -15,16 +15,16 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
         public static IEnumerable<OperationNode> Descendants(this OperationNode root) 
             => root.SelectManyRecursive(node => node.Children);
         public static string Render(this FaultHubException exception) {
-            Log(() => "[Render] Starting exception rendering.");
+            LogFast($"[Render] Starting exception rendering.");
             if (exception == null) {
-                Log(() => "[Render] Exception is null, returning empty string.");
+                LogFast($"[Render] Exception is null, returning empty string.");
                 return string.Empty;
             }
 
             var mergedTree = exception.OperationTree();
             if (mergedTree == null) {
                 var message = exception.InnerException?.ToString() ?? exception.Message;
-                Log(() => $"[Render] Merged tree is null. Returning base exception message: {message}");
+                LogFast($"[Render] Merged tree is null. Returning base exception message: {message}");
                 return message;
             }
 
@@ -32,23 +32,23 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
             var rootContextItems = exception.BuildReportHeader(mergedTree, sb);
             mergedTree.BuildReportBody(rootContextItems, sb);
             var finalReport = sb.ToString().Trim();
-            Log(() => "[Render] Rendering finished.");
+            LogFast($"[Render] Rendering finished.");
             return finalReport;
         }
         
         private static void BuildReportBody(this OperationNode mergedTree, object[] rootContextItems, StringBuilder sb) {
             if (mergedTree.Children.Any()) {
-                Log(() => "[Render] Rendering child nodes.");
+                LogFast($"[Render] Rendering child nodes.");
                 mergedTree.RenderChildNodes(rootContextItems, sb);
             }
             else if (mergedTree.GetRootCause() != null || (mergedTree.GetLogicalStack() != null && mergedTree.GetLogicalStack().Any())) {
-                Log(() => "[Render] No children, appending root cause details directly.");
+                LogFast($"[Render] No children, appending root cause details directly.");
                 AppendRootCauseDetails(mergedTree, sb, "  ");
             }
         }
         private static object[] BuildReportHeader(this FaultHubException exception, OperationNode mergedTree, StringBuilder sb) {
             var allRootCauses = exception.FindRootCauses().ToList();
-            Log(() => $"[Render] Found {allRootCauses.Count} root causes.");
+            LogFast($"[Render] Found {allRootCauses.Count} root causes.");
             var summary = string.Join(" • ", allRootCauses.Select(rc => rc.Message).Distinct());
             var title = mergedTree.Name.CompoundName();
             var rootContextItems = mergedTree.ContextData
@@ -57,7 +57,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
                 .ToArray();
             var rootContext = rootContextItems.Any() ? $" ({string.Join(", ", rootContextItems)})" : "";
             var errorMessage = exception.GenerateErrorMessage(mergedTree, title, allRootCauses, rootContext, summary);
-            Log(() => $"[Render] Generated error message: '{errorMessage}'");
+            LogFast($"[Render] Generated error message: '{errorMessage}'");
 
             sb.AppendLine(errorMessage);
             return rootContextItems;
@@ -77,7 +77,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
             return $"{title} {exception.ErrorStatus}{rootContext}{tagsPart}{summaryPart}";
         }
         private static void RenderChildNodes(this OperationNode mergedTree,object[] rootContextItems,  StringBuilder sb){
-            Log(()=>$"[RenderChildNodes] Rendering {mergedTree.Children.Count} children for node '{mergedTree.Name}'.");
+            LogFast($"[RenderChildNodes] Rendering {mergedTree.Children.Count} children for node '{mergedTree.Name}'.");
             var titleContextItems = new HashSet<object>(rootContextItems);
             for (var i = 0; i < mergedTree.Children.Count; i++) {
                 var child = mergedTree.Children[i];
@@ -87,15 +87,20 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
         }
 
         public static string RenderStack(this OperationNode node) {
-            Log(() => $"[RenderStack] Called for node '{node?.Name ?? "null"}'.");
+            LogFast($"[RenderStack] Called for node '{node?.Name ?? "null"}'.");
             var logicalStack = node?.GetLogicalStack();
             if (logicalStack == null || !logicalStack.Any()) {
-                Log(() => "[RenderStack] No logical stack found, returning empty string.");
+                LogFast($"[RenderStack] No logical stack found, returning empty string.");
                 return string.Empty;
             }
             var blacklistedPatterns = FaultHub.BlacklistedFilePathRegexes;
-            Log(() => blacklistedPatterns.Any() ? $"[RenderStack] Found {blacklistedPatterns.Count} blacklist patterns. Using filtering."
-                : "[RenderStack] No blacklist patterns. Using simple render.");
+            if (blacklistedPatterns.Any()) {
+                LogFast($"[RenderStack] Found {blacklistedPatterns.Count} blacklist patterns. Using filtering.");
+            }
+            else {
+                LogFast($"[RenderStack] No blacklist patterns. Using simple render.");
+            }
+            LogFast($"");
             if (!blacklistedPatterns.Any()) return logicalStack.RenderSimpleStack();
             var sb = new StringBuilder();
             sb.AppendLine("--- Invocation Stack ---");
@@ -104,14 +109,14 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
         }
 
         private static void BuildRenderedStackString(this StringBuilder sb, IReadOnlyList<LogicalStackFrame> originalStack, Dictionary<string, string> blacklistedPatterns) {
-            Log(()=>$"[BuildRenderedStackString] Filtering stack with {originalStack.Count} frames.");
+            LogFast($"[BuildRenderedStackString] Filtering stack with {originalStack.Count} frames.");
             var filteredItems = originalStack.FilterAndGroupBlacklistedFrames( blacklistedPatterns);
             if (!filteredItems.OfType<LogicalStackFrame>().Any() && originalStack.Any()) {
-                Log(()=>"[BuildRenderedStackString] Blacklist would hide all frames. Falling back to full stack.");
+                LogFast($"[BuildRenderedStackString] Blacklist would hide all frames. Falling back to full stack.");
                 sb.RenderFallbackStack( originalStack);
             }
             else {
-                Log(()=>"[BuildRenderedStackString] Rendering filtered stack.");
+                LogFast($"[BuildRenderedStackString] Rendering filtered stack.");
                 sb.RenderFilteredStack( filteredItems);
             }
             sb.AppendBlacklistFooter( filteredItems, blacklistedPatterns);
@@ -184,7 +189,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
 
 
         public static string Render(this OperationNode rootNode,bool includeDetails = false) {
-            Log(() => $"[Render.OperationNode] Rendering node '{rootNode?.Name ?? "null"}' with includeDetails={includeDetails}.");
+            LogFast($"[Render.OperationNode] Rendering node '{rootNode?.Name ?? "null"}' with includeDetails={includeDetails}.");
             if (rootNode == null) return string.Empty;
             var sb = new StringBuilder();
             rootNode.RenderNode(null, new List<OperationNode>(), new HashSet<object>(), sb, "", true, includeDetails);
@@ -193,7 +198,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
 
         public static OperationNode Union(this IEnumerable<OperationNode> source) {
             var nodes = source?.ToList();
-            Log(() => $"[Union] Starting union of {nodes?.Count ?? 0} nodes.");
+            LogFast($"[Union] Starting union of {nodes?.Count ?? 0} nodes.");
             if (nodes == null || !nodes.Any()) return null;
             if (nodes.Count == 1) return nodes.Single();
             var rootGroups = nodes.GroupBy(n => n.Name).ToList();
@@ -201,7 +206,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
         }        
         private static OperationNode MergeNodeGroup(this IGrouping<string, OperationNode> groupToMerge) {
             var representative = groupToMerge.First();
-            Log(() => $"[Union] Merging {groupToMerge.Count()} nodes under root '{representative.Name}'.");
+            LogFast($"[Union] Merging {groupToMerge.Count()} nodes under root '{representative.Name}'.");
             var allChildren = groupToMerge.SelectMany(n => n.Children).ToArray();
             var mergedChildren = !allChildren.Any() ? new List<OperationNode>()
                 : allChildren.GroupBy(c => c.Name).Select(childGroup => Union(childGroup.ToList())).ToList();
@@ -210,7 +215,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
             return new OperationNode(representative.Name, representative.ContextData, mergedChildren, rootCause, logicalStack);
         }
         private static OperationNode CreateVirtualRootForMultipleGroups(this List<OperationNode> nodes) {
-            Log(() => "[Union] Multiple root names found. Creating virtual 'Multiple Operations' root.");
+            LogFast($"[Union] Multiple root names found. Creating virtual 'Multiple Operations' root.");
             return new OperationNode("Multiple Operations", [], nodes);
         }
         private static string CompoundName(this string s) 
@@ -241,8 +246,8 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
             var contextData = ancestors.ContextData(node, parent,  titleContextItems, includeDetails);
             var connector = isLast ? "└ " : "├ ";
             var tagsSuffix = (node.Tags?.Any() ?? false) ? $" [{string.Join(", ", node.Tags)}]" : "";
-            Log(() => $"[RenderNode] Rendering '{node.Name}' with prefix '{prefix}', context '{contextData}'.");
-            Log(() => $"[RenderNode-DIAGNOSTIC] Rendering '{node.Name}' with prefix length {prefix.Length} ('{prefix}').");
+            LogFast($"[RenderNode] Rendering '{node.Name}' with prefix '{prefix}', context '{contextData}'.");
+            LogFast($"[RenderNode-DIAGNOSTIC] Rendering '{node.Name}' with prefix length {prefix.Length} ('{prefix}').");
             sb.Append(prefix).Append(connector).AppendLine(node.Name.CompoundName() + tagsSuffix + contextData);
             var childPrefix = prefix + (isLast ? "  " : "│ ");
             node.RenderChildNodes( ancestors, titleContextItems, sb, includeDetails, childPrefix);
@@ -259,12 +264,12 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
         }
 
         private static void AppendRootCauseDetails(OperationNode node, StringBuilder sb, string childPrefix){
-            Log(()=>$"[AppendRootCauseDetails] Appending details for '{node.Name}'. Root cause: {node.RootCause?.GetType().Name}");
-            sb.Append(childPrefix).Append("• Root Cause: ").Append(node.RootCause.GetType().FullName).Append(": ").AppendLine(node.RootCause.Message);
+            LogFast($"[AppendRootCauseDetails] Appending details for '{node.Name}'. Root cause: {node.RootCause?.GetType().Name}");
+            sb.Append(childPrefix).Append("• Root Cause: ").Append(node.RootCause?.GetType().FullName).Append(": ").AppendLine(node.RootCause?.Message);
             var stack = node.RenderStack();
             if (!string.IsNullOrEmpty(stack)) sb.AppendLine(string.Join(Environment.NewLine, stack.Split(["\r\n", "\n"], StringSplitOptions.None).Select(l => childPrefix + "  " + l)));
             sb.Append(childPrefix).AppendLine("  --- Original Exception Details ---");
-            using var reader = new System.IO.StringReader(node.RootCause.ToString());
+            using var reader = new System.IO.StringReader(node.RootCause!.ToString());
             while (reader.ReadLine() is{ } line) {
                 sb.Append(childPrefix).Append("    ").AppendLine(line);
             }
@@ -284,35 +289,35 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
         private static bool ShouldKeepContextItem(this OperationNode node,object c,  OperationNode parent, List<OperationNode> ancestors, HashSet<object> titleContextItems, HashSet<string> knownTags) {
             if (c == null || titleContextItems.Contains(c)) return false;
             if (ancestors.Any(a => a.ContextData.Contains(c))) {
-                Log(() => $"[ContextData.Filter] Suppressing inherited context '{c}' from node '{node.Name}'.");
+                LogFast($"[ContextData.Filter] Suppressing inherited context '{c}' from node '{node.Name}'.");
                 return false;
             }
             if (c is not string contextString) {
-                Log(() => $"[ContextData.Filter] Keeping non-string context '{c}'.");
+                LogFast($"[ContextData.Filter] Keeping non-string context '{c}'.");
                 return true;
             }
             if (knownTags.Contains(contextString) || contextString.Contains(" - ") || node.IsRedundantWithNameInHierarchy(contextString,  parent)) {
-                if (contextString.Contains(" - ")) Log(() => $"[ContextData.Filter] Removing '{contextString}' (matches structural noise pattern 'A - B').");
+                if (contextString.Contains(" - ")) LogFast($"[ContextData.Filter] Removing '{contextString}' (matches structural noise pattern 'A - B').");
                 return false;
             }
-            Log(() => $"[ContextData.Filter] Keeping '{contextString}'.");
+            LogFast($"[ContextData.Filter] Keeping '{contextString}'.");
             return true;
         }
         private static bool IsRedundantWithNameInHierarchy(this OperationNode node,string contextString,  OperationNode parent) {
             var contextCompoundName = contextString.CompoundName();
             if (contextCompoundName == node.Name.CompoundName()) {
-                Log(() => $"[ContextData.Filter] Removing '{contextString}' (matches node name '{node.Name}').");
+                LogFast($"[ContextData.Filter] Removing '{contextString}' (matches node name '{node.Name}').");
                 return true;
             }
 
             if (parent == null) return false;
             if (contextCompoundName == parent.Name.CompoundName()) {
-                Log(() => $"[ContextData.Filter] Removing '{contextString}' (matches parent name '{parent.Name}').");
+                LogFast($"[ContextData.Filter] Removing '{contextString}' (matches parent name '{parent.Name}').");
                 return true;
             }
             foreach (var sibling in parent.Children) {
                 if (sibling != node && contextCompoundName == sibling.Name.CompoundName()) {
-                    Log(() => $"[ContextData.Filter] Removing '{contextString}' (matches sibling name '{sibling.Name}').");
+                    LogFast($"[ContextData.Filter] Removing '{contextString}' (matches sibling name '{sibling.Name}').");
                     return true;
                 }
             }
@@ -321,19 +326,17 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
         public static OperationNode GetChild(this OperationNode node, string name) 
             => node.Children.Single(c => c.Name == name);
         public static OperationNode OperationTree(this FaultHubException topException) {
-            Log(() => "[Parser] Starting NewOperationTree parser...");
+            LogFast($"[Parser] Starting NewOperationTree parser...");
             var contextLookup = topException.FaultHubExceptions();
             var rawTree = topException.Context.BuildFromContext([],contextLookup);
-            Log(() => "[Parser] Raw tree built. Starting collapse phase...");
+            LogFast($"[Parser] Raw tree built. Starting collapse phase...");
             var collapsedTree = rawTree.Collapse();
-            Log(() => "[Parser] Collapse phase finished.");
+            LogFast($"[Parser] Collapse phase finished.");
             return collapsedTree;
         }
 
         private static Dictionary<AmbientFaultContext, FaultHubException> FaultHubExceptions(this FaultHubException topException){
-            var allFaults = topException.SelectMany().OfType<FaultHubException>().ToList();
-            Log(() => $"[VALIDATION] Items from SelectMany():\n" + string.Join("\n", 
-                allFaults.Select(f => $"  - Fault Msg: '{f.Message}', Context Boundary: '{f.Context?.BoundaryName}', Context Hash: {f.Context?.GetHashCode()}")));
+            
             var lookup = new Dictionary<AmbientFaultContext, FaultHubException>();
             var queue = new Queue<Exception>();
             if (topException != null) queue.Enqueue(topException);
@@ -348,14 +351,14 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
                     queue.Enqueue(inner);
                 }
             }
-            Log(() => $"[Parser] Created context lookup dictionary with {lookup.Count} entries.");
-            Log(()=>$"[VALIDATION] ContextLookup Keys: [{string.Join(", ", lookup.Keys.Select(c => c.BoundaryName ?? "NULL"))}]");
+            LogFast($"[Parser] Created context lookup dictionary with {lookup.Count} entries.");
+            LogFast($"[VALIDATION] ContextLookup Keys: [{string.Join(", ", lookup.Keys.Select(c => c.BoundaryName ?? "NULL"))}]");
             return lookup;
         }
 
         static OperationNode Collapse(this OperationNode node) {
             if (node == null) return null;
-            Log(() => $"[Collapse] ==> Processing node '{node.Name}' with {node.Children.Count} children.");
+            LogFast($"[Collapse] ==> Processing node '{node.Name}' with {node.Children.Count} children.");
 
             var processedChildren = node.ProcessChildren();
 
@@ -366,7 +369,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
             }
 
             var finalNode = node with { Children = processedChildren };
-            Log(() => $"[Collapse] <== Returning node '{finalNode.Name}' with {finalNode.Children.Count} children.");
+            LogFast($"[Collapse] <== Returning node '{finalNode.Name}' with {finalNode.Children.Count} children.");
             return finalNode;
         }
 
@@ -375,7 +378,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
                 c.Name.CompoundName() == node.Name.CompoundName() || node.Name.CompoundName().EndsWith($".{c.Name.CompoundName()}") || c.Name.CompoundName().EndsWith($".{node.Name.CompoundName()}"));
 
         private static OperationNode MergeWithChild(this OperationNode node, OperationNode childToMerge, IReadOnlyList<OperationNode> allProcessedChildren) {
-            Log(() => $"[Collapse] Merging child '{childToMerge.Name}' into parent '{node.Name}'.");
+            LogFast($"[Collapse] Merging child '{childToMerge.Name}' into parent '{node.Name}'.");
 
             var mergedTags = (node.Tags ?? []).Concat(childToMerge.Tags ?? []).Distinct().ToList();
             var mergedContext = node.ContextData.Concat(childToMerge.ContextData).Distinct().ToArray();
@@ -394,18 +397,18 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
         
         static OperationNode BuildFromGenericException(this Exception ex, IReadOnlyList<LogicalStackFrame> parentStack,
             Dictionary<AmbientFaultContext, FaultHubException> contextLookup) {
-            Log(() => $"[Parser.Generic] Processing generic exception: {ex?.GetType().Name}");
-            Log(() => $"[VALIDATION][BuildFromGenericException] ==> ENTER. Exception Type: '{ex?.GetType().Name}', Message: '{ex?.Message}'");
+            LogFast($"[Parser.Generic] Processing generic exception: {ex?.GetType().Name}");
+            LogFast($"[VALIDATION][BuildFromGenericException] ==> ENTER. Exception Type: '{ex?.GetType().Name}', Message: '{ex?.Message}'");
             if (ex is not AggregateException aggEx) return ex is FaultHubException fhEx ? fhEx.Context.BuildFromContext(parentStack, contextLookup) : null;
             
             var children = aggEx.InnerExceptions.Select(e => e.BuildFromGenericException(parentStack, contextLookup)).Where(n => n != null).ToList();
-            Log(() => $"[Parser.Generic] Parsed AggregateException into {children.Count} children.");
+            LogFast($"[Parser.Generic] Parsed AggregateException into {children.Count} children.");
             return children.Count == 1 ? children.Single() : new OperationNode("Multiple Operations", [], children);
         }
 
         static OperationNode BuildFromContext(this AmbientFaultContext context, IReadOnlyList<LogicalStackFrame> parentStack, Dictionary<AmbientFaultContext, FaultHubException> contextLookup) {
             if (context == null) return null;
-            Log(() => $"[Parser.Context] ==> Processing context for: '{context.BoundaryName ?? "NULL"}'");
+            LogFast($"[Parser.Context] ==> Processing context for: '{context.BoundaryName ?? "NULL"}'");
             return context.BoundaryName == null ? context.HandleNamelessContext( parentStack, contextLookup) : context.BuildNamedNode( parentStack, contextLookup);
         }
         
@@ -413,7 +416,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
             var localStack = context.LogicalStackTrace ?? Enumerable.Empty<LogicalStackFrame>();
             var fullStack = localStack.Concat(parentStack).Distinct().ToList();
             var children = new List<OperationNode>();
-            Log(() => $"[Parser.Context] Recursing on InnerContext: '{context.InnerContext?.BoundaryName ?? "NULL"}'");
+            LogFast($"[Parser.Context] Recursing on InnerContext: '{context.InnerContext?.BoundaryName ?? "NULL"}'");
             var hierarchicalChild = context.InnerContext.BuildFromContext(fullStack, contextLookup);
             if (hierarchicalChild != null) {
                 if (hierarchicalChild.Name == "Multiple Operations") {
@@ -423,49 +426,49 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
                 }
             }
             var rootCause = context.RootCause(contextLookup, fullStack, children);
-            Log(() => $"[Parser.DIAGNOSTIC] After RootCause call for '{context.BoundaryName}', children count is: {children.Count}.");
+            LogFast($"[Parser.DIAGNOSTIC] After RootCause call for '{context.BoundaryName}', children count is: {children.Count}.");
             var resultNode = new OperationNode(context.BoundaryName, context.UserContext ?? [], children, rootCause, fullStack, context.Tags);
-            Log(() => $"[INSTRUMENTATION][BuildFromContext] Created node '{resultNode.Name}' with Tags: [{(resultNode.Tags != null ? string.Join(", ", resultNode.Tags) : "null")}]");
-            Log(() => $"[Parser.Context] <== Created node for '{resultNode.Name}' with {resultNode.Children.Count} children.");
+            LogFast($"[INSTRUMENTATION][BuildFromContext] Created node '{resultNode.Name}' with Tags: [{(resultNode.Tags != null ? string.Join(", ", resultNode.Tags) : "null")}]");
+            LogFast($"[Parser.Context] <== Created node for '{resultNode.Name}' with {resultNode.Children.Count} children.");
             return resultNode;
         }
         private static OperationNode HandleNamelessContext(this AmbientFaultContext context, IReadOnlyList<LogicalStackFrame> parentStack, Dictionary<AmbientFaultContext, FaultHubException> contextLookup) {
-            Log(() => "[Parser.Context] BoundaryName is null. Trying to build from generic inner exception.");
+            LogFast($"[Parser.Context] BoundaryName is null. Trying to build from generic inner exception.");
             if (contextLookup.TryGetValue(context, out var owner)) return owner.InnerException.BuildFromGenericException(parentStack, contextLookup);
-            Log(() => "[Parser.Context] Could not find owner for nameless context. Returning null.");
+            LogFast($"[Parser.Context] Could not find owner for nameless context. Returning null.");
             return null;
         }
         private static Exception RootCause(this AmbientFaultContext context, Dictionary<AmbientFaultContext, FaultHubException> contextLookup, List<LogicalStackFrame> fullStack, List<OperationNode> children) {
             if (!contextLookup.TryGetValue(context, out var contextOwner)) return null;
-            Log(() => $"[RootCause] Analyzing context '{context.BoundaryName}' owned by exception '{contextOwner.Message}'.");
+            LogFast($"[RootCause] Analyzing context '{context.BoundaryName}' owned by exception '{contextOwner.Message}'.");
             if (context.InnerContext == null) return contextOwner.ProcessLeafContext( fullStack, contextLookup, children);
             
             return null;
         }
         
         private static Exception ProcessLeafContext(this FaultHubException contextOwner, List<LogicalStackFrame> fullStack, Dictionary<AmbientFaultContext, FaultHubException> contextLookup, List<OperationNode> children) {
-            Log(() => "[RootCause] No inner context. Building from owner's inner exception.");
+            LogFast($"[RootCause] No inner context. Building from owner's inner exception.");
             if (contextOwner.InnerException is FaultHubException { Context: not null } innerFhEx && contextOwner.Context.InnerContext == innerFhEx.Context) {
-                Log(() => $"[Parser.DIAGNOSTIC] Child node for '{innerFhEx.Context.BoundaryName}' is already being created via InnerContext traversal. Skipping redundant InnerException parse.");
+                LogFast($"[Parser.DIAGNOSTIC] Child node for '{innerFhEx.Context.BoundaryName}' is already being created via InnerContext traversal. Skipping redundant InnerException parse.");
                 return innerFhEx.FindRootCauses().FirstOrDefault();
             }
             var errorNode = contextOwner.InnerException.BuildFromGenericException(fullStack, contextLookup);
             if (contextOwner.Context.BoundaryName == "Nested_Tx") {
-                Log(() => $"[VALIDATION][ProcessLeafContext] For 'Nested_Tx', the generated errorNode is: '{errorNode?.Name ?? "null"}'");
+                LogFast($"[VALIDATION][ProcessLeafContext] For 'Nested_Tx', the generated errorNode is: '{errorNode?.Name ?? "null"}'");
             }
-            Log(() => $"[Parser.DIAGNOSTIC] Parsed inner exception for '{contextOwner.Context.BoundaryName}'. Generated errorNode: '{errorNode?.Name ?? "null"}'. Children count before add: {children.Count}.");
+            LogFast($"[Parser.DIAGNOSTIC] Parsed inner exception for '{contextOwner.Context.BoundaryName}'. Generated errorNode: '{errorNode?.Name ?? "null"}'. Children count before add: {children.Count}.");
             if (errorNode != null) {
                 if (errorNode.Name == "Multiple Operations") {
-                    Log(() => $"[Parser.DIAGNOSTIC] errorNode is 'Multiple Operations', adding {errorNode.Children.Count} children.");
+                    LogFast($"[Parser.DIAGNOSTIC] errorNode is 'Multiple Operations', adding {errorNode.Children.Count} children.");
                     children.AddRange(errorNode.Children);
                 } else {
-                    Log(() => $"[Parser.DIAGNOSTIC] errorNode is a single node, adding '{errorNode.Name}'.");
+                    LogFast($"[Parser.DIAGNOSTIC] errorNode is a single node, adding '{errorNode.Name}'.");
                     children.Add(errorNode);
                 }
             }
-            Log(() => $"[Parser.DIAGNOSTIC] Children count after add: {children.Count}.");
+            LogFast($"[Parser.DIAGNOSTIC] Children count after add: {children.Count}.");
             if (contextOwner.InnerException is not (null or FaultHubException or AggregateException)) {
-                Log(() => $"[RootCause] Found primitive root cause: {contextOwner.InnerException.GetType().Name}");
+                LogFast($"[RootCause] Found primitive root cause: {contextOwner.InnerException.GetType().Name}");
                 return contextOwner.InnerException;
             }
             return null;
@@ -473,7 +476,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
         
 
         public static IEnumerable<Exception> FindRootCauses(this FaultHubException e) {
-            Log(() => $"[FindRootCauses] Traversing exception: {e?.GetType().Name}");
+            LogFast($"[FindRootCauses] Traversing exception: {e?.GetType().Name}");
             return e.SelectMany()
                 .Where(ex => ex is not AggregateException && ex is not FaultHubException { InnerException: not null });
         }

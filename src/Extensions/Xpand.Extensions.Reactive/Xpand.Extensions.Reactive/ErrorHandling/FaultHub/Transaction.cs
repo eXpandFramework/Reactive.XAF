@@ -17,10 +17,10 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
         public static IObservable<TFinal[]> Run<TFinal>(this ITransactionBuilder<TFinal> builder, bool failFast = true, bool collectAllResults = false)
             => Observable.Defer(() => {
                 var ib = (TransactionBuilder<TFinal>)builder;
-                Log(() => $"[Tx:{ib.TransactionName}] Run called. Mode={ib.Mode}, FailFast={failFast}, CollectAllResults={collectAllResults}");
+                LogFast($"[Tx:{ib.TransactionName}] Run called. Mode={ib.Mode}, FailFast={failFast}, CollectAllResults={collectAllResults}");
                 var scheduledLogic = ib.ScheduledLogic(failFast, collectAllResults);
                 return failFast?scheduledLogic.Catch((FaultHubException ex) => {
-                    Log(() => $"[INSTRUMENTATION][Transaction.Run] Creating TransactionAbortedException for transaction '{ib.TransactionName}'.");
+                    LogFast($"[INSTRUMENTATION][Transaction.Run] Creating TransactionAbortedException for transaction '{ib.TransactionName}'.");
                     return Observable.Throw<TFinal[]>(new TransactionAbortedException($"{ib.TransactionName} failed", ex, new AmbientFaultContext {
                         BoundaryName = ib.TransactionName, UserContext = ib.Context, InnerContext = ex.Context, Tags = ib.Tags.Concat([TransactionNodeTag,ib.Mode.ToString(),nameof(RunFailFast)]).Distinct().ToList()
                     }));
@@ -86,11 +86,11 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
             => allSteps.Aggregate(Observable.Return((results: (object)new List<object>(), failures: new List<Exception>(), allResults: new List<object>())), 
                     (accObservable, step) => accObservable.SelectMany(acc => {
                         if (failFast && acc.failures.Any()) {
-                            Log(() => $"[Tx-FORNSC:{builder.TransactionName}][StepChain] ==> SKIPPING step '{step.Name}' due to prior failure in FailFast mode.");
+                            LogFast($"[Tx-FORNSC:{builder.TransactionName}][StepChain] ==> SKIPPING step '{step.Name}' due to prior failure in FailFast mode.");
                             return Observable.Return(acc);
                         }
                         var accFailures = acc.failures.Any() ? string.Join(", ", acc.failures.Select(f => f.GetType().Name)) : "empty";
-                        Log(() => $"[Tx-FORNSC:{builder.TransactionName}][StepChain] ==> ENTERING step '{step.Name}'. Accumulator has {acc.failures.Count} failure(s): [{accFailures}]");
+                        LogFast($"[Tx-FORNSC:{builder.TransactionName}][StepChain] ==> ENTERING step '{step.Name}'. Accumulator has {acc.failures.Count} failure(s): [{accFailures}]");
                         return step.ExecuteStep(acc, failFast)
                             .PushFrameConditionally(!string.IsNullOrEmpty(step.Name) ? step.Name : $"Part {allSteps.IndexOf(step) + 1}",step.FilePath,step.LineNumber)
                             .Materialize().BufferUntilCompleted()
@@ -104,13 +104,13 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
             var errorNotifications = notifications.Where(n => n.Kind == NotificationKind.OnError).ToList();
             if (errorNotifications.Any()) {
                 var stepErrors = string.Join(", ", errorNotifications.Select(n => n.Exception?.GetType().Name));
-                Log(() => $"[Tx-FORNSC:{builder.TransactionName}][StepChain] -- CAPTURED {errorNotifications.Count} error(s) from step '{step.Name}': [{stepErrors}]");
+                LogFast($"[Tx-FORNSC:{builder.TransactionName}][StepChain] -- CAPTURED {errorNotifications.Count} error(s) from step '{step.Name}': [{stepErrors}]");
             }
             var results = notifications.Where(n => n.Kind == NotificationKind.OnNext).Select(n => n.Value).ToList();
             var allResults = acc.allResults.Concat(results).ToList();
             var failures = acc.failures.Concat(allSteps.CollectErrors(builder, errorNotifications, step)).ToList();
             var exitFailures = failures.Any() ? string.Join(", ", failures.Select(f => f.GetType().Name)) : "empty";
-            Log(() => $"[Tx-FORNSC:{builder.TransactionName}][StepChain] <== EXITING step '{step.Name}'. Accumulator now has {failures.Count} failure(s): [{exitFailures}]");
+            LogFast($"[Tx-FORNSC:{builder.TransactionName}][StepChain] <== EXITING step '{step.Name}'. Accumulator now has {failures.Count} failure(s): [{exitFailures}]");
             return (results,  failures, allResults);
         }
         public static IObservable<TFinal[]> RunToEnd<TFinal>(this ITransactionBuilder<TFinal> builder) => builder.Run(false);
@@ -118,10 +118,10 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
             => allSteps.ExecuteStepChain(builder, false)
                 .SelectMany(t => {
                     if (!t.allFailures.Any()) {
-                        Log(() => $"[Tx:{builder.TransactionName}] RunToEnd: No failures. CollectAllResults={collectAllResults}, IsNested={isNested}");
+                        LogFast($"[Tx:{builder.TransactionName}] RunToEnd: No failures. CollectAllResults={collectAllResults}, IsNested={isNested}");
                         return Observable.Return(collectAllResults ? t.allResults : (List<object>)t.finalStepResult);
                     }
-                    Log(() => $"[Tx:{builder.TransactionName}] RunToEnd: Completed with {t.allFailures.Count} failure(s). Creating final aggregate exception.");
+                    LogFast($"[Tx:{builder.TransactionName}] RunToEnd: Completed with {t.allFailures.Count} failure(s). Creating final aggregate exception.");
                     var aggregateException = new AggregateException(t.allFailures);
                     if (!isNested) return Observable.Throw<object>(aggregateException);
                     var finalTypedResults = t.allResults.OfType<TFinal>().Cast<object>().ToList();
@@ -130,7 +130,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
 
         private static IEnumerable<FaultHubException> CollectErrors<TFinal>(this List<StepDefinition> allSteps, TransactionBuilder<TFinal> builder, List<Notification<object>> errors, StepDefinition step) {
             if (!errors.Any()) return [];
-            Log(() => $"[Tx:{builder.TransactionName}][CollectErrors] Collecting {errors.Count} error(s) for step '{step.Name}'.");
+            LogFast($"[Tx:{builder.TransactionName}][CollectErrors] Collecting {errors.Count} error(s) for step '{step.Name}'.");
             var stepNameForContext = !string.IsNullOrEmpty(step.Name) ? step.Name : $"Part {allSteps.IndexOf(step) + 1}";
             return errors.Select(e => {
                 var stack = e.Exception.CapturedStack();
@@ -140,7 +140,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
                 if (e.Exception is TransactionAbortedException abortedException) {
                     contextForStep = contextForStep with { BoundaryName = abortedException.Context.BoundaryName };
                 }
-                Log(() => $"[INSTRUMENTATION][CollectErrors] Creating context for step '{stepNameForContext}'. Tags are: [{string.Join(", ", contextForStep.Tags)}]");
+                LogFast($"[INSTRUMENTATION][CollectErrors] Creating context for step '{stepNameForContext}'. Tags are: [{string.Join(", ", contextForStep.Tags)}]");
                 return e.Exception.ExceptionToPublish(contextForStep);
             });
         }

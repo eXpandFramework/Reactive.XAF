@@ -116,7 +116,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
         public TransactionBuilder(IObservable<object> initialStep, string transactionName, object[] context,
             IScheduler scheduler, string callerMemberName, string callerMemberPath, int callerMemberLine,IReadOnlyList<string> tags = null) 
             : this(initialStep, transactionName, context, scheduler, new List<StepDefinition>(),tags) {
-            Log(() => $"[Tx.DEBUG][BUILDER][SEQ] Constructor called for transaction: '{transactionName}'.");
+            LogFast($"[Tx.DEBUG][BUILDER][SEQ] Constructor called for transaction: '{transactionName}'.");
             CallerMemberName = callerMemberName;
             CallerMemberPath = callerMemberPath;
             CallerMemberLine = callerMemberLine;
@@ -125,7 +125,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
         public TransactionBuilder(List<(string Name, IObservable<object> Source)> batchedSources, TransactionMode mode,
             string transactionName, object[] context, IScheduler scheduler, string callerMemberName, string callerMemberPath, int callerMemberLine,IReadOnlyList<string> tags = null)
             : this(null, transactionName, context, scheduler, new List<StepDefinition>(),tags) {
-            Log(() => $"[Tx.DEBUG][BUILDER][BATCH] Constructor called for transaction: '{transactionName}'. Mode: {mode}.");
+            LogFast($"[Tx.DEBUG][BUILDER][BATCH] Constructor called for transaction: '{transactionName}'. Mode: {mode}.");
             BatchedSources = batchedSources;
             Mode = mode;
             CallerMemberName = callerMemberName;

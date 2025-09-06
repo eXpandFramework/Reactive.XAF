@@ -72,7 +72,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
         public static (FaultResult Action, bool Mute) GetFaultResult(this Exception originalException) {
             var handlerAction = HandlersContext.Value?.Select(handler => handler(originalException)).FirstOrDefault(action => action.HasValue);
             if (!handlerAction.HasValue) return (FaultResult.Proceed, false);
-            Log(() => $"[HUB] A handler matched with action: {handlerAction.Value}.");
+            LogFast($"[HUB] A handler matched with action: {handlerAction.Value}.");
             return handlerAction.Value switch {
                 FaultAction.Complete => (FaultResult.Complete, false),
                 FaultAction.Rethrow => (FaultResult.Rethrow, false),
@@ -90,10 +90,10 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
             if (correlationId != Guid.Empty && !Seen.TryAdd($"{correlationId}:{ex.GetType().FullName}:{ex.Message}")) return false;
             try {
                 BusSubject.OnNext(ex);
-                Log(() => $"[DIAGNOSTIC][Publish] ==> Bus.OnNext(ex) completed successfully.");
+                LogFast($"[DIAGNOSTIC][Publish] ==> Bus.OnNext(ex) completed successfully.");
             }
             catch (Exception busEx) {
-                Log(() => $"[DIAGNOSTIC][Publish] ==> CRITICAL: Exception thrown from Bus.OnNext(): {busEx.Message}");
+                LogFast($"[DIAGNOSTIC][Publish] ==> CRITICAL: Exception thrown from Bus.OnNext(): {busEx.Message}");
                 throw;
             }
             return true;
@@ -110,21 +110,17 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
 
         public static IObservable<T> Publish<T>(this FaultHubException ex) {
             var publish = ex.Publish();
-            Log(() => $"[HUB][Publish<T>] Publish() returned: {publish}.");
+            LogFast($"[HUB][Publish<T>] Publish() returned: {publish}.");
             return publish ? Observable.Empty<T>() : Observable.Throw<T>(ex);
         }
         
         public static IObservable<T> PublishFaults<T>(this IObservable<T> source) 
             => Enabled ? source.Catch<T, Exception>(ex => {
-                    Log(() => $"[DIAGNOSTIC][PublishFaults] ==> Caught exception of type: {ex.GetType().Name}");
-                    Log(() => ex.Data.Contains(SkipKey)
-                        ? "[DIAGNOSTIC][PublishFaults] ==> Exception IS MUTED (contains SkipKey). This is the likely cause of failure."
-                        : "[DIAGNOSTIC][PublishFaults] ==> Exception is NOT muted.");
-
+                    LogFast($"[DIAGNOSTIC][PublishFaults] ==> Caught exception of type: {ex.GetType().Name}");
                     var faultToPublish = ex as FaultHubException ?? ex.ExceptionToPublish();
-                    Log(() => $"[DIAGNOSTIC][PublishFaults] ==> Fault to be published is of type: {faultToPublish.GetType().Name}");
+                    LogFast($"[DIAGNOSTIC][PublishFaults] ==> Fault to be published is of type: {faultToPublish.GetType().Name}");
                     var published = faultToPublish.Publish();
-                    Log(() => $"[DIAGNOSTIC][PublishFaults] ==> Call to internal Publish() method returned: {published}");
+                    LogFast($"[DIAGNOSTIC][PublishFaults] ==> Call to internal Publish() method returned: {published}");
                     return published ? Observable.Empty<T>() : Observable.Throw<T>(ex);
                 }) : source;
 
@@ -172,12 +168,12 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
             => source.ChainFaultContext(retryStrategy, context).Select(t => (TResult)(object)t).Catch(fallbackSelector);
         
         internal static IObservable<T> ProcessFault<T>(this Exception ex, AmbientFaultContext faultContext, Func<FaultHubException, IObservable<T>> proceedAction) {
-            Log(() => $"[HUB][{nameof(ProcessFault)}] Entered for context '{faultContext.Name}'.");
+            LogFast($"[HUB][{nameof(ProcessFault)}] Entered for context '{faultContext.Name}'.");
             var enrichedException = ex.ExceptionToPublish(faultContext);
             var (localAction, muteOnRethrow) = ex.GetFaultResult();
             LogFast($"[HUB][{nameof(ProcessFault)}] Local handler check resulted in action: '{(localAction, muteOnRethrow)}'.");
             if (ex.IsSkipped()) {
-                Log(() => $"[HUB][{nameof(ProcessFault)}] {nameof(MuteForBus)} '{faultContext.Name}'.");
+                LogFast($"[HUB][{nameof(ProcessFault)}] {nameof(MuteForBus)} '{faultContext.Name}'.");
                 enrichedException.MuteForBus();
             }
             return enrichedException.ProcessFault(proceedAction, localAction,  muteOnRethrow);
@@ -186,14 +182,14 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
         private static IObservable<T> ProcessFault<T>(this FaultHubException e,Func<FaultHubException, IObservable<T>> proceedAction, FaultResult localAction, bool muteOnRethrow){
             switch (localAction) {
                 case FaultResult.Complete:
-                    Log(() => $"[HUB][{nameof(ProcessFault)}] Honoring local 'Complete' action.");
+                    LogFast($"[HUB][{nameof(ProcessFault)}] Honoring local 'Complete' action.");
                     if (!e.IsSkipped()) {
                         e.Publish();
                     }
                     return Observable.Empty<T>();
 
                 case FaultResult.Rethrow:
-                    Log(() => $"[HUB][{nameof(ProcessFault)}] Honoring local 'Rethrow' action.");
+                    LogFast($"[HUB][{nameof(ProcessFault)}] Honoring local 'Rethrow' action.");
                     if (muteOnRethrow) {
                         e.MuteForBus();
                     }
@@ -214,33 +210,33 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
         }
 
         public static FaultHubException ExceptionToPublish(this Exception e, AmbientFaultContext contextToUse=null) {
-            Log(() => $"[FaultHub.ExceptionToPublish] Entered. Exception Type: {e.GetType().Name}. Context to use: '{contextToUse?.BoundaryName ?? "null"}'");
+            LogFast($"[FaultHub.ExceptionToPublish] Entered. Exception Type: {e.GetType().Name}. Context to use: '{contextToUse?.BoundaryName ?? "null"}'");
             if (contextToUse == null) {
-                Log(() => "[FaultHub.ExceptionToPublish] contextToUse is null, returning original exception.");
+                LogFast($"[FaultHub.ExceptionToPublish] contextToUse is null, returning original exception.");
                 var existingFault = e.SelectMany().OfType<FaultHubException>().FirstOrDefault();
                 if (existingFault != null) return existingFault;
                 return e as FaultHubException ?? new FaultHubException("An exception occurred in a traced fault context.", e, new System.Diagnostics.StackTrace(true).LogicalStackFrames().NewFaultContext([]));
             }
             if (e is not FaultHubException faultHubException) {
                 var message = e is AggregateException ? $"{contextToUse.BoundaryName} completed with errors" : e.Message;
-                Log(() => "[FaultHub.ExceptionToPublish] Path: Raw exception. Wrapping in new FaultHubException.");
+                LogFast($"[FaultHub.ExceptionToPublish] Path: Raw exception. Wrapping in new FaultHubException.");
                 return new FaultHubException(message, e, contextToUse);
             }
-            Log(() => "[FaultHub.ExceptionToPublish] Path: Existing FaultHubException. Chaining context.");
+            LogFast($"[FaultHub.ExceptionToPublish] Path: Existing FaultHubException. Chaining context.");
             
             var newChainedContext = contextToUse with{ InnerContext = faultHubException.Context };
             
             if (faultHubException.PreserveType) {
-                Log(() => $"[FaultHub.ExceptionToPublish] Path: PreserveType is true for {faultHubException.GetType().Name}. Re-creating instance.");
+                LogFast($"[FaultHub.ExceptionToPublish] Path: PreserveType is true for {faultHubException.GetType().Name}. Re-creating instance.");
                 return (FaultHubException)Activator.CreateInstance(faultHubException.GetType(),
                     faultHubException.Message, faultHubException, newChainedContext);
             }
             
             
-            Log(() => "[FaultHub.ExceptionToPublish] Path: PreserveType is false. Creating standard FaultHubException wrapper.");
+            LogFast($"[FaultHub.ExceptionToPublish] Path: PreserveType is false. Creating standard FaultHubException wrapper.");
             var newException = new FaultHubException(faultHubException.Message, faultHubException, newChainedContext);
             var finalContextSummary = $"'{string.Join(" | ", newException.Context.UserContext)}' -> '{string.Join(" | ", newException.Context.InnerContext?.UserContext ?? [])}'";
-            Log(() => $"[FaultHub.ExceptionToPublish] Created new FaultHubException. Final Context Chain: {finalContextSummary}");
+            LogFast($"[FaultHub.ExceptionToPublish] Created new FaultHubException. Final Context Chain: {finalContextSummary}");
             return newException;
         }
         public static IDisposable Disable() => AddHandler(_ => FaultAction.Rethrow);
