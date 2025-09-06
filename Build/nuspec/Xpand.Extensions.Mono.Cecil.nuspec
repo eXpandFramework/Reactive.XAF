@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.Extensions.Mono.Cecil</id>
-    <version>4.251.5.0</version>
+    <version>4.251.5.1</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -16,9 +16,9 @@
     <dependencies>
       <group targetFramework="net9.0">
         <dependency id="Fasterflect.Xpand" version="2.0.7" />
-        <dependency id="Mono.Cecil" version="0.11.5" />
-        <dependency id="System.CodeDom" version="9.0" />
-        <dependency id="System.ValueTuple" version="4.5" />
+        <dependency id="Mono.Cecil" version="0.11.6" />
+        <dependency id="System.CodeDom" version="9.0.8" />
+        <dependency id="System.ValueTuple" version="4.6.1" />
       </group>
     </dependencies>
   </metadata>

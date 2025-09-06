@@ -886,23 +886,23 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         
         static IObservable<T[]> WhenObjects<T>(this XafApplication application, ObjectModification objectModification,
             CriteriaOperator criteria, string[] modifiedProperties, IObservable<IObjectSpace> spaceSource,params Type[] types)
-            => new Subject<T[]>().Use(subject => subject.Merge(types.ToNowObservable().Where(_ => objectModification != ObjectModification.Deleted)
-                .SelectMany(type => application.UseObjectSpace(type, space => {
-                    var array = space.GetObjects(type, criteria).Cast<T>().ToArray();
-                    subject.OnNext(array);
-                    return array;
-                }))
-                .SelectMany()
-                .BufferUntilCompleted()
-                .Merge(spaceSource.SelectMany(space => types.ToNowObservable()
-                    .SelectMany(type => space.WhenCommittedDetailed(type, objectModification, modifiedProperties,
-                            o => space.IsObjectFitForCriteria(criteria, o))
-                        .Select(t => {
-                            var array = t.details.Select(t1 => t1.instance).Cast<T>().ToArray();
-                            subject.OnNext(array);
-                            return array;
-                        }))))
-                .IgnoreElements()))
+            => Observable.Using(() => new Subject<T[]>(),subject => subject.Merge(types.ToNowObservable().Where(_ => objectModification != ObjectModification.Deleted)
+                    .SelectMany(type => application.UseObjectSpace(type, space => {
+                        var array = space.GetObjects(type, criteria).Cast<T>().ToArray();
+                        subject.OnNext(array);
+                        return array;
+                    }))
+                    .SelectMany()
+                    .BufferUntilCompleted()
+                    .Merge(spaceSource.SelectMany(space => types.ToNowObservable()
+                        .SelectMany(type => space.WhenCommittedDetailed(type, objectModification, modifiedProperties,
+                                o => space.IsObjectFitForCriteria(criteria, o))
+                            .Select(t => {
+                                var array = t.details.Select(t1 => t1.instance).Cast<T>().ToArray();
+                                subject.OnNext(array);
+                                return array;
+                            }))))
+                    .IgnoreElements()))
                 .WhenNotEmpty();
 
         public static IObservable<T> WhenObject<T>(this XafApplication application,ObjectModification objectModification,bool existing,string[] modifiedProperties ,Expression<Func<T, bool>> criteriaExpression=null) where T:class{

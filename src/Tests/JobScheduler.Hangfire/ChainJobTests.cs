@@ -22,8 +22,8 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests {
 
         [XpandTest(state:ApartmentState.MTA)][Test]
         public async Task ChainedJob() {
-            var subject = new Subject<JobState>();
-            await subject.Use(signal => StartJobSchedulerTest(application => application.WhenMainWindowCreated()
+            
+            await Observable.Using(() => new Subject<JobState>(),signal => StartJobSchedulerTest(application => application.WhenMainWindowCreated()
                 .SelectMany(_ => application.AssertJobListViewNavigation()
                     .SelectMany(window => window.CreateJob(typeof(ChainJob), nameof(ChainJob.TestChainJob),false)
                         .Zip(application.WhenTabControl(typeof(Job),selectedTab:1).Take(1)).ToFirst()

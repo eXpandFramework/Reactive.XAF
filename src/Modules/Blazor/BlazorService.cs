@@ -64,7 +64,7 @@ namespace Xpand.XAF.Modules.Blazor {
             => frameTemplate.ProcessEvent(nameof(FrameTemplate.ViewChanged)).To(frameTemplate);
         
         public static IObservable<TArgs> WhenCallback<TArgs>(this object source, string callbackName) 
-            => new Subject<TArgs>().Use(subject => {
+            => Observable.Using(() => new Subject<TArgs>(), subject => {
                 source.SetPropertyValue(callbackName, EventCallback.Factory.Create<TArgs>(source, args => subject.OnNext(args)));
                 return subject.AsObservable().Finally(subject.Dispose);
             });
