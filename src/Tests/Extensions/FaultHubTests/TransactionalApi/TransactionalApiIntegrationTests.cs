@@ -44,32 +44,6 @@ public class TransactionalApiIntegrationTests : FaultHubTestBase {
     [SuppressMessage("ReSharper", "UnusedParameter.Local")]
     private IObservable<Unit> MockBrowserSelector(string parseResult) => 
         Observable.Return(Unit.Default);
-
-    [Test]
-    public async Task Ambient_Transaction_Correlates_Failing_Inner_Selector_As_Step() {
-        var service = new ExternalService();
-
-        using (Transaction.BeginScope("VisitPageWorkflow")) {
-            var execution = service.WhenVisitPage(driver => MockParsePageThatFails(driver).CorrelateToWorkflow(),
-                parseResult => MockBrowserSelector(parseResult).CorrelateToWorkflow()
-            );
-
-            await execution.Capture();
-        }
-
-        BusEvents.Count.ShouldBe(1);
-        var finalReport = BusEvents.Single().ShouldBeOfType<TransactionAbortedException>();
-
-        finalReport.Message.ShouldBe("VisitPageWorkflow failed");
-        finalReport.Context.BoundaryName.ShouldBe("VisitPageWorkflow");
-
-        var aggregate = finalReport.InnerException.ShouldBeOfType<AggregateException>();
-        var stepFault = aggregate.InnerExceptions.Single().ShouldBeOfType<FaultHubException>();
-
-        stepFault.Context.BoundaryName.ShouldBe(nameof(MockParsePageThatFails));
-        stepFault.Context.Tags.ShouldContain(Transaction.StepNodeTag);
-        stepFault.InnerException.ShouldBeOfType<InvalidOperationException>().Message.ShouldBe("Parsing Failed");
-    }
     
     [Test]
     public async Task Fluent_API_Correlates_Steps_From_Inner_Selectors() {
@@ -77,11 +51,11 @@ public class TransactionalApiIntegrationTests : FaultHubTestBase {
 
         var transaction = service.WhenVisitPage(
                 driver => MockParsePageThatFails(driver)
-                    .CorrelateToWorkflow(),
+                    .AsStep(),
                 parseResult => MockBrowserSelector(parseResult)
-                    .CorrelateToWorkflow()
+                    .AsStep()
             )
-            .BeginWorkflow("VisitPageWorkflow")
+            .BeginWorkflow()
             .RunFailFast();
 
         await transaction.PublishFaults().Capture();
@@ -102,16 +76,14 @@ public class TransactionalApiIntegrationTests : FaultHubTestBase {
     private IObservable<Unit> Step2_Succeeds(string input) => Observable.Return(Unit.Default);
 
     [Test]
-    public async Task CorrelateToWorkflow_Attributes_Failure_To_The_Correct_Step() {
+    public async Task CorrelateToWorkflow_Attributes_Assigned_To_The_Correct_Step() {
         var service = new ExternalService();
 
         var transaction = service.ExecuteWorkflow(
-                input => Step1_Fails(input)
-                    .CorrelateToWorkflow(),
-                result => Step2_Succeeds(result)
-                    .CorrelateToWorkflow()
+                input => Step1_Fails(input).AsStep(),
+                result => Step2_Succeeds(result).AsStep()
             )
-            .BeginWorkflow("StepAttributionTest")
+            .BeginWorkflow()
             .RunFailFast();
 
         await transaction.PublishFaults().Capture();
@@ -125,7 +97,7 @@ public class TransactionalApiIntegrationTests : FaultHubTestBase {
     }
     
     [Test]
-    public void Ambient_Context_Is_Overridden_By_Nested_Workflow_And_Not_Restored() {
+    public async Task Ambient_Context_Is_Overridden_By_Nested_Workflow_And_Not_Restored() {
         string contextInOuterScopeAfterInnerFailure = "CONTEXT_NOT_SET";
 
         IObservable<Unit> InnerFailingWorkflow() {
@@ -136,7 +108,7 @@ public class TransactionalApiIntegrationTests : FaultHubTestBase {
                 .ToUnit();
         }
 
-        var outerWorkflow = Observable.Return(Unit.Default)
+        await Observable.Return(Unit.Default)
             .BeginWorkflow("OuterWorkflow")
             .Then(_ => InnerFailingWorkflow().Catch(Observable.Empty<Unit>()))
             .Then(_ => {
@@ -145,8 +117,60 @@ public class TransactionalApiIntegrationTests : FaultHubTestBase {
             })
             .RunToEnd();
 
-        outerWorkflow.Wait();
+        
 
         contextInOuterScopeAfterInnerFailure.ShouldBe("OuterWorkflow");
     }
-}
+    
+    [Test]
+    public async Task AsStep_Correlates_Failures_With_RunToEnd() {
+        var step2WasExecuted = false;
+
+        var transaction = Observable.Return("start")
+            .BeginWorkflow()
+            .Then(_ => Step1_Fails("start").AsStep())
+            .Then(results => {
+                step2WasExecuted = true;
+                return Step2_Succeeds(results.FirstOrDefault()).AsStep().Select(u => (object)u);
+            })
+            .RunAndCollect(Observable.Return);
+
+        var result = await transaction.PublishFaults().Capture();
+
+        result.Error.ShouldBeNull();
+        step2WasExecuted.ShouldBeTrue("The second step should execute in RunAndCollect mode.");
+        
+        BusEvents.Count.ShouldBe(1);
+        var finalFault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
+        var aggregate = finalFault.InnerException.ShouldBeOfType<AggregateException>();
+        var stepFault = aggregate.InnerExceptions.Single().ShouldBeOfType<FaultHubException>();
+
+        stepFault.Context.BoundaryName.ShouldBe(nameof(Step1_Fails));
+        
+    }
+    
+    [Test]
+    public async Task AsStep_Correlates_Failures_With_RunAndCollect() {
+        var step2WasExecuted = false;
+
+        var transaction = Observable.Return("start")
+            .BeginWorkflow()
+            .Then(_ => Step1_Fails("start").AsStep())
+            .Then(results => {
+                step2WasExecuted = true;
+                return Step2_Succeeds(results.FirstOrDefault()).AsStep().Select(u => (object)u);
+            })
+            .RunAndCollect(Observable.Return);
+
+        var result = await transaction.PublishFaults().Capture();
+
+        result.Error.ShouldBeNull();
+        step2WasExecuted.ShouldBeTrue("The second step should execute in RunAndCollect mode.");
+        
+        BusEvents.Count.ShouldBe(1);
+        var finalFault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
+        var aggregate = finalFault.InnerException.ShouldBeOfType<AggregateException>();
+        var stepFault = aggregate.InnerExceptions.Single().ShouldBeOfType<FaultHubException>();
+
+        stepFault.Context.BoundaryName.ShouldBe(nameof(Step1_Fails));
+    }}

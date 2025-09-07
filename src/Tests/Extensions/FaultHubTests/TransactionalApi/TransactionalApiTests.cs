@@ -15,7 +15,6 @@ using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 
 namespace Xpand.Extensions.Tests.FaultHubTests.TransactionalApi {
-    internal class Url { public string Href { get; set; } }
     public class TransactionalApiTests  : FaultHubTestBase {
         [MethodImpl(MethodImplOptions.NoInlining)]
         private IObservable<string> FailingOperation(SubscriptionCounter failingCounter)
@@ -1378,5 +1377,85 @@ namespace Xpand.Extensions.Tests.FaultHubTests.TransactionalApi {
                 "The stack for Step B should have accumulated the context from the preceding, successful Step A.");
             
         }
+        
+        [Test]
+        public async Task BeginWorkflow_Pushes_StackFrame_For_Failing_Initial_Source_On_RunFailFast() {
+            // ARRANGE
+            var source = Observable.Throw<string>(new InvalidOperationException("Initial source failed"));
+
+            // ACT
+            var transaction = source.BeginWorkflow()
+                                    .RunFailFast();
+
+            await transaction.PublishFaults().Capture();
+
+            // ASSERT
+            BusEvents.Count.ShouldBe(1);
+            var abortedException = BusEvents.Single().ShouldBeOfType<TransactionAbortedException>();
+            var stepFault = abortedException.InnerException.ShouldBeOfType<FaultHubException>();
+
+            // Check the UserContext for the step name, which is added by CollectErrors
+            var stepContext = $"{nameof(BeginWorkflow_Pushes_StackFrame_For_Failing_Initial_Source_On_RunFailFast)} - {nameof(source)}";
+            stepFault.AllContexts.ShouldContain(stepContext);
+            
+            // Check the logical stack for the pushed frame
+            stepFault.LogicalStackTrace.ShouldNotBeEmpty();
+            stepFault.LogicalStackTrace.ShouldContain(frame => frame.MemberName == nameof(source));
+        }
+
+        [Test]
+        public async Task BeginWorkflow_Pushes_StackFrame_For_Failing_Initial_Source_On_RunToEnd() {
+            // ARRANGE
+            var source = Observable.Throw<string>(new InvalidOperationException("Initial source failed"));
+
+            // ACT
+            var transaction = source.BeginWorkflow()
+                                    .RunToEnd();
+
+            await transaction.PublishFaults().Capture();
+
+            // ASSERT
+            BusEvents.Count.ShouldBe(1);
+            var finalFault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
+            var aggregate = finalFault.InnerException.ShouldBeOfType<AggregateException>();
+            var stepFault = aggregate.InnerExceptions.Single().ShouldBeOfType<FaultHubException>();
+
+            // Check the UserContext for the step name, which is added by CollectErrors
+            var stepContext = $"{nameof(BeginWorkflow_Pushes_StackFrame_For_Failing_Initial_Source_On_RunToEnd)} - {nameof(source)}";
+            stepFault.AllContexts.ShouldContain(stepContext);
+            
+            // Check the logical stack for the pushed frame
+            stepFault.LogicalStackTrace.ShouldNotBeEmpty();
+            stepFault.LogicalStackTrace.ShouldContain(frame => frame.MemberName == nameof(source));
+        }
+
+        [Test]
+        public async Task BeginWorkflow_From_IEnumerable_Pushes_StackFrame_For_First_Failing_Source() {
+            // ARRANGE
+            var operations = new[] {
+                Observable.Throw<string>(new InvalidOperationException("First operation failed")),
+                Observable.Return("Second operation")
+            };
+
+            // ACT
+            var transaction = operations.BeginWorkflow(mode: TransactionMode.Sequential)
+                                        .RunToEnd();
+
+            await transaction.PublishFaults().Capture();
+
+            // ASSERT
+            BusEvents.Count.ShouldBe(1);
+            var finalFault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
+            var aggregate = finalFault.InnerException.ShouldBeOfType<AggregateException>();
+            var stepFault = aggregate.InnerExceptions.Single().ShouldBeOfType<FaultHubException>();
+            
+            var stepContext = $"{nameof(BeginWorkflow_From_IEnumerable_Pushes_StackFrame_For_First_Failing_Source)} - {nameof(operations)}[0]";
+            stepFault.AllContexts.ShouldContain(stepContext);
+            
+            stepFault.LogicalStackTrace.ShouldNotBeEmpty();
+            stepFault.LogicalStackTrace.ShouldContain(frame => frame.MemberName == $"{nameof(operations)}[0]");
+        }
     }
+
+    internal class Url { public string Href { get; set; } }
 }

@@ -13,11 +13,6 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
         private static readonly AsyncLocal<TransactionContext> CurrentTransactionContext = new();
         public static TransactionContext Current => CurrentTransactionContext.Value;
 
-        public static TransactionScope BeginScope(string name) {
-            var context = new TransactionContext(name);
-            CurrentTransactionContext.Value = context;
-            return new TransactionScope(context, () => CurrentTransactionContext.Value = null);
-        }
         public static ITransactionBuilder<TSource> BeginWorkflow<TSource>(this IObservable<TSource> source,
             string transactionName, object[] context = null, IScheduler scheduler = null, [CallerMemberName] string memberName = "",
             [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0, [CallerArgumentExpression(nameof(source))] string sourceExpression = null)
@@ -30,8 +25,9 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
         private static IObservable<TSource> ContextualSource<TSource>(this IObservable<TSource> source, string transactionName){
             var transactionContext = new TransactionContext(transactionName);
             return Observable.Create<TSource>(obs => {
+                var parentContext = CurrentTransactionContext.Value;
                 CurrentTransactionContext.Value = transactionContext;
-                return source.Finally(() => CurrentTransactionContext.Value = null).Subscribe(obs);
+                return source.Finally(() => CurrentTransactionContext.Value = parentContext).Subscribe(obs);
             });
         }
 
@@ -44,7 +40,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
             object[] context = null, IScheduler scheduler = null, [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0,
             [CallerArgumentExpression(nameof(sources))] string sourceExpression = null)
             => new TransactionBuilder<object>(sources.ToArray().Select((obs, i) => (Name: $"{sourceExpression}[{i}]", Source: obs.Select(o => (object) o))).ToList(),
-                mode, transactionName, context, scheduler, memberName, filePath, lineNumber,new[]{TransactionNodeTag,mode.ToString()}.AddNestedTag()) { InitialStepName = sourceExpression };
+                mode, transactionName ?? memberName, context, scheduler, memberName, filePath, lineNumber,new[]{TransactionNodeTag,mode.ToString()}.AddNestedTag()) { InitialStepName = sourceExpression };
 
         public static ITransactionBuilder<TSource> BeginWorkflow<TSource>(this IEnumerable<IObservable<TSource>> sources,
             string transactionName, object[] context = null, IScheduler scheduler = null,
@@ -63,7 +59,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
             return builder;
         }
         
-        public static IObservable<T> CorrelateToWorkflow<T>(this IObservable<T> source, 
+        public static IObservable<T> AsStep<T>(this IObservable<T> source, 
             [CallerArgumentExpression("source")] string stepExpression = null) {
             var parsedStepName = GetStepName(stepExpression);
             Console.WriteLine($"[CORRELATION_TRACE] Operator applied. Expression: '{stepExpression}'. Parsed Name: '{parsedStepName}'.");
