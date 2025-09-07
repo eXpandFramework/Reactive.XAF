@@ -17,6 +17,8 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
         public static IObservable<T> ChainFaultContext<T>(this IObservable<T> source, Func<IObservable<T>, IObservable<T>> retryStrategy, object[] context = null,
             [CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0)
             => source.ChainFaultContext(context ?? [], retryStrategy,memberName, filePath, lineNumber);
+        public static IObservable<T> ChainFaultContext<T>(this IObservable<T> source, Func<IObservable<T>, IObservable<T>> retryStrategy,(string memberName,string filePath,int lineNumber) caller, object[] context = null)
+            => source.ChainFaultContext(retryStrategy,context,caller.memberName,caller.filePath,caller.lineNumber);
 
         public static IObservable<T> ChainFaultContext<T>(this IObservable<T> source, 
             bool handleUpstreamRetries, object[] context = null,[CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0)
@@ -33,6 +35,8 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
         public static IObservable<T> PushStackFrame<T>(this IObservable<T> source,
             [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0)
             => !FaultHub.Enabled ? source : source.PushStackFrame(new LogicalStackFrame(memberName, filePath, lineNumber));
+        public static IObservable<T> PushStackFrame<T>(this IObservable<T> source, (string memberName,string filePath,int lineNumber) caller)
+            => source.PushStackFrame(caller.memberName, caller.filePath, caller.lineNumber);
         
         private static void LogAsyncLocalState(this Func<string> step) {
             var handlerCount = FaultHub.HandlersContext.Value?.Count ?? -1;

@@ -90,6 +90,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
     }
 
     internal class TransactionBuilder<TCurrentResult> : ITransactionBuilder<TCurrentResult> {
+        
         internal readonly IReadOnlyList<string> Tags;
         internal readonly IObservable<object> InitialStep;
         internal readonly List<StepDefinition> SubsequentSteps;
@@ -104,7 +105,8 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
         internal TransactionMode Mode { get; init; } = TransactionMode.Sequential;
         internal List<(string Name, IObservable<object> Source)> BatchedSources { get; init; }
 
-        internal TransactionBuilder(IObservable<object> initialStep, string transactionName, object[] context, IScheduler scheduler, List<StepDefinition> subsequentSteps,IReadOnlyList<string> tags = null) {
+        internal TransactionBuilder(IObservable<object> initialStep,string transactionName, object[] context, IScheduler scheduler, List<StepDefinition> subsequentSteps,IReadOnlyList<string> tags = null) {
+            LogFast($"[Tx.DEBUG][BUILDER][SEQ] Constructor called for transaction: '{transactionName}'.");
             InitialStep = initialStep;
             TransactionName = transactionName;
             Context = context;
@@ -133,9 +135,10 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
             CallerMemberLine = callerMemberLine;
         }
     }
-        
+
     [SuppressMessage("ReSharper", "UnusedTypeParameter")]
-    public interface ITransactionBuilder<out TCurrentResult> { }
+    public interface ITransactionBuilder<out TCurrentResult> {
+    }
     public sealed class TransactionAbortedException(string message, Exception innerException, AmbientFaultContext context) : FaultHubException(message, innerException, context) {
         public override string ErrorStatus=>"failed" ;
     }

@@ -1,0 +1,152 @@
+﻿using System;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
+using System.Reactive;
+using System.Reactive.Linq;
+using System.Threading.Tasks;
+using NUnit.Framework;
+using Shouldly;
+using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
+using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.Reactive.Utility;
+
+namespace Xpand.Extensions.Tests.FaultHubTests.TransactionalApi;
+[TestFixture]
+public class TransactionalApiIntegrationTests : FaultHubTestBase {
+    public class ExternalService {
+        public IObservable<Unit> ExecuteWorkflow(
+            Func<string, IObservable<string>> step1,
+            Func<string, IObservable<Unit>> step2) {
+            return Observable.Defer(() => {
+                Console.WriteLine("[CORRELATION_TRACE] ExecuteWorkflow subscribed to. Chaining Step 1.");
+                var step1Result = Observable.Return("start").SelectMany(step1);
+                Console.WriteLine("[CORRELATION_TRACE] Chaining Step 2.");
+                var step2Result = step1Result.SelectMany(step2);
+                Console.WriteLine("[CORRELATION_TRACE] Returning final observable.");
+                return step2Result;
+            });
+        }
+        public IObservable<Unit> WhenVisitPage(
+            Func<string, IObservable<string>> parsePageSelector,
+            Func<string, IObservable<Unit>> browserSelector) {
+            return Observable.Defer(() => 
+                Observable.Return("mockDriver")
+                    .SelectMany(parsePageSelector)
+                    .SelectMany(browserSelector)
+            );
+        }
+    }
+
+    [SuppressMessage("ReSharper", "UnusedParameter.Local")]
+    private IObservable<string> MockParsePageThatFails(string driver) =>
+        Observable.Throw<string>(new InvalidOperationException("Parsing Failed"));
+
+    [SuppressMessage("ReSharper", "UnusedParameter.Local")]
+    private IObservable<Unit> MockBrowserSelector(string parseResult) => 
+        Observable.Return(Unit.Default);
+
+    [Test]
+    public async Task Ambient_Transaction_Correlates_Failing_Inner_Selector_As_Step() {
+        var service = new ExternalService();
+
+        using (Transaction.BeginScope("VisitPageWorkflow")) {
+            var execution = service.WhenVisitPage(driver => MockParsePageThatFails(driver).CorrelateToWorkflow(),
+                parseResult => MockBrowserSelector(parseResult).CorrelateToWorkflow()
+            );
+
+            await execution.Capture();
+        }
+
+        BusEvents.Count.ShouldBe(1);
+        var finalReport = BusEvents.Single().ShouldBeOfType<TransactionAbortedException>();
+
+        finalReport.Message.ShouldBe("VisitPageWorkflow failed");
+        finalReport.Context.BoundaryName.ShouldBe("VisitPageWorkflow");
+
+        var aggregate = finalReport.InnerException.ShouldBeOfType<AggregateException>();
+        var stepFault = aggregate.InnerExceptions.Single().ShouldBeOfType<FaultHubException>();
+
+        stepFault.Context.BoundaryName.ShouldBe(nameof(MockParsePageThatFails));
+        stepFault.Context.Tags.ShouldContain(Transaction.StepNodeTag);
+        stepFault.InnerException.ShouldBeOfType<InvalidOperationException>().Message.ShouldBe("Parsing Failed");
+    }
+    
+    [Test]
+    public async Task Fluent_API_Correlates_Steps_From_Inner_Selectors() {
+        var service = new ExternalService();
+
+        var transaction = service.WhenVisitPage(
+                driver => MockParsePageThatFails(driver)
+                    .CorrelateToWorkflow(),
+                parseResult => MockBrowserSelector(parseResult)
+                    .CorrelateToWorkflow()
+            )
+            .BeginWorkflow("VisitPageWorkflow")
+            .RunFailFast();
+
+        await transaction.PublishFaults().Capture();
+
+        BusEvents.Count.ShouldBe(1);
+        var finalReport = BusEvents.Single().ShouldBeOfType<TransactionAbortedException>();
+
+        var stepFault = finalReport.InnerException.ShouldBeOfType<FaultHubException>();
+
+        stepFault.Context.BoundaryName.ShouldBe(nameof(MockParsePageThatFails));
+    }
+    
+    [SuppressMessage("ReSharper", "UnusedParameter.Local")]
+    private IObservable<string> Step1_Fails(string input) =>
+        Observable.Throw<string>(new InvalidOperationException("Failure in Step 1"));
+
+    [SuppressMessage("ReSharper", "UnusedParameter.Local")]
+    private IObservable<Unit> Step2_Succeeds(string input) => Observable.Return(Unit.Default);
+
+    [Test]
+    public async Task CorrelateToWorkflow_Attributes_Failure_To_The_Correct_Step() {
+        var service = new ExternalService();
+
+        var transaction = service.ExecuteWorkflow(
+                input => Step1_Fails(input)
+                    .CorrelateToWorkflow(),
+                result => Step2_Succeeds(result)
+                    .CorrelateToWorkflow()
+            )
+            .BeginWorkflow("StepAttributionTest")
+            .RunFailFast();
+
+        await transaction.PublishFaults().Capture();
+
+        BusEvents.Count.ShouldBe(1);
+        var finalReport = BusEvents.Single().ShouldBeOfType<TransactionAbortedException>();
+
+        var stepFault = finalReport.InnerException.ShouldBeOfType<FaultHubException>();
+
+        stepFault.Context.BoundaryName.ShouldBe(nameof(Step1_Fails));
+    }
+    
+    [Test]
+    public void Ambient_Context_Is_Overridden_By_Nested_Workflow_And_Not_Restored() {
+        string contextInOuterScopeAfterInnerFailure = "CONTEXT_NOT_SET";
+
+        IObservable<Unit> InnerFailingWorkflow() {
+            return Observable.Return(Unit.Default)
+                .BeginWorkflow("InnerWorkflow")
+                .Then(_ => Observable.Throw<Unit>(new InvalidOperationException("Inner Failure")))
+                .RunFailFast()
+                .ToUnit();
+        }
+
+        var outerWorkflow = Observable.Return(Unit.Default)
+            .BeginWorkflow("OuterWorkflow")
+            .Then(_ => InnerFailingWorkflow().Catch(Observable.Empty<Unit>()))
+            .Then(_ => {
+                contextInOuterScopeAfterInnerFailure = Transaction.Current?.Name;
+                return Observable.Return(Unit.Default);
+            })
+            .RunToEnd();
+
+        outerWorkflow.Wait();
+
+        contextInOuterScopeAfterInnerFailure.ShouldBe("OuterWorkflow");
+    }
+}

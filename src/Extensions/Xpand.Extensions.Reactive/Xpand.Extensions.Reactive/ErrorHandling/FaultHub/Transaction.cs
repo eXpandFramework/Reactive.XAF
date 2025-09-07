@@ -21,9 +21,12 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
                 var scheduledLogic = ib.ScheduledLogic(failFast, collectAllResults);
                 return failFast?scheduledLogic.Catch((FaultHubException ex) => {
                     LogFast($"[INSTRUMENTATION][Transaction.Run] Creating TransactionAbortedException for transaction '{ib.TransactionName}'.");
-                    return Observable.Throw<TFinal[]>(new TransactionAbortedException($"{ib.TransactionName} failed", ex, new AmbientFaultContext {
-                        BoundaryName = ib.TransactionName, UserContext = ib.Context, InnerContext = ex.Context, Tags = ib.Tags.Concat([TransactionNodeTag,ib.Mode.ToString(),nameof(RunFailFast)]).Distinct().ToList()
-                    }));
+                    return Observable.Throw<TFinal[]>(new TransactionAbortedException($"{ib.TransactionName} failed", (Current != null && !Current.Failures.IsEmpty) ? Current.Failures.First() : ex, 
+                        new AmbientFaultContext {
+                            BoundaryName = ib.TransactionName, UserContext = ib.Context, InnerContext = ex.Context,
+                            Tags = ib.Tags.Concat([TransactionNodeTag, ib.Mode.ToString(), nameof(RunFailFast)])
+                                .Distinct().ToList()
+                        }));
                 }):scheduledLogic.ChainFaultContext(ib.Context, null, ib.TransactionName, ib.CallerMemberPath, ib.CallerMemberLine,
                     ib.UpdateRunTags(collectAllResults));
             });

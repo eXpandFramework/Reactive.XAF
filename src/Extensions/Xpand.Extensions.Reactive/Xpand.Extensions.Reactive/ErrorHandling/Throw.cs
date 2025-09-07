@@ -8,7 +8,7 @@ using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 namespace Xpand.Extensions.Reactive.ErrorHandling {
     public static partial class ErrorHandling {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("ReSharper", "ConvertToLambdaExpression")]
-        public static IObservable<T> Throw<T>(this Exception ex,[CallerMemberName]string caller="") 
+        public static IObservable<T> Throw<T>(this Exception ex) 
             => Observable.Throw<T>(ex);
         
         public static IObservable<T> ThrowOnNext<T>(this IObservable<T> source, [CallerMemberName] string caller = "")

@@ -49,8 +49,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Core {
             .PushStackFrame(["Saving database record"]);
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private IObservable<int> Level2_BusinessLogic() => Level3_DetailWork()
-            .PushStackFrame(); 
+        private IObservable<int> Level2_BusinessLogic() => Level3_DetailWork().PushStackFrame(); 
 
         [Test]
         public async Task ChainFaultContext_Should_Capture_The_Upstream_Logical_Story_Within_Its_Boundary() {
