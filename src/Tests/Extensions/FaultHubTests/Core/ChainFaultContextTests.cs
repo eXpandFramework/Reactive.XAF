@@ -248,8 +248,8 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Core {
             var logicalStack = fault.LogicalStackTrace.ToList();
 
 
-            logicalStack.Count.ShouldBe(1, "The logical stack should be reset for each retry attempt.");
-            logicalStack.Single().MemberName.ShouldBe("OperationFrame");
+            logicalStack.Count.ShouldBe(2, "The logical stack should be reset for each retry attempt.");
+            logicalStack.Count(frame => frame.MemberName=="OperationFrame").ShouldBe(1);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -353,7 +353,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Core {
             var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
             var logicalStack = fault.LogicalStackTrace.ToArray();
 
-            logicalStack.Length.ShouldBe(2, "The logical stack should contain frames from both operators upstream of the boundary.");
+            logicalStack.Length.ShouldBe(3, "The logical stack should contain frames from both operators upstream of the boundary.");
 
             logicalStack.ShouldContain(frame => frame.MemberName == "InnerFrame");
             logicalStack.ShouldContain(frame => frame.MemberName == "OuterFrame");
@@ -379,10 +379,67 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Core {
             var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
             var logicalStack = fault.LogicalStackTrace.ToArray();
 
-            logicalStack.Length.ShouldBe(1, "The logical stack should only contain the frame captured by ChainFaultContext.");
+            logicalStack.Length.ShouldBe(2, "The logical stack should only contain the frame captured by ChainFaultContext.");
             logicalStack.ShouldContain(frame => frame.MemberName == "InnerFrame");
             logicalStack.ShouldNotContain(frame => frame.MemberName == "OuterFrame_ToBeIgnored",
                 "The frame from PushStackFrame after the boundary should have been ignored.");
         }
+        
+        [Test]
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public async Task ChainFaultContext_Handles_Upstream_Duplicate_Frames() {
+            var source = Observable.Throw<Unit>(new InvalidOperationException("Failure"));
+
+            var stream = source
+                .PushStackFrame()
+                .PushStackFrame()
+                .ChainFaultContext();
+
+            await stream.PublishFaults().Capture();
+
+            BusEvents.Count.ShouldBe(1);
+            var finalFault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
+            var logicalStack = finalFault.LogicalStackTrace.ToList();
+
+            logicalStack.Count.ShouldBe(1);
+            logicalStack.Single().MemberName.ShouldBe(nameof(ChainFaultContext_Handles_Upstream_Duplicate_Frames));
+        }
+        
+        [Test]
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public async Task Pushes_Its_Own_Frame_When_Stack_Is_Empty() {
+            var source = Observable.Throw<Unit>(new InvalidOperationException("Failure"));
+            var stream = source.ChainFaultContext();
+
+            await stream.PublishFaults().Capture();
+
+            BusEvents.Count.ShouldBe(1);
+            var finalFault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
+            var logicalStack = finalFault.LogicalStackTrace.ToList();
+
+            logicalStack.ShouldHaveSingleItem();
+            logicalStack.Single().MemberName.ShouldBe(nameof(Pushes_Its_Own_Frame_When_Stack_Is_Empty));
+        }
+        
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private IObservable<Unit> UpstreamOperation() =>
+            Observable.Throw<Unit>(new InvalidOperationException("Failure"))
+                .PushStackFrame();
+
+        [Test]
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public async Task Pushes_Its_Own_Frame_When_Upstream_Frame_Is_Different() {
+            var stream = UpstreamOperation().ChainFaultContext();
+
+            await stream.PublishFaults().Capture();
+
+            BusEvents.Count.ShouldBe(1);
+            var finalFault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
+            var logicalStack = finalFault.LogicalStackTrace.ToList();
+
+            logicalStack.Count.ShouldBe(2);
+            logicalStack[0].MemberName.ShouldBe(nameof(Pushes_Its_Own_Frame_When_Upstream_Frame_Is_Different));
+            logicalStack[1].MemberName.ShouldBe(nameof(UpstreamOperation));
+        }
     }
-    }
+}

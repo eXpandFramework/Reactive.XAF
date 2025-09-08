@@ -1380,70 +1380,57 @@ namespace Xpand.Extensions.Tests.FaultHubTests.TransactionalApi {
         
         [Test]
         public async Task BeginWorkflow_Pushes_StackFrame_For_Failing_Initial_Source_On_RunFailFast() {
-            // ARRANGE
             var source = Observable.Throw<string>(new InvalidOperationException("Initial source failed"));
 
-            // ACT
             var transaction = source.BeginWorkflow()
                                     .RunFailFast();
 
             await transaction.PublishFaults().Capture();
 
-            // ASSERT
             BusEvents.Count.ShouldBe(1);
             var abortedException = BusEvents.Single().ShouldBeOfType<TransactionAbortedException>();
             var stepFault = abortedException.InnerException.ShouldBeOfType<FaultHubException>();
 
-            // Check the UserContext for the step name, which is added by CollectErrors
             var stepContext = $"{nameof(BeginWorkflow_Pushes_StackFrame_For_Failing_Initial_Source_On_RunFailFast)} - {nameof(source)}";
             stepFault.AllContexts.ShouldContain(stepContext);
-            
-            // Check the logical stack for the pushed frame
+
             stepFault.LogicalStackTrace.ShouldNotBeEmpty();
             stepFault.LogicalStackTrace.ShouldContain(frame => frame.MemberName == nameof(source));
         }
 
         [Test]
         public async Task BeginWorkflow_Pushes_StackFrame_For_Failing_Initial_Source_On_RunToEnd() {
-            // ARRANGE
             var source = Observable.Throw<string>(new InvalidOperationException("Initial source failed"));
 
-            // ACT
             var transaction = source.BeginWorkflow()
                                     .RunToEnd();
 
             await transaction.PublishFaults().Capture();
 
-            // ASSERT
             BusEvents.Count.ShouldBe(1);
             var finalFault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
             var aggregate = finalFault.InnerException.ShouldBeOfType<AggregateException>();
             var stepFault = aggregate.InnerExceptions.Single().ShouldBeOfType<FaultHubException>();
 
-            // Check the UserContext for the step name, which is added by CollectErrors
             var stepContext = $"{nameof(BeginWorkflow_Pushes_StackFrame_For_Failing_Initial_Source_On_RunToEnd)} - {nameof(source)}";
             stepFault.AllContexts.ShouldContain(stepContext);
-            
-            // Check the logical stack for the pushed frame
+
             stepFault.LogicalStackTrace.ShouldNotBeEmpty();
             stepFault.LogicalStackTrace.ShouldContain(frame => frame.MemberName == nameof(source));
         }
 
         [Test]
         public async Task BeginWorkflow_From_IEnumerable_Pushes_StackFrame_For_First_Failing_Source() {
-            // ARRANGE
             var operations = new[] {
                 Observable.Throw<string>(new InvalidOperationException("First operation failed")),
                 Observable.Return("Second operation")
             };
 
-            // ACT
             var transaction = operations.BeginWorkflow(mode: TransactionMode.Sequential)
                                         .RunToEnd();
 
             await transaction.PublishFaults().Capture();
 
-            // ASSERT
             BusEvents.Count.ShouldBe(1);
             var finalFault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
             var aggregate = finalFault.InnerException.ShouldBeOfType<AggregateException>();
@@ -1454,6 +1441,25 @@ namespace Xpand.Extensions.Tests.FaultHubTests.TransactionalApi {
             
             stepFault.LogicalStackTrace.ShouldNotBeEmpty();
             stepFault.LogicalStackTrace.ShouldContain(frame => frame.MemberName == $"{nameof(operations)}[0]");
+        }
+        
+        [Test]
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public async Task BeginWorkflow_Does_Not_Push_Duplicate_Frame() {
+            var beginWorkflowDoesNotPushDuplicateFrame = Observable.Throw<Unit>(new InvalidOperationException("Failure")) ;
+            var transaction = beginWorkflowDoesNotPushDuplicateFrame.BeginWorkflow()
+                .RunFailFast()
+                .PushStackFrame();
+
+            await transaction.PublishFaults().Capture();
+
+            BusEvents.Count.ShouldBe(1);
+            var abortedException = BusEvents.Single().ShouldBeOfType<TransactionAbortedException>();
+            var finalFault = abortedException.InnerException.ShouldBeOfType<FaultHubException>();
+            var logicalStack = finalFault.LogicalStackTrace.ToList();
+
+
+            logicalStack.Count(frame => frame.MemberName==nameof(BeginWorkflow_Does_Not_Push_Duplicate_Frame)).ShouldBe(1);
         }
     }
 
