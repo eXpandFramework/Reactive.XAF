@@ -35,7 +35,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
 		        var action = actionBase(tuple);
 		        tuple.controller.TargetWindowType=WindowType.Main;
 		        return action;
-	        }).PushStackFrame();
+	        });
 
         public static IObservable<TAction> RegisterChildWindowAction<TAction>(this ApplicationModulesManager applicationModulesManager, string id,
             Func<(WindowController controller, string id), TAction> actionBase) where  TAction:ActionBase 
@@ -43,47 +43,47 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
                     var action = actionBase(tuple);
                     tuple.controller.TargetWindowType=WindowType.Child;
                     return action;
-                }).PushStackFrame();
+                });
 
         public static IObservable<TAction> RegisterWindowAction<TAction>(this ApplicationModulesManager applicationModulesManager, string id,
             Func<(WindowController controller, string id), TAction> actionBase) where TAction:ActionBase 
-	        => applicationModulesManager.RegisterAction(id,actionBase).PushStackFrame();
+	        => applicationModulesManager.RegisterAction(id,actionBase);
 
         public static IObservable<PopupWindowShowAction> RegisterViewPopupWindowShowAction(this ApplicationModulesManager manager, string id,
             Type targetObjectType=null,ViewType viewType=ViewType.Any,PredefinedCategory category=PredefinedCategory.View) 
 	        => manager.RegisterViewAction(id, category.NewAction<PopupWindowShowAction,ViewController>(targetObjectType.Configure(viewType)))
-                .PushStackFrame();
+                ;
 
         public static IObservable<PopupWindowShowAction> RegisterViewPopupWindowShowAction(this ApplicationModulesManager manager, string id,
             Action<PopupWindowShowAction> configure,PredefinedCategory category=PredefinedCategory.View) 
 	        => manager.RegisterViewAction(id, category.NewAction<PopupWindowShowAction,ViewController>(configure))
-                .PushStackFrame();
+                ;
 
         public static IObservable<PopupWindowShowAction> RegisterWindowPopupWindowShowAction(this ApplicationModulesManager manager, string id,
             PredefinedCategory category=PredefinedCategory.View,Action<PopupWindowShowAction> configure=null) 
 	        => manager.RegisterWindowAction(id, category.NewAction<PopupWindowShowAction,WindowController>(configure))
-                .PushStackFrame();
+                ;
 
         public static IObservable<SimpleAction> RegisterViewSimpleAction(this ApplicationModulesManager manager, string id, 
             Type targetObjectType=null,ViewType viewType=ViewType.Any,PredefinedCategory category = PredefinedCategory.View) 
                 => manager.RegisterViewAction(id, category.NewAction<SimpleAction,ViewController>( targetObjectType.Configure(viewType)))
-                    .PushStackFrame();
+                    ;
 
 
         public static IObservable<SimpleAction> RegisterViewSimpleAction(this ApplicationModulesManager manager, string id, 
             Action<SimpleAction> configure,PredefinedCategory category = PredefinedCategory.View) 
                 => manager.RegisterViewAction(id, category.NewAction<SimpleAction,ViewController>( configure))
-                    .PushStackFrame();
+                    ;
 
         public static IObservable<SingleChoiceAction> RegisterViewSingleChoiceAction(this ApplicationModulesManager manager, string id, 
             Type targetObjectType=null,ViewType viewType=ViewType.Any ,PredefinedCategory category = PredefinedCategory.View) 
                 => manager.RegisterViewAction(id, category.NewAction<SingleChoiceAction,ViewController>( targetObjectType.Configure(viewType)))
-                    .PushStackFrame();
+                    ;
 
         public static IObservable<SingleChoiceAction> RegisterViewSingleChoiceAction(this ApplicationModulesManager manager, string id, 
              Action<SingleChoiceAction> configure ,PredefinedCategory category = PredefinedCategory.View) 
                 => manager.RegisterViewAction(id, category.NewAction<SingleChoiceAction,ViewController>( configure))
-                    .PushStackFrame();
+                    ;
 
         private static Func<(TController controller, string id), TAction> NewAction<TAction, TController>(
             this PredefinedCategory category, Action<TAction> configure) where TAction:ActionBase, new() where TController:Controller 
@@ -113,7 +113,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
 		        var parametrizedAction = category.NewAction(targetObjectType.Configure<ParametrizedAction>(viewType),tuple);
 		        parametrizedAction.ValueType=valueType;
 		        return parametrizedAction;
-	        }).PushStackFrame();
+	        });
 
         public static IObservable<ParametrizedAction> RegisterViewParametrizedAction(this ApplicationModulesManager manager, string id,Type valueType,
             Action<ParametrizedAction> configure,PredefinedCategory category=PredefinedCategory.View) 
@@ -121,12 +121,12 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
                 var parametrizedAction = category.NewAction(configure,tuple);
                 parametrizedAction.ValueType=valueType;
                 return parametrizedAction;
-            }).PushStackFrame();
+            });
 
 
         public static IObservable<SimpleAction> RegisterWindowSimpleAction(this ApplicationModulesManager manager, string id,
             PredefinedCategory category=PredefinedCategory.Tools,Action<SimpleAction> configure=null) 
-	        => manager.RegisterWindowAction(id, category.NewAction<SimpleAction,WindowController>(configure)).PushStackFrame();
+	        => manager.RegisterWindowAction(id, category.NewAction<SimpleAction,WindowController>(configure));
 
 
         public static IObservable<SingleChoiceAction> RegisterWindowSingleChoiceAction(this ApplicationModulesManager manager, string id,
@@ -134,7 +134,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
             => windowType == WindowType.Main ? manager.RegisterMainWindowAction(id, category.NewAction<SingleChoiceAction, WindowController>(configure))
             : windowType == WindowType.Child ? manager.RegisterChildWindowAction(id, category.NewAction<SingleChoiceAction, WindowController>(configure))
             : manager.RegisterWindowAction(id, category.NewAction<SingleChoiceAction, WindowController>(configure))
-                .PushStackFrame();
+                ;
 
         private static Action<T> Configure<T>(this Type targetObjectType, ViewType viewType) where T:ActionBase 
 	        => action => {
@@ -151,11 +151,11 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
 		        var parametrizedAction = category.NewAction(configure,t);
 		        parametrizedAction.ValueType=valueType;
 		        return parametrizedAction;
-	        }).PushStackFrame();
+	        });
 
         public static IObservable<TAction> RegisterViewAction<TAction>(this ApplicationModulesManager applicationModulesManager, string id,
             Func<(ViewController controller, string id), TAction> actionBase) where TAction:ActionBase 
-	        => applicationModulesManager.RegisterAction(id, actionBase).PushStackFrame();
+	        => applicationModulesManager.RegisterAction(id, actionBase);
 
         static IObservable<TAction> RegisterAction<TController,TAction>(this ApplicationModulesManager applicationModulesManager, string id,
             Func<(TController controller, string id), TAction> actionBase) where TController : Controller where TAction:ActionBase
@@ -178,7 +178,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
 
         public static IObservable<ActionBase> WhenActionAdded(this ActionList actionList)
             => actionList.ProcessEvent<ActionManipulationEventArgs>(nameof(ActionList.ActionAdded)).Select(e => e.Action)
-                .PushStackFrame();
+                ;
         
         private static Type NewControllerType<T>(string id) where T:Controller{
             var baseController = GetBaseController<T>();

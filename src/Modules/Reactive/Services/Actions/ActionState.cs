@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reactive.Linq;
-using System.Runtime.CompilerServices;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.Editors;
@@ -24,8 +23,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions {
 
         public static IObservable<T> SetImage<T,TObject>(this IObservable<T> source, CommonImage startImage,
             CommonImage replaceImage, Expression<Func<TObject, bool>> lambda) where T : ActionBase
-            => source.MergeIgnored(action => action.SetImage(startImage, replaceImage, lambda))
-                .PushStackFrame();
+            => source.MergeIgnored(action => action.SetImage(startImage, replaceImage, lambda)) ;
         
         public static IObservable<T> SetImage<T>(this ActionBase action, CommonImage startImage,
             CommonImage replaceImage, Expression<Func<T, bool>> lambda)  
@@ -34,8 +32,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions {
                     .Merge(view.WhenSelectionChanged().SelectMany(_ => view.SelectedObjects.Cast<T>()))
                     .StartWith(view.SelectedObjects.Cast<T>())
                     .WaitUntilInactive(TimeSpan.FromMilliseconds(250)).ObserveOnContext()
-                .Do(_ => action.SetImage( lambda,startImage, replaceImage)))
-                .PushStackFrame();
+                .Do(_ => action.SetImage( lambda,startImage, replaceImage))) ;
 
         private static void SetImage<T>(this ActionBase action, Expression<Func<T, bool>> lambda, CommonImage startImage, CommonImage replaceImage) 
             => action.SetImage(action.View().ObjectSpace.IsObjectFitForCriteria(lambda.ToCriteria(),
@@ -54,18 +51,15 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions {
         
         public static IObservable<TAction> ActivateFor<TAction>(this IObservable<TAction> source,TemplateContext context) where TAction : ActionBase
             => source.WhenControllerActivated(action => action.Observe()
-                .Do(simpleAction => action.Active[$"{nameof(ActivateFor)} {context}"]=simpleAction.Controller.Frame.Context==context).ToUnit())
-                .PushStackFrame();
+                .Do(simpleAction => action.Active[$"{nameof(ActivateFor)} {context}"]=simpleAction.Controller.Frame.Context==context).ToUnit()) ;
         
         public static IObservable<TAction> ActivateFor<TAction>(this IObservable<TAction> source,Func<TAction,bool> condition) where TAction : ActionBase
             => source.WhenControllerActivated(action => action.Observe()
-                .Do(simpleAction => simpleAction.Active[$"{nameof(ActivateFor)}"]=condition(simpleAction)).ToUnit())
-                .PushStackFrame();
+                .Do(simpleAction => simpleAction.Active[$"{nameof(ActivateFor)}"]=condition(simpleAction)).ToUnit()) ;
         
         public static IObservable<TAction> EnableFor<TAction>(this IObservable<TAction> source,Func<TAction,bool> condition) where TAction : ActionBase
             => source.WhenControllerActivated(action => action.View().WhenSelectedObjectsChanged().To(action).StartWith(action)
-                .Do(simpleAction => simpleAction.Enabled[$"{nameof(EnableFor)}"]=condition(simpleAction)).ToUnit())
-                .PushStackFrame();
+                .Do(simpleAction => simpleAction.Enabled[$"{nameof(EnableFor)}"]=condition(simpleAction)).ToUnit()) ;
         
         public static IObservable<TAction> WhenControllerDeActivated<TAction>(this IObservable<TAction> source) where TAction : ActionBase 
             => source.SelectMany(a =>a.Controller.WhenDeactivated().To(a) )
@@ -84,23 +78,19 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions {
             => simpleAction.Observe().WhenActive();
 
        public static IObservable<TAction> WhenActivated<TAction>(this IObservable<TAction> source,string[] contexts=null) where TAction : ActionBase 
-            => source.SelectMany(a => a.WhenActivated(contexts))
-                .PushStackFrame();
+            => source.SelectMany(a => a.WhenActivated(contexts)) ;
        
        public static IObservable<TAction> WhenInActive<TAction>(this TAction simpleAction) where TAction : ActionBase 
             => simpleAction.Observe().WhenInActive();
 
        public static IObservable<TAction> WhenDeactivated<TAction>(this IObservable<TAction> source) where TAction : ActionBase 
-            => source.SelectMany(a => a.WhenDeactivated())
-                .PushStackFrame();
+            => source.SelectMany(a => a.WhenDeactivated()) ;
 
         public static IObservable<TAction> WhenActivated<TAction>(this TAction simpleAction,string[] contexts=null) where TAction : ActionBase 
             => simpleAction.ResultValueChanged(action => action.Active)
                 .SelectManyItemResilient(t => (contexts ??[]).Concat(Controller.ControllerActiveKey.YieldItem()).Select(context => (t,context))
                     .Where(t1 => t1.t.action.Active.ResultValue&&t1.t.action.Active.Contains(t1.context)&& t1.t.action.Active[t1.context])
-                    .Select(t1 => t1.t.action))
-                
-                .PushStackFrame();
+                    .Select(t1 => t1.t.action)) ;
         
         public static IObservable<TAction> WhenDeactivated<TAction>(this TAction simpleAction) where TAction : ActionBase 
             => simpleAction.ResultValueChanged(action => action.Active)
@@ -129,8 +119,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions {
                 .Select(t => t.action);
         
         public static IObservable<TAction> ActivateInLookupListView<TAction>(this IObservable<TAction> source) where TAction:ActionBase
-            => source.WhenControllerActivated().Do(action => action.Active[nameof(ActivateInLookupListView)]=action.Frame().Template is ILookupPopupFrameTemplate)
-                .PushStackFrame();
+            => source.WhenControllerActivated().Do(action => action.Active[nameof(ActivateInLookupListView)]=action.Frame().Template is ILookupPopupFrameTemplate) ;
         
         public static IObservable<TAction> ActivateInUserDetails<TAction>(this IObservable<TAction> registerAction) where TAction:ActionBase 
             => registerAction.WhenControllerActivated()
@@ -142,7 +131,6 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions {
                     }
                     action.Active[nameof(ActivateInUserDetails)] = active;
                })
-                .WhenNotDefault(a => a.Active[nameof(ActivateInUserDetails)])
-                .PushStackFrame();
+                .WhenNotDefault(a => a.Active[nameof(ActivateInUserDetails)]) ;
     }
 }

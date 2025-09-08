@@ -51,20 +51,20 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                             else {
                                 t1.memberInfo.AddAttribute(t1.attribute);
                             }
-                        }))).PushStackFrame();
+                        })));
         
         public static IObservable<T> WhenSetupComplete<T>(this ApplicationModulesManager manager, Func<XafApplication, IObservable<T>> resilientSelector)
-            => manager.WhenApplication(application => application.WhenSetupComplete().SelectManyItemResilient(resilientSelector)).PushStackFrame();
+            => manager.WhenApplication(application => application.WhenSetupComplete().SelectManyItemResilient(resilientSelector));
         
         public static IObservable<T> WhenApplication<T>(this ApplicationModulesManager manager,Func<XafApplication,IObservable<T>> resilientSelector,bool emitInternalApplications=true) 
             => manager.WhereApplication().Where(application => emitInternalApplications||!application.IsInternal()).ToNowObservable()
-                .SelectManyItemResilient(resilientSelector).PushStackFrame();
+                .SelectManyItemResilient(resilientSelector);
 
         public static IObservable<T> WhenGeneratingModelNodes<T>(this IObservable<ApplicationModulesManager> source,Expression<Func<IModelApplication,T>> selector=null) where T : IEnumerable<IModelNode> 
-            => source.SelectMany(manager => manager.WhenGeneratingModelNodes(selector)).PushStackFrame();
+            => source.SelectMany(manager => manager.WhenGeneratingModelNodes(selector));
 
         public static IObservable<T> WhenGeneratingModelNodes<T>(this XafApplication application,Expression<Func<IModelApplication,T>> selector=null) where T : IEnumerable<IModelNode> 
-            => application.WhenApplicationModulesManager().SelectMany(manager => manager.WhenGeneratingModelNodes(selector)).PushStackFrame();
+            => application.WhenApplicationModulesManager().SelectMany(manager => manager.WhenGeneratingModelNodes(selector));
 
         public static IObservable<T> WhenGeneratingModelNodes<T>(this ApplicationModulesManager manager,bool emitCached) where T : IEnumerable<IModelNode> 
             => manager.Modules.OfType<ReactiveModule>().ToObservable()
@@ -78,11 +78,11 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                     updaters.Add((IModelNodesGeneratorUpdater) updater);
                     var name =emitCached? nameof(NodesUpdater<ModelNodesGeneratorBase>.UpdateCached):nameof(NodesUpdater<ModelNodesGeneratorBase>.Update);
                     return ((IObservable<ModelNode>) updater.GetPropertyValue(name)).Cast<T>();
-                }).PushStackFrame();
+                });
 
         [SuppressMessage("ReSharper", "UnusedParameter.Global")]
         public static IObservable<T> WhenGeneratingModelNodes<T>(this ApplicationModulesManager manager,Expression<Func<IModelApplication,T>> selector=null,bool emitCached=false) where T : IEnumerable<IModelNode> 
-            => manager.WhenGeneratingModelNodes<T>(emitCached).PushStackFrame();
+            => manager.WhenGeneratingModelNodes<T>(emitCached);
         #endregion
 
         #region Low-Level Plumbing
