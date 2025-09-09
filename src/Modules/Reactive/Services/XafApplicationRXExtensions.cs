@@ -106,10 +106,11 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<T> WhenModule<T>(this object value) => FindModules<T>(value).ToNowObservable();
 
         public static IEnumerable<T> FindModules<T>(this object value){
+            if (value is XafApplication application)
+                return application.Modules.OfType<T>();
             var modules = ((IModelSources)CaptionHelper.ApplicationModel).Modules.ToArray();
             var module = modules.Module(value);
-            return value is XafApplication application ? application.Modules.OfType<T>()
-                : modules.OfType<T>().Where(@base => @base.GetType() == module?.GetType());
+            return modules.OfType<T>().Where(@base => @base.GetType() == module?.GetType());
         }
 
         public static IObservable<(ViewItem item, Frame frame)> WhenViewItemControl(this XafApplication application,Type objectType = null, ViewType viewType = ViewType.Any, Nesting nesting = Nesting.Any)

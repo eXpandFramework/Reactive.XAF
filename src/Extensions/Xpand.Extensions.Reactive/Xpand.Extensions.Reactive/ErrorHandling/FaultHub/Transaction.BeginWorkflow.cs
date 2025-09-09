@@ -62,7 +62,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
         public static IObservable<T> AsStep<T>(this IObservable<T> source, 
             [CallerArgumentExpression("source")] string stepExpression = null) {
             var parsedStepName = GetStepName(stepExpression);
-            Console.WriteLine($"[CORRELATION_TRACE] Operator applied. Expression: '{stepExpression}'. Parsed Name: '{parsedStepName}'.");
+            LogFast($"[CORRELATION_TRACE] Operator applied. Expression: '{stepExpression}'. Parsed Name: '{parsedStepName}'.");
             var context = Current;
             if (context == null) return source;
             return source.Catch((Exception ex) => {
@@ -82,16 +82,4 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
         internal ConcurrentBag<FaultHubException> Failures { get; } = new();
     }
 
-    public sealed class TransactionScope(TransactionContext context, Action onDispose) : IDisposable {
-        public void Dispose() {
-            onDispose();
-            if (!context.Failures.IsEmpty) {
-                var aggregate = new AggregateException(context.Failures);
-                var finalFault = new TransactionAbortedException(
-                    $"{context.Name} failed", aggregate, new AmbientFaultContext { BoundaryName = context.Name });
-
-                finalFault.Publish();
-            }
-        }
-    }
 }

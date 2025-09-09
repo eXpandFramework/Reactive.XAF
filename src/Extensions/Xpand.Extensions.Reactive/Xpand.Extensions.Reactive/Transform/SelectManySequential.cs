@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Reactive.Threading.Tasks;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 
 namespace Xpand.Extensions.Reactive.Transform{
     internal class AsyncKeyedSequencer<TKey> {
@@ -24,7 +24,6 @@ namespace Xpand.Extensions.Reactive.Transform{
                     semaphoreRef = new SemaphoreReference();
                     _semaphores[key] = semaphoreRef;
                 }
-
                 semaphoreRef.ReferenceCount++;
                 return semaphoreRef.Semaphore;
             }
@@ -32,29 +31,20 @@ namespace Xpand.Extensions.Reactive.Transform{
 
         private void ReleaseSemaphore(TKey key) {
             lock (_lock) {
-                if (_semaphores.TryGetValue(key, out var semaphoreRef)) {
-                    semaphoreRef.ReferenceCount--;
-                    if (semaphoreRef.ReferenceCount == 0)
-                        
-                        _semaphores.Remove(key);
-                }
+                if (!_semaphores.TryGetValue(key, out var semaphoreRef)) return;
+                semaphoreRef.ReferenceCount--;
+                if (semaphoreRef.ReferenceCount != 0) return;
+                _semaphores.Remove(key);
             }
         }
 
-        public IObservable<TResult> Enqueue<TResult>(TKey key, Func<IObservable<TResult>> action) {
-            return Observable.FromAsync(async cancellationToken => {
+        public IObservable<TResult> Enqueue<TResult>(TKey key, Func<IObservable<TResult>> action) 
+            => Observable.Defer(() => {
                 var semaphore = AcquireSemaphore(key);
-
-                await semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
-                try {
-                    return await action().ToTask(cancellationToken).ConfigureAwait(false);
-                }
-                finally {
-                    semaphore.Release();
-                    ReleaseSemaphore(key);
-                }
-            });
-        }
+                return Observable.FromAsync(token => semaphore.WaitAsync(token))
+                    .SelectMany(_ => action().Finally(() => semaphore.Release()));
+            })
+            .Finally(() => ReleaseSemaphore(key));
     }
     public static partial class Transform{
         
@@ -68,13 +58,11 @@ namespace Xpand.Extensions.Reactive.Transform{
         private static readonly ConditionalWeakTable<object, object> SequencerMap = new();
         
         public static IObservable<TResult> SelectManySequential<TResult, TKey, T>(this T value, Func<IObservable<TResult>> action, Func<T, TKey> keySelector,
-            ConcurrentDictionary<TKey, ISubject<Func<IObservable<Unit>>>> queues) {
-            if (queues == null) throw new ArgumentNullException(nameof(queues));
-            var sequencer = (AsyncKeyedSequencer<TKey>)SequencerMap.GetValue(
-                queues, _ => new AsyncKeyedSequencer<TKey>()
-            );
+            ConcurrentDictionary<TKey, ISubject<Func<IObservable<Unit>>>> queues,[CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0) {
             var key = keySelector(value);
-            return sequencer!.Enqueue(key, action);
+            return ((AsyncKeyedSequencer<TKey>)SequencerMap.GetValue(queues, _ => new AsyncKeyedSequencer<TKey>()))!
+                .Enqueue(key, action)
+                .PushStackFrame([key], memberName, filePath, lineNumber);
         }
     }
 }
