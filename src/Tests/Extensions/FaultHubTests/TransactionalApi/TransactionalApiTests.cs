@@ -1461,6 +1461,62 @@ namespace Xpand.Extensions.Tests.FaultHubTests.TransactionalApi {
 
             logicalStack.Count(frame => frame.MemberName==nameof(BeginWorkflow_Does_Not_Push_Duplicate_Frame)).ShouldBe(1);
         }
+        
+        [Test]
+        public async Task RunFailFast_Can_Collect_NonCritical_Errors_And_Fail_At_The_End() {
+            
+            var step1 = Observable.Return("Step1");
+            var nonCriticalErrorStep = Observable.Throw<string>(new InvalidOperationException("Non-critical failure"));
+            var step2 = Observable.Return("Step2");
+
+            await step1
+                .BeginWorkflow()
+                .Then(_ => nonCriticalErrorStep)
+                .Then(_ => step2)
+                .RunFailFast(ex => ex is InvalidOperationException)
+                .PublishFaults()
+                .Capture();
+
+            BusEvents.Count.ShouldBe(1);
+            var finalException = BusEvents.Single().ShouldBeOfType<FaultHubException>().InnerException;
+            var aggregateException = finalException.ShouldBeOfType<AggregateException>();
+            aggregateException.InnerExceptions.Single()
+                .ShouldBeOfType<InvalidOperationException>()
+                .Message.ShouldBe("Non-critical failure");            
+        }
+
+        [Test]
+        public async Task RunFailFast_Should_FailFast_On_Critical_Error() {
+            // ARRANGE
+            var step3Executed = false;
+            var step1 = Observable.Return("Step1");
+            var criticalErrorStep = Observable.Throw<string>(new InvalidOperationException("This is a critical error."));
+            var stepThatShouldNotRun = Observable.Defer(() => {
+                step3Executed = true;
+                return Observable.Return("Step3");
+            });
+
+            // ACT
+            await step1
+                .BeginWorkflow()
+                .Then(_ => criticalErrorStep, "CriticalErrorStep")
+                .Then(_ => stepThatShouldNotRun, "StepThatShouldNotRun")
+                .RunFailFast(ex => ex is TimeoutException) // Policy ignores Timeouts, but not InvalidOperationException
+                .PublishFaults()
+                .Capture();
+
+            // ASSERT
+            step3Executed.ShouldBeFalse("The transaction should have aborted before executing the third step.");
+
+            BusEvents.Count.ShouldBe(1);
+            var abortedException = BusEvents.Single().ShouldBeOfType<TransactionAbortedException>();
+            abortedException.Context.BoundaryName.ShouldBe(nameof(RunFailFast_Should_FailFast_On_Critical_Error));
+
+            var fault = abortedException.InnerException.ShouldBeOfType<FaultHubException>();
+            fault.Context.BoundaryName.ShouldBe("CriticalErrorStep");
+            fault.InnerException.ShouldBeOfType<InvalidOperationException>()
+                .Message.ShouldBe("This is a critical error.");
+        }
     }
 
     internal class Url { public string Href { get; set; } }

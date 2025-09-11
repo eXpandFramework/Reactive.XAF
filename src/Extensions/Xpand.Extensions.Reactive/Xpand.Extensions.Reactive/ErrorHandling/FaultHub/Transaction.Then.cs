@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
-using static Xpand.Extensions.Reactive.ErrorHandling.FaultHub.FaultHubLogger;
 
 namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
     public static partial class Transaction {
@@ -42,7 +41,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
             });
 
         public static ITransactionBuilder<TNext[]> Then<TCurrent, TNext>(this ITransactionBuilder<TCurrent> builder,
-            Func<TCurrent[], ITransactionBuilder<TNext>> transactionSelector, bool failFast = true, [CallerArgumentExpression(nameof(transactionSelector))] string selectorExpression = null)
+            Func<TCurrent[], ITransactionBuilder<TNext>> transactionSelector, bool failFast=true, [CallerArgumentExpression(nameof(transactionSelector))] string selectorExpression = null)
             => builder.Then(previousResults => transactionSelector(previousResults).Run(failFast), stepName: GetStepName(selectorExpression));
         
         public static ITransactionBuilder<object[]> ThenConcurrent<TCurrent>(this ITransactionBuilder<TCurrent> builder,
