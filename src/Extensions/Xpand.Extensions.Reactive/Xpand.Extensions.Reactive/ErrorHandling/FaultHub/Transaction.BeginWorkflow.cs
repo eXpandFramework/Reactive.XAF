@@ -14,11 +14,17 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
         private static readonly AsyncLocal<TransactionContext> CurrentTransactionContext = new();
         public static TransactionContext Current => CurrentTransactionContext.Value;
 
+        public static IObservable<FaultHubException> TransactionFault(this IObservable<FaultHubException> source, Guid transactionId)
+            => source.Where(e => e.TransactionId() == transactionId);
+        
+        public static Guid? TransactionId(this FaultHubException exception) 
+            => exception.GetMetadata<Guid>(nameof(TransactionFault));
+
         public static ITransactionBuilder<TSource> BeginWorkflow<TSource>(this IObservable<TSource> source,
-            string transactionName, object[] context = null, IScheduler scheduler = null, [CallerMemberName] string memberName = "",
+            string transactionName, object[] context = null,Guid? correlationId=null, IScheduler scheduler = null, [CallerMemberName] string memberName = "",
             [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0, [CallerArgumentExpression(nameof(source))] string sourceExpression = null)
             => new TransactionBuilder<TSource>(source.ContextualSource( transactionName).BufferUntilCompleted()
-                    .Select(list => (object)list), transactionName ?? memberName, context, scheduler, memberName, filePath, lineNumber,
+                    .Select(list => (object)list), transactionName ?? memberName, context.AddToContext(correlationId.ToMetadataToken(nameof(TransactionFault))), scheduler, memberName, filePath, lineNumber,
                 new List<string> { TransactionNodeTag, nameof(TransactionMode.Sequential) }.AddNestedTag()) {
                 InitialStepName = GetStepName(sourceExpression)
             };
@@ -33,9 +39,9 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
         }
 
         public static ITransactionBuilder<TSource> BeginWorkflow<TSource>(this IObservable<TSource> source, object[] context = null,
-            string transactionName = null, IScheduler scheduler = null, [CallerMemberName] string memberName = "",
+            string transactionName = null,Guid? correlationId=null, IScheduler scheduler = null, [CallerMemberName] string memberName = "",
             [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0,[CallerArgumentExpression(nameof(source))] string sourceExpression = null)
-            => source.BeginWorkflow(transactionName,context,scheduler,memberName,filePath,lineNumber,sourceExpression);
+            => source.BeginWorkflow(transactionName,context,correlationId,scheduler,memberName,filePath,lineNumber,sourceExpression);
 
         public static ITransactionBuilder<object> BeginWorkflow<TSource>(this IEnumerable<IObservable<TSource>> sources, string transactionName=null, TransactionMode mode = TransactionMode.Sequential,
             object[] context = null, IScheduler scheduler = null, [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0,
@@ -44,11 +50,11 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
                 mode, transactionName ?? memberName, context, scheduler, memberName, filePath, lineNumber,new[]{TransactionNodeTag,mode.ToString()}.AddNestedTag()) { InitialStepName = sourceExpression };
 
         public static ITransactionBuilder<TSource> BeginWorkflow<TSource>(this IEnumerable<IObservable<TSource>> sources,
-            string transactionName, object[] context = null, IScheduler scheduler = null,
+            string transactionName, object[] context = null,Guid? correlationId=null, IScheduler scheduler = null,
             [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0,
             [CallerArgumentExpression(nameof(sources))] string sourceExpression = null) {
             var sourcesList = sources.ToList();
-            if (!sourcesList.Any()) return Observable.Empty<TSource>().BeginWorkflow(context, transactionName, scheduler, memberName, filePath, lineNumber);
+            if (!sourcesList.Any()) return Observable.Empty<TSource>().BeginWorkflow(context, transactionName,correlationId, scheduler, memberName, filePath, lineNumber);
             var firstStepExpression = $"{sourceExpression}[0]";
             var builder = sourcesList.First().BeginWorkflow(transactionName, context: context, scheduler: scheduler,
                 memberName: memberName, filePath: filePath, lineNumber: lineNumber, sourceExpression: firstStepExpression);

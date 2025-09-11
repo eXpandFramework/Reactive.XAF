@@ -5,7 +5,6 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Xpand.Extensions.ExceptionExtensions;
 using Xpand.Extensions.LinqExtensions;
-using static Xpand.Extensions.Reactive.ErrorHandling.FaultHub.FaultHubLogger;
 
 namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
     public record OperationNode(string Name, IReadOnlyList<object> ContextData, IReadOnlyList<OperationNode> Children,
@@ -51,7 +50,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
             LogFast($"[Render] Found {allRootCauses.Count} root causes.");
             var summary = string.Join(" • ", allRootCauses.Select(rc => rc.Message).Distinct());
             var title = mergedTree.Name.CompoundName();
-            var rootContextItems = mergedTree.ContextData
+            var rootContextItems = mergedTree.ContextData.ExceptType(typeof(IMetadataToken))
                 .Where(o => o is not string s ? o is not OperationNode
                     : !(mergedTree.Tags?.Contains(s) ?? false) && s.CompoundName() != title && s != title)
                 .ToArray();
@@ -276,7 +275,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
         }
 
         private static string ContextData(this List<OperationNode> ancestors, OperationNode node, OperationNode parent, HashSet<object> titleContextItems, bool includeDetails) {
-            if (!includeDetails || !node.ContextData.Any()) return "";
+            if (!includeDetails || !node.ContextData.ExceptType(typeof(IMetadataToken)).Any()) return "";
             var filteredContext = ancestors.FilterContextItems( node, parent, titleContextItems);
             return filteredContext.Any() ? $" ({string.Join(", ", filteredContext)})" : "";
         }
@@ -290,6 +289,10 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
             if (c == null || titleContextItems.Contains(c)) return false;
             if (ancestors.Any(a => a.ContextData.Contains(c))) {
                 LogFast($"[ContextData.Filter] Suppressing inherited context '{c}' from node '{node.Name}'.");
+                return false;
+            }
+
+            if (c is IMetadataToken) {
                 return false;
             }
             if (c is not string contextString) {

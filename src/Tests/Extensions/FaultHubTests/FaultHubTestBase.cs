@@ -17,7 +17,7 @@ using Xpand.Extensions.StringExtensions;
 
 namespace Xpand.Extensions.Tests.FaultHubTests{
     public class FaultHubTestBase {
-        protected List<Exception> BusEvents;
+        protected List<FaultHubException> BusEvents;
         private IDisposable _busSubscription;
 
         public FaultHubTestBase() => FaultHub.Logging = true;
@@ -48,7 +48,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
         public virtual void Setup(){
             FaultHub.BlacklistedFilePathRegexes.Clear();
             FaultHub.Seen.Clear();  
-            BusEvents = new List<Exception>();
+            BusEvents = new List<FaultHubException>();
             _busSubscription = FaultHub.Bus.Subscribe(BusEvents.Add);
         }
 

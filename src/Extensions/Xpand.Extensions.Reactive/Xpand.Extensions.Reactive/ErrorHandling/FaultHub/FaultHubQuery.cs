@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Runtime.CompilerServices;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
@@ -29,15 +30,11 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
             => source.SelectMany(ex => {
                 var tree = ex.OperationTree();
                 if (tree == null) return [];
-
                 var leafNodes = tree.Descendants().Where(n => n.RootCause != null).ToList();
-
                 return leafNodes.Select(leaf => {
-                    var path = FindPathToNode(tree, leaf);
-                    
+                    var path = tree.FindPathToNode( leaf);
                     var stepNode = path.LastOrDefault(n => n.Tags.Contains(Transaction.StepNodeTag));
                     var transactionNode = path.FirstOrDefault(n => n.Tags.Contains(Transaction.TransactionNodeTag));
-
                     return new FailureMetric(
                         TransactionName: transactionNode?.Name ?? tree.Name,
                         StepName: stepNode?.Name ?? leaf.Name,
@@ -48,13 +45,13 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
                 });
             });
 
-        private static IReadOnlyList<OperationNode> FindPathToNode(OperationNode root, OperationNode target) {
+        private static IReadOnlyList<OperationNode> FindPathToNode(this OperationNode root, OperationNode target) {
             var pathStack = new Stack<OperationNode>();
-            FindPathRecursive(root, target, pathStack);
+            root.FindPathRecursive( target, pathStack);
             return pathStack.Reverse().ToList();
         }
 
-        private static bool FindPathRecursive(OperationNode current, OperationNode target, Stack<OperationNode> path) {
+        private static bool FindPathRecursive(this OperationNode current, OperationNode target, Stack<OperationNode> path) {
             path.Push(current);
             if (current == target) return true;
 
@@ -65,7 +62,14 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
             path.Pop();
             return false;
         }
-    
+
+        public static IMetadataToken ToMetadataToken(this object value,string key=null,[CallerArgumentExpression(nameof(value))] string valueExpression = null) 
+            => new MetadataToken(key??valueExpression, value);
+
+        public static T? GetMetadata<T>(this FaultHubException exception, string key) where T : struct {
+            var token = exception.AllContexts.OfType<MetadataToken>().FirstOrDefault(t => t.Key == key);
+            return token?.Value is T value ? value : null;
+        }
     }
     
     public record FailureMetric(string TransactionName, string StepName, string RootCauseType, IReadOnlyList<string> Tags, DateTime Timestamp);
@@ -77,5 +81,12 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
         Warning,
         Error,
         Critical
+    }
+    
+    public interface IMetadataToken { }
+
+    public class MetadataToken(string key, object value) : IMetadataToken {
+        public string Key { get; } = key;
+        public object Value { get; } = value;
     }
 }
