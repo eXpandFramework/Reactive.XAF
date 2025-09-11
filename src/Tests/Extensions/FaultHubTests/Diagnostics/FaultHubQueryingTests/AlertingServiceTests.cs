@@ -99,6 +99,6 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics.FaultHubQueryingTests
             result.Items.ShouldBeEmpty();
             result.Error.ShouldBeNull();
         }
-        
+    
     }
 }

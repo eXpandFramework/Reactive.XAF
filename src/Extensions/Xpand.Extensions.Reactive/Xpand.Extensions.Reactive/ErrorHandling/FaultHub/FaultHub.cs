@@ -200,7 +200,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
         }
 
         internal static object[] AddToContext(this object[] context, params object[] items) 
-            => items.Concat(context ?? Enumerable.Empty<object>()).ToArray();
+            => items.WhereNotDefault().Concat(context ?? Enumerable.Empty<object>()).ToArray();
         
         public static IObservable<T> RethrowOnFault<T>(this IObservable<T> source, Func<Exception, bool> predicate = null) {
             predicate ??= _ => true;

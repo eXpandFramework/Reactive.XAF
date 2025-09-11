@@ -47,11 +47,11 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
             var hashCode = new HashCode();
             hashCode.Add(MemberName);
             hashCode.Add(FilePath);
-            context?.Do(hashCode.Add).Enumerate();
+            Context?.Do(hashCode.Add).Enumerate();
             return hashCode.ToHashCode();
         }
         
-        public object[] Context=> context;
+        public object[] Context=> context?.WhereNotDefault().ExceptType(typeof(IMetadataToken)).ToArray();
         public string MemberName => memberName;
 
         public string FilePath => filePath;
@@ -59,7 +59,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
         public int LineNumber => lineNumber;
         
         public override string ToString() {
-            var validContexts = context?.Where(c => c is not null && !string.IsNullOrWhiteSpace(c.ToString())).ToArray();
+            var validContexts = Context?.Where(c => c is not null && !string.IsNullOrWhiteSpace(c.ToString())).ToArray();
             var contextPrefix = (validContexts?.Length > 0) ? $"{validContexts.JoinCommaSpace().EncloseParenthesis()} " : "";
             var cleanedMemberName = memberName.ParseMemberName();
             return $"{contextPrefix}at {cleanedMemberName} in {filePath}:line {lineNumber}";
