@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
@@ -58,7 +59,13 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
             }
             return builder;
         }
-        
+        public static IObservable<T> AsStep<T>(this IEnumerable<IObservable<T>> sources, [CallerMemberName] string boundaryName = "") {
+            return sources.Select(s => s.Materialize()).Concat().ToList()
+                .SelectMany(notifications => {
+                    var errors = notifications.Where(n => n.Kind == NotificationKind.OnError).Select(n => n.Exception).ToList();
+                    return errors.Any() ? new AggregateException(errors).ExceptionToPublish(new AmbientFaultContext { BoundaryName = boundaryName }).Throw<T>() : notifications.ToObservable().Dematerialize();
+                });
+        }
         public static IObservable<T> AsStep<T>(this IObservable<T> source, 
             [CallerArgumentExpression("source")] string stepExpression = null) {
             var parsedStepName = GetStepName(stepExpression);

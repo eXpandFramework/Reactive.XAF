@@ -76,7 +76,7 @@ public class TransactionalApiIntegrationTests : FaultHubTestBase {
     private IObservable<Unit> Step2_Succeeds(string input) => Observable.Return(Unit.Default);
 
     [Test]
-    public async Task CorrelateToWorkflow_Attributes_Assigned_To_The_Correct_Step() {
+    public async Task AsStep_Attributes_Assigned_To_The_Correct_Step() {
         var service = new ExternalService();
 
         var transaction = service.ExecuteWorkflow(

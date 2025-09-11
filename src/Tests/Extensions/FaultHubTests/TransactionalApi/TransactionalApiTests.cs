@@ -937,7 +937,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.TransactionalApi {
         
         
         [TestCaseSource(nameof(RunSelectors))]
-        public async Task RunToEnd_Accumulates_Stack_And_Isolates_Context_For_Sequential_Failing_Steps(Func<ITransactionBuilder<string>,IObservable<string[]>> runSelector) {
+        public async Task Run_Accumulates_Stack_And_Isolates_Context_For_Sequential_Failing_Steps(Func<ITransactionBuilder<string>,IObservable<string[]>> runSelector) {
             IObservable<string> FailingStep1()
                 => Observable.Throw<string>(new InvalidOperationException("Failure 1"))
                     .PushStackFrame("Frame_From_Step1");
@@ -974,7 +974,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.TransactionalApi {
 
         
         [TestCaseSource(nameof(RunSelectors))]
-        public async Task RunToEnd_Accumulates_Stack_And_Isolates_Context_For_Failing_Async_Steps(Func<ITransactionBuilder<string>,IObservable<string[]>> runSelector) {
+        public async Task Run_Accumulates_Stack_And_Isolates_Context_For_Failing_Async_Steps(Func<ITransactionBuilder<string>,IObservable<string[]>> runSelector) {
             [MethodImpl(MethodImplOptions.NoInlining)]
             IObservable<string> FailingStep1Async()
                 => Observable.Timer(TimeSpan.FromMilliseconds(10))
@@ -1254,7 +1254,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.TransactionalApi {
         }
         
         [TestCaseSource(nameof(RunSelectors))]
-        public async Task RunToEnd_Accumulates_Stack_And_Isolates_Context_For_Failing_Steps(Func<ITransactionBuilder<string>,IObservable<string[]>> runSelector) {
+        public async Task Run_Accumulates_Stack_And_Isolates_Context_For_Failing_Steps(Func<ITransactionBuilder<string>,IObservable<string[]>> runSelector) {
             [MethodImpl(MethodImplOptions.NoInlining)]
             IObservable<string> StepAWithInternalStack() =>
                 Observable.Throw<string>(new InvalidOperationException("Failure A"))

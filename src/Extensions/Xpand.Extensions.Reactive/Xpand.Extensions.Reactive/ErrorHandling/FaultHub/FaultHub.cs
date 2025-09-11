@@ -7,9 +7,9 @@ using System.Reactive.Subjects;
 using System.Threading;
 using Microsoft.Extensions.Caching.Memory;
 using Xpand.Extensions.ExceptionExtensions;
+using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.MemoryCacheExtensions;
 using Xpand.Extensions.Reactive.Utility;
-using static Xpand.Extensions.Reactive.ErrorHandling.FaultHub.FaultHubLogger;
 
 namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
     public static class FaultHub {
@@ -33,12 +33,10 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
         static FaultHub() => Logging = true;
         public static bool Enabled { get; set; } = true;
         public static void Reset() {
-            LogicalStackContext.Value = null;
-            HandlersContext.Value = null;
-            CurrentFaultSnapshot.Value=null;
-            Ctx.Value = null;
+            All.Concat(ChainFaultContextService.All)
+                .Do(local => local.Value=null)
+                .Enumerate();
             Seen.Clear();
-            ChainFaultContextService.ContextStack.Value = null;
         }
 
         public static Exception TagOrigin(this Exception ex)
