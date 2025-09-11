@@ -7,7 +7,6 @@ using System.Reactive.Concurrency;
 using System.Threading;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.TypeExtensions;
-using static Xpand.Extensions.Reactive.ErrorHandling.FaultHub.FaultHubLogger;
 
 namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
     public static partial class Transaction {
@@ -139,7 +138,14 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
     [SuppressMessage("ReSharper", "UnusedTypeParameter")]
     public interface ITransactionBuilder<out TCurrentResult> {
     }
-    public sealed class TransactionAbortedException(string message, Exception innerException, AmbientFaultContext context) : FaultHubException(message, innerException, context) {
+    public sealed class TransactionAbortedException(string message, Exception innerException, AmbientFaultContext context)
+        : FaultHubException(message, innerException, context) {
+        public TransactionAbortedException(string message, FaultHubException innerException, object[] context,
+            IReadOnlyList<string> tags = null, string boundaryName = "") :this(message, innerException,new AmbientFaultContext {
+            BoundaryName = boundaryName, UserContext = context, InnerContext = innerException.Context,
+            Tags = tags }) {
+        }
+
         public override string ErrorStatus=>"failed" ;
     }
     public enum TransactionMode {

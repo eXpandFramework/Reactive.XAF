@@ -48,8 +48,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
             [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0,
             [CallerArgumentExpression(nameof(sources))] string sourceExpression = null) {
             var sourcesList = sources.ToList();
-            if (!sourcesList.Any())
-                return Observable.Empty<TSource>().BeginWorkflow(context, transactionName, scheduler, memberName, filePath, lineNumber);
+            if (!sourcesList.Any()) return Observable.Empty<TSource>().BeginWorkflow(context, transactionName, scheduler, memberName, filePath, lineNumber);
             var firstStepExpression = $"{sourceExpression}[0]";
             var builder = sourcesList.First().BeginWorkflow(transactionName, context: context, scheduler: scheduler,
                 memberName: memberName, filePath: filePath, lineNumber: lineNumber, sourceExpression: firstStepExpression);
@@ -59,28 +58,26 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
             }
             return builder;
         }
-        public static IObservable<T> AsStep<T>(this IEnumerable<IObservable<T>> sources, [CallerMemberName] string boundaryName = "") {
-            return sources.Select(s => s.Materialize()).Concat().ToList()
+        public static IObservable<T> AsStep<T>(this IEnumerable<IObservable<T>> sources, [CallerMemberName] string boundaryName = "") 
+            => sources.Select(s => s.Materialize()).Concat().ToList()
                 .SelectMany(notifications => {
                     var errors = notifications.Where(n => n.Kind == NotificationKind.OnError).Select(n => n.Exception).ToList();
                     return errors.Any() ? new AggregateException(errors).ExceptionToPublish(new AmbientFaultContext { BoundaryName = boundaryName }).Throw<T>() : notifications.ToObservable().Dematerialize();
                 });
-        }
-        public static IObservable<T> AsStep<T>(this IObservable<T> source, 
-            [CallerArgumentExpression("source")] string stepExpression = null) {
+
+        public static IObservable<T> AsStep<T>(this IObservable<T> source, [CallerArgumentExpression("source")] string stepExpression = null) {
             var parsedStepName = GetStepName(stepExpression);
             LogFast($"[CORRELATION_TRACE] Operator applied. Expression: '{stepExpression}'. Parsed Name: '{parsedStepName}'.");
             var context = Current;
-            if (context == null) return source;
-            return source.Catch((Exception ex) => {
-                var stepFault = ex.ExceptionToPublish(new AmbientFaultContext {
-                    BoundaryName = parsedStepName,
-                    Tags = [StepNodeTag]
+            return context == null ? source
+                : source.Catch((Exception ex) => {
+                    var stepFault = ex.ExceptionToPublish(new AmbientFaultContext {
+                        BoundaryName = parsedStepName,
+                        Tags = [StepNodeTag]
+                    });
+                    context.Failures.Add(stepFault);
+                    return Observable.Throw<T>(stepFault);
                 });
-                context.Failures.Add(stepFault);
-                return Observable.Throw<T>(stepFault);
-            });
-            
         }
     }
     

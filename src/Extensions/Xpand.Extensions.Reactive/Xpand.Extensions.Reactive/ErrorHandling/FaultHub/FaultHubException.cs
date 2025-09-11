@@ -7,6 +7,10 @@ using Xpand.Extensions.LinqExtensions;
 
 namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
     public class FaultHubException : Exception {
+        public FaultHubException(string message, Exception innerException,object[] context,IReadOnlyList<string> tags = null, string boundaryName="",string boundaryPath="",int boundaryLineNumber=0):
+            this(message, innerException, FaultHub.LogicalStackContext.Value.NewFaultContext(context,tags,boundaryName,boundaryPath,boundaryLineNumber)){
+        }
+
         public FaultHubException(string message, Exception innerException, AmbientFaultContext context)
             : base(message, innerException) {
             Context = context;

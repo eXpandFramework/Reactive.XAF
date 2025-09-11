@@ -207,6 +207,17 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
             return source.RegisterHandler(ex => predicate(ex) ? FaultAction.Rethrow : null);
         }
 
+        public static FaultHubException ExceptionToPublish(this Exception exception, object[] context, IReadOnlyList<string> tags, string memberName){
+            var stack = exception.CapturedStack();
+            var capturedStack = stack ?? LogicalStackContext.Value;
+            var contextForStep = capturedStack.NewFaultContext(context, tags: tags, memberName: memberName);
+            if (exception is TransactionAbortedException abortedException) {
+                contextForStep = contextForStep with { BoundaryName = abortedException.Context.BoundaryName };
+            }
+            LogFast($"[INSTRUMENTATION][CollectErrors] Creating context for step '{memberName}'. Tags are: [{string.Join(", ", contextForStep.Tags)}]");
+            return exception.ExceptionToPublish(contextForStep);
+        }
+
         public static FaultHubException ExceptionToPublish(this Exception e, AmbientFaultContext contextToUse=null) {
             LogFast($"[FaultHub.ExceptionToPublish] Entered. Exception Type: {e.GetType().Name}. Context to use: '{contextToUse?.BoundaryName ?? "null"}'");
             if (contextToUse == null) {
