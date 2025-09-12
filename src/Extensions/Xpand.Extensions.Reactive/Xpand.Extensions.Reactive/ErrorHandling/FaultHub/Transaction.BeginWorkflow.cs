@@ -71,6 +71,26 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
                     return errors.Any() ? new AggregateException(errors).ExceptionToPublish(new AmbientFaultContext { BoundaryName = boundaryName }).Throw<T>() : notifications.ToObservable().Dematerialize();
                 });
 
+        public static IObservable<T> AsStep<T>(this IObservable<T> source, Func<Exception, bool> isNonCritical, [CallerArgumentExpression("source")] string stepExpression = null) {
+            var context = Current;
+            if (context == null) {
+                return source;
+            }
+
+            return source.Catch((Exception ex) => {
+                var parsedStepName = GetStepName(stepExpression);
+                var stepFault = ex.ExceptionToPublish(new AmbientFaultContext {
+                    BoundaryName = parsedStepName,
+                    Tags = [StepNodeTag]
+                });
+                var rootCause = (ex as FaultHubException)?.FindRootCauses().FirstOrDefault() ?? ex;
+                if (isNonCritical(rootCause)) {
+                    context.Failures.Add(stepFault);
+                    return Observable.Empty<T>();
+                }
+                return Observable.Throw<T>(stepFault);
+            });
+        }
         public static IObservable<T> AsStep<T>(this IObservable<T> source, [CallerArgumentExpression("source")] string stepExpression = null) {
             var parsedStepName = GetStepName(stepExpression);
             LogFast($"[CORRELATION_TRACE] Operator applied. Expression: '{stepExpression}'. Parsed Name: '{parsedStepName}'.");
@@ -81,7 +101,6 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
                         BoundaryName = parsedStepName,
                         Tags = [StepNodeTag]
                     });
-                    context.Failures.Add(stepFault);
                     return Observable.Throw<T>(stepFault);
                 });
         }

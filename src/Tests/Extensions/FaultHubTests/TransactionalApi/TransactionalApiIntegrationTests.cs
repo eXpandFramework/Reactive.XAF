@@ -173,4 +173,60 @@ public class TransactionalApiIntegrationTests : FaultHubTestBase {
         var stepFault = aggregate.InnerExceptions.Single().ShouldBeOfType<FaultHubException>();
 
         stepFault.Context.BoundaryName.ShouldBe(nameof(Step1_Fails));
-    }}
+    }
+    
+    private class NonCriticalTestException(string message) : Exception(message);
+
+    [Test]
+    public async Task AsStep_With_NonCritical_Predicate_Suppresses_Error_And_Allows_Transaction_To_Continue() {
+        var step2WasExecuted = false;
+
+        var transaction = Observable.Return("start")
+            .BeginWorkflow()
+            .Then(_ => Observable.Throw<string>(new NonCriticalTestException("This is a non-critical failure."))
+                .AsStep(isNonCritical: ex => ex is NonCriticalTestException))
+            .Then(results => {
+                step2WasExecuted = true;
+                results.ShouldBeEmpty();
+                return Step2_Succeeds(results.FirstOrDefault()).AsStep().Select(u => (object)u);
+            })
+            .RunToEnd();
+
+        var result = await transaction.PublishFaults().Capture();
+
+        step2WasExecuted.ShouldBeTrue("The transaction should have continued to the second step.");
+        result.Error.ShouldBeNull("The final transaction should have completed successfully from the subscriber's perspective.");
+        
+        BusEvents.Count.ShouldBe(1);
+        var finalFault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
+        var aggregate = finalFault.InnerException.ShouldBeOfType<AggregateException>();
+        var stepFault = aggregate.InnerExceptions.Single().ShouldBeOfType<FaultHubException>();
+
+        stepFault.InnerException.ShouldBeOfType<NonCriticalTestException>();
+    }
+
+    [Test]
+    public async Task AsStep_With_NonCritical_Predicate_Aborts_On_Critical_Error() {
+        var step2WasExecuted = false;
+
+        var transaction = Observable.Return("start")
+            .BeginWorkflow()
+            .Then(_ => Observable.Throw<string>(new InvalidOperationException("This is a critical failure."))
+                .AsStep(isNonCritical: ex => ex is NonCriticalTestException))
+            .Then(results => {
+                step2WasExecuted = true;
+                return Step2_Succeeds(results.FirstOrDefault()).AsStep().Select(u => (object)u);
+            })
+            .RunFailFast();
+
+        await transaction.PublishFaults().Capture();
+
+        step2WasExecuted.ShouldBeFalse("The transaction should have aborted before the second step.");
+
+        BusEvents.Count.ShouldBe(1);
+        var abortedException = BusEvents.Single().ShouldBeOfType<TransactionAbortedException>();
+        var stepFault = abortedException.InnerException.ShouldBeOfType<FaultHubException>();
+
+        stepFault.InnerException.ShouldBeOfType<InvalidOperationException>();
+    }
+}
