@@ -18,9 +18,10 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics{
     [TestFixture]
 public class DependentTransactionTests {
     private IObservable<Unit> OperationA() 
-        => Observable.Throw<Unit>(new InvalidOperationException("Operation A Failed")).RetryWithBackoff(2); //THROWS;
+        => Observable.Throw<Unit>(new InvalidOperationException("Operation A Failed")).RetryWithBackoff(2);
+
     private IObservable<Unit> VisitPage(string url) 
-        => Observable.Defer(() => url.Contains("page1")//THROWS for Page1
+        => Observable.Defer(() => url.Contains("page1")
             ? Observable.Throw<Unit>(new HttpRequestException("Failed to load page1"))
             : Unit.Default.Observe()).RetryWithBackoff(2, _ => 1.Milliseconds());
     [Test][Apartment(ApartmentState.STA)]
@@ -49,18 +50,17 @@ public class DependentTransactionTests {
     private IObservable<Unit> VisitAndProcessUrl(string url) {
         var processOperations = new [] { OperationA(), OperationB() }
             .BeginWorkflow($"Processing-{url}", TransactionMode.Concurrent)
-            .RunToEnd(); // Run A & B, continue even if one fails, but aggregate the error.
+            .RunToEnd();
 
         return VisitPage(url)
             .BeginWorkflow($"Visit-{url}") 
             .Then(_ => processOperations)
-            .RunFailFast() // If visit fails, abort this sub-transaction.
+            .RunFailFast()
             .ToUnit();
     }
 
     private IObservable<object[]> ProcessAllUrlsSequentially(string[] urls) 
         => urls.Select(VisitAndProcessUrl)
-            .BeginWorkflow() //transaction name taken from method name == ProcessAllUrlsSequentially
-            .RunToEnd(); //all urls are processed
-
+            .BeginWorkflow()
+            .RunToEnd();
 }}

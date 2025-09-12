@@ -1517,6 +1517,156 @@ namespace Xpand.Extensions.Tests.FaultHubTests.TransactionalApi {
             fault.InnerException.ShouldBeOfType<InvalidOperationException>()
                 .Message.ShouldBe("This is a critical error.");
         }
+        
+        [Test]
+        public async Task Then_With_NonCritical_Predicate_Allows_RunToEnd_To_Continue_And_Aggregate() {
+            var step2WasExecuted = false;
+
+            var transaction = Observable.Return("start")
+                .BeginWorkflow()
+                .Then(
+                    _ => Observable.Throw<string>(new InvalidOperationException("This is a non-critical failure.")),
+                    isNonCritical: ex => ex is InvalidOperationException
+                )
+                .Then(results => {
+                    step2WasExecuted = true;
+                    results.ShouldBeEmpty(); 
+                    return SuccessfulOperation(new SubscriptionCounter()).Select(u => (object)u);
+                })
+                .RunToEnd();
+
+            await transaction.PublishFaults().Capture();
+
+            step2WasExecuted.ShouldBeTrue("The transaction should have continued to the second step.");
+            
+            BusEvents.Count.ShouldBe(1);
+            var finalFault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
+            var aggregate = finalFault.InnerException.ShouldBeOfType<AggregateException>();
+            var stepFault = aggregate.InnerExceptions.Single().ShouldBeOfType<FaultHubException>();
+            stepFault.InnerException.ShouldBeOfType<InvalidOperationException>();
+            stepFault.Context.Tags.ShouldContain(Transaction.NonCriticalStepTag);
+        }
+        
+        [Test]
+        public async Task Then_With_NonCritical_Predicate_Allows_RunFailFast_To_Continue_And_Fail_At_End() {
+            var step2WasExecuted = false;
+
+            var transaction = Observable.Return("start")
+                .BeginWorkflow()
+                .Then(
+                    _ => Observable.Throw<string>(new InvalidOperationException("This is a non-critical failure.")),
+                    isNonCritical: ex => ex is InvalidOperationException
+                )
+                .Then(_ => {
+                    step2WasExecuted = true;
+                    return SuccessfulOperation(new SubscriptionCounter()).Select(u => (object)u);
+                })
+                .RunFailFast();
+
+            await transaction.PublishFaults().Capture();
+
+            step2WasExecuted.ShouldBeTrue("The transaction should have continued to the second step.");
+
+            BusEvents.Count.ShouldBe(1);
+            var finalException = BusEvents.Single().ShouldBeOfType<FaultHubException>();
+            finalException.Message.ShouldContain("completed with non-critical errors");
+            finalException.Context.Tags.ShouldContain(Transaction.NonCriticalAggregateTag);
+
+            var aggregateException = finalException.InnerException.ShouldBeOfType<AggregateException>();
+            var fault = aggregateException.InnerExceptions.Single().ShouldBeOfType<FaultHubException>();
+            fault.InnerException.ShouldBeOfType<InvalidOperationException>();
+            fault.Context.Tags.ShouldContain(Transaction.NonCriticalStepTag);
+        }
+        
+        [Test]
+        public async Task Then_With_NonCritical_Predicate_Overrides_Global_RunFailFast_Predicate() {
+            var step2WasExecuted = false;
+
+            var transaction = Observable.Return("start")
+                .BeginWorkflow()
+                .Then(
+                    _ => Observable.Throw<string>(new InvalidOperationException("Step-level non-critical")),
+                    isNonCritical: ex => ex is InvalidOperationException 
+                )
+                .Then(_ => {
+                    step2WasExecuted = true;
+                    return SuccessfulOperation(new SubscriptionCounter()).Select(u => (object)u);
+                })
+                .RunFailFast(isNonCritical: ex => ex is TimeoutException); // Global predicate does NOT match
+
+            await transaction.PublishFaults().Capture();
+
+            step2WasExecuted.ShouldBeTrue("Execution should continue because the step-level predicate matched.");
+
+            BusEvents.Count.ShouldBe(1);
+            var finalException = BusEvents.Single().ShouldBeOfType<FaultHubException>();
+            finalException.Message.ShouldContain("completed with non-critical errors");
+        }
+        
+        [Test]
+        public async Task RunFailFast_Aborts_On_Critical_Error_After_Ignoring_NonCritical_Step() {
+            var step3WasExecuted = false;
+
+            var transaction = Observable.Return("start")
+                .BeginWorkflow()
+                .Then(
+                    _ => Observable.Throw<string>(new InvalidOperationException("Step-level non-critical")),
+                    isNonCritical: ex => ex is InvalidOperationException
+                )
+                .Then(_ => Observable.Throw<object>(new NotSupportedException("This is critical")))
+                .Then(_ => {
+                    step3WasExecuted = true;
+                    return SuccessfulOperation(new SubscriptionCounter());
+                })
+                .RunFailFast();
+
+            await transaction.PublishFaults().Capture();
+
+            step3WasExecuted.ShouldBeFalse("Transaction should have aborted on the critical error.");
+
+            BusEvents.Count.ShouldBe(1);
+            var abortedException = BusEvents.Single().ShouldBeOfType<TransactionAbortedException>();
+            var fault = abortedException.InnerException.ShouldBeOfType<FaultHubException>();
+            fault.InnerException.ShouldBeOfType<NotSupportedException>();
+            fault.Context.Tags.ShouldNotContain(Transaction.NonCriticalStepTag);
+        }
+        
+        [Test]
+        public async Task RunFailFast_Aggregates_Multiple_NonCritical_Errors() {
+            var step3WasExecuted = false;
+
+            var transaction = Observable.Return("start")
+                .BeginWorkflow()
+                .Then(
+                    _ => Observable.Throw<string>(new InvalidOperationException("Non-critical 1")),
+                    isNonCritical: ex => ex is InvalidOperationException
+                )
+                .Then(
+                    _ => Observable.Throw<object>(new TimeoutException("Non-critical 2")),
+                    isNonCritical: ex => ex is TimeoutException
+                )
+                .Then(_ => {
+                    step3WasExecuted = true;
+                    return SuccessfulOperation(new SubscriptionCounter());
+                })
+                .RunFailFast();
+
+            await transaction.PublishFaults().Capture();
+
+            step3WasExecuted.ShouldBeTrue("The transaction should have continued to the final step.");
+
+            BusEvents.Count.ShouldBe(1);
+            var finalException = BusEvents.Single().ShouldBeOfType<FaultHubException>();
+            finalException.Message.ShouldContain("completed with non-critical errors");
+
+            var aggregate = finalException.InnerException.ShouldBeOfType<AggregateException>();
+            aggregate.InnerExceptions.Count.ShouldBe(2);
+
+            aggregate.InnerExceptions.OfType<FaultHubException>()
+                .ShouldContain(ex => ex.InnerException is InvalidOperationException);
+            aggregate.InnerExceptions.OfType<FaultHubException>()
+                .ShouldContain(ex => ex.InnerException is TimeoutException);
+        }
     }
 
     internal class Url { public string Href { get; set; } }

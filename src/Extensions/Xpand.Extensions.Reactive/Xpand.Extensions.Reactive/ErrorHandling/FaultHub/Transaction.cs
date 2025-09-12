@@ -4,11 +4,13 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
+using Xpand.Extensions.ExceptionExtensions;
 using Xpand.Extensions.Reactive.Transform;
 
 namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
     public static partial class Transaction {
-        private const string NonCriticalAggregateTag = "NonCriticalAggregate";
+        [Obsolete("should be private")]
+        public const string NonCriticalAggregateTag = "NonCriticalAggregate";
         public static IObservable<TFinal[]> RunFailFast<TFinal>(this ITransactionBuilder<TFinal> builder, Func<Exception, bool> isNonCritical=null) 
             => builder.Run(failFast: true, isNonCritical: isNonCritical);
         
@@ -105,10 +107,13 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
                 .Select(acc => (acc.results, acc.failures, acc.allResults));
 
         private static bool HasCriticalFailure(this  List<Exception> failures,Func<Exception, bool> isNonCritical){
-            var nonCriticalCheck = isNonCritical ?? (_ => false);
+            var globalNonCriticalCheck = isNonCritical ?? (_ => false);
             return failures.Any(f => {
+                if (f is FaultHubException fhEx && fhEx.Context.Tags.Contains(NonCriticalStepTag)) {
+                    return false;
+                }
                 var rootCause = (f as FaultHubException)?.FindRootCauses().FirstOrDefault() ?? f;
-                return !nonCriticalCheck(rootCause);
+                return !globalNonCriticalCheck(rootCause);
             });
         }
 
@@ -146,20 +151,39 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
             if (!errors.Any()) return [];
             LogFast($"[Tx:{builder.TransactionName}][CollectErrors] Collecting {errors.Count} error(s) for step '{step.Name}'.");
             var stepNameForContext = !string.IsNullOrEmpty(step.Name) ? step.Name : $"Part {allSteps.IndexOf(step) + 1}";
-            return errors.Select(e => e.Exception.ExceptionToPublish( builder.Context.AddToContext(builder.TransactionName,
-                $"{builder.TransactionName} - {stepNameForContext}"), [StepNodeTag], stepNameForContext));
+            var isNonCriticalCheck = step.IsNonCritical ?? (_ => false);
+            return errors.Select(e => {
+                var rootCause = e.Exception.SelectMany().LastOrDefault(ex => ex is not AggregateException and not FaultHubException) ?? e.Exception;
+                var isNonCritical = isNonCriticalCheck(rootCause);
+                var tags = new List<string> { StepNodeTag };
+                if (isNonCritical) {
+                    tags.Add(NonCriticalStepTag);
+                }
+                return e.Exception.ExceptionToPublish(builder.Context.AddToContext(builder.TransactionName,
+                    $"{builder.TransactionName} - {stepNameForContext}"), tags, stepNameForContext);
+            });
         }
         
         private static IObservable<object> FailFast<TFinal>(this  List<StepDefinition> allSteps,TransactionBuilder<TFinal> builder, Func<Exception, bool> isNonCritical = null) 
             => allSteps.ExecuteStepChain(builder,true, isNonCritical)
                 .SelectMany(t => {
                     if (!t.allFailures.Any()) return Observable.Return(t.finalStepResult);
-                    if (isNonCritical == null) return Observable.Throw<object>(t.allFailures.First());
-                    var anyCritical = t.allFailures.Any(f => !isNonCritical((f as FaultHubException)?.FindRootCauses().FirstOrDefault() ?? f));
-                    if (anyCritical) return t.allFailures.First().Throw<object>();
+
+                    var criticalFailure = t.allFailures.FirstOrDefault(f => {
+                        if (f is FaultHubException fhEx && fhEx.Context.Tags.Contains(NonCriticalStepTag)) {
+                            return false;
+                        }
+                        var rootCause = (f as FaultHubException)?.FindRootCauses().FirstOrDefault() ?? f;
+                        return !(isNonCritical?.Invoke(rootCause) ?? false);
+                    });
+
+                    if (criticalFailure != null) {
+                        return Observable.Throw<object>(criticalFailure);
+                    }
+
                     LogFast($"[Tx:{builder.TransactionName}] FailFast with predicate: All failures are non-critical. Aggregating.");
                     return new FaultHubException($"{builder.TransactionName} completed with non-critical errors", new AggregateException(t.allFailures), builder.Context,
-                        builder.UpdateRunTags(false).Concat([NonCriticalAggregateTag]).ToArray(),builder.TransactionName, builder.CallerMemberPath, builder.CallerMemberLine)
+                            builder.UpdateRunTags(false).Concat([NonCriticalAggregateTag]).ToArray(),builder.TransactionName, builder.CallerMemberPath, builder.CallerMemberLine)
                         .Throw<object>();
                 });
     }

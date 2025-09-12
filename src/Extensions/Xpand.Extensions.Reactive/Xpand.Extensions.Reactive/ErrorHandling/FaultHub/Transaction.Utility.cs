@@ -11,6 +11,8 @@ using Xpand.Extensions.TypeExtensions;
 namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
     public static partial class Transaction {
         private static readonly AsyncLocal<int> TransactionNestingLevel = new();
+        [Obsolete]
+        public const string NonCriticalStepTag = "NonCriticalStep";
         public const string TransactionNodeTag = "Transaction";
         public const string NestedTransactionNodeTag = "Nested";
         public const string StepNodeTag = "Step";
@@ -71,6 +73,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
     }
     
     internal class StepAction<TIn, TOut> {
+        public Func<Exception, bool> IsNonCritical { get; init; }
         public Func<TIn[], IObservable<TOut>> Selector { get; init; }
         public Func<Exception, TIn[], IObservable<TOut>> FallbackSelector { get; init; }
         public string SelectorExpression { get; init; }
@@ -81,6 +84,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
     }
         
     internal class StepDefinition {
+        public Func<Exception, bool> IsNonCritical { get; set; }
         public Func<object, IObservable<object>> Selector { get; set; }
         public Func<Exception, object, IObservable<object>> FallbackSelector { get; set; }
         public string Name { get; set; }

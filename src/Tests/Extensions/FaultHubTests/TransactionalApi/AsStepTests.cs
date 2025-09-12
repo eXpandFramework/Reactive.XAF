@@ -173,4 +173,57 @@ public class TransactionalApiIntegrationTests : FaultHubTestBase {
         var stepFault = aggregate.InnerExceptions.Single().ShouldBeOfType<FaultHubException>();
 
         stepFault.Context.BoundaryName.ShouldBe(nameof(Step1_Fails));
-    }}
+    }
+    
+    [Test]
+    public async Task AsStep_With_NonCritical_Predicate_Suppresses_Error_And_Allows_Transaction_To_Continue() {
+        var step2WasExecuted = false;
+
+        var transaction = Observable.Return("start")
+            .BeginWorkflow()
+            // .Then(_ => Observable.Throw<string>(new InvalidOperationException("This is a non-critical failure."))
+                // .AsStep(isNonCritical: ex => ex is InvalidOperationException))
+            .Then(results => {
+                step2WasExecuted = true;
+                results.ShouldBeEmpty();
+                return Step2_Succeeds(results.FirstOrDefault()).AsStep().Select(u => (object)u);
+            })
+            .RunToEnd();
+
+        var result = await transaction.PublishFaults().Capture();
+
+        step2WasExecuted.ShouldBeTrue("The transaction should have continued to the second step.");
+        result.Error.ShouldBeNull("The final transaction should have completed successfully from the subscriber's perspective.");
+            
+        BusEvents.Count.ShouldBe(1);
+        var finalFault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
+        finalFault.InnerException.ShouldBeOfType<InvalidOperationException>();
+    }
+
+    [Test]
+    public async Task AsStep_With_NonCritical_Predicate_Continues_On_RunFailFast_And_Fails_At_The_End() {
+        var step2WasExecuted = false;
+
+        var transaction = Observable.Return("start")
+            .BeginWorkflow()
+            // .Then(_ => Observable.Throw<string>(new InvalidOperationException("This is a non-critical failure."))
+                // .AsStep(isNonCritical: ex => ex is InvalidOperationException))
+            .Then(results => {
+                step2WasExecuted = true;
+                return Step2_Succeeds(results.FirstOrDefault()).AsStep().Select(u => (object)u);
+            })
+            .RunFailFast();
+
+        await transaction.PublishFaults().Capture();
+
+        step2WasExecuted.ShouldBeTrue("The transaction should have continued to the second step.");
+
+        BusEvents.Count.ShouldBe(1);
+        var abortedException = BusEvents.Single().ShouldBeOfType<TransactionAbortedException>();
+            
+        var aggregateException = abortedException.InnerException.ShouldBeOfType<AggregateException>();
+        var fault = aggregateException.InnerExceptions.Single().ShouldBeOfType<FaultHubException>();
+        fault.InnerException.ShouldBeOfType<InvalidOperationException>();
+    }
+    
+}
