@@ -56,15 +56,16 @@ namespace Xpand.Extensions.Tests.FaultHubTests.TransactionalApi {
 
             BusEvents.Count.ShouldBe(1);
             var finalException = BusEvents.Single().ShouldBeOfType<TransactionAbortedException>();
-            
-            var deferredException = finalException.InnerException.ShouldBeOfType<FaultHubException>();
-            
+
+            var outerStepFault = finalException.InnerException.ShouldBeOfType<FaultHubException>();
+            var aggregateException = outerStepFault.InnerException.ShouldBeOfType<AggregateException>();
+            var deferredException = aggregateException.InnerExceptions.Single().ShouldBeOfType<FaultHubException>();
+
             deferredException.Context.ShouldNotBeNull();
             deferredException.Context.Name.ShouldBe(nameof(TestableExternalService.FlakyOperationThatCanFail));
             
             var originalException = deferredException.InnerException.ShouldBeOfType<InvalidOperationException>();
             originalException.Message.ShouldBe("This is a deferred failure.");
             
-        }
-    }
+        }    }
 }

@@ -98,9 +98,7 @@ public class TransactionalApiIntegrationTests : FaultHubTestBase {
     }
     
     [Test]
-    public async Task Ambient_Context_Is_Overridden_By_Nested_Workflow_And_Not_Restored() {
-        string contextInOuterScopeAfterInnerFailure = "CONTEXT_NOT_SET";
-
+    public async Task Ambient_Context_Is_Restored_After_Nested_Workflow_Completes() {
         IObservable<Unit> InnerFailingWorkflow() {
             return Observable.Return(Unit.Default)
                 .BeginWorkflow("InnerWorkflow")
@@ -109,18 +107,28 @@ public class TransactionalApiIntegrationTests : FaultHubTestBase {
                 .ToUnit();
         }
 
-        await Observable.Return(Unit.Default)
+        IObservable<Unit> StepAfterInnerFailure() 
+            => Observable.Throw<Unit>(new InvalidOperationException("Failure after nested completion"));
+
+        var transaction = Observable.Return(Unit.Default)
             .BeginWorkflow("OuterWorkflow")
             .Then(_ => InnerFailingWorkflow().Catch(Observable.Empty<Unit>()))
-            .Then(_ => {
-                contextInOuterScopeAfterInnerFailure = Transaction.Current?.Name;
-                return Observable.Return(Unit.Default);
-            })
+            .Then(_ => StepAfterInnerFailure().AsStep())
             .RunToEnd();
 
-        
+        await transaction.PublishFaults().Capture();
 
-        contextInOuterScopeAfterInnerFailure.ShouldBe("OuterWorkflow");
+        BusEvents.Count.ShouldBe(1);
+        var finalFault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
+
+        var tree = finalFault.OperationTree();
+        tree.ShouldNotBeNull();
+        tree.Name.ShouldBe("OuterWorkflow");
+
+        var stepNode = tree.Children.ShouldHaveSingleItem();
+        stepNode.Name.ShouldBe(nameof(StepAfterInnerFailure));
+        stepNode.GetRootCause().ShouldBeOfType<InvalidOperationException>()
+            .Message.ShouldBe("Failure after nested completion");
     }
     
     [Test]
@@ -262,5 +270,72 @@ public class TransactionalApiIntegrationTests : FaultHubTestBase {
         fault.InnerException.ShouldBeOfType<InvalidOperationException>();
         fault.Context.Tags.ShouldContain(Transaction.NonCriticalStepTag);
     }
+
+    [Test]
+        public async Task AsStep_With_SuppressError_True_Allows_Transaction_To_Complete_With_Aggregated_Report() {
+            var step2WasExecuted = false;
+
+            var transaction = Observable.Return("start")
+                .BeginWorkflow()
+                .Then(_ => Observable.Throw<string>(new InvalidOperationException("Suppressed Failure"))
+                    .AsStep(suppressError: true))
+                .Then(results => {
+                    step2WasExecuted = true;
+                    results.ShouldBeEmpty();
+                    return Step2_Succeeds(results.FirstOrDefault()).AsStep().Select(u => (object)u);
+                })
+                .RunFailFast();
+
+            await transaction.PublishFaults().Capture();
+
+            step2WasExecuted.ShouldBeTrue("The transaction should have continued to the second step.");
+            
+            BusEvents.Count.ShouldBe(1);
+            var finalReport = BusEvents.Single().ShouldBeOfType<FaultHubException>();
+            finalReport.ShouldNotBeOfType<TransactionAbortedException>();
+
+            var aggregate = finalReport.InnerException.ShouldBeOfType<AggregateException>();
+            var stepFault = aggregate.InnerExceptions.Single().ShouldBeOfType<FaultHubException>();
+            stepFault.InnerException.ShouldBeOfType<InvalidOperationException>();
+        }
+
+        [Test]
+        public async Task AsStep_With_SuppressError_False_Reports_To_Transaction_And_Aborts() {
+            var step2WasExecuted = false;
+
+            var transaction = Observable.Return("start")
+                .BeginWorkflow()
+                .Then(_ => Observable.Throw<string>(new InvalidOperationException("Aborting Failure"))
+                    .AsStep(suppressError: false))
+                .Then(results => {
+                    step2WasExecuted = true;
+                    return Step2_Succeeds(results.FirstOrDefault()).AsStep().Select(u => (object)u);
+                })
+                .RunFailFast();
+
+            await transaction.PublishFaults().Capture();
+
+            step2WasExecuted.ShouldBeFalse("The transaction should have aborted before the second step.");
+            
+            BusEvents.Count.ShouldBe(1);
+            var abortedException = BusEvents.Single().ShouldBeOfType<TransactionAbortedException>();
+            var stepFault = abortedException.InnerException.ShouldBeOfType<FaultHubException>();
+            stepFault.InnerException.ShouldBeOfType<InvalidOperationException>();
+        }
+
+        [Test]
+        public async Task AsStep_Outside_Transaction_Rethrows_Exception_Even_When_Suppress_Is_True() {
+            var stream = Observable.Throw<Unit>(new InvalidOperationException("Raw Failure"))
+                .AsStep(suppressError: true);
+
+            var result = await stream.Capture();
+
+            result.Error.ShouldNotBeNull("The exception should have been re-thrown as no transaction was active.");
+            var fault = result.Error.ShouldBeOfType<FaultHubException>();
+            fault.InnerException.ShouldBeOfType<InvalidOperationException>();
+            
+            BusEvents.ShouldBeEmpty("The error should be re-thrown, not published to the bus.");
+        }
+
 
 }

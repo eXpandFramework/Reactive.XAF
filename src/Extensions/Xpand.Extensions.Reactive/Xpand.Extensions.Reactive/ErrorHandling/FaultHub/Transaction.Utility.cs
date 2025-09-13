@@ -14,9 +14,11 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
         public const string NonCriticalStepTag =FaultHubException.SystemTag+ "NonCriticalStep";
         public const string NonCriticalAggregateTag =FaultHubException.SystemTag+  "NonCriticalAggregate";
         public const string AsStepOriginTag = FaultHubException.SystemTag+"AsStepOrigin";
+        public const string PropagatedAsStepFaultTag = FaultHubException.SystemTag+"PropagatedAsStepFault";
         public const string TransactionNodeTag = "Transaction";
         public const string NestedTransactionNodeTag = "Nested";
         public const string StepNodeTag = "Step";
+        
         
         private static List<string> AddNestedTag(this ICollection<string> tags) 
             => TransactionNestingLevel.Value <= 0 ? tags.ToList() : tags.AddToArray(NestedTransactionNodeTag).ToList();

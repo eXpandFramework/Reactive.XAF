@@ -101,7 +101,12 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
                         return step.ExecuteStep(acc, failFast)
                             .PushFrameConditionally(!string.IsNullOrEmpty(step.Name) ? step.Name : $"Part {allSteps.IndexOf(step) + 1}",step.FilePath,step.LineNumber)
                             .Materialize().BufferUntilCompleted()
-                            .Select(notifications => allSteps.CollectStepErrors( builder, notifications, step, acc));                                        
+                            .Select(notifications => {
+                                var newAcc = allSteps.CollectStepErrors( builder, notifications, step, acc);
+                                var suppressedFailures = Current?.Failures.Where(f => !newAcc.failures.Contains(f)).ToList();
+                                return !(suppressedFailures?.Any() ?? false) ? newAcc
+                                    : newAcc with { failures = newAcc.failures.Concat(suppressedFailures).ToList() };
+                            });                                        
                     }))
                 .Select(acc => (acc.results, acc.failures, acc.allResults));
 
@@ -152,16 +157,24 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
             var stepNameForContext = !string.IsNullOrEmpty(step.Name) ? step.Name : $"Part {allSteps.IndexOf(step) + 1}";
             var isNonCriticalCheck = step.IsNonCritical ?? (_ => false);
             return errors.Select(e => {
-                if (e.Exception is FaultHubException fhEx && (fhEx.Context.Tags?.Contains(AsStepOriginTag) ?? false)) return fhEx;
+                LogFast($"[DIAGNOSTIC][CollectErrors] Processing exception of type '{e.Exception?.GetType().Name}'.");
+                if (e.Exception is FaultHubException fhEx && (fhEx.Context.Tags?.Contains(AsStepOriginTag) ?? false)) {
+                    LogFast($"[DIAGNOSTIC][CollectErrors] Found '{AsStepOriginTag}'. Preserving existing FaultHubException for step '{fhEx.Context.BoundaryName}'.");
+                    return fhEx;
+                }
+
                 var rootCause = e.Exception.SelectMany().LastOrDefault(ex => ex is not AggregateException and not FaultHubException) ?? e.Exception;
                 var isNonCritical = isNonCriticalCheck(rootCause);
                 var tags = new List<string> { StepNodeTag };
-                if (isNonCritical) tags.Add(NonCriticalStepTag);
+                if (isNonCritical) {
+                    tags.Add(NonCriticalStepTag);
+                }
+
+                LogFast($"[DIAGNOSTIC][CollectErrors] Wrapping exception. Applying tags: [{string.Join(", ", tags)}]. Step context: '{stepNameForContext}'.");
                 return e.Exception.ExceptionToPublish(builder.Context.AddToContext(builder.TransactionName,
                     $"{builder.TransactionName} - {stepNameForContext}"), tags, stepNameForContext);
             });
-        }
-        
+        }        
         private static IObservable<object> FailFast<TFinal>(this  List<StepDefinition> allSteps,TransactionBuilder<TFinal> builder, Func<Exception, bool> isNonCritical = null) 
             => allSteps.ExecuteStepChain(builder,true, isNonCritical)
                 .SelectMany(t => {
