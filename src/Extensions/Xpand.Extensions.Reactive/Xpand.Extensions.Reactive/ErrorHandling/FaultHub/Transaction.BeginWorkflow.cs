@@ -71,15 +71,19 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
                     return errors.Any() ? new AggregateException(errors).ExceptionToPublish(new AmbientFaultContext { BoundaryName = boundaryName }).Throw<T>() : notifications.ToObservable().Dematerialize();
                 });
 
-        public static IObservable<T> AsStep<T>(this IObservable<T> source, [CallerArgumentExpression("source")] string stepExpression = null) {
+        public static IObservable<T> AsStep<T>(this IObservable<T> source,Func<Exception,bool> isNonCritical=null, [CallerArgumentExpression("source")] string stepExpression = null) {
             var parsedStepName = GetStepName(stepExpression);
             LogFast($"[CORRELATION_TRACE] Operator applied. Expression: '{stepExpression}'. Parsed Name: '{parsedStepName}'.");
             var context = Current;
             return context == null ? source
                 : source.Catch((Exception ex) => {
+                    var tags = new List<string> { StepNodeTag, AsStepOriginTag };
+                    if (isNonCritical?.Invoke(ex) ?? false) {
+                        tags.Add(NonCriticalStepTag);
+                    }
                     var stepFault = ex.ExceptionToPublish(new AmbientFaultContext {
                         BoundaryName = parsedStepName,
-                        Tags = [StepNodeTag]
+                        Tags = tags
                     });
                     context.Failures.Add(stepFault);
                     return Observable.Throw<T>(stepFault);

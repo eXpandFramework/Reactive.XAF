@@ -1609,10 +1609,8 @@ namespace Xpand.Extensions.Tests.FaultHubTests.TransactionalApi {
 
             var transaction = Observable.Return("start")
                 .BeginWorkflow()
-                .Then(
-                    _ => Observable.Throw<string>(new InvalidOperationException("Step-level non-critical")),
-                    isNonCritical: ex => ex is InvalidOperationException
-                )
+                .Then(_ => Observable.Throw<string>(new InvalidOperationException("Step-level non-critical")),
+                    isNonCritical: ex => ex is InvalidOperationException)
                 .Then(_ => Observable.Throw<object>(new NotSupportedException("This is critical")))
                 .Then(_ => {
                     step3WasExecuted = true;
@@ -1667,6 +1665,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.TransactionalApi {
             aggregate.InnerExceptions.OfType<FaultHubException>()
                 .ShouldContain(ex => ex.InnerException is TimeoutException);
         }
+        
     }
 
     internal class Url { public string Href { get; set; } }

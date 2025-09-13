@@ -13,6 +13,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
         private static readonly AsyncLocal<int> TransactionNestingLevel = new();
         public const string NonCriticalStepTag =FaultHubException.SystemTag+ "NonCriticalStep";
         public const string NonCriticalAggregateTag =FaultHubException.SystemTag+  "NonCriticalAggregate";
+        public const string AsStepOriginTag = FaultHubException.SystemTag+"AsStepOrigin";
         public const string TransactionNodeTag = "Transaction";
         public const string NestedTransactionNodeTag = "Nested";
         public const string StepNodeTag = "Step";

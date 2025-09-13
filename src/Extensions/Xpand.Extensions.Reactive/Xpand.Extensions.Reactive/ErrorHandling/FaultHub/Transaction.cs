@@ -152,12 +152,11 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
             var stepNameForContext = !string.IsNullOrEmpty(step.Name) ? step.Name : $"Part {allSteps.IndexOf(step) + 1}";
             var isNonCriticalCheck = step.IsNonCritical ?? (_ => false);
             return errors.Select(e => {
+                if (e.Exception is FaultHubException fhEx && (fhEx.Context.Tags?.Contains(AsStepOriginTag) ?? false)) return fhEx;
                 var rootCause = e.Exception.SelectMany().LastOrDefault(ex => ex is not AggregateException and not FaultHubException) ?? e.Exception;
                 var isNonCritical = isNonCriticalCheck(rootCause);
                 var tags = new List<string> { StepNodeTag };
-                if (isNonCritical) {
-                    tags.Add(NonCriticalStepTag);
-                }
+                if (isNonCritical) tags.Add(NonCriticalStepTag);
                 return e.Exception.ExceptionToPublish(builder.Context.AddToContext(builder.TransactionName,
                     $"{builder.TransactionName} - {stepNameForContext}"), tags, stepNameForContext);
             });
