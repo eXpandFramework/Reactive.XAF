@@ -715,7 +715,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.TransactionalApi {
                 .PublishFaults()
                 .Capture();
             BusEvents.Count.ShouldBe(1);
-            var faultHubException = BusEvents.ShouldHaveSingleItem() as FaultHubException;
+            var faultHubException = BusEvents.ShouldHaveSingleItem();
             faultHubException.ShouldNotBeNull();
             faultHubException.Message.ShouldContain(explicitName);
             faultHubException.Message.ShouldNotContain(nameof(Run_Methods_Report_BoundaryName_From_Explicit_Transaction_Name));
@@ -740,7 +740,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.TransactionalApi {
                 .PublishFaults()
                 .Capture();
             BusEvents.Count.ShouldBe(1);
-            var faultHubException = BusEvents.ShouldHaveSingleItem() as FaultHubException;
+            var faultHubException = BusEvents.ShouldHaveSingleItem();
             faultHubException.ShouldNotBeNull();
             faultHubException.Context.BoundaryName.ShouldBe(nameof(Run_Methods_Infer_BoundaryName_From_Caller_When_Transaction_Is_Unnamed));
             faultHubException.Message.ShouldContain(nameof(Run_Methods_Infer_BoundaryName_From_Caller_When_Transaction_Is_Unnamed));

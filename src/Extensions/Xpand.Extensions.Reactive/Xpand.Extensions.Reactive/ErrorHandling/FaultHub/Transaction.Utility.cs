@@ -11,8 +11,8 @@ using Xpand.Extensions.TypeExtensions;
 namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
     public static partial class Transaction {
         private static readonly AsyncLocal<int> TransactionNestingLevel = new();
-        [Obsolete]
-        public const string NonCriticalStepTag = "NonCriticalStep";
+        public const string NonCriticalStepTag =FaultHubException.SystemTag+ "NonCriticalStep";
+        public const string NonCriticalAggregateTag =FaultHubException.SystemTag+  "NonCriticalAggregate";
         public const string TransactionNodeTag = "Transaction";
         public const string NestedTransactionNodeTag = "Nested";
         public const string StepNodeTag = "Step";

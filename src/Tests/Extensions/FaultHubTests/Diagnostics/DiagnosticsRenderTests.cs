@@ -273,6 +273,29 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics {
             stepLine.ShouldNotBeNull();
             stepLine.Trim().ShouldEndWith("My Nested Step [Step] (SomeStepData)");
         }
-        
+    
+        [Test]
+        public void Render_Does_Not_Display_System_Tags_With_Underscore_Prefix() {
+            var stepEx = new InvalidOperationException("Step Failure");
+            var stepCtx = new AmbientFaultContext {
+                BoundaryName = "MyStep",
+                Tags = ["Step", "_NonCriticalStep"]
+            };
+            var fhStep = new FaultHubException("Step failed", stepEx, stepCtx);
+
+            var txCtx = new AmbientFaultContext {
+                BoundaryName = "MyTransaction",
+                Tags = ["Transaction", "_NonCriticalAggregate"],
+                InnerContext = fhStep.Context
+            };
+            var fhTx = new FaultHubException("Transaction failed", fhStep, txCtx);
+
+            var report = fhTx.Render();
+
+            report.ShouldContain(" [Transaction]");
+            report.ShouldContain(" [Step]");
+            report.ShouldNotContain("_NonCriticalAggregate");
+            report.ShouldNotContain("_NonCriticalStep");
+        }
     }
 }

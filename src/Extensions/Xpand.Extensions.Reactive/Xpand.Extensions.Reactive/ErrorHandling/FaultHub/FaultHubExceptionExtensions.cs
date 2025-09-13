@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Xpand.Extensions.ExceptionExtensions;
 using Xpand.Extensions.LinqExtensions;
+using static Xpand.Extensions.Reactive.ErrorHandling.FaultHub.FaultHubException;
 
 namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
     public record OperationNode(string Name, IReadOnlyList<object> ContextData, IReadOnlyList<OperationNode> Children,
@@ -67,13 +68,15 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
                 tags = exception.SelectMany().OfType<FaultHubException>()
                     .FirstOrDefault(fh => fh.Context.Tags is { Count: > 0 })?.Context.Tags;
             }
-            var tagsPart = (tags is { Count: > 0 }) ? $" [{string.Join(", ", tags)}]" : "";
+            var displayableTags = tags?.Where(t => !t.StartsWith("_")).ToList();
+            var tagsPart = (displayableTags is { Count: > 0 }) ? $" [{string.Join(", ", displayableTags)}]" : "";
             var summaryPart = allRootCauses.Count switch {
                 0 => "",
                 1 => $" <{summary}>",
                 _ => $" <{allRootCauses.Count} times: {summary}>"
             };
             return $"{title} {exception.ErrorStatus}{rootContext}{tagsPart}{summaryPart}";
+            
         }
         private static void RenderChildNodes(this OperationNode mergedTree,object[] rootContextItems,  StringBuilder sb){
             LogFast($"[RenderChildNodes] Rendering {mergedTree.Children.Count} children for node '{mergedTree.Name}'.");
@@ -244,7 +247,8 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
         private static void RenderNode(this OperationNode node, OperationNode parent, List<OperationNode> ancestors, HashSet<object> titleContextItems, StringBuilder sb, string prefix, bool isLast, bool includeDetails) {
             var contextData = ancestors.ContextData(node, parent,  titleContextItems, includeDetails);
             var connector = isLast ? "└ " : "├ ";
-            var tagsSuffix = (node.Tags?.Any() ?? false) ? $" [{string.Join(", ", node.Tags)}]" : "";
+            var displayableTags = node.Tags?.Where(t => !t.StartsWith(SystemTag)).ToList();
+            var tagsSuffix = (displayableTags?.Any() ?? false) ? $" [{string.Join(", ", displayableTags)}]" : "";
             LogFast($"[RenderNode] Rendering '{node.Name}' with prefix '{prefix}', context '{contextData}'.");
             LogFast($"[RenderNode-DIAGNOSTIC] Rendering '{node.Name}' with prefix length {prefix.Length} ('{prefix}').");
             sb.Append(prefix).Append(connector).AppendLine(node.Name.CompoundName() + tagsSuffix + contextData);

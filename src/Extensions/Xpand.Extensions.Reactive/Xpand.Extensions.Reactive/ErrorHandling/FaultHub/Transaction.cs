@@ -9,8 +9,7 @@ using Xpand.Extensions.Reactive.Transform;
 
 namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
     public static partial class Transaction {
-        [Obsolete("should be private")]
-        public const string NonCriticalAggregateTag = "NonCriticalAggregate";
+        
         public static IObservable<TFinal[]> RunFailFast<TFinal>(this ITransactionBuilder<TFinal> builder, Func<Exception, bool> isNonCritical=null) 
             => builder.Run(failFast: true, isNonCritical: isNonCritical);
         
