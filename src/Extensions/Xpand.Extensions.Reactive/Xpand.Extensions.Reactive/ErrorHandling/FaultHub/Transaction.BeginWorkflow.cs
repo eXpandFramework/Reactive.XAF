@@ -68,7 +68,9 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
             => sources.Select(s => s.Materialize()).Concat().ToList()
                 .SelectMany(notifications => {
                     var errors = notifications.Where(n => n.Kind == NotificationKind.OnError).Select(n => n.Exception).ToList();
-                    return errors.Any() ? new AggregateException(errors).ExceptionToPublish(new AmbientFaultContext
+                    LogFast($"[DIAGNOSTIC][IEnumerable.AsStep] Collected {errors.Count} error(s). Types: [{string.Join(", ", errors.Select(e => e.GetType().Name))}]");
+                    return errors.Any()
+                        ? new AggregateException(errors).ExceptionToPublish(new AmbientFaultContext
                             { BoundaryName = boundaryName, Tags = [StepNodeTag, AsStepOriginTag] }).Throw<T>()
                         : notifications.ToObservable().Dematerialize();
                 });
@@ -76,28 +78,46 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
         public static IObservable<T> AsStep<T>(this IObservable<T> source, Func<Exception, bool> isNonCritical = null, bool suppressError = false, [CallerArgumentExpression("source")] string stepExpression = null) {
             var parsedStepName = GetStepName(stepExpression);
             LogFast($"[CORRELATION_TRACE] Operator applied. Expression: '{stepExpression}'. Parsed Name: '{parsedStepName}'.");
+            
             return source.Catch((Exception ex) => {
                 var transactionContext = Current;
                 if (transactionContext == null) {
-                    var fault = ex.ExceptionToPublish(new AmbientFaultContext { BoundaryName = parsedStepName, Tags = new List<string> { StepNodeTag, AsStepOriginTag }});
-                    return Observable.Throw<T>(fault);
-                }
-
-                var tags = new List<string> { StepNodeTag, AsStepOriginTag };
-                if (isNonCritical?.Invoke(ex) ?? false) {
-                    tags.Add(NonCriticalStepTag);
+                    return Observable.Throw<T>(ex);
                 }
 
                 if (suppressError) {
-                    LogFast($"[DIAGNOSTIC][AsStep] Creating fault for '{parsedStepName}'. Tags: [{string.Join(", ", tags)}]");
-                    var fault = ex.ExceptionToPublish(new AmbientFaultContext { BoundaryName = parsedStepName, Tags = tags.Concat([NonCriticalStepTag]).Distinct().ToList()});
-                    transactionContext.Failures.Add(fault);
-                    return Observable.Empty<T>();
+                    if (isNonCritical == null) {
+                        return new InvalidOperationException("Cannot suppress an error without an `isNonCritical` predicate. Suppression requires an explicit decision on which errors are tolerable.").Throw<T>();
+                    }
+
+                    var isNonCriticalFlag = isNonCritical.Invoke(ex);
+                    var tags = new List<string> { StepNodeTag, AsStepOriginTag };
+                    if (isNonCriticalFlag) {
+                        tags.Add(NonCriticalStepTag);
+                    }
+                    
+                    var stepFault = ex.ExceptionToPublish(new AmbientFaultContext {
+                        BoundaryName = parsedStepName,
+                        Tags = tags
+                    });
+
+                    transactionContext.Failures.Add(stepFault);
+
+                    return isNonCriticalFlag ? Observable.Empty<T>() : Observable.Throw<T>(stepFault);
                 }
-                
-                tags.Add(PropagatedAsStepFaultTag);
-                var stepFault = ex.ExceptionToPublish(new AmbientFaultContext { BoundaryName = parsedStepName, Tags = tags });
-                return Observable.Throw<T>(stepFault);
+
+                var isNonCriticalFlagDefault = isNonCritical?.Invoke(ex) ?? false;
+                var tagsDefault = new List<string> { StepNodeTag, AsStepOriginTag };
+                if (isNonCriticalFlagDefault) {
+                    tagsDefault.Add(NonCriticalStepTag);
+                }
+
+                var stepFaultDefault = ex.ExceptionToPublish(new AmbientFaultContext {
+                    BoundaryName = parsedStepName,
+                    Tags = tagsDefault
+                });
+
+                return Observable.Throw<T>(stepFaultDefault);
             });
         }
         

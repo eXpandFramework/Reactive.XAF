@@ -104,8 +104,10 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
                             .Select(notifications => {
                                 var newAcc = allSteps.CollectStepErrors( builder, notifications, step, acc);
                                 var suppressedFailures = Current?.Failures.Where(f => !newAcc.failures.Contains(f)).ToList();
-                                return !(suppressedFailures?.Any() ?? false) ? newAcc
-                                    : newAcc with { failures = newAcc.failures.Concat(suppressedFailures).ToList() };
+                                if (suppressedFailures?.Any() ?? false) {
+                                    return newAcc with { failures = newAcc.failures.Concat(suppressedFailures).ToList() };
+                                }
+                                return newAcc;
                             });                                        
                     }))
                 .Select(acc => (acc.results, acc.failures, acc.allResults));
