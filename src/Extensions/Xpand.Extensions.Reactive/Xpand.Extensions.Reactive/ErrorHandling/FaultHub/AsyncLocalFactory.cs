@@ -8,6 +8,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
         public static AsyncLocal<T> NewContext<T>() {
             var asyncLocal = new AsyncLocal<T>();
             RegisteredContexts.Add(asyncLocal.Wrap());
+            LogFast($"[DIAG-FACTORY] Registered new context. Total registered: {RegisteredContexts.Count}.");
             return asyncLocal;
         }
     }

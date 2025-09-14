@@ -32,6 +32,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
 
         private static IObservable<TSource> ContextualSource<TSource>(this IObservable<TSource> source, string transactionName) 
             => source.UseContext(new TransactionContext(transactionName),CurrentTransactionContext.Wrap());
+        
 
         public static ITransactionBuilder<TSource> BeginWorkflow<TSource>(this IObservable<TSource> source, object[] context = null,
             string transactionName = null,Guid? correlationId=null, IScheduler scheduler = null, [CallerMemberName] string memberName = "",

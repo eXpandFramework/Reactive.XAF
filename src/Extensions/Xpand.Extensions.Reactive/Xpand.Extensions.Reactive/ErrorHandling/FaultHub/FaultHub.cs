@@ -14,17 +14,17 @@ using Xpand.Extensions.Reactive.Utility;
 namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
     public static class FaultHub {
         internal const string CapturedStackKey = "FaultHub.CapturedStack";
-        public static readonly AsyncLocal<IReadOnlyList<LogicalStackFrame>> LogicalStackContext = new();
-        internal static readonly AsyncLocal<List<Func<Exception, FaultAction?>>> HandlersContext = new();
-        static readonly AsyncLocal<Guid?> Ctx = new();
-        public static readonly AsyncLocal<FaultSnapshot> CurrentFaultSnapshot = new();
-        internal static readonly IAsyncLocal[] All= [LogicalStackContext.Wrap(), HandlersContext.Wrap(), Ctx.Wrap(), CurrentFaultSnapshot.Wrap()];
+        public static readonly AsyncLocal<IReadOnlyList<LogicalStackFrame>> LogicalStackContext=NewContext<IReadOnlyList<LogicalStackFrame>>();
+        internal static readonly AsyncLocal<List<Func<Exception, FaultAction?>>> HandlersContext=NewContext<List<Func<Exception, FaultAction?>>>();
+        static readonly AsyncLocal<Guid?> Ctx=NewContext<Guid?>();
+        public static readonly AsyncLocal<FaultSnapshot> CurrentFaultSnapshot=NewContext<FaultSnapshot>();
         public static readonly MemoryCache Seen = new(new MemoryCacheOptions { SizeLimit = 10000 });
         static readonly ISubject<FaultHubException> BusSubject = Subject.Synchronize(new Subject<FaultHubException>());
         public static readonly IObservable<FaultHubException> Bus = BusSubject.AsObservable();
         public static Dictionary<string, string> BlacklistedFilePathRegexes { get; } = new() {
             [@"Reactive.XAF"] = "Xpand Framework"
         };
+        
         const string KeyCId = "CorrelationId";
         public const string SkipKey = "FaultHub.Skip";
         const string PublishedKey = "FaultHub.Published";
@@ -33,7 +33,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
         static FaultHub() => Logging = true;
         public static bool Enabled { get; set; } = true;
         public static void Reset() {
-            All.Concat(ChainFaultContextService.All)
+            RegisteredContexts
                 .Do(local => local.Value=null)
                 .Enumerate();
             Seen.Clear();
@@ -259,6 +259,9 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
         public static IReadOnlyList<LogicalStackFrame> CapturedStack(this Exception exception) 
             => exception.Data.Contains(CapturedStackKey) ? (IReadOnlyList<LogicalStackFrame>)exception.Data[CapturedStackKey] : null;
 
+        internal static IObservable<T> FaultHubFlowContext<T>(this IObservable<T> source,
+            Func<IObservable<T>, IObservable<T>> retrySelector = null, params IAsyncLocal[] context)
+            => source.FlowContext(retrySelector, RegisteredContexts.Concat(context).ToArray());
     }
     
 

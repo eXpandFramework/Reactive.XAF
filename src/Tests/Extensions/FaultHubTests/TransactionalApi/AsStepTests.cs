@@ -372,7 +372,7 @@ public async Task AsStep_Outside_Transaction_Rethrows_Original_Exception() {
             "transaction context was lost before AsStep could process the exception.");
     }
 
-[Test][Ignore("")]
+[Test]
 public async Task TransactionContext_Is_Nulled_By_Outer_Resilience_Boundary_Before_Final_Handling() {
     bool contextWasNullInFinalHandler = false;
 
