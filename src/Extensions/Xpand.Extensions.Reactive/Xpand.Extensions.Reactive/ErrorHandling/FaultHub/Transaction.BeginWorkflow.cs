@@ -8,10 +8,11 @@ using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.Reactive.Utility;
 
 namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
     partial class Transaction {
-        private static readonly AsyncLocal<TransactionContext> CurrentTransactionContext = new();
+        internal static readonly AsyncLocal<TransactionContext> CurrentTransactionContext = new();
         public static TransactionContext Current => CurrentTransactionContext.Value;
 
         public static IObservable<FaultHubException> TransactionFault(this IObservable<FaultHubException> source, Guid transactionId)
@@ -75,52 +76,49 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
                         : notifications.ToObservable().Dematerialize();
                 });
 
-        public static IObservable<T> AsStep<T>(this IObservable<T> source, Func<Exception, bool> isNonCritical = null, bool suppressError = false, [CallerArgumentExpression("source")] string stepExpression = null) {
+        public static IObservable<T> AsStep<T>(this IObservable<T> source, Func<Exception, ResilienceAction> onFault = null, [CallerArgumentExpression("source")] string stepExpression = null) {
             var parsedStepName = GetStepName(stepExpression);
-            LogFast($"[CORRELATION_TRACE] Operator applied. Expression: '{stepExpression}'. Parsed Name: '{parsedStepName}'.");
+            LogFast($"[CORRELATION_TRACE][AsStep] Operator applied. Expression: '{stepExpression}'. Parsed Name: '{parsedStepName}'.");
             
             return source.Catch((Exception ex) => {
                 var transactionContext = Current;
+                LogFast($"[DIAGNOSTIC][AsStep] ==> CATCH BLOCK ENTERED for step '{parsedStepName}'. Exception: '{ex.GetType().Name}'.");
+                
                 if (transactionContext == null) {
+                    LogFast($"[DIAGNOSTIC][AsStep] No active transaction. Re-throwing original exception.");
                     return Observable.Throw<T>(ex);
                 }
 
-                if (suppressError) {
-                    if (isNonCritical == null) {
-                        return new InvalidOperationException("Cannot suppress an error without an `isNonCritical` predicate. Suppression requires an explicit decision on which errors are tolerable.").Throw<T>();
-                    }
+                LogFast($"[DIAGNOSTIC][AsStep] Active transaction: '{transactionContext.Name}'. Invoking onFault selector.");
+                var resilienceAction = onFault?.Invoke(ex) ?? ResilienceAction.Critical;
+                LogFast($"[DIAGNOSTIC][AsStep] onFault selector returned: '{resilienceAction}'.");
 
-                    var isNonCriticalFlag = isNonCritical.Invoke(ex);
-                    var tags = new List<string> { StepNodeTag, AsStepOriginTag };
-                    if (isNonCriticalFlag) {
-                        tags.Add(NonCriticalStepTag);
-                    }
-                    
-                    var stepFault = ex.ExceptionToPublish(new AmbientFaultContext {
-                        BoundaryName = parsedStepName,
-                        Tags = tags
-                    });
-
-                    transactionContext.Failures.Add(stepFault);
-
-                    return isNonCriticalFlag ? Observable.Empty<T>() : Observable.Throw<T>(stepFault);
+                var tags = new List<string> { StepNodeTag, AsStepOriginTag };
+                if (resilienceAction == ResilienceAction.Tolerate || resilienceAction == ResilienceAction.Suppress) {
+                    tags.Add(NonCriticalStepTag);
                 }
 
-                var isNonCriticalFlagDefault = isNonCritical?.Invoke(ex) ?? false;
-                var tagsDefault = new List<string> { StepNodeTag, AsStepOriginTag };
-                if (isNonCriticalFlagDefault) {
-                    tagsDefault.Add(NonCriticalStepTag);
-                }
-
-                var stepFaultDefault = ex.ExceptionToPublish(new AmbientFaultContext {
+                LogFast($"[DIAGNOSTIC][AsStep] Creating fault. Tags: [{string.Join(", ", tags)}]");
+                var stepFault = ex.ExceptionToPublish(new AmbientFaultContext {
                     BoundaryName = parsedStepName,
-                    Tags = tagsDefault
+                    Tags = tags
                 });
 
-                return Observable.Throw<T>(stepFaultDefault);
+                if (resilienceAction == ResilienceAction.Suppress) {
+                    LogFast($"[DIAGNOSTIC][AsStep] Reporting suppressed fault to transaction and completing stream.");
+                    transactionContext.Failures.Add(stepFault);
+                    return Observable.Empty<T>();
+                }
+                
+                LogFast($"[DIAGNOSTIC][AsStep] <== CATCH BLOCK EXITING. Propagating fault.");
+                return Observable.Throw<T>(stepFault);
             });
-        }
-        
+        }    }
+
+    public enum ResilienceAction {
+        Critical,
+        Tolerate,
+        Suppress
     }
 
     public class TransactionContext(string name) {
