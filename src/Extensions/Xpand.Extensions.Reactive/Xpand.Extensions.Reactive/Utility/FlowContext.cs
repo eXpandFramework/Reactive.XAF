@@ -3,9 +3,22 @@ using System.Collections;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading;
+using Xpand.Extensions.LinqExtensions;
 
 namespace Xpand.Extensions.Reactive.Utility {
     public static partial class Utility {
+        public static IObservable<TSource> UseContext<TSource>(this IObservable<TSource> source, object contextValue, params IAsyncLocal[] contexts) 
+            => Observable.Create<TSource>(bus => {
+                    var originalValues = contexts.Select(c => c.Value).ToArray();
+                    contexts.Do(local => local.Value=contextValue).Enumerate();
+                    return source.Finally(() => {
+                        for (int i = 0; i < contexts.Length; i++) {
+                            contexts[i].Value = originalValues[i];
+                        }
+                    }).Subscribe(bus);
+                } 
+            );
+
         public static IObservable<T> FlowContext<T>(this IObservable<T> source,Func<IObservable<T>,IObservable<T>> retrySelector=null, params IAsyncLocal[] context)
             => Observable.Create<T>(observer => {
                 var capturedValues = context.Select(l => l.Value).ToArray();
