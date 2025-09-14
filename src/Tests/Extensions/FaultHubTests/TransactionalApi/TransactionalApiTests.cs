@@ -1665,8 +1665,22 @@ namespace Xpand.Extensions.Tests.FaultHubTests.TransactionalApi {
             aggregate.InnerExceptions.OfType<FaultHubException>()
                 .ShouldContain(ex => ex.InnerException is TimeoutException);
         }
-        
+     
+        private IObservable<T> BreakTheContext<T>(IObservable<T> source) {
+            return Observable.Create<T>(observer => {
+                var disposable = new System.Reactive.Disposables.SingleAssignmentDisposable();
+                System.Threading.ThreadPool.QueueUserWorkItem(_ => {
+                    using (System.Threading.ExecutionContext.SuppressFlow()) {
+                        disposable.Disposable = source.Subscribe(observer);
+                    }
+                });
+                return disposable;
+            });
+        }
+
+
+    }
     }
 
     internal class Url { public string Href { get; set; } }
-}
+

@@ -372,33 +372,6 @@ public async Task AsStep_Outside_Transaction_Rethrows_Original_Exception() {
             "transaction context was lost before AsStep could process the exception.");
     }
 
-[Test]
-public async Task TransactionContext_Is_Nulled_By_Outer_Resilience_Boundary_Before_Final_Handling() {
-    bool contextWasNullInFinalHandler = false;
-
-    var transaction = Observable.Return("start")
-        .ChainFaultContext(["OuterBoundary"])
-        .SelectMany(_ => Observable.Return("inner")
-                .BeginWorkflow("InnerWorkflow")
-                .Then(_ => Observable.Timer(TimeSpan.FromMilliseconds(20))
-                        .SelectMany(_ => Observable.Throw<string>(new InvalidOperationException("Inner Failure")))
-                )
-                .RunFailFast())
-        .ContinueOnFault(publishWhen: _ => {
-            if (Transaction.Current == null) {
-                contextWasNullInFinalHandler = true;
-            }
-            return Observable.Return(true);
-        });
-
-    await transaction.Capture();
-
-    contextWasNullInFinalHandler.ShouldBeTrue(
-        "The Transaction.Current context was not null in the final handler, " +
-        "which means the outer ChainFaultContext did not overwrite it as expected. " +
-        "The bug that causes context loss in production is not being replicated."
-    );
-}
 }
     
 

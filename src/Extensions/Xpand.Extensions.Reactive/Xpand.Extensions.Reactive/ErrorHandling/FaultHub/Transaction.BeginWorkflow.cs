@@ -13,6 +13,7 @@ using Xpand.Extensions.Reactive.Utility;
 namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
     partial class Transaction {
         internal static readonly AsyncLocal<TransactionContext> CurrentTransactionContext = new();
+        
         public static TransactionContext Current => CurrentTransactionContext.Value;
 
         public static IObservable<FaultHubException> TransactionFault(this IObservable<FaultHubException> source, Guid transactionId)
@@ -24,15 +25,15 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
         public static ITransactionBuilder<TSource> BeginWorkflow<TSource>(this IObservable<TSource> source,
             string transactionName, object[] context = null,Guid? correlationId=null, IScheduler scheduler = null, [CallerMemberName] string memberName = "",
             [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0, [CallerArgumentExpression(nameof(source))] string sourceExpression = null)
-            => new TransactionBuilder<TSource>(source.ContextualSource( transactionName).BufferUntilCompleted()
+            => new TransactionBuilder<TSource>(source.BufferUntilCompleted()
                     .Select(list => (object)list), transactionName ?? memberName, context.AddToContext(correlationId.ToMetadataToken(nameof(TransactionFault))), scheduler, memberName, filePath, lineNumber,
                 new List<string> { TransactionNodeTag, nameof(TransactionMode.Sequential) }.AddNestedTag()) {
                 InitialStepName = GetStepName(sourceExpression)
             };
 
         private static IObservable<TSource> ContextualSource<TSource>(this IObservable<TSource> source, string transactionName) 
-            => source.UseContext(new TransactionContext(transactionName),CurrentTransactionContext.Wrap());
-        
+            => source.UseContext(new TransactionContext(transactionName), CurrentTransactionContext.Wrap());
+
 
         public static ITransactionBuilder<TSource> BeginWorkflow<TSource>(this IObservable<TSource> source, object[] context = null,
             string transactionName = null,Guid? correlationId=null, IScheduler scheduler = null, [CallerMemberName] string memberName = "",
@@ -70,6 +71,19 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
                             { BoundaryName = boundaryName, Tags = [StepNodeTag, AsStepOriginTag] }).Throw<T>()
                         : notifications.ToObservable().Dematerialize();
                 });
+        public static IObservable<T> TraceTransactionContext<T>(this IObservable<T> source, string stepName) 
+            => Observable.Defer(() => {
+                var txName = Current?.Name ?? "NULL";
+                LogFast($"[CONTEXT_TRACE] Entering '{stepName}'. Transaction Context: '{txName}'");
+                return source.Do(_ => LogFast($"[CONTEXT_TRACE] Emit '{stepName}'. Transaction Context: '{txName}'"),() => LogFast($"[CONTEXT_TRACE] Completed '{stepName}'. Transaction Context: '{txName}'"));
+            });
+
+        public static IObservable<T> TransactionFlowContext<T>(this IObservable<T> source,
+            Func<IObservable<T>, IObservable<T>> retrySelector = null)
+            => source.FlowContext(retrySelector, CurrentTransactionContext.Wrap());
+
+        public static IObservable<T> AsStep<T>(this IObservable<T> source, ResilienceAction resilienceAction, [CallerArgumentExpression("source")] string stepExpression = null)
+            => source.AsStep(_ => resilienceAction, stepExpression);
 
         public static IObservable<T> AsStep<T>(this IObservable<T> source, Func<Exception, ResilienceAction> onFault = null, [CallerArgumentExpression("source")] string stepExpression = null) {
             var parsedStepName = GetStepName(stepExpression);

@@ -17,15 +17,46 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
         public static IObservable<TFinal> RunAndCollect<TFinal>(this ITransactionBuilder<object> builder, Func<object[], IObservable<TFinal>> resultSelector)
             => builder.Run(false,true).SelectMany(objects => resultSelector(objects.SelectMany(o => o as IEnumerable<object> ?? [o]).ToArray()));
 
-        public static IObservable<TFinal[]> Run<TFinal>(this ITransactionBuilder<TFinal> builder, bool failFast = true, bool collectAllResults = false, Func<Exception, bool> isNonCritical = null)
+        public static IObservable<TFinal[]> Run<TFinal>(this ITransactionBuilder<TFinal> builder, bool failFast = true,
+            bool collectAllResults = false, Func<Exception, bool> isNonCritical = null)
             => Observable.Defer(() => {
                 var ib = (TransactionBuilder<TFinal>)builder;
-                LogFast($"[Tx:{ib.TransactionName}] Run called. Mode={ib.Mode}, FailFast={failFast}, CollectAllResults={collectAllResults}");
-                var scheduledLogic = ib.ScheduledLogic(failFast, collectAllResults, isNonCritical);
-                return failFast ? scheduledLogic.RunFailFast(ib)
-                    : scheduledLogic.ChainFaultContext(ib.Context, null, ib.TransactionName, ib.CallerMemberPath, ib.CallerMemberLine, ib.UpdateRunTags(collectAllResults));
+                return Observable.Return(Unit.Default).ContextualSource(ib.TransactionName)
+                    .SelectMany(_ => {
+                        LogFast($"[Tx:{ib.TransactionName}] Run called. Mode={ib.Mode}, FailFast={failFast}, CollectAllResults={collectAllResults}");
+                        if (ib.Mode == TransactionMode.Concurrent) {
+                            return RunConcurrent(ib, failFast);
+                        }
+                        return RunSequential(ib, failFast, collectAllResults, isNonCritical);
+                    });
             });
+        
+        private static IObservable<TFinal[]> RunSequential<TFinal>(TransactionBuilder<TFinal> builder, bool failFast, bool collectAllResults, Func<Exception, bool> isNonCritical) {
+            var logic = builder.TransactionLogic(failFast, collectAllResults, isNonCritical)
+                .Select(CreateInputArray<TFinal>);
+            
+            return failFast ? logic.RunFailFast(builder)
+                : logic.ChainFaultContext(builder.Context, null, builder.TransactionName, builder.CallerMemberPath, builder.CallerMemberLine, builder.UpdateRunTags(collectAllResults));
+        }
 
+        private static IObservable<TFinal[]> RunConcurrent<TFinal>(TransactionBuilder<TFinal> builder, bool failFast) {
+            var logic = (builder.BatchedSources.ToObservable(builder.Scheduler ?? Scheduler.Default)
+                    .TransactionLogic(builder, failFast))
+                .Select(CreateInputArray<TFinal>);
+
+            return failFast ? logic.RunFailFast(builder)
+                : logic.ChainFaultContext(builder.Context, null, builder.TransactionName, builder.CallerMemberPath, builder.CallerMemberLine, builder.UpdateRunTags(false));
+        }
+        
+        private static IObservable<object> TransactionLogic<TFinal>(this IObservable<(string Name, IObservable<object> Source)> source, TransactionBuilder<TFinal> builder, bool failFast){
+            return failFast
+                ? source.ConcurrentFailFast(builder.TransactionName, 0, builder.Context, builder.CallerMemberPath, builder.CallerMemberLine).ToList().Select(list => (object)list)
+                : source.ConcurrentRunToEnd(builder.TransactionName, 0, builder.Context, builder.CallerMemberPath, builder.CallerMemberLine)
+                    .SelectMany(resultTuple => {
+                        var resultStream = Observable.Return((object)resultTuple.Results);
+                        return resultTuple.Fault == null ? resultStream : resultStream.Concat(Observable.Throw<object>(resultTuple.Fault));
+                    });
+        }
         private static IObservable<TFinal[]> RunFailFast<TFinal>(this IObservable<TFinal[]> source, TransactionBuilder<TFinal> ib) 
             => source.Catch((FaultHubException ex) => {
                 if (ex.Context.Tags.Contains(NonCriticalAggregateTag)) {
@@ -36,12 +67,6 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
                     ib.Context,ib.Tags.Concat([TransactionNodeTag, ib.Mode.ToString(), nameof(RunFailFast)])
                         .Distinct().ToList(),ib.TransactionName).Throw<TFinal[]>();
             });
-
-        private static IObservable<TFinal[]> ScheduledLogic<TFinal>(this TransactionBuilder<TFinal> builder,bool failFast, bool collectAllResults, Func<Exception, bool> isNonCritical = null){
-            var finalLogic = (builder.Mode == TransactionMode.Concurrent && builder.BatchedSources != null?builder.TransactionLogic(failFast):builder.TransactionLogic(failFast, collectAllResults, isNonCritical))
-                .Select(CreateInputArray<TFinal>);
-            return builder.Scheduler == null ? finalLogic : finalLogic.SubscribeOn(builder.Scheduler);
-        }
         
         private static IObservable<object> TransactionLogic<TFinal>(this TransactionBuilder<TFinal> builder,bool failFast, bool collectAllResults, Func<Exception, bool> isNonCritical = null){
             var isNested = TransactionNestingLevel.Value > 0;
@@ -55,17 +80,6 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
             }
             allSteps.AddRange(builder.SubsequentSteps);
             return (failFast ? allSteps.FailFast(builder, isNonCritical) : builder.RunToEnd(allSteps, isNested, collectAllResults)).Finally(() => TransactionNestingLevel.Value--);
-        }
-
-        private static IObservable<object> TransactionLogic<TFinal>(this TransactionBuilder<TFinal> builder,bool failFast){
-            var concurrentSources = builder.BatchedSources.ToObservable(builder.Scheduler ?? Scheduler.Default);
-            return failFast? concurrentSources.ConcurrentFailFast(builder.TransactionName, 0, builder.Context, builder.CallerMemberPath, builder.CallerMemberLine)
-                .ToList().Select(list => (object)list):concurrentSources.ConcurrentRunToEnd(builder.TransactionName, 0, builder.Context, builder.CallerMemberPath, builder.CallerMemberLine)
-                .SelectMany(resultTuple => {
-                    var resultStream = Observable.Return(resultTuple.Results);
-                    return resultTuple.Fault == null ? resultStream : resultStream.Concat(Observable.Throw<object>(resultTuple.Fault));
-        
-                });
         }
         private static IObservable<(List<object> Results, FaultHubException Fault)> ConcurrentRunToEnd(this IObservable<(string Name, IObservable<object> Source)> source, string transactionName, int maxConcurrency, object[] context,string filePath,int lineNumber) 
             => source.Select(op => op.Source.PushStackFrame(op.Name, filePath, lineNumber)

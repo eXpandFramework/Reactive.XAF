@@ -24,7 +24,7 @@ namespace Xpand.Extensions.Tests.Reactive.ProofOfConcepts{
             contextDuringStream.ShouldBe("During");
             context.Value.ShouldBe("Initial", "Context was not restored after successful completion.");
         }
-
+        private static readonly AsyncLocal<string> TestContext = new();
         [Test]
         public async Task UseContext_SetsValue_ForDurationOfFailingStream_AndRestoresAfter() {
             var context = new AsyncLocal<string> { Value = "Initial" };
