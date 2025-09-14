@@ -1666,6 +1666,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.TransactionalApi {
                 .ShouldContain(ex => ex.InnerException is TimeoutException);
         }
         
+        
     }
 
     internal class Url { public string Href { get; set; } }

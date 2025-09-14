@@ -53,6 +53,9 @@
     <Compile Update="FaultHubTests\FaultHubExtensionTest\FaultHubExtensionRenderTests.cs">
       <DependentUpon>FaultHubExtensionTests.cs</DependentUpon>
     </Compile>
+    <Compile Update="Reactive\ProofOfConcepts\UseContextFlawTests.cs">
+      <DependentUpon>FlowContextTests.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
   <Import Project="..\..\..\.paket\Paket.Restore.targets" />
 </Project>

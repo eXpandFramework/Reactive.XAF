@@ -12,8 +12,7 @@ using Xpand.XAF.Modules.Reactive.Extensions;
 namespace Xpand.XAF.Modules.Reactive.Services.Controllers{
     public static partial class ControllerExtensions {
         public static IObservable<Frame> WhenFrame(this Controller controller)
-            => controller.WhenFrameAssigned().ViewChanged().Select(_ => controller.Frame)
-                .PushStackFrame();
+            => controller.WhenFrameAssigned().ViewChanged().Select(_ => controller.Frame) ;
         public static IObservable<T> TakeUntilDeactivated<T>(this IObservable<T> source, Controller controller) 
             => source;
             // => source.TakeUntil(controller.WhenDeactivated());
@@ -35,12 +34,10 @@ namespace Xpand.XAF.Modules.Reactive.Services.Controllers{
             ViewType viewType = ViewType.Any, Type objectType = null, Nesting nesting = Nesting.Any)
             where TController : Controller{
             objectType ??= typeof(object);
-            return source
-                .SelectMany(controller => controller.Frame?.View != null ? controller.Observe()
+            return source.SelectMany(controller => controller.Frame?.View != null ? controller.Observe()
                         .Where(c => c.Frame.View.Is(viewType, nesting) && objectType.IsAssignableFrom(c.Frame.View.ObjectTypeInfo.Type))
                     : Observable.Return(controller).FrameAssigned().SelectMany(c => c.Frame.WhenViewChanged().Select(_ => c)))
-                .Where(controller => controller.Frame.View.Is(viewType, nesting) && objectType.IsAssignableFrom(controller.Frame.View.ObjectTypeInfo.Type))
-                .PushStackFrame();
+                .Where(controller => controller.Frame.View.Is(viewType, nesting) && objectType.IsAssignableFrom(controller.Frame.View.ObjectTypeInfo.Type)) ;
         }
 
 
@@ -51,8 +48,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Controllers{
             => controller as T;
 
         public static IObservable<T> WhenViewControlsCreated<T>(this T controller) where T : ViewController 
-            => controller.ProcessEvent(nameof(ViewController.ViewControlsCreated))
-                .PushStackFrame();
+            => controller.ProcessEvent(nameof(ViewController.ViewControlsCreated)) ;
 
         public static IObservable<T> WhenActivated<T>(this T controller, bool emitWhenActive = false) where T : Controller 
             => controller.Observe().Activated(emitWhenActive);
@@ -62,21 +58,18 @@ namespace Xpand.XAF.Modules.Reactive.Services.Controllers{
         
         
         public static IObservable<T2> SelectManyUntilDeactivated<T,T2>(this IObservable<T> source,Func<T,IObservable<T2>> selector) where T:Controller
-            => source.SelectMany(controller => selector(controller).TakeUntilDeactivated(controller))
-                .PushStackFrame();
+            => source.SelectMany(controller => selector(controller).TakeUntilDeactivated(controller)) ;
         
         public static IObservable<Frame> WhenFrameAssigned(this Controller controller)
             => controller.ProcessEvent(nameof(Controller.FrameAssigned)).Select(_ => controller.Frame)
-                .TakeUntilDisposed(controller)
-                .PushStackFrame();
+                .TakeUntilDisposed(controller) ;
 
         public static IObservable<T> Activated<T>(this IObservable<T> controllers, bool emitWhenActive = false) where T : Controller 
             => controllers.SelectMany(controller => emitWhenActive && controller.Active
                 ? controller.Observe()
                 : controller.ProcessEvent(nameof(Controller.Activated)).TakeUntilDisposed(controller)
                     .Select(_ => controller))
-                .TraceRX(controller => controller.Name)
-                .PushStackFrame();
+                .TraceRX(controller => controller.Name) ;
 
         public static IObservable<T> WhenDeactivated<T>(this T controller) where T : Controller => controller.ProcessEvent(nameof(Controller.Deactivated)).To(controller).TakeUntilDisposed(controller);
 
@@ -90,7 +83,6 @@ namespace Xpand.XAF.Modules.Reactive.Services.Controllers{
                 })
                 .Concat()
                 .Where(arg => templateContext == default || arg.Frame.Context == templateContext)
-                .Select(arg => arg)
-                .PushStackFrame();
+                .Select(arg => arg) ;
     }
 }

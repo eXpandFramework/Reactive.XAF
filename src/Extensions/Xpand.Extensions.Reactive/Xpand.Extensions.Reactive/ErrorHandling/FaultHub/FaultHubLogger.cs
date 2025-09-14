@@ -31,17 +31,5 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
                 Console.WriteLine(builder.GetFormattedText());
             }
         }
-        // public static void Log(Func<string> messageSelector) {
-        //     LogFast($"");
-        //     if (Logging) {
-        //         if (Debugger.IsAttached) {
-        //             Debug.WriteLine(messageSelector());
-        //         }
-        //         else {
-        //             Console.WriteLine(messageSelector());
-        //         }
-        //         
-        //     };
-        // }
     }
 }

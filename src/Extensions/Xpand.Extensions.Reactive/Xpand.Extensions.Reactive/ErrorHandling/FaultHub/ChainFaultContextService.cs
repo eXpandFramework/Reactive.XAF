@@ -7,13 +7,11 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
-using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.StringExtensions;
-using static Xpand.Extensions.Reactive.ErrorHandling.FaultHub.FaultHubLogger;
+
 namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
     public static class ChainFaultContextService {
-        internal static readonly AsyncLocal<IImmutableStack<object>> ContextStack = new();
-        internal static readonly IAsyncLocal[] All = [ ContextStack.Wrap()];
+        internal static readonly AsyncLocal<IImmutableStack<object>> ContextStack=NewContext<IImmutableStack<object>>();
 
         public static IObservable<T> ChainFaultContext<T>(this IObservable<T> source, Func<IObservable<T>, IObservable<T>> retryStrategy, object[] context = null,
             [CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0)
@@ -62,7 +60,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
                 var resilientSource = retryStrategy != null ? retryStrategy(source) : source;
                 return resilientSource.Catch((Exception e) => e.ProcessFaultContext<T>(context, memberName, filePath, lineNumber, tags,  snapshot, originalStack))
                     .Finally(() => originalSnapshot.RestoreFault(memberName, originalStack))
-                    .FlowContext(context:FaultHub.All.Concat(All).ToArray());
+                    .FaultHubFlowContext();
             });
 
         private static IReadOnlyList<LogicalStackFrame> CaptureOriginalStack(this FaultSnapshot snapshot,string memberName){
@@ -101,7 +99,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
                 var originalStack = FaultHub.LogicalStackContext.Value;
                 if (originalStack?.FirstOrDefault().Equals(frame) ?? false) {
                     LogFast($"[PushStackFrame] Skipping duplicate frame: {frame.MemberName}");
-                    return source.FlowContext(context:FaultHub.All.Concat(All).ToArray());
+                    return source.FaultHubFlowContext();
                 }
                 frame.UpdateStackForFrame( originalStack);
                 return source.Materialize()
@@ -111,7 +109,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
                     })
                     .Dematerialize()
                     .Finally(() => frame.RestoreOriginalStack(originalStack))
-                    .FlowContext(context:FaultHub.All.Concat(All).ToArray());
+                    .FaultHubFlowContext();
             });
 
         private static void RestoreOriginalStack(this LogicalStackFrame frame, IReadOnlyList<LogicalStackFrame> originalStack){
