@@ -146,6 +146,10 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
                 LogFast($"[Tx-FORNSC:{builder.TransactionName}][StepChain] -- CAPTURED {errorNotifications.Count} error(s) from step '{step.Name}': [{stepErrors}]");
             }
             var results = notifications.Where(n => n.Kind == NotificationKind.OnNext).Select(n => n.Value).ToList();
+            if (errorNotifications.Any() && step.EmissionStrategy == FailureEmissionStrategy.EmitEmpty) {
+                LogFast($"[Tx-FORNSC:{builder.TransactionName}][StepChain] -- Step '{step.Name}' failed with EmitEmpty strategy. Discarding {results.Count} partial results.");
+                results.Clear();
+            }
             var allResults = acc.allResults.Concat(results).ToList();
             var failures = acc.failures.Concat(allSteps.CollectErrors(builder, errorNotifications, step)).ToList();
             var exitFailures = failures.Any() ? string.Join(", ", failures.Select(f => f.GetType().Name)) : "empty";
