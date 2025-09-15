@@ -9,7 +9,7 @@ using Xpand.Extensions.Reactive.Transform;
 
 namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
     public static partial class Transaction {
-        
+        public const string PartialResultsKey = "FaultHub.PartialResults";
         public static IObservable<TFinal[]> RunFailFast<TFinal>(this ITransactionBuilder<TFinal> builder, Func<Exception, bool> isNonCritical=null) 
             => builder.Run(failFast: true, isNonCritical: isNonCritical);
         
@@ -106,26 +106,62 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
         private static IObservable<(object finalStepResult, List<Exception> allFailures, List<object> allResults)> ExecuteStepChain<TFinal>(this List<StepDefinition> allSteps, TransactionBuilder<TFinal> builder, bool failFast, Func<Exception, bool> isNonCritical = null)  
             => allSteps.Aggregate(Observable.Return((results: (object)new List<object>(), failures: new List<Exception>(), allResults: new List<object>())), 
                     (accObservable, step) => accObservable.SelectMany(acc => {
-                        if (failFast && acc.failures.HasCriticalFailure(isNonCritical)) {
+                        var hasCriticalFailure = failFast && acc.failures.HasCriticalFailure(isNonCritical);
+                        if (hasCriticalFailure) {
                             LogFast($"[Tx-FORNSC:{builder.TransactionName}][StepChain] ==> SKIPPING step '{step.Name}' due to prior failure in FailFast mode.");
                             return Observable.Return(acc);
                         }
+                
                         var accFailures = acc.failures.Any() ? string.Join(", ", acc.failures.Select(f => f.GetType().Name)) : "empty";
                         LogFast($"[Tx-FORNSC:{builder.TransactionName}][StepChain] ==> ENTERING step '{step.Name}'. Accumulator has {acc.failures.Count} failure(s): [{accFailures}]");
+                
                         return step.ExecuteStep(acc, failFast)
                             .PushFrameConditionally(!string.IsNullOrEmpty(step.Name) ? step.Name : $"Part {allSteps.IndexOf(step) + 1}",step.FilePath,step.LineNumber)
                             .Materialize().BufferUntilCompleted()
                             .Select(notifications => {
-                                var newAcc = allSteps.CollectStepErrors( builder, notifications, step, acc);
-                                var suppressedFailures = Current?.Failures.Where(f => !newAcc.failures.Contains(f)).ToList();
-                                if (suppressedFailures?.Any() ?? false) {
-                                    return newAcc with { failures = newAcc.failures.Concat(suppressedFailures).ToList() };
-                                }
-                                return newAcc;
+                                var (onNextResults, stepFailures, sideChannelResults) = allSteps.ProcessStepNotifications(builder, notifications, step);
+                        
+                                var newAllResults = acc.allResults.Concat(onNextResults).Concat(sideChannelResults).ToList();
+                                var newFailures = acc.failures.Concat(stepFailures).ToList();
+                                var resultsForNextStep = stepFailures.Any() ? (object)new List<object>() : onNextResults;
+
+                                var exitFailures = newFailures.Any() ? string.Join(", ", newFailures.Select(f => f.GetType().Name)) : "empty";
+                                LogFast($"[Tx-FORNSC:{builder.TransactionName}][StepChain] <== EXITING step '{step.Name}'. Accumulator now has {newFailures.Count} failure(s): [{exitFailures}]");
+                        
+                                return (results: resultsForNextStep, failures: newFailures, allResults: newAllResults);
                             });                                        
                     }))
                 .Select(acc => (acc.results, acc.failures, acc.allResults));
 
+        private static (List<object> onNextResults, List<Exception> failures, List<object> sideChannelResults) ProcessStepNotifications<TFinal>(this List<StepDefinition> allSteps,
+            TransactionBuilder<TFinal> builder, IReadOnlyList<Notification<object>> notifications, StepDefinition step) {
+    
+            var errorNotifications = notifications.Where(n => n.Kind == NotificationKind.OnError).ToList();
+            if (errorNotifications.Any()) {
+                var stepErrors = string.Join(", ", errorNotifications.Select(n => n.Exception?.GetType().Name));
+                LogFast($"[Tx-FORNSC:{builder.TransactionName}][StepChain] -- CAPTURED {errorNotifications.Count} error(s) from step '{step.Name}': [{stepErrors}]");
+            }
+
+            var onNextResults = notifications.Where(n => n.Kind == NotificationKind.OnNext).Select(n => n.Value).ToList();
+            var sideChannelResults = new List<object>();
+
+            if (errorNotifications.Any()) {
+                foreach (var errorNotification in errorNotifications) {
+                    var exceptionWithData = errorNotification.Exception;
+                    if (exceptionWithData is FaultHubException { InnerException: not null } fhEx) {
+                        exceptionWithData = fhEx.InnerException;
+                    }
+            
+                    if (exceptionWithData?.Data.Contains(PartialResultsKey) ?? false) {
+                        sideChannelResults.AddRange(((List<object>)exceptionWithData.Data[PartialResultsKey])!);
+                    }
+                }
+            }
+
+            var failures = allSteps.CollectErrors(builder, errorNotifications, step).ToList().Cast<Exception>().ToList();
+            return (onNextResults, failures, sideChannelResults);
+        }
+        
         private static bool HasCriticalFailure(this  List<Exception> failures,Func<Exception, bool> isNonCritical){
             var globalNonCriticalCheck = isNonCritical ?? (_ => false);
             return failures.Any(f => {
@@ -137,21 +173,6 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
             });
         }
 
-        private static (object results, List<Exception> failures, List<object> allResults) CollectStepErrors<TFinal>(this List<StepDefinition> allSteps,
-            TransactionBuilder<TFinal> builder, IReadOnlyList<Notification<object>> notifications, StepDefinition step,
-            (object results, List<Exception> failures, List<object> allResults) acc){
-            var errorNotifications = notifications.Where(n => n.Kind == NotificationKind.OnError).ToList();
-            if (errorNotifications.Any()) {
-                var stepErrors = string.Join(", ", errorNotifications.Select(n => n.Exception?.GetType().Name));
-                LogFast($"[Tx-FORNSC:{builder.TransactionName}][StepChain] -- CAPTURED {errorNotifications.Count} error(s) from step '{step.Name}': [{stepErrors}]");
-            }
-            var results = notifications.Where(n => n.Kind == NotificationKind.OnNext).Select(n => n.Value).ToList();
-            var allResults = acc.allResults.Concat(results).ToList();
-            var failures = acc.failures.Concat(allSteps.CollectErrors(builder, errorNotifications, step)).ToList();
-            var exitFailures = failures.Any() ? string.Join(", ", failures.Select(f => f.GetType().Name)) : "empty";
-            LogFast($"[Tx-FORNSC:{builder.TransactionName}][StepChain] <== EXITING step '{step.Name}'. Accumulator now has {failures.Count} failure(s): [{exitFailures}]");
-            return (results,  failures, allResults);
-        }
         public static IObservable<TFinal[]> RunToEnd<TFinal>(this ITransactionBuilder<TFinal> builder) => builder.Run(false);
         private static IObservable<object> RunToEnd<TFinal>(this TransactionBuilder<TFinal> builder, List<StepDefinition> allSteps, bool isNested,bool collectAllResults)
             => allSteps.ExecuteStepChain(builder, false)
@@ -160,11 +181,13 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
                         LogFast($"[Tx:{builder.TransactionName}] RunToEnd: No failures. CollectAllResults={collectAllResults}, IsNested={isNested}");
                         return Observable.Return(collectAllResults ? t.allResults : (List<object>)t.finalStepResult);
                     }
-                    LogFast($"[Tx:{builder.TransactionName}] RunToEnd: Completed with {t.allFailures.Count} failure(s). Creating final aggregate exception.");
-                    var aggregateException = new AggregateException(t.allFailures);
+                    var aggregateException = new AggregateException(t.allFailures) {
+                        Data = { [PartialResultsKey] = t.allResults }
+                    };
                     if (!isNested) return Observable.Throw<object>(aggregateException);
-                    var finalTypedResults = t.allResults.OfType<TFinal>().Cast<object>().ToList();
-                    return Observable.Return((object)finalTypedResults).Concat(Observable.Throw<object>(aggregateException));
+            
+                    var emptyResultForNextStep = new List<object>(); 
+                    return Observable.Return((object)emptyResultForNextStep).Concat(Observable.Throw<object>(aggregateException));
                 });
 
         private static IEnumerable<FaultHubException> CollectErrors<TFinal>(this List<StepDefinition> allSteps, TransactionBuilder<TFinal> builder, List<Notification<object>> errors, StepDefinition step) {

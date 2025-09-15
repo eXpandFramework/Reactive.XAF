@@ -14,6 +14,8 @@ using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 
+internal class Url { public string Href { get; set; } }
+
 namespace Xpand.Extensions.Tests.FaultHubTests.TransactionalApi {
     public class TransactionalApiTests  : FaultHubTestBase {
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -1592,7 +1594,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.TransactionalApi {
                     step2WasExecuted = true;
                     return SuccessfulOperation(new SubscriptionCounter()).Select(u => (object)u);
                 })
-                .RunFailFast(isNonCritical: ex => ex is TimeoutException); // Global predicate does NOT match
+                .RunFailFast(isNonCritical: ex => ex is TimeoutException);
 
             await transaction.PublishFaults().Capture();
 
@@ -1678,9 +1680,49 @@ namespace Xpand.Extensions.Tests.FaultHubTests.TransactionalApi {
             });
         }
 
+// CLASS: TransactionalApiTests
 
+        [Test]
+        public async Task NestedRunToEnd_Passes_All_Partial_Result_Types_To_Next_Step_Before_Failing() {
+            var finalStepWasCalled = false;
+    
+            IObservable<string[]> InnerFailingTransactionWithMixedTypes() {
+                return Observable.Return("start")
+                    .BeginWorkflow("Inner-Mixed-Type")
+                    .Then(_ => Observable.Return(123)) 
+                    .Then(_ => Observable.Return("some_string")) 
+                    .Then(_ => Observable.Throw<string>(new InvalidOperationException("Inner Failure")))
+                    .RunToEnd(); 
+            }
+
+            var outerTransactionStream = Observable.Return("start")
+                .BeginWorkflow("Outer-Consuming-Mixed")
+                .Then(_ => InnerFailingTransactionWithMixedTypes())
+                .Then(partialResults => {
+                    finalStepWasCalled = true;
+                    partialResults.ShouldBeEmpty("The primary input channel from a failed step must be empty.");
+                    return Observable.Return(Unit.Default);
+                })
+                .RunToEnd();
+
+            var result = await outerTransactionStream.Capture();
+
+            finalStepWasCalled.ShouldBe(true);
+            result.Error.ShouldNotBeNull("The transaction should have ultimately failed.");
+
+            var finalException = result.Error.ShouldBeOfType<FaultHubException>();
+            var aggregateException = finalException.InnerException.ShouldBeOfType<AggregateException>();
+    
+            aggregateException.Data.Contains(Transaction.PartialResultsKey).ShouldBeTrue("The final aggregated exception should contain the partial results on its side-channel.");
+            var partialsFromSideChannel = (List<object>)aggregateException.Data[Transaction.PartialResultsKey];
+    
+            //MODIFICATION: START
+            partialsFromSideChannel.Count.ShouldBe(3, "Should contain the initial 'start', the two partials, and the final Unit result.");
+            partialsFromSideChannel.ShouldContain("start");
+            //MODIFICATION: END
+            partialsFromSideChannel.ShouldContain(123);
+            partialsFromSideChannel.ShouldContain("some_string");
+            //MODIFICATION: END
+        }        
     }
     }
-
-    internal class Url { public string Href { get; set; } }
-
