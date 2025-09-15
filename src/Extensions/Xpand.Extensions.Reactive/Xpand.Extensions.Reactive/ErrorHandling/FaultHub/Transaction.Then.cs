@@ -29,13 +29,13 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
             return step;
         }
         public static ITransactionBuilder<TNext> Then<TCurrent, TNext>(this ITransactionBuilder<TCurrent> builder, IObservable<TNext> step,
-            string stepName = null, Func<Exception, TCurrent[], IObservable<TNext>> fallbackSelector = null, Func<Exception, bool> isNonCritical = null,FailureEmissionStrategy emissionStrategy=FailureEmissionStrategy.EmitPartialResults, 
+            string stepName = null, Func<Exception, TCurrent[], IObservable<TNext>> fallbackSelector = null, Func<Exception, bool> isNonCritical = null,FailureEmissionStrategy emissionStrategy=FailureEmissionStrategy.Inherit, 
             [CallerArgumentExpression(nameof(step))] string selectorExpression = null, [CallerArgumentExpression(nameof(fallbackSelector))] string fallbackSelectorExpression = null
             ,[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0) 
             => builder.Then(_ => step, stepName, fallbackSelector, isNonCritical,emissionStrategy, selectorExpression, fallbackSelectorExpression, filePath, lineNumber);
         
         public static ITransactionBuilder<TNext> Then<TCurrent, TNext>(this ITransactionBuilder<TCurrent> builder, Func<TCurrent[], IObservable<TNext>> selector,
-            string stepName = null, Func<Exception, TCurrent[], IObservable<TNext>> fallbackSelector = null,Func<Exception, bool> isNonCritical = null,FailureEmissionStrategy emissionStrategy=FailureEmissionStrategy.EmitPartialResults
+            string stepName = null, Func<Exception, TCurrent[], IObservable<TNext>> fallbackSelector = null,Func<Exception, bool> isNonCritical = null,FailureEmissionStrategy emissionStrategy=FailureEmissionStrategy.Inherit
             , [CallerArgumentExpression(nameof(selector))] string selectorExpression = null, [CallerArgumentExpression(nameof(fallbackSelector))] string fallbackSelectorExpression = null
             ,[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0) 
             => builder.Then(new StepAction<TCurrent, TNext> { Selector = selector, FallbackSelector = fallbackSelector, IsNonCritical = isNonCritical, SelectorExpression = selectorExpression, 

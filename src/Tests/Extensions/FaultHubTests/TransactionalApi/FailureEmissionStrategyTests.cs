@@ -74,8 +74,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.TransactionalApi {
                 .BeginWorkflow("FailFast-Ignore-Tx")
                 .Then(
                     _ => Step_EmitsPartial_Then_Fails(),
-                    emissionStrategy: FailureEmissionStrategy.EmitPartialResults // This should be ignored
-                )
+                    emissionStrategy: FailureEmissionStrategy.EmitPartialResults)
                 .Then(_ => {
                     nextStepExecuted = true;
                     return Observable.Return("This step should not run.");
@@ -89,6 +88,62 @@ namespace Xpand.Extensions.Tests.FaultHubTests.TransactionalApi {
             var abortedException = BusEvents.Single().ShouldBeOfType<TransactionAbortedException>();
             abortedException.InnerException.ShouldBeOfType<FaultHubException>()
                 .InnerException.ShouldBeOfType<InvalidOperationException>().Message.ShouldBe("Step Failed");
+        }
+        
+        [Test]
+        public async Task RunToEnd_With_Global_EmitEmpty_Strategy_Applies_To_All_Steps() {
+            var nextStepReceivedEmpty = false;
+
+            var transaction = Observable.Return("start")
+                .BeginWorkflow("GlobalEmitEmpty-Tx")
+                .Then(_ => Step_EmitsPartial_Then_Fails())
+                .Then(results => {
+                    results.ShouldBeEmpty();
+                    nextStepReceivedEmpty = true;
+                    return Observable.Return("Final Step");
+                })
+                .RunToEnd(emissionStrategy: FailureEmissionStrategy.EmitEmpty);
+
+            await transaction.PublishFaults().Capture();
+
+            nextStepReceivedEmpty.ShouldBeTrue("The step did not inherit the global EmitEmpty strategy.");
+            BusEvents.Count.ShouldBe(1);
+        }
+
+        [Test]
+        public async Task Then_Local_Strategy_Overrides_RunToEnd_Global_Strategy() {
+            var step2ReceivedEmpty = false;
+            var step3ReceivedPartials = false;
+
+            var transaction = Observable.Return("start")
+                .BeginWorkflow("Override-Tx")
+                .Then(
+                    _ => Step_EmitsPartial_Then_Fails(),
+                    stepName: "Step1_Inherits")
+                .Then(
+                    results => {
+                        results.ShouldBeEmpty();
+                        step2ReceivedEmpty = true;
+                        return Step_EmitsPartial_Then_Fails();
+                    },
+                    stepName: "Step2_Overrides", emissionStrategy: FailureEmissionStrategy.EmitPartialResults
+                )
+                .Then(
+                    results => {
+                        results.ShouldHaveSingleItem();
+                        results.Single().ShouldBe("Partial Data");
+                        step3ReceivedPartials = true;
+                        return Observable.Return("Final Step");
+                    },
+                    stepName: "Step3_Receives"
+                )
+                .RunToEnd(emissionStrategy: FailureEmissionStrategy.EmitEmpty);
+
+            await transaction.PublishFaults().Capture();
+
+            step2ReceivedEmpty.ShouldBeTrue("Step 2 should have received an empty collection from Step 1.");
+            step3ReceivedPartials.ShouldBeTrue("Step 3 should have received partial results from Step 2 due to the override.");
+            BusEvents.Count.ShouldBe(1);
         }
     }
 }

@@ -98,7 +98,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
     }
 
     internal class TransactionBuilder<TCurrentResult> : ITransactionBuilder<TCurrentResult> {
-        
+        internal FailureEmissionStrategy EmissionStrategy { get; set; } = FailureEmissionStrategy.EmitPartialResults;
         internal readonly IReadOnlyList<string> Tags;
         internal readonly IObservable<object> InitialStep;
         internal readonly List<StepDefinition> SubsequentSteps;
@@ -163,6 +163,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
     }
     
     public enum FailureEmissionStrategy {
+        Inherit,
         EmitPartialResults,
         EmitEmpty
     }
