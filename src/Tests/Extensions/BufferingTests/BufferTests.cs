@@ -1,14 +1,13 @@
-﻿using System.Reactive;
+﻿using System.Linq;
+using System.Reactive;
 using System.Reactive.Subjects;
 using akarnokd.reactive_extensions;
+using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.TestsLib;
 
-namespace Xpand.Extensions.Tests;
-using NUnit.Framework;
-using System.Linq;
-
+namespace Xpand.Extensions.Tests.BufferingTests;
 public class BufferTests : BaseTest {
 
     

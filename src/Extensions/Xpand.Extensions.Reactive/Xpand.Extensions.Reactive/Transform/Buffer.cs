@@ -99,7 +99,16 @@ namespace Xpand.Extensions.Reactive.Transform {
             var zeroCrossings = outstanding.Where(total => total == 0);
             return src.Buffer(zeroCrossings);
         }
-        
+        public static IObservable<IList<T>> BufferUntilCompletionOrError<T>(this IObservable<T> source) 
+            => source.Materialize().ToList()
+                .SelectMany(notifications => {
+                    var items = notifications.Where(n => n.Kind == NotificationKind.OnNext)
+                        .Select(n => n.Value).ToList();
+                    var terminalNotification = notifications.FirstOrDefault(n => n.Kind != NotificationKind.OnNext);
+                    return terminalNotification?.Kind != NotificationKind.OnError ? Observable.Return(items)
+                        : Observable.Return(items).Concat(Observable.Throw<IList<T>>(terminalNotification.Exception!));
+                });
+
         public static IObservable<TSource[]> BufferUntilCompleted<TSource>(this IObservable<TSource> source,bool skipEmpty=false) 
             => source.Buffer(Observable.Never<Unit>()).Where(sources => !skipEmpty || sources.Any()).Select(list => list.ToArray());
         

@@ -6,7 +6,7 @@ using Microsoft.Reactive.Testing;
 using NUnit.Framework;
 using Xpand.Extensions.Reactive.Transform;
 
-namespace Xpand.Extensions.Tests{
+namespace Xpand.Extensions.Tests.BufferingTests{
     [TestFixture]
     public class BufferWithInactivityTests {
         [Test]
