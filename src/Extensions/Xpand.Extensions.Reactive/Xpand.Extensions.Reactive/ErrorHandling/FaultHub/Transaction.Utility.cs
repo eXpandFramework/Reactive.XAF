@@ -14,7 +14,9 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
         public const string NonCriticalStepTag =FaultHubException.SystemTag+ "NonCriticalStep";
         public const string NonCriticalAggregateTag =FaultHubException.SystemTag+  "NonCriticalAggregate";
         public const string AsStepOriginTag = FaultHubException.SystemTag+"AsStepOrigin";
-        public const string PropagatedAsStepFaultTag = FaultHubException.SystemTag+"PropagatedAsStepFault";
+        internal static readonly AsyncLocal<TransactionContext> CurrentTransactionContext = new();
+        internal const string SalvagedDataKey = "FaultHub.SalvagedData";
+        public static TransactionContext Current => CurrentTransactionContext.Value;
         public const string TransactionNodeTag = "Transaction";
         public const string NestedTransactionNodeTag = "Nested";
         public const string StepNodeTag = "Step";
@@ -76,7 +78,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
     }
     
     internal class StepAction<TIn, TOut> {
-        public FailureEmissionStrategy EmissionStrategy { get; init; }
+        public DataSalvageStrategy DataSalvageStrategy { get; init; }
         public Func<Exception, bool> IsNonCritical { get; init; }
         public Func<TIn[], IObservable<TOut>> Selector { get; init; }
         public Func<Exception, TIn[], IObservable<TOut>> FallbackSelector { get; init; }
@@ -88,7 +90,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
     }
         
     internal class StepDefinition {
-        public FailureEmissionStrategy EmissionStrategy { get; set; }
+        public DataSalvageStrategy DataSalvageStrategy { get; set; }
         public Func<Exception, bool> IsNonCritical { get; set; }
         public Func<object, IObservable<object>> Selector { get; set; }
         public Func<Exception, object, IObservable<object>> FallbackSelector { get; set; }
@@ -98,7 +100,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
     }
 
     internal class TransactionBuilder<TCurrentResult> : ITransactionBuilder<TCurrentResult> {
-        internal FailureEmissionStrategy EmissionStrategy { get; set; } = FailureEmissionStrategy.EmitPartialResults;
+        internal DataSalvageStrategy DataSalvageStrategy { get; set; } = DataSalvageStrategy.EmitPartialResults;
         internal readonly IReadOnlyList<string> Tags;
         internal readonly IObservable<object> InitialStep;
         internal readonly List<StepDefinition> SubsequentSteps;
@@ -162,7 +164,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
         Concurrent
     }
     
-    public enum FailureEmissionStrategy {
+    public enum DataSalvageStrategy {
         Inherit,
         EmitPartialResults,
         EmitEmpty

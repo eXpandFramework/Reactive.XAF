@@ -12,9 +12,7 @@ using Xpand.Extensions.Reactive.Utility;
 
 namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
     partial class Transaction {
-        internal static readonly AsyncLocal<TransactionContext> CurrentTransactionContext = new();
         
-        public static TransactionContext Current => CurrentTransactionContext.Value;
 
         public static IObservable<FaultHubException> TransactionFault(this IObservable<FaultHubException> source, Guid transactionId)
             => source.Where(e => e.TransactionId() == transactionId);

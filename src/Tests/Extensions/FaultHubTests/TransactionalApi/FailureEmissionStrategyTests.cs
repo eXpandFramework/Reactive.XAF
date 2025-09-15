@@ -9,7 +9,7 @@ using Xpand.Extensions.Reactive.Utility;
 
 namespace Xpand.Extensions.Tests.FaultHubTests.TransactionalApi {
     [TestFixture]
-    public class FailureEmissionStrategyTests : FaultHubTestBase {
+    public class DataSalvageStrategyTests : FaultHubTestBase {
         private IObservable<string> Step_EmitsPartial_Then_Fails() =>
             Observable.Return("Partial Data")
                 .Concat(Observable.Throw<string>(new InvalidOperationException("Step Failed")));
@@ -47,7 +47,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.TransactionalApi {
                 .BeginWorkflow("EmitEmpty-Tx")
                 .Then(
                     _ => Step_EmitsPartial_Then_Fails(),
-                    emissionStrategy: FailureEmissionStrategy.EmitEmpty
+                    dataSalvageStrategy: DataSalvageStrategy.EmitEmpty
                 )
                 .Then(results => {
                     results.ShouldBeEmpty();
@@ -67,14 +67,14 @@ namespace Xpand.Extensions.Tests.FaultHubTests.TransactionalApi {
         }
 
         [Test]
-        public async Task RunFailFast_Ignores_EmissionStrategy_And_Aborts() {
+        public async Task RunFailFast_Ignores_DataSalvageStrategy_And_Aborts() {
             var nextStepExecuted = false;
 
             var transaction = Observable.Return("start")
                 .BeginWorkflow("FailFast-Ignore-Tx")
                 .Then(
                     _ => Step_EmitsPartial_Then_Fails(),
-                    emissionStrategy: FailureEmissionStrategy.EmitPartialResults)
+                    dataSalvageStrategy: DataSalvageStrategy.EmitPartialResults)
                 .Then(_ => {
                     nextStepExecuted = true;
                     return Observable.Return("This step should not run.");
@@ -102,7 +102,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.TransactionalApi {
                     nextStepReceivedEmpty = true;
                     return Observable.Return("Final Step");
                 })
-                .RunToEnd(emissionStrategy: FailureEmissionStrategy.EmitEmpty);
+                .RunToEnd(dataSalvageStrategy: DataSalvageStrategy.EmitEmpty);
 
             await transaction.PublishFaults().Capture();
 
@@ -126,7 +126,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.TransactionalApi {
                         step2ReceivedEmpty = true;
                         return Step_EmitsPartial_Then_Fails();
                     },
-                    stepName: "Step2_Overrides", emissionStrategy: FailureEmissionStrategy.EmitPartialResults
+                    stepName: "Step2_Overrides", dataSalvageStrategy: DataSalvageStrategy.EmitPartialResults
                 )
                 .Then(
                     results => {
@@ -137,7 +137,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.TransactionalApi {
                     },
                     stepName: "Step3_Receives"
                 )
-                .RunToEnd(emissionStrategy: FailureEmissionStrategy.EmitEmpty);
+                .RunToEnd(dataSalvageStrategy: DataSalvageStrategy.EmitEmpty);
 
             await transaction.PublishFaults().Capture();
 
