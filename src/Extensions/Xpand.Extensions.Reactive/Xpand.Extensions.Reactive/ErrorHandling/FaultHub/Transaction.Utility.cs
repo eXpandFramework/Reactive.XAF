@@ -28,23 +28,40 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
         private static List<string> UpdateRunTags<TFinal>(this TransactionBuilder<TFinal> ib,bool collectAllResults) 
             => ib.Tags.Contains(StepNodeTag) ? ib.Tags.ToList() : ib.Tags.Concat([collectAllResults ? nameof(RunAndCollect) : nameof(RunToEnd)]).ToList();
 
-        static TCurrent[] CreateInputArray<TCurrent>(object currentResult) => currentResult switch {
-            null => [], TCurrent[] typedArray => typedArray,
-            IEnumerable enumerable when typeof(TCurrent) == typeof(object) => enumerable.Cast<TCurrent>().ToArray(),
-            TCurrent collection when collection is IEnumerable && !typeof(TCurrent).IsArray => [collection],
-            IEnumerable<TCurrent> collection => collection.ToArray(),
-            IEnumerable<object> objectCollection => objectCollection
-                .SelectMany(o => {
-                    if (o is TCurrent tCurrent) return tCurrent.YieldItem();
-                    if (o is IEnumerable<TCurrent> cast) return cast;
-                    if (!typeof(TCurrent).IsList()) return o.YieldItem().Cast<TCurrent>();
-                    var instance = ((IList)Activator.CreateInstance(typeof(TCurrent)));
-                    instance!.Add(o);
-                    return ((TCurrent)instance).YieldItem();
-                }).ToArray(),
-            _ => [(TCurrent)currentResult]
-        };
         
+        static TCurrent[] CreateInputArray<TCurrent>(object currentResult) {
+            static TCurrent[] CreateJaggedArray(IEnumerable<object> collection) {
+                var elementType = typeof(TCurrent).GetElementType()!; // e.g., string[]
+                var innerElementType = elementType.GetElementType()!; // e.g., string
+                
+                var items = collection.Where(innerElementType.IsInstanceOfType).ToArray();
+                var innerArray = Array.CreateInstance(innerElementType, items.Length);
+                Array.Copy(items, innerArray, items.Length);
+
+                var outerArray = Array.CreateInstance(elementType, 1);
+                outerArray.SetValue(innerArray, 0);
+                
+                return (TCurrent[])outerArray;
+            }
+            return currentResult switch {
+                null => [], TCurrent[] typedArray => typedArray,
+                IEnumerable enumerable when typeof(TCurrent) == typeof(object) => enumerable.Cast<TCurrent>().ToArray(),
+                TCurrent collection when collection is IEnumerable && !typeof(TCurrent).IsArray => [collection],
+                IEnumerable<TCurrent> collection => collection.ToArray(),
+                IEnumerable<object> objectCollection when typeof(TCurrent).IsArray => CreateJaggedArray(objectCollection),
+                IEnumerable<object> objectCollection => objectCollection
+                    .SelectMany(o => {
+                        if (o is TCurrent tCurrent) return tCurrent.YieldItem();
+                        if (o is IEnumerable<TCurrent> cast) return cast;
+                        if (!typeof(TCurrent).IsList()) return o.YieldItem().Cast<TCurrent>();
+                        var instance = ((IList)Activator.CreateInstance(typeof(TCurrent)));
+                        instance!.Add(o);
+                        return ((TCurrent)instance).YieldItem();
+                    }).ToArray(),
+                _ => [(TCurrent)currentResult]
+            };
+        }
+
 
         private static IObservable<T> PushFrameConditionally<T>(this IObservable<T> stepStream, string stepName, string filePath, int lineNumber) {
             var existingFrame = FaultHub.LogicalStackContext.Value?.FirstOrDefault();

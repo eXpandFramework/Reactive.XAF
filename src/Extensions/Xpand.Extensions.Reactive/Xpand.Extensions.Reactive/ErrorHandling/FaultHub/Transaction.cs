@@ -89,6 +89,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
             return (failFast ? allSteps.FailFast(builder, isNonCritical) : builder.RunToEnd(allSteps, collectAllResults))
                 .Finally(() => TransactionNestingLevel.Value--);
         }
+        
         private static IObservable<(List<object> Results, FaultHubException Fault)> ConcurrentRunToEnd(this IObservable<(string Name, IObservable<object> Source)> source, string transactionName, int maxConcurrency, object[] context,string filePath,int lineNumber) 
             => source.Select(op => op.Source.PushStackFrame(op.Name, filePath, lineNumber)
                     .ChainFaultContext(context:context.AddToContext($"{transactionName} - {op.Name}"),null, op.Name).Materialize())
@@ -111,8 +112,8 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
                 : primaryBus.Catch((Exception ex) => step.FallbackSelector(ex, acc.results));
         }
         
-        private static IObservable<(object finalStepResult, List<Exception> allFailures, List<object> allResults)> ExecuteStepChain<TFinal>(this List<StepDefinition> allSteps, TransactionBuilder<TFinal> builder, bool failFast, Func<Exception, bool> isNonCritical = null)  
-            => allSteps.Aggregate(Observable.Return((results: (object)new List<object>(), failures: new List<Exception>(), allResults: new List<object>())), 
+        private static IObservable<(object finalStepResult, List<Exception> allFailures, List<object> allResults)> ExecuteStepChain<TFinal>(this List<StepDefinition> allSteps, TransactionBuilder<TFinal> builder, bool failFast, Func<Exception, bool> isNonCritical = null) {
+            return allSteps.Aggregate(Observable.Return((results: (object)new List<object>(), failures: new List<Exception>(), allResults: new List<object>())),
                     (accObservable, step) => accObservable.SelectMany(acc => {
                         if (failFast && acc.failures.HasCriticalFailure(isNonCritical)) {
                             LogFast($"[Tx-FORNSC:{builder.TransactionName}][StepChain] ==> SKIPPING step '{step.Name}' due to prior failure in FailFast mode.");
@@ -121,19 +122,19 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
                         var accFailures = acc.failures.Any() ? string.Join(", ", acc.failures.Select(f => f.GetType().Name)) : "empty";
                         LogFast($"[Tx-FORNSC:{builder.TransactionName}][StepChain] ==> ENTERING step '{step.Name}'. Accumulator has {acc.failures.Count} failure(s): [{accFailures}]");
                         return step.ExecuteStep(acc, failFast)
-                            .PushFrameConditionally(!string.IsNullOrEmpty(step.Name) ? step.Name : $"Part {allSteps.IndexOf(step) + 1}",step.FilePath,step.LineNumber)
+                            .PushFrameConditionally(!string.IsNullOrEmpty(step.Name) ? step.Name : $"Part {allSteps.IndexOf(step) + 1}", step.FilePath, step.LineNumber)
                             .Materialize().BufferUntilCompleted()
                             .Select(notifications => {
-                                var newAcc = allSteps.CollectStepErrors( builder, notifications, step, acc, isNonCritical);
+                                var newAcc = allSteps.CollectStepErrors(builder, notifications, step, acc, isNonCritical);
                                 var suppressedFailures = Current?.Failures.Where(f => !newAcc.failures.Contains(f)).ToList();
                                 if (suppressedFailures?.Any() ?? false) {
                                     return newAcc with { failures = newAcc.failures.Concat(suppressedFailures).ToList() };
                                 }
                                 return newAcc;
-                            });                                        
+                            });
                     }))
                 .Select(acc => (acc.results, acc.failures, acc.allResults));
-
+        }
         private static bool HasCriticalFailure(this  List<Exception> failures,Func<Exception, bool> isNonCritical){
             var globalNonCriticalCheck = isNonCritical ?? (_ => false);
             return failures.Any(f => {
@@ -172,13 +173,13 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
                 .SelectMany(t => {
                     var (finalStepResult, allFailures, allResults) = t;
                     if (!allFailures.Any()) {
-                        LogFast($"[Tx:{builder.TransactionName}] RunToEnd: No failures. CollectAllResults={collectAllResults}, IsNested={TransactionNestingLevel.Value > 0}");
+                        LogFast($"[Tx:{builder.TransactionName}] RunToEnd: No failures. CollectAllResults={collectAllResults}, IsNested={TransactionNestingLevel.Value > 1}");
                         return Observable.Return(collectAllResults ? allResults : (List<object>)finalStepResult);
                     }
                     LogFast($"[Tx:{builder.TransactionName}] RunToEnd: Completed with {allFailures.Count} failure(s). Creating final aggregate exception.");
                     var aggregateException = new AggregateException(allFailures);
-                    if (!(TransactionNestingLevel.Value > 0)) return Observable.Throw<object>(aggregateException);
-                    var finalTypedResults = (finalStepResult as IEnumerable<object> ?? []).ToList();
+                    if (!(TransactionNestingLevel.Value > 1)) return Observable.Throw<object>(aggregateException);
+                    var finalTypedResults = allResults.ToList();;
                     return Observable.Return((object)finalTypedResults).Concat(Observable.Throw<object>(aggregateException));
                 });
         
