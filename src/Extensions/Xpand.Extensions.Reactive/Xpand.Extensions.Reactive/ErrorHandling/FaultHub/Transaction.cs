@@ -76,9 +76,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
                     });
         }
         
-        
         private static IObservable<object> TransactionLogic<TFinal>(this TransactionBuilder<TFinal> builder,bool failFast, bool collectAllResults, Func<Exception, bool> isNonCritical = null){
-            var isNested = TransactionNestingLevel.Value > 0;
             TransactionNestingLevel.Value++;
             var allSteps = new List<StepDefinition>();
             if (builder.InitialStep != null) {
@@ -88,7 +86,8 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
                 allSteps.AddRange(builder.BatchedSources.Select(bs => new StepDefinition { Selector = _ => bs.Source, Name = bs.Name, FilePath = builder.CallerMemberPath, LineNumber = builder.CallerMemberLine }));
             }
             allSteps.AddRange(builder.SubsequentSteps);
-            return (failFast ? allSteps.FailFast(builder, isNonCritical) : builder.RunToEnd(allSteps, isNested, collectAllResults)).Finally(() => TransactionNestingLevel.Value--);
+            return (failFast ? allSteps.FailFast(builder, isNonCritical) : builder.RunToEnd(allSteps, collectAllResults))
+                .Finally(() => TransactionNestingLevel.Value--);
         }
         private static IObservable<(List<object> Results, FaultHubException Fault)> ConcurrentRunToEnd(this IObservable<(string Name, IObservable<object> Source)> source, string transactionName, int maxConcurrency, object[] context,string filePath,int lineNumber) 
             => source.Select(op => op.Source.PushStackFrame(op.Name, filePath, lineNumber)
@@ -168,24 +167,21 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
         }
         public static IObservable<TFinal[]> RunToEnd<TFinal>(this ITransactionBuilder<TFinal> builder, DataSalvageStrategy dataSalvageStrategy = DataSalvageStrategy.EmitPartialResults) 
             => builder.Run(false,dataSalvageStrategy:dataSalvageStrategy);
-        private static IObservable<object> RunToEnd<TFinal>(this TransactionBuilder<TFinal> builder, List<StepDefinition> allSteps, bool isNested,bool collectAllResults)
+        private static IObservable<object> RunToEnd<TFinal>(this TransactionBuilder<TFinal> builder, List<StepDefinition> allSteps, bool collectAllResults)
             => allSteps.ExecuteStepChain(builder, false)
                 .SelectMany(t => {
-                    if (!t.allFailures.Any()) {
-                        LogFast($"[Tx:{builder.TransactionName}] RunToEnd: No failures. CollectAllResults={collectAllResults}, IsNested={isNested}");
-                        return Observable.Return(collectAllResults ? t.allResults : (List<object>)t.finalStepResult);
+                    var (finalStepResult, allFailures, allResults) = t;
+                    if (!allFailures.Any()) {
+                        LogFast($"[Tx:{builder.TransactionName}] RunToEnd: No failures. CollectAllResults={collectAllResults}, IsNested={TransactionNestingLevel.Value > 0}");
+                        return Observable.Return(collectAllResults ? allResults : (List<object>)finalStepResult);
                     }
-                    LogFast($"[Tx:{builder.TransactionName}] RunToEnd: Completed with {t.allFailures.Count} failure(s). Creating final aggregate exception.");
-                    var aggregateException = new AggregateException(t.allFailures);
-                    if (!isNested) {
-                        LogFast($"[Tx:{builder.TransactionName}] Path: Non-nested failure. isNested = {isNested}. Throwing.");
-                        return Observable.Throw<object>(aggregateException);
-                    }
-                    LogFast($"[Tx:{builder.TransactionName}] Path: Nested failure. isNested = {isNested}. Proceeding to salvage.");
-                    var finalTypedResults = t.allResults.OfType<TFinal>().Cast<object>().ToList();
+                    LogFast($"[Tx:{builder.TransactionName}] RunToEnd: Completed with {allFailures.Count} failure(s). Creating final aggregate exception.");
+                    var aggregateException = new AggregateException(allFailures);
+                    if (!(TransactionNestingLevel.Value > 0)) return Observable.Throw<object>(aggregateException);
+                    var finalTypedResults = (finalStepResult as IEnumerable<object> ?? []).ToList();
                     return Observable.Return((object)finalTypedResults).Concat(Observable.Throw<object>(aggregateException));
                 });
-
+        
         private static IEnumerable<FaultHubException> CollectErrors<TFinal>(this List<StepDefinition> allSteps,
             TransactionBuilder<TFinal> builder, List<Notification<object>> errors, StepDefinition step, List<object> stepResults, Func<Exception, bool> isNonCritical = null) {
             if (!errors.Any()) return [];
