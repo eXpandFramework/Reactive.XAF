@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Reactive;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using Xpand.Extensions.Reactive.Combine;
-using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 
 namespace Xpand.Extensions.Reactive.ErrorHandling {
     public static partial class ErrorHandling {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("ReSharper", "ConvertToLambdaExpression")]
-        public static IObservable<T> Throw<T>(this Exception ex) 
-            => Observable.Throw<T>(ex);
+        public static IObservable<T> Throw<T>(this Exception ex,IScheduler scheduler=null) 
+            => Observable.Throw<T>(ex,scheduler??ImmediateScheduler.Instance);
         
         public static IObservable<T> ThrowOnNext<T>(this IObservable<T> source, [CallerMemberName] string caller = "")
             => source.SelectMany(arg => new InvalidOperationException($"{arg} - {caller}").Throw<T>());

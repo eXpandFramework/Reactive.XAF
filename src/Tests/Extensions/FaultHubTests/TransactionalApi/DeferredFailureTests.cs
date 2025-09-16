@@ -10,14 +10,9 @@ using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.Reactive.Utility;
 
 namespace Xpand.Extensions.Tests.FaultHubTests.TransactionalApi {
-    using System;
-using System.Linq;
-using System.Reactive.Linq;
-using System.Threading.Tasks;
-using NUnit.Framework;
-using Shouldly;
 
-    namespace Xpand.Extensions.Tests.FaultHubTests.TransactionalApi { }
+
+    
     [TestFixture]
     public class DeferredFailureTests:FaultHubTestBase {
         public class TestableExternalService {

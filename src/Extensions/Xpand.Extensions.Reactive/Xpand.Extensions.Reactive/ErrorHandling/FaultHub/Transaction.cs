@@ -177,7 +177,11 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
                     }
                     LogFast($"[Tx:{builder.TransactionName}] RunToEnd: Completed with {t.allFailures.Count} failure(s). Creating final aggregate exception.");
                     var aggregateException = new AggregateException(t.allFailures);
-                    if (!isNested) return Observable.Throw<object>(aggregateException);
+                    if (!isNested) {
+                        LogFast($"[Tx:{builder.TransactionName}] Path: Non-nested failure. isNested = {isNested}. Throwing.");
+                        return Observable.Throw<object>(aggregateException);
+                    }
+                    LogFast($"[Tx:{builder.TransactionName}] Path: Nested failure. isNested = {isNested}. Proceeding to salvage.");
                     var finalTypedResults = t.allResults.OfType<TFinal>().Cast<object>().ToList();
                     return Observable.Return((object)finalTypedResults).Concat(Observable.Throw<object>(aggregateException));
                 });

@@ -59,10 +59,12 @@ namespace Xpand.Extensions.Reactive.Transform{
         
         public static IObservable<TResult> SelectManySequential<TResult, TKey, T>(this T value, Func<IObservable<TResult>> action, Func<T, TKey> keySelector,
             ConcurrentDictionary<TKey, ISubject<Func<IObservable<Unit>>>> queues,[CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0) {
-            var key = keySelector(value);
-            return ((AsyncKeyedSequencer<TKey>)SequencerMap.GetValue(queues, _ => new AsyncKeyedSequencer<TKey>()))!
-                .Enqueue(key, action)
-                .PushStackFrame([key], memberName, filePath, lineNumber);
+            return Observable.Defer(() => {
+                var key = keySelector(value);
+                return ((AsyncKeyedSequencer<TKey>)SequencerMap.GetValue(queues, _ => new AsyncKeyedSequencer<TKey>()))!
+                    .Enqueue(key, action)
+                    .PushStackFrame([key], memberName, filePath, lineNumber);
+            });
         }
     }
 }
