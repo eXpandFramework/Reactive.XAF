@@ -8,6 +8,7 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading;
 using Xpand.Extensions.Numeric;
+using Xpand.Extensions.Reactive.ErrorHandling;
 
 namespace Xpand.Extensions.Reactive.Transform {
     public static partial class Transform {
@@ -99,14 +100,12 @@ namespace Xpand.Extensions.Reactive.Transform {
             var zeroCrossings = outstanding.Where(total => total == 0);
             return src.Buffer(zeroCrossings);
         }
-        public static IObservable<IList<T>> BufferUntilCompletionOrError<T>(this IObservable<T> source) 
-            => source.Materialize().ToList()
+        public static IObservable<IList<T>> BufferUntilCompletionOrError<T>(this IObservable<T> source, params IObservable<T>[] sources) 
+            => new[] { source }.Concat(sources).Select(s => s.Materialize()).Merge().ToList()
                 .SelectMany(notifications => {
-                    var items = notifications.Where(n => n.Kind == NotificationKind.OnNext)
-                        .Select(n => n.Value).ToList();
-                    var terminalNotification = notifications.FirstOrDefault(n => n.Kind != NotificationKind.OnNext);
-                    return terminalNotification?.Kind != NotificationKind.OnError ? Observable.Return(items)
-                        : Observable.Return(items).Concat(Observable.Throw<IList<T>>(terminalNotification.Exception!));
+                    var items = notifications.Where(n => n.Kind == NotificationKind.OnNext).Select(n => n.Value).ToList();
+                    var errors = notifications.Where(n => n.Kind == NotificationKind.OnError).Select(n => n.Exception!).ToList();
+                    return !errors.Any() ? items.Observe() : items.Observe().Concat((sources.Length == 0 ? errors[0] : new AggregateException(errors)).Throw<List<T>>());
                 });
 
         public static IObservable<TSource[]> BufferUntilCompleted<TSource>(this IObservable<TSource> source,bool skipEmpty=false) 
@@ -184,10 +183,7 @@ namespace Xpand.Extensions.Reactive.Transform {
                 _liveEvents.OnNext(item);
             }
         }
-        
-        /// <summary>
-        /// Emits a list every interval that contains all the currently buffered elements.
-        /// </summary>
+
         public static IObservable<IList<TSource>> BufferHistorical<TSource>(this IObservable<TSource> source, TimeSpan interval, TimeSpan replayDuration) 
             => source.Replay(replayed => Observable.Interval(interval)
                 .SelectMany(_ => replayed.TakeUntil(Observable.Return(Unit.Default, Scheduler.CurrentThread)).ToList())
@@ -197,11 +193,7 @@ namespace Xpand.Extensions.Reactive.Transform {
             => observable.GroupByUntil(_ => 1, g => Observable.Timer(maxDelay).Merge(g.Skip(maxBufferCount - 1).Take(1).Select(_ => 1L)))
                 .Select(x => x.ToArray())
                 .Switch();
-        
-        /// <summary>
-        /// Splits the elements of a sequence into chunks that are starting with
-        /// elements that satisfy the predicate.
-        /// </summary>
+
         public static IObservable<IList<TSource>> BufferByPredicate<TSource>(this IObservable<TSource> source, Predicate<TSource> startNewBufferPredicate) 
             => source.SelectMany(x => {
                     var subSequence = Observable.Return((Value: x, HasValue: true));
