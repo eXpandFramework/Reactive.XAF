@@ -1,19 +1,17 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using static Xpand.Extensions.Reactive.ErrorHandling.FaultHub.FaultHub;
+using System.Runtime.CompilerServices;
+using System.Text;
 
-namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
-    using System.Runtime.CompilerServices;
-    using System.Text;
 
+namespace Xpand.Extensions.Tracing{
     [InterpolatedStringHandler]
     [SuppressMessage("ReSharper", "StructCanBeMadeReadOnly")]
     public ref struct HighPerformanceLogBuilder {
         private readonly StringBuilder _stringBuilder;
 
         public HighPerformanceLogBuilder(int literalLength, int formattedCount, out bool isEnabled) {
-            isEnabled = Logging;
+            isEnabled = FastLogger.Enabled;
             _stringBuilder = isEnabled ? new StringBuilder(literalLength + formattedCount * 8) : null;
         }
 
@@ -25,23 +23,12 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
     }
 
     
-    public static class FaultHubLogger {
+    public static class FastLogger {
+        public static bool Enabled { get; set; }
         public static void LogFast(ref HighPerformanceLogBuilder builder) {
-            if (Logging) {
-                Console.WriteLine(builder.GetFormattedText());
-            }
+            if (!Enabled) return;
+            Console.WriteLine(builder.GetFormattedText());
         }
-        // public static void Log(Func<string> messageSelector) {
-        //     LogFast($"");
-        //     if (Logging) {
-        //         if (Debugger.IsAttached) {
-        //             Debug.WriteLine(messageSelector());
-        //         }
-        //         else {
-        //             Console.WriteLine(messageSelector());
-        //         }
-        //         
-        //     };
-        // }
+        
     }
 }
