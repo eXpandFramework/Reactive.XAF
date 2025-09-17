@@ -17,14 +17,14 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
         private static StepDefinition StepDefinition<TCurrent, TNext>(this StepAction<TCurrent, TNext> stepAction){
             var step = new StepDefinition {
                 Name = GetStepName(stepAction.SelectorExpression, stepAction.StepName, stepAction.Selector),
-                Selector = currentResult => stepAction.Selector(CreateInputArray<TCurrent>(currentResult)).Select(res => (object)res),
+                Selector = currentResult => stepAction.Selector(currentResult.AsArray<TCurrent>()).Select(res => (object)res),
                 FilePath = stepAction.FilePath,LineNumber = stepAction.LineNumber,
                 IsNonCritical = stepAction.IsNonCritical, DataSalvageStrategy = stepAction.DataSalvageStrategy
             };
             step.FallbackSelector = stepAction.FallbackSelector == null ? null : (ex, currentResult) => {
                 var fallbackName = GetStepName(stepAction.FallbackSelectorExpression, null, stepAction.FallbackSelector);
                 step.Name = $"{fallbackName} (Fallback)";
-                return stepAction.FallbackSelector(ex, CreateInputArray<TCurrent>(currentResult)).Select(res => (object)res);
+                return stepAction.FallbackSelector(ex, currentResult.AsArray<TCurrent>()).Select(res => (object)res);
             };
             return step;
         }

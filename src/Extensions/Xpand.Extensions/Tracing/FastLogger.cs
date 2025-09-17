@@ -11,7 +11,7 @@ namespace Xpand.Extensions.Tracing{
         private readonly StringBuilder _stringBuilder;
 
         public HighPerformanceLogBuilder(int literalLength, int formattedCount, out bool isEnabled) {
-            isEnabled = FastLogger.Enabled;
+            isEnabled = Enabled;
             _stringBuilder = isEnabled ? new StringBuilder(literalLength + formattedCount * 8) : null;
         }
 
@@ -27,8 +27,10 @@ namespace Xpand.Extensions.Tracing{
         public static bool Enabled { get; set; }
         public static void LogFast(ref HighPerformanceLogBuilder builder) {
             if (!Enabled) return;
-            Console.WriteLine(builder.GetFormattedText());
+            Write(builder.GetFormattedText());
         }
-        
+
+        public static Action<string> Write { get; set; } = Console.WriteLine;
+
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -9,7 +10,6 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -19,7 +19,6 @@ using Xpand.Extensions.JsonExtensions;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Network;
 using Xpand.Extensions.Numeric;
-using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.ErrorHandling;
 using Xpand.Extensions.Reactive.Transform.System.Text.Json;
@@ -104,6 +103,7 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net {
 
         private static readonly JsonDocument EmptyArrayDoc = JsonDocument.Parse("[]");
 
+        [SuppressMessage("ReSharper", "UnusedParameter.Global")]
         public static JsonDocument EmptyArrayJsonDocument(this HttpClient client)
             => EmptyArrayDoc;
         
@@ -118,11 +118,11 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net {
         private static object CreateInstance<T>() => typeof(T) == typeof(string) ? "" : typeof(T).CreateInstance();
 
         public static IObservable<T> SendRequest<T>(this HttpClient client, HttpRequestMessage httpRequestMessage, 
-            T obj = null, Func<HttpResponseMessage, IObservable<T>> deserializeResponse = null, [CallerMemberName] string caller = "") where T : class,new()
-            => client.SendRequest(httpRequestMessage,null,obj,deserializeResponse,caller);
+            T obj = null, Func<HttpResponseMessage, IObservable<T>> deserializeResponse = null) where T : class,new()
+            => client.SendRequest(httpRequestMessage,null,obj,deserializeResponse);
         
         public static IObservable<T> SendRequest<T>(this HttpClient client, HttpRequestMessage httpRequestMessage,Action<HttpResponseMessage> onResponse, 
-            T obj = null, Func<HttpResponseMessage, IObservable<T>> deserializeResponse = null, [CallerMemberName] string caller = "") where T : class,new()
+            T obj = null, Func<HttpResponseMessage, IObservable<T>> deserializeResponse = null) where T : class,new()
             => client.Request( httpRequestMessage, onResponse, obj)
                 .SendRequest(obj??typeof(T).CreateInstance(), deserializeResponse);
 
@@ -221,7 +221,7 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net {
             => message => message.DeserializeJson<T>(obj?.GetType());
         private static IObservable<T> DeserializeJson<T>(this HttpResponseMessage responseMessage,Type returnType) where T:class,new() 
             => returnType != null ? responseMessage.DeserializeJson(returnType).ToObservable().Cast<T>()
-                    .If(obj => obj?.GetType().IsArray ?? false, arg => arg.Cast<IEnumerable<T>>().ToNowObservable(),
+                    .If(obj => obj?.GetType().IsArray ?? false, arg => ((IEnumerable<T>)arg).ToNowObservable(),
                         arg => arg.Observe()).Select(arg => arg) :
                 responseMessage.DeserializeJson<T>().ToObservable(Transform.ImmediateScheduler).Select(arg => arg);
 

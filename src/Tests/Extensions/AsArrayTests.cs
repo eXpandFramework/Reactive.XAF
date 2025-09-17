@@ -4,10 +4,11 @@ using System.Diagnostics.CodeAnalysis;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.ObjectExtensions;
+using Xpand.TestsLib;
 
 namespace Xpand.Extensions.Tests;
 [TestFixture]
-public class AsArrayTests {
+public class AsArrayTests:BaseTest {
     [Test]
     [SuppressMessage("ReSharper", "ExpressionIsAlwaysNull")]
     public void AsArray_WithNullInput_ReturnsEmptyArray() {
@@ -102,5 +103,32 @@ public class AsArrayTests {
         result.Length.ShouldBe(2);
         result[0].ShouldBe(["a"]);
         result[1].ShouldBe(["b"]);
+    }
+
+    [Test]
+    public void AsArray_FromObjectListWithPromotableElements_ReturnsArrayOfPromotedArrays() {
+        var input = new object[] { 1, 2 };
+        var result = input.AsArray<int[]>();
+        result.Length.ShouldBe(2);
+        result[0].ShouldBe([1]);
+        result[1].ShouldBe([2]);
+    }
+
+    [Test]
+    public void AsArray_FromMixedObjectListWithPromotableAndPreExistingArrays_ReturnsCorrectlyCombinedArray() {
+        var input = new object[] { "a", new[] { "b", "c" } };
+        var result = input.AsArray<string[]>();
+        result.Length.ShouldBe(2);
+        result[0].ShouldBe(["a"]);
+        result[1].ShouldBe(["b", "c"]);
+    }
+
+    [Test]
+    public void AsArray_FromMixedObjectListWithPromotableAndUncastableElements_FiltersUncastableElements() {
+        var input = new object[] { 10, "fail", 20 };
+        var result = input.AsArray<int[]>();
+        result.Length.ShouldBe(2);
+        result[0].ShouldBe([10]);
+        result[1].ShouldBe([20]);
     }
 }

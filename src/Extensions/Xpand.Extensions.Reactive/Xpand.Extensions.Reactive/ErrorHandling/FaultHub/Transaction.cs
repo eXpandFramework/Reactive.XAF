@@ -16,7 +16,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
         private static IObservable<TFinal[]> RunFailFast<TFinal>(this IObservable<TFinal[]> source, TransactionBuilder<TFinal> ib) 
             => source.Catch((FaultHubException ex) => {
                 if (ex.Data.Contains(SalvagedDataKey) && ex.Data[SalvagedDataKey] is IEnumerable<object> salvagedData) {
-                    var typedData = CreateInputArray<TFinal>(salvagedData);
+                    var typedData = salvagedData.AsArray<TFinal>();
                     if (typedData.Any()) {
                         return Observable.Return(typedData).Concat(CreateAbortedException(ex, ib).Throw<TFinal[]>());
                     }
@@ -42,7 +42,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
         
         private static IObservable<TFinal[]> RunSequential<TFinal>(TransactionBuilder<TFinal> builder, bool failFast, bool collectAllResults, Func<Exception, bool> isNonCritical) {
             var logic = builder.TransactionLogic(failFast, collectAllResults, isNonCritical)
-                .Select(CreateInputArray<TFinal>);
+                .Select(o => o.AsArray<TFinal>());
             return failFast ? logic.RunFailFast(builder)
                 : logic.ChainFaultContext(builder.Context, null, builder.TransactionName, builder.CallerMemberPath, builder.CallerMemberLine, builder.UpdateRunTags(collectAllResults));
         }
@@ -60,7 +60,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
         private static IObservable<TFinal[]> RunConcurrent<TFinal>(this TransactionBuilder<TFinal> builder, bool failFast) {
             var logic = (builder.BatchedSources.ToObservable(builder.Scheduler ?? Scheduler.Default)
                     .TransactionLogic(builder, failFast))
-                .Select(CreateInputArray<TFinal>);
+                .Select(o => o.AsArray<TFinal>());
 
             return failFast ? logic.RunFailFast(builder)
                 : logic.ChainFaultContext(builder.Context, null, builder.TransactionName, builder.CallerMemberPath, builder.CallerMemberLine, builder.UpdateRunTags(false));

@@ -8,7 +8,6 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using DevExpress.Persistent.Base;
 using Xpand.Extensions.LinqExtensions;
-using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.Extensions.XAF.TypesInfoExtensions;
 using Xpand.XAF.Modules.Reactive;
@@ -46,7 +45,7 @@ namespace Xpand.XAF.Modules.ViewItemValue{
 						.Select(editor => (editor,t.attribute))))
 				.GroupBy(t => t.editor.GetParent<IModelDetailView>())
 				.ForEach(views => {
-					var item = node.Cast<IModelViewItemValueItems>().AddNode<IModelViewItemValueItem>();
+					var item = ((IModelViewItemValueItems)node).AddNode<IModelViewItemValueItem>();
 					item.ObjectView = views.Key.AsObjectView;
 					views.Where(t => item.Members[t.editor.ModelMember.Id()] == null).ForEach(t => {
 						var viewItem = item.Members.AddNode<IModelViewItemValueObjectViewItem>();

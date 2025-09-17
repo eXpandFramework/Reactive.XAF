@@ -28,22 +28,6 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
         private static List<string> UpdateRunTags<TFinal>(this TransactionBuilder<TFinal> ib,bool collectAllResults) 
             => ib.Tags.Contains(StepNodeTag) ? ib.Tags.ToList() : ib.Tags.Concat([collectAllResults ? nameof(RunAndCollect) : nameof(RunToEnd)]).ToList();
 
-        static TCurrent[] CreateInputArray<TCurrent>(object currentResult) => currentResult switch {
-            null => [], TCurrent[] typedArray => typedArray,
-            IEnumerable enumerable when typeof(TCurrent) == typeof(object) => enumerable.Cast<TCurrent>().ToArray(),
-            TCurrent collection when collection is IEnumerable && !typeof(TCurrent).IsArray => [collection],
-            IEnumerable<TCurrent> collection => collection.ToArray(),
-            IEnumerable<object> objectCollection => objectCollection
-                .SelectMany(o => {
-                    if (o is TCurrent tCurrent) return tCurrent.YieldItem();
-                    if (o is IEnumerable<TCurrent> cast) return cast;
-                    if (!typeof(TCurrent).IsList()) return o.YieldItem().Cast<TCurrent>();
-                    var instance = ((IList)Activator.CreateInstance(typeof(TCurrent)));
-                    instance!.Add(o);
-                    return ((TCurrent)instance).YieldItem();
-                }).ToArray(),
-            _ => [(TCurrent)currentResult]
-        };
         
 
         private static IObservable<T> PushFrameConditionally<T>(this IObservable<T> stepStream, string stepName, string filePath, int lineNumber) {
