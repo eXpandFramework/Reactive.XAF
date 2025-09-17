@@ -28,24 +28,36 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
         private static List<string> UpdateRunTags<TFinal>(this TransactionBuilder<TFinal> ib,bool collectAllResults) 
             => ib.Tags.Contains(StepNodeTag) ? ib.Tags.ToList() : ib.Tags.Concat([collectAllResults ? nameof(RunAndCollect) : nameof(RunToEnd)]).ToList();
 
-        static TCurrent[] CreateInputArray<TCurrent>(object currentResult) => currentResult switch {
-            null => [], TCurrent[] typedArray => typedArray,
-            IEnumerable enumerable when typeof(TCurrent) == typeof(object) => enumerable.Cast<TCurrent>().ToArray(),
-            TCurrent collection when collection is IEnumerable && !typeof(TCurrent).IsArray => [collection],
-            IEnumerable<TCurrent> collection => collection.ToArray(),
-            IEnumerable<object> objectCollection => objectCollection
-                .SelectMany(o => {
-                    if (o is TCurrent tCurrent) return tCurrent.YieldItem();
-                    if (o is IEnumerable<TCurrent> cast) return cast;
-                    if (!typeof(TCurrent).IsList()) return o.YieldItem().Cast<TCurrent>();
-                    var instance = ((IList)Activator.CreateInstance(typeof(TCurrent)));
-                    instance!.Add(o);
-                    return ((TCurrent)instance).YieldItem();
-                }).ToArray(),
-            _ => [(TCurrent)currentResult]
-        };
-        
+        static TCurrent[] CreateInputArray<TCurrent>(object currentResult) {
+            LogFast($"[CreateInputArray] Entered. Input type: '{currentResult?.GetType().Name ?? "null"}', Target array type: '{typeof(TCurrent[]).Name}'.");
+            if (currentResult == null) {
+                LogFast($"[CreateInputArray] Input is null. Returning empty array.");
+                return [];
+            }
+            
+            if (currentResult is TCurrent[] typedArray) {
+                LogFast($"[CreateInputArray] Input is already the target array type. Passing through directly.");
+                return typedArray;
+            }
 
+            if (currentResult is IEnumerable objectCollection) {
+                var items = objectCollection.Cast<object>().ToList();
+                LogFast($"[CreateInputArray] Input is IEnumerable with {items.Count} item(s). Processing as a collection.");
+                
+                if (items.Count == 1 && items[0] is TCurrent singleItem) {
+                    LogFast($"[CreateInputArray] Detected single-item collection containing the exact target type '{singleItem.GetType().Name}'. Wrapping in array.");
+                    return [singleItem];
+                }
+                
+                LogFast($"[CreateInputArray] Proceeding with general flattening logic for the collection.");
+                var flattenedItems = items
+                    .SelectMany(o => o is IEnumerable enumerable && o is not string ? enumerable.Cast<object>() : [o]);
+                return flattenedItems.Cast<TCurrent>().ToArray();
+            }
+
+            LogFast($"[CreateInputArray] Input is a single item. Wrapping in a new array.");
+            return [(TCurrent)currentResult];
+        }
         private static IObservable<T> PushFrameConditionally<T>(this IObservable<T> stepStream, string stepName, string filePath, int lineNumber) {
             var existingFrame = FaultHub.LogicalStackContext.Value?.FirstOrDefault();
             return existingFrame == null || existingFrame.Value.MemberName != stepName ? stepStream.PushStackFrame(stepName,filePath,lineNumber) : stepStream;
