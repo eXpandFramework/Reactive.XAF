@@ -177,7 +177,9 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
                     }
                     LogFast($"[Tx:{builder.TransactionName}] RunToEnd: Completed with {allFailures.Count} failure(s). Creating final aggregate exception.");
                     var aggregateException = new AggregateException(allFailures);
-                    if (!(TransactionNestingLevel.Value > 0)) return Observable.Throw<object>(aggregateException);
+                    if (TransactionNestingLevel.Value == 1) {
+                        return Observable.Throw<object>(aggregateException);
+                    }
                     var finalTypedResults = (finalStepResult as IEnumerable<object> ?? []).ToList();
                     return Observable.Return((object)finalTypedResults).Concat(Observable.Throw<object>(aggregateException));
                 });
