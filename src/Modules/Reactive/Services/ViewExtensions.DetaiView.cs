@@ -7,7 +7,6 @@ using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Layout;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.SystemModule;
-using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.Reactive.Filter;
@@ -72,7 +71,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => source.SelectMany(view => view.WhenViewEditModeChanging());
 
         public static void SetDefaultFocusedItem(this DetailView view, string viewItemId) 
-            => view.Model.Cast<IModelDetailViewDefaultFocusedItem>().DefaultFocusedItem =
+            => ((IModelDetailViewDefaultFocusedItem)view.Model).DefaultFocusedItem =
                 view.Model.Items.First(viewItem => viewItem.Id == viewItemId);
         #endregion
     }

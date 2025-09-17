@@ -63,7 +63,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Controllers{
                         if (e.NewObject != null) return modifyObject?.Invoke(e) ?? Observable.Empty<object>();
                         e.ObjectSpace = e.ObjectType.ToTypeInfo().IsPersistent ? controller.View.ObjectSpace.CreateNestedObjectSpace()
                             : controller.Application.CreateObjectSpace(e.ObjectType);
-                        e.ObjectSpace.Cast<CompositeObjectSpace>().PopulateAdditionalObjectSpaces(controller.Application);
+                        ((CompositeObjectSpace)e.ObjectSpace).PopulateAdditionalObjectSpaces(controller.Application);
                         e.NewObject = e.ObjectSpace.CreateObject(e.ObjectType);
                         return modifyObject?.Invoke(e)??Observable.Empty<object>();
                     })

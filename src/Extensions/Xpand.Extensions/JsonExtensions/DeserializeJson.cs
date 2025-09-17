@@ -8,7 +8,6 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using Xpand.Extensions.LinqExtensions;
-using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.StringExtensions;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
@@ -57,7 +56,7 @@ namespace Xpand.Extensions.JsonExtensions {
             var utf8Reader = new Utf8JsonReader(bytes);
             utf8Reader.Read();
             var needsFlatten = utf8Reader.TokenType == JsonTokenType.StartArray && !objectType.IsArray;
-            return needsFlatten ? JsonSerializer.Deserialize(ref utf8Reader, objectType.MakeArrayType(), options).Cast<IEnumerable<object>>()
+            return needsFlatten ? ((IEnumerable<object>)JsonSerializer.Deserialize(ref utf8Reader, objectType.MakeArrayType(), options))
                 : JsonSerializer.Deserialize(ref utf8Reader, objectType, options).YieldItem();
         }
 
