@@ -500,7 +500,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.TransactionalApi {
                 .Then(_ => InnerFailingTransaction())
                 .Then(partialResults => {
                     finalStepWasCalled = true;
-             
+                    partialResults.ShouldBeEmpty();
                     dataReceivedInFinalStep.AddRange(partialResults.SelectMany(s => s));
                     return Observable.Return(Unit.Default);
                 })
@@ -508,8 +508,8 @@ namespace Xpand.Extensions.Tests.FaultHubTests.TransactionalApi {
             var result = await outerTransactionStream.Capture();
 
             step1Succeeded.ShouldBe(true, "The successful inner step should have executed.");
-            finalStepWasCalled.ShouldBe(true, "The final step should have been called with the partial results.");
-            dataReceivedInFinalStep.ShouldContain("Partial Success Data");
+            finalStepWasCalled.ShouldBe(true, "The final step should have been called, albeit with empty results.");
+            dataReceivedInFinalStep.ShouldBeEmpty("A failed nested transaction should not salvage and feed partial results to the next step.");
             result.Error.ShouldNotBeNull("The stream should have failed after processing partial results.");
             
             var outermostFault = result.Error.ShouldBeOfType<FaultHubException>();
@@ -1592,7 +1592,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.TransactionalApi {
                     step2WasExecuted = true;
                     return SuccessfulOperation(new SubscriptionCounter()).Select(u => (object)u);
                 })
-                .RunFailFast(isNonCritical: ex => ex is TimeoutException); // Global predicate does NOT match
+                .RunFailFast(isNonCritical: ex => ex is TimeoutException);
 
             await transaction.PublishFaults().Capture();
 
