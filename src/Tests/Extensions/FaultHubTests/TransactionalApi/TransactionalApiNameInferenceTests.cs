@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using NUnit.Framework;
 using Shouldly;
-using Xpand.Extensions.Reactive.FaultHub.Transaction;
+using Xpand.Extensions.Reactive.Relay.Transaction;
 
 namespace Xpand.Extensions.Tests.FaultHubTests.TransactionalApi {
     [TestFixture]

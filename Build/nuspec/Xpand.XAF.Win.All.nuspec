@@ -19,6 +19,7 @@
         <dependency id="Xpand.Extensions" version="4.251.5.1" />
         <dependency id="Xpand.Extensions.Office.Cloud" version="4.251.5.1" />
         <dependency id="Xpand.Extensions.Reactive" version="4.251.5.1" />
+        <dependency id="Xpand.Extensions.Reactive.Relay" version="4.251.5.1" />
         <dependency id="Xpand.Extensions.XAF" version="4.251.5.1" />
         <dependency id="Xpand.Extensions.XAF.Xpo" version="4.251.5.1" />
         <dependency id="Xpand.XAF.Modules.AutoCommit" version="4.251.5.1" />
@@ -59,6 +60,7 @@
         <dependency id="Xpand.Extensions" version="4.251.5.1" />
         <dependency id="Xpand.Extensions.Office.Cloud" version="4.251.5.1" />
         <dependency id="Xpand.Extensions.Reactive" version="4.251.5.1" />
+        <dependency id="Xpand.Extensions.Reactive.Relay" version="4.251.5.1" />
         <dependency id="Xpand.Extensions.XAF" version="4.251.5.1" />
         <dependency id="Xpand.Extensions.XAF.Xpo" version="4.251.5.1" />
         <dependency id="Xpand.XAF.Modules.AutoCommit" version="4.251.5.1" />

@@ -12,7 +12,7 @@ using Xpand.Extensions.ExpressionExtensions;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Numeric;
 using Xpand.Extensions.Reactive.Conditional;
-using Xpand.Extensions.Reactive.FaultHub;
+using Xpand.Extensions.Reactive.Relay;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;

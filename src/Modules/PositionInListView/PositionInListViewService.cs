@@ -12,7 +12,7 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.Xpo;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Conditional;
-using Xpand.Extensions.Reactive.FaultHub;
+using Xpand.Extensions.Reactive.Relay;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.Tracing;

@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 using Xpand.Extensions.ObjectExtensions;
 
 
-namespace Xpand.Extensions.Reactive.FaultHub.Transaction{
+namespace Xpand.Extensions.Reactive.Relay.Transaction{
     public static partial class Transaction {
         private static ITransactionBuilder<TNext> Then<TCurrent, TNext>(this ITransactionBuilder<TCurrent> builder, StepAction<TCurrent, TNext> stepAction) {
             var ib = (TransactionBuilder<TCurrent>)builder;

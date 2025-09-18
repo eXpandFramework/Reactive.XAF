@@ -8,8 +8,8 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using NUnit.Framework;
 using Shouldly;
-using Xpand.Extensions.Reactive.FaultHub;
-using Xpand.Extensions.Reactive.FaultHub.Transaction;
+using Xpand.Extensions.Reactive.Relay;
+using Xpand.Extensions.Reactive.Relay.Transaction;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 

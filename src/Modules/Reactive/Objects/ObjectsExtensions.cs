@@ -6,7 +6,7 @@ using System.Reactive.Linq;
 using DevExpress.ExpressApp.DC;
 using DevExpress.Persistent.Base;
 using Xpand.Extensions.Reactive.Combine;
-using Xpand.Extensions.Reactive.FaultHub;
+using Xpand.Extensions.Reactive.Relay;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.NonPersistentObjects;
 

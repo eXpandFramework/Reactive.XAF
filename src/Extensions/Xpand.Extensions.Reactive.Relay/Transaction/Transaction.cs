@@ -11,7 +11,7 @@ using Xpand.Extensions.Reactive.ErrorHandling;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 
-namespace Xpand.Extensions.Reactive.FaultHub.Transaction {
+namespace Xpand.Extensions.Reactive.Relay.Transaction {
     public static partial class Transaction {
         public static IObservable<TFinal[]> RunFailFast<TFinal>(this ITransactionBuilder<TFinal> builder, Func<Exception, bool> isNonCritical = null,
             DataSalvageStrategy dataSalvageStrategy = DataSalvageStrategy.EmitEmpty) 

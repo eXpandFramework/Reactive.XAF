@@ -5,7 +5,7 @@ using System.Linq;
 using Xpand.Extensions.ExceptionExtensions;
 using Xpand.Extensions.LinqExtensions;
 
-namespace Xpand.Extensions.Reactive.FaultHub{
+namespace Xpand.Extensions.Reactive.Relay{
     public class FaultHubException : Exception {
         public const string SystemTag = "_";
         public FaultHubException(string message, Exception innerException,object[] context,IReadOnlyList<string> tags = null, string boundaryName="",string boundaryPath="",int boundaryLineNumber=0):

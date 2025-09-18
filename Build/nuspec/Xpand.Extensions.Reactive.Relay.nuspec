@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<package>
+  <metadata>
+    <id>Xpand.Extensions.Reactive.Relay</id>
+    <version>4.251.5.1</version>
+    <authors>eXpandFramework</authors>
+    <owners>eXpandFramework</owners>
+    <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/eXpandFramework/Reactive.XAF/blob/master/src/Extensions/Xpand.Extensions.Reactive.Relay</projectUrl>
+    <iconUrl>http://sign.expandframework.com</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Xpand.Extensions.Reactive.Relay</description>
+    <releaseNotes>https://github.com/eXpandFramework/Reactive.XAF/releases</releaseNotes>
+    <copyright>eXpandFramework.com</copyright>
+    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Workflow, Stream-Resilience, Xpand.Extensions.Reactive.Relay, 25.1.5</tags>
+    <dependencies>
+      <group targetFramework="net9.0">
+        <dependency id="Xpand.Extensions" version="4.251.5.1" />
+        <dependency id="Xpand.Extensions.Reactive" version="4.251.5.1" />
+        <dependency id="System.Interactive.Async" version="6.0.1" />
+        <dependency id="System.Interactive" version="6.0.1" />
+        <dependency id="System.Linq.Async" version="6.0.1" />
+        <dependency id="Microsoft.Extensions.Caching.Memory" version="9.0.8" />
+        <dependency id="System.Reactive" version="6.0.1" />
+      </group>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="Xpand.Extensions.Reactive.Relay.dll" target="lib\net9.0\Xpand.Extensions.Reactive.Relay.dll" />
+    <file src="Xpand.Extensions.Reactive.Relay.pdb" target="lib\net9.0\Xpand.Extensions.Reactive.Relay.pdb" />
+    <file src="..\build\Targets\CopySymbols.targets" target="build\Xpand.Extensions.Reactive.Relay.targets" />
+    <file src="..\build\Targets\CopySymbols.ps1" target="build\CopySymbols.ps1" />
+  </files>
+</package>

@@ -7,7 +7,7 @@ using akarnokd.reactive_extensions;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.Numeric;
-using Xpand.Extensions.Reactive.FaultHub;
+using Xpand.Extensions.Reactive.Relay;
 using Xpand.TestsLib.Common;
 
 namespace Xpand.Extensions.Tests.FaultHubTests.ProofOfConcepts {

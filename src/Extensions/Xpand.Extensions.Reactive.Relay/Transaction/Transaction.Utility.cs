@@ -6,7 +6,7 @@ using System.Reactive.Concurrency;
 using System.Threading;
 using Xpand.Extensions.LinqExtensions;
 
-namespace Xpand.Extensions.Reactive.FaultHub.Transaction{
+namespace Xpand.Extensions.Reactive.Relay.Transaction{
     public static partial class Transaction {
         private static readonly AsyncLocal<int> TransactionNestingLevel = new();
         public const string NonCriticalStepTag =FaultHubException.SystemTag+ "NonCriticalStep";

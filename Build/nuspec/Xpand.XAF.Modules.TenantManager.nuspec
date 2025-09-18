@@ -12,7 +12,7 @@
     <description>The `TenantManager` integrates cloud authentication with dedicated datastore Organizations over a certainly controlled management;</description>
     <releaseNotes>https://github.com/eXpandFramework/Reactive.XAF/releases</releaseNotes>
     <copyright>eXpandFramework.com</copyright>
-    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, TenantManager, 25.1.4</tags>
+    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, TenantManager, 25.1.5</tags>
     <dependencies>
       <group targetFramework="net9.0">
         <dependency id="Xpand.Extensions.Reactive" version="4.251.5.1" />
@@ -22,15 +22,15 @@
         <dependency id="Xpand.XAF.Modules.Reactive" version="4.251.5.1" />
         <dependency id="Xpand.XAF.Modules.Blazor" version="4.251.5.1" />
         <dependency id="Xpand.Extensions.Blazor" version="4.251.5.1" />
-        <dependency id="DevExpress.ExpressApp.Security" version="25.1.4" />
+        <dependency id="DevExpress.ExpressApp.Security" version="25.1.5" />
         <dependency id="Xpand.Patcher" version="9.0" />
         <dependency id="System.Reactive" version="6.0.1" />
-        <dependency id="DevExpress.Persistent.Base" version="25.1.4" />
-        <dependency id="DevExpress.ExpressApp.Xpo" version="25.1.4" />
+        <dependency id="DevExpress.Persistent.Base" version="25.1.5" />
+        <dependency id="DevExpress.ExpressApp.Xpo" version="25.1.5" />
         <dependency id="Fasterflect.Xpand" version="2.0.7" />
         <dependency id="System.Text.Json" version="9.0.8" />
         <dependency id="Xpand.Collections" version="1.0.4" />
-        <dependency id="DevExpress.ExpressApp.Blazor" version="25.1.4" />
+        <dependency id="DevExpress.ExpressApp.Blazor" version="25.1.5" />
         <dependency id="System.Threading.Tasks.Dataflow" version="9.0.8" />
         <dependency id="Microsoft.AspNetCore.Components" version="9.0.8" />
       </group>

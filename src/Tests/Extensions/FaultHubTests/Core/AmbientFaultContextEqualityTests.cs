@@ -1,6 +1,6 @@
 ﻿using NUnit.Framework;
 using Shouldly;
-using Xpand.Extensions.Reactive.FaultHub;
+using Xpand.Extensions.Reactive.Relay;
 
 namespace Xpand.Extensions.Tests.FaultHubTests.Core {
     [TestFixture]

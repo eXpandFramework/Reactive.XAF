@@ -13,7 +13,7 @@ using HarmonyLib;
 using Xpand.Extensions.ConfigurationExtensions;
 using Xpand.Extensions.ExceptionExtensions;
 using Xpand.Extensions.Reactive.ErrorHandling;
-using Xpand.Extensions.Reactive.FaultHub;
+using Xpand.Extensions.Reactive.Relay;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.Reactive.Services.Controllers;

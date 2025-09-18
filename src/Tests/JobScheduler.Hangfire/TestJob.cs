@@ -38,7 +38,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests {
         [JobProvider]
         public async Task<bool> CreateObjectAnonymous(PerformContext context) 
             => await Provider.RunWithStorageAsync(application => {
-                    application.Security.Cast<SecurityStrategyComplex>().AnonymousAllowedTypes.Add(typeof(JS));
+                    ((SecurityStrategyComplex)application.Security).AnonymousAllowedTypes.Add(typeof(JS));
                     return application.UseObjectSpace(space => Observable.Range(0, 10)
                         .Select(_ => space.CreateObject<JS>()).Commit());
                 })

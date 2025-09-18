@@ -4,11 +4,11 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
-using Xpand.Extensions.Reactive.FaultHub;
+using Xpand.Extensions.Reactive.Relay;
 using Xpand.Extensions.Reactive.Utility;
 
 namespace Xpand.Extensions.Tests.FaultHubTests.Core {
-    [TestFixture]
+    
     public class NestedResilienceRenderingTests : FaultHubTestBase {
         // [Test][Ignore("not validated")]
         public void Renderer_Collapses_Redundant_Boundaries_Defined_In_Same_Method() {

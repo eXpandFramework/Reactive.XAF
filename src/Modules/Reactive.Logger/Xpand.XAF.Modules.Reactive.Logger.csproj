@@ -26,7 +26,7 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Xpand.Extensions.Reactive">
-        <HintPath>..\..\..\bin\Xpand.Extensions.Reactive.FaultHub.dll</HintPath>
+      <HintPath>..\..\..\bin\Xpand.Extensions.Reactive.Relay.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.Extensions">
       <HintPath>..\..\..\bin\Xpand.Extensions.dll</HintPath>

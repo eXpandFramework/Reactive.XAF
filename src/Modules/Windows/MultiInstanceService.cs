@@ -5,7 +5,7 @@ using System.Reactive.Linq;
 using System.Runtime.InteropServices;
 using DevExpress.ExpressApp;
 using Xpand.Extensions.ProcessExtensions;
-using Xpand.Extensions.Reactive.FaultHub;
+using Xpand.Extensions.Reactive.Relay;
 using Xpand.Extensions.Reactive.Transform;
 
 namespace Xpand.XAF.Modules.Windows {

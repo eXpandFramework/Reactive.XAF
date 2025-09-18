@@ -12,7 +12,7 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using Fasterflect;
 using Xpand.Extensions.Reactive.Combine;
-using Xpand.Extensions.Reactive.FaultHub;
+using Xpand.Extensions.Reactive.Relay;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.TypeExtensions;
 using Xpand.Extensions.XAF.ApplicationModulesManagerExtensions;

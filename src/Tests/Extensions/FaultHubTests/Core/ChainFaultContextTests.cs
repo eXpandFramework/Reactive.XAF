@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using NUnit.Framework;
 using Shouldly;
-using Xpand.Extensions.Reactive.FaultHub;
+using Xpand.Extensions.Reactive.Relay;
 using Xpand.Extensions.Reactive.Utility;
 
 namespace Xpand.Extensions.Tests.FaultHubTests.Core {
@@ -438,8 +438,8 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Core {
             var logicalStack = finalFault.LogicalStackTrace.ToList();
 
             logicalStack.Count.ShouldBe(2);
-            logicalStack[0].MemberName.ShouldBe(nameof(Pushes_Its_Own_Frame_When_Upstream_Frame_Is_Different));
-            logicalStack[1].MemberName.ShouldBe(nameof(UpstreamOperation));
+            logicalStack[1].MemberName.ShouldBe(nameof(Pushes_Its_Own_Frame_When_Upstream_Frame_Is_Different));
+            logicalStack[0].MemberName.ShouldBe(nameof(UpstreamOperation));
         }
     }
 }

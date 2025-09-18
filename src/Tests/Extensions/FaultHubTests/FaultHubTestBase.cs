@@ -12,7 +12,7 @@ using Shouldly;
 using Xpand.Extensions.AssemblyExtensions;
 using Xpand.Extensions.Numeric;
 using Xpand.Extensions.Reactive.ErrorHandling;
-using Xpand.Extensions.Reactive.FaultHub;
+using Xpand.Extensions.Reactive.Relay;
 using Xpand.Extensions.StringExtensions;
 using Xpand.TestsLib;
 

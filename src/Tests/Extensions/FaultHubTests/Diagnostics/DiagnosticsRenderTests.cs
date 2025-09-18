@@ -2,7 +2,7 @@
 using System.Linq;
 using NUnit.Framework;
 using Shouldly;
-using Xpand.Extensions.Reactive.FaultHub;
+using Xpand.Extensions.Reactive.Relay;
 
 namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics {
     public class DiagnosticsRenderTests  : FaultHubExtensionTestBase {
@@ -226,7 +226,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics {
             var innerEx = new InvalidOperationException("Failure");
             var multiRoleCtx = new AmbientFaultContext {
                 BoundaryName = "MultiRoleOperation",
-                Tags = [Extensions.Reactive.FaultHub.Transaction.Transaction.StepNodeTag, Extensions.Reactive.FaultHub.Transaction.Transaction.TransactionNodeTag, nameof(Extensions.Reactive.FaultHub.Transaction.Transaction.RunToEnd)]
+                Tags = [Extensions.Reactive.Relay.Transaction.Transaction.StepNodeTag, Extensions.Reactive.Relay.Transaction.Transaction.TransactionNodeTag, nameof(Extensions.Reactive.Relay.Transaction.Transaction.RunToEnd)]
             };
             var fhMultiRole = new FaultHubException("Multi-role failed", innerEx, multiRoleCtx);
             var rootCtx = new AmbientFaultContext {

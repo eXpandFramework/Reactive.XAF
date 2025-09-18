@@ -8,7 +8,7 @@ using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 
-namespace Xpand.Extensions.Reactive.FaultHub{
+namespace Xpand.Extensions.Reactive.Relay{
     public static class FaultHubQuery {
         public static IObservable<Alert> ToAlert(this IObservable<FaultHubException> source, params AlertRule[] rules)  
             => source.Select(ex => new { Exception = ex, Tree = ex.OperationTree() }).WhenNotDefault(x => x.Tree)

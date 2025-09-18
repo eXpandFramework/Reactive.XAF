@@ -7,7 +7,9 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
-using Xpand.Extensions.Reactive.FaultHub;
+using Xpand.Extensions.Numeric;
+using Xpand.Extensions.Reactive.Relay;
+using Xpand.Extensions.Reactive.Transform.System;
 using Xpand.Extensions.Reactive.Utility;
 
 namespace Xpand.Extensions.Tests.FaultHubTests.Core {
@@ -99,6 +101,40 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Core {
 
             logicalStack.Count(f => f.MemberName == "RecursiveMethodWithSameFrame").ShouldBe(1);
         }
-        
+    
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private IObservable<Unit> TopLevel_Operation()
+            => MidLevel_Helper()
+                .ChainFaultContext();
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private IObservable<Unit> MidLevel_Helper()
+            => LowLevel_Error_Source().PushStackFrame();
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private IObservable<Unit> LowLevel_Error_Source()
+            => 100.Milliseconds().Timer()
+                .SelectMany(_ => Observable.Throw<Unit>(new InvalidOperationException("Failure at the lowest level.")))
+                .PushStackFrame();
+
+        [Test]
+        public async Task Nested_PushStackFrame_Preserves_Correct_Order_On_Final_Report() {
+            await TopLevel_Operation().PublishFaults().Capture();
+
+            BusEvents.Count.ShouldBe(1);
+            var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
+            var logicalStack = fault.LogicalStackTrace.Select(f => f.MemberName).ToArray();
+
+            logicalStack.ShouldNotBeNull();
+
+            var topLevelIndex = Array.IndexOf(logicalStack, nameof(TopLevel_Operation));
+            var midLevelIndex = Array.IndexOf(logicalStack, nameof(MidLevel_Helper));
+            var lowLevelIndex = Array.IndexOf(logicalStack, nameof(LowLevel_Error_Source));
+
+            lowLevelIndex.ShouldBeLessThan(midLevelIndex,
+                "The logical stack is not in the correct order: LowLevel should come before MidLevel.");
+            midLevelIndex.ShouldBeLessThan(topLevelIndex,
+                "The logical stack is not in the correct order: MidLevel should come before TopLevel.");
+        }
     }
 }

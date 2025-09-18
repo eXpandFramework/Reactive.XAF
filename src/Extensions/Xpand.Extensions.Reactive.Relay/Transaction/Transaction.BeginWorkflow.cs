@@ -11,7 +11,7 @@ using Xpand.Extensions.Reactive.ErrorHandling;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 
-namespace Xpand.Extensions.Reactive.FaultHub.Transaction{
+namespace Xpand.Extensions.Reactive.Relay.Transaction{
     partial class Transaction {
         
 

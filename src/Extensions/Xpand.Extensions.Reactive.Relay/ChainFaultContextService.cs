@@ -9,7 +9,7 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using Xpand.Extensions.StringExtensions;
 
-namespace Xpand.Extensions.Reactive.FaultHub{
+namespace Xpand.Extensions.Reactive.Relay{
     public static class ChainFaultContextService {
         internal static readonly AsyncLocal<IImmutableStack<object>> ContextStack=NewContext<IImmutableStack<object>>();
 
@@ -86,8 +86,8 @@ namespace Xpand.Extensions.Reactive.FaultHub{
             var stackTraceForLog = string.Join(" -> ", fullStack.Select(f => f.MemberName));
             LogFast($"[CTX-TRACE][ChainCtx-Catch] Reassembled stack. Inner: {snapshot.CapturedStack?.Count ?? 0}, Parent: {originalStack?.Count ?? 0}, Total: {fullStack.Count}. Stack: [{stackTraceForLog}]");
             var selfFrame = new LogicalStackFrame(memberName, filePath, lineNumber, context);
-            if (!fullStack.FirstOrDefault().Equals(selfFrame)) {
-                fullStack.Insert(0, new LogicalStackFrame(selfFrame.MemberName.Remove(" "),selfFrame.FilePath, selfFrame.LineNumber,selfFrame.Context));
+            if (!fullStack.Contains(selfFrame)) {
+                fullStack.Add(new LogicalStackFrame(selfFrame.MemberName.Remove(" "),selfFrame.FilePath, selfFrame.LineNumber,selfFrame.Context));
             }
             var faultContext = fullStack.NewFaultContext(context,tags,memberName, filePath, lineNumber);
             return e.ProcessFault(faultContext, Observable.Throw<T>);

@@ -9,9 +9,10 @@ namespace Xpand.Extensions.Reactive.Utility {
     public static partial class Utility {
         public static IObservable<TSource> UseContext<TSource>(this IObservable<TSource> source, object contextValue, params IAsyncLocal[] contexts) 
             => Observable.Using(() => {
-                    var originalValues = contexts
-                        .Do(local => local.Value=contextValue)
-                        .Select(c => c.Value).ToArray();
+                    var originalValues = contexts.Select(c => c.Value).ToArray();
+                    foreach (var local in contexts) {
+                        local.Value = contextValue;
+                    }
                     return Disposable.Create(contexts, locals => {
                         for (int i = 0; i < locals.Length; i++) {
                             locals[i].Value = originalValues[i];

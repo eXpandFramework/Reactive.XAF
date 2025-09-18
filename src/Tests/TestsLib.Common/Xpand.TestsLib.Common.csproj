@@ -43,8 +43,8 @@
       <HintPath>..\..\..\bin\Xpand.Extensions.Reactive.dll</HintPath>
       <SpecificVersion>false</SpecificVersion>
     </Reference>
-      <Reference Include="Xpand.Extensions.Reactive.FaultHub">
-      <HintPath>..\..\..\bin\Xpand.Extensions.Reactive.FaultHub.dll</HintPath>
+    <Reference Include="Xpand.Extensions.Reactive.Relay">
+      <HintPath>..\..\..\bin\Xpand.Extensions.Reactive.Relay.dll</HintPath>
       <SpecificVersion>false</SpecificVersion>
     </Reference>
     <Reference Include="Xpand.Extensions.XAF">

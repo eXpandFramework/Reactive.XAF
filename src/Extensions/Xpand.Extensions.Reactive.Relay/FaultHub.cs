@@ -9,10 +9,10 @@ using Microsoft.Extensions.Caching.Memory;
 using Xpand.Extensions.ExceptionExtensions;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.MemoryCacheExtensions;
-using Xpand.Extensions.Reactive.FaultHub.Transaction;
+using Xpand.Extensions.Reactive.Relay.Transaction;
 using Xpand.Extensions.Reactive.Utility;
 
-namespace Xpand.Extensions.Reactive.FaultHub {
+namespace Xpand.Extensions.Reactive.Relay {
     public static class FaultHub {
         internal const string CapturedStackKey = "FaultHub.CapturedStack";
         public static readonly AsyncLocal<IReadOnlyList<LogicalStackFrame>> LogicalStackContext=NewContext<IReadOnlyList<LogicalStackFrame>>();

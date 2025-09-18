@@ -5,8 +5,8 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
-using Xpand.Extensions.Reactive.FaultHub;
-using Xpand.Extensions.Reactive.FaultHub.Transaction;
+using Xpand.Extensions.Reactive.Relay;
+using Xpand.Extensions.Reactive.Relay.Transaction;
 
 namespace Xpand.Extensions.Tests.FaultHubTests.ProofOfConcepts{
     public class AggregateStepChainTests {

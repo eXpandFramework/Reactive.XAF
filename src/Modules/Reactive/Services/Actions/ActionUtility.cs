@@ -12,7 +12,7 @@ using Xpand.Extensions.XAF.FrameExtensions;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Utils;
 using Fasterflect;
-using Xpand.Extensions.Reactive.FaultHub;
+using Xpand.Extensions.Reactive.Relay;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.ActionExtensions;
 using Xpand.Extensions.XAF.ViewExtensions;

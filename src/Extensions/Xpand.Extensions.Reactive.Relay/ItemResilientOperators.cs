@@ -9,7 +9,7 @@ using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Enumerable = System.Linq.Enumerable;
 
-namespace Xpand.Extensions.Reactive.FaultHub {
+namespace Xpand.Extensions.Reactive.Relay {
     
     public static class ItemResilientOperators {
         private static IObservable<T> ApplyItemResilience<T>(this IObservable<T> source, Func<IObservable<T>, IObservable<T>> retryStrategy,
