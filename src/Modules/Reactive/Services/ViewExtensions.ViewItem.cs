@@ -10,7 +10,7 @@ using DevExpress.ExpressApp.Model;
 using Fasterflect;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.Reactive.Conditional;
-using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
+using Xpand.Extensions.Reactive.FaultHub;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.ViewExtensions;
 
@@ -24,7 +24,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<TTabbedControl> WhenTabControl<TTabbedControl>(this XafApplication application, Type objectType=null, Func<DetailView, bool> match=null, Func<IModelTabbedGroup, bool> tabMatch=null) 
             => application.WhenDetailViewCreated(objectType).ToDetailView()
                 .Where(view => match?.Invoke(view)??true)
-                .SelectMany(detailView => detailView.WhenTabControl(tabMatch)).Cast<TTabbedControl>().PushStackFrame();
+                .SelectMany(detailView => detailView.WhenTabControl(tabMatch)).Cast<TTabbedControl>()
+                .PushStackFrame();
         
         public static IObservable<TTabbedControl> WhenTabControl<TTabbedControl>(this IObservable<DashboardViewItem> source) 
             => source.SelectMany(item => item.Frame.View.ToDetailView().WhenTabControl()).Cast<TTabbedControl>().PushStackFrame();

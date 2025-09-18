@@ -4,7 +4,7 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading;
-using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
+using Xpand.Extensions.Reactive.FaultHub;
 
 namespace Xpand.Extensions.Tests.FaultHubTests.ProofOfConcepts{
 

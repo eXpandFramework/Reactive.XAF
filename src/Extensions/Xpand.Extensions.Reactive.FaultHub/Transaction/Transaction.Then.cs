@@ -5,7 +5,8 @@ using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using Xpand.Extensions.ObjectExtensions;
 
-namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
+
+namespace Xpand.Extensions.Reactive.FaultHub.Transaction{
     public static partial class Transaction {
         private static ITransactionBuilder<TNext> Then<TCurrent, TNext>(this ITransactionBuilder<TCurrent> builder, StepAction<TCurrent, TNext> stepAction) {
             var ib = (TransactionBuilder<TCurrent>)builder;

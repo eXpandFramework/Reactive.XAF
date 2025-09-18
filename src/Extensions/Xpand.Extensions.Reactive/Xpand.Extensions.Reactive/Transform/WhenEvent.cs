@@ -30,7 +30,7 @@ namespace Xpand.Extensions.Reactive.Transform {
         public static IObservable<T> ProcessEvent<T>(this T source, string eventName, IScheduler scheduler = null) 
             => source.FromEventPattern<EventArgs>(eventName, scheduler).Select(pattern => pattern.EventArgs).To(source);
 
-        internal static IObservable<EventPattern<TArgs>> FromEventPattern<TArgs>(this object source, string eventName, IScheduler scheduler) {
+        public static IObservable<EventPattern<TArgs>> FromEventPattern<TArgs>(this object source, string eventName, IScheduler scheduler) {
             var eventInfo = source.EventInfo(eventName);
             if (eventInfo.info == null) {
                 throw new ArgumentException($"Event '{eventName}' not found on type '{source.GetType().Name}'.");

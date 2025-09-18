@@ -24,6 +24,9 @@
     <Reference Include="Xpand.Extensions.XAF">
       <HintPath>..\..\..\bin\Xpand.Extensions.XAF.dll</HintPath>
     </Reference>
+    <Reference Include="Xpand.Extensions.Reactive">
+        <HintPath>..\..\..\bin\Xpand.Extensions.Reactive.FaultHub.dll</HintPath>
+    </Reference>
     <Reference Include="Xpand.XAF.Modules.Reactive">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>

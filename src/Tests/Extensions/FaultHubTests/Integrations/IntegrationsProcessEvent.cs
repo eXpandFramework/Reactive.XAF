@@ -5,7 +5,7 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
-using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
+using Xpand.Extensions.Reactive.FaultHub;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 

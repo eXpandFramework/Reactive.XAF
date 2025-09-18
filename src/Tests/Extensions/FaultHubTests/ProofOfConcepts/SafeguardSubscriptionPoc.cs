@@ -4,7 +4,7 @@ using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using NUnit.Framework;
 using Shouldly;
-using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
+using Xpand.Extensions.Reactive.FaultHub;
 using Xpand.Extensions.Reactive.Utility;
 
 namespace Xpand.Extensions.Tests.FaultHubTests.ProofOfConcepts {

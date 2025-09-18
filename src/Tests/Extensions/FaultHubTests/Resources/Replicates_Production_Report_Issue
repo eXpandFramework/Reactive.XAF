@@ -5,15 +5,15 @@ Schedule Web Scraping failed (HomePageUrl) [Transaction, Sequential, RunFailFast
     │ └ Fetch Initial Urls [Step]
     │   • Root Cause: System.Exception: Failed to fetch URLs
     │     --- Invocation Stack ---
-    │       at FetchInitialUrls in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 57
-    │       at Observable.Return in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 56
-    │       at GetPageLinks in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 56
-    │       (HomePageUrl, UserAgent) at ExtractAndProcessLinks in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\Diagnostics\ProductionScenarioBaseTest.cs:line 42
-    │       at ExtractAndProcessLinks in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 24
-    │       at NavigateToHomePage in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 22
-    │       (HomePageUrl) at ParseHomePage in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 28
-    │       (Scheduled Context) at ScheduleWebScraping in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\Diagnostics\ProductionScenarioBaseTest.cs:line 15
-    │       (HomePageUrl) at ScheduleWebScraping in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\Diagnostics\ProductionScenarioBaseTest.cs:line 16
+    │       at FetchInitialUrls in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 58
+    │       at Observable.Return in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 57
+    │       at GetPageLinks in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 57
+    │       (HomePageUrl, UserAgent) at ExtractAndProcessLinks in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\Diagnostics\ProductionScenarioBaseTest.cs:line 43
+    │       at ExtractAndProcessLinks in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 25
+    │       at NavigateToHomePage in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 23
+    │       (HomePageUrl) at ParseHomePage in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 29
+    │       (Scheduled Context) at ScheduleWebScraping in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\Diagnostics\ProductionScenarioBaseTest.cs:line 16
+    │       (HomePageUrl) at ScheduleWebScraping in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\Diagnostics\ProductionScenarioBaseTest.cs:line 17
     │     --- Original Exception Details ---
     │       System.Exception: Failed to fetch URLs
     └ Scrape Data From Links [Step, Transaction, Sequential, Nested, RunToEnd]
@@ -23,19 +23,19 @@ Schedule Web Scraping failed (HomePageUrl) [Transaction, Sequential, RunFailFast
             └ Extract Content [Step]
               • Root Cause: System.Exception: Failed to extract content
                 --- Invocation Stack ---
-                  at ExtractContent in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\Diagnostics\ProductionScenarioBaseTest.cs:line 94
-                  at ValidatePage in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\Diagnostics\ProductionScenarioBaseTest.cs:line 93
-                  at DataExtractionTransaction in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\Diagnostics\ProductionScenarioBaseTest.cs:line 93
-                  at WhenLinkScraped in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\Diagnostics\ProductionScenarioBaseTest.cs:line 80
-                  at ScrapeDataFromLink in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\Diagnostics\ProductionScenarioBaseTest.cs:line 66
-                  at ScrapeDataFromLinks in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\Diagnostics\ProductionScenarioBaseTest.cs:line 66
-                  at GetPageLinks in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\Diagnostics\ProductionScenarioBaseTest.cs:line 43
-                  at Observable.Return in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\Diagnostics\ProductionScenarioBaseTest.cs:line 42
-                  (HomePageUrl, UserAgent) at ExtractAndProcessLinks in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\Diagnostics\ProductionScenarioBaseTest.cs:line 42
-                  at ExtractAndProcessLinks in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\Diagnostics\ProductionScenarioBaseTest.cs:line 24
-                  at NavigateToHomePage in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\Diagnostics\ProductionScenarioBaseTest.cs:line 22
-                  (HomePageUrl) at ParseHomePage in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\Diagnostics\ProductionScenarioBaseTest.cs:line 28
-                  (Scheduled Context) at ScheduleWebScraping in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\Diagnostics\ProductionScenarioBaseTest.cs:line 15
-                  (HomePageUrl) at ScheduleWebScraping in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\Diagnostics\ProductionScenarioBaseTest.cs:line 16
+                  at ExtractContent in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\Diagnostics\ProductionScenarioBaseTest.cs:line 95
+                  at ValidatePage in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\Diagnostics\ProductionScenarioBaseTest.cs:line 94
+                  at DataExtractionTransaction in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\Diagnostics\ProductionScenarioBaseTest.cs:line 94
+                  at WhenLinkScraped in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\Diagnostics\ProductionScenarioBaseTest.cs:line 81
+                  at ScrapeDataFromLink in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\Diagnostics\ProductionScenarioBaseTest.cs:line 67
+                  at ScrapeDataFromLinks in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\Diagnostics\ProductionScenarioBaseTest.cs:line 67
+                  at GetPageLinks in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\Diagnostics\ProductionScenarioBaseTest.cs:line 44
+                  at Observable.Return in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\Diagnostics\ProductionScenarioBaseTest.cs:line 43
+                  (HomePageUrl, UserAgent) at ExtractAndProcessLinks in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\Diagnostics\ProductionScenarioBaseTest.cs:line 43
+                  at ExtractAndProcessLinks in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\Diagnostics\ProductionScenarioBaseTest.cs:line 25
+                  at NavigateToHomePage in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\Diagnostics\ProductionScenarioBaseTest.cs:line 23
+                  (HomePageUrl) at ParseHomePage in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\Diagnostics\ProductionScenarioBaseTest.cs:line 29
+                  (Scheduled Context) at ScheduleWebScraping in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\Diagnostics\ProductionScenarioBaseTest.cs:line 16
+                  (HomePageUrl) at ScheduleWebScraping in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\Diagnostics\ProductionScenarioBaseTest.cs:line 17
                 --- Original Exception Details ---
                   System.Exception: Failed to extract content

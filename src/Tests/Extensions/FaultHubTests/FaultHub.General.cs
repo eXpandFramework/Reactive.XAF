@@ -11,7 +11,7 @@ using Shouldly;
 using Xpand.Extensions.ExceptionExtensions;
 using Xpand.Extensions.Numeric;
 using Xpand.Extensions.Reactive.ErrorHandling;
-using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
+using Xpand.Extensions.Reactive.FaultHub;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 

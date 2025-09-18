@@ -2,7 +2,7 @@
 using System.Threading;
 using Xpand.Extensions.Reactive.Utility;
 
-namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
+namespace Xpand.Extensions.Reactive.FaultHub{
     public class AsyncLocalFactory {
         public static readonly ConcurrentBag<IAsyncLocal> RegisteredContexts = new();
         public static AsyncLocal<T> NewContext<T>() {

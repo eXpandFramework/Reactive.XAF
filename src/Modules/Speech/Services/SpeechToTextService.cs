@@ -50,14 +50,14 @@ namespace Xpand.XAF.Modules.Speech.Services {
 	public static class SpeechToTextService {
 		public static ParametrizedAction SpareTime(this (SpeechModule, Frame frame) tuple)
 			=> tuple.frame.ParametrizedAction(nameof(SpareTime));
-        public static SimpleAction SpeechToText(this (SpeechModule, Frame frame) tuple) 
-            => tuple.frame.Action(nameof(SpeechToText)).Cast<SimpleAction>();
+        public static ActionBase SpeechToText(this (SpeechModule, Frame frame) tuple) 
+            => tuple.frame.Action(nameof(SpeechToText));
         
         public static ParametrizedAction Rate(this (SpeechModule, Frame frame) tuple) 
-            => tuple.frame.Action(nameof(Rate)).Cast<ParametrizedAction>();
+            => (ParametrizedAction)tuple.frame.Action(nameof(Rate));
 
         public static SingleChoiceAction Synthesize(this (SpeechModule, Frame frame) tuple) 
-            => tuple.frame.Action(nameof(Synthesize)).Cast<SingleChoiceAction>();
+            => (SingleChoiceAction)tuple.frame.Action(nameof(Synthesize));
         
         public static IObservable<Unit> ConnectSpeechToText(this ApplicationModulesManager manager) 
 	        => manager.SpeechToTextAction(nameof(SpeechToText), CommonImage.ConvertTo, Recognize())
@@ -443,7 +443,7 @@ namespace Xpand.XAF.Modules.Speech.Services {
 		        .Select(links => links.Select(link => (link, reader: new AudioFileReader(link.File.FullName))).ToArray())
 		        .SelectMany(readers => Observable.Using(
 			        () => new CompositeDisposable(readers.Select(t => t.reader)), _ => {
-				        var firstSpeechText = readers.First().link.Cast<SpeechText>();
+				        var firstSpeechText = readers.First().link;
 				        var filename = $"{modelSpeech.DefaultStorageFolder}\\{firstSpeechText.File.Oid}_{readers.Last().link.File.Oid}.wav";
 				        WaveFileWriter.CreateWaveFile16(filename, new ConcatenatingSampleProvider(readers.Select(t => t.reader)));
 				        
@@ -524,7 +524,7 @@ namespace Xpand.XAF.Modules.Speech.Services {
 	        => manager.WhenSpeechApplication(application => application.WhenFrame(typeof(SpeechToText),ViewType.DetailView)
 		        .SelectUntilViewClosed(frame => frame.SimpleAction(actionId)
 			        .WhenExecuted().Where(e => e.Action.CommonImage()==startImage).Do(e => e.Action.SetImage(CommonImage.Stop))
-			        .Select(e => (speechToText:e.View().CurrentObject.Cast<SpeechToText>(),action:e.Action.ToSimpleAction(),context:SynchronizationContext.Current))
+			        .Select(e => (speechToText: ((SpeechToText)e.View().CurrentObject),action:e.Action.ToSimpleAction(),context:SynchronizationContext.Current))
 			        .SelectMany(t => Observable.Using(() => t.speechToText.AudioConfig(),audioConfig => operation(audioConfig, t.speechToText, t.context,t.action)))));
 
         private static IObservable<Unit> SaveTextAudioFile(this SingleChoiceAction sayItAction, SpeechVoice speechVoice, SpeechText speechText, SpeechSynthesisResult result) {

@@ -4,7 +4,7 @@ using System.Linq;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.StringExtensions;
 
-namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
+namespace Xpand.Extensions.Reactive.FaultHub{
     public record AmbientFaultContext {
         public IReadOnlyList<string> Tags { get; init; }
         public IReadOnlyList<LogicalStackFrame> LogicalStackTrace { get; init; }

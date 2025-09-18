@@ -10,7 +10,7 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Blazor;
 using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Conditional;
-using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
+using Xpand.Extensions.Reactive.FaultHub;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;

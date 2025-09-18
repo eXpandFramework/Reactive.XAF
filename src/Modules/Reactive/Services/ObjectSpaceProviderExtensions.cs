@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
-using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
+using Xpand.Extensions.Reactive.FaultHub;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
     public static partial class ObjectSpaceProviderExtensions{

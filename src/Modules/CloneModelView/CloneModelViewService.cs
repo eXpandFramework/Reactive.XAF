@@ -3,7 +3,7 @@ using System.Linq;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
-using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
+using Xpand.Extensions.Reactive.FaultHub;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.XAF.Modules.Reactive.Services;

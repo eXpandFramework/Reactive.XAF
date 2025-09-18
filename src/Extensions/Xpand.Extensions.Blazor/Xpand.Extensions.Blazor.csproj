@@ -21,9 +21,9 @@
     <Compile Include="..\..\Common\AssemblyInfoVersion.cs" Link="Properties\AssemblyInfoVersion.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DevExpress.ExpressApp.Blazor" Version="25.1.4" />
-    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="25.1.4" />
-    <PackageReference Include="DevExpress.ExpressApp" Version="25.1.4" />
+    <PackageReference Include="DevExpress.ExpressApp.Blazor" Version="25.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="25.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp" Version="25.1.5" />
     <PackageReference Include="System.ServiceModel.Security" Version="4.10.2" />
     <PackageReference Include="System.CodeDom" Version="9.0" />
     <FrameworkReference Include="Microsoft.AspNetCore.App" />

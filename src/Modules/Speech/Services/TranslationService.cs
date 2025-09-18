@@ -34,7 +34,7 @@ using Xpand.XAF.Modules.Speech.BusinessObjects;
 namespace Xpand.XAF.Modules.Speech.Services {
     public static class TranslationService {
         public static SingleChoiceAction Translate(this (SpeechModule, Frame frame) tuple) 
-            => tuple.frame.Action(nameof(Translate)).Cast<SingleChoiceAction>();
+            => (SingleChoiceAction)tuple.frame.Action(nameof(Translate));
         
         internal static IObservable<Unit> Translate(this ApplicationModulesManager manager)
             => manager.RegisterViewSingleChoiceAction(nameof(Translate), action => {
@@ -44,8 +44,8 @@ namespace Xpand.XAF.Modules.Speech.Services {
                     action.TargetViewType=ViewType.ListView;
                     action.TargetObjectType = typeof(SpeechText);
                 })
-                .AddItems(action => action.Controller.Frame.AsNestedFrame().ViewItem.View.CurrentObject
-                    .Cast<SpeechToText>().SpeechVoices.Select(voice => voice.Language.ShortName()).Distinct().ToNowObservable()
+                .AddItems(action => ((SpeechToText)action.Controller.Frame.AsNestedFrame().ViewItem.View.CurrentObject)
+                    .SpeechVoices.Select(voice => voice.Language.ShortName()).Distinct().ToNowObservable()
                     .Do(language => action.Items.Add(new ChoiceActionItem(language, language))).ToUnit() )
                 .WhenConcatExecution(e => {
                     var targetLanguage = (string)e.SelectedChoiceActionItem.Data;

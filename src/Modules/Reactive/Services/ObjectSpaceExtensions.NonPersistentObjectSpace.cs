@@ -8,7 +8,7 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using Fasterflect;
 using Xpand.Extensions.LinqExtensions;
-using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
+using Xpand.Extensions.Reactive.FaultHub;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.Extensions.XAF.NonPersistentObjects;

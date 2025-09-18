@@ -8,7 +8,7 @@ using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 
-namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
+namespace Xpand.Extensions.Reactive.FaultHub{
     public static class FaultHubQuery {
         public static IObservable<Alert> ToAlert(this IObservable<FaultHubException> source, params AlertRule[] rules)  
             => source.Select(ex => new { Exception = ex, Tree = ex.OperationTree() }).WhenNotDefault(x => x.Tree)
@@ -33,8 +33,8 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
                 var leafNodes = tree.Descendants().Where(n => n.RootCause != null).ToList();
                 return leafNodes.Select(leaf => {
                     var path = tree.FindPathToNode( leaf);
-                    var stepNode = path.LastOrDefault(n => n.Tags.Contains(Transaction.StepNodeTag));
-                    var transactionNode = path.FirstOrDefault(n => n.Tags.Contains(Transaction.TransactionNodeTag));
+                    var stepNode = path.LastOrDefault(n => n.Tags.Contains(Transaction.Transaction.StepNodeTag));
+                    var transactionNode = path.FirstOrDefault(n => n.Tags.Contains(Transaction.Transaction.TransactionNodeTag));
                     return new FailureMetric(
                         TransactionName: transactionNode?.Name ?? tree.Name,
                         StepName: stepNode?.Name ?? leaf.Name,

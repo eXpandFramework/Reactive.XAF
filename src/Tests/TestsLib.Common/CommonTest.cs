@@ -14,7 +14,7 @@ using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.FileExtensions;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Numeric;
-using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
+using Xpand.Extensions.Reactive.FaultHub;
 using Xpand.Extensions.StringExtensions;
 using Xpand.Extensions.Tracing;
 using Xpand.Extensions.XAF.XafApplicationExtensions;

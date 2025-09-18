@@ -9,7 +9,7 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using Xpand.Extensions.StringExtensions;
 
-namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
+namespace Xpand.Extensions.Reactive.FaultHub{
     public static class ChainFaultContextService {
         internal static readonly AsyncLocal<IImmutableStack<object>> ContextStack=NewContext<IImmutableStack<object>>();
 

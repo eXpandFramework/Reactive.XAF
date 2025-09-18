@@ -1,5 +1,5 @@
 ﻿using NUnit.Framework;
-using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
+using Xpand.Extensions.Reactive.FaultHub;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
 using Xpand.XAF.Modules.Reactive.Tests.Common;
 

@@ -8,7 +8,7 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.Model;
 using Xpand.Extensions.Reactive.Conditional;
-using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
+using Xpand.Extensions.Reactive.FaultHub;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.ActionExtensions;
 using Xpand.Extensions.XAF.CollectionSourceExtensions;

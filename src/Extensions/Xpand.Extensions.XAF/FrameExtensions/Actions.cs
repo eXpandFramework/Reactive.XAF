@@ -33,7 +33,7 @@ namespace Xpand.Extensions.XAF.FrameExtensions{
         
         public static bool ParentIsNull(this Frame frame)  => frame.ParentObject<object>()==null;
         public static NestedFrame AsNestedFrame(this Frame frame) => frame.As<NestedFrame>(); 
-        public static NestedFrame ToNestedFrame(this Frame frame) => frame.Cast<NestedFrame>(); 
+        public static NestedFrame ToNestedFrame(this Frame frame) => (NestedFrame)frame; 
         public static ActionBase Action(this Frame frame, string id) 
             => frame.Actions(id).FirstOrDefault();
         public static SimpleAction SimpleAction(this Frame frame, string id) 

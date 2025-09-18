@@ -6,11 +6,12 @@ using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
-using System.Threading;
+using Xpand.Extensions.Reactive.ErrorHandling;
+
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 
-namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
+namespace Xpand.Extensions.Reactive.FaultHub.Transaction{
     partial class Transaction {
         
 

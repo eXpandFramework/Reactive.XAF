@@ -12,7 +12,6 @@ using DevExpress.ExpressApp.SystemModule;
 using Microsoft.CognitiveServices.Speech;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.FileExtensions;
-using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.ErrorHandling;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
@@ -33,7 +32,7 @@ namespace Xpand.XAF.Modules.Speech.Services {
         private static IObservable<Unit> UpdateVoicesOnViewRefresh(this ApplicationModulesManager manager) 
             => manager.WhenSpeechApplication(application => application.WhenFrame(typeof(BusinessObjects.SpeechService),ViewType.DetailView)
                 .SelectUntilViewClosed(frame => frame.GetController<RefreshController>().RefreshAction
-                    .WhenConcatExecution(_ =>frame.View.CurrentObject.Cast<BusinessObjects.SpeechService>().UpdateVoices() )).ToUnit());
+                    .WhenConcatExecution(_ => ((BusinessObjects.SpeechService)frame.View.CurrentObject).UpdateVoices() )).ToUnit());
 
         public static BusinessObjects.SpeechService DefaultSpeechAccount(this IObjectSpace space,IModelSpeech modelSpeech) 
             => space.FindObject<BusinessObjects.SpeechService>(CriteriaOperator.Parse(modelSpeech.DefaultSpeechServiceCriteria));

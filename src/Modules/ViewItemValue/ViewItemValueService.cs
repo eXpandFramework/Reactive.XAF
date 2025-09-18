@@ -11,7 +11,7 @@ using DevExpress.ExpressApp.Templates;
 using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Conditional;
-using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
+using Xpand.Extensions.Reactive.FaultHub;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.Tracing;

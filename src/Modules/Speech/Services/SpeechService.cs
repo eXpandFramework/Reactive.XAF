@@ -18,7 +18,6 @@ using Microsoft.CognitiveServices.Speech.Translation;
 using NAudio.Wave;
 using Xpand.Extensions.FileExtensions;
 using Xpand.Extensions.LinqExtensions;
-using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.ErrorHandling;
 using Xpand.Extensions.Reactive.Transform;
@@ -39,7 +38,7 @@ namespace Xpand.XAF.Modules.Speech.Services{
 	internal static class SpeechService{
 		internal static string ShortName(this SpeechLanguage language) => language.Name.Split('-')[0];
 	    public static SimpleAction SelectInExplorer(this (SpeechModule, Frame frame) tuple) 
-		    => tuple.frame.Action(nameof(SelectInExplorer)).Cast<SimpleAction>();
+		    => (SimpleAction)tuple.frame.Action(nameof(SelectInExplorer));
 
 	    
         internal static IObservable<Unit> ConnectSpeech(this  ApplicationModulesManager manager)
@@ -69,7 +68,7 @@ namespace Xpand.XAF.Modules.Speech.Services{
         [SuppressMessage("ReSharper", "HeapView.CanAvoidClosure")]
         private static IObservable<Unit> SpeechSynthesizerCache(this ApplicationModulesManager manager)
 			=> manager.WhenSpeechApplication(application => application.WhenFrame(typeof(SpeechToText),ViewType.DetailView)
-				.Select(frame => frame.View.CurrentObject.Cast<SpeechToText>())
+				.Select(frame => ((SpeechToText)frame.View.CurrentObject))
 				.SelectMany(speechToText => speechToText.WhenVoices()
 					.SelectMany(voice => new[]{typeof(SpeechText),typeof(SpeechTranslation)}.ToObservable()
 						.Do(type => SpeechSynthesizersCache.GetOrAdd((voice.ShortName,type), _ => {

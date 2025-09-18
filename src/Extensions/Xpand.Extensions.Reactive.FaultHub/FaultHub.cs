@@ -9,9 +9,10 @@ using Microsoft.Extensions.Caching.Memory;
 using Xpand.Extensions.ExceptionExtensions;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.MemoryCacheExtensions;
+using Xpand.Extensions.Reactive.FaultHub.Transaction;
 using Xpand.Extensions.Reactive.Utility;
 
-namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
+namespace Xpand.Extensions.Reactive.FaultHub {
     public static class FaultHub {
         internal const string CapturedStackKey = "FaultHub.CapturedStack";
         public static readonly AsyncLocal<IReadOnlyList<LogicalStackFrame>> LogicalStackContext=NewContext<IReadOnlyList<LogicalStackFrame>>();
@@ -163,7 +164,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
         
         public static IObservable<TResult> SwitchOnFault<TSource, TResult>(this IObservable<TSource> source, Func<FaultHubException, IObservable<TResult>> fallbackSelector, 
             Func<IObservable<TSource>, IObservable<TSource>> retryStrategy = null, object[] context = null)
-            => source.ChainFaultContext(retryStrategy, context).Select(t => (TResult)(object)t).Catch(fallbackSelector);
+            => source.ChainFaultContext( retryStrategy, context).Select(t => (TResult)(object)t).Catch(fallbackSelector);
         
         internal static IObservable<T> ProcessFault<T>(this Exception ex, AmbientFaultContext faultContext, Func<FaultHubException, IObservable<T>> proceedAction) {
             LogFast($"[HUB][{nameof(ProcessFault)}] Entered for context '{faultContext.Name}'.");
@@ -210,7 +211,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
         public static FaultHubException ExceptionToPublish(this Exception exception, object[] context, IReadOnlyList<string> tags, string memberName){
             var stack = exception.CapturedStack();
             var capturedStack = stack ?? LogicalStackContext.Value;
-            var contextForStep = capturedStack.NewFaultContext(context, tags: tags, memberName: memberName);
+            var contextForStep = capturedStack.NewFaultContext( context, tags: tags, memberName: memberName);
             if (exception is TransactionAbortedException abortedException) {
                 contextForStep = contextForStep with { BoundaryName = abortedException.Context.BoundaryName };
             }

@@ -25,28 +25,28 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DevExpress.Drawing.Skia" Version="25.1.4" />
-    <PackageReference Include="DevExpress.ExpressApp.Blazor" Version="25.1.4" />
-    <PackageReference Include="DevExpress.ExpressApp.Dashboards.Blazor" Version="25.1.4" />
-    <PackageReference Include="DevExpress.ExpressApp.FileAttachment.Blazor" Version="25.1.4" />
-    <PackageReference Include="DevExpress.ExpressApp.Office.Blazor" Version="25.1.4" />
-    <PackageReference Include="DevExpress.ExpressApp.ReportsV2.Blazor" Version="25.1.4" />
-    <PackageReference Include="DevExpress.ExpressApp.Scheduler.Blazor" Version="25.1.4" />
-    <PackageReference Include="DevExpress.ExpressApp.Security.Xpo" Version="25.1.4" />
-    <PackageReference Include="DevExpress.ExpressApp.Validation.Blazor" Version="25.1.4" />
-    <PackageReference Include="DevExpress.ExpressApp" Version="25.1.4" />
-    <PackageReference Include="DevExpress.ExpressApp.AuditTrail.Xpo" Version="25.1.4" />
-    <PackageReference Include="DevExpress.ExpressApp.ConditionalAppearance" Version="25.1.4" />
-    <PackageReference Include="DevExpress.ExpressApp.Dashboards" Version="25.1.4" />
-    <PackageReference Include="DevExpress.ExpressApp.Objects" Version="25.1.4" />
-    <PackageReference Include="DevExpress.ExpressApp.Office" Version="25.1.4" />
-    <PackageReference Include="DevExpress.ExpressApp.ReportsV2" Version="25.1.4" />
-    <PackageReference Include="DevExpress.ExpressApp.Scheduler" Version="25.1.4" />
-    <PackageReference Include="DevExpress.ExpressApp.StateMachine" Version="25.1.4" />
-    <PackageReference Include="DevExpress.ExpressApp.Validation" Version="25.1.4" />
-    <PackageReference Include="DevExpress.ExpressApp.ViewVariantsModule" Version="25.1.4" />
-    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="25.1.4" />
-    <PackageReference Include="DevExpress.Persistent.Base" Version="25.1.4" />
-    <PackageReference Include="DevExpress.Persistent.BaseImpl.Xpo" Version="25.1.4" />
+    <PackageReference Include="DevExpress.Drawing.Skia" Version="25.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp.Blazor" Version="25.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp.Dashboards.Blazor" Version="25.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp.FileAttachment.Blazor" Version="25.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp.Office.Blazor" Version="25.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp.ReportsV2.Blazor" Version="25.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp.Scheduler.Blazor" Version="25.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp.Security.Xpo" Version="25.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp.Validation.Blazor" Version="25.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp" Version="25.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp.AuditTrail.Xpo" Version="25.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp.ConditionalAppearance" Version="25.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp.Dashboards" Version="25.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp.Objects" Version="25.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp.Office" Version="25.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp.ReportsV2" Version="25.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp.Scheduler" Version="25.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp.StateMachine" Version="25.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp.Validation" Version="25.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp.ViewVariantsModule" Version="25.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="25.1.5" />
+    <PackageReference Include="DevExpress.Persistent.Base" Version="25.1.5" />
+    <PackageReference Include="DevExpress.Persistent.BaseImpl.Xpo" Version="25.1.5" />
   </ItemGroup>
 </Project>

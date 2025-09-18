@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Linq;
-using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
+using Xpand.Extensions.Reactive.FaultHub;
 
 namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics{
     public abstract class FaultHubExtensionTestBase:FaultHubTestBase {

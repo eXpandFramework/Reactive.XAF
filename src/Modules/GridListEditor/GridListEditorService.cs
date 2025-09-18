@@ -17,7 +17,7 @@ using Fasterflect;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Combine;
-using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
+using Xpand.Extensions.Reactive.FaultHub;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
@@ -127,7 +127,7 @@ namespace Xpand.XAF.Modules.GridListEditor{
                     .Select(column => (attribute: column.ModelMember.MemberInfo.FindAttribute<SortPropertyAttribute>(), column))
                     .WhereNotDefault(t => t.attribute)
                     .Do(t => {
-                        var xafGridColumnWrappers = ((WinColumnsListEditor)listView.Editor).Columns.OfType<XafGridColumnWrapper>();
+                        var xafGridColumnWrappers = ((WinColumnsListEditor)listView.Editor).Columns.OfType<WinGridColumnWrapper>();
                         var columnWrapper = xafGridColumnWrappers.FirstOrDefault(wrapper => t.column.Id == wrapper.Id);
                         if (columnWrapper == null) return;
                         columnWrapper.Column.OptionsColumn.AllowSort = DefaultBoolean.True;

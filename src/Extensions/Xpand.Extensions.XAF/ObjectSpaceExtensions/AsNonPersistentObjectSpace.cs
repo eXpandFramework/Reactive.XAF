@@ -1,7 +1,4 @@
-﻿using System;
-using DevExpress.ExpressApp;
-using Fasterflect;
-using Xpand.Extensions.ObjectExtensions;
+﻿using DevExpress.ExpressApp;
 
 namespace Xpand.Extensions.XAF.ObjectSpaceExtensions {
     
@@ -9,6 +6,6 @@ namespace Xpand.Extensions.XAF.ObjectSpaceExtensions {
         public static NonPersistentObjectSpace AsNonPersistentObjectSpace(this IObjectSpace objectSpace)
             => objectSpace as NonPersistentObjectSpace;
         public static NonPersistentObjectSpace ToNonPersistentObjectSpace(this IObjectSpace objectSpace)
-            => objectSpace.Cast<NonPersistentObjectSpace>();
+            => (NonPersistentObjectSpace)objectSpace;
     }
 }

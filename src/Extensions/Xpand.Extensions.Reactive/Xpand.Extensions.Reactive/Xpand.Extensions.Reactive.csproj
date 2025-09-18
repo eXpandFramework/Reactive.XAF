@@ -30,15 +30,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\..\..\Common\AssemblyInfoVersion.cs" Link="Properties\AssemblyInfoVersion.cs" />
-    <Compile Update="ErrorHandling\FaultHub\Transaction.BeginWorkflow.cs">
-      <DependentUpon>Transaction.cs</DependentUpon>
-    </Compile>
-    <Compile Update="ErrorHandling\FaultHub\Transaction.Then.cs">
-      <DependentUpon>Transaction.cs</DependentUpon>
-    </Compile>
-    <Compile Update="ErrorHandling\FaultHub\Transaction.Utility.cs">
-      <DependentUpon>Transaction.cs</DependentUpon>
-    </Compile>
   </ItemGroup>
   <Import Project="..\..\..\..\.paket\Paket.Restore.targets" />
 </Project>

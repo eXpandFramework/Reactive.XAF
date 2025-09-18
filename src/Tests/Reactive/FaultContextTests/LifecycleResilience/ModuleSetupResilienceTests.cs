@@ -13,7 +13,7 @@
 // using NUnit.Framework;
 // using Shouldly;
 // using Xpand.Extensions.Reactive.Combine;
-// using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
+// using Xpand.Extensions.Reactive.FaultHub;
 // using Xpand.Extensions.Reactive.Transform;
 // using Xpand.Extensions.Reactive.Transform.System;
 // using Xpand.Extensions.Reactive.Utility;

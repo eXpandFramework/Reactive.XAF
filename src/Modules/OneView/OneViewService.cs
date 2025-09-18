@@ -9,7 +9,7 @@ using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.SystemModule;
 using DevExpress.ExpressApp.Win.SystemModule;
 using Fasterflect;
-using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
+using Xpand.Extensions.Reactive.FaultHub;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
@@ -40,7 +40,7 @@ namespace Xpand.XAF.Modules.OneView{
 
         private static IObservable<Unit> ExitApplication(this IObservable<ShowViewParameters> showView,XafApplication application){
             var editingModel = showView.SelectMany(parameters =>parameters.Controllers.OfType<OneViewDialogController>().ToObservable()
-                .SelectMany(controller => controller.AcceptAction.WhenExecuting(args => Observable.Empty<SimpleAction>())));
+                .SelectMany(controller => controller.AcceptAction.WhenExecuting(_ => Observable.Empty<SimpleAction>())));
             return  Observable.Defer(() => showView.SelectMany(parameters => parameters.CreatedView.WhenClosing()
 			            .SelectMany(_ => parameters.CreatedView.WhenClosed().To(application.MainWindow)))
 		            .TakeUntil(editingModel)).Repeat()

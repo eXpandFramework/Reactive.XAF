@@ -11,7 +11,7 @@ using DevExpress.ExpressApp.Core;
 using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using HarmonyLib;
-using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
+using Xpand.Extensions.Reactive.FaultHub;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.XafApplicationExtensions;

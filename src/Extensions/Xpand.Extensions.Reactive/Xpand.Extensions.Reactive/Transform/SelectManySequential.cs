@@ -6,7 +6,7 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Runtime.CompilerServices;
 using System.Threading;
-using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
+
 
 namespace Xpand.Extensions.Reactive.Transform{
     internal class AsyncKeyedSequencer<TKey> {
@@ -62,8 +62,7 @@ namespace Xpand.Extensions.Reactive.Transform{
             return Observable.Defer(() => {
                 var key = keySelector(value);
                 return ((AsyncKeyedSequencer<TKey>)SequencerMap.GetValue(queues, _ => new AsyncKeyedSequencer<TKey>()))!
-                    .Enqueue(key, action)
-                    .PushStackFrame([key], memberName, filePath, lineNumber);
+                    .Enqueue(key, action) ;
             });
         }
     }

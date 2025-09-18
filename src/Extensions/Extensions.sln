@@ -33,6 +33,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.Extensions.Blazor", "
 		{2856A16A-A776-4A9B-B2C1-518644B9B2F3} = {2856A16A-A776-4A9B-B2C1-518644B9B2F3}
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xpand.Extensions.Reactive.FaultHub", "Xpand.Extensions.Reactive.FaultHub\Xpand.Extensions.Reactive.FaultHub.csproj", "{0E68C871-57AA-4D32-B246-917BC64F6DA5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug_20.1|Any CPU = Debug_20.1|Any CPU
@@ -75,6 +77,12 @@ Global
 		{70196D29-CF06-4AC4-9ED1-3EDFA5A53BA6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{70196D29-CF06-4AC4-9ED1-3EDFA5A53BA6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{70196D29-CF06-4AC4-9ED1-3EDFA5A53BA6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0E68C871-57AA-4D32-B246-917BC64F6DA5}.Debug_20.1|Any CPU.ActiveCfg = Debug|Any CPU
+		{0E68C871-57AA-4D32-B246-917BC64F6DA5}.Debug_20.1|Any CPU.Build.0 = Debug|Any CPU
+		{0E68C871-57AA-4D32-B246-917BC64F6DA5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0E68C871-57AA-4D32-B246-917BC64F6DA5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0E68C871-57AA-4D32-B246-917BC64F6DA5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0E68C871-57AA-4D32-B246-917BC64F6DA5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

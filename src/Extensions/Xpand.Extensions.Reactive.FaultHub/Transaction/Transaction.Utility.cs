@@ -6,7 +6,7 @@ using System.Reactive.Concurrency;
 using System.Threading;
 using Xpand.Extensions.LinqExtensions;
 
-namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
+namespace Xpand.Extensions.Reactive.FaultHub.Transaction{
     public static partial class Transaction {
         private static readonly AsyncLocal<int> TransactionNestingLevel = new();
         public const string NonCriticalStepTag =FaultHubException.SystemTag+ "NonCriticalStep";
@@ -29,7 +29,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
 
         private static IObservable<T> PushFrameConditionally<T>(this IObservable<T> stepStream, string stepName, string filePath, int lineNumber) {
             var existingFrame = FaultHub.LogicalStackContext.Value?.FirstOrDefault();
-            return existingFrame == null || existingFrame.Value.MemberName != stepName ? stepStream.PushStackFrame(stepName,filePath,lineNumber) : stepStream;
+            return existingFrame == null || existingFrame.Value.MemberName != stepName ? stepStream.PushStackFrame( stepName,filePath,lineNumber) : stepStream;
         }
         
         public static string GetStepName(string expression, string explicitName = null, Delegate selector = null) {

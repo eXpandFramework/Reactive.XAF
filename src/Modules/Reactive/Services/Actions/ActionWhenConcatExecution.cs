@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp.Actions;
-using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
+using Xpand.Extensions.Reactive.FaultHub;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.XAF.Modules.Reactive.Services.Controllers;

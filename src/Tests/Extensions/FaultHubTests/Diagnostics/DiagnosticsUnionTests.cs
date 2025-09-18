@@ -3,7 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using NUnit.Framework;
 using Shouldly;
-using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
+using Xpand.Extensions.Reactive.FaultHub;
 
 namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics {
     public class DiagnosticsUnionTests : FaultHubExtensionTestBase {

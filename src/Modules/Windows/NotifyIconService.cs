@@ -11,7 +11,7 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.SystemModule;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.Reactive.Combine;
-using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
+using Xpand.Extensions.Reactive.FaultHub;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.XAF.Modules.Reactive.Services;
 

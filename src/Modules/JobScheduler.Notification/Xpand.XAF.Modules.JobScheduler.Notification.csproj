@@ -34,6 +34,9 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="Xpand.Extensions.Reactive">
+        <HintPath>..\..\..\bin\Xpand.Extensions.Reactive.FaultHub.dll</HintPath>
+    </Reference>
     <Reference Include="Xpand.Extensions.Blazor">
       <HintPath>..\..\..\bin\Xpand.Extensions.Blazor.dll</HintPath>
     </Reference>

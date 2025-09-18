@@ -5,9 +5,9 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Xpand.Extensions.ExceptionExtensions;
 using Xpand.Extensions.LinqExtensions;
-using static Xpand.Extensions.Reactive.ErrorHandling.FaultHub.FaultHubException;
+using static Xpand.Extensions.Reactive.FaultHub.FaultHubException;
 
-namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
+namespace Xpand.Extensions.Reactive.FaultHub {
     public record OperationNode(string Name, IReadOnlyList<object> ContextData, IReadOnlyList<OperationNode> Children,
         Exception RootCause = null, IReadOnlyList<LogicalStackFrame> LogicalStack = null,IReadOnlyList<string> Tags = null
     );

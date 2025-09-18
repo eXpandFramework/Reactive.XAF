@@ -22,6 +22,9 @@
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
+    <Reference Include="Xpand.Extensions.Reactive">
+        <HintPath>..\..\..\bin\Xpand.Extensions.Reactive.FaultHub.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Update="Module.cs" />

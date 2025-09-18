@@ -12,7 +12,7 @@ using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.MemoryCacheExtensions;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.ErrorHandling;
-using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
+using Xpand.Extensions.Reactive.FaultHub;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.Tracing;
@@ -52,7 +52,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
                     return !t.exception.IsSkipped() &&
                            (correlationId == null || Seen.TryAdd(correlationId.Value));
                 })
-                .SelectMany(t => t.originalException.Observe().SelectMany(exception => Observable.Throw<Exception>(exception))
+                .SelectMany(t => t.originalException.Observe().SelectMany(Observable.Throw<Exception>)
                     .TraceErrorLogger().CompleteOnError().WhenCompleted())
                 .ToUnit();
 

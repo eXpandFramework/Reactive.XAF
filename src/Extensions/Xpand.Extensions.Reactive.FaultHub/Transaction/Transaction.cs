@@ -7,10 +7,11 @@ using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using Xpand.Extensions.ExceptionExtensions;
 using Xpand.Extensions.ObjectExtensions;
+using Xpand.Extensions.Reactive.ErrorHandling;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 
-namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
+namespace Xpand.Extensions.Reactive.FaultHub.Transaction {
     public static partial class Transaction {
         public static IObservable<TFinal[]> RunFailFast<TFinal>(this ITransactionBuilder<TFinal> builder, Func<Exception, bool> isNonCritical = null,
             DataSalvageStrategy dataSalvageStrategy = DataSalvageStrategy.EmitEmpty) 
@@ -47,7 +48,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
             var logic = builder.TransactionLogic(failFast, collectAllResults, isNonCritical)
                 .Select(o => o.AsArray<TFinal>());
             return failFast ? logic.RunFailFast(builder)
-                : logic.ChainFaultContext(builder.Context, null, builder.TransactionName, builder.CallerMemberPath, builder.CallerMemberLine, builder.UpdateRunTags(collectAllResults));
+                : logic.ChainFaultContext( builder.Context, null, builder.TransactionName, builder.CallerMemberPath, builder.CallerMemberLine, builder.UpdateRunTags(collectAllResults));
         }
         
         private static FaultHubException CreateAbortedException<TFinal>(FaultHubException ex, TransactionBuilder<TFinal> ib) {
@@ -66,7 +67,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
                 .Select(o => o.AsArray<TFinal>());
 
             return failFast ? logic.RunFailFast(builder)
-                : logic.ChainFaultContext(builder.Context, null, builder.TransactionName, builder.CallerMemberPath, builder.CallerMemberLine, builder.UpdateRunTags(false));
+                : logic.ChainFaultContext( builder.Context, null, builder.TransactionName, builder.CallerMemberPath, builder.CallerMemberLine, builder.UpdateRunTags(false));
         }
         
         private static IObservable<object> TransactionLogic<TFinal>(this IObservable<(string Name, IObservable<object> Source)> source, TransactionBuilder<TFinal> builder, bool failFast){
@@ -94,8 +95,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
             return (failFast ? allSteps.FailFast(builder, isNonCritical) : builder.RunToEnd(allSteps,  collectAllResults)).Finally(() => TransactionNestingLevel.Value--);
         }
         private static IObservable<(List<object> Results, FaultHubException Fault)> ConcurrentRunToEnd(this IObservable<(string Name, IObservable<object> Source)> source, string transactionName, int maxConcurrency, object[] context,string filePath,int lineNumber) 
-            => source.Select(op => op.Source.PushStackFrame(op.Name, filePath, lineNumber)
-                    .ChainFaultContext(context:context.AddToContext($"{transactionName} - {op.Name}"),null, op.Name).Materialize())
+            => source.Select(op => op.Source.PushStackFrame( op.Name, filePath, lineNumber).ChainFaultContext(context:context.AddToContext($"{transactionName} - {op.Name}"),null, op.Name).Materialize())
                 .Merge(maxConcurrency > 0 ? maxConcurrency : int.MaxValue).BufferUntilCompleted()
                 .Select(notifications => {
                     var exceptions = notifications.Where(n => n.Kind == NotificationKind.OnError).Select(n => n.Exception).ToList();
@@ -104,8 +104,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub {
                 });
         
         private static IObservable<object> ConcurrentFailFast(this IObservable<(string Name, IObservable<object> Source)> source, string transactionName, int maxConcurrency, object[] context,string filePath,int lineNumber) 
-            => source.Select(op => op.Source.PushStackFrame(op.Name, filePath, lineNumber)
-                    .ChainFaultContext(context:context.AddToContext($"{transactionName} - {op.Name}"),null, op.Name))
+            => source.Select(op => op.Source.PushStackFrame(op.Name, filePath, lineNumber).ChainFaultContext(context:context.AddToContext($"{transactionName} - {op.Name}"),null, op.Name))
                 .Merge(maxConcurrency > 0 ? maxConcurrency : int.MaxValue);
         
         private static IObservable<object> ExecuteStep(this StepDefinition step,

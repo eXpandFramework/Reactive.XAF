@@ -6,7 +6,6 @@ using DevExpress.ExpressApp.Xpo;
 using DevExpress.Xpo;
 using DevExpress.Xpo.DB.Helpers;
 using Fasterflect;
-using Xpand.Extensions.ObjectExtensions;
 
 namespace Xpand.Extensions.XAF.Xpo.ObjectSpaceExtensions{
     public static partial class ObjectSpaceExtensions{
@@ -18,7 +17,7 @@ namespace Xpand.Extensions.XAF.Xpo.ObjectSpaceExtensions{
         [DebuggerStepThrough]
         public static UnitOfWork UnitOfWork(this IObjectSpace objectSpace) 
             => (UnitOfWork)(objectSpace is XPObjectSpace xpObjectSpace ? xpObjectSpace.Session
-                : (UnitOfWork)objectSpace.Cast<CompositeObjectSpace>().AdditionalObjectSpaces.OfType<XPObjectSpace>().FirstOrDefault()?.Session);
+                : (UnitOfWork)((CompositeObjectSpace)objectSpace).AdditionalObjectSpaces.OfType<XPObjectSpace>().FirstOrDefault()?.Session);
         
         [DebuggerStepThrough]
         public static UnitOfWork Session(this IObjectSpace objectSpace) 

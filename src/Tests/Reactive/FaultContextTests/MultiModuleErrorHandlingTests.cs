@@ -8,7 +8,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using akarnokd.reactive_extensions;
 using Xpand.Extensions.Reactive.Combine;
-using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
+using Xpand.Extensions.Reactive.FaultHub;
 using Xpand.Extensions.XAF.ActionExtensions;
 using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;

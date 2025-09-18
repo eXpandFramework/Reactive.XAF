@@ -18,7 +18,6 @@ using Microsoft.Data.SqlClient;
 using Swordfish.NET.Collections.Auxiliary;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.LinqExtensions;
-using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.StringExtensions;
 using Xpand.Extensions.XAF.TypesInfoExtensions;
 using Xpand.Extensions.XAF.Xpo.Attributes;
@@ -226,7 +225,8 @@ namespace Xpand.Extensions.XAF.Xpo {
             }
 
             return connectionProvider is not STASafeDataStore ? connectionProvider is ConnectionProviderSql provider ? provider.Connection :
-                connectionProvider is ISqlDataStore dataStore ? dataStore.Connection : null : connectionProvider.GetFieldValue("DataStore").Cast<ConnectionProviderSql>().Connection;
+                connectionProvider is ISqlDataStore dataStore ? dataStore.Connection : null : (
+                    (ConnectionProviderSql)connectionProvider.GetFieldValue("DataStore")).Connection;
         }
         
         public static SqlConnection NewSQLConnection(this XafApplication application,Type objectType=null) {

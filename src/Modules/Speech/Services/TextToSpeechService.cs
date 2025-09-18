@@ -10,7 +10,6 @@ using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.SystemModule;
 using DevExpress.Persistent.Base;
-using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
@@ -27,7 +26,7 @@ using Xpand.XAF.Modules.Speech.BusinessObjects;
 namespace Xpand.XAF.Modules.Speech.Services {
     public static class TextToSpeechService {
         public static SingleChoiceAction SpeakText(this (SpeechModule, Frame frame) tuple) 
-            => tuple.frame.Action(nameof(SpeakText)).Cast<SingleChoiceAction>();
+            => (SingleChoiceAction)tuple.frame.Action(nameof(SpeakText));
 
         internal static IObservable<Unit> ConnectTextToSpeech(this  ApplicationModulesManager manager)
             => manager.SpeakText()
