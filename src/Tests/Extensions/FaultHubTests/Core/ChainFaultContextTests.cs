@@ -318,7 +318,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Core {
             stackWithoutBoundary.ShouldNotContain(nameof(MidLevel_For_Boundary_Test));
             stackWithoutBoundary.ShouldNotContain(nameof(LowLevel_For_Boundary_Test));
 
-            TearDown();
+            Dispose();
             Setup();
 
             var streamWithBoundary = TopLevel_For_Boundary_Test()

@@ -59,7 +59,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Core {
             stackWithoutBoundary.ShouldNotContain(nameof(TopLevel_For_Boundary_Test), "The stack from the nested calls was captured, but it should have been lost without a boundary.");
             stackWithoutBoundary.ShouldNotContain(nameof(MidLevel_For_Boundary_Test));
             stackWithoutBoundary.ShouldNotContain(nameof(LowLevel_For_Boundary_Test));
-            TearDown();
+            Dispose();
             Setup();
 
             var streamWithBoundary = TopLevel_For_Boundary_Test()

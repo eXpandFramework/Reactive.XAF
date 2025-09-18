@@ -1,12 +1,10 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reactive.Concurrency;
 using System.Threading;
 using Xpand.Extensions.LinqExtensions;
-using Xpand.Extensions.TypeExtensions;
 
 namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
     public static partial class Transaction {
@@ -28,7 +26,6 @@ namespace Xpand.Extensions.Reactive.ErrorHandling.FaultHub{
         private static List<string> UpdateRunTags<TFinal>(this TransactionBuilder<TFinal> ib,bool collectAllResults) 
             => ib.Tags.Contains(StepNodeTag) ? ib.Tags.ToList() : ib.Tags.Concat([collectAllResults ? nameof(RunAndCollect) : nameof(RunToEnd)]).ToList();
 
-        
 
         private static IObservable<T> PushFrameConditionally<T>(this IObservable<T> stepStream, string stepName, string filePath, int lineNumber) {
             var existingFrame = FaultHub.LogicalStackContext.Value?.FirstOrDefault();

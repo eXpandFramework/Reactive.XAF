@@ -14,11 +14,12 @@ using Xpand.Extensions.Numeric;
 using Xpand.Extensions.Reactive.ErrorHandling;
 using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.StringExtensions;
+using Xpand.TestsLib;
 
 namespace Xpand.Extensions.Tests.FaultHubTests{
-    public class FaultHubTestBase {
-        protected List<FaultHubException> BusEvents;
-        private IDisposable _busSubscription;
+    public class FaultHubTestBase:BaseTest {
+        // protected List<FaultHubException> BusEvents;
+        // private IDisposable _busSubscription;
 
         public FaultHubTestBase() => FaultHub.Logging = true;
 
@@ -31,12 +32,18 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
             }
         }
 
+        // [TearDown]
+        // public void TearDown() {
+        //     // _busSubscription?.Dispose();
+        //     FaultHub.BlacklistedFilePathRegexes.Clear();
+        // }
+
         [TearDown]
-        public void TearDown() {
-            _busSubscription?.Dispose();
+        public override void Dispose() {
+            base.Dispose();
             FaultHub.BlacklistedFilePathRegexes.Clear();
         }
-        
+
         protected static IEnumerable<TestCaseData> RetrySelectors() {
             yield return new TestCaseData(RetrySelector).SetName("Retry");
             yield return new TestCaseData(RetrySelectorWithBackoff).SetName("RetrySelector");
@@ -45,11 +52,12 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
         private static Func<IObservable<Unit>,IObservable<Unit>> RetrySelector=>source => source.Retry(3);
         private static Func<IObservable<Unit>,IObservable<Unit>> RetrySelectorWithBackoff=>source => source.RetryWithBackoff(3, strategy:_ => 50.Milliseconds());
         [SetUp]
-        public virtual void Setup(){
+        public override void Setup(){
+            base.Setup();
             FaultHub.BlacklistedFilePathRegexes.Clear();
             FaultHub.Seen.Clear();  
-            BusEvents = new List<FaultHubException>();
-            _busSubscription = FaultHub.Bus.Subscribe(BusEvents.Add);
+            // BusEvents = new List<FaultHubException>();
+            // _busSubscription = FaultHub.Bus.Subscribe(BusEvents.Add);
         }
 
         protected void AssertFaultExceptionReport(FaultHubException exception, [CallerMemberName] string caller = "") 

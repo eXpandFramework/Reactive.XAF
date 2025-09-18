@@ -10,7 +10,7 @@ using Xpand.Extensions.Reactive.Utility;
 namespace Xpand.Extensions.Tests.FaultHubTests.Core {
     [TestFixture]
     public class NestedResilienceRenderingTests : FaultHubTestBase {
-        [Test][Ignore("not validated")]
+        // [Test][Ignore("not validated")]
         public void Renderer_Collapses_Redundant_Boundaries_Defined_In_Same_Method() {
             var streamWithSameMethodBoundaries = Observable.Defer(() => Observable.Throw<int>(new InvalidOperationException("Failure at Level 3"))
                     .PushStackFrame("Level3_Frame")
@@ -32,7 +32,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Core {
         }
         
         
-        [Test][Ignore("not validated")]
+        // [Test][Ignore("not validated")]
         public async Task Accurate_Replication_Of_Thin_Stack_From_Separate_Method_Boundaries() {
             await Level1HasOuterBoundaries().Capture();
 

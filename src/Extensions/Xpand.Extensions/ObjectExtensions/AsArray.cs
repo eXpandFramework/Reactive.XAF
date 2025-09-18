@@ -36,7 +36,8 @@ namespace Xpand.Extensions.ObjectExtensions {
                     }
 
                     if (!typeof(TCurrent).IsList()) {
-                        return CurrentIsList<TCurrent>(o);
+                        LogFast($"[AsArray]   - Path 4: TCurrent is not a list. Attempting to cast item.");
+                        return o.YieldItem().Cast<TCurrent>();
                     }
 
                     LogFast($"[AsArray]   - Path 5: TCurrent is a list. Creating instance and adding item.");
@@ -50,15 +51,5 @@ namespace Xpand.Extensions.ObjectExtensions {
         return result;
     }
 
-    private static TCurrent[] CurrentIsList<TCurrent>(object o){
-        LogFast($"[AsArray]   - Path 4: TCurrent is not a list. Attempting to cast item.");
-        try {
-            var casted = (TCurrent)o;
-            return casted.YieldItem().ToArray();
-        } catch (Exception ex) {
-            LogFast($"[AsArray]   - Path 4 FAILED: {ex.Message}");
-            return [];
-        }
-    }
     }
 }

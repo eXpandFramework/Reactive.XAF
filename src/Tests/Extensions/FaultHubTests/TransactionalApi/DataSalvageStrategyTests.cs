@@ -8,6 +8,14 @@ using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.Reactive.Utility;
 
 namespace Xpand.Extensions.Tests.FaultHubTests.TransactionalApi {
+    using System;
+    using System.Linq;
+    using System.Reactive.Linq;
+    using System.Threading.Tasks;
+    using NUnit.Framework;
+    using Shouldly;
+
+    namespace Xpand.Extensions.Tests.FaultHubTests.TransactionalApi { }
     [TestFixture]
     public class DataSalvageStrategyTests : FaultHubTestBase {
         private IObservable<string> Step_EmitsPartial_Then_Fails() =>

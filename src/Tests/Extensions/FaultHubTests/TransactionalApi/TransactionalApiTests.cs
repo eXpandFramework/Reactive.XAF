@@ -15,6 +15,7 @@ using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 
 namespace Xpand.Extensions.Tests.FaultHubTests.TransactionalApi {
+
     public class TransactionalApiTests  : FaultHubTestBase {
         [MethodImpl(MethodImplOptions.NoInlining)]
         private IObservable<string> FailingOperation(SubscriptionCounter failingCounter)
@@ -86,7 +87,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.TransactionalApi {
 
             var result = await operations
                 .BeginWorkflow( "FromIEnumerableTx",TransactionMode.Sequential)
-                .RunToEnd()
+                .RunToEnd(DataSalvageStrategy.EmitEmpty)
                 .PublishFaults()
                 .Capture();
             result.IsCompleted.ShouldBe(true);
@@ -368,7 +369,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.TransactionalApi {
             var result = await source
                 .BeginWorkflow("RunToCompletionTx")
                 .Then(SecondStreamSelector)
-                .RunToEnd()
+                .RunToEnd(DataSalvageStrategy.EmitEmpty)
                 .PublishFaults()
                 .Capture();
             (part1Counter, part2Counter).ShouldBe((1, 1));
@@ -467,7 +468,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.TransactionalApi {
             var result = await source.BeginWorkflow( "TopLevel-Atomic-Tx")
                 .Then(Step2Succeeds)
                 .Then(Step3Fails)
-                .RunToEnd()
+                .RunToEnd(DataSalvageStrategy.EmitEmpty)
                 .PublishFaults()
                 .Capture();
             result.IsCompleted.ShouldBe(true);
@@ -543,6 +544,36 @@ namespace Xpand.Extensions.Tests.FaultHubTests.TransactionalApi {
 
         }
         
+        [Test]
+        public async Task Nested_RunToEnd_With_Failure_And_SalvagedData_Correctly_Feeds_Next_Step() {
+            var finalStepExecuted = false;
+
+            IObservable<string[]> NestedTxEmitsAndFails(object[] _) =>
+                Observable.Return("start")
+                    .BeginWorkflow("Nested-Tx")
+                    .Then(_ => Observable.Throw<string>(new InvalidOperationException("Inner Failure")))
+                    .Then(_ => Observable.Return("Salvaged Data")) 
+                    .RunToEnd();
+
+            IObservable<object> FinalStepReceivesData(string[][] results) {
+                finalStepExecuted = true;
+                results.ShouldHaveSingleItem("The final step should have received the salvaged data from the nested transaction.");
+                results.Single().ShouldHaveSingleItem("Salvaged Data");
+                return Observable.Return((object)null);
+            }
+
+            var transaction = Observable.Return(Array.Empty<object>())
+                .BeginWorkflow("Parent-Tx")
+                .Then(NestedTxEmitsAndFails)
+                .Then(FinalStepReceivesData)
+                .RunToEnd();
+
+            await transaction.PublishFaults().Capture();
+
+            finalStepExecuted.ShouldBeTrue("The final step was never executed, which proves that the salvaged data from the failing nested transaction was lost.");
+            BusEvents.Count.ShouldBe(1);
+        }
+
         public static IEnumerable<TestCaseData> Lambda_Naming_Cases() {
             ITransactionBuilder<Unit> ImplicitNameAction(ITransactionBuilder<string> builder) 
                 => builder.Then(_ => Observable.Throw<Unit>(new InvalidOperationException("Lambda Failed")));

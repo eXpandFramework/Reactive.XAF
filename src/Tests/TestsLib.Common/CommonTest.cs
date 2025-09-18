@@ -16,6 +16,7 @@ using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Numeric;
 using Xpand.Extensions.Reactive.ErrorHandling.FaultHub;
 using Xpand.Extensions.StringExtensions;
+using Xpand.Extensions.Tracing;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Logger;
@@ -34,7 +35,10 @@ namespace Xpand.TestsLib.Common{
         public static TimeSpan Timeout = TimeSpan.FromSeconds(240);
         public static TimeSpan OneMinute = 60.Seconds();
 
-        protected CommonTest() => AssemblyExtensions.EntryAssembly = GetType().Assembly;
+        protected CommonTest() {
+            AssemblyExtensions.EntryAssembly = GetType().Assembly;
+            FastLogger.Enabled = true;
+        }
 
         private void CleanTempFolder() {
             if (!Debugger.IsAttached&&new DriveInfo(Path.GetPathRoot(Path.GetTempPath())!).IsDriveFull(85)) {
@@ -139,7 +143,7 @@ namespace Xpand.TestsLib.Common{
         public static TraceSource TraceSource{ get; }
         
         
-        protected List<Exception> BusEvents = null!;
+        protected List<FaultHubException> BusEvents = null!;
         
         private IDisposable _busSubscription = null!;
          public const string NotImplemented = "NotImplemented";
@@ -149,7 +153,7 @@ namespace Xpand.TestsLib.Common{
             TestContext.Out.Write(TestContext.CurrentContext.Test.FullName);
             FaultHub.Seen.Clear();  
             
-            BusEvents = new List<Exception>();
+            BusEvents = new List<FaultHubException>();
             _busSubscription = FaultHub.Bus.Subscribe(BusEvents.Add);
         }
 

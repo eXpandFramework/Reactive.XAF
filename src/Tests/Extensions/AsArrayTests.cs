@@ -126,9 +126,7 @@ public class AsArrayTests:BaseTest {
     [Test]
     public void AsArray_FromMixedObjectListWithPromotableAndUncastableElements_FiltersUncastableElements() {
         var input = new object[] { 10, "fail", 20 };
-        var result = input.AsArray<int[]>();
-        result.Length.ShouldBe(2);
-        result[0].ShouldBe([10]);
-        result[1].ShouldBe([20]);
+        Should.Throw<InvalidCastException>(() => input.AsArray<long>());
+        
     }
 }
