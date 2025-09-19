@@ -64,11 +64,11 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |----|----
 |**DevExpress.ExpressApp**|**Any**
  |**DevExpress.Xpo**|**Any**
-|Xpand.Extensions.Reactive|4.251.5
- |Xpand.Extensions.XAF|4.251.5
- |Xpand.Extensions|4.251.5
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.251.5
- |[Xpand.XAF.Modules.Reactive.Logger](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive.Logger)|4.251.5
+|Xpand.Extensions.Reactive|4.251.6
+ |Xpand.Extensions.XAF|4.251.6
+ |Xpand.Extensions|4.251.6
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.251.6
+ |[Xpand.XAF.Modules.Reactive.Logger](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive.Logger)|4.251.6
  |MagicOnion|2.6.3
  |System.Interactive.Async|6.0.1
  |System.Reactive|6.0.1
@@ -76,11 +76,11 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |YamlDotNet|11.2.1
  |Xpand.Patcher|9.0.0
  |Xpand.Collections|1.0.4
- |System.CodeDom|9.0.0
- |System.Text.Json|9.0.0
- |System.Threading.Tasks.Dataflow|7.0.0
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.251.5
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.251.5
+ |System.CodeDom|9.0.8
+ |System.Text.Json|9.0.8
+ |System.Threading.Tasks.Dataflow|9.0.8
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.251.6
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.251.6
 
 ## Issues-Debugging-Troubleshooting
 

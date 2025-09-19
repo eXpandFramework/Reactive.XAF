@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.ModelMapper</id>
-    <version>4.251.5.1</version>
+    <version>4.251.5.2</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -15,10 +15,10 @@
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, ModelMapper, 25.1.5</tags>
     <dependencies>
       <group targetFramework="net9.0">
-        <dependency id="Xpand.Extensions" version="4.251.5.1" />
-        <dependency id="Xpand.Extensions.Reactive" version="4.251.5.1" />
-        <dependency id="Xpand.Extensions.XAF" version="4.251.5.1" />
-        <dependency id="Xpand.XAF.Modules.Reactive" version="4.251.5.1" />
+        <dependency id="Xpand.Extensions" version="4.251.5.2" />
+        <dependency id="Xpand.Extensions.Reactive" version="4.251.5.2" />
+        <dependency id="Xpand.Extensions.XAF" version="4.251.5.2" />
+        <dependency id="Xpand.XAF.Modules.Reactive" version="4.251.5.2" />
         <dependency id="Enums.NET" version="4.0" />
         <dependency id="Mono.Cecil" version="0.11.6" />
         <dependency id="System.CodeDom" version="9.0.8" />
@@ -31,10 +31,10 @@
         <dependency id="System.Threading.Tasks.Dataflow" version="9.0.8" />
       </group>
       <group targetFramework="netstandard2.0">
-        <dependency id="Xpand.VersionConverter" version="4.251.5.1" />
+        <dependency id="Xpand.VersionConverter" version="4.251.5.2" />
       </group>
       <group targetFramework="net6.0">
-        <dependency id="Xpand.VersionConverter" version="4.251.5.1" />
+        <dependency id="Xpand.VersionConverter" version="4.251.5.2" />
       </group>
     </dependencies>
   </metadata>
