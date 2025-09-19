@@ -16,7 +16,7 @@ An advanced resilience and error-handling framework for Rx.NET, designed to prov
 
 This framework is documented through two primary guides that cover its philosophy, core patterns, and formal API.
 
-*   **[The Unbreakable Stream: A Developer & AI Guide](./docs/The%20Unbreakable%20Stream%20A%20Developer%20&%20AI%20Guide%20to%20Fixing%20the%20Billion-Dollar%20Mistake.md)**
+*   **[The Unbreakable Stream: A Developer & AI Guide](./Xpand.Extensions.Reactive.Relay/docs/The%20Unbreakable%20Stream%20A%20Developer%20&%20AI%20Guide%20to%20Fixing%20the%20Billion-Dollar%20Mistake.md)**
     This is the foundational guide. It explains the core principles of the framework, the distinction between Operator and Item resilience, and the best practices for building robust, "unbreakable" reactive streams. It serves as the architectural contract for the entire system.
 
 *   **[The Reactive Transactional API: Composing Resilient Workflows](./docs/The%20Reactive%20Transactional%20API%20Composing%20Resilient%20Workflows.md)**
