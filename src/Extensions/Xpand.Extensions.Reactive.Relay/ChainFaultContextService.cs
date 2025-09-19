@@ -85,9 +85,8 @@ namespace Xpand.Extensions.Reactive.Relay{
             var fullStack = (snapshot.CapturedStack ?? Enumerable.Empty<LogicalStackFrame>()).ToList();
             var stackTraceForLog = string.Join(" -> ", fullStack.Select(f => f.MemberName));
             LogFast($"[CTX-TRACE][ChainCtx-Catch] Reassembled stack. Inner: {snapshot.CapturedStack?.Count ?? 0}, Parent: {originalStack?.Count ?? 0}, Total: {fullStack.Count}. Stack: [{stackTraceForLog}]");
-            var selfFrame = new LogicalStackFrame(memberName, filePath, lineNumber, context);
-            if (!fullStack.Contains(selfFrame)) {
-                fullStack.Add(new LogicalStackFrame(selfFrame.MemberName.Remove(" "),selfFrame.FilePath, selfFrame.LineNumber,selfFrame.Context));
+            if (fullStack.All(f => f.MemberName != memberName)) {
+                fullStack.Add( new LogicalStackFrame(memberName.Remove(" "),filePath, lineNumber, context));
             }
             var faultContext = fullStack.NewFaultContext(context,tags,memberName, filePath, lineNumber);
             return e.ProcessFault(faultContext, Observable.Throw<T>);

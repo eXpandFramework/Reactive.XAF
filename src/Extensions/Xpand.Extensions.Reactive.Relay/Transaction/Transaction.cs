@@ -139,10 +139,8 @@ namespace Xpand.Extensions.Reactive.Relay.Transaction {
                                 LogFast($"[ExecuteStepChain] Step '{step.Name}' completed. Received {notifications.Length} notifications ({notifications.Count(n => n.Kind == NotificationKind.OnNext)} OnNext, {notifications.Count(n => n.Kind == NotificationKind.OnError)} OnError).");
                                 var newAcc = allSteps.CollectStepErrors( builder, notifications, step, acc, isNonCritical);
                                 var suppressedFailures = Current?.Failures.Where(f => !newAcc.failures.Contains(f)).ToList();
-                                if (suppressedFailures?.Any() ?? false) {
-                                    return newAcc with { failures = newAcc.failures.Concat(suppressedFailures).ToList() };
-                                }
-                                return newAcc;
+                                return !(suppressedFailures?.Any() ?? false) ? newAcc
+                                    : newAcc with { failures = newAcc.failures.Concat(suppressedFailures).ToList() };
                             });                                        
                     }))
                 .Select(acc => (acc.results, acc.failures, acc.allResults));

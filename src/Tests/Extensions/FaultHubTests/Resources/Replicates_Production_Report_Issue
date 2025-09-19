@@ -13,7 +13,6 @@ Schedule Web Scraping failed (HomePageUrl) [Transaction, Sequential, RunFailFast
     │       at NavigateToHomePage in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 23
     │       (HomePageUrl) at ParseHomePage in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenarioBaseTest.cs:line 29
     │       (Scheduled Context) at ScheduleWebScraping in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\Diagnostics\ProductionScenarioBaseTest.cs:line 16
-    │       (HomePageUrl) at ScheduleWebScraping in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\Diagnostics\ProductionScenarioBaseTest.cs:line 17
     │     --- Original Exception Details ---
     │       System.Exception: Failed to fetch URLs
     └ Scrape Data From Links [Step, Transaction, Sequential, Nested, RunToEnd]
@@ -36,6 +35,5 @@ Schedule Web Scraping failed (HomePageUrl) [Transaction, Sequential, RunFailFast
                   at NavigateToHomePage in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\Diagnostics\ProductionScenarioBaseTest.cs:line 23
                   (HomePageUrl) at ParseHomePage in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\Diagnostics\ProductionScenarioBaseTest.cs:line 29
                   (Scheduled Context) at ScheduleWebScraping in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\Diagnostics\ProductionScenarioBaseTest.cs:line 16
-                  (HomePageUrl) at ScheduleWebScraping in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\Diagnostics\ProductionScenarioBaseTest.cs:line 17
                 --- Original Exception Details ---
                   System.Exception: Failed to extract content
