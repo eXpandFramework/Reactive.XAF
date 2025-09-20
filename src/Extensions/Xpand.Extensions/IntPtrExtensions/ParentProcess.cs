@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace Xpand.Extensions.IntPtrExtensions{
@@ -8,13 +9,10 @@ namespace Xpand.Extensions.IntPtrExtensions{
         public static Process ParentProcess(this IntPtr handle){
             var pbi = new ProcessInformation();
             var status = NtQueryInformationProcess(handle, 0, ref pbi, Marshal.SizeOf(pbi), out _);
-            if (status != 0) throw new Win32Exception(status);
-            try{
-                return Process.GetProcessById(pbi.InheritedFromUniqueProcessId.ToInt32());
-            }
-            catch (ArgumentException){
-                return null;
-            }
+            if (status != 0)
+                throw new Win32Exception(status);
+            return pbi.InheritedFromUniqueProcessId == 0 ? null : Process.GetProcesses()
+                    .FirstOrDefault(process => process.Id == pbi.InheritedFromUniqueProcessId.ToInt32());
         }
 
         [DllImport("ntdll.dll")]

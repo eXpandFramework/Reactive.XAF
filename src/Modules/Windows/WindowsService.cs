@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.IO;
@@ -17,7 +18,10 @@ using DevExpress.Persistent.Base;
 using DevExpress.XtraGrid.Columns;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Numeric;
+using Xpand.Extensions.ProcessExtensions;
 using Xpand.Extensions.Reactive.Combine;
+using Xpand.Extensions.Reactive.ErrorHandling;
+using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Relay;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Transform.System;
@@ -157,6 +161,13 @@ namespace Xpand.XAF.Modules.Windows{
             };
         }
 
+        public static IObservable<Process> WhenNewProcessUIReady(this ProcessStartInfo startInfo) {
+            var processName = Path.GetFileNameWithoutExtension(startInfo.FileName);
+            var existing = Process.GetProcessesByName(processName).Select(p=>p.Id).ToHashSet();
+            return Observable.Defer(() => Process.GetProcessesByName(processName).Where(p => !existing.Contains(p.Id)).ToNowObservable()
+                    .SelectMany(p =>Observable.Defer(() => p.Parent().Observe().WhenNotDefault().Where(parent =>parent.MainWindowHandle!=IntPtr.Zero )).CompleteOnError() ))
+                .RepeatWhen(250.ToMilliseconds()).Take(1) ;
+        }
         public static void UseGlobalExceptionHandling(this WinApplication _) {
             Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
             Application.ThreadException += (_, e) => Tracing.Tracer.LogError(e.Exception.ToString());
