@@ -12,5 +12,13 @@ namespace Xpand.Extensions.Reactive.Utility {
                 return new CompositeDisposable(
                     source.Materialize().Do(x => last = x).Dematerialize().Subscribe(o), disposable);
             });
+        
+        public static T DisposeWith<T>(this T disposable, CompositeDisposable container) where T : IDisposable {
+            if (container == null) {
+                throw new ArgumentNullException(nameof(container));
+            }
+            container.Add(disposable);
+            return disposable;
+        }
     }
 }
