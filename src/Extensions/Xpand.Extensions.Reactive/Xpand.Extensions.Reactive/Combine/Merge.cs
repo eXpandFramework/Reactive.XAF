@@ -41,16 +41,20 @@ namespace Xpand.Extensions.Reactive.Combine{
             => source.Select(source1 => source1 as object).WhenNotDefault().Merge(value.To<TValue>());
         
         
-        public static IObservable<T> MergeIgnored<T,T2>(this IObservable<T> source,Func<T,IObservable<T2>> secondSelector,Func<T,bool> merge=null)
-            => source.Publish(obs => obs.SelectMany(arg => {
+        public static IObservable<T> MergeIgnored<T,T2>(this IObservable<T> source,Func<T,IObservable<T2>> secondSelector,Func<T,bool> merge=null) {
+            return source.Publish(bus => bus.SelectMany(arg => {
                 merge ??= _ => true;
                 var observable = Observable.Empty<T>();
                 if (merge(arg)) {
-                    observable = secondSelector(arg).IgnoreElements().To(arg);
+                    observable = secondSelector(arg)
+                        .TakeUntil(bus.WhenFinished())
+                        .IgnoreElements().To(arg);
                 }
+
                 return arg.Observe().Merge(observable);
             }));
-        
+        }
+
         public static IObservable<T> MergeIgnored<T,T2>(this IObservable<T> source,Func<T,bool> merge,Func<T,IObservable<T2>> secondSelector)
             => source.MergeIgnored(secondSelector);
         

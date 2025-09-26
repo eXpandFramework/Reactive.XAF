@@ -110,10 +110,40 @@ namespace Xpand.Extensions.Reactive.Relay {
             return sb.ToString().TrimEnd();
         }
 
+        public record GroupedStackFrame(LogicalStackFrame Frame, int Count);
+
+        private static List<object> GroupConsecutiveFrames(this IReadOnlyList<LogicalStackFrame> stack) {
+            var grouped = new List<object>();
+            if (stack == null || !stack.Any()) {
+                return grouped;
+            }
+
+            using var enumerator = stack.GetEnumerator();
+            if (!enumerator.MoveNext()) return grouped;
+    
+            var currentFrame = enumerator.Current;
+            var consecutiveCount = 1;
+
+            while (enumerator.MoveNext()) {
+                if (enumerator.Current.Equals(currentFrame)) {
+                    consecutiveCount++;
+                } else {
+                    grouped.Add(consecutiveCount > 1 ? new GroupedStackFrame(currentFrame, consecutiveCount) : currentFrame);
+                    currentFrame = enumerator.Current;
+                    consecutiveCount = 1;
+                }
+            }
+            grouped.Add(consecutiveCount > 1 ? new GroupedStackFrame(currentFrame, consecutiveCount) : currentFrame);
+            return grouped;
+        }
         private static void BuildRenderedStackString(this StringBuilder sb, IReadOnlyList<LogicalStackFrame> originalStack, Dictionary<string, string> blacklistedPatterns) {
-            LogFast($"[BuildRenderedStackString] Filtering stack with {originalStack.Count} frames.");
-            var filteredItems = originalStack.FilterAndGroupBlacklistedFrames( blacklistedPatterns);
-            if (!filteredItems.OfType<LogicalStackFrame>().Any() && originalStack.Any()) {
+            LogFast($"[BuildRenderedStackString] Grouping {originalStack.Count} original frames.");
+            var groupedStack = originalStack.GroupConsecutiveFrames();
+
+            LogFast($"[BuildRenderedStackString] Filtering {groupedStack.Count} grouped items.");
+            var filteredItems = groupedStack.FilterAndGroupBlacklistedFrames(blacklistedPatterns);
+
+            if (!filteredItems.Any(item => item is LogicalStackFrame || item is GroupedStackFrame) && originalStack.Any()) {
                 LogFast($"[BuildRenderedStackString] Blacklist would hide all frames. Falling back to full stack.");
                 sb.RenderFallbackStack( originalStack);
             }
@@ -129,6 +159,9 @@ namespace Xpand.Extensions.Reactive.Relay {
                 if (item is LogicalStackFrame frame) {
                     sb.Append("  ").AppendLine(frame.ToString());
                 }
+                else if (item is GroupedStackFrame groupedFrame) {
+                    sb.Append("  ").AppendLine($"{groupedFrame.Frame} ({groupedFrame.Count} similar calls)");
+                }
                 else if (item is int count) {
                     sb.Append("  ").AppendLine($"... {count} frame(s) hidden ...");
                 }
@@ -142,20 +175,30 @@ namespace Xpand.Extensions.Reactive.Relay {
             sb.Append("  ").AppendLine("... (Fallback: All frames shown as the blacklist would hide the entire stack) ...");
         }
 
-        private static List<object> FilterAndGroupBlacklistedFrames(this IReadOnlyList<LogicalStackFrame> logicalStack, Dictionary<string, string> blacklistedPatterns) {
+        private static List<object> FilterAndGroupBlacklistedFrames(this List<object> groupedStack, Dictionary<string, string> blacklistedPatterns) {
             var filteredItems = new List<object>();
             int consecutiveHiddenCount = 0;
 
-            foreach (var frame in logicalStack) {
-                if (!string.IsNullOrEmpty(frame.FilePath) && blacklistedPatterns.Keys.Any(pattern => Regex.IsMatch(frame.FilePath, pattern, RegexOptions.IgnoreCase))) {
-                    consecutiveHiddenCount++;
+            foreach (var item in groupedStack) {
+                LogicalStackFrame? frame = item switch {
+                    LogicalStackFrame f => f,
+                    GroupedStackFrame gf => gf.Frame,
+                    _ => null
+                };
+
+                if (frame != null && !string.IsNullOrEmpty(frame.Value.FilePath) && blacklistedPatterns.Keys.Any(pattern => Regex.IsMatch(frame.Value.FilePath, pattern, RegexOptions.IgnoreCase))) {
+                    consecutiveHiddenCount += item switch {
+                        LogicalStackFrame => 1,
+                        GroupedStackFrame gf => gf.Count,
+                        _ => throw new ArgumentOutOfRangeException()
+                    };
                 }
                 else {
                     if (consecutiveHiddenCount > 0) {
                         filteredItems.Add(consecutiveHiddenCount);
                         consecutiveHiddenCount = 0;
                     }
-                    filteredItems.Add(frame);
+                    filteredItems.Add(item);
                 }
             }
 
@@ -163,6 +206,7 @@ namespace Xpand.Extensions.Reactive.Relay {
                 filteredItems.Add(consecutiveHiddenCount);
             }
             return filteredItems;
+            
         }
 
         private static string RenderSimpleStack(this IReadOnlyList<LogicalStackFrame> logicalStack) {
@@ -420,8 +464,8 @@ namespace Xpand.Extensions.Reactive.Relay {
         }
         
         private static OperationNode BuildNamedNode(this AmbientFaultContext context, IReadOnlyList<LogicalStackFrame> parentStack, Dictionary<AmbientFaultContext, FaultHubException> contextLookup) {
-            var localStack = context.LogicalStackTrace ?? Enumerable.Empty<LogicalStackFrame>();
-            var fullStack = localStack.Concat(parentStack).Distinct().ToList();
+            var localStack = (context.LogicalStackTrace ?? Enumerable.Empty<LogicalStackFrame>()).ToArray();
+            var fullStack = localStack.Concat(parentStack.Except(localStack)).ToList();
             var children = new List<OperationNode>();
             LogFast($"[Parser.Context] Recursing on InnerContext: '{context.InnerContext?.BoundaryName ?? "NULL"}'");
             var hierarchicalChild = context.InnerContext.BuildFromContext(fullStack, contextLookup);

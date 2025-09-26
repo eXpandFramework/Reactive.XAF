@@ -297,5 +297,27 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics {
             report.ShouldNotContain("_NonCriticalAggregate");
             report.ShouldNotContain("_NonCriticalStep");
         }
+        
+        [Test]
+        public void Render_Collapses_Consecutive_Identical_Frames() {
+            var exception = CreateFaultWithLogicalStack(
+                new LogicalStackFrame("TopLevelMethod", @"C:\app\main.cs", 50),
+                new LogicalStackFrame("ProcessItem", @"C:\app\logic.cs", 100),
+                new LogicalStackFrame("ProcessItem", @"C:\app\logic.cs", 100),
+                new LogicalStackFrame("ProcessItem", @"C:\app\logic.cs", 100),
+                new LogicalStackFrame("InitialSetup", @"C:\app\main.cs", 25)
+            );
+
+            FaultHub.BlacklistedFilePathRegexes.Add(@"dummy-pattern-to-trigger-advanced-render", "Dummy");
+            var report = exception.Render();
+
+            var expectedCollapsedLine = "at ProcessItem in C:\\app\\logic.cs:line 100 (3 similar calls)";
+            var reportLines = report.Split([Environment.NewLine], StringSplitOptions.RemoveEmptyEntries);
+    
+            reportLines.ShouldContain(line => line.Trim().StartsWith("at TopLevelMethod"));
+            reportLines.ShouldContain(line => line.Trim().StartsWith("at InitialSetup"));
+            reportLines.Count(line => line.Contains("ProcessItem")).ShouldBe(1, "The 'ProcessItem' frames were not collapsed into a single line.");
+            reportLines.ShouldContain(line => line.Trim().Contains(expectedCollapsedLine));
+        }
     }
 }

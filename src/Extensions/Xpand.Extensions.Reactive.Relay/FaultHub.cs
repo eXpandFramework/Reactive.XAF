@@ -23,7 +23,7 @@ namespace Xpand.Extensions.Reactive.Relay {
         static readonly ISubject<FaultHubException> BusSubject = Subject.Synchronize(new Subject<FaultHubException>());
         public static readonly IObservable<FaultHubException> Bus = BusSubject.AsObservable();
         public static Dictionary<string, string> BlacklistedFilePathRegexes { get; } = new() {
-            [@"Reactive.XAF"] = "Xpand Framework"
+            ["Reactive.XAF"] = "Xpand Framework", ["System.Reactive"] = "RX"
         };
         
         const string KeyCId = "CorrelationId";
