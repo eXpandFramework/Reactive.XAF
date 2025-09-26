@@ -25,6 +25,8 @@ namespace Xpand.Extensions.Reactive.ErrorHandling {
         
         public static IObservable<T> ThrowIfEmpty<T>(this IObservable<T> source, Exception exception) 
             => source.SwitchIfEmpty(exception.Throw<T>());
+        public static IObservable<T> ThrowIfDefault<T>(this IObservable<T> source, Exception exception) 
+            => source.SwitchIfDefault(exception.Throw<T>());
     }
 
     public class SequenceIsEmptyException(string message) : Exception(message);
