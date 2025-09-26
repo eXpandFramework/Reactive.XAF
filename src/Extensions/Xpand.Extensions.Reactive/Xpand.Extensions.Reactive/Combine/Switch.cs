@@ -1,8 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using Xpand.Extensions.Reactive.Transform;
 
 namespace Xpand.Extensions.Reactive.Combine{
     public static partial class Combine{
@@ -12,7 +12,9 @@ namespace Xpand.Extensions.Reactive.Combine{
                 signal.OnCompleted();
             }).Concat(switchTo.TakeUntil(signal)));
 
-        public static IObservable<T> SwitchIfDefault<T>(this IObservable<T> @this, IObservable<T> switchTo) where T : class 
-            => @this.SelectMany(entry => entry != null ? entry.Observe() : switchTo);
+        public static IObservable<T> SwitchIfDefault<T>(this IObservable<T> source, IObservable<T> switchTo)  
+            => source.Select(entry => !EqualityComparer<T>.Default.Equals(entry, default) ? Observable.Return(entry) : switchTo)
+                .TakeUntil(stream => stream == switchTo)
+                .Concat();
     }
 }
