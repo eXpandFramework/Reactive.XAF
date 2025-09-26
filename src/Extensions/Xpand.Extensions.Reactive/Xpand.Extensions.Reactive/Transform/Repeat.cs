@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
@@ -55,8 +56,9 @@ namespace Xpand.Extensions.Reactive.Transform {
                 .SelectMany()
                 .Select(o => o);
         
-        public static IObservable<T> RepeatWhenEmpty<T>(this IObservable<T> source, int? maxRetries=null,[CallerMemberName]string caller="") 
-            => Observable.Defer(() => source.SwitchIfEmpty(Observable.Defer(() => new Exception(caller).Throw<T>())))
+        public static IObservable<T> RepeatWhenEmpty<T>(this IObservable<T> source, int? maxRetries=null,IObservable<Unit> delay=null,[CallerMemberName]string caller="") 
+            => Observable.Defer(() => (delay==null?source:delay.IgnoreElements().To<T>().Concat(source))
+                    .SwitchIfEmpty(Observable.Defer(() => new Exception(caller).Throw<T>())))
                 .Retry(maxRetries??Int32.MaxValue).Catch<T,Exception>(exception => exception.Throw<T>());
     }
 }

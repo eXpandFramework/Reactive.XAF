@@ -8,8 +8,8 @@ namespace Xpand.Extensions.LinqExtensions{
             return list.GroupBy(_ => i++ % parts).Select(part => part.AsEnumerable());
         }
         
-        public static IEnumerable<string> TrimAll(this IEnumerable<string> source)
-            => source.Select(s => s?.Trim());
+        public static IEnumerable<string> TrimAll(this IEnumerable<string> source,params char[] trimChars)
+            => source.Select(s => s?.Trim(trimChars));
 
     }
 }

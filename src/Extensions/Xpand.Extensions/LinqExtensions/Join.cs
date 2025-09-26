@@ -29,6 +29,7 @@ namespace Xpand.Extensions.LinqExtensions{
 		public static string JoinCommaSpace(this IEnumerable source) => source?.Join(", ");
 		public static string JoinColonSpace(this IEnumerable source) => source?.Join(": ");
 		public static string JoinDotSpace(this IEnumerable source) => source?.Join(". ");
+		public static string JoinDashSpaces(this IEnumerable source) => source?.Join(" - ");
 		public static string JoinDotNewLine(this IEnumerable source) => source?.Join(". \r\n");
 		
 		public static string Join(this IEnumerable<string> values, string separator)

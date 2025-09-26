@@ -18,7 +18,8 @@ namespace Xpand.Extensions.Reactive.Transform {
             => source.When(NotificationKind.OnError).Select(notification => notification.Exception);
         
         public static IObservable<T[]> WhenFinished<T>(this IObservable<T> source) 
-            => source.Publish(obs => obs.WhenCompleted().Merge(obs.WhenError().Select(_ => Array.Empty<T>())).Take(1));
+            => source.Publish(obs => obs.When(NotificationKind.OnCompleted).Select(_ => Array.Empty<T>())
+                .Merge(obs.WhenError().Select(_ => Array.Empty<T>())).Take(1));
         
         public static IObservable<T> WhenIs<T>(this object source)
             => source.As<T>().Observe().WhenNotDefault();
