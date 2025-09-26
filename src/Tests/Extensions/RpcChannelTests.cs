@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -11,9 +12,11 @@ using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.Numeric;
 using Xpand.Extensions.Reactive;
+using Xpand.Extensions.Reactive.Combine;
 using MemoryCache = Microsoft.Extensions.Caching.Memory.MemoryCache;
 
 namespace Xpand.Extensions.Tests {
+    
     [TestFixture]
     public class RpcChannelTests {
         [SetUp]
@@ -161,5 +164,32 @@ namespace Xpand.Extensions.Tests {
                 Console.SetOut(originalOutput);
             }
         }
+        
+        [Test]
+        public void Operator_Establishes_Handler_Forwards_Tuple_And_Disposes_Handler_On_Unsubscribe() {
+            var source = new Subject<(string key, IntPtr value)>();
+            var testData = (key: "test-channel-1", value: new IntPtr(12345));
+
+            var stream = source.MergeIgnored(tuple =>tuple.key.HandleRequest(tuple.value) );
+            
+            var observer = stream.Test();
+
+            source.OnNext(testData);
+
+            observer.ItemCount.ShouldBe(1);
+            observer.Items[0].key.ShouldBe(testData.key);
+
+            var receivedValue = testData.key.MakeRequest().With<IntPtr>()
+                .Timeout(TimeSpan.FromSeconds(1)).FirstAsync().GetAwaiter().GetResult();
+            receivedValue.ShouldBe(testData.value);
+
+            observer.Dispose();
+
+            Should.Throw<TimeoutException>(() => {
+                testData.key.MakeRequest().With<IntPtr>()
+                    .Timeout(TimeSpan.FromMilliseconds(100)).FirstAsync().GetAwaiter().GetResult();
+            });
+        }
+
     }
 }
