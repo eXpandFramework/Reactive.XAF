@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Xpand.Extensions.StreamExtensions{
@@ -7,7 +8,7 @@ namespace Xpand.Extensions.StreamExtensions{
             using var streamReader = new StreamReader(stream);
             return streamReader.ReadToEnd();
         }
-        public static string ReadToEndAsString(this Stream stream){
+        public static string ReadToEndAsString(this Stream stream,Encoding encoding=null){
             using var streamReader = new StreamReader(stream);
             return streamReader.ReadToEnd();
         }

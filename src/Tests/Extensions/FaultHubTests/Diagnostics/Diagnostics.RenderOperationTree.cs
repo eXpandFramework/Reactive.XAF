@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.Reactive.Relay;
@@ -66,5 +67,33 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics {
 
             result.ShouldBeEmpty();
         }
+        
+        [Test]
+        public void Render_Does_Not_Display_Empty_Parentheses_For_ValueTuple_Context() {
+            var headerContext = new AmbientFaultContext {
+                BoundaryName = "TestOperation",
+                UserContext = [ValueTuple.Create()]
+            };
+            var exception = new FaultHubException("Test Failure", 
+                new FaultHubException("Inner", new InvalidOperationException("Root Cause"), 
+                    new AmbientFaultContext{ LogicalStackTrace = [
+                        new LogicalStackFrame("MethodWithValueTupleContext", "file.cs", 10, [ValueTuple.Create()]) 
+                    ]}), 
+                headerContext);
+
+            var report = exception.Render();
+            Console.WriteLine(report);
+
+            var reportLines = report.Split([Environment.NewLine], StringSplitOptions.None);
+    
+            var headerLine = reportLines.First();
+            headerLine.ShouldBe("Test Operation completed with errors <Root Cause>");
+            headerLine.ShouldNotContain("()");
+
+            var frameLine = reportLines.Single(l => l.Contains("MethodWithValueTupleContext"));
+            frameLine.Trim().ShouldStartWith("at MethodWithValueTupleContext");
+            frameLine.ShouldNotContain("()");
+        }
+
     }
 }

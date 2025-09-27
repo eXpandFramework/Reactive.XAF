@@ -319,5 +319,33 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics {
             reportLines.Count(line => line.Contains("ProcessItem")).ShouldBe(1, "The 'ProcessItem' frames were not collapsed into a single line.");
             reportLines.ShouldContain(line => line.Trim().Contains(expectedCollapsedLine));
         }
+        
+        [Test]
+        public void Render_Does_Not_Display_Empty_Parentheses_For_Empty_Context() {
+            var headerContext = new AmbientFaultContext {
+                BoundaryName = "TestOperation",
+                UserContext = [""]
+            };
+            var exception = new FaultHubException("Test Failure", 
+                new FaultHubException("Inner", new InvalidOperationException("Root Cause"), 
+                    new AmbientFaultContext{ LogicalStackTrace = [
+                        new LogicalStackFrame("MethodWithEmptyContext", "file.cs", 10, [""])
+                    ]}), 
+                headerContext);
+
+            var report = exception.Render();
+
+            var reportLines = report.Split([Environment.NewLine], StringSplitOptions.None);
+    
+            var headerLine = reportLines.First();
+            headerLine.ShouldNotContain("()");
+            headerLine.ShouldBe("Test Operation completed with errors <Root Cause>");
+            
+
+            var frameLine = reportLines.Single(l => l.Contains("MethodWithEmptyContext"));
+            frameLine.ShouldNotContain("()"); 
+            frameLine.Trim().ShouldStartWith("at MethodWithEmptyContext");
+                       
+        }
     }
 }

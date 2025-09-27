@@ -203,15 +203,19 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics {
         }
 
         [Test]
-        public void Returns_Null_If_No_Valid_Context_Is_Found() {
+        public void Returns_Virtual_Node_If_No_Valid_Context_Is_Found() {
+            var rootCause = new Exception();
             var context = new AmbientFaultContext { BoundaryName = null, UserContext = null };
-            var exception = new FaultHubException("Test", new Exception(), context);
+            var exception = new FaultHubException("Test", rootCause, context);
 
             var result = exception.OperationTree();
 
-            result.ShouldBeNull();
+            result.ShouldNotBeNull();
+            result.Name.ShouldBe(nameof(Exception));
+            result.GetRootCause().ShouldBe(rootCause);
+            result.Children.ShouldBeEmpty();
         }
-
+        
         [Test]
         public void NewOperationTree_Preserves_Nested_Logical_Stack_Instead_Of_Overwriting() {
             var innerEx = new InvalidOperationException("Root Cause");
@@ -504,5 +508,6 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics {
             var childNode = tree.Children.ShouldHaveSingleItem();
             childNode.Name.ShouldBe("InnerOperation");
         }
+        
     }
 }

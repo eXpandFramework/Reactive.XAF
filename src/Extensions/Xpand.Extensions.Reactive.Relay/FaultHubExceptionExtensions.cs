@@ -55,7 +55,8 @@ namespace Xpand.Extensions.Reactive.Relay {
                 .Where(o => o is not string s ? o is not OperationNode
                     : !(mergedTree.Tags?.Contains(s) ?? false) && s.CompoundName() != title && s != title)
                 .ToArray();
-            var rootContext = rootContextItems.Any() ? $" ({string.Join(", ", rootContextItems)})" : "";
+            var rootContextString = string.Join(", ", rootContextItems.Select(o => o.ToString()).Where(s => !string.IsNullOrWhiteSpace(s) && s != "()"));
+            var rootContext = !string.IsNullOrEmpty(rootContextString) ? $" ({rootContextString})" : "";
             var errorMessage = exception.GenerateErrorMessage(mergedTree, title, allRootCauses, rootContext, summary);
             LogFast($"[Render] Generated error message: '{errorMessage}'");
 
@@ -485,9 +486,24 @@ namespace Xpand.Extensions.Reactive.Relay {
         }
         private static OperationNode HandleNamelessContext(this AmbientFaultContext context, IReadOnlyList<LogicalStackFrame> parentStack, Dictionary<AmbientFaultContext, FaultHubException> contextLookup) {
             LogFast($"[Parser.Context] BoundaryName is null. Trying to build from generic inner exception.");
-            if (contextLookup.TryGetValue(context, out var owner)) return owner.InnerException.BuildFromGenericException(parentStack, contextLookup);
-            LogFast($"[Parser.Context] Could not find owner for nameless context. Returning null.");
-            return null;
+            if (!contextLookup.TryGetValue(context, out var owner) || owner.InnerException == null) {
+                LogFast($"[Parser.Context] Could not find owner or owner has no inner exception. Returning null.");
+                return null;
+            }
+
+            var nodeFromInner = owner.InnerException.BuildFromGenericException(parentStack, contextLookup);
+            if (nodeFromInner != null) {
+                return nodeFromInner;
+            }
+    
+            LogFast($"[Parser.Context] Inner exception did not produce a node. Creating virtual node for primitive exception '{owner.InnerException.GetType().Name}'.");
+            return new OperationNode(
+                Name: owner.InnerException.GetType().Name,
+                ContextData: [],
+                Children: [],
+                RootCause: owner.InnerException,
+                LogicalStack: context.LogicalStackTrace
+            );
         }
         private static Exception RootCause(this AmbientFaultContext context, Dictionary<AmbientFaultContext, FaultHubException> contextLookup, List<LogicalStackFrame> fullStack, List<OperationNode> children) {
             if (!contextLookup.TryGetValue(context, out var contextOwner)) return null;
