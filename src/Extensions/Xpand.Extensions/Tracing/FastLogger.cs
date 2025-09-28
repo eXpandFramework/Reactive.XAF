@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
 
 namespace Xpand.Extensions.Tracing{
     [InterpolatedStringHandler]
@@ -43,26 +46,50 @@ namespace Xpand.Extensions.Tracing{
         public static bool Enabled { get; set; }
 
         public static Action<string> Write { get; set; } = Console.WriteLine;
+
         private static string FormatMessage(ref HighPerformanceLogBuilder builder) {
             var message = builder.GetFormattedText();
-            return string.IsNullOrEmpty(builder.FilePath) ? message
-                : $"{Path.GetFileNameWithoutExtension(builder.FilePath)} - {builder.MemberName} | {message}";
+            return !string.IsNullOrEmpty(builder.FilePath)
+                ? $"{Path.GetFileNameWithoutExtension(builder.FilePath)} - {builder.MemberName} | {message}"
+                : message;
+        }
+        private static readonly AsyncLocal<List<Func<(string method, string path), bool>>> Predicates = new();
+
+        public static IDisposable Filter(Func<(string method, string path), bool> predicate) {
+            Predicates.Value ??= new List<Func<(string method, string path), bool>>();
+            Predicates.Value.Add(predicate);
+            return new FilterScope(predicate);
+        }
+        
+        private readonly struct FilterScope(Func<(string method, string path), bool> predicate) : IDisposable {
+            public void Dispose() => Predicates.Value?.Remove(predicate);
+        }
+        private static bool ShouldLog(ref HighPerformanceLogBuilder builder) {
+            if (Predicates.Value == null || !Predicates.Value.Any()) return true;
+            foreach (var predicate in Predicates.Value) {
+                if (predicate((builder.MemberName, builder.FilePath))) continue;
+                return false;
+            }
+            return true;
+        }
+
+        public static void LogError(ref HighPerformanceLogBuilder builder) {
+            if (!ShouldLog(ref builder)) return;
+            if (builder.GetFormattedText().StartsWith("[")) return;
+            Write(ErrorColor.AnsiColorize(FormatMessage(ref builder)));
         }
 
         public static void LogWarning(ref HighPerformanceLogBuilder builder) {
+            if (!ShouldLog(ref builder)) return;
             if (builder.GetFormattedText().StartsWith("[")) return;
             Write(WarningColor.AnsiColorize(FormatMessage(ref builder)));
         }
         
         public static void LogFast(ref HighPerformanceLogBuilder builder) {
             if (!Enabled) return;
+            if (!ShouldLog(ref builder)) return;
             if (builder.GetFormattedText().StartsWith("[")) return;
             Write(FormatMessage(ref builder));
-        }
-        
-        public static void LogError(ref HighPerformanceLogBuilder builder) {
-            if (builder.GetFormattedText().StartsWith("[")) return;
-            Write(ErrorColor.AnsiColorize(FormatMessage(ref builder)));
         }
 
         private static string AnsiColorize(this ConsoleColor color,string message) 
@@ -88,4 +115,5 @@ namespace Xpand.Extensions.Tracing{
             _ => "37"
         };
     }
+    
 }

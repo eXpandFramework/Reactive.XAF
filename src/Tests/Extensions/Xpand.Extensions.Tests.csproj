@@ -59,6 +59,9 @@
     <Compile Update="Reactive\ProofOfConcepts\UseContextFlawTests.cs">
       <DependentUpon>FlowContextTests.cs</DependentUpon>
     </Compile>
+    <Compile Update="FastLoggerFilteringTests.cs">
+      <DependentUpon>FastLoggerTests.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
   <Import Project="..\..\..\.paket\Paket.Restore.targets" />
 </Project>
