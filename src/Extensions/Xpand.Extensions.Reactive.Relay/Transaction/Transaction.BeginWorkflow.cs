@@ -64,7 +64,7 @@ namespace Xpand.Extensions.Reactive.Relay.Transaction{
             => sources.Select(s => s.Materialize()).Concat().ToList()
                 .SelectMany(notifications => {
                     var errors = notifications.Where(n => n.Kind == NotificationKind.OnError).Select(n => n.Exception).ToList();
-                    LogFast($"[DIAGNOSTIC][IEnumerable.AsStep] Collected {errors.Count} error(s). Types: [{string.Join(", ", errors.Select(e => e.GetType().Name))}]");
+                    LogFast($"Collected {errors.Count} error(s). Types: [{string.Join(", ", errors.Select(e => e.GetType().Name))}]");
                     return errors.Any()
                         ? new AggregateException(errors).ExceptionToPublish(new AmbientFaultContext
                             { BoundaryName = boundaryName, Tags = [StepNodeTag, AsStepOriginTag] }).Throw<T>()
@@ -73,8 +73,8 @@ namespace Xpand.Extensions.Reactive.Relay.Transaction{
         public static IObservable<T> TraceTransactionContext<T>(this IObservable<T> source, string stepName) 
             => Observable.Defer(() => {
                 var txName = Current?.Name ?? "NULL";
-                LogFast($"[CONTEXT_TRACE] Entering '{stepName}'. Transaction Context: '{txName}'");
-                return source.Do(_ => LogFast($"[CONTEXT_TRACE] Emit '{stepName}'. Transaction Context: '{txName}'"),() => LogFast($"[CONTEXT_TRACE] Completed '{stepName}'. Transaction Context: '{txName}'"));
+                LogFast($"Entering '{stepName}'. Transaction Context: '{txName}'");
+                return source.Do(_ => LogFast($"Emit '{stepName}'. Transaction Context: '{txName}'"),() => LogFast($"Completed '{stepName}'. Transaction Context: '{txName}'"));
             });
 
         public static IObservable<T> TransactionFlowContext<T>(this IObservable<T> source,
@@ -86,39 +86,39 @@ namespace Xpand.Extensions.Reactive.Relay.Transaction{
 
         public static IObservable<T> AsStep<T>(this IObservable<T> source, Func<Exception, ResilienceAction> onFault = null, [CallerArgumentExpression("source")] string stepExpression = null) {
             var parsedStepName = GetStepName(stepExpression);
-            LogFast($"[CORRELATION_TRACE][AsStep] Operator applied. Expression: '{stepExpression}'. Parsed Name: '{parsedStepName}'.");
+            LogFast($"Operator applied. Expression: '{stepExpression}'. Parsed Name: '{parsedStepName}'.");
             
             return source.Catch((Exception ex) => {
                 var transactionContext = Current;
-                LogFast($"[DIAGNOSTIC][AsStep] ==> CATCH BLOCK ENTERED for step '{parsedStepName}'. Exception: '{ex.GetType().Name}'.");
+                LogFast($"==> CATCH BLOCK ENTERED for step '{parsedStepName}'. Exception: '{ex.GetType().Name}'.");
                 
                 if (transactionContext == null) {
-                    LogFast($"[DIAGNOSTIC][AsStep] No active transaction. Re-throwing original exception.");
+                    LogFast($"No active transaction. Re-throwing original exception.");
                     return Observable.Throw<T>(ex);
                 }
 
-                LogFast($"[DIAGNOSTIC][AsStep] Active transaction: '{transactionContext.Name}'. Invoking onFault selector.");
+                LogFast($"Active transaction: '{transactionContext.Name}'. Invoking onFault selector.");
                 var resilienceAction = onFault?.Invoke(ex) ?? ResilienceAction.Critical;
-                LogFast($"[DIAGNOSTIC][AsStep] onFault selector returned: '{resilienceAction}'.");
+                LogFast($"onFault selector returned: '{resilienceAction}'.");
 
                 var tags = new List<string> { StepNodeTag, AsStepOriginTag };
                 if (resilienceAction == ResilienceAction.Tolerate || resilienceAction == ResilienceAction.Suppress) {
                     tags.Add(NonCriticalStepTag);
                 }
 
-                LogFast($"[DIAGNOSTIC][AsStep] Creating fault. Tags: [{string.Join(", ", tags)}]");
+                LogFast($"Creating fault. Tags: [{string.Join(", ", tags)}]");
                 var stepFault = ex.ExceptionToPublish(new AmbientFaultContext {
                     BoundaryName = parsedStepName,
                     Tags = tags
                 });
 
                 if (resilienceAction == ResilienceAction.Suppress) {
-                    LogFast($"[DIAGNOSTIC][AsStep] Reporting suppressed fault to transaction and completing stream.");
+                    LogFast($"Reporting suppressed fault to transaction and completing stream.");
                     transactionContext.Failures.Add(stepFault);
                     return Observable.Empty<T>();
                 }
                 
-                LogFast($"[DIAGNOSTIC][AsStep] <== CATCH BLOCK EXITING. Propagating fault.");
+                LogFast($"<== CATCH BLOCK EXITING. Propagating fault.");
                 return Observable.Throw<T>(stepFault);
             });
         }    }

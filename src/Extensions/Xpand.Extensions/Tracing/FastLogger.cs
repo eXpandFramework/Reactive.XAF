@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
 
@@ -8,10 +9,21 @@ namespace Xpand.Extensions.Tracing{
     [SuppressMessage("ReSharper", "StructCanBeMadeReadOnly")]
     public ref struct HighPerformanceLogBuilder {
         private readonly StringBuilder _stringBuilder;
+        public string MemberName { get; }
+        public string FilePath { get; }
+        
 
-        public HighPerformanceLogBuilder(int literalLength, int formattedCount, out bool isEnabled) {
-            isEnabled = true;
+        public HighPerformanceLogBuilder(int literalLength, int formattedCount, out bool isEnabled,
+            [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "") {
+            isEnabled = Enabled;
+            if (!isEnabled) {
+                MemberName = null;
+                FilePath = null;
+                return;
+            }
             _stringBuilder = new StringBuilder(literalLength + formattedCount * 8);
+            MemberName = memberName;
+            FilePath = filePath;
         }
 
         public void AppendLiteral(string value) => _stringBuilder?.Append(value);
@@ -31,18 +43,26 @@ namespace Xpand.Extensions.Tracing{
         public static bool Enabled { get; set; }
 
         public static Action<string> Write { get; set; } = Console.WriteLine;
-
-        public static void LogError(ref HighPerformanceLogBuilder builder) {
-            Write(ErrorColor.AnsiColorize(builder.GetFormattedText()));
+        private static string FormatMessage(ref HighPerformanceLogBuilder builder) {
+            var message = builder.GetFormattedText();
+            return string.IsNullOrEmpty(builder.FilePath) ? message
+                : $"{Path.GetFileNameWithoutExtension(builder.FilePath)} - {builder.MemberName} | {message}";
         }
 
         public static void LogWarning(ref HighPerformanceLogBuilder builder) {
-            Write(WarningColor.AnsiColorize(builder.GetFormattedText()));
+            if (builder.GetFormattedText().StartsWith("[")) return;
+            Write(WarningColor.AnsiColorize(FormatMessage(ref builder)));
         }
-
+        
         public static void LogFast(ref HighPerformanceLogBuilder builder) {
             if (!Enabled) return;
-            Write(builder.GetFormattedText());
+            if (builder.GetFormattedText().StartsWith("[")) return;
+            Write(FormatMessage(ref builder));
+        }
+        
+        public static void LogError(ref HighPerformanceLogBuilder builder) {
+            if (builder.GetFormattedText().StartsWith("[")) return;
+            Write(ErrorColor.AnsiColorize(FormatMessage(ref builder)));
         }
 
         private static string AnsiColorize(this ConsoleColor color,string message) 

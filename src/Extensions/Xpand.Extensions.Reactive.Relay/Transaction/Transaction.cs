@@ -39,7 +39,7 @@ namespace Xpand.Extensions.Reactive.Relay.Transaction {
                 ib.DataSalvageStrategy = dataSalvageStrategy;
                 return Observable.Return(Unit.Default).ContextualSource(ib.TransactionName)
                     .SelectMany(_ => {
-                        LogFast($"[Tx:{ib.TransactionName}] Run called. Mode={ib.Mode}, FailFast={failFast}, CollectAllResults={collectAllResults}");
+                        LogFast($"{ib.TransactionName}: Run called. Mode={ib.Mode}, FailFast={failFast}, CollectAllResults={collectAllResults}");
                         return ib.Mode == TransactionMode.Concurrent ? ib.RunConcurrent( failFast) : ib.RunSequential( failFast, collectAllResults, isNonCritical);
                     });
             });        
@@ -55,7 +55,7 @@ namespace Xpand.Extensions.Reactive.Relay.Transaction {
             if (ex.Context.Tags.Contains(NonCriticalAggregateTag)) {
                 return ex;
             }
-            LogFast($"[INSTRUMENTATION][Transaction.Run] Creating TransactionAbortedException for transaction '{ib.TransactionName}'.");
+            LogFast($"Creating TransactionAbortedException for transaction '{ib.TransactionName}'.");
             return new TransactionAbortedException($"{ib.TransactionName} failed", (Current != null && !Current.Failures.IsEmpty) ? Current.Failures.First() : ex,
                 ib.Context,ib.Tags.Concat([TransactionNodeTag, ib.Mode.ToString(), nameof(RunFailFast)])
                     .Distinct().ToList(),ib.TransactionName);
@@ -118,25 +118,24 @@ namespace Xpand.Extensions.Reactive.Relay.Transaction {
             => allSteps.Aggregate(Observable.Return((results: (object)new List<object>(), failures: new List<Exception>(), allResults: new List<object>())), 
                     (accObservable, step) => accObservable.SelectMany(acc => {
                         if (failFast && acc.failures.HasCriticalFailure(isNonCritical)) {
-                            LogFast($"[Tx-FORNSC:{builder.TransactionName}][StepChain] ==> SKIPPING step '{step.Name}' due to prior failure in FailFast mode.");
+                            LogFast($"{builder.TransactionName}: SKIPPING step '{step.Name}' due to prior failure in FailFast mode.");
                             return Observable.Return(acc);
                         }
                         var accFailures = acc.failures.Any() ? string.Join(", ", acc.failures.Select(f => f.GetType().Name)) : "empty";
-                        LogFast($"[Tx-FORNSC:{builder.TransactionName}][StepChain] ==> ENTERING step '{step.Name}'. Accumulator has {acc.failures.Count} failure(s): [{accFailures}]");
-                        
+                        LogFast($"{builder.TransactionName}: ENTERING step '{step.Name}'. Accumulator has {acc.failures.Count} failure(s): [{accFailures}]");
                         var resultsCount = acc.results.IsEnumerable() ? ((IEnumerable)acc.results).Cast<object>().Count() : 1;
-                        LogFast($"[ACCUMULATOR-IN] For Step '{step.Name}': Results Count = {resultsCount}, Failures Count = {acc.failures.Count} ({accFailures})");
+                        LogFast($"For Step '{step.Name}': Results Count = {resultsCount}, Failures Count = {acc.failures.Count} ({accFailures})");
                         var lastFailure = acc.failures.LastOrDefault();
                         if (lastFailure != null && lastFailure.Data.Contains(SalvagedDataKey)) {
                             var salvaged = lastFailure.Data[SalvagedDataKey];
                             var salvagedCount = salvaged.IsEnumerable() ? ((IEnumerable)salvaged)!.Cast<object>().Count() : 1;
-                            LogFast($"[ACCUMULATOR-IN]   - Last failure ('{lastFailure.GetType().Name}') contains salvaged data. Type: {salvaged?.GetType().Name}, Count: {salvagedCount}");
+                            LogFast($"Last failure ('{lastFailure.GetType().Name}') contains salvaged data. Type: {salvaged?.GetType().Name}, Count: {salvagedCount}");
                         }
                         return step.ExecuteStep(acc, failFast)
                             .PushFrameConditionally(!string.IsNullOrEmpty(step.Name) ? step.Name : $"Part {allSteps.IndexOf(step) + 1}",step.FilePath,step.LineNumber)
                             .Materialize().BufferUntilCompleted()
                             .Select(notifications => {
-                                LogFast($"[ExecuteStepChain] Step '{step.Name}' completed. Received {notifications.Length} notifications ({notifications.Count(n => n.Kind == NotificationKind.OnNext)} OnNext, {notifications.Count(n => n.Kind == NotificationKind.OnError)} OnError).");
+                                LogFast($"Step '{step.Name}' completed. Received {notifications.Length} notifications ({notifications.Count(n => n.Kind == NotificationKind.OnNext)} OnNext, {notifications.Count(n => n.Kind == NotificationKind.OnError)} OnError).");
                                 var newAcc = allSteps.CollectStepErrors( builder, notifications, step, acc, isNonCritical);
                                 var suppressedFailures = Current?.Failures.Where(f => !newAcc.failures.Contains(f)).ToList();
                                 return !(suppressedFailures?.Any() ?? false) ? newAcc
@@ -159,23 +158,23 @@ namespace Xpand.Extensions.Reactive.Relay.Transaction {
         private static (object results, List<Exception> failures, List<object> allResults) CollectStepErrors<TFinal>(this List<StepDefinition> allSteps,
             TransactionBuilder<TFinal> builder, IReadOnlyList<Notification<object>> notifications, StepDefinition step,
             (object results, List<Exception> failures, List<object> allResults) acc, Func<Exception, bool> isNonCritical = null){
-            LogFast($"[CollectStepErrors] PRE-PROCESSING for step '{step.Name}': acc.allResults.Count = {acc.allResults.Count}");
+            LogFast($"PRE-PROCESSING for step '{step.Name}': acc.allResults.Count = {acc.allResults.Count}");
             var errorNotifications = notifications.Where(n => n.Kind == NotificationKind.OnError).ToList();
             if (errorNotifications.Any()) {
                 var stepErrors = string.Join(", ", errorNotifications.Select(n => n.Exception?.GetType().Name));
-                LogFast($"[Tx-FORNSC:{builder.TransactionName}][StepChain] -- CAPTURED {errorNotifications.Count} error(s) from step '{step.Name}': [{stepErrors}]");
+                LogFast($"{builder.TransactionName}: CAPTURED {errorNotifications.Count} error(s) from step '{step.Name}': [{stepErrors}]");
             }
             var results = notifications.Where(n => n.Kind == NotificationKind.OnNext).Select(n => n.Value).ToList();
             var effectiveStrategy = step.DataSalvageStrategy == DataSalvageStrategy.Inherit ? builder.DataSalvageStrategy : step.DataSalvageStrategy;
             if (errorNotifications.Any() && effectiveStrategy == DataSalvageStrategy.EmitEmpty) {
-                LogFast($"[Tx-FORNSC:{builder.TransactionName}][StepChain] -- Step '{step.Name}' failed with EmitEmpty strategy. Discarding {results.Count} partial results.");
+                LogFast($"{builder.TransactionName}: Step '{step.Name}' failed with EmitEmpty strategy. Discarding {results.Count} partial results.");
                 results.Clear();
             }
             var allResults = acc.allResults.Concat(results).ToList();
             var failures = acc.failures.Concat(allSteps.CollectErrors(builder, errorNotifications, step, results, isNonCritical)).ToList();
-            LogFast($"[CollectStepErrors] POST-PROCESSING for step '{step.Name}': allResults.Count = {allResults.Count}, failures.Count = {failures.Count}");
+            LogFast($"POST-PROCESSING for step '{step.Name}': allResults.Count = {allResults.Count}, failures.Count = {failures.Count}");
             var exitFailures = failures.Any() ? string.Join(", ", failures.Select(f => f.GetType().Name)) : "empty";
-            LogFast($"[Tx-FORNSC:{builder.TransactionName}][StepChain] <== EXITING step '{step.Name}'. Accumulator now has {failures.Count} failure(s): [{exitFailures}]");
+            LogFast($"{builder.TransactionName}: EXITING step '{step.Name}'. Accumulator now has {failures.Count} failure(s): [{exitFailures}]");
             return (results,  failures, allResults);
         }
         public static IObservable<TFinal[]> RunToEnd<TFinal>(this ITransactionBuilder<TFinal> builder, DataSalvageStrategy dataSalvageStrategy = DataSalvageStrategy.EmitPartialResults) 
@@ -184,16 +183,15 @@ namespace Xpand.Extensions.Reactive.Relay.Transaction {
             => allSteps.ExecuteStepChain(builder, false)
                 .SelectMany(t => {
                     if (!t.allFailures.Any()) {
-                        LogFast($"[Tx:{builder.TransactionName}] RunToEnd: No failures. CollectAllResults={collectAllResults}, IsNested={TransactionNestingLevel.Value}");
+                        LogFast($"{builder.TransactionName}: RunToEnd: No failures. CollectAllResults={collectAllResults}, IsNested={TransactionNestingLevel.Value}");
                         return Observable.Return(collectAllResults ? t.allResults : (List<object>)t.finalStepResult);
                     }
-                    LogFast($"[Tx:{builder.TransactionName}] RunToEnd: Completed with {t.allFailures.Count} failure(s). Creating final aggregate exception.");
+                    LogFast($"{builder.TransactionName}: RunToEnd: Completed with {t.allFailures.Count} failure(s). Creating final aggregate exception.");
                     var aggregateException = new AggregateException(t.allFailures);
                     if ((TransactionNestingLevel.Value ==1)) {
-                        LogFast($"[Tx:{builder.TransactionName}] Path: Non-nested failure. isNested = {TransactionNestingLevel.Value}. Throwing.");
+                        LogFast($"{builder.TransactionName}: Path: Non-nested failure. isNested = {TransactionNestingLevel.Value}. Throwing.");
                     }
-                    LogFast($"[Tx:{builder.TransactionName}] Path: Nested failure. isNested = {TransactionNestingLevel.Value}. Proceeding to salvage.");
-                    
+                    LogFast($"{builder.TransactionName}: Path: Nested failure. isNested = {TransactionNestingLevel.Value}. Proceeding to salvage.");
                     var finalTypedResults =builder.DataSalvageStrategy==DataSalvageStrategy.EmitPartialResults? t.allResults.OfType<TFinal>().Cast<object>().ToList():null;
                     return Observable.Return((object)finalTypedResults).WhenNotDefault()
                         .Concat(Observable.Throw<object>(aggregateException));
@@ -202,11 +200,11 @@ namespace Xpand.Extensions.Reactive.Relay.Transaction {
         private static IEnumerable<FaultHubException> CollectErrors<TFinal>(this List<StepDefinition> allSteps,
             TransactionBuilder<TFinal> builder, List<Notification<object>> errors, StepDefinition step, List<object> stepResults, Func<Exception, bool> isNonCritical = null) {
             if (!errors.Any()) return [];
-            LogFast($"[Tx:{builder.TransactionName}][CollectErrors] Collecting {errors.Count} error(s) for step '{step.Name}'.");
+            LogFast($"{builder.TransactionName}: Collecting {errors.Count} error(s) for step '{step.Name}'.");
             var stepNameForContext = !string.IsNullOrEmpty(step.Name) ? step.Name : $"Part {allSteps.IndexOf(step) + 1}";
             var isNonCriticalCheck = step.IsNonCritical ?? (_ => false);
             return errors.Select(e => {
-                LogFast($"[DIAGNOSTIC][CollectErrors] Processing exception of type '{e.Exception?.GetType().Name}'.");
+                LogFast($"Processing exception of type '{e.Exception?.GetType().Name}'.");
                 var effectiveStrategy = step.DataSalvageStrategy == DataSalvageStrategy.Inherit ? builder.DataSalvageStrategy : step.DataSalvageStrategy;
                 if (effectiveStrategy is DataSalvageStrategy.EmitPartialResults or DataSalvageStrategy.EmitEmpty) {
                     var salvagedData = effectiveStrategy == DataSalvageStrategy.EmitPartialResults ? stepResults : new List<object>();
@@ -214,7 +212,7 @@ namespace Xpand.Extensions.Reactive.Relay.Transaction {
                 }
 
                 if (e.Exception is FaultHubException fhEx && (fhEx.Context.Tags?.Contains(AsStepOriginTag) ?? false)) {
-                    LogFast($"[DIAGNOSTIC][CollectErrors] Found '{AsStepOriginTag}'. Preserving existing FaultHubException for step '{fhEx.Context.BoundaryName}'.");
+                    LogFast($"Found '{AsStepOriginTag}'. Preserving existing FaultHubException for step '{fhEx.Context.BoundaryName}'.");
                     return fhEx;
                 }
 
@@ -225,15 +223,15 @@ namespace Xpand.Extensions.Reactive.Relay.Transaction {
                     tags.Add(NonCriticalStepTag);
                 }
 
-                LogFast($"[DIAGNOSTIC][CollectErrors] Wrapping exception. Applying tags: [{string.Join(", ", tags)}]. Step context: '{stepNameForContext}'.");
+                LogFast($"Wrapping exception. Applying tags: [{string.Join(", ", tags)}]. Step context: '{stepNameForContext}'.");
                 return e.Exception.ExceptionToPublish(builder.Context.AddToContext(builder.TransactionName,
                     $"{builder.TransactionName} - {stepNameForContext}"), tags, stepNameForContext);
             });
-        }        private static IObservable<object> FailFast<TFinal>(this  List<StepDefinition> allSteps,TransactionBuilder<TFinal> builder, Func<Exception, bool> isNonCritical = null) 
+        }        
+        private static IObservable<object> FailFast<TFinal>(this  List<StepDefinition> allSteps,TransactionBuilder<TFinal> builder, Func<Exception, bool> isNonCritical = null) 
             => allSteps.ExecuteStepChain(builder,true, isNonCritical)
                 .SelectMany(t => {
                     if (!t.allFailures.Any()) return Observable.Return(t.finalStepResult);
-
                     var criticalFailure = t.allFailures.FirstOrDefault(f => {
                         if (f is FaultHubException fhEx && fhEx.Context.Tags.Contains(NonCriticalStepTag)) {
                             return false;
@@ -245,7 +243,7 @@ namespace Xpand.Extensions.Reactive.Relay.Transaction {
                     if (criticalFailure != null) {
                         return Observable.Throw<object>(criticalFailure);                    }
 
-                    LogFast($"[Tx:{builder.TransactionName}] FailFast with predicate: All failures are non-critical. Aggregating.");
+                    LogFast($"{builder.TransactionName}: FailFast with predicate: All failures are non-critical. Aggregating.");
                     return new FaultHubException($"{builder.TransactionName} completed with non-critical errors", new AggregateException(t.allFailures), builder.Context,
                             builder.UpdateRunTags(false).Concat([NonCriticalAggregateTag]).ToArray(),builder.TransactionName, builder.CallerMemberPath, builder.CallerMemberLine)
                         .Throw<object>();

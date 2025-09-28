@@ -55,7 +55,7 @@ namespace Xpand.Extensions.Reactive.Relay.Transaction{
             var tb = (TransactionBuilder<TCurrent>)builder;
             var stepName = GetStepName(selectorExpression);
             return builder.Then(previousResults => {
-                LogFast($"[Tx:{tb.TransactionName}][Step:{stepName}] Executing concurrent batch. FailFast={failFast}, MaxConcurrency={maxConcurrency}");
+                LogFast($"{tb.TransactionName}: {stepName}: Executing concurrent batch. FailFast={failFast}, MaxConcurrency={maxConcurrency}");
                 var operations = concurrentSelector(previousResults).ToObservable();
                 return failFast ? operations.ConcurrentFailFast(tb.TransactionName, maxConcurrency, tb.Context,filePath, lineNumber).ToList()
                         .Select(list => list.ToArray()).PushStackFrame(stepName)

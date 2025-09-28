@@ -8,7 +8,7 @@ namespace Xpand.Extensions.Reactive.Relay{
         public static AsyncLocal<T> NewContext<T>() {
             var asyncLocal = new AsyncLocal<T>();
             RegisteredContexts.Add(asyncLocal.Wrap());
-            LogFast($"[DIAG-FACTORY] Registered new context. Total registered: {RegisteredContexts.Count}.");
+            LogFast($"Registered new context. Total registered: {RegisteredContexts.Count}.");
             return asyncLocal;
         }
     }
