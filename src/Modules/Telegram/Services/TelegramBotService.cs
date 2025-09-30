@@ -10,7 +10,6 @@ using System.Threading.Tasks;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.Templates;
-using DevExpress.ExpressApp.Xpo;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
@@ -18,11 +17,14 @@ using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Numeric;
 using Xpand.Extensions.Reactive;
 using Xpand.Extensions.Reactive.Combine;
+using Xpand.Extensions.Reactive.Relay;
+using Xpand.Extensions.Reactive.Relay.Transaction;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Transform.System;
 using Xpand.Extensions.XAF.ActionExtensions;
 using Xpand.Extensions.XAF.Attributes;
 using Xpand.Extensions.XAF.FrameExtensions;
+using Xpand.Extensions.XAF.Xpo.ObjectSpaceExtensions;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
 using Xpand.XAF.Modules.Telegram.BusinessObjects;
@@ -62,15 +64,23 @@ namespace Xpand.XAF.Modules.Telegram.Services{
                 .MergeToUnit(manager.TelegramUpdate());
 
         private static IObservable<Unit> WhenSendTextPayload(this XafApplication application) 
-            => ((application.ObjectSpaceProvider as XPObjectSpaceProvider)?.DataLayer).HandleRequest()
-                .With<SendTextPayload, IObservable<Message>>(payload 
-                    => application.UseProviderObjectSpace(space => {
-                        var bot = space.GetObjectByKey<TelegramBot>(payload.BotId);
-                        return bot.ClientSource().SelectMany(client =>
-                            bot.Chats.Where(chat => chat.Active).ToObservable()
-                                .SelectMany(chat => client.SendText(chat, payload.ParseMode, payload.Messages))
-                        );
-                    },typeof(TelegramBot)).Observe());
+            => application.ObjectSpaceProvider.HandleDataLayerRequest()
+                .With<SendTextPayload, IObservable<Message>>(payload => 
+                    application.UseProviderObjectSpace(space => space.SendTextMessagesToActiveChats( payload)
+                        .BeginWorkflow($"SendTextPayload-{payload.BotId}", context: [payload])
+                        .RunToEnd()
+                        .SelectMany(messages => messages.ToObservable()),typeof(TelegramBot)).Observe());
+        
+
+        private static IObservable<Message> SendTextMessagesToActiveChats(this IObjectSpace space, SendTextPayload payload) 
+            => Observable.Defer(() => {
+                var bot = space.GetObjectByKey<TelegramBot>(payload.BotId);
+                return bot == null ? Observable.Empty<Message>()
+                    : bot.ClientSource().SelectMany(client =>
+                        bot.Chats.Where(chat => chat.Active).ToObservable()
+                            .SelectMany(chat => client.SendText(chat, payload.ParseMode, payload.Messages))
+                    );
+            });
 
         public static IObservable<Message> SendText(this TelegramBot bot,params string[] messages) 
             => bot.SendText(ParseMode.Html, messages);
@@ -120,18 +130,14 @@ namespace Xpand.XAF.Modules.Telegram.Services{
         
         private static IObservable<TelegramChatMessage> Update(this TelegramBot bot, XafApplication application, CancellationToken token) 
             => bot.ClientSource().SelectMany(client => client
-                .WhenUpdates(bot.LastUpdate + 1, timeout: (int?)bot.UpdateInterval.TotalSeconds.Round() - 1,
-                    token: token).SelectMany()
-                .SelectMany(update => application.UseObject(bot, telegramBot => telegramBot.Observe().Do(bot1 => {
+                .WhenUpdates(bot.LastUpdate + 1, timeout: (int?)bot.UpdateInterval.TotalSeconds.Round() - 1, token: token).SelectMany()
+                .SelectManyItemResilient(update => application.UseObject(bot, telegramBot => telegramBot.Observe().Do(bot1 => {
                         bot1.LastUpdate = update.Id;
                         bot1.UpdateTime = DateTime.Now;
                     })
-                    .SelectMany(bot1 => {
-                        var ensureTelegramChat = bot1.EnsureTelegramChat(update);
-                        return ensureTelegramChat == null
-                            ? Observable.Empty<TelegramChatMessage>()
-                            : ensureTelegramChat.CreateMessage(update).Commit();
-                    }))));
+                    .Select(message => message.EnsureTelegramChat(update))
+                    .SelectMany(chat => chat == null ? Observable.Empty<TelegramChatMessage>()
+                        : chat.CreateMessage(update).Commit()))));
 
         static IObservable<IObservable<TelegramBotClient>> CacheClients(this XafApplication application)
             => application.WhenProviderObject<TelegramBot>(ObjectModification.NewOrUpdated,bot => bot.Secret!=null&&bot.Active)

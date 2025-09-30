@@ -1,22 +1,9 @@
 ﻿using System;
 using System.Data;
-using System.Data.SqlClient;
 using DevExpress.ExpressApp;
-using Microsoft.Extensions.Configuration;
-using Xpand.Extensions.XAF.XafApplicationExtensions;
 
 namespace Xpand.Extensions.XAF.Xpo.ObjectSpaceExtensions {
     public static partial class ObjectSpaceExtensions {
-        // public static bool DbExist(this XafApplication application,string connectionString=null) {
-        //     var builder = new SqlConnectionStringBuilder(connectionString??application.GetService<IConfiguration>()
-        //         .GetConnectionString("ConnectionString")??application.ConnectionString);
-        //     var initialCatalog = "Initial catalog";
-        //     var databaseName = builder[initialCatalog].ToString();
-        //     builder.Remove(initialCatalog);
-        //     using var sqlConnection = new SqlConnection(builder.ConnectionString);
-        //     return sqlConnection.DbExists(databaseName);
-        // }
-
         public static bool DbExist(this IObjectSpaceProvider objectSpaceProvider) {
             using var objectSpace = objectSpaceProvider.CreateUpdatingObjectSpace(true);
             var dbConnection = objectSpace.Connection();

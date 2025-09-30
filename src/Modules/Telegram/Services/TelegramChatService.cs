@@ -101,14 +101,17 @@ namespace Xpand.XAF.Modules.Telegram.Services{
             }
             var botCommand = chatMessage.TelegramChat.Bot.Commands.FirstOrDefault(command => command.Name==commandText);
             if (botCommand == null){
-                return chatMessage.TelegramChat.SendText($"{commandText} is not a valid command").ToUnit().IgnoreElements().To<(TelegramChatMessage chatMessage, string query, string commandText)>();    
+                return chatMessage.TelegramChat.SendText($"{commandText} is not a valid command").ToUnit()
+                    .ContinueOnFault(context: [chatMessage])
+                    .IgnoreElements().To<(TelegramChatMessage chatMessage, string query, string commandText)>();
             }
             var requiredParametersCount = botCommand.Parameters.Count(parameter => parameter.Required);
             return requiredParametersCount == query.Split(' ').Skip(1).TrimAll().Count() ? Unit.Default.Observe()
                     .Select(_ => (chatMessage,query,commandText))
-                : chatMessage.TelegramChat.SendText($"Wrong required parameters count, expected {requiredParametersCount.ToWords()}").ToUnit().IgnoreElements()
+                : chatMessage.TelegramChat.SendText($"Wrong required parameters count, expected {requiredParametersCount.ToWords()}").ToUnit()
+                    .ContinueOnFault(context: [chatMessage])
+                    .IgnoreElements()
                     .To<(TelegramChatMessage chatMessage, string query, string commandText)>();
         }
-
     }
 }
