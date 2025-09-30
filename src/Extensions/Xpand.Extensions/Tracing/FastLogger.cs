@@ -6,6 +6,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
+using Xpand.Extensions.Colors;
 
 namespace Xpand.Extensions.Tracing{
     [InterpolatedStringHandler]
@@ -19,11 +20,7 @@ namespace Xpand.Extensions.Tracing{
         public HighPerformanceLogBuilder(int literalLength, int formattedCount, out bool isEnabled,
             [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "") {
             isEnabled = Enabled;
-            if (!isEnabled) {
-                MemberName = null;
-                FilePath = null;
-                return;
-            }
+            if (!Enabled) return;
             _stringBuilder = new StringBuilder(literalLength + formattedCount * 8);
             MemberName = memberName;
             FilePath = filePath;
@@ -53,67 +50,53 @@ namespace Xpand.Extensions.Tracing{
                 ? $"{Path.GetFileNameWithoutExtension(builder.FilePath)} - {builder.MemberName} | {message}"
                 : message;
         }
-        private static readonly AsyncLocal<List<Func<(string method, string path), bool>>> Predicates = new();
+        private static readonly AsyncLocal<List<Func<(FastLogLevel level, string method, string path), bool>>> Predicates = new();
 
-        public static IDisposable Filter(Func<(string method, string path), bool> predicate) {
-            Predicates.Value ??= new List<Func<(string method, string path), bool>>();
+        public static IDisposable Filter(Func<(FastLogLevel level, string method, string path), bool> predicate) {
+            Predicates.Value ??= new List<Func<(FastLogLevel level, string method, string path), bool>>();
             Predicates.Value.Add(predicate);
             return new FilterScope(predicate);
         }
         
-        private readonly struct FilterScope(Func<(string method, string path), bool> predicate) : IDisposable {
+        private readonly struct FilterScope(Func<(FastLogLevel level, string method, string path), bool> predicate) : IDisposable {
             public void Dispose() => Predicates.Value?.Remove(predicate);
         }
-        private static bool ShouldLog(ref HighPerformanceLogBuilder builder) {
+        private static bool ShouldLog(FastLogLevel level, ref HighPerformanceLogBuilder builder) {
             if (Predicates.Value == null || !Predicates.Value.Any()) return true;
             foreach (var predicate in Predicates.Value) {
-                if (predicate((builder.MemberName, builder.FilePath))) continue;
+                if (predicate((level, builder.MemberName, builder.FilePath))) continue;
                 return false;
             }
             return true;
         }
 
         public static void LogError(ref HighPerformanceLogBuilder builder) {
-            if (!ShouldLog(ref builder)) return;
-            if (builder.GetFormattedText().StartsWith("[")) return;
+            if (!Enabled)return;
+            if (!ShouldLog(FastLogLevel.Error, ref builder)) return;
             Write(ErrorColor.AnsiColorize(FormatMessage(ref builder)));
         }
 
         public static void LogWarning(ref HighPerformanceLogBuilder builder) {
-            if (!ShouldLog(ref builder)) return;
-            if (builder.GetFormattedText().StartsWith("[")) return;
+            if (!Enabled)return;
+            if (!ShouldLog(FastLogLevel.Warning, ref builder)) return;
             Write(WarningColor.AnsiColorize(FormatMessage(ref builder)));
         }
-        
+
         public static void LogFast(ref HighPerformanceLogBuilder builder) {
-            if (!Enabled) return;
-            if (!ShouldLog(ref builder)) return;
-            if (builder.GetFormattedText().StartsWith("[")) return;
+            if (!Enabled)return;
+            if (!ShouldLog(FastLogLevel.Info, ref builder)) return;
             Write(FormatMessage(ref builder));
         }
 
         private static string AnsiColorize(this ConsoleColor color,string message) 
-            => $"\x1b[{color.AnsiColorCode()}m{message}\x1b[0m";
+            => $"\x1b[{color.ToAnsiColorCode()}m{message}\x1b[0m";
 
-        private static string AnsiColorCode(this ConsoleColor color) => color switch {
-            ConsoleColor.Black => "30",
-            ConsoleColor.DarkRed => "31",
-            ConsoleColor.DarkGreen => "32",
-            ConsoleColor.DarkYellow => "33",
-            ConsoleColor.DarkBlue => "34",
-            ConsoleColor.DarkMagenta => "35",
-            ConsoleColor.DarkCyan => "36",
-            ConsoleColor.Gray => "37",
-            ConsoleColor.DarkGray => "90",
-            ConsoleColor.Red => "91",
-            ConsoleColor.Green => "92",
-            ConsoleColor.Yellow => "93",
-            ConsoleColor.Blue => "94",
-            ConsoleColor.Magenta => "95",
-            ConsoleColor.Cyan => "96",
-            ConsoleColor.White => "97",
-            _ => "37"
-        };
+    }
+    
+    public enum FastLogLevel {
+        Info,
+        Warning,
+        Error
     }
     
 }

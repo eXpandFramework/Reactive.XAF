@@ -4,29 +4,18 @@ using System.Drawing;
 using System.Linq;
 
 namespace Xpand.Extensions.Colors{
-    public static class ColorGenerator{
+    public static partial class ColorExtensions{
         public static string[] DistinctColors(this int i){
             var colors = new List<Color>();
             var index = 0;
             while (colors.Count < i){
                 var color = Color.FromArgb(GetRGB(index));
-                if (!IsInvalidColor(color) && !color.IsSimilarToExistingColors( colors))
+                if (!IsInvalidColor(color) && !color.IsSimilar( colors))
                     colors.Add(color.LightenColor());
                 index++;
             }
             return colors.Select(c => c.ToHex()).ToArray();
         }
-
-        static Color LightenColor(this Color color, float lighteningFactor = 1.3f) 
-            => Color.FromArgb(
-                Math.Min(255, (int)(color.R * lighteningFactor)),
-                Math.Min(255, (int)(color.G * lighteningFactor)),
-                Math.Min(255, (int)(color.B * lighteningFactor))
-            );
-
-        static bool IsSimilarToExistingColors(this Color newColor, List<Color> existingColors) 
-            => existingColors.Select(color 
-                => Math.Sqrt(Math.Pow(newColor.R - color.R, 2) + Math.Pow(newColor.G - color.G, 2) + Math.Pow(newColor.B - color.B, 2))).Any(distance => distance < 10);
 
         static bool IsInvalidColor(Color color){
             var luminance = (0.299 * color.R + 0.587 * color.G + 0.114 * color.B) / 255;
@@ -35,9 +24,6 @@ namespace Xpand.Extensions.Colors{
             var nearGray = Math.Abs(color.R - color.G) < 10 && Math.Abs(color.G - color.B) < 10;
             return nearWhite || nearBlack || nearGray;
         }
-
-        public static string ToHex(this Color color) 
-            => $"#{color.R:X2}{color.G:X2}{color.B:X2}";
 
         static int GetRGB(int index){
             var p = GetPattern(index);

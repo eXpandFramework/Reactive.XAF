@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 using Shouldly;
+using Xpand.Extensions.Tracing;
 
 namespace Xpand.Extensions.Tests {
     [TestFixture]
@@ -76,15 +77,40 @@ namespace Xpand.Extensions.Tests {
             output.ShouldContain($" - {nameof(LogWarning_Includes_Caller_Info_And_Color_Codes)} | {message}");
         }
 
+    
         [Test]
-        public void Logging_Is_Suppressed_When_Message_Starts_With_Bracket() {
-            var message = "[DIAGNOSTIC] Special message";
-            
-            LogFast($"{message}");
-            LogError($"{message}");
-            LogWarning($"{message}");
-            
-            _logOutput.ShouldBeEmpty("Logging should be suppressed for messages starting with '['.");
+        public void Filter_Allows_Only_Specified_LogLevel() {
+            var infoMessage = "This is an info message.";
+            var warningMessage = "This is a warning message.";
+            var errorMessage = "This is an error message.";
+
+            using (Filter(log => log.level == FastLogLevel.Warning)) {
+                LogFast($"{infoMessage}");
+                LogWarning($"{warningMessage}");
+                LogError($"{errorMessage}");
+            }
+
+            _logOutput.ShouldHaveSingleItem();
+            _logOutput.Single().ShouldContain(warningMessage);
         }
+
+        [Test]
+        public void Filter_Can_Allow_Multiple_LogLevels() {
+            var infoMessage = "This is an info message.";
+            var warningMessage = "This is a warning message.";
+            var errorMessage = "This is an error message.";
+
+            using (Filter(log => log.level == FastLogLevel.Error || log.level == FastLogLevel.Info)) {
+                LogFast($"{infoMessage}");
+                LogWarning($"{warningMessage}");
+                LogError($"{errorMessage}");
+            }
+
+            _logOutput.Count.ShouldBe(2);
+            _logOutput.ShouldContain(item => item.Contains(infoMessage));
+            _logOutput.ShouldContain(item => item.Contains(errorMessage));
+            _logOutput.ShouldNotContain(item => item.Contains(warningMessage));
+        }
+        
     }
 }
