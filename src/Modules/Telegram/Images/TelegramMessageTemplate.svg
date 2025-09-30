@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+    <!-- Gear -->
+    <g>
+        <circle cx="16" cy="16" r="7" fill="black" stroke="white" stroke-width="2"/>
+        <g>
+            <rect x="15" y="2" width="2" height="4" fill="white"/>
+            <rect x="15" y="26" width="2" height="4" fill="white"/>
+            <rect x="2" y="15" width="4" height="2" fill="white"/>
+            <rect x="26" y="15" width="4" height="2" fill="white"/>
+            <rect x="6.2" y="6.2" width="2" height="4" fill="white" transform="rotate(-45 7.2 8.2)"/>
+            <rect x="23.8" y="6.2" width="2" height="4" fill="white" transform="rotate(45 24.8 8.2)"/>
+            <rect x="6.2" y="21.8" width="2" height="4" fill="white" transform="rotate(45 7.2 23.8)"/>
+            <rect x="23.8" y="21.8" width="2" height="4" fill="white" transform="rotate(-45 24.8 23.8)"/>
+        </g>
+    </g>
+    <!-- Document Overlay -->
+    <g>
+        <rect x="19" y="19" width="9" height="11" rx="2" fill="black" stroke="white" stroke-width="1.5"/>
+        <rect x="21" y="21" width="5" height="2" fill="white"/>
+        <rect x="21" y="24" width="5" height="2" fill="white"/>
+    </g>
+</svg>

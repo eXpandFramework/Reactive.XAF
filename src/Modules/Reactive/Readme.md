@@ -274,10 +274,10 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |**DevExpress.ExpressApp.ConditionalAppearance**|**Any**
  |**DevExpress.ExpressApp.Security.Xpo**|**Any**
  |**DevExpress.Persistent.Base**|**Any**
-|Xpand.Extensions|4.251.6
- |Xpand.Extensions.Reactive|4.251.6
- |Xpand.Extensions.Reactive.Relay|4.251.6
- |Xpand.Extensions.XAF|4.251.6
+|Xpand.Extensions|4.251.6.1
+ |Xpand.Extensions.Reactive|4.251.6.1
+ |Xpand.Extensions.Reactive.Relay|4.251.6.1
+ |Xpand.Extensions.XAF|4.251.6.1
  |System.Interactive|6.0.1
  |System.Reactive|6.0.1
  |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
@@ -288,8 +288,8 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |System.Threading.Tasks.Dataflow|9.0.8
  |Microsoft.Extensions.Hosting|6.0.0
  |Serialize.Linq|2.0.0
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.251.6
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.251.6
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.251.6.1
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.251.6.1
 
 ## Issues-Debugging-Troubleshooting
 

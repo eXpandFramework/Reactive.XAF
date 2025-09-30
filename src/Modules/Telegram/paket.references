@@ -1,0 +1,12 @@
+DevExpress.ExpressApp.Win
+DevExpress.ExpressApp.Xpo
+System.Reactive
+Fasterflect.Xpand
+System.Text.Json
+Enums.NET
+Xpand.Patcher
+Microsoft.Extensions.DependencyInjection.Abstractions
+Microsoft.CodeAnalysis
+Microsoft.Extensions.Options
+Microsoft.Extensions.Configuration.Abstractions
+Telegram.Bot

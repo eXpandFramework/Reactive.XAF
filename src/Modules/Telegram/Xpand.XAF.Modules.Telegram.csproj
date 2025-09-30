@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net9.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <LangVersion>latest</LangVersion>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\Xpand.key\xpand.snk</AssemblyOriginatorKeyFile>
+    <DebugSymbols>true</DebugSymbols>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
+    <OutputPath>..\..\..\bin\</OutputPath>
+    <AssemblyTitle>Xpand.XAF.Modules.Application.Telegram</AssemblyTitle>
+    <Product>Xpand.XAF.Modules.Application.Telegram</Product>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <AppendTargetFrameworkToOutputPath>False</AppendTargetFrameworkToOutputPath>
+    <DebugType>full</DebugType>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <NoWarn>CA1416</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Xpand.Extensions.Reactive">
+      <HintPath>..\..\..\bin\Xpand.Extensions.Reactive.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.Extensions.Reactive">
+      <HintPath>..\..\..\bin\Xpand.Extensions.Reactive.Relay.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.Extensions.XAF">
+      <HintPath>..\..\..\bin\Xpand.Extensions.XAF.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.Extensions.XAF.Xpo">
+      <HintPath>..\..\..\bin\Xpand.Extensions.XAF.Xpo.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.Extensions">
+      <HintPath>..\..\..\bin\Xpand.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.XAF.Modules.Reactive">
+      <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="Xpand.XAF.Modules.CloneModelView">
+      <HintPath>..\..\..\bin\Xpand.XAF.Modules.CloneModelView.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="Xpand.XAF.Modules.SuppressConfirmation">
+      <HintPath>..\..\..\bin\Xpand.XAF.Modules.SuppressConfirmation.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Module.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\..\Common\AssemblyInfoVersion.cs" Link="Properties\AssemblyInfoVersion.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Model.DesignedDiffs.xafml" />
+    <None Remove="Images\Telegram.svg" />
+    <EmbeddedResource Include="Images\Telegram.svg" />
+    <None Remove="Images\TelegramBot.svg" />
+    <EmbeddedResource Include="Images\TelegramBot.svg" />
+    <None Remove="Images\TelegramChat.svg" />
+    <EmbeddedResource Include="Images\TelegramChat.svg" />
+    <None Remove="Images\TelegramChatMessage.svg" />
+    <EmbeddedResource Include="Images\TelegramChatMessage.svg" />
+    <None Remove="Images\TelegramMessageTemplate.svg" />
+    <EmbeddedResource Include="Images\TelegramMessageTemplate.svg" />
+    <None Remove="Images\TelegramSendMessage.svg" />
+    <EmbeddedResource Include="Images\TelegramSendMessage.svg" />
+    <None Remove="Images\TelegramUpdate.svg" />
+    <EmbeddedResource Include="Images\TelegramUpdate.svg" />
+    <None Remove="Images\TelegramUser.svg" />
+    <EmbeddedResource Include="Images\TelegramUser.svg" />
+  </ItemGroup>
+  <Import Project="..\..\..\.paket\Paket.Restore.targets" />
+</Project>

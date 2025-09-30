@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3500 3500">
+    <rect x="500" y="500" width="2500" height="2500" fill="none" stroke="#000000" stroke-width="200"/>
+
+    <!-- Telegram paper plane -->
+    <path d="M1000 1750 L2500 1000 L1750 2500 L1500 2000 Z" fill="none" stroke="#000000" stroke-width="200"/>
+    <line x1="1500" y1="2000" x2="2500" y2="1000" stroke="#000000" stroke-width="150"/>
+
+    <!-- Bot symbol -->
+    <circle cx="1750" cy="2200" r="400" fill="none" stroke="#000000" stroke-width="150"/>
+    <rect x="1550" y="1700" width="400" height="300" rx="50" ry="50" fill="none" stroke="#000000" stroke-width="150"/>
+    <circle cx="1600" cy="2100" r="50" fill="#000000"/>
+    <circle cx="1900" cy="2100" r="50" fill="#000000"/>
+
+    <!-- Command symbols -->
+    <path d="M850 2800 L1150 2500 L850 2200" fill="none" stroke="#000000" stroke-width="150" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M2650 2800 L2350 2500 L2650 2200" fill="none" stroke="#000000" stroke-width="150" stroke-linecap="round" stroke-linejoin="round"/>
+    <line x1="1150" y1="2500" x2="2350" y2="2500" stroke="#000000" stroke-width="150" stroke-linecap="round"/>
+</svg>
+

@@ -1,0 +1,109 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Application Title="CryptoCommander">
+  <Views>
+    <ListView Id="TelegramBot_Chats_ListView" MasterDetailMode="ListViewAndDetailView" AllowEdit="True">
+      <Columns>
+        <ColumnInfo Id="User" AllowEdit="False" />
+        <ColumnInfo Id="Active" AllowEdit="True" />
+      </Columns>
+    </ListView>
+    <DetailView Id="TelegramBot_DetailView">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="SimpleEditors" RelativeSize="5.390070921985815">
+            <LayoutGroup Id="Account" TextAlignMode="UseParentOptions" Index="0" RelativeSize="47.05882352941177" Caption="Has Sub Accounts" Removed="True">
+              <LayoutItem Id="HasSubAccounts" RelativeSize="100" ViewItem="HasSubAccounts" Removed="True" />
+            </LayoutGroup>
+            <LayoutGroup Id="AccountBase" RelativeSize="100" Index="0" Direction="Horizontal" Caption="Name">
+              <LayoutItem Id="Name" RelativeSize="59.21951219512195" ViewItem="Name" />
+              <LayoutItem Id="Active" ViewItem="Active" Index="1" RelativeSize="11.902439024390244" TextAlignMode="CustomSize" IsNewNode="True" />
+              <LayoutItem Id="HumanUpdateTime" ViewItem="HumanUpdateTime" Index="2" RelativeSize="28.878048780487806" IsNewNode="True" />
+            </LayoutGroup>
+            <LayoutGroup Id="ServiceAccount" Caption="ServiceAccount" Index="0" RelativeSize="32.6530612244898" Removed="True">
+              <LayoutItem Id="AccountType" Index="0" RelativeSize="100" ViewItem="AccountType" Removed="True" />
+              <LayoutItem Id="UserId" ViewItem="UserId" Removed="True" />
+            </LayoutGroup>
+            <LayoutGroup Id="TelegramBot" Index="1" RelativeSize="44.11764705882353" Caption="Update Interval" Removed="True">
+              <LayoutItem Id="UpdateInterval" RelativeSize="100" ViewItem="UpdateInterval" Removed="True" />
+            </LayoutGroup>
+          </LayoutGroup>
+          <TabbedGroup Id="Item1" CaptionLocation="Top" Index="1" RelativeSize="94.60992907801419" IsNewNode="True">
+            <LayoutGroup Id="Chats_Group" ShowCaption="True" Caption="Chats" TextAlignMode="AlignWithChildren" Index="0" RelativeSize="100" IsNewNode="True">
+              <LayoutItem Id="Chats" ViewItem="Chats" Index="0" RelativeSize="100" TextAlignMode="AutoSize" IsNewNode="True" />
+            </LayoutGroup>
+            <LayoutGroup Id="Item2" ShowCaption="True" CaptionLocation="Top" Direction="Vertical" Index="1" Caption="Settings" RelativeSize="100" ImageName="Settings" IsNewNode="True">
+              <LayoutGroup Id="Auto3bfda2d4-0893-4e62-89bd-1d036eaa12c7" ShowCaption="False" Caption="" Direction="Horizontal" Index="0" RelativeSize="5.103668261562999" IsNewNode="True">
+                <LayoutItem Id="Secret" ViewItem="Secret" Index="0" RelativeSize="53.240279162512465" IsNewNode="True" />
+                <LayoutItem Id="UpdateInterval" ViewItem="UpdateInterval" Index="1" RelativeSize="46.759720837487535" IsNewNode="True" />
+              </LayoutGroup>
+              <LayoutGroup Id="Autoad099249-c840-4e85-8dbc-7fdf0d9b0bed" ShowCaption="False" Caption="Autoad099249-c840-4e85-8dbc-7fdf0d9b0bed(10)" Direction="Horizontal" Index="1" RelativeSize="5.741626794258373" IsNewNode="True">
+                <LayoutItem Id="DisableWebPagePreview" ViewItem="DisableWebPagePreview" Index="0" RelativeSize="53.33998005982054" IsNewNode="True" />
+                <LayoutItem Id="LastUpdate" ViewItem="LastUpdate" Index="1" RelativeSize="46.66001994017946" IsNewNode="True" />
+              </LayoutGroup>
+              <LayoutItem Id="StartMessageRegex" ViewItem="StartMessageRegex" Index="2" RelativeSize="45.933014354066984" IsNewNode="True" />
+              <LayoutItem Id="StopMessageRegex" ViewItem="StopMessageRegex" Index="3" RelativeSize="43.22169059011164" IsNewNode="True" />
+            </LayoutGroup>
+            <LayoutGroup Id="Item3" ShowCaption="True" CaptionLocation="Top" Direction="Vertical" Index="2" TextAlignMode="AlignWithChildren" RelativeSize="100" Caption="Message Templates" IsNewNode="True">
+              <LayoutItem Id="MessageTemplates" ViewItem="MessageTemplates" Index="0" RelativeSize="100" TextAlignMode="AutoSize" IsNewNode="True" />
+            </LayoutGroup>
+            <LayoutGroup Id="Item4" ShowCaption="True" CaptionLocation="Top" Direction="Vertical" Index="3" Caption="Commands" TextAlignMode="AlignWithChildren" RelativeSize="100" IsNewNode="True">
+              <LayoutItem Id="Commands" ViewItem="Commands" Index="0" RelativeSize="100" TextAlignMode="AutoSize" IsNewNode="True" />
+            </LayoutGroup>
+          </TabbedGroup>
+          <LayoutGroup Id="SizeableEditors" RelativeSize="45.1063829787234" Caption="SizeableEditors" Removed="True">
+            <LayoutItem Id="StopMessageRegex" RelativeSize="100" Index="0" ViewItem="StopMessageRegex" Removed="True" />
+            <LayoutItem Id="StartMessageRegex" RelativeSize="50" ViewItem="StartMessageRegex" Removed="True" />
+          </LayoutGroup>
+          <TabbedGroup Id="Tabs" RelativeSize="25.390070921985817" Removed="True">
+            <LayoutGroup Id="AccountTrades" TextAlignMode="AlignWithChildren" RelativeSize="100" Index="0" Removed="True">
+              <LayoutItem Id="AccountTrades" TextAlignMode="AutoSize" RelativeSize="100" ViewItem="AccountTrades" />
+            </LayoutGroup>
+            <LayoutGroup Id="Deals" TextAlignMode="AlignWithChildren" RelativeSize="100" Index="0" Removed="True">
+              <LayoutItem Id="Deals" TextAlignMode="AutoSize" RelativeSize="100" ViewItem="Deals" />
+            </LayoutGroup>
+            <LayoutGroup Id="Chats" TextAlignMode="AlignWithChildren" RelativeSize="100" Removed="True">
+              <LayoutItem Id="Chats" TextAlignMode="AutoSize" RelativeSize="100" ViewItem="Chats" />
+            </LayoutGroup>
+          </TabbedGroup>
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <DetailView Id="TelegramBotMessageTemplate_DetailView">
+      <Layout>
+        <LayoutItem Id="MessageTemplate" ViewItem="MessageTemplate" Index="0" RelativeSize="100" IsNewNode="True" />
+      </Layout>
+    </DetailView>
+    <DetailView Id="TelegramChat_DetailView">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="Messages_Group" TextAlignMode="AlignWithChildren" Direction="Vertical" RelativeSize="100" Index="0" ShowCaption="False" Caption="Messages">
+            <LayoutItem Id="Active" ViewItem="Active" Index="0" RelativeSize="4.539007092198582" IsNewNode="True" />
+            <LayoutItem Id="Messages" RelativeSize="95.46099290780141" Index="1" ViewItem="Messages" />
+          </LayoutGroup>
+          <LayoutGroup Id="SimpleEditors" RelativeSize="5.390070921985815" Removed="True">
+            <LayoutGroup Id="TelegramChat" Caption="TelegramChat" RelativeSize="100" Removed="True">
+              <LayoutItem Id="Id" Index="0" RelativeSize="100" ViewItem="Id" Removed="True" />
+              <LayoutItem Id="User" ViewItem="User" Removed="True" />
+            </LayoutGroup>
+          </LayoutGroup>
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <DetailView Id="TelegramChatMessage_DetailView_Reply">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="SizeableEditors" Caption="SizeableEditors" RelativeSize="100" Index="0" TextAlignMode="AlignWithChildren">
+            <LayoutItem Id="Reply" Index="0" RelativeSize="100" ShowCaption="False" TextAlignMode="CustomSize" ViewItem="Reply" />
+            <LayoutItem Id="Message" ViewItem="Message" Removed="True" />
+          </LayoutGroup>
+          <LayoutGroup Id="SimpleEditors" RelativeSize="5.390070921985815" Removed="True">
+            <LayoutGroup Id="TelegramChatMessage" RelativeSize="100" Caption="Created" Removed="True">
+              <LayoutItem Id="CreatedString" RelativeSize="100" ViewItem="CreatedString" Removed="True" />
+            </LayoutGroup>
+          </LayoutGroup>
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <DetailView Id="TelegramMessage_DetailView" SupressConfirmation="True" />
+  </Views>
+</Application>

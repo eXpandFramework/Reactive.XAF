@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.Extensions.Reactive.Relay</id>
-    <version>4.251.5.2</version>
+    <version>4.251.6.1</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -15,8 +15,8 @@
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Xpand.Extensions.Reactive.Relay, 25.1.5</tags>
     <dependencies>
       <group targetFramework="net9.0">
-        <dependency id="Xpand.Extensions" version="4.251.5.2" />
-        <dependency id="Xpand.Extensions.Reactive" version="4.251.5.2" />
+        <dependency id="Xpand.Extensions" version="4.251.6.1" />
+        <dependency id="Xpand.Extensions.Reactive" version="4.251.6.1" />
         <dependency id="System.Interactive.Async" version="6.0.1" />
         <dependency id="System.Interactive" version="6.0.1" />
         <dependency id="System.Linq.Async" version="6.0.1" />

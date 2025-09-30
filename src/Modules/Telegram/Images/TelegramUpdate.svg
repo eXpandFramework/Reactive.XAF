@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3500 3500">
+    <rect x="500" y="500" width="2500" height="2500" fill="none" stroke="#000000" stroke-width="200"/>
+
+    <!-- Update symbol (larger and centered) -->
+    <circle cx="1750" cy="1750" r="1000" fill="none" stroke="#000000" stroke-width="200"/>
+    <path d="M1750 1000 L1750 1750 L2250 1750" fill="none" stroke="#000000" stroke-width="200" stroke-linecap="round"/>
+
+    <!-- Simplified Telegram paper plane (smaller, in top-left) -->
+    <path d="M800 800 L1300 1000 L1000 1300 L900 1100 Z" fill="none" stroke="#000000" stroke-width="150"/>
+
+    <!-- Update arrow -->
+    <path d="M2700 2700 A1000 1000 0 0 1 1750 2750 L1750 2550 L2100 2700 L1750 2850 L1750 2650" fill="none" stroke="#000000" stroke-width="150" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

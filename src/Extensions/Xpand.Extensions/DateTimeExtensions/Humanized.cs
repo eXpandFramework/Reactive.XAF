@@ -43,10 +43,10 @@ namespace Xpand.Extensions.DateTimeExtensions {
                 type == typeof(ushort) || type == typeof(sbyte))
                 return value.ToString();
         
-            if (type == typeof(string))
-                return ((string)value).Humanize();
-        
-            return value.ToString().Humanize();
+            return type == typeof(string) ? ((string)value).Humanize() : value.ToString().Humanize();
         }
+        
+        public static string HumanizeCompact(this DateTime? dateTime) =>dateTime?.HumanizeCompact();
+        public static string HumanizeCompact(this DateTime dateTime) =>dateTime==DateTime.MinValue?null: dateTime.Humanize(utcDate: false,DateTime.Now).Replace(" from now"," later");
     }
 }

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3500 3500">
+    <rect x="500" y="500" width="2500" height="2500" fill="none" stroke="#000000" stroke-width="200"/>
+
+    <!-- Telegram paper plane -->
+    <path d="M2300 800 L1000 1200 L1400 1500 L2300 800" fill="none" stroke="#000000" stroke-width="200"/>
+    <line x1="1400" y1="1500" x2="1700" y2="1350" stroke="#000000" stroke-width="150"/>
+
+    <!-- Chat message bubble -->
+    <path d="M800 1700 H2700 Q2900 1700 2900 1900 V2600 Q2900 2800 2700 2800 H1200 L800 3200 V1700" fill="none" stroke="#000000" stroke-width="150"/>
+
+    <!-- Message lines -->
+    <line x1="1000" y1="2000" x2="2700" y2="2000" stroke="#000000" stroke-width="100"/>
+    <line x1="1000" y1="2250" x2="2500" y2="2250" stroke="#000000" stroke-width="100"/>
+    <line x1="1000" y1="2500" x2="2200" y2="2500" stroke="#000000" stroke-width="100"/>
+
+    <!-- Command symbols -->
+    <path d="M850 800 L1150 1100 L850 1400" fill="none" stroke="#000000" stroke-width="150" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M2650 800 L2350 1100 L2650 1400" fill="none" stroke="#000000" stroke-width="150" stroke-linecap="round" stroke-linejoin="round"/>
+    <line x1="1150" y1="1100" x2="2350" y2="1100" stroke="#000000" stroke-width="150" stroke-linecap="round"/>
+</svg>
