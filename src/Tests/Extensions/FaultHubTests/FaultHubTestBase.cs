@@ -52,7 +52,8 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
         public override void Setup(){
             base.Setup();
             FaultHub.BlacklistedFilePathRegexes.Clear();
-            FaultHub.Seen.Clear();  
+            
+            FaultHub.Reset();
             // BusEvents = new List<FaultHubException>();
             // _busSubscription = FaultHub.Bus.Subscribe(BusEvents.Add);
         }

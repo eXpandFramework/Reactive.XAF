@@ -8,20 +8,21 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using akarnokd.reactive_extensions;
+using Microsoft.Extensions.Caching.Memory;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.Numeric;
 using Xpand.Extensions.Reactive;
 using Xpand.Extensions.Reactive.Combine;
-using MemoryCache = Microsoft.Extensions.Caching.Memory.MemoryCache;
+using Xpand.Extensions.Reactive.Utility;
+using Xpand.Extensions.Tests.FaultHubTests;
 
 namespace Xpand.Extensions.Tests {
     
     [TestFixture]
-    public class RpcChannelTests {
+    public class RpcChannelTests:FaultHubTestBase {
         [SetUp]
-        public void Setup() {
-
+        public override void Setup() {
             var rpcChannelType = typeof(RpcChannel);
             var fieldInfo = rpcChannelType.GetField("Channels", BindingFlags.Static | BindingFlags.NonPublic);
             fieldInfo.ShouldNotBeNull();
@@ -30,6 +31,7 @@ namespace Xpand.Extensions.Tests {
             channelsCache.ShouldNotBeNull();
             
             channelsCache.Compact(1.0);
+            base.Setup();
         }
 
         [Test]
@@ -191,5 +193,52 @@ namespace Xpand.Extensions.Tests {
             });
         }
 
+        [Test]
+        public async Task Nested_MakeRequest_Within_Handler_Succeeds() {
+            var key1 = "key1";
+            var key2 = "key2";
+
+            using var handler2Subscription = key2.HandleRequest()
+                .With<string, string>(_ => Observable.Return("Response from Key2"))
+                .Subscribe();
+
+            using var handler1Subscription = key1.HandleRequest()
+                .With<string, string>(requestPayload => key2.MakeRequest().With<string, string>(requestPayload))
+                .Subscribe();
+
+            var result = await key1.MakeRequest().With<string, string>("Initial Request").Capture();
+
+            result.Error.ShouldBeNull();
+            result.IsCompleted.ShouldBeTrue();
+            result.Items.ShouldHaveSingleItem();
+            result.Items.Single().ShouldBe("Response from Key2");
+        }
+        
+        [Test]
+        public async Task Handler_Failure_Is_Reported_To_FaultHub() {
+            
+            var key = "test_key";
+            var handlerInvocationCount = 0;
+
+            IObservable<string> FailingHandler(Unit _) {
+                handlerInvocationCount++;
+                return Observable.Throw<string>(new InvalidOperationException("Handler failed intentionally"));
+            }
+
+            using var _ = key.HandleRequest().With((Func<Unit, IObservable<string>>)FailingHandler).Subscribe();
+
+            var result = await key.MakeRequest().With<Unit, string>(Unit.Default).Capture();
+
+            handlerInvocationCount.ShouldBe(1);
+
+            result.Error.ShouldBeOfType<InvalidOperationException>()
+                .Message.ShouldBe("Handler failed intentionally");
+
+            BusEvents.Count.ShouldBe(1, "The handler failure was not published to the FaultHub for system-wide observation.");
+        }
     }
-}
+    
+
+    
+
+    }

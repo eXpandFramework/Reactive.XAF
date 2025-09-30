@@ -22,7 +22,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests.FaultContextTests{
             base.Dispose();
             FaultHub.Reset();
             ActionsService.ControllerCtorState.Clear();
-            FaultHub.Seen.Clear();
+            
         }
     }
 }

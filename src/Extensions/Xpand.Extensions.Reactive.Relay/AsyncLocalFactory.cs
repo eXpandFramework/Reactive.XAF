@@ -4,7 +4,7 @@ using Xpand.Extensions.Reactive.Utility;
 
 namespace Xpand.Extensions.Reactive.Relay{
     public class AsyncLocalFactory {
-        public static readonly ConcurrentBag<IAsyncLocal> RegisteredContexts = new();
+        public static readonly ConcurrentBag<IAsyncLocal> RegisteredContexts = [];
         public static AsyncLocal<T> NewContext<T>() {
             var asyncLocal = new AsyncLocal<T>();
             RegisteredContexts.Add(asyncLocal.Wrap());

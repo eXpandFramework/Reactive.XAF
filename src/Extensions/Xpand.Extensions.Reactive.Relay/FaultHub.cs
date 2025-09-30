@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
@@ -31,13 +32,37 @@ namespace Xpand.Extensions.Reactive.Relay {
         const string PublishedKey = "FaultHub.Published";
         private const string Key = "Origin";
 
-        static FaultHub() => Logging = true;
-        public static bool Enabled { get; set; } = true;
+        static FaultHub() {
+            Logging = true;
+            Reset();
+        }
+
+        private static readonly BehaviorSubject<bool> IsEnabledSubject = new(true);
+
+        public static bool Enabled {
+            get => IsEnabledSubject.Value;
+            set => IsEnabledSubject.OnNext(value);
+        }
+        private static readonly SerialDisposable RpcBusSubscription = new();
         public static void Reset() {
+            RpcBusSubscription.PublishRpcChannelErrors();
             RegisteredContexts
                 .Do(local => local.Value=null)
                 .Enumerate();
             Seen.Clear();
+        }
+
+        private static void PublishRpcChannelErrors(this SerialDisposable  disposable) {
+            disposable.Disposable = IsEnabledSubject.Where(enabled => enabled)
+                .SelectMany(_ => AppDomain.CurrentDomain.HandleRequest()
+                    .With<Exception, Unit>(ex => {
+                        ex.ExceptionToPublish().Publish();
+                        return Observable.Return(Unit.Default);
+                    })
+                    .TakeUntil(IsEnabledSubject.Where(enabled => !enabled))
+                )
+                .Repeat()
+                .Subscribe();
         }
 
         public static Exception TagOrigin(this Exception ex)

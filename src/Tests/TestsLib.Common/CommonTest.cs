@@ -151,7 +151,7 @@ namespace Xpand.TestsLib.Common{
         [SetUp]
         public virtual void Setup() {
             TestContext.Out.Write(TestContext.CurrentContext.Test.FullName);
-            FaultHub.Seen.Clear();  
+            FaultHub.Reset();  
             
             BusEvents = new List<FaultHubException>();
             _busSubscription = FaultHub.Bus.Subscribe(BusEvents.Add);
