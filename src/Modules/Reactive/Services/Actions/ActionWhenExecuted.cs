@@ -8,23 +8,27 @@ using Xpand.XAF.Modules.Reactive.Services.Controllers;
 
 namespace Xpand.XAF.Modules.Reactive.Services.Actions {
     public static partial class ActionsService {
-        public static IObservable<T> WhenExecuted<T>(this ActionBase action,Func<ActionBaseEventArgs,IObservable<T>> resilientSelector) 
-            => action.ProcessEvent(nameof(ActionBase.Executed), resilientSelector).TakeUntilDisposed(action) ;
+        public static IObservable<T> WhenExecuted<T>(this ActionBase action,
+            Func<ActionBaseEventArgs, IObservable<T>> resilientSelector)
+            => action.When(nameof(ActionBase.Executed),resilientSelector)
+                .PushStackFrame();
 
-        public static IObservable<ActionBaseEventArgs> WhenExecuted(this ActionBase action) 
-            => action.WhenExecuted(e => e.Observe());
+        public static IObservable<ActionBaseEventArgs> WhenExecuted(this ActionBase action)
+            => action.WhenExecuteCompleted(e => e.Observe());
         
         public static IObservable<T> WhenExecuted<T>(this SimpleAction action, Func<SimpleActionExecuteEventArgs, IObservable<T>> resilientSelector) 
-            => action.When(nameof(ActionBase.Executed), resilientSelector) ;
+            => ((ActionBase)action).WhenExecuted(e =>resilientSelector((SimpleActionExecuteEventArgs)e) ) ;
 
         public static IObservable<SimpleActionExecuteEventArgs> WhenExecuted(this SimpleAction action)
             => action.WhenExecuted(e => e.Observe());
         
         public static IObservable<T> WhenExecuted<T>(this SingleChoiceAction action, Func<SingleChoiceActionExecuteEventArgs, IObservable<T>> resilientSelector)
-            => action.When(nameof(ActionBase.Executed),resilientSelector);
+            => ((ActionBase)action).WhenExecuted(e =>resilientSelector((SingleChoiceActionExecuteEventArgs)e) );
         
         public static IObservable<T> WhenExecuted<T>(this ParametrizedAction parametrizedAction, Func<ParametrizedActionExecuteEventArgs, IObservable<T>> resilientSelector)
-            => parametrizedAction.When(nameof(ActionBase.Executed),resilientSelector);
+            => ((ActionBase)parametrizedAction).WhenExecuted(e =>resilientSelector((ParametrizedActionExecuteEventArgs)e) );
+        public static IObservable<T> WhenExecuted<T>(this PopupWindowShowAction action, Func<PopupWindowShowActionExecuteEventArgs, IObservable<T>> resilientSelector)
+            => ((ActionBase)action).WhenExecuted(e =>resilientSelector((PopupWindowShowActionExecuteEventArgs)e) );
         
         public static IObservable<T> WhenExecuted<T>(this IObservable<SimpleAction> source, Func<SimpleActionExecuteEventArgs, IObservable<T>> resilientSelector) 
             => source.SelectMany(action => action.WhenExecuted(resilientSelector).TakeUntilDeactivated(action.Controller));
@@ -48,13 +52,13 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions {
             => source.WhenExecuted(e => e.DeferAction(() => resilientSelector(e)).To(e.Action).Concat(e.Action.Observe()).Cast<ParametrizedAction>()) ;
 
         public static IObservable<SingleChoiceActionExecuteEventArgs> WhenExecuted(this SingleChoiceAction action) 
-            => action.ProcessEvent<SingleChoiceActionExecuteEventArgs>(nameof(SingleChoiceAction.Executed)).TakeUntilDisposed(action) ;
+            => action.WhenExecuted(e =>e.Observe() ) ;
         
         public static IObservable<ParametrizedActionExecuteEventArgs> WhenExecuted(this ParametrizedAction action) 
-            => action.ProcessEvent<ParametrizedActionExecuteEventArgs>(nameof(ParametrizedAction.Executed)).TakeUntilDisposed(action) ;
+            => action.WhenExecuted(e =>e.Observe() ) ;
         
         public static IObservable<PopupWindowShowActionExecuteEventArgs> WhenExecuted(this PopupWindowShowAction action) 
-            => action.ProcessEvent<PopupWindowShowActionExecuteEventArgs>(nameof(PopupWindowShowAction.Executed)).TakeUntilDisposed(action) ;
+            => action.WhenExecuted(e =>e.Observe() ) ;
         
         public static IObservable<ParametrizedActionExecuteEventArgs> WhenExecuted(this IObservable<ParametrizedAction> source) 
             => source.SelectMany(action => action.WhenExecuted());

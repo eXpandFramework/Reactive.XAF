@@ -13,9 +13,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions {
 
         public static IObservable<T> When<TEventArgs, T>(this IObservable<ActionBase> source, string eventName,
             Func<TEventArgs, IObservable<T>> resilientSelector) where TEventArgs : EventArgs
-            => source.SelectMany(a => a.When(eventName, resilientSelector)).PushStackFrame()
-                .PushStackFrame();
-
+            => source.SelectMany(a => a.When(eventName, resilientSelector));
         
         public static IObservable<TEventArgs> When<TEventArgs>(this ActionBase action,string eventName) 
             where TEventArgs : EventArgs 

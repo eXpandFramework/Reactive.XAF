@@ -18,14 +18,12 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions {
     public static partial class ActionsService {
 
         public static IObservable<T> WhenExecuting<TAction, T>(this TAction action, Func<CancelEventArgs, IObservable<T>> resilientSelector) where TAction : ActionBase
-            => action.ProcessEvent<CancelEventArgs, T>(nameof(ActionBase.Executing), e => resilientSelector(e).DoOnError(_ => e.Cancel = true), [action]).TakeUntilDisposed(action)
-                .PushStackFrame();        
+            => action.ProcessEvent<CancelEventArgs, T>(nameof(ActionBase.Executing), e => resilientSelector(e).DoOnError(_ => e.Cancel = true), [action]).TakeUntilDisposed(action) ;        
         public static IObservable<T2> WhenUpdating<T2>(this ActionBase action,Func<UpdateActionEventArgs,IObservable<T2>> selector) 
             => action.Controller.WhenActivated(true)
                 .SelectManyUntilDeactivated(controller => controller.Frame.GetController<ActionsCriteriaViewController>()
                     .ProcessEvent<UpdateActionEventArgs>(nameof(ActionsCriteriaViewController.ActionUpdating)).Where(e => e.Active&&e.NeedUpdateEnabled)
-                    .SelectMany(selector))
-                .PushStackFrame();
+                    .SelectMany(selector)) ;
         
         public static IObservable<ParametrizedAction> WhenValueChangedApplyValue(this IObservable<ParametrizedAction> source,Func<ParametrizedAction,IObservable<Unit>> selector=null)
             => source.WhenCustomizeControl(t => t.e.Control.Observe()

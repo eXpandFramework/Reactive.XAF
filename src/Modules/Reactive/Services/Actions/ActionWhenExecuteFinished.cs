@@ -7,13 +7,10 @@ using Xpand.Extensions.Reactive.Transform;
 
 namespace Xpand.XAF.Modules.Reactive.Services.Actions {
     public static partial class ActionsService {
-
-
         public static IObservable<TAction> WhenExecuteFinished<TAction>(this TAction action,bool customEmit=false) where TAction : ActionBase
             => customEmit || (action.Data.ContainsKey(nameof(ExecutionFinished)) && (bool)action.Data[nameof(ExecutionFinished)])
                 ? ExecuteFinishedSubject.Where(a => a == action).Cast<TAction>() 
-                : action.ProcessEvent<EventArgs,TAction>(nameof(ActionBase.ExecuteCompleted),_ => action.Observe()).TakeUntilDisposed(action).PushStackFrame()
-                    .PushStackFrame();
+                : action.WhenExecuteCompleted().To(action);
 
         public static IObservable<TAction> WhenExecuteFinished<TAction>(this IObservable<TAction> source,
             bool customEmit = false) where TAction : ActionBase
