@@ -5,6 +5,7 @@ using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
+using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Enumerable = System.Linq.Enumerable;
@@ -24,9 +25,9 @@ namespace Xpand.Extensions.Reactive.Relay {
 
         private static AmbientFaultContext CreateNewFaultContext(this Exception e,object[] context, string memberName, string filePath, int lineNumber){
             var currentFrame = new LogicalStackFrame(memberName, filePath, lineNumber, context);
-            return e is FaultHubException?new[] { currentFrame }.NewFaultContext([],null, memberName, filePath, lineNumber):
-                new[] { currentFrame }.Concat(FaultHub.LogicalStackContext.Value ?? Enumerable.Empty<LogicalStackFrame>()).ToList()
-                    .NewFaultContext(context,null, memberName, filePath, lineNumber);
+            return e is FaultHubException?new[] { currentFrame }.ToImmutableStack().NewFaultContext([],null, memberName, filePath): 
+                (new[] { currentFrame }.Concat(FaultHub.LogicalStackContext.Value ?? Enumerable.Empty<LogicalStackFrame>()).ToList()).ToImmutableStack()
+                    .NewFaultContext(context,null, memberName, filePath);
         }
 
         public static IObservable<TEventArgs> ProcessEvent<TEventArgs>(this object source, string eventName,Func<TEventArgs, IObservable<TEventArgs>> resilientSelector, 

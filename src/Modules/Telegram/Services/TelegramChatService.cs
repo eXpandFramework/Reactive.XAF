@@ -6,24 +6,31 @@ using System.Reactive.Threading.Tasks;
 using DevExpress.ExpressApp;
 using Humanizer;
 using Telegram.Bot;
+using Telegram.Bot.Exceptions;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Xpand.Extensions.LinqExtensions;
+using Xpand.Extensions.Reactive;
 using Xpand.Extensions.Reactive.Combine;
+using Xpand.Extensions.Reactive.Conditional;
+using Xpand.Extensions.Reactive.ErrorHandling;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Relay;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.StringExtensions;
 using Xpand.Extensions.XAF.Attributes;
 using Xpand.Extensions.XAF.ObjectSpaceExtensions;
+using Xpand.Extensions.XAF.Xpo.ObjectSpaceExtensions;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Telegram.BusinessObjects;
 using Message = Telegram.Bot.Types.Message;
 
 namespace Xpand.XAF.Modules.Telegram.Services{
     public static class TelegramChatService{
+        internal record SendChatDisabledPayload(long ChatId);
         internal static IObservable<Unit> TelegramChatConnect(this ApplicationModulesManager manager) 
             => manager.WhenApplication(application => application.UpdateChats()
+                .MergeToUnit(application.WhenSetupComplete(_ => application.WhenSendChatDisabledPayload()))
                 .MergeToUnit(application.WhenProviderCommitted<TelegramChatMessage>(ObjectModification.Updated).ToObjects().Where(message => message.HasReply)
                     .SelectManyItemResilient(message => message.TelegramChat.SendText($@"
 > {message.Message.EncloseHTMLImportant()}
@@ -31,6 +38,12 @@ namespace Xpand.XAF.Modules.Telegram.Services{
 {message.Reply}
 "))));
 
+        private static IObservable<Unit> WhenSendChatDisabledPayload(this XafApplication application)
+            => application.ObjectSpaceProvider.HandleDataLayerRequest()
+                .With<SendChatDisabledPayload, TelegramChat>(payload => application.UseProviderObjectSpace(space => space.GetObjectsQuery<TelegramChat>()
+                    .Where(chat => chat.Id == payload.ChatId).ToArray().ToNowObservable()
+                    .Do(chat => chat.Active = false).Commit()));
+        
         public static IObservable<Message> SendText(this TelegramChat chat,ParseMode parseMode,params string[] messages) 
             => chat.Bot.ClientSource().SelectMany(client => client.SendText(chat,parseMode, messages));
 
@@ -89,7 +102,9 @@ namespace Xpand.XAF.Modules.Telegram.Services{
         internal static IObservable<Message> SendText(this TelegramBotClient client,  TelegramChat chat,ParseMode parseMode, string[] messages) 
             => messages.ToNowObservable().WhenNotDefaultOrEmpty()
                 .SelectManyItemResilient(msg => client.SendMessage(new ChatId(chat.Id), msg,parseMode:parseMode,
-                    linkPreviewOptions:new LinkPreviewOptions(){IsDisabled = chat.Bot.DisableWebPagePreview}).ToObservable());
+                    linkPreviewOptions:new LinkPreviewOptions(){IsDisabled = chat.Bot.DisableWebPagePreview}).ToObservable()
+                    .Catch<Message,ApiRequestException>(e =>e.Observe().If(_ => e.ErrorCode==403, _ => chat.Session?.DataLayer.MakeRequest()
+                        .With<SendChatDisabledPayload, TelegramChat>(new SendChatDisabledPayload(chat.Id)).To<Message>(),_ => e.Throw<Message>()) ));
     
         public static IObservable<(TelegramChatMessage chatMessage, string query, string commandText)> WhenValid(this TelegramChatMessage chatMessage){
             var message = chatMessage.Message;

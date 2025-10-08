@@ -5,8 +5,11 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+using System.Reactive;
+using System.Reactive.Concurrency;
 using System.Reflection;
 using System.Threading;
+using System.Threading.Tasks;
 using DevExpress.ExpressApp;
 using Microsoft.Reactive.Testing;
 using NUnit.Framework;
@@ -25,6 +28,28 @@ using IDisposable = System.IDisposable;
 using TestScheduler = akarnokd.reactive_extensions.TestScheduler;
 
 namespace Xpand.TestsLib.Common{
+    internal interface IPoCInterface {
+        string GetFixedMessage();
+        int Add(int a, int b);
+        T Echo<T>(T value);
+        void DoNothing();
+        IObservable<TResult> TransformAndFlatten<TSource, TResult>(IObservable<TSource> source, Func<TSource, IObservable<TResult>> transformer);
+        void ConstrainedGeneric<TException>(TException error) where TException : Exception;
+        void GenericByRef<T>(ref T value);
+    }
+
+    internal interface IMultipleOverloadPoc {
+        // These are the 8 overloads for StartAsync
+        IObservable<TSource> StartAsync<TSource>(Func<Task<TSource>> functionAsync);
+        IObservable<TSource> StartAsync<TSource>(Func<CancellationToken, Task<TSource>> functionAsync);
+        IObservable<TSource> StartAsync<TSource>(Func<Task<TSource>> functionAsync, IScheduler scheduler);
+        IObservable<TSource> StartAsync<TSource>(Func<CancellationToken, Task<TSource>> functionAsync, IScheduler scheduler);
+        IObservable<Unit> StartAsync(Func<Task> actionAsync);
+        IObservable<Unit> StartAsync(Func<CancellationToken, Task> actionAsync);
+        IObservable<Unit> StartAsync(Func<Task> actionAsync, IScheduler scheduler);
+        IObservable<Unit> StartAsync(Func<CancellationToken, Task> actionAsync, IScheduler scheduler);
+    }
+
     public abstract class CommonTest:ReactiveTest, IDisposable {
         public const int MaxTries = 3;
         public readonly TestScheduler TestScheduler=new();

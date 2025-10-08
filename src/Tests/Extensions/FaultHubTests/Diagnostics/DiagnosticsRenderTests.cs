@@ -2,6 +2,7 @@
 using System.Linq;
 using NUnit.Framework;
 using Shouldly;
+using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Relay;
 
 namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics {
@@ -110,7 +111,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics {
         private FaultHubException CreateFaultWithLogicalStack(params LogicalStackFrame[] frames) {
             var context = new AmbientFaultContext {
                 BoundaryName = "TestOperation",
-                LogicalStackTrace = frames
+                LogicalStackTrace = frames.ToImmutableStack()
             };
             return new FaultHubException("Test Failure", new InvalidOperationException("Root Cause"), context);
         }

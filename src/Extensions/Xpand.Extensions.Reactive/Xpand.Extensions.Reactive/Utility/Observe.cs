@@ -11,7 +11,7 @@ namespace Xpand.Extensions.Reactive.Utility {
         public static IObservable<T> ObserveOnWindows<T>(this IObservable<T> source, SynchronizationContext synchronizationContext) =>
             AppDomain.CurrentDomain.IsHosted() ? source : source.ObserveOn(synchronizationContext);
         public static IObservable<T> ObserveOnDefault<T>(this IObservable<T> source) {
-            TaskPoolScheduler.Default.DisableOptimizations(typeof(ISchedulerLongRunning));
+            // TaskPoolScheduler.Default.DisableOptimizations(typeof(ISchedulerLongRunning));
             return source.ObserveOn(DefaultScheduler.Instance);
         }
         public static IObservable<T> ObserveOnCurrent<T>(this IObservable<T> source) 

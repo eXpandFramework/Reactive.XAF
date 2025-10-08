@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -9,7 +10,7 @@ using static Xpand.Extensions.Reactive.Relay.FaultHubException;
 
 namespace Xpand.Extensions.Reactive.Relay {
     public record OperationNode(string Name, IReadOnlyList<object> ContextData, IReadOnlyList<OperationNode> Children,
-        Exception RootCause = null, IReadOnlyList<LogicalStackFrame> LogicalStack = null,IReadOnlyList<string> Tags = null
+        Exception RootCause = null, IImmutableStack<LogicalStackFrame> LogicalStack = null,IReadOnlyList<string> Tags = null
     );
     public static class FaultHubExceptionExtensions {
         public static IEnumerable<OperationNode> Descendants(this OperationNode root) 
@@ -91,7 +92,7 @@ namespace Xpand.Extensions.Reactive.Relay {
         public static string RenderStack(this OperationNode node) {
             LogFast($"Called for node '{node?.Name ?? "null"}'.");
             var logicalStack = node?.GetLogicalStack();
-            if (logicalStack == null || !logicalStack.Any()) {
+            if (logicalStack == null || logicalStack.IsEmpty) {
                 LogFast($"No logical stack found, returning empty string.");
                 return string.Empty;
             }
@@ -105,19 +106,23 @@ namespace Xpand.Extensions.Reactive.Relay {
             if (!blacklistedPatterns.Any()) return logicalStack.RenderSimpleStack();
             var sb = new StringBuilder();
             sb.AppendLine("--- Invocation Stack ---");
-            sb.BuildRenderedStackString( logicalStack,blacklistedPatterns);
+            sb.BuildRenderedStackString( logicalStack.ToImmutableStack(),blacklistedPatterns);
             return sb.ToString().TrimEnd();
         }
 
         public record GroupedStackFrame(LogicalStackFrame Frame, int Count);
 
-        private static List<object> GroupConsecutiveFrames(this IReadOnlyList<LogicalStackFrame> stack) {
+        private static List<object> GroupConsecutiveFrames(this IImmutableStack<LogicalStackFrame> stack) {
             var grouped = new List<object>();
-            if (stack == null || !stack.Any()) {
+            if (stack == null || stack.IsEmpty()) {
+                return grouped;
+            }
+            var logicalStackFrames = stack.ToList();
+            if (!logicalStackFrames.Any()) {
                 return grouped;
             }
 
-            using var enumerator = stack.GetEnumerator();
+            var enumerator = logicalStackFrames.GetEnumerator();
             if (!enumerator.MoveNext()) return grouped;
     
             var currentFrame = enumerator.Current;
@@ -135,13 +140,13 @@ namespace Xpand.Extensions.Reactive.Relay {
             grouped.Add(consecutiveCount > 1 ? new GroupedStackFrame(currentFrame, consecutiveCount) : currentFrame);
             return grouped;
         }
-        private static void BuildRenderedStackString(this StringBuilder sb, IReadOnlyList<LogicalStackFrame> originalStack, Dictionary<string, string> blacklistedPatterns) {
-            LogFast($"Grouping {originalStack.Count} original frames.");
+        private static void BuildRenderedStackString(this StringBuilder sb, ImmutableStack<LogicalStackFrame> originalStack, Dictionary<string, string> blacklistedPatterns) {
+            LogFast($"Grouping {originalStack.Count()} original frames.");
             var groupedStack = originalStack.GroupConsecutiveFrames();
             LogFast($"Filtering {groupedStack.Count} grouped items.");
             var filteredItems = groupedStack.FilterAndGroupBlacklistedFrames(blacklistedPatterns);
 
-            if (!filteredItems.Any(item => item is LogicalStackFrame || item is GroupedStackFrame) && originalStack.Any()) {
+            if (!filteredItems.Any(item => item is LogicalStackFrame || item is GroupedStackFrame) && !originalStack.IsEmpty) {
                 LogFast($"Blacklist would hide all frames. Falling back to full stack.");
                 sb.RenderFallbackStack( originalStack);
             }
@@ -149,8 +154,7 @@ namespace Xpand.Extensions.Reactive.Relay {
                 LogFast($"Rendering filtered stack.");
                 sb.RenderFilteredStack( filteredItems);
             }
-            sb.AppendBlacklistFooter( filteredItems, blacklistedPatterns);
-        }
+            sb.AppendBlacklistFooter( filteredItems, blacklistedPatterns);        }
 
         private static void RenderFilteredStack(this StringBuilder sb, List<object> filteredItems) {
             foreach (var item in filteredItems) {
@@ -166,7 +170,7 @@ namespace Xpand.Extensions.Reactive.Relay {
             }
         }
         
-        private static void RenderFallbackStack(this StringBuilder sb, IReadOnlyList<LogicalStackFrame> originalStack) {
+        private static void RenderFallbackStack(this StringBuilder sb, ImmutableStack<LogicalStackFrame> originalStack) {
             foreach (var frame in originalStack) {
                 sb.Append("  ").AppendLine(frame.ToString());
             }
@@ -207,7 +211,7 @@ namespace Xpand.Extensions.Reactive.Relay {
             
         }
 
-        private static string RenderSimpleStack(this IReadOnlyList<LogicalStackFrame> logicalStack) {
+        private static string RenderSimpleStack(this IImmutableStack<LogicalStackFrame> logicalStack) {
             var sb = new StringBuilder();
             sb.AppendLine("--- Invocation Stack ---");
             foreach (var frame in logicalStack) {
@@ -223,9 +227,8 @@ namespace Xpand.Extensions.Reactive.Relay {
                 sb.Append("Blacklisted patterns applied: ").Append(string.Join(", ", appliedPatterns));
             }
         }
-        public static IReadOnlyList<LogicalStackFrame> GetLogicalStack(this OperationNode node)
-            => node.LogicalStack ??
-            node.Children.Select(child => child.GetLogicalStack()).FirstOrDefault(s => s != null);
+        public static IImmutableStack<LogicalStackFrame> GetLogicalStack(this OperationNode node)
+            =>  node.Children.Select(child => child.GetLogicalStack()).FirstOrDefault(s => s is { IsEmpty: false }) ?? node.LogicalStack;
 
         public static Exception GetRootCause(this OperationNode node)
             => node.RootCause ??
@@ -256,7 +259,7 @@ namespace Xpand.Extensions.Reactive.Relay {
                 : allChildren.GroupBy(c => c.Name).Select(childGroup => Union(childGroup.ToList())).ToList();
             var logicalStack = groupToMerge.SelectMany(n => n.LogicalStack ?? Enumerable.Empty<LogicalStackFrame>()).Distinct().ToList();
             var rootCause = groupToMerge.FirstOrDefault(n => n.RootCause != null)?.RootCause;
-            return new OperationNode(representative.Name, representative.ContextData, mergedChildren, rootCause, logicalStack);
+            return new OperationNode(representative.Name, representative.ContextData, mergedChildren, rootCause, logicalStack.ToImmutableStack());
         }
         private static OperationNode CreateVirtualRootForMultipleGroups(this List<OperationNode> nodes) {
             LogFast($"Multiple root names found. Creating virtual 'Multiple Operations' root.");
@@ -431,13 +434,13 @@ namespace Xpand.Extensions.Reactive.Relay {
                 .Distinct().ToList();
             var mergedRootCause = node.RootCause ?? childToMerge.RootCause;
             var finalChildren = childToMerge.Children.Concat(allProcessedChildren.Where(c => c != childToMerge)).ToList();
-            return new OperationNode(node.Name, mergedContext, finalChildren, mergedRootCause, mergedStack, mergedTags);
+            return new OperationNode(node.Name, mergedContext, finalChildren, mergedRootCause, mergedStack.ToImmutableStack(), mergedTags);
         }
         private static List<OperationNode> ProcessChildren(this OperationNode node) 
             => node.Children.Select(c => c.Collapse()).Where(c => c != null)
                 .GroupBy(c => c.Name).Select(group => group.ToList().Union()).ToList();
         
-        static OperationNode BuildFromGenericException(this Exception ex, IReadOnlyList<LogicalStackFrame> parentStack,
+        static OperationNode BuildFromGenericException(this Exception ex, IImmutableStack<LogicalStackFrame> parentStack,
             Dictionary<AmbientFaultContext, FaultHubException> contextLookup) {
             LogFast($"Processing generic exception: {ex?.GetType().Name}");
             LogFast($"ENTER. Exception Type: '{ex?.GetType().Name}', Message: '{ex?.Message}'");
@@ -448,15 +451,20 @@ namespace Xpand.Extensions.Reactive.Relay {
             return children.Count == 1 ? children.Single() : new OperationNode("Multiple Operations", [], children);
         }
 
-        static OperationNode BuildFromContext(this AmbientFaultContext context, IReadOnlyList<LogicalStackFrame> parentStack, Dictionary<AmbientFaultContext, FaultHubException> contextLookup) {
+        static OperationNode BuildFromContext(this AmbientFaultContext context, IImmutableStack<LogicalStackFrame> parentStack, Dictionary<AmbientFaultContext, FaultHubException> contextLookup) {
             if (context == null) return null;
             LogFast($"Processing context for: '{context.BoundaryName ?? "NULL"}'");
             return context.BoundaryName == null ? context.HandleNamelessContext( parentStack, contextLookup) : context.BuildNamedNode( parentStack, contextLookup);
         }
         
-        private static OperationNode BuildNamedNode(this AmbientFaultContext context, IReadOnlyList<LogicalStackFrame> parentStack, Dictionary<AmbientFaultContext, FaultHubException> contextLookup) {
-            var localStack = (context.LogicalStackTrace ?? Enumerable.Empty<LogicalStackFrame>()).ToArray();
-            var fullStack = localStack.Concat(parentStack.Except(localStack)).ToList();
+        private static OperationNode BuildNamedNode(this AmbientFaultContext context, IImmutableStack<LogicalStackFrame> parentStack, Dictionary<AmbientFaultContext, FaultHubException> contextLookup) {
+            contextLookup.TryGetValue(context, out var contextOwner);
+            var nodeStack = contextOwner?.SelectMany()
+                .Select(ex => ex.CapturedStack())
+                .LastOrDefault(s => s != null && !s.IsEmpty);
+
+            var fullStack = nodeStack ?? parentStack ?? ImmutableStack<LogicalStackFrame>.Empty;
+            
             var children = new List<OperationNode>();
             LogFast($"Recursing on InnerContext: '{context.InnerContext?.BoundaryName ?? "NULL"}'");
             var hierarchicalChild = context.InnerContext.BuildFromContext(fullStack, contextLookup);
@@ -467,14 +475,14 @@ namespace Xpand.Extensions.Reactive.Relay {
                     children.Add(hierarchicalChild);
                 }
             }
-            var rootCause = context.RootCause(contextLookup, fullStack, children);
+            var rootCause = context.RootCause(contextLookup, fullStack.ToArray(), children);
             LogFast($"After RootCause call for '{context.BoundaryName}', children count is: {children.Count}.");
             var resultNode = new OperationNode(context.BoundaryName, context.UserContext ?? [], children, rootCause, fullStack, context.Tags);
             LogFast($"Created node '{resultNode.Name}' with Tags: [{(resultNode.Tags != null ? string.Join(", ", resultNode.Tags) : "null")}]");
             LogFast($"Created node for '{resultNode.Name}' with {resultNode.Children.Count} children.");
-            return resultNode;
+            return resultNode;        
         }
-        private static OperationNode HandleNamelessContext(this AmbientFaultContext context, IReadOnlyList<LogicalStackFrame> parentStack, Dictionary<AmbientFaultContext, FaultHubException> contextLookup) {
+        private static OperationNode HandleNamelessContext(this AmbientFaultContext context, IImmutableStack<LogicalStackFrame> parentStack, Dictionary<AmbientFaultContext, FaultHubException> contextLookup) {
             LogFast($"BoundaryName is null. Trying to build from generic inner exception.");
             if (!contextLookup.TryGetValue(context, out var owner) || owner.InnerException == null) {
                 LogFast($"Could not find owner or owner has no inner exception. Returning null.");
@@ -495,19 +503,19 @@ namespace Xpand.Extensions.Reactive.Relay {
                 LogicalStack: context.LogicalStackTrace
             );
         }
-        private static Exception RootCause(this AmbientFaultContext context, Dictionary<AmbientFaultContext, FaultHubException> contextLookup, List<LogicalStackFrame> fullStack, List<OperationNode> children) {
+        private static Exception RootCause(this AmbientFaultContext context, Dictionary<AmbientFaultContext, FaultHubException> contextLookup, LogicalStackFrame[] fullStack, List<OperationNode> children) {
             if (!contextLookup.TryGetValue(context, out var contextOwner)) return null;
             LogFast($"Analyzing context '{context.BoundaryName}' owned by exception '{contextOwner.Message}'.");
             return context.InnerContext == null ? contextOwner.ProcessLeafContext( fullStack, contextLookup, children) : null;
         }
         
-        private static Exception ProcessLeafContext(this FaultHubException contextOwner, List<LogicalStackFrame> fullStack, Dictionary<AmbientFaultContext, FaultHubException> contextLookup, List<OperationNode> children) {
+        private static Exception ProcessLeafContext(this FaultHubException contextOwner, LogicalStackFrame[] fullStack, Dictionary<AmbientFaultContext, FaultHubException> contextLookup, List<OperationNode> children) {
             LogFast($"No inner context. Building from owner's inner exception.");
             if (contextOwner.InnerException is FaultHubException { Context: not null } innerFhEx && contextOwner.Context.InnerContext == innerFhEx.Context) {
                 LogFast($"Child node for '{innerFhEx.Context.BoundaryName}' is already being created via InnerContext traversal. Skipping redundant InnerException parse.");
                 return innerFhEx.FindRootCauses().FirstOrDefault();
             }
-            var errorNode = contextOwner.InnerException.BuildFromGenericException(fullStack, contextLookup);
+            var errorNode = contextOwner.InnerException.BuildFromGenericException(fullStack.ToImmutableStack(), contextLookup);
             if (contextOwner.Context.BoundaryName == "Nested_Tx") {
                 LogFast($"For 'Nested_Tx', the generated errorNode is: '{errorNode?.Name ?? "null"}'");
             }

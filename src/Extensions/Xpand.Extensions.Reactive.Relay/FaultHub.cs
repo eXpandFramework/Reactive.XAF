@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using Microsoft.Extensions.Caching.Memory;
 using Xpand.Extensions.ExceptionExtensions;
@@ -15,11 +17,13 @@ using Xpand.Extensions.Reactive.Utility;
 
 namespace Xpand.Extensions.Reactive.Relay {
     public static class FaultHub {
-        internal const string CapturedStackKey = "FaultHub.CapturedStack";
-        public static readonly AsyncLocal<IReadOnlyList<LogicalStackFrame>> LogicalStackContext=NewContext<IReadOnlyList<LogicalStackFrame>>();
+        internal static readonly ConditionalWeakTable<Exception, IImmutableStack<LogicalStackFrame>> ExceptionStacks = new();
+        internal static readonly AsyncLocal<IImmutableStack<LogicalStackFrame>> LastKnownStack = NewContext<IImmutableStack<LogicalStackFrame>>();
+        // internal const string CapturedStackKey = "FaultHub.CapturedStack";
+        public static readonly AsyncLocal<IImmutableStack<LogicalStackFrame>> LogicalStackContext=NewContext<IImmutableStack<LogicalStackFrame>>();
         internal static readonly AsyncLocal<List<Func<Exception, FaultAction?>>> HandlersContext=NewContext<List<Func<Exception, FaultAction?>>>();
         static readonly AsyncLocal<Guid?> Ctx=NewContext<Guid?>();
-        public static readonly AsyncLocal<FaultSnapshot> CurrentFaultSnapshot=NewContext<FaultSnapshot>();
+        
         public static readonly MemoryCache Seen = new(new MemoryCacheOptions { SizeLimit = 10000 });
         static readonly ISubject<FaultHubException> BusSubject = Subject.Synchronize(new Subject<FaultHubException>());
         public static readonly IObservable<FaultHubException> Bus = BusSubject.AsObservable();
@@ -39,6 +43,7 @@ namespace Xpand.Extensions.Reactive.Relay {
 
         private static readonly BehaviorSubject<bool> IsEnabledSubject = new(true);
 
+        
         public static bool Enabled {
             get => IsEnabledSubject.Value;
             set => IsEnabledSubject.OnNext(value);
@@ -281,9 +286,8 @@ namespace Xpand.Extensions.Reactive.Relay {
             return Disposable.Create(context, list => list.Remove(handler));
         }
 
-        public static IReadOnlyList<LogicalStackFrame> CapturedStack(this Exception exception) 
-            => exception.Data.Contains(CapturedStackKey) ? (IReadOnlyList<LogicalStackFrame>)exception.Data[CapturedStackKey] : null;
-
+        public static IImmutableStack<LogicalStackFrame> CapturedStack(this Exception exception) 
+            => LastKnownStack.Value;
         internal static IObservable<T> FaultHubFlowContext<T>(this IObservable<T> source,
             Func<IObservable<T>, IObservable<T>> retrySelector = null, params IAsyncLocal[] context)
             => source.FlowContext(retrySelector, RegisteredContexts.Concat(context).ToArray());
@@ -302,7 +306,4 @@ namespace Xpand.Extensions.Reactive.Relay {
     }
 
 
-    public class FaultSnapshot {
-        public IReadOnlyList<LogicalStackFrame> CapturedStack { get; set; }
-    }
 }

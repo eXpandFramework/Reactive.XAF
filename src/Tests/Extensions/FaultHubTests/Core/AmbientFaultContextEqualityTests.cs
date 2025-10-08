@@ -1,5 +1,6 @@
 ﻿using NUnit.Framework;
 using Shouldly;
+using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Relay;
 
 namespace Xpand.Extensions.Tests.FaultHubTests.Core {
@@ -19,8 +20,8 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Core {
             var stack1 = new[] { new LogicalStackFrame("MethodA", "file.cs", 10, "context") };
             var stack2 = new[] { new LogicalStackFrame("MethodA", "file.cs", 10, "context") };
 
-            var context1 = new AmbientFaultContext { BoundaryName = "Test", LogicalStackTrace = stack1 };
-            var context2 = new AmbientFaultContext { BoundaryName = "Test", LogicalStackTrace = stack2 };
+            var context1 = new AmbientFaultContext { BoundaryName = "Test", LogicalStackTrace = stack1.ToImmutableStack() };
+            var context2 = new AmbientFaultContext { BoundaryName = "Test", LogicalStackTrace = stack2.ToImmutableStack() };
 
             context1.ShouldBe(context2);
             context1.GetHashCode().ShouldBe(context2.GetHashCode());

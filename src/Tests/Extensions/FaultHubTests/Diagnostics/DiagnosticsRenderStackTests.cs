@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using NUnit.Framework;
 using Shouldly;
+using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Relay;
 
 namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics {
@@ -11,8 +12,9 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics {
         [Test]
         public void RenderStack_Correctly_Formats_Logical_Stack() {
             var exception = CreateFaultWithLogicalStack(
-                new LogicalStackFrame("MethodA", "fileA.cs", 10),
-                new LogicalStackFrame("MethodB", "fileB.cs", 25)
+                new LogicalStackFrame("MethodB", "fileB.cs", 25),
+                new LogicalStackFrame("MethodA", "fileA.cs", 10)
+                
             );
             var tree = exception.OperationTree();
             var expected = string.Join(Environment.NewLine,
@@ -72,8 +74,9 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics {
         [Test]
         public void RenderStack_Handles_Frames_With_And_Without_Context() {
             var exception = CreateFaultWithLogicalStack(
-                new LogicalStackFrame("MethodA", "fileA.cs", 10, "My Context"),
-                new LogicalStackFrame("MethodB", "fileB.cs", 25)
+                new LogicalStackFrame("MethodB", "fileB.cs", 25),
+                new LogicalStackFrame("MethodA", "fileA.cs", 10, "My Context")
+                
             );
             var tree = exception.OperationTree();
             var expected = string.Join(Environment.NewLine,
@@ -90,7 +93,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics {
          private FaultHubException CreateFaultWithLogicalStack(params LogicalStackFrame[] frames) {
             var context = new AmbientFaultContext {
                 BoundaryName = "TestOperation",
-                LogicalStackTrace = frames
+                LogicalStackTrace = frames.ToImmutableStack()
             };
             return new FaultHubException("Test Failure", new InvalidOperationException("Root Cause"), context);
         }

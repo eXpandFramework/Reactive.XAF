@@ -6,6 +6,7 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;
 using DevExpress.Xpo;
 using DevExpress.Xpo.Metadata;
+using Xpand.Extensions.XAF.Attributes;
 
 namespace Xpand.Extensions.XAF.Xpo.BaseObjects {
     [NonPersistent]
@@ -55,8 +56,7 @@ namespace Xpand.Extensions.XAF.Xpo.BaseObjects {
             return obj?.ToString() ?? base.ToString();
         }
 
-        [Browsable(false)]
-        [MemberDesignTimeVisibility(false)]
+        [InvisibleInAllViews]
         public bool IsNewObject => Session.IsNewObject(this);
 
         [Obsolete("Use XpandUnitOfWork instead")]

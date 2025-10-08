@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.StringExtensions;
@@ -7,7 +8,7 @@ using Xpand.Extensions.StringExtensions;
 namespace Xpand.Extensions.Reactive.Relay{
     public record AmbientFaultContext {
         public IReadOnlyList<string> Tags { get; init; }
-        public IReadOnlyList<LogicalStackFrame> LogicalStackTrace { get; init; }
+        public IImmutableStack<LogicalStackFrame> LogicalStackTrace { get; init; }
         public object[] UserContext { get; init; }
         
         public virtual bool Equals(AmbientFaultContext other) {

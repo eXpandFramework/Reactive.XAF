@@ -7,11 +7,17 @@ using Xpand.Extensions.Reactive.Relay;
 using Xpand.Extensions.Reactive.Relay.Transaction;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.StringExtensions;
+using Xpand.Extensions.Tracing;
 
 namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics {
     [TestFixture]
     public class ProductionScenarioTests : ProductionScenarioBaseTest {
-        
+        [SetUp]
+        public override void Setup() {
+            base.Setup();
+            FastLogger.LogFastFilter(t => )
+        }
+
         [Test][Apartment(ApartmentState.STA)]
         public async Task Replicates_Production_Report_Issue() {
             

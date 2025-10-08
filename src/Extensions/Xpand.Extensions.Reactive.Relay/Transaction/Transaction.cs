@@ -92,7 +92,9 @@ namespace Xpand.Extensions.Reactive.Relay.Transaction {
                 allSteps.AddRange(builder.BatchedSources.Select(bs => new StepDefinition { Selector = _ => bs.Source, Name = bs.Name, FilePath = builder.CallerMemberPath, LineNumber = builder.CallerMemberLine }));
             }
             allSteps.AddRange(builder.SubsequentSteps);
-            return (failFast ? allSteps.FailFast(builder, isNonCritical) : builder.RunToEnd(allSteps,  collectAllResults)).Finally(() => TransactionNestingLevel.Value--);
+            return (failFast ? allSteps.FailFast(builder, isNonCritical) : builder.RunToEnd(allSteps,  collectAllResults))
+                .PushStackFrame(builder.TransactionName, builder.CallerMemberPath, builder.CallerMemberLine)
+                .Finally(() => TransactionNestingLevel.Value--);
         }
         private static IObservable<(List<object> Results, FaultHubException Fault)> ConcurrentRunToEnd(this IObservable<(string Name, IObservable<object> Source)> source, string transactionName, int maxConcurrency, object[] context,string filePath,int lineNumber) 
             => source.Select(op => op.Source.PushStackFrame( op.Name, filePath, lineNumber).ChainFaultContext(context:context.AddToContext($"{transactionName} - {op.Name}"),null, op.Name).Materialize())
@@ -136,7 +138,14 @@ namespace Xpand.Extensions.Reactive.Relay.Transaction {
                             .Materialize().BufferUntilCompleted()
                             .Select(notifications => {
                                 LogFast($"Step '{step.Name}' completed. Received {notifications.Length} notifications ({notifications.Count(n => n.Kind == NotificationKind.OnNext)} OnNext, {notifications.Count(n => n.Kind == NotificationKind.OnError)} OnError).");
+                                var initialFailureCount = acc.failures.Count;
                                 var newAcc = allSteps.CollectStepErrors( builder, notifications, step, acc, isNonCritical);
+
+                                if (newAcc.failures.Count > initialFailureCount) {
+                                    LogFast($"Step '{step.Name}' failed. Clearing logical stack context for isolation.");
+                                    FaultHub.LogicalStackContext.Value = null;
+                                }
+                        
                                 var suppressedFailures = Current?.Failures.Where(f => !newAcc.failures.Contains(f)).ToList();
                                 return !(suppressedFailures?.Any() ?? false) ? newAcc
                                     : newAcc with { failures = newAcc.failures.Concat(suppressedFailures).ToList() };
@@ -194,7 +203,10 @@ namespace Xpand.Extensions.Reactive.Relay.Transaction {
                     LogFast($"{builder.TransactionName}: Path: Nested failure. isNested = {TransactionNestingLevel.Value}. Proceeding to salvage.");
                     var finalTypedResults =builder.DataSalvageStrategy==DataSalvageStrategy.EmitPartialResults? t.allResults.OfType<TFinal>().Cast<object>().ToList():null;
                     return Observable.Return((object)finalTypedResults).WhenNotDefault()
-                        .Concat(Observable.Throw<object>(aggregateException));
+                        .ConcatDefer(() => {
+                            FaultHub.LogicalStackContext.Value = null;
+                            return aggregateException.Throw<object>();
+                        });
                 });
 
         private static IEnumerable<FaultHubException> CollectErrors<TFinal>(this List<StepDefinition> allSteps,

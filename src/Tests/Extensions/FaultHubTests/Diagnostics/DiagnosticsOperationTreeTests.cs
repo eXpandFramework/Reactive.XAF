@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
+using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Relay;
 using Xpand.Extensions.Reactive.Relay.Transaction;
 using Xpand.Extensions.Reactive.Utility;
@@ -220,11 +221,11 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics {
         public void NewOperationTree_Preserves_Nested_Logical_Stack_Instead_Of_Overwriting() {
             var innerEx = new InvalidOperationException("Root Cause");
             var innerStack = new[] { new LogicalStackFrame("InnerWork", "inner.cs", 100) };
-            var innerCtx = new AmbientFaultContext { BoundaryName = "InnerBoundary", LogicalStackTrace = innerStack };
+            var innerCtx = new AmbientFaultContext { BoundaryName = "InnerBoundary", LogicalStackTrace = innerStack.ToImmutableStack() };
             var fhInner = new FaultHubException("Inner fail", innerEx, innerCtx);
 
             var outerStack = new[] { new LogicalStackFrame("OuterWork", "outer.cs", 20) };
-            var outerCtx = new AmbientFaultContext { BoundaryName = "OuterBoundary", LogicalStackTrace = outerStack, InnerContext = fhInner.Context};
+            var outerCtx = new AmbientFaultContext { BoundaryName = "OuterBoundary", LogicalStackTrace = outerStack.ToImmutableStack(), InnerContext = fhInner.Context};
             var fhOuter = new FaultHubException("Outer fail", fhInner, outerCtx);
 
             var result = fhOuter.OperationTree();
@@ -321,7 +322,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics {
             };
             var context = new AmbientFaultContext {
                 BoundaryName = "FetchOperation",
-                LogicalStackTrace = logicalStack,
+                LogicalStackTrace = logicalStack.ToImmutableStack(),
                 InnerContext = null
             };
             var exception = new FaultHubException("Operation Failed", rootCause, context);
@@ -333,7 +334,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics {
             result.Children.ShouldBeEmpty("A single context without an InnerContext should not produce child nodes.");
             result.GetRootCause().ShouldBe(rootCause);
 
-            var resultStack = result.GetLogicalStack();
+            var resultStack = result.GetLogicalStack().Reverse();
             resultStack.ShouldBe(logicalStack);
         }
         

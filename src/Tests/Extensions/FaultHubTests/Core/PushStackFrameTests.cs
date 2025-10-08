@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -18,7 +19,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Core {
         [Test]
         public void PushStackFrame_Correctly_Appends_To_Existing_Logical_Stack() {
             
-            IReadOnlyList<LogicalStackFrame> stackAtErrorTime = null;
+            IImmutableStack<LogicalStackFrame> stackAtErrorTime = null;
             var initialFrame = new LogicalStackFrame("OuterScope", "test.cs", 1);
 
             
@@ -123,7 +124,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Core {
 
             BusEvents.Count.ShouldBe(1);
             var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
-            var logicalStack = fault.LogicalStackTrace.Select(f => f.MemberName).ToArray();
+            var logicalStack = fault.LogicalStackTrace.Reverse().Select(f => f.MemberName).ToArray();
 
             logicalStack.ShouldNotBeNull();
 

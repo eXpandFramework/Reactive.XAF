@@ -5,6 +5,7 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
+using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Relay;
 using Xpand.Extensions.Reactive.Utility;
 
@@ -269,7 +270,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.ResilienceModels {
         [Test]
         public async Task ItemResilience_Correctly_Wraps_Existing_FaultHubException_Without_Reprocessing_Stack() {
             var upstreamStack = new[] { new LogicalStackFrame("UpstreamWork", "", 0) };
-            var upstreamContext = new AmbientFaultContext { BoundaryName = "UpstreamBoundary", LogicalStackTrace = upstreamStack };
+            var upstreamContext = new AmbientFaultContext { BoundaryName = "UpstreamBoundary", LogicalStackTrace = upstreamStack.ToImmutableStack() };
             var upstreamFault = new FaultHubException("Upstream Failure", new InvalidOperationException("Root"), upstreamContext);
             var source = Observable.Throw<Unit>(upstreamFault);
 
@@ -281,7 +282,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.ResilienceModels {
 
             finalFault.Context.InnerContext.ShouldBe(upstreamContext, "The original context from the upstream fault should have been preserved as the InnerContext.");
 
-            finalFault.Context.LogicalStackTrace.Count.ShouldBe(1, 
+            finalFault.Context.LogicalStackTrace.Count().ShouldBe(1, 
                 "The new context's stack should only contain its own frame, not the entire re-processed upstream stack.");
             finalFault.Context.LogicalStackTrace.Single().MemberName
                 .ShouldBe(nameof(ItemResilience_Correctly_Wraps_Existing_FaultHubException_Without_Reprocessing_Stack));

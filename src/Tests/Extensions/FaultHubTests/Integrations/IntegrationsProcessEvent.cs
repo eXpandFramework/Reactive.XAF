@@ -127,7 +127,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Integrations {
             
             BusEvents.Count.ShouldBe(1);
             var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
-            var logicalStack = fault.LogicalStackTrace.ToList();
+            var logicalStack = fault.LogicalStackTrace.Reverse().ToList();
 
             logicalStack.Count.ShouldBe(3);
             logicalStack[0].MemberName.ShouldBe(nameof(ProcessEvent_Preserves_Subscription_Context_On_Event_Streams));

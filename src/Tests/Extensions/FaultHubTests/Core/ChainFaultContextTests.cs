@@ -223,8 +223,9 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Core {
             var logicalStack = fault.LogicalStackTrace.ToList();
 
             
-            logicalStack.ShouldContain(frame => frame.MemberName == "InnerFrame");
+            logicalStack.ShouldContain(frame => frame.MemberName == nameof(ChainFaultContext_Captures_Full_Stack_From_Chained_Async_PushStackFrame_Operators));
             logicalStack.ShouldContain(frame => frame.MemberName == "OuterFrame");
+            logicalStack.ShouldContain(frame => frame.MemberName == "InnerFrame");
         }
         
         [Test]
@@ -279,7 +280,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Core {
             BusEvents.Count.ShouldBe(1);
             var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
             Clipboard.SetText(BusEvents.First().ToString());
-            var logicalStack = fault.LogicalStackTrace.Select(f => f.MemberName).ToArray();
+            var logicalStack = fault.LogicalStackTrace.Reverse().Select(f => f.MemberName).ToArray();
 
             var level1Index = Array.IndexOf(logicalStack, nameof(PoC_Level1_Calls_Level2));
             var level2Index = Array.IndexOf(logicalStack, nameof(PoC_Level2_Calls_Level3));
@@ -435,7 +436,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Core {
 
             BusEvents.Count.ShouldBe(1);
             var finalFault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
-            var logicalStack = finalFault.LogicalStackTrace.ToList();
+            var logicalStack = finalFault.LogicalStackTrace.Reverse().ToList();
 
             logicalStack.Count.ShouldBe(2);
             logicalStack[1].MemberName.ShouldBe(nameof(Pushes_Its_Own_Frame_When_Upstream_Frame_Is_Different));

@@ -32,9 +32,9 @@ namespace Xpand.Extensions.Reactive {
 
         internal static RpcChannel<TKey, TRequest, TResponse> Get<TKey, TRequest, TResponse>(TKey key) where TKey : notnull {
             var cacheKey = new CacheKey(typeof(TKey), typeof(TRequest), typeof(TResponse), key);
-            LogFast($"Attempting to get or create RpcChannel with stable cache key: {cacheKey}");
+            LogFast($"Attempting to get or create RpcChannel. KeyObject HashCode: {key?.GetHashCode()}. Stable cache key: {cacheKey}");
             return Channels.GetOrCreate(cacheKey, entry => {
-                LogFast($"Cache miss for key: {cacheKey}. Creating new RpcChannel.");
+                LogFast($"Cache miss for key with KeyObject HashCode: {key?.GetHashCode()}. Creating new RpcChannel. Full key: {cacheKey}.");
                 entry.SetSlidingExpiration(SlidingExpiration);
                 return new RpcChannel<TKey, TRequest, TResponse>();
             });
@@ -109,40 +109,5 @@ namespace Xpand.Extensions.Reactive {
 
                 return responseSubscription;
             });
-    }
-    
-    public readonly struct RpcRequester<TKey> where TKey : notnull {
-        private readonly TKey _key;
-        internal RpcRequester(TKey key) => _key = key;
-
-        public IObservable<TResponse> With<TResponse>() {
-            LogFast($"Requester for key '{_key}' making a request with no payload (Unit).");
-            return RpcChannel.Get<TKey, Unit, TResponse>(_key).MakeRequest(_key, Unit.Default);
-        }
-
-        public IObservable<TResponse> With<TRequest, TResponse>(TRequest request) {
-            LogFast($"Requester for key '{_key}' making a request with payload: {request}");
-            return RpcChannel.Get<TKey, TRequest, TResponse>(_key).MakeRequest(_key, request);
-        }
-    }
-
-    public readonly struct RpcHandler<TKey> where TKey : notnull {
-        private readonly TKey _key;
-        internal RpcHandler(TKey key) => _key = key;
-
-        public IObservable<Unit> With<TResponse>(IObservable<TResponse> source) {
-            LogFast($"Handler for key '{_key}' is being set up with an IObservable<TResponse> source.");
-            return With<Unit, TResponse>(_ => source.Take(1));
-        }
-
-        public IObservable<Unit> With<TResponse>(TResponse value) {
-            LogFast($"Handler for key '{_key}' is being set up with a single value: {value}");
-            return With<Unit, TResponse>(_ => Observable.Return(value));
-        }
-
-        public IObservable<Unit> With<TRequest, TResponse>(Func<TRequest, IObservable<TResponse>> handler) {
-            LogFast($"Handler for key '{_key}' is being set up with a function delegate.");
-            return RpcChannel.Get<TKey, TRequest, TResponse>(_key).HandleRequests(_key, handler);
-        }
     }
 }

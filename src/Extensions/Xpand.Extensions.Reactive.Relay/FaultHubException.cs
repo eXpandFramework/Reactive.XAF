@@ -9,7 +9,7 @@ namespace Xpand.Extensions.Reactive.Relay{
     public class FaultHubException : Exception {
         public const string SystemTag = "_";
         public FaultHubException(string message, Exception innerException,object[] context,IReadOnlyList<string> tags = null, string boundaryName="",string boundaryPath="",int boundaryLineNumber=0):
-            this(message, innerException, FaultHub.LogicalStackContext.Value.NewFaultContext(context,tags,boundaryName,boundaryPath,boundaryLineNumber)){
+            this(message, innerException, FaultHub.LogicalStackContext.Value.NewFaultContext(context,tags,boundaryName,boundaryPath)){
         }
 
         public FaultHubException(string message, Exception innerException, AmbientFaultContext context)
@@ -25,7 +25,7 @@ namespace Xpand.Extensions.Reactive.Relay{
         public IEnumerable<LogicalStackFrame> LogicalStackTrace => this.SelectMany().OfType<FaultHubException>()
             .SelectMany(fault => fault.Context.FromHierarchy(c => c.InnerContext).Reverse())
             .Select(context => context.LogicalStackTrace)
-            .Where(stack => stack != null)
+            .Where(stack => stack is { IsEmpty: false })
             .SelectMany(stack => stack)
             .Distinct();
         public IEnumerable<object> AllContexts {

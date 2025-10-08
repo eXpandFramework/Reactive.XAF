@@ -62,6 +62,16 @@
     <Compile Update="FastLoggerFilteringTests.cs">
       <DependentUpon>FastLoggerTests.cs</DependentUpon>
     </Compile>
+    <Compile Update="FaultHubTests\NewDirectory1\SchedulerPatch.cs">
+      <DependentUpon>XpandScheduler.cs</DependentUpon>
+    </Compile>
+    <Compile Update="FaultHubTests\NewDirectory1\Proxy.NAry.cs">
+      <DependentUpon>Proxy.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="ICSharpCode.Decompiler" Version="9.1.0.7988" />
+    <PackageReference Include="ImpromptuInterface" Version="8.0.6" />
   </ItemGroup>
   <Import Project="..\..\..\.paket\Paket.Restore.targets" />
 </Project>

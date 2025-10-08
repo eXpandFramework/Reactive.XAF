@@ -7,19 +7,13 @@ using Xpand.Extensions.Numeric;
 using Xpand.Extensions.XAF.Attributes;
 using Xpand.Extensions.XAF.Attributes.Custom;
 using Xpand.Extensions.XAF.Attributes.Validation;
-using Xpand.Extensions.XAF.Xpo.BaseObjects;
 using Xpand.XAF.Modules.Telegram.Services;
+using Xpand.XAF.Persistent.BaseImpl;
 
 namespace Xpand.XAF.Modules.Telegram.BusinessObjects{
     [DefaultProperty(nameof(Name))][ImageName(nameof(TelegramBot))]
-    public class TelegramBot(Session session) : XPCustomBaseObject(session){
-        int _id;
-
-        [Key(true)]
-        public int Id {
-            get => _id;
-            set => SetPropertyValue(nameof(Id), ref _id, value);
-        }
+    public class TelegramBot(Session session) : CustomBaseObject(session){
+        
         string _name;
 
         public string Name{
@@ -62,7 +56,7 @@ namespace Xpand.XAF.Modules.Telegram.BusinessObjects{
         
         string _startMessageRegex;
 
-        [Size(-1)]
+        [Size(-1)][ModelDefault("RowCount","1")]
         public string StartMessageRegex{
             get => _startMessageRegex;
             set => SetPropertyValue(nameof(StartMessageRegex), ref _startMessageRegex, value);
@@ -77,7 +71,7 @@ namespace Xpand.XAF.Modules.Telegram.BusinessObjects{
             set => SetPropertyValue(nameof(Version), ref _version, value);
         }
         
-        [Size(-1)]
+        [Size(-1)][ModelDefault("RowCount","1")]
         public string StopMessageRegex{
             get => _stopMessageRegex;
             set => SetPropertyValue(nameof(StopMessageRegex), ref _stopMessageRegex, value);
