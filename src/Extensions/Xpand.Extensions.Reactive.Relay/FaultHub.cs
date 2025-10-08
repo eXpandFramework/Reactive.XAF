@@ -17,9 +17,9 @@ using Xpand.Extensions.Reactive.Utility;
 
 namespace Xpand.Extensions.Reactive.Relay {
     public static class FaultHub {
-        internal static readonly ConditionalWeakTable<Exception, IImmutableStack<LogicalStackFrame>> ExceptionStacks = new();
+        
         internal static readonly AsyncLocal<IImmutableStack<LogicalStackFrame>> LastKnownStack = NewContext<IImmutableStack<LogicalStackFrame>>();
-        // internal const string CapturedStackKey = "FaultHub.CapturedStack";
+        internal const string CapturedStackKey = "FaultHub.CapturedStack";
         public static readonly AsyncLocal<IImmutableStack<LogicalStackFrame>> LogicalStackContext=NewContext<IImmutableStack<LogicalStackFrame>>();
         internal static readonly AsyncLocal<List<Func<Exception, FaultAction?>>> HandlersContext=NewContext<List<Func<Exception, FaultAction?>>>();
         static readonly AsyncLocal<Guid?> Ctx=NewContext<Guid?>();
@@ -230,6 +230,13 @@ namespace Xpand.Extensions.Reactive.Relay {
             }
         }
 
+        public static IImmutableStack<T> PushRange<T>(this IImmutableStack<T> stack, IEnumerable<T> items) {
+            var immutableStack = stack;
+            foreach (var item in items) {
+                immutableStack = immutableStack.Push(item);
+            }
+            return immutableStack;
+        }
         internal static object[] AddToContext(this object[] context, params object[] items) 
             => items.WhereNotDefault().Concat(context ?? Enumerable.Empty<object>()).ToArray();
         
@@ -287,7 +294,8 @@ namespace Xpand.Extensions.Reactive.Relay {
         }
 
         public static IImmutableStack<LogicalStackFrame> CapturedStack(this Exception exception) 
-            => LastKnownStack.Value;
+            => exception?.Data.Contains(CapturedStackKey) == true && exception.Data[CapturedStackKey] is IImmutableStack<LogicalStackFrame> stack 
+                ? (ImmutableStack<LogicalStackFrame>)stack : null;
         internal static IObservable<T> FaultHubFlowContext<T>(this IObservable<T> source,
             Func<IObservable<T>, IObservable<T>> retrySelector = null, params IAsyncLocal[] context)
             => source.FlowContext(retrySelector, RegisteredContexts.Concat(context).ToArray());

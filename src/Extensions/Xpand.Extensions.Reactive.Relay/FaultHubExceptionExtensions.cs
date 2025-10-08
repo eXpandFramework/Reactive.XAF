@@ -228,7 +228,7 @@ namespace Xpand.Extensions.Reactive.Relay {
             }
         }
         public static IImmutableStack<LogicalStackFrame> GetLogicalStack(this OperationNode node)
-            =>  node.Children.Select(child => child.GetLogicalStack()).FirstOrDefault(s => s is { IsEmpty: false }) ?? node.LogicalStack;
+            =>  node.LogicalStack;
 
         public static Exception GetRootCause(this OperationNode node)
             => node.RootCause ??
@@ -429,9 +429,7 @@ namespace Xpand.Extensions.Reactive.Relay {
             LogFast($"Merging child '{childToMerge.Name}' into parent '{node.Name}'.");
             var mergedTags = (node.Tags ?? []).Concat(childToMerge.Tags ?? []).Distinct().ToList();
             var mergedContext = node.ContextData.Concat(childToMerge.ContextData).Distinct().ToArray();
-            var mergedStack = (node.LogicalStack ?? Enumerable.Empty<LogicalStackFrame>())
-                .Concat(childToMerge.LogicalStack ?? Enumerable.Empty<LogicalStackFrame>())
-                .Distinct().ToList();
+            var mergedStack = childToMerge.LogicalStack ?? node.LogicalStack ?? Enumerable.Empty<LogicalStackFrame>();
             var mergedRootCause = node.RootCause ?? childToMerge.RootCause;
             var finalChildren = childToMerge.Children.Concat(allProcessedChildren.Where(c => c != childToMerge)).ToList();
             return new OperationNode(node.Name, mergedContext, finalChildren, mergedRootCause, mergedStack.ToImmutableStack(), mergedTags);
@@ -463,7 +461,10 @@ namespace Xpand.Extensions.Reactive.Relay {
                 .Select(ex => ex.CapturedStack())
                 .LastOrDefault(s => s != null && !s.IsEmpty);
 
-            var fullStack = nodeStack ?? parentStack ?? ImmutableStack<LogicalStackFrame>.Empty;
+            var combinedFrames = (nodeStack ?? Enumerable.Empty<LogicalStackFrame>())
+                .Concat(context.LogicalStackTrace ?? Enumerable.Empty<LogicalStackFrame>())
+                .Concat(parentStack ?? Enumerable.Empty<LogicalStackFrame>()) ;
+            var fullStack = combinedFrames.Reverse().ToImmutableStack();
             
             var children = new List<OperationNode>();
             LogFast($"Recursing on InnerContext: '{context.InnerContext?.BoundaryName ?? "NULL"}'");

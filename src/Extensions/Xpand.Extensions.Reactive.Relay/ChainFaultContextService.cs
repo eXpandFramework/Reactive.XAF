@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -13,20 +14,6 @@ using Xpand.Extensions.StringExtensions;
 namespace Xpand.Extensions.Reactive.Relay{
     public static class ChainFaultContextService {
         internal static readonly AsyncLocal<IImmutableStack<object>> ContextStack=NewContext<IImmutableStack<object>>();
-
-        public static IObservable<T> ChainFaultContext<T>(this IObservable<T> source, Func<IObservable<T>, IObservable<T>> retryStrategy, object[] context = null,
-            [CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0)
-            => source.ChainFaultContext(context ?? [], retryStrategy,memberName, filePath, lineNumber);
-        public static IObservable<T> ChainFaultContext<T>(this IObservable<T> source, Func<IObservable<T>, IObservable<T>> retryStrategy,(string memberName,string filePath,int lineNumber) caller, object[] context = null)
-            => source.ChainFaultContext(retryStrategy,context,caller.memberName,caller.filePath,caller.lineNumber);
-
-        public static IObservable<T> ChainFaultContext<T>(this IObservable<T> source, 
-            bool handleUpstreamRetries, object[] context = null,[CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0)
-            => !handleUpstreamRetries ? source.ChainFaultContext(context,null,memberName, filePath, lineNumber)
-                : source.ChainFaultContext(errors => errors.Take(1).IgnoreElements(), context, memberName, filePath, lineNumber);
-
-        public static IObservable<T> ChainFaultContext<T>(this IObservable<T> source,[CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0)
-            => source.ChainFaultContext([],null, memberName, filePath, lineNumber);
         
         public static IObservable<T> PushStackFrame<T>(this IObservable<T> source,object[] context,
             [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0 )
@@ -44,28 +31,43 @@ namespace Xpand.Extensions.Reactive.Relay{
                 return new LogicalStackFrame(method?.Name, frame.GetFileName(), frame.GetFileLineNumber(), method?.DeclaringType?.Namespace);
             }).ToList().ToImmutableStack();
         
-        public static IObservable<T> ChainFaultContext<T>(this IObservable<T> source, object[] context, Func<IObservable<T>, IObservable<T>> retryStrategy = null,
-            [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0,IReadOnlyList<string> tags = null)
+        public static IObservable<T> ChainFaultContext<T>(this IObservable<T> source, Func<IObservable<T>, IObservable<T>> retryStrategy, object[] context = null, [CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0, bool preserveStack = false)
+            => source.ChainFaultContext(context ?? [], retryStrategy,memberName, filePath, lineNumber, null, preserveStack);
+
+        public static IObservable<T> ChainFaultContext<T>(this IObservable<T> source, Func<IObservable<T>, IObservable<T>> retryStrategy,(string memberName,string filePath,int lineNumber) caller, object[] context = null, bool preserveStack = false) => source.ChainFaultContext(retryStrategy,context,caller.memberName,caller.filePath,caller.lineNumber, preserveStack);
+
+        public static IObservable<T> ChainFaultContext<T>(this IObservable<T> source, bool handleUpstreamRetries, object[] context = null,[CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0, bool preserveStack = false)
+            => !handleUpstreamRetries ? source.ChainFaultContext(context,null,memberName, filePath, lineNumber, null, preserveStack)
+                : source.ChainFaultContext(context,errors => errors.Take(1).IgnoreElements(), memberName, filePath, lineNumber, null, preserveStack);
+
+        public static IObservable<T> ChainFaultContext<T>(this IObservable<T> source,[CallerMemberName]string memberName="",[CallerFilePath]string filePath="",[CallerLineNumber]int lineNumber=0, bool preserveStack = false) => source.ChainFaultContext([],null, memberName, filePath, lineNumber, null, preserveStack);
+
+        public static IObservable<T> ChainFaultContext<T>(this IObservable<T> source, object[] context, Func<IObservable<T>, IObservable<T>> retryStrategy = null, [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0,IReadOnlyList<string> tags = null, bool preserveStack = false)
             => Observable.Defer(() => {
-                LogFast($"Entering Defer for boundary '{memberName}'.");
+                LogFast($"Entering Defer for boundary '{memberName}'. PreserveStack={preserveStack}");
                 var originalStack = FaultHub.LogicalStackContext.Value;
-                FaultHub.LogicalStackContext.Value = ImmutableStack<LogicalStackFrame>.Empty;
-                LogFast($"Cleared logical stack (was {originalStack?.Count() ?? 0} frames).");
+                if (!preserveStack) {
+                    FaultHub.LogicalStackContext.Value = ImmutableStack<LogicalStackFrame>.Empty;
+                    LogFast($"Cleared logical stack (was {originalStack?.Count() ?? 0} frames).");
+                }
+                else {
+                    LogFast($"Preserving logical stack ({originalStack?.Count() ?? 0} frames).");
+                }
                 var resilientSource = retryStrategy != null ? retryStrategy(source) : source;
                 return resilientSource.Catch((Exception e) => e.ProcessFaultContext<T>(context, memberName, filePath, lineNumber, tags))
                     .Finally(() => {
                         LogFast($"Finally block entered for boundary '{memberName}'.");
-                        FaultHub.LogicalStackContext.Value = originalStack;
-                        LogFast($"Restored logical stack to {originalStack?.Count() ?? 0} frames.");
+                        if (!preserveStack) {
+                            FaultHub.LogicalStackContext.Value = originalStack;
+                            LogFast($"Restored logical stack to {originalStack?.Count() ?? 0} frames.");
+                        }
                     })
                     .FaultHubFlowContext();
             });
 
-
-
         private static IObservable<T> ProcessFaultContext<T>(this Exception e,object[] context, string memberName, string filePath, int lineNumber, IReadOnlyList<string> tags){
-            var fullStack = FaultHub.LastKnownStack.Value ?? ImmutableStack<LogicalStackFrame>.Empty;
-            FaultHub.LastKnownStack.Value = null;
+            var fullStack = e.SelectMany().Select(ex => ex.CapturedStack()).FirstOrDefault(s => s is { IsEmpty: false }) 
+                            ?? ImmutableStack<LogicalStackFrame>.Empty;
             
             var stackTraceForLog = string.Join(" -> ", fullStack.Select(f => f.MemberName));
             LogFast($"Reassembled stack. Total: {fullStack.Count()}. Stack: [{stackTraceForLog}]");
@@ -74,9 +76,10 @@ namespace Xpand.Extensions.Reactive.Relay{
                 fullStack = fullStack.Push( new LogicalStackFrame(memberName.Remove(" "),filePath, lineNumber, context));
             }
             var faultContext = fullStack.NewFaultContext(context,tags,memberName, filePath);
-            return e.ProcessFault(faultContext, Observable.Throw<T>);        }
+            return e.ProcessFault(faultContext, Observable.Throw<T>);
+        }
 
-        private static IObservable<T> PushStackFrame<T>(this IObservable<T> source, LogicalStackFrame frame) 
+        internal static IObservable<T> PushStackFrame<T>(this IObservable<T> source, LogicalStackFrame frame) 
             => Observable.Create<T>(observer => {
                 if (FaultHub.LogicalStackContext.Value?.FirstOrDefault().Equals(frame) ?? false) {
                     LogFast($"Skipping duplicate frame: {frame.MemberName}");
@@ -91,20 +94,19 @@ namespace Xpand.Extensions.Reactive.Relay{
                     },
                     ex => {
                         using (new StackManager(frame)) {
-                            
-                            var currentStack = FaultHub.LogicalStackContext.Value;
-                            FaultHub.LastKnownStack.Value = currentStack;
-
-                            observer.OnError(ex);                        }                    },
+                            ex.Data[FaultHub.CapturedStackKey] = FaultHub.LogicalStackContext.Value;
+                            observer.OnError(ex);
+                        }
+                    },
                     () => {
                         using (new StackManager(frame)) {
                             observer.OnCompleted();
                         }
                     }
-                );
+                );;
             });
-        
-        private readonly struct StackManager : IDisposable {
+
+        internal readonly struct StackManager : IDisposable {
             private readonly IImmutableStack<LogicalStackFrame> _originalStack;
 
             public StackManager(LogicalStackFrame frame) {

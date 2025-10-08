@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reactive.Concurrency;
+using System.Reactive.Disposables;
+using System.Reactive.Linq;
 using System.Threading;
 using Xpand.Extensions.LinqExtensions;
 
@@ -28,8 +30,23 @@ namespace Xpand.Extensions.Reactive.Relay.Transaction{
 
 
         private static IObservable<T> PushFrameConditionally<T>(this IObservable<T> stepStream, string stepName, string filePath, int lineNumber) {
+            var frame = new LogicalStackFrame(stepName, filePath, lineNumber);
             var existingFrame = FaultHub.LogicalStackContext.Value?.FirstOrDefault();
-            return existingFrame == null || existingFrame.Value.MemberName != stepName ? stepStream.PushStackFrame( stepName,filePath,lineNumber) : stepStream;
+            if (existingFrame != null && existingFrame.Value.Equals(frame)) {
+                return stepStream;
+            }
+            return Observable.Create<T>(observer => {
+                var stackManager = new ChainFaultContextService.StackManager(frame);
+                var subscription = stepStream.Subscribe(
+                    observer.OnNext,
+                    ex => {
+                        ex.Data[FaultHub.CapturedStackKey] = FaultHub.LogicalStackContext.Value;
+                        observer.OnError(ex);
+                    },
+                    observer.OnCompleted
+                );
+                return new CompositeDisposable(subscription, stackManager);
+            });
         }
         
         public static string GetStepName(string expression, string explicitName = null, Delegate selector = null) {

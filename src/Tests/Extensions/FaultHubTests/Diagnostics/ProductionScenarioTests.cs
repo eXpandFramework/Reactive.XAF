@@ -15,7 +15,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics {
         [SetUp]
         public override void Setup() {
             base.Setup();
-            FastLogger.LogFastFilter(t => )
+            
         }
 
         [Test][Apartment(ApartmentState.STA)]

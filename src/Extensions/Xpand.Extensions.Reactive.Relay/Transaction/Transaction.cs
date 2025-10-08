@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Concurrency;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Xpand.Extensions.ExceptionExtensions;
 using Xpand.Extensions.ObjectExtensions;
@@ -48,7 +49,8 @@ namespace Xpand.Extensions.Reactive.Relay.Transaction {
             var logic = builder.TransactionLogic(failFast, collectAllResults, isNonCritical)
                 .Select(o => o.AsArray<TFinal>());
             return failFast ? logic.RunFailFast(builder)
-                : logic.ChainFaultContext( builder.Context, null, builder.TransactionName, builder.CallerMemberPath, builder.CallerMemberLine, builder.UpdateRunTags(collectAllResults));
+                : logic.ChainFaultContext( builder.Context, null, builder.TransactionName, builder.CallerMemberPath, builder.CallerMemberLine, builder.UpdateRunTags(collectAllResults),
+                    preserveStack: TransactionNestingLevel.Value > 1);
         }
         
         private static FaultHubException CreateAbortedException<TFinal>(FaultHubException ex, TransactionBuilder<TFinal> ib) {
@@ -67,35 +69,42 @@ namespace Xpand.Extensions.Reactive.Relay.Transaction {
                 .Select(o => o.AsArray<TFinal>());
 
             return failFast ? logic.RunFailFast(builder)
-                : logic.ChainFaultContext( builder.Context, null, builder.TransactionName, builder.CallerMemberPath, builder.CallerMemberLine, builder.UpdateRunTags(false));
+                : logic.ChainFaultContext( builder.Context, null, builder.TransactionName, builder.CallerMemberPath, builder.CallerMemberLine, builder.UpdateRunTags(false),
+                    preserveStack: TransactionNestingLevel.Value > 1);
         }
         
-        private static IObservable<object> TransactionLogic<TFinal>(this IObservable<(string Name, IObservable<object> Source)> source, TransactionBuilder<TFinal> builder, bool failFast){
-            return failFast
-                ? source.ConcurrentFailFast(builder.TransactionName, 0, builder.Context, builder.CallerMemberPath, builder.CallerMemberLine).ToList().Select(list => (object)list)
+        private static IObservable<object> TransactionLogic<TFinal>(this IObservable<(string Name, IObservable<object> Source)> source, TransactionBuilder<TFinal> builder, bool failFast) 
+            => failFast ? source.ConcurrentFailFast(builder.TransactionName, 0, builder.Context, builder.CallerMemberPath, builder.CallerMemberLine).ToList().Select(list => (object)list)
                 : source.ConcurrentRunToEnd(builder.TransactionName, 0, builder.Context, builder.CallerMemberPath, builder.CallerMemberLine)
                     .SelectMany(resultTuple => {
                         var resultStream = Observable.Return((object)resultTuple.Results);
                         return resultTuple.Fault == null ? resultStream : resultStream.Concat(Observable.Throw<object>(resultTuple.Fault));
                     });
-        }
-        
-        
-        private static IObservable<object> TransactionLogic<TFinal>(this TransactionBuilder<TFinal> builder,bool failFast, bool collectAllResults, Func<Exception, bool> isNonCritical = null){
+
+        private static IObservable<object> TransactionLogic<TFinal>(this TransactionBuilder<TFinal> builder,bool failFast, bool collectAllResults, Func<Exception, bool> isNonCritical = null) {
+            return Observable.Create<object>(observer => {
+                var frame = new LogicalStackFrame(builder.TransactionName, builder.CallerMemberPath, builder.CallerMemberLine);
+                using (new ChainFaultContextService.StackManager(frame)) {
+                    TransactionNestingLevel.Value++;
+                    var allSteps = new List<StepDefinition>();
+                    if (builder.InitialStep != null) {
+                        allSteps.Add(new StepDefinition { Selector = _ => builder.InitialStep, Name = builder.InitialStepName, FilePath = builder.CallerMemberPath, LineNumber = builder.CallerMemberLine });
+                    }
+                    else if (builder.Mode == TransactionMode.Sequential && builder.BatchedSources != null) {
+                        allSteps.AddRange(builder.BatchedSources.Select(bs => new StepDefinition { Selector = _ => bs.Source, Name = bs.Name, FilePath = builder.CallerMemberPath, LineNumber = builder.CallerMemberLine }));
+                    }
+                    allSteps.AddRange(builder.SubsequentSteps);
             
-            TransactionNestingLevel.Value++;
-            var allSteps = new List<StepDefinition>();
-            if (builder.InitialStep != null) {
-                allSteps.Add(new StepDefinition { Selector = _ => builder.InitialStep, Name = builder.InitialStepName, FilePath = builder.CallerMemberPath, LineNumber = builder.CallerMemberLine });
-            }
-            else if (builder.Mode == TransactionMode.Sequential && builder.BatchedSources != null) {
-                allSteps.AddRange(builder.BatchedSources.Select(bs => new StepDefinition { Selector = _ => bs.Source, Name = bs.Name, FilePath = builder.CallerMemberPath, LineNumber = builder.CallerMemberLine }));
-            }
-            allSteps.AddRange(builder.SubsequentSteps);
-            return (failFast ? allSteps.FailFast(builder, isNonCritical) : builder.RunToEnd(allSteps,  collectAllResults))
-                .PushStackFrame(builder.TransactionName, builder.CallerMemberPath, builder.CallerMemberLine)
-                .Finally(() => TransactionNestingLevel.Value--);
+                    var subscription = (failFast ? allSteps.FailFast(builder, isNonCritical) : builder.RunToEnd(allSteps,  collectAllResults))
+                        .Finally(() => TransactionNestingLevel.Value--)
+                        .Subscribe(observer);
+
+                    return subscription;
+                }
+            });
+            
         }
+
         private static IObservable<(List<object> Results, FaultHubException Fault)> ConcurrentRunToEnd(this IObservable<(string Name, IObservable<object> Source)> source, string transactionName, int maxConcurrency, object[] context,string filePath,int lineNumber) 
             => source.Select(op => op.Source.PushStackFrame( op.Name, filePath, lineNumber).ChainFaultContext(context:context.AddToContext($"{transactionName} - {op.Name}"),null, op.Name).Materialize())
                 .Merge(maxConcurrency > 0 ? maxConcurrency : int.MaxValue).BufferUntilCompleted()
@@ -118,39 +127,55 @@ namespace Xpand.Extensions.Reactive.Relay.Transaction {
         
         private static IObservable<(object finalStepResult, List<Exception> allFailures, List<object> allResults)> ExecuteStepChain<TFinal>(this List<StepDefinition> allSteps, TransactionBuilder<TFinal> builder, bool failFast, Func<Exception, bool> isNonCritical = null)  
             => allSteps.Aggregate(Observable.Return((results: (object)new List<object>(), failures: new List<Exception>(), allResults: new List<object>())), 
-                    (accObservable, step) => accObservable.SelectMany(acc => {
-                        if (failFast && acc.failures.HasCriticalFailure(isNonCritical)) {
-                            LogFast($"{builder.TransactionName}: SKIPPING step '{step.Name}' due to prior failure in FailFast mode.");
-                            return Observable.Return(acc);
-                        }
-                        var accFailures = acc.failures.Any() ? string.Join(", ", acc.failures.Select(f => f.GetType().Name)) : "empty";
-                        LogFast($"{builder.TransactionName}: ENTERING step '{step.Name}'. Accumulator has {acc.failures.Count} failure(s): [{accFailures}]");
-                        var resultsCount = acc.results.IsEnumerable() ? ((IEnumerable)acc.results).Cast<object>().Count() : 1;
-                        LogFast($"For Step '{step.Name}': Results Count = {resultsCount}, Failures Count = {acc.failures.Count} ({accFailures})");
-                        var lastFailure = acc.failures.LastOrDefault();
-                        if (lastFailure != null && lastFailure.Data.Contains(SalvagedDataKey)) {
-                            var salvaged = lastFailure.Data[SalvagedDataKey];
-                            var salvagedCount = salvaged.IsEnumerable() ? ((IEnumerable)salvaged)!.Cast<object>().Count() : 1;
-                            LogFast($"Last failure ('{lastFailure.GetType().Name}') contains salvaged data. Type: {salvaged?.GetType().Name}, Count: {salvagedCount}");
-                        }
-                        return step.ExecuteStep(acc, failFast)
-                            .PushFrameConditionally(!string.IsNullOrEmpty(step.Name) ? step.Name : $"Part {allSteps.IndexOf(step) + 1}",step.FilePath,step.LineNumber)
-                            .Materialize().BufferUntilCompleted()
-                            .Select(notifications => {
-                                LogFast($"Step '{step.Name}' completed. Received {notifications.Length} notifications ({notifications.Count(n => n.Kind == NotificationKind.OnNext)} OnNext, {notifications.Count(n => n.Kind == NotificationKind.OnError)} OnError).");
-                                var initialFailureCount = acc.failures.Count;
-                                var newAcc = allSteps.CollectStepErrors( builder, notifications, step, acc, isNonCritical);
+                    (accObservable, step) => {
+                        var faultHubFlowContext = accObservable.SelectMany(acc => {
+                            if (failFast && acc.failures.HasCriticalFailure(isNonCritical)) {
+                                LogFast($"{builder.TransactionName}: SKIPPING step '{step.Name}' due to prior failure in FailFast mode.");
+                                return Observable.Return(acc);
+                            }
 
-                                if (newAcc.failures.Count > initialFailureCount) {
-                                    LogFast($"Step '{step.Name}' failed. Clearing logical stack context for isolation.");
-                                    FaultHub.LogicalStackContext.Value = null;
-                                }
-                        
-                                var suppressedFailures = Current?.Failures.Where(f => !newAcc.failures.Contains(f)).ToList();
-                                return !(suppressedFailures?.Any() ?? false) ? newAcc
-                                    : newAcc with { failures = newAcc.failures.Concat(suppressedFailures).ToList() };
-                            });                                        
-                    }))
+                            var accFailures = acc.failures.Any()
+                                ? string.Join(", ", acc.failures.Select(f => f.GetType().Name))
+                                : "empty";
+                            LogFast(
+                                $"{builder.TransactionName}: ENTERING step '{step.Name}'. Accumulator has {acc.failures.Count} failure(s): [{accFailures}]");
+                            var resultsCount = acc.results.IsEnumerable()
+                                ? ((IEnumerable)acc.results).Cast<object>().Count()
+                                : 1;
+                            LogFast(
+                                $"For Step '{step.Name}': Results Count = {resultsCount}, Failures Count = {acc.failures.Count} ({accFailures})");
+                            var lastFailure = acc.failures.LastOrDefault();
+                            if (lastFailure != null && lastFailure.Data.Contains(SalvagedDataKey)) {
+                                var salvaged = lastFailure.Data[SalvagedDataKey];
+                                var salvagedCount = salvaged.IsEnumerable()
+                                    ? ((IEnumerable)salvaged)!.Cast<object>().Count()
+                                    : 1;
+                                LogFast(
+                                    $"Last failure ('{lastFailure.GetType().Name}') contains salvaged data. Type: {salvaged?.GetType().Name}, Count: {salvagedCount}");
+                            }
+
+                            return step.ExecuteStep(acc, failFast)
+                                .PushFrameConditionally(
+                                    !string.IsNullOrEmpty(step.Name) ? step.Name : $"Part {allSteps.IndexOf(step) + 1}",
+                                    step.FilePath, step.LineNumber)
+                                .Materialize().BufferUntilCompleted()
+                                .Select(notifications => {
+                                    LogFast(
+                                        $"Step '{step.Name}' completed. Received {notifications.Length} notifications ({notifications.Count(n => n.Kind == NotificationKind.OnNext)} OnNext, {notifications.Count(n => n.Kind == NotificationKind.OnError)} OnError).");
+                                    var newAcc = allSteps.CollectStepErrors(builder, notifications, step, acc,
+                                        isNonCritical);
+
+                                    var suppressedFailures = Current?.Failures.Where(f => !newAcc.failures.Contains(f))
+                                        .ToList();
+                                    return !(suppressedFailures?.Any() ?? false)
+                                        ? newAcc
+                                        : newAcc with {
+                                            failures = newAcc.failures.Concat(suppressedFailures).ToList()
+                                        };
+                                });
+                        }).FaultHubFlowContext();
+                        return faultHubFlowContext;
+                    })
                 .Select(acc => (acc.results, acc.failures, acc.allResults));
 
         private static bool HasCriticalFailure(this  List<Exception> failures,Func<Exception, bool> isNonCritical){
