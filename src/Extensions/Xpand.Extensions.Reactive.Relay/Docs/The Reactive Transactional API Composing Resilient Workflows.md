@@ -472,6 +472,78 @@ result.Error.ShouldBeOfType<TransactionAbortedException>();
 
 This pattern ensures that the responsibility for defining failure policy remains cleanly at the transaction step level, while `AsStep` remains focused on its single responsibility of correlating failures.
 
+#### 3.8. Defining Atomic Steps with the `IEnumerable` Overload
+
+Beyond correlating a single observable, `AsStep` provides a powerful overload for `IEnumerable<IObservable<T>>` that allows you to group multiple sub-operations into a single, atomic transactional step. This is essential for scenarios where a logical step consists of several parallel or sequential tasks that must be treated as a single unit of work.
+
+This overload enables a "deferred failure" pattern. It executes all observables in the collection, waits for them all to complete, and only then determines the outcome of the step.
+
+**Key Behaviors:**
+
+1.  **Atomic Execution**: All observables in the enumerable are executed. The failure of one does not prevent its siblings from running.
+2.  **Deferred Failure Reporting**: The `AsStep` operator waits until all sub-operations have terminated.
+3.  **Aggregate Reporting**: If one or more sub-operations failed, `AsStep` aggregates all of their exceptions into a single `AggregateException`. It then wraps this in a single `FaultHubException` that represents the failure of the entire step.
+4.  **Success Aggregation**: If all sub-operations succeed, their emissions are collected and passed on as the successful result of the step.
+
+This pattern is invaluable when you need to ensure that certain essential, parallel tasks (like logging or cleanup) are attempted even if the primary task within the same step fails.
+
+**Example: Ensuring Sibling Operations Complete Before Failing**
+
+Consider a service that performs several actions as part of a single logical step. One action is flaky, but another is essential and must always be attempted.
+
+```csharp
+public class TestableExternalService {
+    public bool EssentialStepWasExecuted { get; private set; }
+
+    // This method defines a single logical step composed of multiple sub-operations.
+    public IObservable<Unit> WhenVisitPage(Uri uri) {
+        // The sub-operations are returned as an enumerable of observables.
+        var subOperations = new[] {
+            MockParsePage().AsStep(),
+            FlakyOperationThatCanFail().AsStep(), // This will fail.
+            AnotherEssentialStep().AsStep()      // This must still run.
+        };
+        
+        // AsStep() is applied to the entire collection, making it one atomic step.
+        return subOperations.AsStep("ExecutingAllSteps");
+    }
+
+    // A sub-operation that will fail.
+    internal IObservable<Unit> FlakyOperationThatCanFail() 
+        => Observable.Throw<Unit>(new InvalidOperationException("This is a deferred failure."));
+
+    // An essential sub-operation that must be attempted.
+    public IObservable<Unit> AnotherEssentialStep() {
+        return Observable.FromAsync(() => {
+            EssentialStepWasExecuted = true;
+            return Task.CompletedTask;
+        });
+    }
+    
+    private IObservable<Unit> MockParsePage() => Observable.Return(Unit.Default);
+}
+
+// Transaction composition
+var service = new TestableExternalService();
+await service.WhenVisitPage(new Uri("http://example.com"))
+    .BeginWorkflow()
+    .RunFailFast()
+    .PublishFaults()
+    .Capture();
+
+// Assertion
+service.EssentialStepWasExecuted.ShouldBe(true); // Proves the sibling operation ran.
+
+var finalException = BusEvents.Single().ShouldBeOfType<TransactionAbortedException>();
+var aggregateException = finalException.InnerException.ShouldBeOfType<FaultHubException>()
+    .InnerException.ShouldBeOfType<AggregateException>();
+
+// The final report contains the single failure from the flaky operation.
+var deferredException = aggregateException.InnerExceptions.Single().ShouldBeOfType<FaultHubException>();
+deferredException.Context.Name.ShouldBe(nameof(TestableExternalService.FlakyOperationThatCanFail));
+```
+
+In this example, even though `FlakyOperationThatCanFail` throws an exception, the `AsStep` overload ensures that `AnotherEssentialStep` is also executed. Only after all three sub-operations are complete does `AsStep` fail the entire "ExecutingAllSteps" step, providing an aggregate report of what went wrong. This allows for robust, multi-part steps within a larger transaction.
 ##### Behavior Outside a Transaction
 
 The `AsStep` operator is designed for use within a transactional context. If it is called when no transaction is active, it becomes inert for safety. It will catch any exception, but then **re-throw the original, unwrapped exception as-is**. The `onFault` selector is ignored in this scenario.
