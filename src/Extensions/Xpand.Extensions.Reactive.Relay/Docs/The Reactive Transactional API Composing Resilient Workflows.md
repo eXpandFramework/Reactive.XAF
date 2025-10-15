@@ -141,32 +141,38 @@ result.Error.ShouldBeOfType<TransactionAbortedException>();
 **Description**:
 `RunToEnd` is designed for batch processing or workflows where the failure of one part should not prevent others from running. It guarantees that every step in the transaction is attempted.
 
-* If a step fails, its error is collected, and an empty result is passed to the next step.
+*   If a step fails, its error is collected. The `dataSalvageStrategy` determines what data (either partial results or an empty collection) is passed to the next step.
 
-* After all steps have been executed, if any errors were collected, `RunToEnd` produces a single `OnError` notification. This notification contains a `FaultHubException` that wraps an `AggregateException` holding the individual exceptions from all failing steps.
+*   After all steps have been executed, if any errors were collected, the transaction emits its final notifications. First, if the `DataSalvageStrategy` allows for it, a single `OnNext` notification is emitted containing an array of all salvaged results from all successful and partially successful steps. Immediately following this, the stream terminates with a single `OnError` notification. This notification contains a `FaultHubException` that wraps an `AggregateException` holding the individual exceptions from all failing steps.
 
-* If all steps succeed, it completes and returns an array of results from the *final* step only.
+*   If all steps succeed, it completes and returns an array of results from the *final* step only.
 
 **Data Salvage Configuration**:
 `RunToEnd` accepts an optional `dataSalvageStrategy` parameter that sets the **global default** for how failing steps within the transaction handle partial results.
 
-*   **`DataSalvageStrategy.EmitPartialResults` (Default)**: If a step fails, any results it successfully emitted before the error are passed to the next step.
-*   **`DataSalvageStrategy.EmitEmpty`**: If a step fails, it emits nothing. The next step receives an empty array.
+*   **`DataSalvageStrategy.EmitPartialResults` (Default)**: If a step fails, any results it successfully emitted before the error are passed to the next step. All such salvaged data from across the entire transaction is collected and emitted in a final `OnNext` notification before the stream terminates with an error.
+*   **`DataSalvageStrategy.EmitEmpty`**: If a step fails, it emits nothing. The next step receives an empty array, and no data is emitted in the final `OnNext` notification.
 
 **Example**:
 
 ```csharp
 var transaction = "http://example.com".Observe()
     .BeginWorkflow("RunToCompletion-Tx")
-    .Then(_ => new InvalidOperationException("Homepage lookup failed").Throw<HomePage>())
-    .Then(emptyHomePageArray => Step3ExtractUrlsEmpty(emptyHomePageArray)) // This step will run
+    .Then(_ => Observable.Return("Partial Data").Concat(new InvalidOperationException("Homepage lookup failed").Throw<string>()))
+    .Then(partialDataArray => Step3ProcessPartials(partialDataArray)) // This step will run with "Partial Data"
     .Then(_ => new InvalidOperationException("URL processing failed").Throw<Unit>())
-    .RunToEnd(dataSalvageStrategy: DataSalvageStrategy.EmitEmpty);
+    .RunToEnd(dataSalvageStrategy: DataSalvageStrategy.EmitPartialResults);
 
+var result = await transaction.Capture();
 
-// Subscribing will result in an OnError notification with an AggregateException
-// containing both "Homepage lookup failed" and "URL processing failed" exceptions.
+// The subscriber receives the salvaged data before the error.
+result.Items.ShouldHaveSingleItem();
+result.Items.Single().ShouldBe(new[] { "Partial Data" });
 
+// The transaction then terminates with an aggregate exception.
+result.Error.ShouldBeOfType<FaultHubException>();
+result.Error.InnerException.ShouldBeOfType<AggregateException>()
+    .InnerExceptions.Count.ShouldBe(2);
 ```
 
 ### 5. `ThenConcurrent`
@@ -544,6 +550,7 @@ deferredException.Context.Name.ShouldBe(nameof(TestableExternalService.FlakyOper
 ```
 
 In this example, even though `FlakyOperationThatCanFail` throws an exception, the `AsStep` overload ensures that `AnotherEssentialStep` is also executed. Only after all three sub-operations are complete does `AsStep` fail the entire "ExecutingAllSteps" step, providing an aggregate report of what went wrong. This allows for robust, multi-part steps within a larger transaction.
+
 ##### Behavior Outside a Transaction
 
 The `AsStep` operator is designed for use within a transactional context. If it is called when no transaction is active, it becomes inert for safety. It will catch any exception, but then **re-throw the original, unwrapped exception as-is**. The `onFault` selector is ignored in this scenario.
