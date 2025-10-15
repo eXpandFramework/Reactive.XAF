@@ -31,7 +31,7 @@ namespace Xpand.Extensions.Tests {
 
         [Test]
         public void Filters_By_Member_Name() {
-            using (Filter(p => p.method == nameof(MethodA))) {
+            using (LogFastFilter(p => p.method == nameof(MethodA))) {
                 MethodA();
                 MethodB();
             }
@@ -42,7 +42,7 @@ namespace Xpand.Extensions.Tests {
 
         [Test]
         public void Filters_By_File_Path() {
-            using (Filter(p => 
+            using (LogFastFilter(p => 
                 string.Equals(Path.GetFileNameWithoutExtension(p.path), "FastLoggerFilteringTests", StringComparison.OrdinalIgnoreCase))) {
                 MethodA(); 
             }
@@ -53,8 +53,8 @@ namespace Xpand.Extensions.Tests {
 
         [Test]
         public void Multiple_Filters_In_Same_Scope_Are_Composed_With_AND() {
-            using (Filter(p => p.method.StartsWith("Method")))
-            using (Filter(p => p.method.EndsWith("B"))) {
+            using (LogFastFilter(p => p.method.StartsWith("Method")))
+            using (LogFastFilter(p => p.method.EndsWith("B"))) {
                 MethodA();
                 MethodB();
                 MethodC();
@@ -66,11 +66,11 @@ namespace Xpand.Extensions.Tests {
 
         [Test]
         public void Nested_Filters_Are_Applied_And_Restored_Correctly() {
-            using (Filter(p => p.method == nameof(MethodA) || p.method == nameof(MethodB))) { 
+            using (LogFastFilter(p => p.method == nameof(MethodA) || p.method == nameof(MethodB))) { 
                 MethodA();
                 MethodB();
 
-                using (Filter(p => p.method == nameof(MethodB))) {
+                using (LogFastFilter(p => p.method == nameof(MethodB))) {
                     MethodA();
                     MethodB();
                 }

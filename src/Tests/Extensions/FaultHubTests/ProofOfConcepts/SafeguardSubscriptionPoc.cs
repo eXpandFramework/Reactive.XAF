@@ -77,7 +77,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.ProofOfConcepts {
             => source.Materialize()
                 .Select(notification => {
                     if (notification.Kind != NotificationKind.OnError) return notification;
-                    var faultContext = FaultHub.LogicalStackContext.Value.NewFaultContext(context,null,memberName, filePath, lineNumber);
+                    var faultContext = FaultHub.LogicalStackContext.Value.NewFaultContext(context,null,memberName, filePath);
                     notification.Exception.ExceptionToPublish(faultContext).Publish();
                     return Notification.CreateOnCompleted<T>();
                 })

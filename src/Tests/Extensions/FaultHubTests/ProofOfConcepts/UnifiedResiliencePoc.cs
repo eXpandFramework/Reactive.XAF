@@ -61,7 +61,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.ProofOfConcepts {
                 .PushStackFrame(memberName, filePath, lineNumber)
                 .Catch((Exception ex) => {
                     ex.ExceptionToPublish(FaultHub.LogicalStackContext.Value.NewFaultContext(context,null, memberName,
-                        filePath, lineNumber)).Publish();
+                        filePath)).Publish();
                     return Observable.Empty<T>();
                 });
         }

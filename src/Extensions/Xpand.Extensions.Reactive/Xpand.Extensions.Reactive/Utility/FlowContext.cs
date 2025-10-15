@@ -39,7 +39,7 @@ namespace Xpand.Extensions.Reactive.Utility {
 
         private static void FlowContext(this IAsyncLocal[] context,Action observerAction, object[] capturedValues,IDictionary errorData=null){
             var originalValues = context.Select(l => l.Value).ToArray();
-            var hasFlowContextData = errorData?.Contains(nameof(FlowContext))??false;
+            var hasFlowContextData = errorData?.Contains(nameof(FlowContext)) != null && errorData.Contains(nameof(FlowContext));
             try {
                 capturedValues=(object[])(hasFlowContextData?errorData[nameof(FlowContext)]:capturedValues);
                 for (int i = 0; i < context.Length; i++) {

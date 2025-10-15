@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Disposables;
@@ -16,10 +18,12 @@ using Xpand.Extensions.Reactive.Utility;
 namespace Xpand.Extensions.Reactive.Relay {
     public static class FaultHub {
         internal const string CapturedStackKey = "FaultHub.CapturedStack";
-        public static readonly AsyncLocal<IReadOnlyList<LogicalStackFrame>> LogicalStackContext=NewContext<IReadOnlyList<LogicalStackFrame>>();
+        internal static readonly AsyncLocal<bool> PreserveLogicalStack = NewContext<bool>();
+        internal static readonly AsyncLocal<bool> IsChainingActive = NewContext<bool>();
+        public static readonly AsyncLocal<ImmutableList<LogicalStackFrame>> LogicalStackContext=NewContext<ImmutableList<LogicalStackFrame>>();
         internal static readonly AsyncLocal<List<Func<Exception, FaultAction?>>> HandlersContext=NewContext<List<Func<Exception, FaultAction?>>>();
         static readonly AsyncLocal<Guid?> Ctx=NewContext<Guid?>();
-        public static readonly AsyncLocal<FaultSnapshot> CurrentFaultSnapshot=NewContext<FaultSnapshot>();
+        
         public static readonly MemoryCache Seen = new(new MemoryCacheOptions { SizeLimit = 10000 });
         static readonly ISubject<FaultHubException> BusSubject = Subject.Synchronize(new Subject<FaultHubException>());
         public static readonly IObservable<FaultHubException> Bus = BusSubject.AsObservable();
@@ -141,7 +145,12 @@ namespace Xpand.Extensions.Reactive.Relay {
         public static IObservable<T> PublishFaults<T>(this IObservable<T> source) 
             => Enabled ? source.Catch<T, Exception>(ex => {
                     LogFast($"Caught exception of type: {ex.GetType().Name}");
-                    var faultToPublish = ex as FaultHubException ?? ex.ExceptionToPublish();
+                    var exceptionToProcess = ex;
+                    if (ex is ExceptionWithLogicalContext contextEx) {
+                        LogFast($"Unwrapping ExceptionWithLogicalContext in PublishFaults.");
+                        exceptionToProcess = contextEx.OriginalException;
+                    }
+                    var faultToPublish = exceptionToProcess as FaultHubException ?? exceptionToProcess.ExceptionToPublish();
                     LogFast($"Fault to be published is of type: {faultToPublish.GetType().Name}");
                     var published = faultToPublish.Publish();
                     LogFast($"Call to internal Publish() method returned: {published}");
@@ -233,29 +242,45 @@ namespace Xpand.Extensions.Reactive.Relay {
             return source.RegisterHandler(ex => predicate(ex) ? FaultAction.Rethrow : null);
         }
 
-        public static FaultHubException ExceptionToPublish(this Exception exception, object[] context, IReadOnlyList<string> tags, string memberName){
-            var stack = exception.CapturedStack();
-            var capturedStack = stack ?? LogicalStackContext.Value;
-            var contextForStep = capturedStack.NewFaultContext( context, tags: tags, memberName: memberName);
-            if (exception is TransactionAbortedException abortedException) {
-                contextForStep = contextForStep with { BoundaryName = abortedException.Context.BoundaryName };
-            }
-            LogFast($"Creating context for step '{memberName}'. Tags are: [{string.Join(", ", contextForStep.Tags)}]");
-            return exception.ExceptionToPublish(contextForStep);
-        }
 
         public static FaultHubException ExceptionToPublish(this Exception e, AmbientFaultContext contextToUse=null) {
             LogFast($"Entered. Exception Type: {e.GetType().Name}. Context to use: '{contextToUse?.BoundaryName ?? "null"}'");
             if (contextToUse == null) {
+                if (e is ExceptionWithLogicalContext contextEx) {
+                    LogFast($"Path: ExceptionToPublish(null) received a wrapped exception. Using its context.");
+                    var newContext = new AmbientFaultContext { LogicalStackTrace = contextEx.ContextPath };
+                    // Recurse with the unwrapped exception and the newly created context.
+                    return contextEx.OriginalException.ExceptionToPublish(newContext);
+                }
                 LogFast($"contextToUse is null, returning original exception.");
                 var existingFault = e.SelectMany().OfType<FaultHubException>().FirstOrDefault();
                 if (existingFault != null) return existingFault;
                 return e as FaultHubException ?? new FaultHubException("An exception occurred in a traced fault context.", e, new System.Diagnostics.StackTrace(true).LogicalStackFrames().NewFaultContext([]));
             }
             if (e is not FaultHubException faultHubException) {
-                var message = e is AggregateException ? $"{contextToUse.BoundaryName} completed with errors" : e.Message;
+                var originalException = e;
+                if (e is ExceptionWithLogicalContext contextEx) {
+                    originalException = contextEx.OriginalException;
+                    LogFast($"Unwrapped internal ExceptionWithLogicalContext. Original is '{originalException.GetType().Name}'.");
+                    foreach (DictionaryEntry entry in contextEx.Data) {
+                        if (!originalException.Data.Contains(entry.Key)) {
+                            originalException.Data[entry.Key] = entry.Value;
+                        }
+                    }
+                    if (originalException is FaultHubException innerFhEx) {
+                        LogFast($"Path: Found nested FaultHubException inside wrapper. Chaining context.");
+                        var chainedContext = contextToUse with { InnerContext = innerFhEx.Context };
+                        if (innerFhEx.PreserveType) {
+                            LogFast($"Path: PreserveType is true for nested {innerFhEx.GetType().Name}. Re-creating instance.");
+                            return (FaultHubException)Activator.CreateInstance(innerFhEx.GetType(),
+                                innerFhEx.Message, innerFhEx, chainedContext);
+                        }
+                        return new FaultHubException(innerFhEx.Message, innerFhEx, chainedContext);
+                    }
+                }
+                var message = originalException is AggregateException ? $"{contextToUse.BoundaryName} completed with errors" : originalException.Message;
                 LogFast($"Path: Raw exception. Wrapping in new FaultHubException.");
-                return new FaultHubException(message, e, contextToUse);
+                return new FaultHubException(message, originalException, contextToUse);
             }
             LogFast($"Path: Existing FaultHubException. Chaining context.");
             var newChainedContext = contextToUse with{ InnerContext = faultHubException.Context };

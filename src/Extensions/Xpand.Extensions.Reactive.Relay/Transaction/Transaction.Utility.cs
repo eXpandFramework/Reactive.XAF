@@ -27,9 +27,9 @@ namespace Xpand.Extensions.Reactive.Relay.Transaction{
             => ib.Tags.Contains(StepNodeTag) ? ib.Tags.ToList() : ib.Tags.Concat([collectAllResults ? nameof(RunAndCollect) : nameof(RunToEnd)]).ToList();
 
 
-        private static IObservable<T> PushFrameConditionally<T>(this IObservable<T> stepStream, string stepName, string filePath, int lineNumber) {
+        private static IObservable<T> PushFrameConditionally<T>(this IObservable<T> stepStream, string stepName, string filePath, int lineNumber, bool preserveContext = false) {
             var existingFrame = FaultHub.LogicalStackContext.Value?.FirstOrDefault();
-            return existingFrame == null || existingFrame.Value.MemberName != stepName ? stepStream.PushStackFrame( stepName,filePath,lineNumber) : stepStream;
+            return existingFrame == null || existingFrame.Value.MemberName != stepName ? stepStream.PushStackFrame( new LogicalStackFrame(stepName,filePath,lineNumber),preserveContext) : stepStream;
         }
         
         public static string GetStepName(string expression, string explicitName = null, Delegate selector = null) {

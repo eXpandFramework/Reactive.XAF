@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
-using Fasterflect;
 using HarmonyLib;
 
 namespace Xpand.Extensions.LinqExtensions{
@@ -14,6 +13,8 @@ namespace Xpand.Extensions.LinqExtensions{
 
         public static IEnumerable<T> To<TResult,T>(this IEnumerable<TResult> source) 
             => source.Select(_ => default(T)).WhereNotDefault();
+        
+        public static ImmutableStack<T> ToImmutableStack<T>(this IEnumerable<T> source) => ImmutableStack.Create(source.ToArray());
         
     }
 }

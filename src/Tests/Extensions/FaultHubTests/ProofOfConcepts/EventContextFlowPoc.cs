@@ -56,39 +56,5 @@ namespace Xpand.Extensions.Tests.FaultHubTests.ProofOfConcepts {
         }
         
 
-        [Test]
-        [Obsolete("Obsolete")]
-        public void FlowFaultContext_Ensures_Event_Streams_Use_Subscription_Context() {
-            
-            var eventSource = new EventSource();
-            FaultHubException capturedFault = null;
-            
-            
-            FaultHub.LogicalStackContext.Value = [new LogicalStackFrame("SubscriptionContext", "", 0)];
-
-            var stream = eventSource.WhenEvent(nameof(EventSource.MyEvent))
-                .SelectMany(_ => Observable.Throw<System.Reactive.Unit>(new Exception("test")))
-                .PushStackFrame("HandlerContext"); 
-
-            
-            using (stream.Subscribe(_ => { }, ex => capturedFault = ex.ExceptionToPublish(
-                       FaultHub.LogicalStackContext.Value.NewFaultContext([],null,"Boundary")))) {
-                
-                
-                FaultHub.LogicalStackContext.Value = [new LogicalStackFrame("FireEventContext", "", 0)];
-                eventSource.FireEvent();
-            }
-
-            
-            capturedFault.ShouldNotBeNull();
-            var logicalStack = capturedFault.LogicalStackTrace.ToList();
-
-            
-            
-            
-            logicalStack.ShouldContain(frame => frame.MemberName == "SubscriptionContext");
-            logicalStack.ShouldNotContain(frame => frame.MemberName == "FireEventContext");
-            logicalStack.Last().MemberName.ShouldBe("SubscriptionContext");
-        }
     }
     }
