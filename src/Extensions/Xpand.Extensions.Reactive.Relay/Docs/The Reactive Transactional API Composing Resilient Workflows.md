@@ -10,7 +10,33 @@ This document provides a formal reference for the eXpandFramework's transactiona
 **Description**:
 The `BeginWorkflow` operator establishes a resilience boundary and prepares a stream for a sequence of transactional steps. It has several overloads to handle different scenarios:
 * **From a single `IObservable<T>`**: The source observable is buffered until it completes, and its results are collected into an array to be passed to the first `Then` step.
-* **From an `IEnumerable<IObservable<T>>`**: The enumerable of observables is treated as a sequence of operations to be executed either sequentially or concurrently, based on the specified `TransactionMode`.
+*   **From an `IEnumerable<IObservable<T>>`**: When starting a workflow from an `IEnumerable<IObservable<T>>`, `BeginWorkflow` offers two distinct modes of operation, determined by the specific overload used:
+
+    **1. As a Batch Operation (using the `TransactionMode` parameter)**
+    This overload treats the entire enumerable as a **single, multi-part logical step**. All observables in the collection are executed either sequentially or concurrently, based on the specified `TransactionMode`. The results from all observables are aggregated. This mode is typically used with `RunAndCollect` to gather all results or with `RunToEnd` to process a batch where individual failures are tolerable.
+
+    ```csharp
+    // All operations are part of a single step, executed concurrently.
+    var operations = new[] { "A".Observe(), "B".Observe() };
+    var transaction = operations
+        .BeginWorkflow("Concurrent-Batch-Tx", mode: TransactionMode.Concurrent);
+    ```
+
+    **2. As a Sequential Workflow Shortcut (without the `TransactionMode` parameter)**
+    This overload provides a powerful compositional shortcut for building a **linear, multi-step sequential transaction**. It is functionally equivalent to chaining multiple `.Then()` calls. The operator takes the first observable to begin the workflow, then chains each subsequent observable as a new `.Then()` step.
+
+    **Crucial Data Flow Behavior:** This shortcut uses a version of `.Then()` where the results from the previous step are **ignored**. Each observable in the enumerable is executed in sequence, but it does not receive input from its predecessor. This pattern is ideal for orchestrating a sequence of independent operations where the order matters but the output of one is not the input for the next.
+
+    ```csharp
+    // This creates a transaction equivalent to:
+    // step1.BeginWorkflow().Then(_ => step2).Then(_ => step3)
+    var step1 = "Connect".Observe();
+    var step2 = "Authenticate".Observe();
+    var step3 = "FetchData".Observe();
+    
+    var transaction = new[] { step1, step2, step3 }
+        .BeginWorkflow("Sequential-Shortcut-Tx");
+    ```
 * **Transaction Naming**: The transaction can be explicitly named by passing a `string`. If the name is omitted, it is automatically inferred from the name of the calling method. This name is used for context in error reports.
 * **Initial Step Creation**: `BeginWorkflow` automatically treats its source observable(s) as the first step of the transaction. If the initial source fails, its context—inferred.
 
@@ -101,7 +127,7 @@ var transaction = Unit.Default.Observe()
 
 ```
 **Hybrid Behavior with `isNonCritical` Predicate**
-This operator's behavior can be modified by providing an `isNonCritical` predicate, either at the transaction level (in the `RunFailFast` call) or at the step level (in a `.Then()` call). The step-level predicate always takes precedence.
+This operator's behavior can be modified by providing an `isNonCritical` predicate, either at the transaction level (in the `RunFailFast` call) or at the step level (in a `.Then()` call). Instead of a hierarchical precedence, the two predicates are combined: a failure is treated as non-critical if **either** the step-level predicate **or** the transaction-level predicate returns `true`. This means a step's failure can be deemed non-critical by the global transaction rule, even if a more specific step-level predicate is defined and returns `false`.
 
 *   **If a failure is deemed CRITICAL** (the `isNonCritical` predicate returns `false`):
     1.  The transaction **aborts** immediately.
@@ -184,7 +210,9 @@ This operator allows you to introduce a parallel processing stage within a large
 
 * **`maxConcurrency`**: An optional parameter to limit how many observables run in parallel at any given time.
 
-* **`failFast`**: If set to `true`, the first failure in any of the concurrent operations will immediately cancel all other running operations in the batch and fail the parent transaction. If `false`, all operations will run to completion, and their errors will be aggregated.
+*   **`failFast`**: This parameter controls the error-handling strategy for the concurrent batch.
+    *   **If `true`**: The first failure in any of the concurrent operations will immediately cancel all other running operations in the batch and propagate the error, causing a `RunFailFast` parent transaction to abort.
+    *   **If `false`**: All operations will run to completion. If any failures occurred, they are aggregated into a single `FaultHubException`. The `ThenConcurrent` step will then first emit an `OnNext` notification containing an array of results from all the **successful** operations in the batch. Immediately after, it will terminate with an `OnError` notification containing the aggregated fault. This allows a `RunToEnd` parent transaction to pass the partial, successful results from the concurrent step to the next step in the chain, while still collecting the aggregated failure for the final report.
 
 **Example**:
 
@@ -231,7 +259,15 @@ When `failFast` is set to `true`, the first error from any concurrent operation 
 **Purpose**: A terminal operator that executes all steps and aggregates the *results* from all successful operations for final processing.
 
 **Description**:
-Unlike `RunToEnd`, which only forwards results from the final step, `RunAndCollect` captures the results from *every* successful step in the transaction. It then provides the complete, flattened collection of all results to a final `resultSelector` function. This is useful when the goal of the transaction is to gather data from multiple stages into a single collection.
+Unlike `RunToEnd`, which only forwards results from the final step, `RunAndCollect` captures the results from *every* successful step in the transaction. In a successful workflow, it provides the complete, flattened collection of all results to a final `resultSelector` function. This is useful when the goal of the transaction is to gather data from multiple stages into a single collection.
+
+In the event of a failure, `RunAndCollect` inherits the error-handling and data-salvage behavior of `RunToEnd`. It will continue to execute all subsequent steps and aggregate any errors. However, its interaction with the `resultSelector` is a crucial distinction. The underlying transaction will first emit an `OnNext` notification containing any salvaged data from all successful and partially successful steps. This `OnNext` emission **will cause the `resultSelector` to be invoked** with this partial, salvaged data. Immediately after the `resultSelector` is invoked and its returned observable is subscribed to, the stream terminates with the final `OnError` notification containing the aggregated `FaultHubException`.
+
+**Important Behavioral Note and Best Practice:**
+
+Because the `resultSelector` is invoked just before the stream fails, placing critical side-effects within it can lead to an inconsistent application state. The logic inside the selector may begin execution with partial data under the false assumption that the transaction was successful, only for the entire operation to be immediately terminated by the error.
+
+Therefore, the `resultSelector` should be considered a **pure function for data transformation only**. Any side-effects or final processing based on the transaction's outcome should be handled by the final `Subscribe` block, where the `OnNext` (for salvaged data on failure, or the selector's result on success) and `OnError` (for the failure report) handlers can be managed separately and explicitly.
 
 **Example**:
 
@@ -341,7 +377,24 @@ The `AsStep()` operator is a declarative bridge that links any observable sequen
 
 This ensures that any operation, no matter how deeply nested in a delegate, becomes a first-class citizen of the transaction, with full support for contextual error reporting.
 
-#### 3.3 Behavior in `RunFailFast` Mode
+#### 3.3. The Diagnostic Role of `AsStep`: A Reporter, Not a Recorder
+
+While `AsStep` is a critical bridge for integrating logic into a transaction, it is essential to understand its specific diagnostic role: it is a **reporter**, not a full **recorder**.
+
+When an observable wrapped by `AsStep` fails, the operator's primary responsibilities are to:
+1.  Intercept the raw exception.
+2.  Find the active ambient `TransactionContext`.
+3.  Create a "thin" `FaultHubException` that contains the **name** of the failing step (inferred from the source code expression) and the appropriate tags.
+4.  Propagate this enriched exception so the parent transaction can handle it.
+
+Crucially, `AsStep` does **not** capture the ambient `LogicalStackContext` at the moment of failure. The `FaultHubException` it creates contains the step's identity but intentionally omits the detailed invocation story.
+
+The full diagnostic snapshot is taken by the transaction's main execution logic—specifically, the `.Then()` or terminal (`Run...`) operator that contains the `AsStep` call. This higher-level operator catches the "thin" fault reported by `AsStep` and performs the final enrichment, capturing the complete logical stack trace at that point.
+
+**Practical Implication:**
+In a final error report, this means the detailed `Invocation Stack` will be associated with the broader transactional step boundary (e.g., the `.Then()` block), while the `AsStep` operator's contribution is providing the precise **name** of the sub-operation that failed within that step.
+
+#### 3.4 Behavior in `RunFailFast` Mode
 
 In a `RunFailFast` transaction, the first correlated failure will abort the entire workflow. `AsStep()` ensures that failures from within selectors are correctly correlated.
 
@@ -375,7 +428,7 @@ stepFault.Context.BoundaryName.ShouldBe(nameof(Step1_Fails));
 
 When `Step1_Fails` throws, `AsStep()` catches the exception, correlates it to the `ServiceWorkflow` transaction, and re-throws the enriched fault. The `RunFailFast` operator receives this fault and immediately terminates the transaction, producing a `TransactionAbortedException` that pinpoints `Step1_Fails` as the root cause.
 
-#### 3.4 Behavior in Aggregating Modes (`RunToEnd` & `RunAndCollect`)
+#### 3.5 Behavior in Aggregating Modes (`RunToEnd` & `RunAndCollect`)
 
 The `AsStep()` operator works seamlessly with error-aggregating modes. It registers the failure with the transaction, but allows the terminal operator to decide whether to continue.
 
@@ -406,13 +459,13 @@ stepFault.Context.BoundaryName.ShouldBe(nameof(Step1_Fails));
 
 In this case, when `Step1_Fails` throws, `AsStep()` reports the failure to the `AggregatingWorkflow` transaction. Because the transaction uses `RunToEnd`, it proceeds to execute the second `Then` block. At the conclusion, `RunToEnd` aggregates all reported failures, and the final `FaultHubException` contains a report that correctly attributes the failure to the `Step1_Fails` step. This same behavior applies to `RunAndCollect`.
 
-#### 3.5 Ambient Context Management in Nested Workflows
+#### 3.6 Ambient Context Management in Nested Workflows
 
 The system robustly manages the ambient `TransactionContext`, even in complex nested scenarios. When a new workflow is started with `BeginWorkflow`, it pushes a new context onto the stack. When that workflow completes (either by success or failure), its context is popped, restoring the parent's context.
 
 This guarantees that `AsStep()` always correlates a failure to the correct, most immediate workflow, preventing context leakage between sibling or nested transactions and ensuring diagnostic accuracy.
 
-#### 3.6. Advanced Error Handling with `onFault`
+#### 3.7 Advanced Error Handling with `onFault`
 
 To provide a unified and explicit model for error handling, the `AsStep` operator consolidates all resilience logic into a single, optional `onFault` selector. This selector is  making the developer's intent unambiguous and prevents invalid parameter combinations.
 
@@ -421,9 +474,44 @@ The `onFault` selector is a function that receives the exception and must return
 ##### `ResilienceAction` Enum
 
 *   **`Critical` (Default):** The failure is considered critical. The fault is wrapped in a `FaultHubException` and **propagated**. This will cause a `RunFailFast` transaction to abort immediately.
-*   **`Tolerate`:** The failure is considered non-critical. The fault is wrapped, tagged as non-critical, and **propagated**. This allows a `RunFailFast` transaction to continue execution while ensuring the failure is included in the final report.
-*   **`Suppress`:** The failure is a tolerable, item-level issue. The fault is wrapped, tagged as non-critical, and **reported** to the transaction's internal failure collection. The operator then **completes** the stream (`Observable.Empty()`), allowing parent streams (like a `SelectMany`) to continue.
+*   **`Tolerate`**: The failure is considered non-critical. The fault is wrapped, tagged as non-critical, and **propagated**. This allows a `RunFailFast` transaction to continue execution while ensuring the failure is included in the final report.
 
+*   **`Suppress`**: The failure is a tolerable, item-level issue. The operator completes the local data stream (`Observable.Empty()`), allowing the transaction to proceed to the next step as if the failing step had succeeded but produced no data.
+
+    **Crucial Distinction: Suppression is Local, Failure is Global**
+    The term "Suppress" applies only to the immediate data stream of the step. The fault is **not discarded**. Instead, it is wrapped, tagged as non-critical, and **reported** to the transaction's internal failure collection **via a side-channel**.
+
+    This means that even though subsequent steps will execute, the transaction has been marked as failed. When the transaction's terminal operator (`RunToEnd` or `RunFailFast`) executes, it will still produce an `OnError` notification containing an aggregate of all failures, including the suppressed ones.
+
+    **When to Use `Suppress`:**
+    Use this action when a step performs a non-essential side-effect and its output is not required by subsequent steps. You want to ensure the rest of the transaction runs, but you still need the final report to reflect that a partial failure occurred.
+
+    **Example: A Suppressed Failure Still Fails the Transaction**
+    ```csharp
+    var step2WasExecuted = false;
+
+    var transaction = Observable.Return("start")
+        .BeginWorkflow()
+        .Then(_ => Observable.Throw<string>(new InvalidOperationException("Suppressed Failure"))
+            .AsStep(onFault: _ => ResilienceAction.Suppress))
+        .Then(results => {
+            // This step executes because the previous failure was suppressed locally.
+            step2WasExecuted = true;
+            results.ShouldBeEmpty(); // No data is passed from the suppressed step.
+            return Observable.Return("Final Step");
+        })
+        .RunToEnd();
+
+    var result = await transaction.Capture();
+
+    step2WasExecuted.ShouldBeTrue();
+    
+    // The transaction still terminates with an error.
+    result.Error.ShouldBeOfType<FaultHubException>();
+    var aggregate = result.Error.InnerException.ShouldBeOfType<AggregateException>();
+    aggregate.InnerExceptions.Single().InnerException.Message.ShouldBe("Suppressed Failure");
+    ```
+    
 ##### Example: Using `onFault` to Control Transaction Flow
 
 ```csharp
@@ -436,7 +524,7 @@ var transaction = "start".Observe()
     .RunFailFast();
 ```
 
-#### 3.7. Interaction with `DataSalvageStrategy`
+#### 3.8 Interaction with `DataSalvageStrategy`
 
 A common question is how to control data salvage for logic wrapped by `AsStep`, especially in a `RunFailFast` transaction. The key architectural principle is a **separation of concerns**:
 
@@ -478,7 +566,7 @@ result.Error.ShouldBeOfType<TransactionAbortedException>();
 
 This pattern ensures that the responsibility for defining failure policy remains cleanly at the transaction step level, while `AsStep` remains focused on its single responsibility of correlating failures.
 
-#### 3.8. Defining Atomic Steps with the `IEnumerable` Overload
+#### 3.9 Defining Atomic Steps with the `IEnumerable` Overload
 
 Beyond correlating a single observable, `AsStep` provides a powerful overload for `IEnumerable<IObservable<T>>` that allows you to group multiple sub-operations into a single, atomic transactional step. This is essential for scenarios where a logical step consists of several parallel or sequential tasks that must be treated as a single unit of work.
 
@@ -492,6 +580,9 @@ This overload enables a "deferred failure" pattern. It executes all observables 
 4.  **Success Aggregation**: If all sub-operations succeed, their emissions are collected and passed on as the successful result of the step.
 
 This pattern is invaluable when you need to ensure that certain essential, parallel tasks (like logging or cleanup) are attempted even if the primary task within the same step fails.
+
+**Naming the Atomic Step**
+The `AsStep` overload for `IEnumerable` follows the same naming convention as `BeginWorkflow`. The name for the aggregated atomic step, which appears in the final error report, can be provided as an optional string parameter. If this parameter is omitted, the name is automatically inferred from the name of the calling method. This ensures that the aggregated step has a meaningful and predictable identity in your diagnostic reports.
 
 **Example: Ensuring Sibling Operations Complete Before Failing**
 
@@ -510,7 +601,7 @@ public class TestableExternalService {
             AnotherEssentialStep().AsStep()      // This must still run.
         };
         
-        // AsStep() is applied to the entire collection, making it one atomic step.
+        // AsStep() is applied to the entire collection, with an explicit name for the atomic step.
         return subOperations.AsStep("ExecutingAllSteps");
     }
 
@@ -541,6 +632,7 @@ await service.WhenVisitPage(new Uri("http://example.com"))
 service.EssentialStepWasExecuted.ShouldBe(true); // Proves the sibling operation ran.
 
 var finalException = BusEvents.Single().ShouldBeOfType<TransactionAbortedException>();
+// The name "ExecutingAllSteps" is used for the boundary of the aggregated fault.
 var aggregateException = finalException.InnerException.ShouldBeOfType<FaultHubException>()
     .InnerException.ShouldBeOfType<AggregateException>();
 

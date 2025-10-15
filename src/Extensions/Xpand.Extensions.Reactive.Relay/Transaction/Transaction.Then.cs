@@ -43,11 +43,6 @@ namespace Xpand.Extensions.Reactive.Relay.Transaction{
             => builder.Then(new StepAction<TCurrent, TNext> { Selector = selector, FallbackSelector = fallbackSelector, IsNonCritical = isNonCritical, SelectorExpression = selectorExpression, 
                 FallbackSelectorExpression = fallbackSelectorExpression, StepName = stepName, FilePath=filePath,LineNumber=lineNumber,DataSalvageStrategy = dataSalvageStrategy
             });
-
-        [Obsolete]
-        public static ITransactionBuilder<TNext[]> Then<TCurrent, TNext>(this ITransactionBuilder<TCurrent> builder,
-            Func<TCurrent[], ITransactionBuilder<TNext>> transactionSelector, bool failFast = true, [CallerArgumentExpression(nameof(transactionSelector))] string selectorExpression = null)
-            => builder.Then(previousResults => transactionSelector(previousResults).Run(failFast), stepName: GetStepName(selectorExpression));
         
         public static ITransactionBuilder<object[]> ThenConcurrent<TCurrent>(this ITransactionBuilder<TCurrent> builder,
             Func<TCurrent[], IEnumerable<(string Name, IObservable<object> Source)>> concurrentSelector, 

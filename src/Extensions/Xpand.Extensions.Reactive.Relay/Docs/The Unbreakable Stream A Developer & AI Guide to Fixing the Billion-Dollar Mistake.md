@@ -148,19 +148,38 @@ The choice between a specialized `...ItemResilient` operator and the general `Co
 
 This pattern guarantees that the stream emits exactly one item—either the successful result or the default value—allowing subsequent operators like `SelectMany` to execute reliably.
 
-###### 4.2.3. Interaction with Upstream Resilience
+#### 4.2.3. Interaction with Upstream Resilience
 
-A critical design feature of the Item Resilience pattern is its behavior when encountering an exception that has *already* been enriched by an upstream resilience boundary (i.e., it is already a `FaultHubException`). In this scenario, the system prioritizes preserving the existing, rich context.
+A critical design feature of the Item Resilience pattern is its behavior when encountering an exception that has *already* been enriched by an upstream resilience boundary (i.e., it is already a `FaultHubException`). In this scenario, the system creates a chain of contexts to preserve the full diagnostic story.
 
 When an operator like `ContinueOnFault` catches an existing `FaultHubException`, it performs a **wrapping** operation:
 
-1. It creates a new `FaultHubException` to represent its own resilience boundary, adding its call-site information to the logical stack.
+1.  It creates a new `FaultHubException` to represent its own suppression boundary. The `context` data passed to the operator (e.g., `ContinueOnFault(context: ["Suppression Boundary"])`) is used to create the `UserContext` for this new wrapper.
+2.  The original, upstream `FaultHubException` is set as the `InnerException` of this new wrapper, and its entire context is nested as the `InnerContext`.
 
-2. The original, upstream `FaultHubException` is set as the `InnerException`, preserving its entire context.
+This ensures that the context of the suppression boundary is captured and added to the story, rather than being discarded. The result is a linked list of contexts that provides a complete, end-to-end trace of the error's journey from its origin to the point of suppression.
 
-3. Crucially, any new `context` data passed to the item resilience operator (e.g., `ContinueOnFault(context: ["New Data"])`) is **not added to the new wrapper's `UserContext`**. This is an intentional design choice to prioritize the richer, more detailed context from the upstream `FaultHubException`.
+**Example: Chaining Contexts Across Boundaries**
 
-This ensures that the detailed story built by `ChainFaultContext` is never accidentally overwritten by a less specific context at the point of suppression. While the passed-in context data is still captured within the call-site's logical stack frame for detailed tracing, developers should be aware that it will not appear in the top-level context of the resulting error report if a richer context already exists.
+```csharp
+// 1. An upstream operation fails and is enriched by ChainFaultContext.
+var failingStream = Observable.Throw<Unit>(new InvalidOperationException("Original failure"))
+    .ChainFaultContext(context: ["Upstream"]);
+
+// 2. A downstream operator suppresses the error, adding its own context.
+var resilientStream = failingStream
+    .ContinueOnFault(context: ["Suppression Boundary"]);
+
+// 3. The final published fault contains a nested context.
+await resilientStream.PublishFaults().Capture();
+var finalFault = BusEvents.Single();
+
+// The outermost context is from the operator that suppressed the error.
+finalFault.Context.UserContext.ShouldContain("Suppression Boundary");
+
+// The inner context from the original failure is preserved.
+finalFault.Context.InnerContext.UserContext.ShouldContain("Upstream");
+```
 
 ##### 4.2.4. Completing the Pattern: Handling Subscription and Disposal Errors
 
@@ -203,26 +222,40 @@ private IObservable<string> GetDataFromDatabase()
 
 In this example, if `GetDataFromFastCache` fails, the `SwitchOnFault` operator catches the error, enables its publication, and then seamlessly subscribes to `GetDataFromDatabase`, allowing the application to self-heal and continue its work.
 
-###### **4.3.2. PublishOnFault**
+###### **4.3.2. `PublishOnFault`**
 
-The `PublishOnFault` operator provides an explicit "log and continue" behavior. It is a variant of `CompleteOnFault` that guarantees the fault is published to the central `FaultHub.Bus` for global monitoring before the local stream is gracefully completed.
+The `PublishOnFault` operator is a declarative instruction that modifies the behavior of an upstream resilience boundary. When an error occurs, it ensures the fault is published to the central `FaultHub.Bus` for global monitoring before the local stream is gracefully completed.
 
-This contrasts with `CompleteOnFault`, which defaults to *muting* the exception (i.e., completing the stream without publishing the fault). `PublishOnFault` is for scenarios where a failure is not critical enough to stop the current operation but is significant enough to be logged system-wide.
+This contrasts with its sibling operator, `CompleteOnFault`, which defaults to *muting* the exception (i.e., completing the stream without publishing the fault). `PublishOnFault` is for scenarios where a failure is not critical enough to stop the current operation but is significant enough to be logged system-wide.
 
-**Example: Processing Non-Critical Notifications**
+**Architectural Requirement: Composition with a Resilience Boundary**
 
+It is critical to understand that `PublishOnFault` does not contain its own error-handling logic (i.e., a `Catch` block). Its functionality is entirely dependent on being composed with an upstream, handler-aware resilience operator that can read and act upon its instruction. This is a core feature of the Handler Precedence System.
+
+The operators that can fulfill this requirement are:
+*   `ContinueOnFault`
+*   Any of the `...ItemResilient` operators (e.g., `SelectManyItemResilient`)
+*   `ChainFaultContext`
+
+Using `PublishOnFault` on a raw observable without a preceding resilience boundary will result in an unhandled exception, and the fault will **not** be published.
+
+**Example: Incorrect Usage (Will Crash)**
 ```csharp
-var notificationStream = GetNotifications()
-    .SelectMany(notification => ProcessNotification(notification)
-        // If one notification fails, publish the error but continue.
-        .PublishOnFault() 
-    );
-
-notificationStream.Subscribe();
-
+// INCORRECT: This stream will crash, and no fault will be sent to the FaultHub.Bus.
+var stream = Observable.Throw<Unit>(new Exception("This will NOT be published"))
+    .PublishOnFault(); 
 ```
 
-In this scenario, if processing a single notification fails, the error will be sent to the `FaultHub.Bus`, but the parent `notificationStream` will not be terminated. It will continue to process the next available notification.
+**Example: Correct Usage**
+```csharp
+// CORRECT: The fault is published, and the stream completes gracefully.
+var stream = Observable.Throw<Unit>(new Exception("This WILL be published"))
+    .ContinueOnFault() // The required resilience boundary that handles the error.
+    .PublishOnFault(); // The instruction that tells the boundary to publish.
+
+stream.Subscribe(); // No error is propagated to the final subscriber.
+```
+In the correct example, `ContinueOnFault` catches the error, inspects the `HandlersContext`, finds the instruction from `PublishOnFault` (which is to *not* mute the exception), publishes the fault to the `FaultHub.Bus`, and then completes the stream as intended.
 
 #### **5. XAF Integration and Configuration**
 
@@ -254,6 +287,26 @@ A powerful way to leverage the `FaultHub` is with the `Reactive.Logger` module. 
 </Notifications>
 
 ```
+
+##### **5.3. The `FaultHub.Bus` and Automatic De-duplication**
+
+A core, non-obvious feature of the `FaultHub` is its built-in de-duplication mechanism, designed to prevent log flooding from rapidly repeating, identical errors (e.g., from a tight retry loop). This system is implemented via an in-memory cache and is triggered only under specific conditions.
+
+**De-duplication Mechanism:**
+
+1.  The de-duplication logic is **only active** for `FaultHubException` instances that have been assigned a `correlationId`. Faults without a `correlationId` will always be published.
+2.  When a correlated exception is published, a unique cache key is generated from the combination of its `correlationId`, its full exception type name, and its `Message`.
+3.  If this exact key has been seen recently (i.e., it exists in the cache), the `Publish` method will silently drop the exception, and it will **not** be emitted on the `FaultHub.Bus`.
+
+**Architectural Implication and Debugging:**
+
+This behavior is a critical consideration when debugging. If you observe a repeating error in a retry loop but only the first instance appears in your logs, this de-duplication mechanism is the likely cause. It is an intentional design choice to protect monitoring systems from being overwhelmed by high-frequency, identical faults from a single correlated operation.
+
+**Controlling the Behavior:**
+
+The de-duplication is directly tied to the `correlationId`.
+*   If you require every single failure instance to be published, you must ensure that each transactional workflow is initiated with a **unique** `correlationId`.
+*   Conversely, if multiple related operations should be de-duplicated as a group, they should be initiated with the **same** `correlationId`.
 
 #### **6. Architectural Patterns and Best Practices**
 
@@ -954,31 +1007,39 @@ _ = FireMetricsPrimitiveError().PublishFaults().Subscribe();
 
 ```
 
-##### **11.5. Advanced Querying with Metadata Tokens**
+#### **11.5. Programmatic Correlation with Metadata Tokens**
 
-For advanced monitoring and correlation scenarios, the framework provides a mechanism to attach arbitrary, machine-readable key-value data to a fault's context using the `IMetadataToken` interface.
+In complex systems, it is often necessary to programmatically track and correlate specific failures for monitoring, telemetry, or automated recovery. The FaultHub provides a flexible, key-value metadata system for this purpose, built around the `IMetadataToken` interface.
 
-A critical feature of this system is that any object implementing `IMetadataToken` is **explicitly excluded** from all human-readable diagnostic reports. This ensures that correlation IDs, telemetry tags, and other programmatic data do not clutter the logical stack trace or operation tree, which are intended for developer analysis.
+A key feature of this system is that any object implementing `IMetadataToken` is **explicitly excluded** from all human-readable diagnostic reports (like the console output or logged string representation). This ensures that correlation IDs, telemetry tags, and other programmatic data do not clutter the logical stack trace or operation tree, which are intended for developer analysis.
 
-Metadata is added to a resilience boundary via the `.ToMetadataToken()` extension method, which is then passed into the `context` array of operators like `ChainFaultContext` or `ContinueOnFault`. It can be retrieved from a `FaultHubException` using the `.GetMetadata<T>()` extension. This enables precise, programmatic filtering of the global `FaultHub.Bus`.
+##### **11.5.1. The Generic Metadata System**
 
-**Example: Correlating a Fault to a Specific Operation ID**
+The core of the system consists of two extension methods:
+
+*   **`ToMetadataToken(string key)`**: This method converts any object into an `IMetadataToken`, associating it with a specific string key. This token can then be passed into the `context` array of any resilience operator (`ChainFaultContext`, `ContinueOnFault`, etc.) or transactional operator (`BeginWorkflow`).
+
+*   **`GetMetadata<T>(string key)`**: This method, called on a `FaultHubException`, allows you to retrieve the value of a metadata token by its key.
+
+This generic mechanism allows you to attach and query any arbitrary data for correlation purposes, such as a user ID, a session token, or an operation name string.
+
+**Example: Correlating a Fault with a Custom String ID**
 
 ```csharp
 [Test]
-public async Task Can_Correlate_Fault_Via_MetadataToken() {
-    var correlationId = Guid.NewGuid();
+public async Task Can_Correlate_Fault_Via_Custom_MetadataToken() {
+    var operationId = "ProcessPayment-XYZ-123";
 
-    // 1. Add the correlationId as a metadata token to the ChainFaultContext.
+    // 1. Add the custom ID as a metadata token to the ChainFaultContext.
     var operation = Observable.Throw<Unit>(new InvalidOperationException("Operation failure"))
         .ChainFaultContext(
-            context: [correlationId.ToMetadataToken(nameof(correlationId))]
+            context: [operationId.ToMetadataToken(nameof(operationId))]
         );
 
     // 2. Listen to the global bus, but filter for exceptions that have
-    //    the correct metadata token.
+    //    the correct metadata token by its key.
     var listener = FaultHub.Bus
-        .Where(fault => fault.GetMetadata<Guid>(nameof(correlationId)) == correlationId)
+        .Where(fault => fault.GetMetadata<string>(nameof(operationId)) == operationId)
         .Take(1);
 
     // 3. Execute the operation and the listener concurrently.
@@ -988,5 +1049,38 @@ public async Task Can_Correlate_Fault_Via_MetadataToken() {
         
     // The listener will only complete if it observes a fault with the matching ID.
     BusEvents.Count.ShouldBe(1);
+}
+```
+
+##### **11.5.2. Shortcut: The `correlationId` Parameter**
+
+For the common use case of correlating a transaction with a unique `Guid`, the framework provides a convenient shortcut. The `BeginWorkflow` operator includes an optional `correlationId` parameter.
+
+When you provide a `Guid` to this parameter, the framework internally creates a `MetadataToken` with a predefined key and attaches it to the transaction's context. To filter the `FaultHub.Bus` for this specific ID, you can use the corresponding `TransactionFault(Guid transactionId)` extension method.
+
+This is simply a specialized application of the generic metadata system, designed to streamline the most frequent correlation scenario.
+
+**Example: Correlating a Fault to a Specific Transaction ID**
+
+```csharp
+[Test]
+public async Task Can_Correlate_Fault_To_Transaction_Via_Shortcut() {
+    var transactionId = Guid.NewGuid();
+
+    // 1. Assign a correlation ID when starting the workflow.
+    var workflow = Observable.Throw<Unit>(new InvalidOperationException("Workflow failure"))
+        .BeginWorkflow("MyCorrelatedWorkflow", correlationId: transactionId);
+
+    // 2. Use the shortcut filter method on the global bus.
+    var listener = FaultHub.Bus
+        .TransactionFault(transactionId)
+        .Take(1);
+
+    // 3. Execute the workflow, which will fail and publish to the bus.
+    await workflow.RunFailFast().PublishFaults().Capture();
+
+    // 4. Concurrently, await the listener, which will only complete
+    //    if it observes the fault with the matching ID.
+    await listener.Timeout(1.Seconds());
 }
 ```
