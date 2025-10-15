@@ -11,7 +11,7 @@ using Xpand.Extensions.Reactive.Utility;
 
 namespace Xpand.Extensions.Tests.FaultHubTests.Integrations {
     public class IntegrationsProcessEvent:FaultHubTestBase {
-                private class TestEventSource {
+        private class TestEventSource {
             public event EventHandler<EventArgs> MyEvent;
 
             public void RaiseEvent() {
@@ -105,17 +105,11 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Integrations {
 
         [Test]
         public void ProcessEvent_Preserves_Subscription_Context_On_Event_Streams() {
-            
             var eventSource = new EventSource();
-    
-
             FaultHub.LogicalStackContext.Value = [new LogicalStackFrame("SubscriptionContext", "", 0)];
 
             var stream = eventSource.ProcessEvent<EventArgs, Unit>(nameof(EventSource.MyEvent),
-                    _ => Observable.Throw<Unit>(new Exception("test")).PushStackFrame("HandlerContext"))
-                ;
-
-            
+                    _ => Observable.Throw<Unit>(new Exception("test")).PushStackFrame("HandlerContext"));
             
             using (stream.Subscribe()) {
                 FaultHub.LogicalStackContext.Value = [new LogicalStackFrame("FireEventContext", "", 0)];

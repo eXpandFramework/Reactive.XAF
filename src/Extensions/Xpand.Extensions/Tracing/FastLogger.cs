@@ -52,7 +52,19 @@ namespace Xpand.Extensions.Tracing{
         }
         private static readonly AsyncLocal<List<Func<(FastLogLevel level, string method, string path), bool>>> Predicates = new();
 
-        public static IDisposable Filter(Func<(FastLogLevel level, string method, string path), bool> predicate) {
+        public static Func<(FastLogLevel level, string method, string path), bool> Or(params Func<(FastLogLevel level, string method, string path), bool>[] predicates) 
+            => context => predicates.Any(predicate => predicate(context));
+
+        public static bool Contains(this HashSet<string> types, (FastLogLevel level, string method, string path) t) 
+            => types.Contains(Path.GetFileNameWithoutExtension(t.path));
+
+
+        public static IDisposable LogFastFilter(Func<(FastLogLevel level, string method, string path), bool> predicate, params Type[] types) {
+            var hashSet = types.Select(type => type.Name).ToHashSet();
+            return LogFastFilter(Or(predicate, t => hashSet.Contains(t)));
+        }
+
+        public static IDisposable LogFastFilter(Func<(FastLogLevel level, string method, string path), bool> predicate) {
             Predicates.Value ??= new List<Func<(FastLogLevel level, string method, string path), bool>>();
             Predicates.Value.Add(predicate);
             return new FilterScope(predicate);
@@ -69,6 +81,8 @@ namespace Xpand.Extensions.Tracing{
             }
             return true;
         }
+
+        public static void FastLog(this Exception exception) => LogError($"{exception}");
 
         public static void LogError(ref HighPerformanceLogBuilder builder) {
             if (!Enabled)return;
@@ -90,7 +104,9 @@ namespace Xpand.Extensions.Tracing{
 
         private static string AnsiColorize(this ConsoleColor color,string message) 
             => $"\x1b[{color.ToAnsiColorCode()}m{message}\x1b[0m";
-
+        
+        
+        
     }
     
     public enum FastLogLevel {

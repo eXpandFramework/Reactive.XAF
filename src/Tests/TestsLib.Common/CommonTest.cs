@@ -34,10 +34,23 @@ namespace Xpand.TestsLib.Common{
 
         public static TimeSpan Timeout = TimeSpan.FromSeconds(240);
         public static TimeSpan OneMinute = 60.Seconds();
-
+        private static readonly Lock FileLock = new();
         protected CommonTest() {
             AssemblyExtensions.EntryAssembly = GetType().Assembly;
+            var processName = Process.GetCurrentProcess().ProcessName;
+            var fileName = $"{processName}.log";
+            if (File.Exists(fileName)) {
+                File.Delete(fileName);
+            }
             FastLogger.Enabled = true;
+            FastLogger.Write = message => {
+                Console.WriteLine(message);
+                Debug.WriteLine(message);
+                TestContext.Out.WriteLine(message);
+                lock (FileLock) {
+                    File.AppendAllText(fileName, message + Environment.NewLine);
+                }
+            };
         }
 
         private void CleanTempFolder() {
@@ -150,6 +163,7 @@ namespace Xpand.TestsLib.Common{
 
         [SetUp]
         public virtual void Setup() {
+            
             TestContext.Out.Write(TestContext.CurrentContext.Test.FullName);
             FaultHub.Reset();  
             

@@ -84,7 +84,7 @@ namespace Xpand.Extensions.Tests {
             var warningMessage = "This is a warning message.";
             var errorMessage = "This is an error message.";
 
-            using (Filter(log => log.level == FastLogLevel.Warning)) {
+            using (LogFastFilter(log => log.level == FastLogLevel.Warning)) {
                 LogFast($"{infoMessage}");
                 LogWarning($"{warningMessage}");
                 LogError($"{errorMessage}");
@@ -100,7 +100,7 @@ namespace Xpand.Extensions.Tests {
             var warningMessage = "This is a warning message.";
             var errorMessage = "This is an error message.";
 
-            using (Filter(log => log.level == FastLogLevel.Error || log.level == FastLogLevel.Info)) {
+            using (LogFastFilter(log => log.level == FastLogLevel.Error || log.level == FastLogLevel.Info)) {
                 LogFast($"{infoMessage}");
                 LogWarning($"{warningMessage}");
                 LogError($"{errorMessage}");

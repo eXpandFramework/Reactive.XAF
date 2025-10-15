@@ -490,19 +490,17 @@ To prevent stack pollution from simple, consecutive, identical calls (e.g., in a
 
 **Note:** This equality check is comprehensive. It considers the full `LogicalStackFrame` record, which includes not only the **method name** but also the **file path** and any **dynamic context objects** passed to the operator. This means that two consecutive calls from the same method will *not* be considered duplicates if they provide different context data. This ensures that meaningful, state-changing recursive calls are fully traced, while preventing noise from simple, stateless recursion.
 
-###### **6.2.7.** The **Diagnostic System: A Tightly Coupled Pair**
+#### **6.2.7. The Diagnostic System: A Required Partnership**
 
-While `PushStackFrame` and `ChainFaultContext` are presented as operators with distinct roles, it is architecturally critical to understand that they form a single, stateful, and tightly coupled diagnostic system. Their collaboration is not merely compositional; it is a mandatory partnership. The `.PublishFaults()` operator, while a valid terminal operator for a stream, does not participate in this partnership and cannot capture the logical stack trace.
+While `PushStackFrame` and `ChainFaultContext` are presented as operators with distinct roles, it is architecturally critical to understand that they form a single, stateful, and tightly coupled diagnostic system. Their collaboration is not merely compositional; it is a mandatory partnership. The logical stack trace can only be captured if both operators are used correctly in the observable chain.
 
-The mechanism that binds `PushStackFrame` and `ChainFaultContext` is an internal `FaultSnapshot` object:
+This partnership is based on a private, in-band signaling mechanism:
 
-1. **`ChainFaultContext` Initiates a "Recording Session":** When a stream is composed with `ChainFaultContext`, the operator creates a `FaultSnapshot` instance and stores it in an `AsyncLocal` variable. This effectively begins a "recording session" for that specific resilience boundary.
+1.  **`PushStackFrame` is an Active Error Interceptor:** The `PushStackFrame` operator does more than just add metadata. It actively intercepts the `OnError` notification as it propagates upstream. Upon interception, it captures the current logical stack and transforms the standard error into a specialized, enriched error signal that carries this stack information internally. It then sends this new signal downstream.
 
-2. `PushStackFrame` Snapshots the **Stack on Error:** The `PushStackFrame` operator contains error-specific logic. It materializes the stream to inspect every notification. If it detects an `OnError` notification, it finds the active `FaultSnapshot` from the `AsyncLocal` and saves the current, complete logical stack into it.
+2.  **`ChainFaultContext` is the Designated Receiver and Finalizer:** The `ChainFaultContext` operator is the designated receiver for this specialized signal. Its internal `Catch` block is the only component designed to recognize and interpret the enriched signal sent by `PushStackFrame`. It extracts the logical stack from the signal, uses it to build the final, comprehensive `FaultHubException`, and then applies its resilience policy (e.g., retry or propagation).
 
-3. **`ChainFaultContext` Finalizes the Report:** The `Catch` block within `ChainFaultContext` retrieves the stack from the `FaultSnapshot`, uses it to build the final, enriched `FaultHubException`, and then clears the snapshot.
-
-This proves that `PushStackFrame` is not a passive metadata operator; it is an active **stack-snapshotter-on-error**. It acts as the "sensor" that captures the state at the moment of failure, but it relies on `ChainFaultContext` to provide the "recorder" (`FaultSnapshot`) to save that state into. Without an active `ChainFaultContext` boundary upstream, the work done by `PushStackFrame` is ephemeral and will be lost, which is why the composition of the two is a strict requirement for the system to function as designed.
+This in-band signaling mechanism is why the composition of the two is a strict architectural requirement. Using `PushStackFrame` without a corresponding `ChainFaultContext` boundary means the enriched error signal is sent, but no operator knows how to interpret it, and the logical stack is lost. Conversely, using `ChainFaultContext` without any upstream `PushStackFrame` calls means it never receives an enriched signal, resulting in a report with no logical stack trace.
 
 ##### **6.3. The Handler Precedence System: A Non-Linear Override Mechanism**
 

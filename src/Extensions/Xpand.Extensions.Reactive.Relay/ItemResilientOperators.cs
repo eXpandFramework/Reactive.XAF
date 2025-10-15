@@ -24,9 +24,13 @@ namespace Xpand.Extensions.Reactive.Relay {
 
         private static AmbientFaultContext CreateNewFaultContext(this Exception e,object[] context, string memberName, string filePath, int lineNumber){
             var currentFrame = new LogicalStackFrame(memberName, filePath, lineNumber, context);
-            return e is FaultHubException?new[] { currentFrame }.NewFaultContext([],null, memberName, filePath, lineNumber):
+            if (e is ExceptionWithLogicalContext contextException) {
+                var logicalStack = new[] { currentFrame }.Concat(contextException.ContextPath).ToList();
+                return logicalStack.NewFaultContext(context, null, memberName, filePath);
+            }
+            return e is FaultHubException?new[] { currentFrame }.NewFaultContext([],null, memberName, filePath):
                 new[] { currentFrame }.Concat(FaultHub.LogicalStackContext.Value ?? Enumerable.Empty<LogicalStackFrame>()).ToList()
-                    .NewFaultContext(context,null, memberName, filePath, lineNumber);
+                    .NewFaultContext(context,null, memberName, filePath);
         }
 
         public static IObservable<TEventArgs> ProcessEvent<TEventArgs>(this object source, string eventName,Func<TEventArgs, IObservable<TEventArgs>> resilientSelector, 

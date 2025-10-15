@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -173,9 +172,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests.FaultContextTests {
             using var exceptionSubscription = application.WhenWin().WhenCustomHandleException()
                 .Do(t => t.handledEventArgs.Handled = true).Subscribe();
             
-            FaultHub.LogicalStackContext.Value = new List<LogicalStackFrame> {
-                new("DirtyFrame_From_Startup", "startup.cs", 1)
-            };
+            FaultHub.LogicalStackContext.Value = [new("DirtyFrame_From_Startup", "startup.cs", 1)];
 
             var actionRegistered = application.WhenApplicationModulesManager()
                 .SelectMany(manager => manager.RegisterViewSimpleAction(nameof(WhenExecuted_Resets_The_Logical_Stack)));

@@ -4,12 +4,12 @@ using DevExpress.Persistent.Base;
 using DevExpress.Persistent.Validation;
 using DevExpress.Xpo;
 using Xpand.Extensions.XAF.Attributes;
-using Xpand.Extensions.XAF.Xpo.BaseObjects;
+using Xpand.XAF.Persistent.BaseImpl;
 
 namespace Xpand.XAF.Modules.Telegram.BusinessObjects{
     [ImageName("TelegramUser")][ListViewShowFooter]
     [DefaultProperty(nameof(DisplayName))]
-    public class TelegramUser(Session session) : XPCustomBaseObject(session){
+    public class TelegramUser(Session session) : CustomBaseObject(session){
         [Association("TelegramChat-TelegramUsers")][ReadOnlyCollection(allowNew:false)]
         public XPCollection<TelegramChat> Chats => GetCollection<TelegramChat>();
 
@@ -25,7 +25,8 @@ namespace Xpand.XAF.Modules.Telegram.BusinessObjects{
 
         long _id;
 
-        [Key]
+        [Indexed(Unique = true)]
+        [RuleUniqueValue]
         public long Id{
             get => _id;
             set => SetPropertyValue(nameof(Id), ref _id, value);

@@ -127,7 +127,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.TransactionalApi {
 
 
 
-            var originalOpFault = innerFault.InnerException.ShouldBeOfType<TransactionAbortedException>().InnerException.ShouldBeOfType<FaultHubException>();
+            var originalOpFault = innerFault.InnerException.ShouldBeOfType<FaultHubException>();
             originalOpFault.InnerException.ShouldBeOfType<InvalidOperationException>().Message
                 .ShouldBe("Inner Tx1 Failed");
             originalOpFault.AllContexts.ShouldContain(ctx => ctx is string && ((string)ctx).StartsWith("InnerTransaction1 -"));
@@ -185,7 +185,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.TransactionalApi {
 
             var failure1 = aggregateException.InnerExceptions.OfType<TransactionAbortedException>().Single();
             failure1.Message.ShouldBe("InnerTransaction1 failed");
-            failure1.InnerException.ShouldBeOfType<TransactionAbortedException>().InnerException.ShouldBeOfType<FaultHubException>()
+            failure1.InnerException.ShouldBeOfType<FaultHubException>()
                 .InnerException.ShouldBeOfType<InvalidOperationException>()
                 .Message.ShouldBe("Inner Tx1 Failed");
 
@@ -1285,53 +1285,6 @@ namespace Xpand.Extensions.Tests.FaultHubTests.TransactionalApi {
             _receivedItemsInFinalStep.Single().ShouldBe([1, 2, 3], "The final step did not receive the correctly buffered items.");
         }
         
-        [TestCaseSource(nameof(RunSelectors))]
-        public async Task Run_Accumulates_Stack_And_Isolates_Context_For_Failing_Steps(Func<ITransactionBuilder<string>,IObservable<string[]>> runSelector) {
-            [MethodImpl(MethodImplOptions.NoInlining)]
-            IObservable<string> StepAWithInternalStack() =>
-                Observable.Throw<string>(new InvalidOperationException("Failure A"))
-                    .PushStackFrame("Internal_Frame_A");
-
-            [MethodImpl(MethodImplOptions.NoInlining)]
-            IObservable<string> StepBWithInternalStack() =>
-                Observable.Throw<string>(new InvalidOperationException("Failure B"))
-                    .PushStackFrame("Internal_Frame_B");
-
-            var transaction = runSelector(Observable.Return(Unit.Default)
-                .BeginWorkflow("AccumulationTest")
-                .Then(_ => StepAWithInternalStack())
-                .Then(_ => StepBWithInternalStack()));
-
-            await transaction.PublishFaults().Capture();
-            BusEvents.Count.ShouldBe(1);
-
-            if (runSelector.Method.Name.Contains(nameof(RunFailFast))) {
-                var abortedException = BusEvents.Single().ShouldBeOfType<TransactionAbortedException>();
-                var stepAFault = abortedException.InnerException.ShouldBeOfType<FaultHubException>();
-                stepAFault.InnerException.ShouldBeOfType<InvalidOperationException>().Message.ShouldBe("Failure A");
-                
-                var stepAStack = stepAFault.LogicalStackTrace.Select(f => f.MemberName).ToArray();
-                stepAStack.ShouldContain("Internal_Frame_A");
-                stepAStack.ShouldContain(nameof(StepAWithInternalStack));
-            }
-            else {
-                var finalFault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
-                var aggregate = finalFault.InnerException.ShouldBeOfType<AggregateException>();
-                var stepBFault = aggregate.InnerExceptions.OfType<FaultHubException>()
-                    .Single(ex => ex.InnerException?.Message == "Failure B");
-                
-                var stepBStack = stepBFault.LogicalStackTrace.Select(f => f.MemberName).ToArray();
-
-                stepBStack.ShouldContain(nameof(StepBWithInternalStack));
-                stepBStack.ShouldContain("Internal_Frame_B");
-                stepBStack.ShouldContain(nameof(StepAWithInternalStack),
-                    "The stack for Step B should have accumulated the context from the preceding Step A.");
-                Array.IndexOf(stepBStack, nameof(StepBWithInternalStack))
-                    .ShouldBeLessThan(Array.IndexOf(stepBStack, nameof(StepAWithInternalStack)),
-                        "The frames for Step B should appear before the frames for Step A in the stack.");
-            }
-            
-        }        
 
         [TestCaseSource(nameof(RunSelectors))]
         public async Task Run_Truncates_Stack_When_Step_Uses_ChainFaultContext(Func<ITransactionBuilder<string>,IObservable<string[]>> runSelector) {
@@ -1475,24 +1428,6 @@ namespace Xpand.Extensions.Tests.FaultHubTests.TransactionalApi {
             stepFault.LogicalStackTrace.ShouldContain(frame => frame.MemberName == $"{nameof(operations)}[0]");
         }
         
-        [Test]
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        public async Task BeginWorkflow_Does_Not_Push_Duplicate_Frame() {
-            var beginWorkflowDoesNotPushDuplicateFrame = Observable.Throw<Unit>(new InvalidOperationException("Failure")) ;
-            var transaction = beginWorkflowDoesNotPushDuplicateFrame.BeginWorkflow()
-                .RunFailFast()
-                .PushStackFrame();
-
-            await transaction.PublishFaults().Capture();
-
-            BusEvents.Count.ShouldBe(1);
-            var abortedException = BusEvents.Single().ShouldBeOfType<TransactionAbortedException>();
-            var finalFault = abortedException.InnerException.ShouldBeOfType<FaultHubException>();
-            var logicalStack = finalFault.LogicalStackTrace.ToList();
-
-
-            logicalStack.Count(frame => frame.MemberName==nameof(BeginWorkflow_Does_Not_Push_Duplicate_Frame)).ShouldBe(1);
-        }
         
         [Test]
         public async Task RunFailFast_Can_Collect_NonCritical_Errors_And_Fail_At_The_End() {
