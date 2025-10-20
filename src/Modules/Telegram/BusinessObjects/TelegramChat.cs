@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel;
-using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.Validation;
@@ -11,7 +10,7 @@ namespace Xpand.XAF.Modules.Telegram.BusinessObjects{
     [ImageName("TelegramChat")][OptimisticLocking(OptimisticLockingBehavior.NoLocking)]
     [ListViewShowFooter]
     [DefaultProperty(nameof(User))]
-    public class TelegramChat(Session session) : CustomBaseObject(session),IXafEntityObject{
+    public class TelegramChat(Session session) : CustomBaseObject(session){
         [Association("TelegramChat-TelegramMessages")][Aggregated][ReadOnlyCollection]
         public XPCollection<TelegramChatMessage> Messages => GetCollection<TelegramChatMessage>();
 
@@ -45,18 +44,6 @@ namespace Xpand.XAF.Modules.Telegram.BusinessObjects{
         public long Id{
             get => _id;
             set => SetPropertyValue(nameof(Id), ref _id, value);
-        }
-
-        public void OnCreated() {
-            throw new System.NotImplementedException();
-        }
-
-        void IXafEntityObject.OnSaving() {
-            
-        }
-
-        void IXafEntityObject.OnLoaded() {
-            
         }
     }
     

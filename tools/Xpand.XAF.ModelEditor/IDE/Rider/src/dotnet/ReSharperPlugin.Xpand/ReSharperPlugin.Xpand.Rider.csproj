@@ -23,8 +23,11 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="..\..\..\..\XVSIX64\Resources\Xpand.XAF.ModelEditor.Win.4.242.3.2.zip">
-      <Link>Resources\Xpand.XAF.ModelEditor.Win.4.242.3.2.zip</Link>
+    <EmbeddedResource Include="..\..\..\..\XVSIX64\Resources\Xpand.XAF.ModelEditor.Win.4.251.6.1.zip">
+      <Link>Resources\Xpand.XAF.ModelEditor.Win.4.251.6.1.zip</Link>
     </EmbeddedResource>
   </ItemGroup>
 </Project>
+
+
+

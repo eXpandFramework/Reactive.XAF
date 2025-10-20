@@ -15,6 +15,7 @@ namespace Xpand.XAF.ModelEditor.Module.Win {
         [DefaultValue("Debug")]
         string ActiveConfiguration { get; set; }
 
+        [DefaultValue(true)]
         bool DownloadPreRelease { get; set; }
         Version DevVersion { get; set; }
     }

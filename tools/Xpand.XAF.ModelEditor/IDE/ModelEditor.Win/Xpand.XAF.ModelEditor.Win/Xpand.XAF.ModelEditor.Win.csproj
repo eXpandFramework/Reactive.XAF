@@ -32,6 +32,7 @@
   <ItemGroup>
     <PackageReference Include="DevExpress.ExpressApp" Version="25.1.5" />
     <PackageReference Include="DevExpress.ExpressApp.Win" Version="25.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp.Win.All" Version="25.1.5" />
     <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="25.1.5" />
   </ItemGroup>
   <ItemGroup>

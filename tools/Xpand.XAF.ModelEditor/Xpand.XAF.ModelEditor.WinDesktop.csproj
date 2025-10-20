@@ -44,7 +44,7 @@
     <Page Remove="IDE\**" />
   </ItemGroup>
   <ItemGroup>
-    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+<!--    <FrameworkReference Include="Microsoft.AspNetCore.App" />-->
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="DevExpress.ExpressApp" Version="25.1.5" />
@@ -58,5 +58,6 @@
     <PackageReference Include="System.Text.Json" Version="9.0.0" />
     <PackageReference Include="System.ServiceModel.NetTcp" Version="8.1.2" />
     <PackageReference Include="System.ServiceModel.Security" Version="4.10.2" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.8" />
   </ItemGroup>
 </Project>

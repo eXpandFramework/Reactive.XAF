@@ -5,7 +5,8 @@
     <OutputType>WinExe</OutputType>
     <AssemblyOriginatorKeyFile>..\..\src\Xpand.key\Xpand.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
-    <TargetFramework>net461</TargetFramework>
+      <TargetFramework>net9.0-windows7.0</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <OutputPath>..\..\bin\</OutputPath>
     <LangVersion>latest</LangVersion>
@@ -39,6 +40,7 @@
     <None Remove="Xpand.XAF.ModelEditor.WinDesktop.csproj.paket.references" />
     <None Remove="Xpand.XAF.ModelEditor.WinDesktop.paket.references" />
     <EmbeddedResource Include="ExpressApp.ico" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.8" />
     <PackageReference Include="DevExpress.ExpressApp" Version="25.1.5" />
     <PackageReference Include="DevExpress.ExpressApp.Win" Version="25.1.5" />
     <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="25.1.5" />

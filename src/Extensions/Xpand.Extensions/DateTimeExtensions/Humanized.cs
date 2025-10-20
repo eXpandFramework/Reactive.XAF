@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using Humanizer;
 using Xpand.Extensions.LinqExtensions;
+using Xpand.Extensions.StringExtensions;
 
 namespace Xpand.Extensions.DateTimeExtensions {
     public static partial class DateTimeExtensions {
@@ -23,14 +25,20 @@ namespace Xpand.Extensions.DateTimeExtensions {
                 "mm:ss" => $"{(int)timeSpan.TotalMinutes:00}:{timeSpan.Seconds:00}",
                 _ => timeSpan.ToString(format)
             };
-        
+
+        public static readonly Dictionary<string, string> HumanizedReplacements = new(){ {"from\\ now","ago"}};
         public static string Humanize(this Type type,object value) {
             if (value == null)
                 return "";
         
-            if (type == typeof(DateTime) || type == typeof(DateTime?))
-                return ((DateTime)value).Humanize ();
-        
+            if (type == typeof(DateTime) || type == typeof(DateTime?)) {
+                var humanize = ((DateTime)value).Humanize ();
+                foreach (var keyValuePair in HumanizedReplacements){
+                    humanize=humanize.RegexReplace(keyValuePair.Key,keyValuePair.Value);
+                }
+                return humanize;
+            }
+
             if (type.IsEnum)
                 return value.ToString().Humanize();
         
