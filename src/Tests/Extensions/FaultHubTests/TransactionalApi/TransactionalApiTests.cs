@@ -1633,9 +1633,31 @@ namespace Xpand.Extensions.Tests.FaultHubTests.TransactionalApi {
                 .ShouldContain(ex => ex.InnerException is TimeoutException);
         }
      
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private IObservable<Unit> StepWithMergedContextAndFailure() =>
+            Observable.Throw<Unit>(new InvalidOperationException("Step Failure"))
+                .PushStackFrame(["ContextFromPush"])
+                .ChainFaultContext(["ContextFromChain"]);
 
+        [Test]
+        public async Task TransactionalBoundary_Preserves_Merged_Context_From_Failing_Step() {
+            var transaction = Observable.Return("start")
+                .BeginWorkflow("ContextMergeTx")
+                .Then(_ => StepWithMergedContextAndFailure())
+                .RunFailFast();
 
-    }
+            await transaction.PublishFaults().Capture();
+
+            BusEvents.Count.ShouldBe(1);
+            var abortedException = BusEvents.Single().ShouldBeOfType<TransactionAbortedException>();
+
+            abortedException.Context.BoundaryName.ShouldBe("ContextMergeTx");
+            
+            abortedException.Context.UserContext.ShouldContain("ContextFromPush");
+            abortedException.Context.UserContext.ShouldContain("ContextFromChain");
+        }
+
+        }
     }
 
     internal class Url { public string Href { get; set; } }

@@ -61,8 +61,12 @@ namespace Xpand.Extensions.Reactive.Relay.Transaction {
                 return ex;
             }
             LogFast($"Creating TransactionAbortedException for transaction '{ib.TransactionName}'.");
-            return new TransactionAbortedException($"{ib.TransactionName} failed", (Current != null && !Current.Failures.IsEmpty) ? Current.Failures.First() : ex,
-                ib.Context,ib.Tags.Concat([TransactionNodeTag, ib.Mode.ToString(), nameof(RunFailFast)])
+            var finalUserContext = ib.Context;
+            if (ex.Context?.UserContext != null) {
+                finalUserContext = finalUserContext.Concat(ex.Context.UserContext).Distinct().ToArray();
+            }
+            return new TransactionAbortedException($"{ib.TransactionName} failed", ex,
+                finalUserContext,ib.Tags.Concat([TransactionNodeTag, ib.Mode.ToString(), nameof(RunFailFast)])
                     .Distinct().ToList(),ib.TransactionName);
         }
         
@@ -276,10 +280,14 @@ namespace Xpand.Extensions.Reactive.Relay.Transaction {
                             exceptionWithContext.OriginalException.Data[entry.Key] = entry.Value;
                         }
                     }
+                    var baseUserContext = builder.Context.AddToContext(builder.TransactionName, $"{builder.TransactionName} - {stepNameForContext}");
+                    var frameContext = exceptionWithContext.ContextPath.SelectMany(f => f.Context ?? Enumerable.Empty<object>());
+                    var mergedContext = baseUserContext.Concat(frameContext).Distinct().ToArray();
+
                     var completeContext = new AmbientFaultContext {
                         LogicalStackTrace = exceptionWithContext.ContextPath,
                         BoundaryName = stepNameForContext,
-                        UserContext = builder.Context.AddToContext(builder.TransactionName, $"{builder.TransactionName} - {stepNameForContext}"),
+                        UserContext = mergedContext,
                         Tags = tags
                     };
                     return exceptionWithContext.OriginalException.ExceptionToPublish(completeContext);

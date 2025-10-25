@@ -282,7 +282,11 @@ namespace Xpand.Extensions.Reactive.Relay {
                 return new FaultHubException(message, originalException, contextToUse);
             }
             LogFast($"Path: Existing FaultHubException. Chaining context.");
-            var newChainedContext = contextToUse with{ InnerContext = faultHubException.Context };
+            var mergedUserContext = contextToUse.UserContext;
+            if (faultHubException.Context?.UserContext != null) {
+                mergedUserContext = mergedUserContext.Concat(faultHubException.Context.UserContext).Distinct().ToArray();
+            }
+            var newChainedContext = contextToUse with{ InnerContext = faultHubException.Context, UserContext = mergedUserContext };
             
             if (faultHubException.PreserveType) {
                 LogFast($"Path: PreserveType is true for {faultHubException.GetType().Name}. Re-creating instance.");

@@ -86,6 +86,7 @@ public static class ChainFaultContextService {
         public static IObservable<T> ChainFaultContext<T>(this IObservable<T> source, object[] context, Func<IObservable<T>, IObservable<T>> retryStrategy = null,
             [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0,IReadOnlyList<string> tags = null)
             => Observable.Defer(() => {
+                context ??= [];
                 var resilientSource = retryStrategy != null ? retryStrategy(source) : source;
                 return resilientSource.Catch((Exception e) => {
                     LogFast($"Catch block entered for boundary '{memberName}'. Exception: {e.GetType().Name}");
@@ -109,7 +110,12 @@ public static class ChainFaultContextService {
                         fullStack.Add(new LogicalStackFrame(memberName, filePath, lineNumber, context));
                     }
                 
-                    var faultContext = fullStack.NewFaultContext(context, tags, memberName, filePath);
+                    var topFrame = fullStack.FirstOrDefault();
+                    var finalContext = context;
+                    if (topFrame.MemberName != null && topFrame.MemberName == memberName && topFrame.FilePath == filePath) {
+                        finalContext = context.Concat(topFrame.Context).Distinct().ToArray();
+                    }
+                    var faultContext = fullStack.NewFaultContext(finalContext, tags, memberName, filePath);
                     return originalException.ProcessFault(faultContext, Observable.Throw<T>);
                 });
             }).UseContext(true, FaultHub.IsChainingActive.Wrap());
