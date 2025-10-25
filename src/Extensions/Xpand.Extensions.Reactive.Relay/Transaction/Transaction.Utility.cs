@@ -97,7 +97,6 @@ namespace Xpand.Extensions.Reactive.Relay.Transaction{
         internal List<(string Name, IObservable<object> Source)> BatchedSources { get; init; }
 
         internal TransactionBuilder(IObservable<object> initialStep,string transactionName, object[] context, IScheduler scheduler, List<StepDefinition> subsequentSteps,IReadOnlyList<string> tags = null) {
-            LogFast($"SEQ Constructor called for transaction: '{transactionName}'.");
             InitialStep = initialStep;
             TransactionName = transactionName;
             Context = context;
@@ -109,7 +108,6 @@ namespace Xpand.Extensions.Reactive.Relay.Transaction{
         public TransactionBuilder(IObservable<object> initialStep, string transactionName, object[] context,
             IScheduler scheduler, string callerMemberName, string callerMemberPath, int callerMemberLine,IReadOnlyList<string> tags = null) 
             : this(initialStep, transactionName, context, scheduler, new List<StepDefinition>(),tags) {
-            LogFast($"SEQ Constructor called for transaction: '{transactionName}'.");
             CallerMemberName = callerMemberName;
             CallerMemberPath = callerMemberPath;
             CallerMemberLine = callerMemberLine;
@@ -118,7 +116,6 @@ namespace Xpand.Extensions.Reactive.Relay.Transaction{
         public TransactionBuilder(List<(string Name, IObservable<object> Source)> batchedSources, TransactionMode mode,
             string transactionName, object[] context, IScheduler scheduler, string callerMemberName, string callerMemberPath, int callerMemberLine,IReadOnlyList<string> tags = null)
             : this(null, transactionName, context, scheduler, new List<StepDefinition>(),tags) {
-            LogFast($"BATCH Constructor called for transaction: '{transactionName}'. Mode: {mode}.");
             BatchedSources = batchedSources;
             Mode = mode;
             CallerMemberName = callerMemberName;

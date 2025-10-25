@@ -122,6 +122,44 @@ namespace Xpand.Extensions.Reactive.Relay.Transaction {
                 : primaryBus.Catch((Exception ex) => step.FallbackSelector(ex, acc.results));
         }
         
+         private static IObservable<object> ExecuteAndInstrumentStep(StepDefinition step, (object results, List<Exception> failures, List<object> allResults, IReadOnlyList<LogicalStackFrame> logicalStack) acc, bool failFast) {
+            var stepStream = step.ExecuteStep(acc, failFast);
+            if (!failFast) {
+                stepStream = stepStream.UseContext(true, FaultHub.PreserveLogicalStack.Wrap());
+            }
+            return stepStream.PushFrameConditionally(!string.IsNullOrEmpty(step.Name) ? step.Name : $"Part {step.GetHashCode()}", step.FilePath, step.LineNumber, preserveContext: true);
+        }
+
+        private static (object results, List<Exception> failures, List<object> allResults, IReadOnlyList<LogicalStackFrame> logicalStack) ProcessStepCompletion<TFinal>(
+            IReadOnlyList<Notification<object>> notifications, StepDefinition step, (object results, List<Exception> failures, List<object> allResults, IReadOnlyList<LogicalStackFrame> logicalStack) acc,
+            TransactionBuilder<TFinal> builder, List<StepDefinition> allSteps, bool failFast, Func<Exception, bool> isNonCritical) {
+
+            LogFast($"Step '{step.Name}' completed. Received {notifications.Count} notifications ({notifications.Count(n => n.Kind == NotificationKind.OnNext)} OnNext, {notifications.Count(n => n.Kind == NotificationKind.OnError)} OnError).");
+
+            IReadOnlyList<LogicalStackFrame> finalStackForStep;
+            if (!failFast) {
+                var errorNotification = notifications.FirstOrDefault(n => n.Kind == NotificationKind.OnError);
+                if (errorNotification?.Exception is ExceptionWithLogicalContext contextException) {
+                    finalStackForStep = contextException.ContextPath;
+                }
+                else {
+                    finalStackForStep = FaultHub.LogicalStackContext.Value;
+                }
+            }
+            else {
+                finalStackForStep = ImmutableList<LogicalStackFrame>.Empty;
+            }
+
+            var (stepResults, stepFailures, stepAllResults) = allSteps.CollectStepErrors(builder, notifications, step, acc, isNonCritical);
+            var suppressedFailures = Current?.Failures.Where(f => !stepFailures.Contains(f)).ToList();
+            var combinedFailures = !(suppressedFailures?.Any() ?? false) ? stepFailures : stepFailures.Concat(suppressedFailures).ToList();
+            
+            var stackForNextStep = stepFailures.Any() ? acc.logicalStack : finalStackForStep;
+            
+            var newAccumulator = (results: stepResults, failures: combinedFailures, allResults: stepAllResults, logicalStack: (IReadOnlyList<LogicalStackFrame>)stackForNextStep);
+            return newAccumulator;
+        }
+        
         private static IObservable<(object finalStepResult, List<Exception> allFailures, List<object> allResults)> ExecuteStepChain<TFinal>(this List<StepDefinition> allSteps, TransactionBuilder<TFinal> builder, bool failFast, Func<Exception, bool> isNonCritical = null)  
             => allSteps.Aggregate(Observable.Return((results: (object)new List<object>(), failures: new List<Exception>(), allResults: new List<object>(), logicalStack: (IReadOnlyList<LogicalStackFrame>)ImmutableList<LogicalStackFrame>.Empty)), 
                     (accObservable, step) => accObservable.SelectMany(acc => {
@@ -129,56 +167,18 @@ namespace Xpand.Extensions.Reactive.Relay.Transaction {
                             LogFast($"{builder.TransactionName}: SKIPPING step '{step.Name}' due to prior failure in FailFast mode.");
                             return Observable.Return(acc);
                         }
-                        LogFast($"ENTERING SelectMany for step '{step.Name}'. ACC logicalStack has {acc.logicalStack?.Count ?? 0} frames.");
+
                         if (!failFast) {
                             FaultHub.LogicalStackContext.Value = acc.logicalStack as ImmutableList<LogicalStackFrame> ?? acc.logicalStack?.ToImmutableList();
-                            LogFast($"Restored ambient LogicalStackContext for step '{step.Name}'. It now has {FaultHub.LogicalStackContext.Value?.Count ?? 0} frames.");
                         }
-                        var accFailures = acc.failures.Any() ? string.Join(", ", acc.failures.Select(f => f.GetType().Name)) : "empty";
-                        LogFast($"{builder.TransactionName}: ENTERING step '{step.Name}'. Accumulator has {acc.failures.Count} failure(s): [{accFailures}]");
-                        var resultsCount = acc.results.IsEnumerable() ? ((IEnumerable)acc.results).Cast<object>().Count() : 1;
-                        LogFast($"For Step '{step.Name}': Results Count = {resultsCount}, Failures Count = {acc.failures.Count} ({accFailures})");
-                        var lastFailure = acc.failures.LastOrDefault();
-                        if (lastFailure != null && lastFailure.Data.Contains(SalvagedDataKey)) {
-                            var salvaged = lastFailure.Data[SalvagedDataKey];
-                            var salvagedCount = salvaged.IsEnumerable() ? ((IEnumerable)salvaged)!.Cast<object>().Count() : 1;
-                            LogFast($"Last failure ('{lastFailure.GetType().Name}') contains salvaged data. Type: {salvaged?.GetType().Name}, Count: {salvagedCount}");
-                        }
-                        var stepStream = step.ExecuteStep(acc, failFast);
-                        if (!failFast) {
-                            stepStream = stepStream.UseContext(true, FaultHub.PreserveLogicalStack.Wrap());
-                        }
-                        return stepStream
-                            .PushFrameConditionally(!string.IsNullOrEmpty(step.Name) ? step.Name : $"Part {allSteps.IndexOf(step) + 1}",step.FilePath,step.LineNumber, preserveContext: true)
-                            .Materialize().BufferUntilCompleted()
-                            .Select(notifications => {
-                                var ambientStackNow = FaultHub.LogicalStackContext.Value;
-                                LogFast($"AFTER step '{step.Name}' termination. Ambient LogicalStackContext has {ambientStackNow?.Count ?? 0} frames.");
-                                IReadOnlyList<LogicalStackFrame> finalStackForStep;
-                                if (!failFast) {
-                                    var errorNotification = notifications.FirstOrDefault(n => n.Kind == NotificationKind.OnError);
-                                    if (errorNotification?.Exception is ExceptionWithLogicalContext contextException) {
-                                        finalStackForStep = contextException.ContextPath;
-                                        LogFast($"Captured stack from ExceptionWithLogicalContext for failing step '{step.Name}'. It has {finalStackForStep.Count} frames.");
-                                    }
-                                    else {
-                                        finalStackForStep = FaultHub.LogicalStackContext.Value;
-                                    }
-                                }
-                                else {
-                                    finalStackForStep = ImmutableList<LogicalStackFrame>.Empty;
-                                }
-                                LogFast($"Captured finalStackForStep for step '{step.Name}'. It has {finalStackForStep?.Count ?? 0} frames.");
-                                
-                                LogFast($"Step '{step.Name}' completed. Received {notifications.Length} notifications ({notifications.Count(n => n.Kind == NotificationKind.OnNext)} OnNext, {notifications.Count(n => n.Kind == NotificationKind.OnError)} OnError).");
-                                var (stepResults, stepFailures, stepAllResults) = allSteps.CollectStepErrors( builder, notifications, step, acc, isNonCritical);
-                                var suppressedFailures = Current?.Failures.Where(f => !stepFailures.Contains(f)).ToList();
-                                var combinedFailures = !(suppressedFailures?.Any() ?? false) ? stepFailures : stepFailures.Concat(suppressedFailures).ToList();
-                                var stackForNextStep = stepFailures.Any() ? acc.logicalStack : finalStackForStep;
-                                var newAccumulator = (results: stepResults, failures: combinedFailures, allResults: stepAllResults, logicalStack: (IReadOnlyList<LogicalStackFrame>)stackForNextStep);
-                                LogFast($"[DIAGNOSTIC LOG] EXITING Select for step '{step.Name}'. NEW ACC logicalStack will have {newAccumulator.logicalStack?.Count ?? 0} frames.");
-                                return newAccumulator;
-                            });                                        
+                        
+                        LogFast($"{builder.TransactionName}: ENTERING step '{step.Name}'.");
+
+                        return ExecuteAndInstrumentStep(step, acc, failFast)
+                            .Materialize()
+                            .BufferUntilCompleted()
+                            .Select(notifications => ProcessStepCompletion(notifications, step, acc, builder, allSteps, failFast, isNonCritical));
+                        
                     }))
                 .Select(acc => (acc.results, acc.failures, acc.allResults))
                 .FlowContext(context:FaultHub.LogicalStackContext.Wrap());
@@ -197,7 +197,6 @@ namespace Xpand.Extensions.Reactive.Relay.Transaction {
         private static (object results, List<Exception> failures, List<object> allResults) CollectStepErrors<TFinal>(this List<StepDefinition> allSteps,
             TransactionBuilder<TFinal> builder, IReadOnlyList<Notification<object>> notifications, StepDefinition step,
             (object results, List<Exception> failures, List<object> allResults, IReadOnlyList<LogicalStackFrame> logicalStack) acc, Func<Exception, bool> isNonCritical = null){
-            LogFast($"PRE-PROCESSING for step '{step.Name}': acc.allResults.Count = {acc.allResults.Count}");
             var errorNotifications = notifications.Where(n => n.Kind == NotificationKind.OnError).ToList();
             if (errorNotifications.Any()) {
                 var stepErrors = string.Join(", ", errorNotifications.Select(n => n.Exception?.GetType().Name));
@@ -211,9 +210,6 @@ namespace Xpand.Extensions.Reactive.Relay.Transaction {
             }
             var allResults = acc.allResults.Concat(results).ToList();
             var failures = acc.failures.Concat(allSteps.CollectErrors(builder, errorNotifications, step, results, isNonCritical)).ToList();
-            LogFast($"POST-PROCESSING for step '{step.Name}': allResults.Count = {allResults.Count}, failures.Count = {failures.Count}");
-            var exitFailures = failures.Any() ? string.Join(", ", failures.Select(f => f.GetType().Name)) : "empty";
-            LogFast($"{builder.TransactionName}: EXITING step '{step.Name}'. Accumulator now has {failures.Count} failure(s): [{exitFailures}]");
             return (results,  failures, allResults);
         }
         public static IObservable<TFinal[]> RunToEnd<TFinal>(this ITransactionBuilder<TFinal> builder, DataSalvageStrategy dataSalvageStrategy = DataSalvageStrategy.EmitPartialResults) 
@@ -243,7 +239,6 @@ namespace Xpand.Extensions.Reactive.Relay.Transaction {
             var stepNameForContext = !string.IsNullOrEmpty(step.Name) ? step.Name : $"Part {allSteps.IndexOf(step) + 1}";
             var isNonCriticalCheck = step.IsNonCritical ?? (_ => false);
             return errors.Select(e => {
-                LogFast($"Processing exception of type '{e.Exception?.GetType().Name}'.");
                 var effectiveStrategy = step.DataSalvageStrategy == DataSalvageStrategy.Inherit ? builder.DataSalvageStrategy : step.DataSalvageStrategy;
                 if (effectiveStrategy is DataSalvageStrategy.EmitPartialResults or DataSalvageStrategy.EmitEmpty) {
                     var salvagedData = effectiveStrategy == DataSalvageStrategy.EmitPartialResults ? stepResults : new List<object>();
@@ -276,7 +271,6 @@ namespace Xpand.Extensions.Reactive.Relay.Transaction {
                 }
 
                 if (e.Exception is ExceptionWithLogicalContext exceptionWithContext) {
-                    LogFast($"Found ExceptionWithLogicalContext. Building context from its captured stack.");
                     foreach (DictionaryEntry entry in exceptionWithContext.Data) {
                         if (!exceptionWithContext.OriginalException.Data.Contains(entry.Key)) {
                             exceptionWithContext.OriginalException.Data[entry.Key] = entry.Value;
@@ -290,8 +284,6 @@ namespace Xpand.Extensions.Reactive.Relay.Transaction {
                     };
                     return exceptionWithContext.OriginalException.ExceptionToPublish(completeContext);
                 }
-                
-                LogFast($"Wrapping exception. Applying tags: [{string.Join(", ", tags)}]. Step context: '{stepNameForContext}'.");
                 var fallbackContext = new AmbientFaultContext {
                     LogicalStackTrace = FaultHub.LogicalStackContext.Value,
                     BoundaryName = stepNameForContext,

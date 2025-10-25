@@ -99,7 +99,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Core {
 
             
             BusEvents.Count.ShouldBe(2);
-            var faults = BusEvents.OfType<FaultHubException>().ToList();
+            var faults = BusEvents.ToList();
 
             
             var faultA = faults.Single(f => f.AllContexts.Contains("StreamA_Boundary"));

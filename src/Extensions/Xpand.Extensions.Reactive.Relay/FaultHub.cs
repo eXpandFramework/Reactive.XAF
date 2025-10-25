@@ -249,7 +249,6 @@ namespace Xpand.Extensions.Reactive.Relay {
                 if (e is ExceptionWithLogicalContext contextEx) {
                     LogFast($"Path: ExceptionToPublish(null) received a wrapped exception. Using its context.");
                     var newContext = new AmbientFaultContext { LogicalStackTrace = contextEx.ContextPath };
-                    // Recurse with the unwrapped exception and the newly created context.
                     return contextEx.OriginalException.ExceptionToPublish(newContext);
                 }
                 LogFast($"contextToUse is null, returning original exception.");
