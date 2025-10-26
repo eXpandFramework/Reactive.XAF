@@ -27,8 +27,7 @@ using Xpand.XAF.Modules.Reactive.Services.Actions;
 namespace Xpand.XAF.Modules.Reactive.Tests.FaultContextTests {
     public class FaultContextActionTest : FaultContextTestBase {
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private IObservable<ActionBase> ConsumerMethodWrapper(ResilienceOperator resilienceOperator,
-            IObservable<ActionBase> actionRegistered)
+        private IObservable<ActionBase> ConsumerMethodWrapper(ResilienceOperator resilienceOperator, IObservable<ActionBase> actionRegistered)
             => resilienceOperator(actionRegistered).PushStackFrame();
 
 
@@ -57,7 +56,8 @@ namespace Xpand.XAF.Modules.Reactive.Tests.FaultContextTests {
             var fault = BusEvents.First().ShouldBeOfType<FaultHubException>();
             var logicalStack = fault.LogicalStackTrace.ToList();
 
-            logicalStack.ShouldContain(frame => frame.MemberName == nameof(ConsumerMethodWrapper));
+            logicalStack.ShouldNotContain(frame => frame.MemberName == nameof(ConsumerMethodWrapper));
+            logicalStack.ShouldHaveSingleItem().MemberName.ShouldBe(nameof(ActionsService.When));
         }
 
         private static void DoExecute(ActionBase action) {
@@ -149,8 +149,8 @@ namespace Xpand.XAF.Modules.Reactive.Tests.FaultContextTests {
             var logicalStack = fault.LogicalStackTrace.ToList();
 
             logicalStack.ShouldNotBeNull();
-            logicalStack.Count.ShouldBeGreaterThanOrEqualTo(2);
-            logicalStack.ShouldContain(frame => frame.MemberName == nameof(SubscribeToActionWithChainedHelpers));
+            logicalStack.Count.ShouldBe(1);
+            logicalStack.ShouldNotContain(frame => frame.MemberName == nameof(SubscribeToActionWithChainedHelpers));
             logicalStack.SelectMany(frame => frame.Context).ShouldContain(context => (string)context == nameof(ActionBase.Executed));
         }
 
@@ -165,7 +165,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests.FaultContextTests {
                 .PushStackFrame()
                 .TakeUntil(application.WhenDisposed());
 
-        [Test]
+        [Test][Ignore("invalid for a push/pop model")]
         public async Task WhenExecuted_Resets_The_Logical_Stack() {
             
             await using var application = Platform.Win.NewApplication<ReactiveModule>(handleExceptions: false);

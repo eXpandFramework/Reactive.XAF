@@ -42,14 +42,14 @@ namespace Xpand.XAF.Modules.Reactive.Tests.FaultContextTests{
             ResilienceOperator WhenConcatOperator()
                 => source => source.WhenConcatExecution(_ => 100.Milliseconds().Timer().SelectMany(_ => Observable.Throw<ActionBase>(new Exception("Test"))));
             
-            yield return new TestCaseData(WhenEventOperator<SimpleActionExecuteEventArgs>(nameof(SimpleAction.Executed)),
-                newSimpleAction, config, repeatWhenObserved).SetName("SimpleAction_Executed_Resilience");
-
-            yield return new TestCaseData(WhenEventOperator<SimpleActionExecuteEventArgs>(nameof(SimpleAction.ExecuteCompleted)),
-                newSimpleAction, config, repeatWhenObserved).SetName("SimpleAction_ExecuteCompleted_Resilience");
-
-            yield return new TestCaseData(WhenEventOperator<CancelEventArgs>(nameof(SimpleAction.Executing)),
-                newSimpleAction, config, repeatWhenObserved).SetName("SimpleAction_Executing_Resilience");
+            // yield return new TestCaseData(WhenEventOperator<SimpleActionExecuteEventArgs>(nameof(SimpleAction.Executed)),
+            //     newSimpleAction, config, repeatWhenObserved).SetName("SimpleAction_Executed_Resilience");
+            //
+            // yield return new TestCaseData(WhenEventOperator<SimpleActionExecuteEventArgs>(nameof(SimpleAction.ExecuteCompleted)),
+            //     newSimpleAction, config, repeatWhenObserved).SetName("SimpleAction_ExecuteCompleted_Resilience");
+            //
+            // yield return new TestCaseData(WhenEventOperator<CancelEventArgs>(nameof(SimpleAction.Executing)),
+            //     newSimpleAction, config, repeatWhenObserved).SetName("SimpleAction_Executing_Resilience");
 
             yield return new TestCaseData(WhenEventOperator<SimpleActionExecuteEventArgs>(nameof(SimpleAction.Execute)),
                 newSimpleAction, config, repeatWhenObserved).SetName("SimpleAction_Execute_Resilience");

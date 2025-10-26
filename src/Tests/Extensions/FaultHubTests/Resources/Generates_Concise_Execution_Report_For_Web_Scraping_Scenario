@@ -5,8 +5,9 @@ Schedule Web Scraping completed with errors [Transaction, Sequential, RunToEnd] 
   │   --- Invocation Stack ---
   │     at GetPageLinks in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenario2Tests.cs:line 42
   │     at Unit.Default.Observe in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenario2Tests.cs:line 41
-  │     at ExtractAndProcessLinks in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenario2Tests.cs:line 41
-  │     at ScheduleWebScraping in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\Diagnostics\ProductionScenario2Tests.cs:line 46
+  │     at ExtractAndProcessLinks in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenario2Tests.cs:line 47
+  │     at Extract And Process Links in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\Diagnostics\ProductionScenario2Tests.cs:line 41
+  │     at Schedule Web Scraping in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\Diagnostics\ProductionScenario2Tests.cs:line 46
   │   --- Original Exception Details ---
   │     System.Exception: Failed to get links
   └ Scrape Data From Links [Step, Transaction, Sequential, Nested, RunToEnd]
@@ -17,11 +18,14 @@ Schedule Web Scraping completed with errors [Transaction, Sequential, RunToEnd] 
             --- Invocation Stack ---
               at Extract Content in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenario2Tests.cs:line 26
               at Unit.Default.Observe in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenario2Tests.cs:line 25
-              at DataExtractionTransaction in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenario2Tests.cs:line 25
-              at WhenLinkScraped in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenario2Tests.cs:line 31
-              at ScrapeDataFromLinks in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenario2Tests.cs:line 35
-              at GetPageLinks in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenario2Tests.cs:line 42
-              at ExtractAndProcessLinks in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenario2Tests.cs:line 41
-              at ScheduleWebScraping in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\Diagnostics\ProductionScenario2Tests.cs:line 46              
+              at DataExtractionTransaction in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenario2Tests.cs:line 32
+              at Data Extraction Transaction in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\Diagnostics\ProductionScenario2Tests.cs:line 25
+              at WhenLinkScraped in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenario2Tests.cs:line 36
+              at When Link Scraped in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\Diagnostics\ProductionScenario2Tests.cs:line 31
+              at ScrapeDataFromLinks in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenario2Tests.cs:line 43
+              at Scrape Data From Links in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\Diagnostics\ProductionScenario2Tests.cs:line 35
+              at ExtractAndProcessLinks in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\FaultHubExtensionTest\ProductionScenario2Tests.cs:line 47
+              at Extract And Process Links in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\Diagnostics\ProductionScenario2Tests.cs:line 41
+              at Schedule Web Scraping in C:\Work\Reactive.XAF\src\Tests\Extensions\FaultHubTests\Diagnostics\ProductionScenario2Tests.cs:line 46        
             --- Original Exception Details ---
               System.Exception: Failed to extract content

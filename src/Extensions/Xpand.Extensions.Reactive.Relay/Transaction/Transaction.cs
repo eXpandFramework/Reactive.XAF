@@ -31,7 +31,7 @@ namespace Xpand.Extensions.Reactive.Relay.Transaction {
                 var abortedException = ex.CreateAbortedException( ib);
                 LogFast($"Throwing exception of type: {abortedException.GetType().FullName}");
                 return abortedException.Throw<TFinal[]>();
-            });
+            }).FlowContext(context:FaultHub.LogicalStackContext.Wrap());
 
         
         public static IObservable<TFinal> RunAndCollect<TFinal>(this ITransactionBuilder<object> builder, Func<object[], IObservable<TFinal>> resultSelector)
@@ -99,6 +99,7 @@ namespace Xpand.Extensions.Reactive.Relay.Transaction {
             allSteps.AddRange(builder.SubsequentSteps);
             return (failFast ? allSteps.FailFast(builder, isNonCritical) : builder.RunToEnd(allSteps,  collectAllResults)).Finally(() => {
                 TransactionNestingLevel.Value--;
+                var transactionBuilder = builder;
                 FaultHub.LogicalStackContext.Value = null;
             });
         }
@@ -122,7 +123,7 @@ namespace Xpand.Extensions.Reactive.Relay.Transaction {
                 : primaryBus.Catch((Exception ex) => step.FallbackSelector(ex, acc.results));
         }
         
-         private static IObservable<object> ExecuteAndInstrumentStep(StepDefinition step, (object results, List<Exception> failures, List<object> allResults, IReadOnlyList<LogicalStackFrame> logicalStack) acc, bool failFast) {
+         private static IObservable<object> Execute(this StepDefinition step, (object results, List<Exception> failures, List<object> allResults, IReadOnlyList<LogicalStackFrame> logicalStack) acc, bool failFast) {
             var stepStream = step.ExecuteStep(acc, failFast);
             if (!failFast) {
                 stepStream = stepStream.UseContext(true, FaultHub.PreserveLogicalStack.Wrap());
@@ -153,11 +154,8 @@ namespace Xpand.Extensions.Reactive.Relay.Transaction {
             var (stepResults, stepFailures, stepAllResults) = allSteps.CollectStepErrors(builder, notifications, step, acc, isNonCritical);
             var suppressedFailures = Current?.Failures.Where(f => !stepFailures.Contains(f)).ToList();
             var combinedFailures = !(suppressedFailures?.Any() ?? false) ? stepFailures : stepFailures.Concat(suppressedFailures).ToList();
-            
             var stackForNextStep = stepFailures.Any() ? acc.logicalStack : finalStackForStep;
-            
-            var newAccumulator = (results: stepResults, failures: combinedFailures, allResults: stepAllResults, logicalStack: (IReadOnlyList<LogicalStackFrame>)stackForNextStep);
-            return newAccumulator;
+            return (results: stepResults, failures: combinedFailures, allResults: stepAllResults, logicalStack: stackForNextStep);
         }
         
         private static IObservable<(object finalStepResult, List<Exception> allFailures, List<object> allResults)> ExecuteStepChain<TFinal>(this List<StepDefinition> allSteps, TransactionBuilder<TFinal> builder, bool failFast, Func<Exception, bool> isNonCritical = null)  
@@ -174,7 +172,7 @@ namespace Xpand.Extensions.Reactive.Relay.Transaction {
                         
                         LogFast($"{builder.TransactionName}: ENTERING step '{step.Name}'.");
 
-                        return ExecuteAndInstrumentStep(step, acc, failFast)
+                        return step.Execute( acc, failFast)
                             .Materialize()
                             .BufferUntilCompleted()
                             .Select(notifications => ProcessStepCompletion(notifications, step, acc, builder, allSteps, failFast, isNonCritical));

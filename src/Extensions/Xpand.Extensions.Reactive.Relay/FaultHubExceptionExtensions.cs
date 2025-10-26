@@ -82,11 +82,11 @@ namespace Xpand.Extensions.Reactive.Relay {
                 return string.Empty;
             }
             var blacklistedPatterns = FaultHub.BlacklistedFilePathRegexes;
-            if (!blacklistedPatterns.Any()) return logicalStack.RenderSimpleStack();
             var sb = new StringBuilder();
             sb.AppendLine("--- Invocation Stack ---");
             sb.BuildRenderedStackString( logicalStack,blacklistedPatterns);
-            return sb.ToString().TrimEnd();        }
+            return sb.ToString().TrimEnd();
+        }
 
         public record GroupedStackFrame(LogicalStackFrame Frame, int Count);
 
@@ -103,7 +103,7 @@ namespace Xpand.Extensions.Reactive.Relay {
             var consecutiveCount = 1;
 
             while (enumerator.MoveNext()) {
-                if (enumerator.Current.Equals(currentFrame)) {
+                if (enumerator.Current.MemberName == currentFrame.MemberName && enumerator.Current.FilePath == currentFrame.FilePath) {
                     consecutiveCount++;
                 } else {
                     grouped.Add(consecutiveCount > 1 ? new GroupedStackFrame(currentFrame, consecutiveCount) : currentFrame);

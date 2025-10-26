@@ -31,7 +31,7 @@ namespace Xpand.Extensions.Reactive.Relay{
         
         public void OnError(Exception error) {
             LogFast($"PushStackFrameObserver received exception of type: {error.GetType().FullName}");
-            if (error is FaultHubException ) {
+            if (error.GetType() ==typeof(FaultHubException) ) {
                 downstream.OnError(error);
                 return;
             }
@@ -105,7 +105,13 @@ public static class ChainFaultContextService {
                     }
                 
                     var fullStack = logicalStack.ToList();
-                    if (fullStack.All(f => f.MemberName != memberName)) {
+                    var existingFrameIndex = fullStack.FindIndex(f => f.MemberName == memberName);
+                    if (existingFrameIndex > -1) {
+                        var existingFrame = fullStack[existingFrameIndex];
+                        var newContext = (existingFrame.Context ?? []).Concat(context ?? []).Distinct().ToArray();
+                        fullStack[existingFrameIndex] = new LogicalStackFrame(memberName, filePath, lineNumber, newContext);
+                    }
+                    else {
                         fullStack.Add(new LogicalStackFrame(memberName, filePath, lineNumber, context));
                     }
                 
