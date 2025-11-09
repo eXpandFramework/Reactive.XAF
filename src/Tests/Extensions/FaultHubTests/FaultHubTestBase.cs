@@ -14,11 +14,12 @@ using Xpand.Extensions.Numeric;
 using Xpand.Extensions.Reactive.ErrorHandling;
 using Xpand.Extensions.Reactive.Relay;
 using Xpand.Extensions.StringExtensions;
+using Xpand.Extensions.Tracing;
 using Xpand.TestsLib;
 
 namespace Xpand.Extensions.Tests.FaultHubTests{
     public class FaultHubTestBase:BaseTest {
-        public FaultHubTestBase() => FaultHub.Logging = true;
+        public FaultHubTestBase() => FastLogger.Enabled = false;
 
         protected class TestResource : IDisposable {
             public bool IsDisposed { get; private set; }

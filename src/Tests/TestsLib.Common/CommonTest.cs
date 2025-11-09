@@ -42,15 +42,15 @@ namespace Xpand.TestsLib.Common{
             if (File.Exists(fileName)) {
                 File.Delete(fileName);
             }
-            FastLogger.Enabled = true;
-            FastLogger.Write = message => {
-                Console.WriteLine(message);
-                Debug.WriteLine(message);
-                TestContext.Out.WriteLine(message);
-                lock (FileLock) {
-                    File.AppendAllText(fileName, message + Environment.NewLine);
-                }
-            };
+            FastLogger.Enabled = false;
+            // FastLogger.Write = message => {
+            //     Console.WriteLine(message);
+            //     Debug.WriteLine(message);
+            //     TestContext.Out.WriteLine(message);
+            //     // lock (FileLock) {
+            //     //     File.AppendAllText(fileName, message + Environment.NewLine);
+            //     // }
+            // };
         }
 
         private void CleanTempFolder() {

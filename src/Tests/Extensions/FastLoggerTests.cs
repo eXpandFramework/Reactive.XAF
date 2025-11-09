@@ -16,7 +16,7 @@ namespace Xpand.Extensions.Tests {
             _logOutput = new List<string>();
             _originalWriter = Write;
             Write = message => _logOutput.Add(message);
-            Enabled = true;
+            Enabled = false;
         }
 
         [TearDown]
