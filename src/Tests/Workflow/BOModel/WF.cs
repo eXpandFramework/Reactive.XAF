@@ -20,6 +20,13 @@ namespace Xpand.XAF.Modules.Workflow.Tests.BOModel{
             get => _status;
             set => SetPropertyValue(nameof(Status), ref _status, value);
         }
+
+        string _name;
+
+        public string Name {
+            get => _name;
+            set => SetPropertyValue(nameof(Name), ref _name, value);
+        }
     }
 
     [DefaultProperty(nameof(Id))]

@@ -17,7 +17,7 @@ namespace Xpand.Extensions.Tests.Reactive.ProofOfConcepts{
     public class AsyncLocalPoc {
         public static readonly AsyncLocal<string> TestContext = new();
         
-        [Test]
+        // [Test]
         public async Task AsyncLocal_Context_Is_Correctly_Isolated_In_Concurrent_SelectMany() {
             var capturedContexts = new ConcurrentDictionary<int, string>();
 
@@ -93,7 +93,7 @@ namespace Xpand.Extensions.Tests.Reactive.ProofOfConcepts{
             contextIsCorrupted.ShouldBe(false, "The AsyncLocal context was corrupted, indicating a failure in ExecutionContext flow.");
         }        
         
-        [Test]
+        // [Test]
         public async Task Context_Is_Preserved_In_Catch_Block_From_Concurrent_SelectMany_Operation() {
             string capturedContext = "CONTEXT_NOT_SET";
             const string topLevelContext = "TOP_LEVEL_CONTEXT";

@@ -122,6 +122,16 @@ The `Workflow` module's behavior is guaranteed by a comprehensive suite of autom
     *   **`SkipTopReturnObjects`:** Skips the specified number of objects from the beginning of the result set. This requires at least one `SortProperties` entry to ensure a deterministic order.
     *   **`SortProperties`:** Defines the sort order for the query, enabling stable paging.
 
+#### ObjectModifiedWorkflowCommand
+*   **Execution on Modification:** The command executes when a change to a specific, monitored property of a configured business object type is committed to the database.
+*   **Filtering and Specificity:**
+    *   **`Criteria`:** The command only triggers for objects that satisfy the specified criteria at the time of the commit.
+    *   **`Member` Specificity:** The command only triggers if the change was made to the specific property it is configured to monitor. Changes to other properties on the same object are ignored.
+    *   **`Object` Specificity:** The command only triggers for modifications to the specific business object type it is configured to monitor.
+*   **Reactive Processing:**
+    *   **Batching:** Rapid, sequential modifications to multiple objects are batched into a single execution, with the output containing all modified objects from that batch.
+    *   **De-duplication:** If the same object is modified multiple times within the batching window, only its final, most recent state is included in the output.
+
 #### Command & Suite Lifecycle Management
 *   **`ExecuteOnce` Behavior:** A command with `ExecuteOnce = true` executes exactly one time and is then automatically set to `Active = false`.
 *   **Inactive Root Command:** A root command with `Active = false` is ignored by the scheduler.

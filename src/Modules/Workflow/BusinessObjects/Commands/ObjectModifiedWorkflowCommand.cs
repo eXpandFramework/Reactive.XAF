@@ -31,6 +31,7 @@ namespace Xpand.XAF.Modules.Workflow.BusinessObjects.Commands{
 
         [EditorAlias(DevExpress.ExpressApp.Editors.EditorAliases.CriteriaPropertyEditor)]
         [CriteriaOptions(nameof(CriteriaType))][Size(-1)]
+        [ToolTip("Optional. A filter criteria to apply. The command will only trigger if the modified object matches this criteria at the time of the commit.")]
         public string Criteria{
             get => _criteria;
             set => SetPropertyValue(nameof(Criteria), ref _criteria, value);
@@ -42,6 +43,7 @@ namespace Xpand.XAF.Modules.Workflow.BusinessObjects.Commands{
         ObjectString _object;
 
         [DataSourceProperty(nameof(Objects))][RuleRequiredField]
+        [ToolTip("The business object type to monitor for changes.")]
         public ObjectString Object{
             get => Objects.FirstOrDefault(s => s.Name==_objectName);
             set{
@@ -53,6 +55,7 @@ namespace Xpand.XAF.Modules.Workflow.BusinessObjects.Commands{
         ObjectString _member;
 
         [DataSourceProperty(nameof(Members))][RuleRequiredField]
+        [ToolTip("The specific property on the object to monitor. The command will only trigger when this property is modified.")]
         public ObjectString Member{
             get => Members.FirstOrDefault(s => s.Name==_memberName);
             set{
@@ -106,7 +109,10 @@ namespace Xpand.XAF.Modules.Workflow.BusinessObjects.Commands{
                     .Select(o => (o,key:t.objectSpace.GetKeyValue(o))).ToArray()))
                 .Where(t => t.objects.Length>0)
                 .BufferUntilInactive(2.Seconds()).WhenNotEmpty()
-                .Select(list => list.SelectMany(t => t.objects).DistinctBy(o => $"{o.GetType()}{o.key}").Select(t => t.o).ToArray())
+                .Select(list => list.SelectMany(t => t.objects)
+                    .GroupBy(o => $"{o.o.GetType()}{o.key}")
+                    .Select(group => group.Last().o)
+                    .ToArray())
                 .Select(objects1 => objects1);
             
         }
