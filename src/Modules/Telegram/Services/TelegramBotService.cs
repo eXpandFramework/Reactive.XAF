@@ -16,6 +16,7 @@ using Telegram.Bot.Types.Enums;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Numeric;
 using Xpand.Extensions.Reactive;
+using Xpand.Extensions.Reactive.Channels;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.ErrorHandling;
 using Xpand.Extensions.Reactive.Relay;
@@ -93,8 +94,10 @@ namespace Xpand.XAF.Modules.Telegram.Services{
                     action.ImageName = "TelegramSendMessage";
                 })
                 .WhenExecuted(e => e.CreateDialogController(e.NewDetailView(typeof(TelegramMessage)),"Send")
-                    .SelectMany(controller => controller.AcceptAction.WhenConcatExecution(e1 => ((TelegramBot)e.View().CurrentObject)
-                        .SendText(((TelegramMessage)e1.View().CurrentObject).Text))))
+                    .SelectMany(controller => controller.AcceptAction
+                        .WhenConcatExecution(e1 => ((TelegramBot)e.View().CurrentObject).SendText(((TelegramMessage)e1.View().CurrentObject).Text)
+                            // .Timeout(10.ToSeconds())
+                        )))
                 .ToUnit();
 
         

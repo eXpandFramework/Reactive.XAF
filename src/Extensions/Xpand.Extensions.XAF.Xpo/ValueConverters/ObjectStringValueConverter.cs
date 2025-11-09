@@ -8,7 +8,7 @@ namespace Xpand.Extensions.XAF.Xpo.ValueConverters {
             => value is ObjectString objectString ? objectString.Name : null;
 
         public override object ConvertFromStorageType(object value) 
-            => new ObjectString((string) value);
+            => value==null ? null : new ObjectString((string)value);
 
         public override Type StorageType { get; } = typeof(string);
     }

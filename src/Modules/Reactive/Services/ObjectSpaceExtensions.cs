@@ -215,8 +215,11 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             return links.Finally(objectSpace.CommitChanges).ToNowObservable().PushStackFrame();
         }
 
-        public static IObservable<T> Commit<T>(this T link) where T:IObjectSpaceLink
-            => Observable.If(() => link!=null,link.Defer(() => link.ObjectSpace.CommitChangesAsync().ToObservable().To(link))).PushStackFrame();
+        public static IObservable<T> Commit<T>(this T link,bool validate=false) where T:IObjectSpaceLink
+            => Observable.If(() => link!=null,link.Defer(() => {
+                if (validate) link.ObjectSpace.Validate();
+                return link.ObjectSpace.CommitChangesAsync().ToObservable().To(link);
+            })).PushStackFrame();
         
         public static IObservable<T> Commit<T>(this IObservable<T> source,RXAction action=RXAction.OnCompleted) where T:IObjectSpaceLink {
             if (action == RXAction.OnCompleted) {

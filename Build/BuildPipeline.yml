@@ -104,6 +104,8 @@ jobs:
       #   TestAssembly: '**/Xpand.XAF.Modules.Reactive.Rest.Tests.dll'
       RefreshView:
         TestAssembly: '**/Xpand.XAF.Modules.RefreshView.Tests.dll'
+      Workflow:
+        TestAssembly: '**/Xpand.XAF.Modules.Workflow.Tests.dll'
       SuppressConfirmation:
         TestAssembly: '**/Xpand.XAF.Modules.SuppressConfirmation.Tests.dll'
       ViewEditMode:

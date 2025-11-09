@@ -255,34 +255,7 @@ namespace Xpand.TestsLib.Common{
             {"TenantManagerModule", 61493},
             {"SpeechManagerModule", 61494},
         };
-
-        public static TestObserver<T> StartWinTest<T>(this XafApplication application, IObservable<T> test,int delay = 200) 
-            => application.Start2(application.WhenFrame(Nesting.Root).Take(1)
-                .Do(_ => SynchronizationContext.SetSynchronizationContext((SynchronizationContext)AppDomain.CurrentDomain
-                    .GetAssemblyType("System.Windows.Forms.WindowsFormsSynchronizationContext").CreateInstance()))
-                .SelectMany(frame => (frame.Template)
-                    .ProcessEvent("Activated").Take(1).WaitUntilInactive(2.Seconds()).Take(1).ObserveOnContext()
-                    .SelectMany(_ => test.BufferUntilCompleted().Do(_ => application.Exit()).SelectMany()))
-                .DoNotComplete(),delay);
         
-        [Obsolete]
-        public static TestObserver<T> StartWinTest2<T>(this XafApplication application, Func<Frame,IObservable<T>> testFactory,int delay = 200) {
-            var testWithProperContext = Observable.Defer(() => {
-                var originalSyncContext = SynchronizationContext.Current;
-
-                var winformsSyncContextType = AppDomain.CurrentDomain.GetAssemblyType("System.Windows.Forms.WindowsFormsSynchronizationContext");
-                SynchronizationContext.SetSynchronizationContext((SynchronizationContext)winformsSyncContextType.CreateInstance());
-
-                var testObservable = application.WhenFrame(Nesting.Root).Take(1)
-                    .SelectMany(frame => (frame.Template)
-                        .ProcessEvent("Activated").Take(1).WaitUntilInactive(2.Seconds()).Take(1).ObserveOnContext()
-                        .SelectMany(_ => testFactory(frame).BufferUntilCompleted().Do(_ => application.Exit()).SelectMany()));
-
-                return testObservable.Finally(() => SynchronizationContext.SetSynchronizationContext(originalSyncContext));
-            });
-
-            return application.Start2(testWithProperContext.DoNotComplete(), delay);
-        }
         public static IObservable<T> StartWinTest<T>(this XafApplication application, Func<Frame,IObservable<T>> testFactory,int delay = 200) 
             => application.Start(Observable.Defer(() => {
                 var originalSyncContext = SynchronizationContext.Current;
@@ -295,11 +268,6 @@ namespace Xpand.TestsLib.Common{
                     .Finally(() => SynchronizationContext.SetSynchronizationContext(originalSyncContext));
             }), delay);
 
-        public static TestObserver<T> Start2<T>(this XafApplication application,IObservable<T> test,int delay=200) {
-            var testObserver = test.Test();
-            application.CallMethod("Start");
-            return testObserver;
-        }
         public static IObservable<T> Start<T>(this XafApplication application,IObservable<T> test,int delay=200) {
             var testObserver = test;
             
@@ -391,16 +359,16 @@ namespace Xpand.TestsLib.Common{
             => platform.NewApplication<TModule>().AddModule<TModule>(title, additionalExportedTypes);
 
         public static Type ApplicationType { get; set; }
-        public static XafApplication NewApplication<TModule>(this Platform platform, bool transmitMessage = true,bool handleExceptions=true,bool usePersistentStorage=false)
+        public static XafApplication NewApplication<TModule>(this Platform platform, bool transmitMessage = true,bool handleExceptions=true,bool usePersistentStorage=false,bool mockEditors=true)
             where TModule : ModuleBase 
-	        => platform.NewXafApplication<TModule>(transmitMessage, handleExceptions).Configure<TModule>(platform, transmitMessage, usePersistentStorage);
+	        => platform.NewXafApplication<TModule>(transmitMessage, handleExceptions).Configure<TModule>(platform, transmitMessage, usePersistentStorage,mockEditors);
 
-        public static XafApplication Configure<TModule>(this XafApplication application,Platform platform, bool transmitMessage = true, bool usePersistentStorage=false) where TModule : ModuleBase {
+        public static XafApplication Configure<TModule>(this XafApplication application,Platform platform, bool transmitMessage = true, bool usePersistentStorage=false,bool mockEditors=true) where TModule : ModuleBase {
             application.ConnectionString = usePersistentStorage ? @$"Integrated Security=SSPI;Pooling=false;Data Source=(localdb)\mssqllocaldb;Initial Catalog={typeof(TModule).Name}" : InMemoryDataStoreProvider.ConnectionString;
             application.DatabaseUpdateMode = DatabaseUpdateMode.UpdateDatabaseAlways;
 	        application.CheckCompatibilityType = CheckCompatibilityType.DatabaseSchema;
 	        application.ConfigureModel<TModule>(transmitMessage).SubscribeReplay();
-	        application.MockEditorsFactory();
+            if (mockEditors) application.MockEditorsFactory();
 
 	        if (platform == Platform.Web) {
 		        var frameTemplateFactoryMock = new Mock<IFrameTemplateFactory>();

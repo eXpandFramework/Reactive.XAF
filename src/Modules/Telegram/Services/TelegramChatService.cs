@@ -10,7 +10,7 @@ using Telegram.Bot.Exceptions;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Xpand.Extensions.LinqExtensions;
-using Xpand.Extensions.Reactive;
+using Xpand.Extensions.Reactive.Channels;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.ErrorHandling;

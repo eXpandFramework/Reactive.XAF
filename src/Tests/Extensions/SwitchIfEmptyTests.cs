@@ -9,9 +9,9 @@ namespace Xpand.Extensions.Tests {
         [Test]
         public void SwitchIfEmpty_SourceNotEmpty_ShouldNotSwitch() {
             var source = Observable.Range(1, 5);
-            var switchTo = Observable.Range(10, 5);
+            var switchTo=Observable.Defer(() => Observable.Range(10, 5));
             var result = source.SwitchIfEmpty(switchTo);
-            result.ToEnumerable().ShouldBe(new[] { 1, 2, 3, 4, 5 });
+            result.ToEnumerable().ShouldBe([1, 2, 3, 4, 5]);
         }
 
         [Test]
@@ -20,7 +20,7 @@ namespace Xpand.Extensions.Tests {
             var switchTo = Observable.Range(10, 5);
             var result = source.SwitchIfEmpty(switchTo);
             var enumerable = result.ToEnumerable();
-            enumerable.ShouldBe(new[] { 10, 11, 12, 13, 14 });
+            enumerable.ShouldBe([10, 11, 12, 13, 14]);
         }
 
         [Test]
@@ -28,7 +28,7 @@ namespace Xpand.Extensions.Tests {
             var source = Observable.Range(1, 5);
             var switchTo = Observable.Empty<int>();
             var result = source.SwitchIfEmpty(switchTo);
-            result.ToEnumerable().ShouldBe(new[] { 1, 2, 3, 4, 5 });
+            result.ToEnumerable().ShouldBe([1, 2, 3, 4, 5]);
         }
 
         [Test]

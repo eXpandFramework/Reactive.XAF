@@ -19,11 +19,7 @@ using Xpand.XAF.Modules.Reactive;
 namespace Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects {
     [Appearance("DisableSelectedObjectsCriteria",AppearanceItemType.ViewItem, nameof(Object)+" Is Null",TargetItems = nameof(SelectedObjectsCriteria),Enabled = false)]
     [Appearance("HideParameter",AppearanceItemType.ViewItem, nameof(IsParameterDisabled)+"=true",TargetItems = nameof(Parameter),Enabled = false)]
-    public class ExecuteActionJob : Job {
-        
-        public ExecuteActionJob(Session session) : base(session) {
-        }
-
+    public class ExecuteActionJob(Session session) : Job(session) {
         public override void AfterConstruction() {
             base.AfterConstruction();
             JobType = new ObjectType(typeof(Jobs.ExecuteActionJob));

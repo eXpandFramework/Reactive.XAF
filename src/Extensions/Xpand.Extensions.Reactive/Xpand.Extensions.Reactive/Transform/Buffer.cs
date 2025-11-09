@@ -29,12 +29,12 @@ namespace Xpand.Extensions.Reactive.Transform {
         public static IObservable<IList<T>> BufferUntilInactive<T>(this IObservable<T> source, int seconds,IScheduler scheduler=null)
             => source.BufferUntilInactive(seconds.Seconds(),scheduler);
         
-        public static IObservable<IEnumerable<T>> BufferWithInactivity<T>(this IObservable<T> source, TimeSpan inactivity, TimeSpan? maxBufferTime=null,IScheduler scheduler=null) {
+        public static IObservable<T[]> BufferWithInactivity<T>(this IObservable<T> source, TimeSpan inactivity, TimeSpan? maxBufferTime=null,IScheduler scheduler=null) {
             if (maxBufferTime.HasValue && maxBufferTime.Value < inactivity)
                 throw new ArgumentException("maxBufferTime must be greater than or equal to inactivity", nameof(maxBufferTime));
             maxBufferTime ??= inactivity * 3;
 
-            return Observable.Create<IEnumerable<T>>(observer => {
+            return Observable.Create<T[]>(observer => {
                 var gate = new object();
                 var buffer = new List<T>();
                 var inactivityTimer = new SerialDisposable();

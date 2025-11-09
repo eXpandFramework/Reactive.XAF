@@ -295,8 +295,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static IObservable<IObjectSpace> WhenProviderObjectSpaceCreated(this XafApplication application,Func<IObjectSpaceProvider> provider=null) {
             var objectSpaceProvider = provider?.Invoke() ?? application.ObjectSpaceProvider;
-            return application.ObjectSpaceProviders.Where(spaceProvider => spaceProvider == objectSpaceProvider)
-                .ToNowObservable()
+            return application.ObjectSpaceProviders.Where(spaceProvider => spaceProvider == objectSpaceProvider).ToNowObservable()
                 .SelectMany(spaceProvider => spaceProvider.WhenObjectSpaceCreated());
         }
 
@@ -531,6 +530,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<XafApplication> WhenLoggedOff(this XafApplication application) 
             => application.ProcessEvent(nameof(XafApplication.LoggedOff)).To(application);
 
+        
         public static IObservable<XafApplication> WhenSetupComplete(this XafApplication application,bool emitIfSetupAlready=true) 
             => emitIfSetupAlready && application.MainWindow != null ? application.Observe()
                 : application.ProcessEvent(nameof(XafApplication.SetupComplete)).Take(1)
@@ -686,7 +686,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         
         public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)> WhenProviderCommittingDetailed<T>(
             this XafApplication application,ObjectModification objectModification,params string[] modifiedProperties) where T:class
-            => application.WhenCommittingDetailed<T>(objectModification,null,modifiedProperties);
+            => application.WhenProviderObjectSpaceCreated().WhenCommittingDetailed<T>(objectModification, null,modifiedProperties);
         
         public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)> WhenCommittedDetailed<T>(
             this XafApplication application,ObjectModification objectModification,string[] modifiedProperties)where T:class

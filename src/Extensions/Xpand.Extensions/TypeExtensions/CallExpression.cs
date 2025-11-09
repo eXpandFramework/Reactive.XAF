@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using Fasterflect;
+using Xpand.Extensions.AssemblyExtensions;
 
 namespace Xpand.Extensions.TypeExtensions {
     public static partial class TypeExtensions {

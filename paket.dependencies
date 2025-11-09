@@ -74,7 +74,7 @@ nuget Shouldly 4.3.0
 nuget Enums.NET 4.0
 nuget Moq 4.16
 nuget NUnit3TestAdapter 4.0.0
-nuget Selenium.WebDriver 4.21
+nuget Selenium.WebDriver 4.38
 nuget System.ValueTuple 4.6.1
 nuget System.Memory 4.6.3
 nuget System.Collections.Concurrent 4.3.0

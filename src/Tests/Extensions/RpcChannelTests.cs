@@ -12,7 +12,7 @@ using Microsoft.Extensions.Caching.Memory;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.Numeric;
-using Xpand.Extensions.Reactive;
+using Xpand.Extensions.Reactive.Channels;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.Tests.FaultHubTests;
