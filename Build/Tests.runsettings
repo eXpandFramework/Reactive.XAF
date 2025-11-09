@@ -1,45 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<!-- File name extension must be .runsettings -->
 <RunSettings>
-  <DataCollectionRunSettings>
-    <DataCollectors>
-      <DataCollector friendlyName="Code Coverage" uri="datacollector://Microsoft/CodeCoverage/2.0" assemblyQualifiedName="Microsoft.VisualStudio.Coverage.DynamicCoverageDataCollector, Microsoft.VisualStudio.TraceCollector, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-        <Configuration>
-          <CodeCoverage>
-            <ModulePaths>
-              <Include>
-                <ModulePath>.*Xpand\.XAF\.Modules.*\.dll$</ModulePath>
-              </Include>
-              <Exclude>
-                <ModulePath>.*Tests\.dll</ModulePath>
-                <ModulePath>.*Hub.*</ModulePath>
-                <ModulePath>.*system.*</ModulePath>
-                <ModulePath>.*xunit.*</ModulePath>
-                <ModulePath>.*nunit.*</ModulePath>
-                <ModulePath>.*testslib.*</ModulePath>
-                <ModulePath>.*extensions.*</ModulePath>
-              </Exclude>
-            </ModulePaths>
-            <Functions>
-              <Exclude>
-              </Exclude>
-            </Functions>
-            <UseVerifiableInstrumentation>True</UseVerifiableInstrumentation>
-            <AllowLowIntegrityProcesses>True</AllowLowIntegrityProcesses>
-            <CollectFromChildProcesses>True</CollectFromChildProcesses>
-            <CollectAspDotNet>False</CollectAspDotNet>
-          </CodeCoverage>
-        </Configuration>
-      </DataCollector>
-      <DataCollector uri="datacollector://microsoft/VideoRecorder/1.0" assemblyQualifiedName="Microsoft.VisualStudio.TestTools.DataCollection.VideoRecorder.VideoRecorderDataCollector, Microsoft.VisualStudio.TestTools.DataCollection.VideoRecorder, Version=15.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" friendlyName="Screen and Voice Recorder">
-        <Configuration>
-          <MediaRecorder sendRecordedMediaForPassedTestCase="false"  xmlns="">           
-            <ScreenCaptureVideo bitRate="512" frameRate="2" quality="20" />
-          </MediaRecorder>
-        </Configuration>
-      </DataCollector>
-      <DataCollector uri="datacollector://microsoft/SystemInfo/1.0" assemblyQualifiedName="Microsoft.VisualStudio.TestTools.DataCollection.SystemInfo.SystemInfoDataCollector, Microsoft.VisualStudio.TestTools.DataCollection.SystemInfo, Version=16.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" friendlyName="System Information">
-      </DataCollector>
-    </DataCollectors>
-  </DataCollectionRunSettings>
+  <RunConfiguration>
+    <!-- Timeout in milliseconds. 7200000 ms = 120 minutes. -->
+    <TestSessionTimeout>7200000</TestSessionTimeout>
+  </RunConfiguration>
 </RunSettings>

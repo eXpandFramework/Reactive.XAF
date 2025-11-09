@@ -157,7 +157,7 @@ jobs:
           !**\*TestAdapter.dll
           !**\obj\**
         searchFolder: '$(Pipeline.Workspace)/TestAssemblies'
-        # runSettingsFile: '$(SOURCE_DIRECTORY)\Build\Tests.runsettings'
+        runSettingsFile: '$(SOURCE_DIRECTORY)\Build\Tests.runsettings'
 - job: PostTestTasks
   dependsOn:
     - Tests

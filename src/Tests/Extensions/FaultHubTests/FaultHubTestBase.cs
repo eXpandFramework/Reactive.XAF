@@ -19,7 +19,7 @@ using Xpand.TestsLib;
 
 namespace Xpand.Extensions.Tests.FaultHubTests{
     public class FaultHubTestBase:BaseTest {
-        public FaultHubTestBase() => FastLogger.Enabled = false;
+        // public FaultHubTestBase() => FastLogger.Enabled = false;
 
         protected class TestResource : IDisposable {
             public bool IsDisposed { get; private set; }
