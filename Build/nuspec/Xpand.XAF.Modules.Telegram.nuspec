@@ -2,26 +2,27 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.Telegram</id>
-    <version>4.251.7.1</version>
+    <version>4.251.7.4</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
     <projectUrl>https://github.com/eXpandFramework/Reactive.XAF/blob/master/src/Modules/Telegram</projectUrl>
     <iconUrl>http://sign.expandframework.com</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>Xpand.XAF.Modules.Telegram</description>
+    <description>The `Telegram` module provides a reactive, controller-less engine for integrating the Telegram messaging platform with XAF applications.</description>
     <releaseNotes>https://github.com/eXpandFramework/Reactive.XAF/releases</releaseNotes>
     <copyright>eXpandFramework.com</copyright>
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Telegram, 25.1.6</tags>
     <dependencies>
       <group targetFramework="net9.0">
-        <dependency id="Xpand.Extensions.Reactive" version="4.251.7.1" />
-        <dependency id="Xpand.Extensions.XAF" version="4.251.7.1" />
-        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.251.7.1" />
-        <dependency id="Xpand.Extensions" version="4.251.7.1" />
-        <dependency id="Xpand.XAF.Modules.Reactive" version="4.251.7.1" />
-        <dependency id="Xpand.XAF.Modules.CloneModelView" version="4.251.7.1" />
-        <dependency id="Xpand.XAF.Modules.SuppressConfirmation" version="4.251.7.1" />
+        <dependency id="Xpand.Extensions.Reactive" version="4.251.7.4" />
+        <dependency id="Xpand.Extensions.XAF" version="4.251.7.4" />
+        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.251.7.4" />
+        <dependency id="Xpand.Extensions" version="4.251.7.4" />
+        <dependency id="Xpand.XAF.Modules.Reactive" version="4.251.7.4" />
+        <dependency id="Xpand.XAF.Modules.Workflow" version="4.251.7.4" />
+        <dependency id="Xpand.XAF.Modules.CloneModelView" version="4.251.7.4" />
+        <dependency id="Xpand.XAF.Modules.SuppressConfirmation" version="4.251.7.4" />
         <dependency id="DevExpress.ExpressApp.Win" version="25.1.6" />
         <dependency id="DevExpress.ExpressApp.Xpo" version="25.1.6" />
         <dependency id="System.Reactive" version="6.0.1" />
@@ -36,10 +37,10 @@
         <dependency id="Telegram.Bot" version="22.7.2" />
       </group>
       <group targetFramework="netstandard2.0">
-        <dependency id="Xpand.VersionConverter" version="4.251.7.1" />
+        <dependency id="Xpand.VersionConverter" version="4.251.7.4" />
       </group>
       <group targetFramework="net6.0">
-        <dependency id="Xpand.VersionConverter" version="4.251.7.1" />
+        <dependency id="Xpand.VersionConverter" version="4.251.7.4" />
       </group>
     </dependencies>
   </metadata>

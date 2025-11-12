@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.Reactive.Logger.Client.Win</id>
-    <version>4.251.7.1</version>
+    <version>4.251.7.4</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -15,14 +15,14 @@
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Reactive.Logger.Client.Win, 25.1.6</tags>
     <dependencies>
       <group targetFramework="net9.0">
-        <dependency id="Xpand.XAF.Modules.GridListEditor" version="4.251.7.1" />
-        <dependency id="Xpand.XAF.Modules.OneView" version="4.251.7.1" />
-        <dependency id="Xpand.XAF.Modules.Windows" version="4.251.7.1" />
-        <dependency id="Xpand.XAF.Modules.Reactive" version="4.251.7.1" />
-        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.251.7.1" />
-        <dependency id="Xpand.Extensions.XAF" version="4.251.7.1" />
-        <dependency id="Xpand.XAF.Modules.Reactive.Logger.Hub" version="4.251.7.1" />
-        <dependency id="Xpand.XAF.Modules.Reactive.Logger" version="4.251.7.1" />
+        <dependency id="Xpand.XAF.Modules.GridListEditor" version="4.251.7.4" />
+        <dependency id="Xpand.XAF.Modules.OneView" version="4.251.7.4" />
+        <dependency id="Xpand.XAF.Modules.Windows" version="4.251.7.4" />
+        <dependency id="Xpand.XAF.Modules.Reactive" version="4.251.7.4" />
+        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.251.7.4" />
+        <dependency id="Xpand.Extensions.XAF" version="4.251.7.4" />
+        <dependency id="Xpand.XAF.Modules.Reactive.Logger.Hub" version="4.251.7.4" />
+        <dependency id="Xpand.XAF.Modules.Reactive.Logger" version="4.251.7.4" />
         <dependency id="DevExpress.ExpressApp.ConditionalAppearance" version="25.1.6" />
         <dependency id="DevExpress.ExpressApp.Win" version="25.1.6" />
         <dependency id="DevExpress.ExpressApp.Xpo" version="25.1.6" />
@@ -34,10 +34,10 @@
         <dependency id="Xpand.Patcher" version="9.0" />
       </group>
       <group targetFramework="netstandard2.0">
-        <dependency id="Xpand.VersionConverter" version="4.251.7.1" />
+        <dependency id="Xpand.VersionConverter" version="4.251.7.4" />
       </group>
       <group targetFramework="net6.0">
-        <dependency id="Xpand.VersionConverter" version="4.251.7.1" />
+        <dependency id="Xpand.VersionConverter" version="4.251.7.4" />
       </group>
     </dependencies>
   </metadata>

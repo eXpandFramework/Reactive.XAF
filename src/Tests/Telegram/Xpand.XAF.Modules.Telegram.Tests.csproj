@@ -34,7 +34,7 @@
     <Reference Include="Xpand.XAF.Modules.Telegram">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Telegram.dll</HintPath>
     </Reference>
-      <Reference Include="Xpand.XAF.Modules.Workflow">
+    <Reference Include="Xpand.XAF.Modules.Workflow">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Workflow.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.TestsLib">

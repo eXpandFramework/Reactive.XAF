@@ -33,7 +33,7 @@ namespace Xpand.XAF.Modules.BulkObjectUpdate{
 
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) 
             => manager.RegisterAction()
-                .AddItems(action => action.AddItems().ToUnit())
+                .AddItems(action => action.AddItems().ToUnit(),Scheduler)
                 .MergeIgnored(action => action.ShowView().UpdateListViewObjects())
                 .ToUnit();
 

@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.Workflow</id>
-    <version>4.251.7.1</version>
+    <version>4.251.7.4</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -15,19 +15,18 @@
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Workflow, 25.1.6</tags>
     <dependencies>
       <group targetFramework="net9.0">
-        <dependency id="Xpand.Extensions.Reactive" version="4.251.7.1" />
-        <dependency id="Xpand.Extensions.XAF" version="4.251.7.1" />
-        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.251.7.1" />
-        <dependency id="Xpand.Extensions" version="4.251.7.1" />
-        <dependency id="Xpand.XAF.Modules.Reactive" version="4.251.7.1" />
-        <dependency id="Xpand.XAF.Modules.ViewItemValue" version="4.251.7.1" />
-        <dependency id="Xpand.XAF.Modules.CloneModelView" version="4.251.7.1" />
-        <dependency id="Xpand.XAF.Modules.Telegram" version="4.251.7.1" />
-        <dependency id="Xpand.XAF.Modules.Windows" version="4.251.7.1" />
-        <dependency id="Xpand.XAF.Modules.ModelViewInheritance" version="4.251.7.1" />
-        <dependency id="Xpand.Extensions.Reactive.Relay" version="4.251.7.1" />
-        <dependency id="Xpand.XAF.Modules.BulkObjectUpdate" version="4.251.7.1" />
-        <dependency id="Xpand.XAF.Modules.HideToolBar" version="4.251.7.1" />
+        <dependency id="Xpand.Extensions.Reactive" version="4.251.7.4" />
+        <dependency id="Xpand.Extensions.XAF" version="4.251.7.4" />
+        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.251.7.4" />
+        <dependency id="Xpand.Extensions" version="4.251.7.4" />
+        <dependency id="Xpand.XAF.Modules.Reactive" version="4.251.7.4" />
+        <dependency id="Xpand.XAF.Modules.ViewItemValue" version="4.251.7.4" />
+        <dependency id="Xpand.XAF.Modules.CloneModelView" version="4.251.7.4" />
+        <dependency id="Xpand.XAF.Modules.Windows" version="4.251.7.4" />
+        <dependency id="Xpand.XAF.Modules.ModelViewInheritance" version="4.251.7.4" />
+        <dependency id="Xpand.Extensions.Reactive.Relay" version="4.251.7.4" />
+        <dependency id="Xpand.XAF.Modules.BulkObjectUpdate" version="4.251.7.4" />
+        <dependency id="Xpand.XAF.Modules.HideToolBar" version="4.251.7.4" />
         <dependency id="DevExpress.ExpressApp.Win" version="25.1.6" />
         <dependency id="DevExpress.ExpressApp.Validation" version="25.1.6" />
         <dependency id="DevExpress.ExpressApp.CloneObject" version="25.1.6" />
@@ -42,14 +41,13 @@
         <dependency id="Microsoft.CodeAnalysis" version="4.12" />
         <dependency id="Microsoft.Extensions.Options" version="9.0.8" />
         <dependency id="Microsoft.Extensions.Configuration.Abstractions" version="9.0.8" />
-        <dependency id="Telegram.Bot" version="22.7.2" />
         <dependency id="DevExpress.ExpressApp.Validation.Win" version="25.1.6" />
       </group>
       <group targetFramework="netstandard2.0">
-        <dependency id="Xpand.VersionConverter" version="4.251.7.1" />
+        <dependency id="Xpand.VersionConverter" version="4.251.7.4" />
       </group>
       <group targetFramework="net6.0">
-        <dependency id="Xpand.VersionConverter" version="4.251.7.1" />
+        <dependency id="Xpand.VersionConverter" version="4.251.7.4" />
       </group>
     </dependencies>
   </metadata>

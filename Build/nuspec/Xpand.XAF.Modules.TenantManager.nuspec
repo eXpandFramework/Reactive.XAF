@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.TenantManager</id>
-    <version>4.251.7.1</version>
+    <version>4.251.7.4</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -15,13 +15,13 @@
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, TenantManager, 25.1.6</tags>
     <dependencies>
       <group targetFramework="net9.0">
-        <dependency id="Xpand.Extensions.Reactive" version="4.251.7.1" />
-        <dependency id="Xpand.Extensions" version="4.251.7.1" />
-        <dependency id="Xpand.Extensions.XAF" version="4.251.7.1" />
-        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.251.7.1" />
-        <dependency id="Xpand.XAF.Modules.Reactive" version="4.251.7.1" />
-        <dependency id="Xpand.XAF.Modules.Blazor" version="4.251.7.1" />
-        <dependency id="Xpand.Extensions.Blazor" version="4.251.7.1" />
+        <dependency id="Xpand.Extensions.Reactive" version="4.251.7.4" />
+        <dependency id="Xpand.Extensions" version="4.251.7.4" />
+        <dependency id="Xpand.Extensions.XAF" version="4.251.7.4" />
+        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.251.7.4" />
+        <dependency id="Xpand.XAF.Modules.Reactive" version="4.251.7.4" />
+        <dependency id="Xpand.XAF.Modules.Blazor" version="4.251.7.4" />
+        <dependency id="Xpand.Extensions.Blazor" version="4.251.7.4" />
         <dependency id="DevExpress.ExpressApp.Security" version="25.1.6" />
         <dependency id="Xpand.Patcher" version="9.0" />
         <dependency id="System.Reactive" version="6.0.1" />
@@ -35,10 +35,10 @@
         <dependency id="Microsoft.AspNetCore.Components" version="9.0.8" />
       </group>
       <group targetFramework="netstandard2.0">
-        <dependency id="Xpand.VersionConverter" version="4.251.7.1" />
+        <dependency id="Xpand.VersionConverter" version="4.251.7.4" />
       </group>
       <group targetFramework="net6.0">
-        <dependency id="Xpand.VersionConverter" version="4.251.7.1" />
+        <dependency id="Xpand.VersionConverter" version="4.251.7.4" />
       </group>
     </dependencies>
   </metadata>

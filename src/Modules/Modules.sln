@@ -244,12 +244,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xpand.XAF.Modules.Telegram"
 	ProjectSection(ProjectDependencies) = postProject
 		{FB456706-C7F0-455C-B2F1-D75B143FDC28} = {FB456706-C7F0-455C-B2F1-D75B143FDC28}
 		{58399364-9ACA-429F-A276-7F01E9E61D7D} = {58399364-9ACA-429F-A276-7F01E9E61D7D}
+		{CD142186-64BE-452F-B9D9-1973BC2FB027} = {CD142186-64BE-452F-B9D9-1973BC2FB027}
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xpand.XAF.Modules.Workflow", "Workflow\Xpand.XAF.Modules.Workflow.csproj", "{CD142186-64BE-452F-B9D9-1973BC2FB027}"
-	ProjectSection(ProjectDependencies) = postProject
-		{EE30A17A-5A72-43E5-8ED3-3DC485BE9EC4} = {EE30A17A-5A72-43E5-8ED3-3DC485BE9EC4}
-	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

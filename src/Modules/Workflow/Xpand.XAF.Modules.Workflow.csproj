@@ -10,8 +10,8 @@
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
     <OutputPath>..\..\..\bin\</OutputPath>
-    <AssemblyTitle>Xpand.XAF.Modules.Application.Workflow</AssemblyTitle>
-    <Product>Xpand.XAF.Modules.Application.Workflow</Product>
+    <AssemblyTitle>Xpand.XAF.Modules.Workflow</AssemblyTitle>
+    <Product>Xpand.XAF.Modules.Workflow</Product>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <AppendTargetFrameworkToOutputPath>False</AppendTargetFrameworkToOutputPath>
     <DebugType>full</DebugType>
