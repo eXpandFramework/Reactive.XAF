@@ -25,11 +25,17 @@
     <Reference Include="Xpand.Extensions">
       <HintPath>..\..\..\bin\Xpand.Extensions.dll</HintPath>
     </Reference>
+    <Reference Include="Xpand.Extensions.Reactive.Relay">
+      <HintPath>..\..\..\bin\Xpand.Extensions.Reactive.Relay.dll</HintPath>
+    </Reference>
     <Reference Include="Xpand.Extensions.XAF">
       <HintPath>..\..\..\bin\Xpand.Extensions.XAF.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.Telegram">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Telegram.dll</HintPath>
+    </Reference>
+      <Reference Include="Xpand.XAF.Modules.Workflow">
+      <HintPath>..\..\..\bin\Xpand.XAF.Modules.Workflow.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.TestsLib">
       <HintPath>..\..\..\bin\Xpand.TestsLib.dll</HintPath>

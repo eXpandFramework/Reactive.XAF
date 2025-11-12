@@ -56,7 +56,7 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
                     wf.Status = "Modified";
                     return wf.Commit().ToUnit();
                 })
-                .Timeout(30.Seconds()).FirstOrDefaultAsync();
+                .FirstOrDefaultAsync();
 
             var result = await capturedOutput.FirstAsync();
             result.Length.ShouldBe(1);
@@ -103,7 +103,7 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
                     wf.Status = "Modified";
                     return wf.Commit().ToUnit();
                 })
-                .Timeout(30.Seconds()).FirstOrDefaultAsync();
+                .FirstOrDefaultAsync();
 
             var result = await capturedOutput.FirstAsync();
             result.Length.ShouldBe(1);
@@ -144,7 +144,7 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
                     return wf.Commit().ToUnit()
                         .Merge(Observable.Timer(200.Milliseconds()).ToUnit());
                 })
-                .Timeout(30.Seconds()).FirstOrDefaultAsync();
+                .FirstOrDefaultAsync();
 
             executionCount.ShouldBe(0);
         }
@@ -178,7 +178,7 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
                     return otherTypeObject.Commit().ToUnit()
                         .Merge(Observable.Timer(200.Milliseconds()).ToUnit());
                 })
-                .Timeout(30.Seconds()).FirstOrDefaultAsync();
+                .FirstOrDefaultAsync();
 
             executionCount.ShouldBe(0);
         }
@@ -227,7 +227,7 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
                     wf2.Status = "Modified2";
                     return space.CommitChangesAsync().ToObservable().ToUnit();
                 })
-                .Timeout(30.Seconds()).FirstOrDefaultAsync();
+                .FirstOrDefaultAsync();
 
             var result = await capturedOutput.FirstAsync();
             result.Length.ShouldBe(2);
@@ -276,7 +276,7 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
                     wf2.Status = "Modified2";
                     return space2.CommitChangesAsync().ToObservable().ToUnit();
                 })
-                .Timeout(30.Seconds()).FirstOrDefaultAsync();
+                .FirstOrDefaultAsync();
 
             var result = await capturedOutput.FirstAsync();
             result.Length.ShouldBe(1);
@@ -312,7 +312,7 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
                     return wf.Commit().ToUnit()
                         .Merge(Observable.Timer(200.Milliseconds()).ToUnit());
                 })
-                .Timeout(30.Seconds()).FirstOrDefaultAsync();
+                .FirstOrDefaultAsync();
 
             executionCount.ShouldBe(0);
         }

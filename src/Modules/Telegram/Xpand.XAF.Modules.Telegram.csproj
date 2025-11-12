@@ -41,6 +41,10 @@
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
+    <Reference Include="Xpand.XAF.Modules.Workflow">
+      <HintPath>..\..\..\bin\Xpand.XAF.Modules.Workflow.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
     <Reference Include="Xpand.XAF.Modules.CloneModelView">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.CloneModelView.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>

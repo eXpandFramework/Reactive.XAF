@@ -363,6 +363,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xpand.XAF.Modules.Telegram"
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xpand.XAF.Modules.Telegram.Tests", "Telegram\Xpand.XAF.Modules.Telegram.Tests.csproj", "{14617668-58CF-4F62-A1D3-99BF83072B23}"
+	ProjectSection(ProjectDependencies) = postProject
+		{A234B0D8-A43C-4B23-A36B-23129FB6D41A} = {A234B0D8-A43C-4B23-A36B-23129FB6D41A}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Workflow", "Workflow", "{2B14F737-401E-43F6-AC43-3DA7E79FA362}"
 EndProject

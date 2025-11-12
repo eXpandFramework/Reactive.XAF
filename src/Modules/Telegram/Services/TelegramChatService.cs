@@ -20,14 +20,14 @@ using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.StringExtensions;
 using Xpand.Extensions.XAF.Attributes;
 using Xpand.Extensions.XAF.ObjectSpaceExtensions;
-using Xpand.Extensions.XAF.Xpo.ObjectSpaceExtensions;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Telegram.BusinessObjects;
 using Message = Telegram.Bot.Types.Message;
 
 namespace Xpand.XAF.Modules.Telegram.Services{
+    public record SendChatDisabledPayload(long ChatId);
     public static class TelegramChatService{
-        internal record SendChatDisabledPayload(long ChatId);
+        
         internal static IObservable<Unit> TelegramChatConnect(this ApplicationModulesManager manager) 
             => manager.WhenApplication(application => application.UpdateChats()
                 .MergeToUnit(application.WhenSetupComplete(_ => application.WhenSendChatDisabledPayload()))
@@ -39,7 +39,7 @@ namespace Xpand.XAF.Modules.Telegram.Services{
 "))));
 
         private static IObservable<Unit> WhenSendChatDisabledPayload(this XafApplication application)
-            => application.ObjectSpaceProvider.HandleDataLayerRequest()
+            => AppDomain.CurrentDomain.HandleRequest()
                 .With<SendChatDisabledPayload, TelegramChat>(payload => application.UseProviderObjectSpace(space => space.GetObjectsQuery<TelegramChat>()
                     .Where(chat => chat.Id == payload.ChatId).ToArray().ToNowObservable()
                     .Do(chat => chat.Active = false).Commit()));
@@ -99,12 +99,13 @@ namespace Xpand.XAF.Modules.Telegram.Services{
             return message;
         }
 
-        internal static IObservable<Message> SendText(this TelegramBotClient client,  TelegramChat chat,ParseMode parseMode, string[] messages) 
+        internal static IObservable<Message> SendText(this ITelegramBotClient client,  TelegramChat chat,ParseMode parseMode, string[] messages) 
             => messages.ToNowObservable().WhenNotDefaultOrEmpty()
                 .SelectManyItemResilient(msg => client.SendMessage(new ChatId(chat.Id), msg,parseMode:parseMode,
                     linkPreviewOptions:new LinkPreviewOptions(){IsDisabled = chat.Bot.DisableWebPagePreview}).ToObservable()
-                    .Catch<Message,ApiRequestException>(e =>e.Observe().If(_ => e.ErrorCode==403, _ => chat.Session?.DataLayer.MakeRequest()
-                        .With<SendChatDisabledPayload, TelegramChat>(new SendChatDisabledPayload(chat.Id)).To<Message>(),_ => e.Throw<Message>()) ));
+                    .Catch<Message,ApiRequestException>(e =>e.Observe().If(_ => e.ErrorCode==403, _ => AppDomain.CurrentDomain.MakeRequest()
+                        .With<SendChatDisabledPayload, TelegramChat>(new SendChatDisabledPayload(chat.Id))
+                        .IgnoreElements().To<Message>().Concat(e.Throw<Message>()),_ => e.Throw<Message>()) ));
     
         public static IObservable<(TelegramChatMessage chatMessage, string query, string commandText)> WhenValid(this TelegramChatMessage chatMessage){
             var message = chatMessage.Message;

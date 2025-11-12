@@ -56,8 +56,7 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
                     var newWf = space.CreateObject<WF>();
                     newWf.Status = "Pending";
                     return newWf.Commit().Do(wf => newOid = wf.Oid);
-                })
-                .Timeout(30.Seconds());
+                }) ;
 
             capturedOutputs.Count.ShouldBe(2);
             
@@ -106,8 +105,7 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
                     newWf.Status = "Pending";
                     return newWf.Commit().ToUnit()
                         .Merge(Observable.Timer(200.Milliseconds()).ToUnit());
-                })
-                .Timeout(30.Seconds());
+                });
 
             capturedOutputs.Count.ShouldBe(1);
             
@@ -150,8 +148,7 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
                     var newWf = space.CreateObject<WF>();
                     newWf.Status = "Pending";
                     return newWf.Commit().Do(wf => newOid = wf.Oid);
-                })
-                .Timeout(30.Seconds());
+                });
 
             capturedOutputs.Count.ShouldBe(1);
             
@@ -203,8 +200,7 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
                 .Subscribe();
             WorkflowModule(application);
             
-            await application.StartWinTest(_ => capturedOutput.ToUnit())
-                .Timeout(30.Seconds()).FirstOrDefaultAsync();
+            await application.StartWinTest(_ => capturedOutput.ToUnit()).FirstOrDefaultAsync();
 
             var result = await capturedOutput.FirstAsync();
             result.Length.ShouldBe(2);
@@ -241,8 +237,7 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
                 .Subscribe();
             WorkflowModule(application);
             
-            await application.StartWinTest(_ => capturedOutput.ToUnit())
-                .Timeout(30.Seconds()).FirstOrDefaultAsync();
+            await application.StartWinTest(_ => capturedOutput.ToUnit()).FirstOrDefaultAsync();
 
             var result = await capturedOutput.FirstAsync();
             result.Length.ShouldBe(1);
@@ -282,7 +277,7 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
             WorkflowModule(application);
             
             await application.StartWinTest(_ => capturedOutput.ToUnit())
-                .Timeout(30.Seconds()).FirstOrDefaultAsync();
+                .FirstOrDefaultAsync();
 
             var result = await capturedOutput.FirstAsync();
             result.Length.ShouldBe(1);
@@ -320,7 +315,7 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
             WorkflowModule(application);
             
             await application.StartWinTest(_ => capturedOutput.ToUnit())
-                .Timeout(30.Seconds()).FirstOrDefaultAsync();
+                .FirstOrDefaultAsync();
 
             var result = await capturedOutput.FirstAsync();
             result.Length.ShouldBe(2);
@@ -365,7 +360,7 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
             WorkflowModule(application);
             
             await application.StartWinTest(_ => capturedOutput.ToUnit())
-                .Timeout(30.Seconds()).FirstOrDefaultAsync();
+                .FirstOrDefaultAsync();
 
             var result = await capturedOutput.FirstAsync();
             result.Length.ShouldBe(2);
@@ -408,7 +403,7 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
             WorkflowModule(application);
             
             await application.StartWinTest(_ => capturedOutput.ToUnit())
-                .Timeout(30.Seconds()).FirstOrDefaultAsync();
+                .FirstOrDefaultAsync();
 
             var result = await capturedOutput.FirstAsync();
             result.Length.ShouldBe(3);

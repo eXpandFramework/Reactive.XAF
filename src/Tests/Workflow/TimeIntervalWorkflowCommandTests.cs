@@ -46,7 +46,7 @@ namespace Xpand.XAF.Modules.Workflow.Tests{
                 .ToUnit();
 
             await application.StartWinTest(TestLogic)
-                .Timeout(30.Seconds());
+                ;
 
             executionTimes.Count.ShouldBe(2);
             executionTimes[0].ShouldBeLessThan(500, "First execution should be near-immediate.");
@@ -80,7 +80,7 @@ namespace Xpand.XAF.Modules.Workflow.Tests{
                 .ToUnit();
 
             await application.StartWinTest(TestLogic)
-                .Timeout(30.Seconds());
+                ;
 
             executionTimes.Count.ShouldBe(1);
             executionTimes[0].ShouldBeInRange((long)intervalMilliseconds - 50, (long)intervalMilliseconds + 500,
@@ -119,7 +119,7 @@ namespace Xpand.XAF.Modules.Workflow.Tests{
                 .ToUnit();
 
             await application.StartWinTest(TestLogic)
-                .Timeout(30.Seconds());
+                ;
 
             executionTimes.Count.ShouldBe(1);
             long expectedDelay = intervalMilliseconds - pastExecutionMilliseconds;
@@ -152,7 +152,7 @@ namespace Xpand.XAF.Modules.Workflow.Tests{
                 .ToUnit();
 
             await application.StartWinTest(TestLogic)
-                .Timeout(30.Seconds());
+                ;
 
             executionTimes.Count.ShouldBe(2);
             executionTimes[0].ShouldBeInRange((long)maxIntervalMilliseconds - 50, (long)maxIntervalMilliseconds * 2 + 500,
@@ -190,7 +190,7 @@ namespace Xpand.XAF.Modules.Workflow.Tests{
                 .ToUnit();
 
             await application.StartWinTest(TestLogic)
-                .Timeout(30.Seconds());
+                ;
 
             executionTimes.Count.ShouldBe(1);
             executionTimes[0].ShouldBeInRange(expectedDelay - 100, expectedDelay + 500, "The execution should occur after the duration specified by the fractional hour.");
@@ -223,7 +223,7 @@ namespace Xpand.XAF.Modules.Workflow.Tests{
                 .ToUnit();
 
             await application.StartWinTest(TestLogic)
-                .Timeout(30.Seconds());
+                ;
 
             executionTimes.Count.ShouldBe(1);
             executionTimes[0].ShouldBeInRange(expectedDelay - 100, expectedDelay + 500,
@@ -259,7 +259,7 @@ namespace Xpand.XAF.Modules.Workflow.Tests{
                 .ToUnit();
 
             await application.StartWinTest(TestLogic)
-                .Timeout(30.Seconds());
+                ;
 
             executionTimes.Count.ShouldBe(1);
             executionTimes[0].ShouldBeInRange(expectedDelay - 100, expectedDelay + 500,

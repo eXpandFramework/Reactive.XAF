@@ -8,8 +8,6 @@ using Humanizer;
 using Xpand.Extensions.XAF.Attributes;
 using Xpand.Extensions.XAF.Xpo.BaseObjects;
 using Xpand.XAF.Modules.CloneModelView;
-using Xpand.XAF.Modules.Telegram.BusinessObjects;
-using Xpand.XAF.Modules.ViewItemValue;
 using Xpand.XAF.Modules.Workflow.BusinessObjects.Commands;
 
 namespace Xpand.XAF.Modules.Workflow.BusinessObjects{
@@ -31,14 +29,6 @@ namespace Xpand.XAF.Modules.Workflow.BusinessObjects{
             get => _hideNotification;
             set => SetPropertyValue(nameof(HideNotification), ref _hideNotification, value);
         }
-
-        [ToolTip("If a Telegram Bot is selected, all notifications will also be sent as messages via this bot.")]
-        [ViewItemValue][DataSourceCriteria(nameof(Xpand.XAF.Modules.Telegram.BusinessObjects.TelegramBot.Active))]
-        public TelegramBot TelegramBot{
-            get => _telegramBot;
-            set => SetPropertyValue(nameof(TelegramBot), ref _telegramBot, value);
-        }
-
         
         [EditorAlias(EditorAliases.LabelPropertyEditor)]
         public string LastExecution => Commands
@@ -71,7 +61,6 @@ namespace Xpand.XAF.Modules.Workflow.BusinessObjects{
         private bool _appNotification;
         private bool _verboseNotification;
         private TimeSpan? _hideNotification;
-        private TelegramBot _telegramBot;
 
         [RuleRequiredField]
         public string Name{

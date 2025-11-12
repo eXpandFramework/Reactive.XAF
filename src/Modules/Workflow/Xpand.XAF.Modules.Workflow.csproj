@@ -46,10 +46,6 @@
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.CloneModelView.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
-    <Reference Include="Xpand.XAF.Modules.Telegram">
-      <HintPath>..\..\..\bin\Xpand.XAF.Modules.Telegram.dll</HintPath>
-      <SpecificVersion>False</SpecificVersion>
-    </Reference>
     <Reference Include="Xpand.XAF.Modules.Windows">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Windows.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>

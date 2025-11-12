@@ -37,7 +37,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions {
             => source.MergeIgnored(action => action.Controller.WhenActivated(emitWhenActive: true)
                 .SelectMany(_ => action.View().WhenCurrentObjectChanged().StartWith(action.View()).TakeUntilDisposed(action))
                 .WaitUntilInactive(1, scheduler: scheduler).ObserveOnContextMaybe()
-                .Do(_ => action.Items.Clear()).SelectManyItemResilient(_ => addItemsResilient(action)
+                .DoItemResilient(_ => action.Items.Clear()).SelectManyItemResilient(_ => addItemsResilient(action)
                     .PushStackFrame( )).TakeUntilDisposed(action))
                 .PushStackFrame();
 

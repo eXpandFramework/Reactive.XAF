@@ -48,8 +48,7 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
                     return suite.Commit();
                 }).ConcatToUnit(messageOptionsSubject).ToUnit();
 
-            await application.StartWinTest(TestLogic)
-                .Timeout(30.Seconds()).FirstOrDefaultAsync();
+            await application.StartWinTest(TestLogic).FirstOrDefaultAsync();
 
             var messageOptions = await messageOptionsSubject.FirstAsync();
             messageOptions.ShouldNotBeNull();

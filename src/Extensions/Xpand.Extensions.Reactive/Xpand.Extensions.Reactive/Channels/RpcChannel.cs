@@ -11,9 +11,9 @@ using Xpand.Extensions.Reactive.Transform;
 namespace Xpand.Extensions.Reactive.Channels {
     public static class RpcChannel {
         [SuppressMessage("ReSharper", "NotAccessedPositionalProperty.Local")]
-        private record CacheKey(Type KeyType, Type RequestType, Type ResponseType, object KeyObject) {
+        private record CacheKey( Type RequestType, Type ResponseType, object KeyObject) {
             public override string ToString()
-                => $"{nameof(CacheKey)} {{ {nameof(KeyType)} = {KeyType.FullName}, {nameof(RequestType)} = {RequestType.FullName}, {nameof(ResponseType)} = {ResponseType.FullName}, {nameof(KeyObject)} = {KeyString(KeyObject)} }}";
+                => $"{nameof(CacheKey)} {{  {KeyObject.GetType().FullName}, {nameof(RequestType)} = {RequestType.FullName}, {nameof(ResponseType)} = {ResponseType.FullName}, {nameof(KeyObject)} = {KeyString(KeyObject)} }}";
         }
         public static TimeSpan SlidingExpiration { get; set; } = TimeSpan.FromMinutes(10);
         private static readonly MemoryCache Channels = new(new MemoryCacheOptions());
@@ -36,7 +36,7 @@ namespace Xpand.Extensions.Reactive.Channels {
         internal static string KeyString(object key) => $"{key.GetType().Name} - {key.GetHashCode()}";
 
         internal static RpcChannel<TKey, TRequest, TResponse> Get<TKey, TRequest, TResponse>(TKey key) where TKey : notnull {
-            var cacheKey = new CacheKey(typeof(TKey), typeof(TRequest), typeof(TResponse), key);
+            var cacheKey = new CacheKey( typeof(TRequest), typeof(TResponse), key);
             LogFast($"Attempting to get or create RpcChannel with stable cache cacheKey: {cacheKey}");
             return Channels.GetOrCreate(cacheKey, entry => {
                 LogFast($"Cache miss for key: {cacheKey}. Creating new RpcChannel.");

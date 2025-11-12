@@ -36,6 +36,7 @@ using Xpand.Extensions.ExceptionExtensions;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Numeric;
 using Xpand.Extensions.Reactive.Conditional;
+using Xpand.Extensions.Reactive.ErrorHandling;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
@@ -256,7 +257,7 @@ namespace Xpand.TestsLib.Common{
             {"SpeechManagerModule", 61494},
         };
         
-        public static IObservable<T> StartWinTest<T>(this XafApplication application, Func<Frame,IObservable<T>> testFactory,int delay = 200) 
+        public static IObservable<T> StartWinTest<T>(this XafApplication application, Func<Frame,IObservable<T>> testFactory,TimeSpan? timeout=null) 
             => application.Start(Observable.Defer(() => {
                 var originalSyncContext = SynchronizationContext.Current;
                 var winformsSyncContextType = AppDomain.CurrentDomain.GetAssemblyType("System.Windows.Forms.WindowsFormsSynchronizationContext");
@@ -266,12 +267,15 @@ namespace Xpand.TestsLib.Common{
                         .ProcessEvent("Activated").Take(1).WaitUntilInactive(2.Seconds()).Take(1).ObserveOnContext()
                         .SelectMany(_ => testFactory(frame).BufferUntilCompleted().Do(_ => application.Exit()).SelectMany()))
                     .Finally(() => SynchronizationContext.SetSynchronizationContext(originalSyncContext));
-            }), delay);
+            }))
+            .Timeout(timeout??30.ToSeconds())
+            .Catch<T,TimeoutException>(e => {
+                application.Exit();
+                return e.Throw<T>();
+            });
 
-        public static IObservable<T> Start<T>(this XafApplication application,IObservable<T> test,int delay=200) {
-            var testObserver = test;
-            
-            return testObserver.Merge(application.DeferAction(_ => application.CallMethod("Start")).To<T>().IgnoreElements());
+        public static IObservable<T> Start<T>(this XafApplication application,IObservable<T> test) {
+            return test.Merge(application.DeferAction(_ => application.CallMethod("Start")).To<T>().IgnoreElements());
         }
 
         [SuppressMessage("ReSharper", "SuspiciousTypeConversion.Global")]

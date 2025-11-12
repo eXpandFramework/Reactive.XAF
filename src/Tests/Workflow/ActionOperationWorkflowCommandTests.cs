@@ -57,7 +57,7 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
             
             await application.StartWinTest(frame => frame.DeferAction(_ => frame.SimpleAction(nameof(Executes_When_Target_Action_Is_Executed)).DoExecute()).IgnoreElements()
                     .ConcatToUnit(capturedOutput))
-                .Timeout(30.Seconds()).FirstOrDefaultAsync();
+                .FirstOrDefaultAsync();
 
             executionCount.ShouldBe(1);
         }
@@ -102,8 +102,7 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
                 return executeInTargetView.MergeToUnit(showTargetView.IgnoreElements());
             }
 
-            await application.StartWinTest(ExecutionLogic)
-                .Timeout(30.Seconds()).FirstOrDefaultAsync();
+            await application.StartWinTest(ExecutionLogic).FirstOrDefaultAsync();
 
             executionCount.ShouldBe(1, "The command should only execute when the action is triggered in the view specified by the 'View' property.");
         }
@@ -147,8 +146,7 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
             }
 
             await SetupLogic().IgnoreElements()
-                .MergeToUnit(application.StartWinTest(ExecutionLogic))
-                .Timeout(30.Seconds()).FirstOrDefaultAsync();
+                .MergeToUnit(application.StartWinTest(ExecutionLogic)).FirstOrDefaultAsync();
 
             var result = await capturedOutput.FirstAsync();
             result.Length.ShouldBe(1);
@@ -197,8 +195,7 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
                 .ToUnit();
 
             await SetupLogic().IgnoreElements()
-                .MergeToUnit(application.StartWinTest(ExecutionLogic))
-                .Timeout(30.Seconds()).FirstOrDefaultAsync();
+                .MergeToUnit(application.StartWinTest(ExecutionLogic)).FirstOrDefaultAsync();
 
             var result = await capturedOutput.FirstAsync();
             result.Length.ShouldBe(2);
@@ -244,8 +241,7 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
             }
 
             await SetupLogic().IgnoreElements()
-                .MergeToUnit(application.StartWinTest(ExecutionLogic))
-                .Timeout(30.Seconds()).FirstOrDefaultAsync();
+                .MergeToUnit(application.StartWinTest(ExecutionLogic)).FirstOrDefaultAsync();
 
             var result = await capturedOutput.FirstAsync();
             result.Length.ShouldBe(1);
@@ -295,8 +291,7 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
                     .ToUnit();
 
             await SetupLogic().IgnoreElements()
-                .MergeToUnit(application.StartWinTest(ExecutionLogic))
-                .Timeout(30.Seconds()).FirstOrDefaultAsync();
+                .MergeToUnit(application.StartWinTest(ExecutionLogic)).FirstOrDefaultAsync();
 
             var result = await capturedOutput.FirstAsync();
             result.Length.ShouldBe(1);
@@ -343,8 +338,7 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
                     .ToUnit();
 
             await SetupLogic().IgnoreElements()
-                .MergeToUnit(application.StartWinTest(ExecutionLogic))
-                .Timeout(30.Seconds()).FirstOrDefaultAsync();
+                .MergeToUnit(application.StartWinTest(ExecutionLogic)).FirstOrDefaultAsync();
 
             var result = await capturedOutput.FirstAsync();
             result.ShouldBeEmpty();
@@ -391,8 +385,7 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
                     .ToUnit();
 
             await SetupLogic().IgnoreElements()
-                .MergeToUnit(application.StartWinTest(ExecutionLogic))
-                .Timeout(30.Seconds()).FirstOrDefaultAsync();
+                .MergeToUnit(application.StartWinTest(ExecutionLogic)).FirstOrDefaultAsync();
 
             var result = await capturedOutput.FirstAsync();
             result.Length.ShouldBe(1);

@@ -7,7 +7,6 @@ using Xpand.Extensions.Numeric;
 using Xpand.Extensions.XAF.Attributes;
 using Xpand.Extensions.XAF.Attributes.Custom;
 using Xpand.Extensions.XAF.Attributes.Validation;
-using Xpand.XAF.Modules.Telegram.Services;
 using Xpand.XAF.Persistent.BaseImpl;
 
 namespace Xpand.XAF.Modules.Telegram.BusinessObjects{
@@ -101,7 +100,6 @@ namespace Xpand.XAF.Modules.Telegram.BusinessObjects{
                     }}
                 }
             ]);
-            this.SendText();
         }
         
         bool _disableWebPagePreview;

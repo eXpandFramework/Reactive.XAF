@@ -15,7 +15,6 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Numeric;
-using Xpand.Extensions.Reactive;
 using Xpand.Extensions.Reactive.Channels;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.ErrorHandling;
@@ -26,17 +25,17 @@ using Xpand.Extensions.Reactive.Transform.System;
 using Xpand.Extensions.XAF.ActionExtensions;
 using Xpand.Extensions.XAF.Attributes;
 using Xpand.Extensions.XAF.FrameExtensions;
-using Xpand.Extensions.XAF.Xpo.ObjectSpaceExtensions;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
 using Xpand.XAF.Modules.Telegram.BusinessObjects;
 using Message = Telegram.Bot.Types.Message;
 
 namespace Xpand.XAF.Modules.Telegram.Services{
+    public record SendBotTextPayload(long BotId, ParseMode ParseMode, string[] Messages);
     public static class TelegramBotService{
-        record SendBotTextPayload(long BotId, ParseMode ParseMode, string[] Messages);
         
-        public static readonly ConcurrentDictionary<TelegramBot, IObservable<TelegramBotClient>> Clients = new(new BotComparer());
+        
+        public static readonly ConcurrentDictionary<TelegramBot, IObservable<ITelegramBotClient>> Clients = new(new BotComparer());
         internal class BotComparer : IEqualityComparer<TelegramBot> {
             public bool Equals(TelegramBot x, TelegramBot y) 
                 => ReferenceEquals(x, y) || x is not null && y is not null && x.Secret == y.Secret;
@@ -46,7 +45,7 @@ namespace Xpand.XAF.Modules.Telegram.Services{
         }
         
         public static IObservable<Message> SendText(this TelegramBot bot, ParseMode parseMode, params string[] messages) 
-            => bot.Session?.DataLayer.MakeRequest()
+            => AppDomain.CurrentDomain.MakeRequest()
                 .With<SendBotTextPayload, IObservable<Message>>(new SendBotTextPayload(bot.Oid, parseMode, messages))
                 .Switch();
 
@@ -62,7 +61,7 @@ namespace Xpand.XAF.Modules.Telegram.Services{
                 .MergeToUnit(manager.TelegramUpdate());
         
         private static IObservable<Unit> WhenSendBotTextPayload(this XafApplication application) 
-            => application.ObjectSpaceProvider.HandleDataLayerRequest()
+            => AppDomain.CurrentDomain.HandleRequest()
                 .With<SendBotTextPayload, IObservable<Message>>(payload => 
                     application.UseProviderObjectSpace(space => space.SendTextMessagesToActiveChats( payload)
                         .BeginWorkflow($"SendTextPayload-{payload.BotId}", context: [payload])
@@ -81,9 +80,9 @@ namespace Xpand.XAF.Modules.Telegram.Services{
         public static IObservable<Message> SendText(this TelegramBot bot,params string[] messages) 
             => bot.SendText(ParseMode.Html, messages);
 
-        internal static IObservable<TelegramBotClient> ClientSource(this TelegramBot bot){
+        internal static IObservable<ITelegramBotClient> ClientSource(this TelegramBot bot){
             Clients.TryGetValue(bot, out var clientSource);
-            return clientSource?? Observable.Empty<TelegramBotClient>();
+            return clientSource?? Observable.Empty<ITelegramBotClient>();
         }
         
         private static IObservable<Unit> SendMessage(this ApplicationModulesManager manager) 
@@ -137,16 +136,16 @@ namespace Xpand.XAF.Modules.Telegram.Services{
                     .SelectMany(chat => chat == null ? Observable.Empty<TelegramChatMessage>()
                         : chat.CreateMessage(update).Commit()))));
 
-        static IObservable<IObservable<TelegramBotClient>> CacheClients(this XafApplication application)
+        static IObservable<IObservable<ITelegramBotClient>> CacheClients(this XafApplication application)
             => application.WhenProviderObject<TelegramBot>(ObjectModification.NewOrUpdated,bot => bot.Secret!=null&&bot.Active)
                 .Select(bot => {
                     var botCommands = bot.CreateCommands().ToArray();
-                    return Clients.GetOrAdd(bot, telegramBot => (ClientFactory?.Invoke(telegramBot)??new TelegramBotClient(telegramBot.Secret).Observe())
+                    return Clients.GetOrAdd(bot, telegramBot => (ClientFactory?.Invoke(telegramBot)??new TelegramBotClient(telegramBot.Secret).Observe().Cast<ITelegramBotClient>())
                         .SelectMany(client => client.SetMyCommands(botCommands).ToObservable().To(client)));
                 });
 
 
-        public static Func<TelegramBot, IObservable<TelegramBotClient>> ClientFactory{ get; set; } 
+        public static Func<TelegramBot, IObservable<ITelegramBotClient>> ClientFactory{ get; set; } 
             = telegramBot => telegramBot.NewClient();
         
         static IObservable<TelegramBotClient> NewClient(this TelegramBot telegramBot) => new TelegramBotClient(telegramBot.Secret).Observe();
@@ -167,7 +166,7 @@ namespace Xpand.XAF.Modules.Telegram.Services{
                         Description = descriptionParts.JoinCommaSpace()
                     };
                 });
-        public static IObservable<Update[]> WhenUpdates(this TelegramBotClient client, int? offset = null,
+        public static IObservable<Update[]> WhenUpdates(this ITelegramBotClient client, int? offset = null,
             int? limit = 100,int? timeout=60,CancellationToken token=default,params UpdateType[] updateTypes)
             => client.GetUpdates(offset,limit,timeout,updateTypes,token).ToObservable()
                 .Catch<Update[],TaskCanceledException>(_ => Observable.Empty<Update[]>() );

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
@@ -33,7 +32,6 @@ namespace Xpand.XAF.Modules.Workflow{
             RequiredModuleTypes.Add(typeof(DevExpress.ExpressApp.SystemModule.SystemModule));
             RequiredModuleTypes.Add(typeof(DevExpress.ExpressApp.Win.SystemModule.SystemWindowsFormsModule));
             RequiredModuleTypes.Add(typeof(ViewItemValue.ViewItemValueModule));
-            RequiredModuleTypes.Add(typeof(Telegram.TelegramModule));
             RequiredModuleTypes.Add(typeof(CloneModelView.CloneModelViewModule));
             RequiredModuleTypes.Add(typeof(CloneObjectModule));
             RequiredModuleTypes.Add(typeof(ModelViewInheritanceModule));

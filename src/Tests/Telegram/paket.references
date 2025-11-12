@@ -2,7 +2,7 @@ Moq
 Shouldly
 NUnit
 NUnit3TestAdapter
-
+Telegram.Bot
 Microsoft.CodeAnalysis
 Microsoft.NET.Test.Sdk
 DevExpress.ExpressApp.Win

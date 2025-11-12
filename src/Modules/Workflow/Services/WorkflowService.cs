@@ -32,7 +32,6 @@ using Xpand.Extensions.XAF.TypesInfoExtensions;
 using Xpand.Extensions.XAF.ViewExtensions;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
-using Xpand.XAF.Modules.Telegram.Services;
 using Xpand.XAF.Modules.Workflow.BusinessObjects;
 using Xpand.XAF.Modules.Workflow.BusinessObjects.Commands;
 
@@ -70,15 +69,18 @@ namespace Xpand.XAF.Modules.Workflow.Services{
                     executions = space.GetObjectsQuery<CommandExecution>()
                         .Where(execution => executionIds.Contains(execution.Oid)).ToArray()
                         .Where(execution => !execution.IsDeleted).ToArray();
-                    return executions.GroupBy(execution => execution.WorkflowCommand).ToNowObservable()
+                    space.Delete(executions.WhereDefault(execution => execution.WorkflowCommand).ToArray());
+                    return executions.GroupBy(execution => execution.WorkflowCommand).ToNowObservable().WhenNotDefault(grouping => grouping.Key)
                         .Select(commandExecutionsGroup => {
-                            var count = space.Count<CommandExecution>(commandExecution => commandExecution.WorkflowCommand.Oid == commandExecutionsGroup.Key.Oid);
+                            var keyOid = commandExecutionsGroup.Key.Oid;
+                            var count = space.Count<CommandExecution>(commandExecution => commandExecution.WorkflowCommand.Oid == keyOid);
                             if (count <= 10) return null;
                             var commandExecutions = commandExecutionsGroup.Key.Executions
                                 .OrderByDescending(commandExecution => commandExecution.Oid).Take(10);
                             space.Delete(commandExecutionsGroup.Key.Executions.Except(commandExecutions).ToArray());
                             return commandExecutionsGroup.Key;
                         })
+                        
                         .Commit();
                 }))
                 .ToUnit();
@@ -164,8 +166,6 @@ namespace Xpand.XAF.Modules.Workflow.Services{
                         LogFast($"Publishing message content to different channels.");
                         return workflowCommand.CommandSuite.AppNotification.Observe().Where(appNotification => appNotification || workflowCommand is MessageWorkflowCommand)
                             .SelectMany(_ => shared.ShowXafMessage(msgType, displayForMilliseconds, position, null).IgnoreElements())
-                            .Merge(shared.Where(_ => workflowCommand.CommandSuite.TelegramBot != null).SelectMany(s
-                                => workflowCommand.CommandSuite.TelegramBot.SendText(s).IgnoreElements().To<string>()))
                             .Concat(shared);
                     })
                     .To<object[]>() ;
@@ -374,7 +374,7 @@ namespace Xpand.XAF.Modules.Workflow.Services{
                     return workflowCommand.Defer(() => workflowCommand.Validate().Execute(application, objects))
                         .Do(objects1 => {
                             LogFast($"Command '{workflowCommand.FullName}' executed successfully. Emitting results to ExecutedSubject.");
-                            ExecutedSubject.OnNext((workflowCommand, objects1));
+                            ExecutedSubject.OnNext((workflowCommand, objects1??[]));
                         })
                         .TakeUntilModified(application, workflowCommand)
                         .TakeUntil(_ => !workflowCommand.Active)
