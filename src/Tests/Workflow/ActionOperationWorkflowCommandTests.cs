@@ -380,12 +380,12 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
             }
 
             IObservable<Unit> ExecutionLogic(Frame frame) 
-                => frame.Application.Navigate(typeof(WF)).Take(1)
+                => frame.Application.Navigate(typeof(WF)).Take(1).IgnoreElements().DoNotComplete()
                     .Do(frame1 => frame1.SimpleAction(nameof(Output_Is_Distinct)).DoExecute())
                     .ToUnit();
 
             await SetupLogic().IgnoreElements()
-                .MergeToUnit(application.StartWinTest(ExecutionLogic)).FirstOrDefaultAsync();
+                .MergeToUnit(application.StartWinTest(ExecutionLogic,100.ToSeconds())).DoNotComplete().FirstOrDefaultAsync();
 
             var result = await capturedOutput.FirstAsync();
             result.Length.ShouldBe(1);

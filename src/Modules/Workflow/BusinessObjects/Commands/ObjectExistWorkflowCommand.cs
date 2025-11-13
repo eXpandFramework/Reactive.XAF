@@ -17,7 +17,7 @@ using Xpand.XAF.Modules.Workflow.Services;
 namespace Xpand.XAF.Modules.Workflow.BusinessObjects.Commands{
     [DefaultProperty(nameof(Description))]
     [System.ComponentModel.DisplayName("Object Exists")]
-    [ImageName("ObjectExists")]
+    [ImageName("ObjectExistWorkflowCommand")]
     [OptimisticLocking(OptimisticLockingBehavior.NoLocking)]
     public class ObjectExistWorkflowCommand(Session session) :WorkflowCommand(session){
         protected override Type GetReturnType() => CriteriaType?.MakeArrayType()??base.GetReturnType();

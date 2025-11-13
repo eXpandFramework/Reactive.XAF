@@ -43,48 +43,6 @@ The following example shows a simple workflow defined in code. This workflow wil
 
 </twitter>
 
-## Details
-This is a `windows` module that allows you to design and execute workflows by chaining together `WorkflowCommand` objects within a `CommandSuite`. A `CommandSuite` acts as a container for a workflow and can be activated or deactivated as a whole.
-
-The module provides several types of commands out of the box, which can be linked together to create powerful automations:
-*   **`TimeIntervalWorkflowCommand`**: Triggers execution on a schedule (e.g., every 5 minutes).
-*   **`ObjectExistWorkflowCommand`**: Triggers based on data queries, reacting to new, updated, or existing objects that match a specific criteria.
-*   **`MessageWorkflowCommand`**: Displays on-screen notifications or sends messages via Telegram.
-*   **`ActionOperationWorkflowCommand`**: Listens for the execution of a standard XAF Action and outputs data based on the execution context. It can be configured to filter by the `View` where the action is executed. Its output is controlled by the `Emission` property:
-    *   `Action`: Outputs the executed `ActionBase` object.
-    *   `SelectedObjects`: Outputs the objects that were selected in the View.
-    *   `ViewObjects`: Outputs all objects present in the View's collection.
-    Additionally, the `OutputProperty` can be used to project a specific property value from the output objects, which is then passed to the next command in the chain.
-
-Commands are chained by setting the `StartAction` or `StartCommands` properties, allowing you to define the order and logic of your workflow. The output of one command is passed as the input to the next, enabling data to flow through the process.
-
-<twitter>
-
-The following example shows a simple workflow defined in code. This workflow will display a "Hello World" message every 10 seconds.
-
-```csharp
-
-
-    
-    var suite = ObjectSpace.CreateObject<CommandSuite>();
-    suite.Name = "My First Workflow";
-
-    var ticker = ObjectSpace.CreateObject<TimeIntervalWorkflowCommand>();
-    ticker.Interval = TimeSpan.FromSeconds(10);
-    ticker.CommandSuite = suite;
-
-    var messenger = ObjectSpace.CreateObject<MessageWorkflowCommand>();
-    messenger.Message = "Hello World";
-    messenger.StartAction = ticker; // Chain the message to the timer
-    messenger.CommandSuite = suite;
-
-    ObjectSpace.CommitChanges();
-    
-
-```
-
-</twitter>
-
 The `Workflow` module's behavior is guaranteed by a comprehensive suite of automated tests. The following sections detail the module's functionality.
 
 #### Core Execution & Dependency Logic
@@ -131,6 +89,15 @@ The `Workflow` module's behavior is guaranteed by a comprehensive suite of autom
 *   **Reactive Processing:**
     *   **Batching:** Rapid, sequential modifications to multiple objects are batched into a single execution, with the output containing all modified objects from that batch.
     *   **De-duplication:** If the same object is modified multiple times within the batching window, only its final, most recent state is included in the output.
+
+#### MessageWorkflowCommand
+*   **Purpose:** Displays on-screen notifications to the user, using the application's standard notification mechanism.
+*   **Input Handling:** The command takes the array of objects from the previous step and formats them into a string for display.
+*   **Configuration Properties:**
+    *   **`MsgType`**: Controls the notification's appearance and icon (`Info`, `Success`, `Warning`, `Error`).
+    *   **`Position`**: Determines where on the screen the notification appears (e.g., `Right`).
+    *   **`DisplayFor`**: A `TimeSpan` value that sets how long the notification remains visible.
+    *   **`VerboseNotification`**: If `true`, the notification message is automatically prefixed with contextual information, including the name of the `CommandSuite` and the `WorkflowCommand` that triggered it.
 
 #### Command & Suite Lifecycle Management
 *   **`ExecuteOnce` Behavior:** A command with `ExecuteOnce = true` executes exactly one time and is then automatically set to `Active = false`.

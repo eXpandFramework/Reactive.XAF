@@ -32,6 +32,7 @@ namespace Xpand.XAF.Modules.Workflow.BusinessObjects.Commands{
             return startActions.Any()
                 ? 1 + startActions.Max(c => c.GetIndex())
                 : 0;
+            
         }
 
 
@@ -51,10 +52,7 @@ namespace Xpand.XAF.Modules.Workflow.BusinessObjects.Commands{
                         : Observable.Empty<object[]>();
                 }) ;
 
-        protected override Type GetReturnType(){
-            var modelClassTypeInfo = CaptionHelper.ApplicationModel.Views[_view]?.AsObjectView.ModelClass.TypeInfo;
-            return OutputProperty != null ? modelClassTypeInfo?.FindMember(OutputProperty)?.MemberType : modelClassTypeInfo?.Type;
-        }
+        protected override Type GetReturnType() => typeof(ActionBase);
 
         protected override bool GetNeedSubscription() => false;
 

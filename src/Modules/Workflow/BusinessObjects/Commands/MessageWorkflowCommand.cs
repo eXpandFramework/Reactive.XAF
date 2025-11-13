@@ -9,14 +9,14 @@ using Xpand.XAF.Modules.Workflow.Services;
 namespace Xpand.XAF.Modules.Workflow.BusinessObjects.Commands{
     [DefaultProperty(nameof(Description))]
     [System.ComponentModel.DisplayName("Message")]
-    [ImageName("Message")][OptimisticLocking(OptimisticLockingBehavior.NoLocking)]
+    [ImageName("MessageWorkflowCommand")][OptimisticLocking(OptimisticLockingBehavior.NoLocking)]
     public class MessageWorkflowCommand(Session session) :WorkflowCommand(session){
         InformationType _msgType;
 
         public override void AfterConstruction(){
             base.AfterConstruction();
             MsgType=InformationType.Info;
-            DisplayFor = 1.Days();
+            DisplayFor = 10.Seconds();
             Position=InformationPosition.Right;
         }
 
@@ -31,16 +31,21 @@ namespace Xpand.XAF.Modules.Workflow.BusinessObjects.Commands{
             get => _position;
             set => SetPropertyValue(ref _position, value);
         }
-        TimeSpan _displayFor;
+        TimeSpan? _displayFor;
         
-        public TimeSpan DisplayFor{
+        public TimeSpan? DisplayFor{
             get => _displayFor;
             set => SetPropertyValue(ref _displayFor, value);
         }
 
-        
+        bool _verbose;
+
+        public bool Verbose {
+            get => _verbose;
+            set => SetPropertyValue(nameof(Verbose), ref _verbose, value);
+        }
         
         public override IObservable<object[]> Execute(XafApplication application, params object[] objects) 
-            => this.ShowMessage( MsgType,Position, (int)DisplayFor.TotalMilliseconds,objects) ;
+            => this.InvokeMessageWorkflowCommand( MsgType,Position, objects,verboseNotification:Verbose) ;
     }
 }

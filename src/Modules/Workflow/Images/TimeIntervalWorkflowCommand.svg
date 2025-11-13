@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3500 3500">
+    <!-- Clock face -->
+    <circle cx="1750" cy="1750" r="1500" fill="none" stroke="#000000" stroke-width="200"/>
+
+    <!-- Hour marks -->
+    <line x1="1750" y1="400" x2="1750" y2="600" stroke="#000000" stroke-width="100"/>
+    <line x1="3100" y1="1750" x2="2900" y2="1750" stroke="#000000" stroke-width="100"/>
+    <line x1="1750" y1="3100" x2="1750" y2="2900" stroke="#000000" stroke-width="100"/>
+    <line x1="400" y1="1750" x2="600" y2="1750" stroke="#000000" stroke-width="100"/>
+
+    <!-- Interval arc -->
+    <path d="M1750 250 A1500 1500 0 0 1 3250 1750" fill="none" stroke="#000000" stroke-width="300" stroke-linecap="round"/>
+
+    <!-- Start marker -->
+    <circle cx="1750" cy="250" r="150" fill="#000000"/>
+
+    <!-- End marker -->
+    <circle cx="3250" cy="1750" r="150" fill="#000000"/>
+
+    <!-- Interval arrow -->
+    <path d="M2900 1000 L3100 1200 L3300 1000" fill="none" stroke="#000000" stroke-width="150" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

@@ -21,14 +21,11 @@ using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Relay;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
-using Xpand.Extensions.StringExtensions;
-using Xpand.Extensions.XAF;
 using Xpand.Extensions.XAF.ActionExtensions;
 using Xpand.Extensions.XAF.Attributes;
 using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.ObjectExtensions;
 using Xpand.Extensions.XAF.ObjectSpaceExtensions;
-using Xpand.Extensions.XAF.TypesInfoExtensions;
 using Xpand.Extensions.XAF.ViewExtensions;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
@@ -134,45 +131,6 @@ namespace Xpand.XAF.Modules.Workflow.Services{
                 .Finally(() => LogFast($"Exiting {nameof(SynchronizeDashboardItem)}"));
         }
 
-        internal static IObservable<object[]> ShowSuccess(this WorkflowCommand workflowCommand, params object[] objects){
-            LogFast($"Entering {nameof(ShowSuccess)} for command '{workflowCommand}'");
-            return workflowCommand.ShowMessage(InformationType.Success, InformationPosition.Right, workflowCommand.DisplayInterval(), objects)
-                .ContinueOnFault(context:[nameof(ShowSuccess), workflowCommand.ToString()])
-                .Finally(() => LogFast($"Exiting {nameof(ShowSuccess)} for command '{workflowCommand}'"));
-        }
-
-        private static int DisplayInterval(this WorkflowCommand workflowCommand) 
-            => (int)(workflowCommand.HideNotification>TimeSpan.Zero?workflowCommand.HideNotification.Value.TotalMilliseconds: (
-                workflowCommand.CommandSuite.HideNotification>TimeSpan.Zero?workflowCommand.CommandSuite.HideNotification.Value.TotalMilliseconds:Int32.MaxValue));
-
-        internal static IObservable<object[]> ShowMessage(this WorkflowCommand workflowCommand,InformationType msgType,InformationPosition position,int displayForMilliseconds,params object[] objects){
-            LogFast($"Entering {nameof(ShowMessage)} for command '{workflowCommand}' with {objects.Length} objects.");
-            return Observable.Defer(() => {
-                objects = objects.ManySelect().ToArray();
-                var defaultPropertyObjects = objects.OfType<IDefaultProperty>().ToArray();
-                return objects.Except(defaultPropertyObjects).JoinDotNewLine().Observe().WhenNotDefault().WhenNotEmpty()
-                    .Merge(defaultPropertyObjects.Select(property => property.DefaultPropertyValue).ToNowObservable())
-                    .Select(o => {
-                        var suiteMsg = $"Suite: {workflowCommand.CommandSuite}".EncloseHTMLImportant();
-                        var commandMsg = $"Command: {((IDefaultProperty)workflowCommand).DefaultPropertyValue}".EncloseHTMLTag("i");
-                        var objectMsg =  $"{o}";
-                        if (workflowCommand.CommandSuite.VerboseNotification){
-                            objectMsg=$"{objects[0].GetType().Name}: ".EncloseHTMLTag("i")+objectMsg;
-                            return new[]{ suiteMsg, commandMsg, objectMsg }.JoinNewLine();
-                        }
-                        return objectMsg;
-                    })
-                    .Publish(shared => {
-                        LogFast($"Publishing message content to different channels.");
-                        return workflowCommand.CommandSuite.AppNotification.Observe().Where(appNotification => appNotification || workflowCommand is MessageWorkflowCommand)
-                            .SelectMany(_ => shared.ShowXafMessage(msgType, displayForMilliseconds, position, null).IgnoreElements())
-                            .Concat(shared);
-                    })
-                    .To<object[]>() ;
-            }).ContinueOnFault(context:[nameof(ShowMessage), workflowCommand.ToString()])
-            .Finally(() => LogFast($"Exiting {nameof(ShowMessage)} for command '{workflowCommand}'"));
-        }
-
         private static IObservable<Unit> MonitorCommandExecutions(this XafApplication application){
             LogFast($"Entering {nameof(MonitorCommandExecutions)}");
             return application.WhenProviderObjects<WorkflowCommand>(ObjectModification.New,command => command.Active).SelectMany()
@@ -181,34 +139,14 @@ namespace Xpand.XAF.Modules.Workflow.Services{
                     return command.WhenExecuted()
                         .SelectManyItemResilient(objects => {
                             LogFast($"Command '{command.FullName}' executed with {objects.Length} objects. Notifying and logging.");
-                            return application.NotifyEmissions(objects, command)
-                                .MergeToUnit(application.NewCommandExecution(command.YieldArray()));
+                            return application.NewCommandExecution(command.YieldArray());
                         });
                 })
                 .ToUnit()
                 .ContinueOnFault(context:[nameof(MonitorCommandExecutions)])
                 .Finally(() => LogFast($"Exiting {nameof(MonitorCommandExecutions)}"));
         }
-
-        private static IObservable<WorkflowCommand> NotifyEmissions(this XafApplication application, object[] objects, WorkflowCommand workflowCommand){
-            LogFast($"Entering {nameof(NotifyEmissions)} for command '{workflowCommand}'.");
-            return application.UseProviderObjectSpace(space => {
-                    LogFast($"Processing {objects.Length} emission objects in a new object space.");
-                    workflowCommand = space.GetObject(workflowCommand);
-                    var list = new List<object>(objects);
-                    var dcObjects = objects.WhereNotDefault().GroupBy(o => o.GetType().ToTypeInfo())
-                        .Where(types => types.Key.IsDomainComponent)
-                        .SelectMany(types => types).Execute(o => list.Remove(o)).ToArray();
-                    objects = space.GetObjects(dcObjects).Concat(list).ToArray();
-                    return (workflowCommand == null ? Observable.Empty<WorkflowCommand>() :
-                        workflowCommand.NotifyEmission || workflowCommand.CommandSuite.NotifyEmission ? !workflowCommand.NotifyEmission
-                            ? !workflowCommand.IsSource ? workflowCommand.ShowSuccess(objects).To<WorkflowCommand>() : Observable.Empty<WorkflowCommand>()
-                            : workflowCommand.ShowSuccess(objects).To<WorkflowCommand>() : Observable.Empty<WorkflowCommand>());
-                })
-                .ContinueOnFault(context:[nameof(NotifyEmissions), workflowCommand.ToString()])
-                .Finally(() => LogFast($"Exiting {nameof(NotifyEmissions)} for command '{workflowCommand}'"));
-        }
-
+        
         private static IObservable<Unit> RefreshCommandSuiteDetailView(this XafApplication application){
             LogFast($"Entering {nameof(RefreshCommandSuiteDetailView)}");
             return application.RefreshDetailViewWhenObjectCommitted<WorkflowCommand>(typeof(CommandSuite), (frame, objects)

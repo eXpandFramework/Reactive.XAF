@@ -11,7 +11,7 @@ using Xpand.XAF.Modules.Workflow.Services;
 namespace Xpand.XAF.Modules.Workflow.BusinessObjects.Commands{
     [DefaultProperty(nameof(Description))]
     [System.ComponentModel.DisplayName("TimeInterval")]
-    [ImageName("TimeInterval")]
+    [ImageName("TimeIntervalWorkflowCommand")]
     [OptimisticLocking(OptimisticLockingBehavior.NoLocking)]
     [AppearanceToolTip("Disable " +nameof(LogExecutions)+ " when " + nameof(TriggerAction.Persistent),nameof(Mode)+"='"+nameof(TriggerAction.Persistent)+"'",TargetItems = nameof(LogExecutions),Enabled = false)]
     public class TimeIntervalWorkflowCommand(Session session) :WorkflowCommand(session){

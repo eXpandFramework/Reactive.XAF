@@ -18,17 +18,6 @@ namespace Xpand.XAF.Modules.Workflow.BusinessObjects{
     [NavigationItemQuickAccess]
     public class CommandSuite(Session session) : XPCustomBaseObject(session),IActiveWorkflowObject{
         public const string CommandSuiteEnableDisableDetailView = "CommandSuiteEnableDisable_DetailView";
-        [ToolTip("Globally enables success notifications for all commands in this suite. A command's individual 'Notify Emission' setting can also enable notifications even if this is false.")]
-        public bool NotifyEmission{
-            get => _notifyEmission;
-            set => SetPropertyValue(nameof(NotifyEmission), ref _notifyEmission, value);
-        }
-
-        [ToolTip("Sets a default duration for how long success notifications are displayed for all commands in this suite.")]
-        public TimeSpan? HideNotification{
-            get => _hideNotification;
-            set => SetPropertyValue(nameof(HideNotification), ref _hideNotification, value);
-        }
         
         [EditorAlias(EditorAliases.LabelPropertyEditor)]
         public string LastExecution => Commands
@@ -57,10 +46,7 @@ namespace Xpand.XAF.Modules.Workflow.BusinessObjects{
 
 
         string _name;
-        private bool _notifyEmission;
-        private bool _appNotification;
-        private bool _verboseNotification;
-        private TimeSpan? _hideNotification;
+        
 
         [RuleRequiredField]
         public string Name{
@@ -72,23 +58,7 @@ namespace Xpand.XAF.Modules.Workflow.BusinessObjects{
         public override void AfterConstruction(){
             base.AfterConstruction();
             ClassInfo.KeyProperty.SetValue(this,XpoDefault.NewGuid());
-            NotifyEmission = true;
-            HideNotification = 10.Seconds();
             Active = true;
-            AppNotification = true;
-        }
-
-
-        [ToolTip("Controls whether notifications are displayed within the application's standard UI. If false, notifications will only be sent to other channels like Telegram, if configured.")]
-        public bool AppNotification{
-            get => _appNotification;
-            set => SetPropertyValue(nameof(AppNotification), ref _appNotification, value);
-        }
-
-        [ToolTip("If true, notifications will include additional context, such as the name of the Command Suite and the specific Command that executed.")]
-        public bool VerboseNotification{
-            get => _verboseNotification;
-            set => SetPropertyValue(nameof(VerboseNotification), ref _verboseNotification, value);
         }
     }
 }

@@ -21,7 +21,9 @@ namespace Xpand.XAF.Modules.Workflow.Tests.BOModel{
         }
 
         public override IObservable<object[]> Execute(XafApplication application, params object[] objects) {
-            
+            if (ReturnEmpty) {
+                return Array.Empty<object>().Observe();
+            }
 
             if (ShouldFail) {
                 return Observable.Throw<object[]>(new InvalidOperationException("Execution Failure"));
@@ -59,6 +61,11 @@ namespace Xpand.XAF.Modules.Workflow.Tests.BOModel{
             set => SetPropertyValue(nameof(Id), ref _id, value);
         }
 
-        
+        bool _returnEmpty;
+
+        public bool ReturnEmpty {
+            get => _returnEmpty;
+            set => SetPropertyValue(nameof(ReturnEmpty), ref _returnEmpty, value);
+        }
     }
 }

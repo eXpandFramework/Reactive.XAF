@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3500 3500">
+    <!-- Outer circle (representing search or check) -->
+    <circle cx="1500" cy="1500" r="1300" fill="none" stroke="#000000" stroke-width="200"/>
+
+    <!-- Inner square (representing object) -->
+    <rect x="900" y="900" width="1200" height="1200" fill="#000000"/>
+
+    <!-- Checkmark -->
+    <path d="M2200 1300 L2600 1700 L3100 900"
+          fill="none" stroke="#000000" stroke-width="250" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

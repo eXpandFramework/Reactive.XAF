@@ -22,7 +22,7 @@ using Xpand.XAF.Modules.Reactive.Services;
 namespace Xpand.XAF.Modules.Workflow.BusinessObjects.Commands{
     [DefaultProperty(nameof(Description))]
     [System.ComponentModel.DisplayName("Object Modified")]
-    [ImageName("ObjectModified")]
+    [ImageName("ObjectModifiedWorkflowCommand")]
     [OptimisticLocking(OptimisticLockingBehavior.NoLocking)]
     public class ObjectModifiedWorkflowCommand(Session session) :WorkflowCommand(session){
         protected override Type GetReturnType() => typeof(object[]);

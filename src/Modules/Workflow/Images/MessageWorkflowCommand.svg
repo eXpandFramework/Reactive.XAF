@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3500 3500">
+    <!-- Message bubble -->
+    <path d="M500 500 
+           H3000 
+           V2500 
+           H1750 
+           L1000 3000 
+           V2500 
+           H500 
+           Z"
+          fill="none" stroke="#000000" stroke-width="200"/>
+
+    <!-- Three dots representing text -->
+    <circle cx="1000" cy="1500" r="150" fill="#000000"/>
+    <circle cx="1750" cy="1500" r="150" fill="#000000"/>
+    <circle cx="2500" cy="1500" r="150" fill="#000000"/>
+</svg>

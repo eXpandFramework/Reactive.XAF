@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3500 3500">
+    <rect x="500" y="500" width="2500" height="2500" fill="none" stroke="#000000" stroke-width="200"/>
+
+    <!-- Clock face -->
+    <circle cx="1750" cy="1750" r="1000" fill="none" stroke="#000000" stroke-width="200"/>
+    <line x1="1750" y1="850" x2="1750" y2="1750" stroke="#000000" stroke-width="150" stroke-linecap="round"/>
+    <line x1="1750" y1="1750" x2="2350" y2="1750" stroke="#000000" stroke-width="150" stroke-linecap="round"/>
+
+    <!-- Command symbols -->
+    <path d="M1000 2650 L1350 2300 L1000 1950" fill="none" stroke="#000000" stroke-width="150" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M2500 2650 L2150 2300 L2500 1950" fill="none" stroke="#000000" stroke-width="150" stroke-linecap="round" stroke-linejoin="round"/>
+    <line x1="1350" y1="2300" x2="2150" y2="2300" stroke="#000000" stroke-width="150" stroke-linecap="round"/>
+</svg>

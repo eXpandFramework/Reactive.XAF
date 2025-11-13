@@ -34,7 +34,7 @@ namespace Xpand.XAF.Modules.Workflow.BusinessObjects.Commands{
 
     [DefaultProperty(nameof(Description))]
     [AppearanceToolTip("Delete action",AppearanceItemType.Action,nameof(Type)+"='"+nameof(ActionObjectType.System)+"'",TargetItems = "Delete",Enabled = false)]
-    [ImageName("Command")]
+    [ImageName("WorkflowCommand")]
     [OptimisticLocking(OptimisticLockingBehavior.NoLocking)]
     [AppearanceToolTip("Bold last",AppearanceItemType.ViewItem, nameof(IsSource)+"=0",TargetItems = "*",FontStyle = DXFontStyle.Bold)]
     [System.ComponentModel.DisplayName("Action")]
@@ -124,8 +124,6 @@ namespace Xpand.XAF.Modules.Workflow.BusinessObjects.Commands{
             ClassInfo.KeyProperty.SetValue(this,XpoDefault.NewGuid());
             Active = true;
             Created=DateTime.Now;
-            HideNotification = TimeSpan.FromSeconds(10);
-            
         }
 
         [InvisibleInAllViews]
@@ -183,25 +181,8 @@ namespace Xpand.XAF.Modules.Workflow.BusinessObjects.Commands{
             get => _active;
             set => SetPropertyValue(ref _active, value);
         }
-
         
-
         bool _executeOnce;
-
-        bool _notifyEmission;
-
-        public bool NotifyEmission{
-            get => _notifyEmission;
-            set => SetPropertyValue(nameof(NotifyEmission), ref _notifyEmission, value);
-        }
-
-        TimeSpan? _hideNotification;
-
-        [VisibleInListView(false)]
-        public TimeSpan? HideNotification{
-            get => _hideNotification;
-            set => SetPropertyValue(nameof(HideNotification), ref _hideNotification, value);
-        }
         
         public bool ExecuteOnce{
             get => _executeOnce;

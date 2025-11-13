@@ -75,9 +75,18 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Model.DesignedDiffs.xafml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Images\" />
+    <None Remove="Images\Command.svg" />
+    <EmbeddedResource Include="Images\WorkflowCommand.svg" />
+    <None Remove="Images\CommandSuite.svg" />
+    <EmbeddedResource Include="Images\CommandSuite.svg" />
+    <None Remove="Images\Message.svg" />
+    <EmbeddedResource Include="Images\MessageWorkflowCommand.svg" />
+    <None Remove="Images\ObjectExists.svg" />
+    <EmbeddedResource Include="Images\ObjectExistWorkflowCommand.svg" />
+    <None Remove="Images\ObjectModified.svg" />
+    <EmbeddedResource Include="Images\ObjectModifiedWorkflowCommand.svg" />
+    <None Remove="Images\TimeInterval.svg" />
+    <EmbeddedResource Include="Images\TimeIntervalWorkflowCommand.svg" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="DevExpress.ExpressApp.Validation.Win" Version="25.1.6" />

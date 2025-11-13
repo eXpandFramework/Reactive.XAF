@@ -40,18 +40,19 @@
                 <LayoutGroup Id="Auto96b2690a-c54e-4f4a-9a60-cb1518a61824">
                   <LayoutGroup Id="Autoe090cc93-e3de-4ca4-8df0-ab3b7d8a6156">
                     <LayoutGroup Id="Auto3918e277-af46-4ef9-85b6-ba758ff2bfeb" RelativeSize="5.390070921985815">
-                      <LayoutItem Id="StartAction" RelativeSize="81.96531791907515" />
-                      <LayoutItem Id="Active" RelativeSize="18.034682080924856" />
+                      <LayoutItem Id="StartAction" RelativeSize="81.84971098265896" />
+                      <LayoutItem Id="Active" RelativeSize="18.15028901734104" />
                     </LayoutGroup>
                     <TabbedGroup Id="Settings" RelativeSize="94.60992907801419">
                       <LayoutGroup Id="Settings" Direction="Horizontal" RelativeSize="100">
-                        <LayoutGroup Id="Auto5223a955-8252-4c69-a604-635a07434cf9" ShowCaption="False" Caption="Auto5223a955-8252-4c69-a604-635a07434cf9(12)" Index="0" RelativeSize="49.572649572649574" IsNewNode="True">
+                        <LayoutGroup Id="Auto5223a955-8252-4c69-a604-635a07434cf9" ShowCaption="False" Caption="Auto5223a955-8252-4c69-a604-635a07434cf9(12)" Index="0" RelativeSize="49.45054945054945" IsNewNode="True">
                           <LayoutItem Id="Action" ViewItem="Action" Index="0" RelativeSize="4.900459418070444" IsNewNode="True" />
                           <LayoutItem Id="View" ViewItem="View" Index="1" RelativeSize="3.6753445635528332" IsNewNode="True" />
                           <LayoutItem Id="UseSelectedObjects" ViewItem="UseSelectedObjects" Index="2" RelativeSize="91.42419601837672" IsNewNode="True" />
                         </LayoutGroup>
-                        <LayoutGroup Id="Auto25b2f52f-cc0f-4e20-9c8c-517a9a866875" ShowCaption="False" Caption="Auto25b2f52f-cc0f-4e20-9c8c-517a9a866875(15)" Index="1" RelativeSize="50.427350427350426" IsNewNode="True">
-                          <LayoutItem Id="OutputProperty" ViewItem="OutputProperty" Index="0" RelativeSize="100" IsNewNode="True" />
+                        <LayoutGroup Id="Auto25b2f52f-cc0f-4e20-9c8c-517a9a866875" ShowCaption="False" Caption="Auto25b2f52f-cc0f-4e20-9c8c-517a9a866875(15)" Index="1" RelativeSize="50.54945054945055" IsNewNode="True">
+                          <LayoutItem Id="OutputProperty" ViewItem="OutputProperty" Index="0" RelativeSize="4.900459418070444" IsNewNode="True" />
+                          <LayoutItem Id="Emission" ViewItem="Emission" Index="1" RelativeSize="95.09954058192956" IsNewNode="True" />
                         </LayoutGroup>
                       </LayoutGroup>
                       <LayoutGroup Id="Item1">
@@ -64,9 +65,9 @@
                             <LayoutGroup Id="Auto1db79195-6757-4ea9-b0e4-299f9238ae45" Caption="Auto1db79195-6757-4ea9-b0e4-299f9238ae45(21)" RelativeSize="94.64012251148546">
                               <LayoutGroup Id="Auto6bcf8de4-81ea-45cc-8a04-ce2b1636b3bc" TextAlignMode="AlignWithChildren">
                                 <LayoutItem Id="DisableOnError" RelativeSize="25.457875457875456" />
-                                <LayoutItem Id="NotifyEmission" RelativeSize="24.175824175824175" />
-                                <LayoutItem Id="ExecuteOnce" RelativeSize="24.90842490842491" />
-                                <LayoutItem Id="LogExecutions" RelativeSize="25.457875457875456" />
+                                <LayoutItem Id="NotifyEmission" RelativeSize="23.992673992673993" />
+                                <LayoutItem Id="ExecuteOnce" RelativeSize="24.725274725274726" />
+                                <LayoutItem Id="LogExecutions" RelativeSize="25.824175824175825" />
                               </LayoutGroup>
                             </LayoutGroup>
                           </LayoutGroup>
@@ -88,13 +89,13 @@
         <MergedDifference Id="WorkflowCommand_DetailView" View="WorkflowCommand_DetailView" IsNewNode="True" />
       </MergedDifferences>
     </DetailView>
-    <ListView Id="CommandSuite_Commands_ListView" MasterDetailMode="ListViewAndDetailView" PreviewColumnName="">
+    <ListView Id="CommandSuite_Commands_ListView" MasterDetailMode="ListViewAndDetailView" PreviewColumnName="Description">
       <Columns>
-        <ColumnInfo Id="StartPath" Index="-1" />
+        <ColumnInfo Id="Description" Index="-1" SortIndex="-1" SortOrder="None" />
         <ColumnInfo Id="Index" Index="0" SortIndex="0" SortOrder="Ascending" />
         <ColumnInfo Id="Active" Index="1" />
         <ColumnInfo Id="Name" Index="1" />
-        <ColumnInfo Id="Description" Index="2" SortIndex="-1" SortOrder="None" />
+        <ColumnInfo Id="StartPath" Index="2" />
         <ColumnInfo Id="Returns" Index="3" />
         <ColumnInfo Id="ExecuteOnce" Index="4" />
       </Columns>
@@ -107,31 +108,15 @@
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
           <LayoutGroup Id="Autod3b3bf99-cc0c-4454-a285-6e7b69e194a4" ShowCaption="False" Caption="Autod3b3bf99-cc0c-4454-a285-6e7b69e194a4(5)" Direction="Vertical" Index="0" RelativeSize="100" IsNewNode="True">
-            <LayoutGroup Id="Commands_Group" ShowCaption="False" Caption="Commands" Index="0" RelativeSize="100" IsNewNode="True">
+            <LayoutGroup Id="Commands_Group" ShowCaption="False" Caption="Commands" Index="0" RelativeSize="100" TextAlignMode="AlignWithChildren" IsNewNode="True">
               <LayoutGroup Id="Auto940b5076-e8c4-4458-a11f-1e41503573f4" ShowCaption="False" Caption="Auto940b5076-e8c4-4458-a11f-1e41503573f4(4)" Direction="Vertical" Index="0" RelativeSize="5.390070921985815" IsNewNode="True">
                 <LayoutGroup Id="Auto729349a4-75e6-4133-90a3-997a11f418d7" ShowCaption="False" Caption="Auto729349a4-75e6-4133-90a3-997a11f418d7(8)" Index="0" RelativeSize="100" Direction="Horizontal" IsNewNode="True">
-                  <LayoutItem Id="Name" ViewItem="Name" Index="0" RelativeSize="70.14634146341463" IsNewNode="True" />
-                  <LayoutItem Id="LastExecution" ViewItem="LastExecution" SizeConstraintsType="Custom" MinSize="144, 36" Index="1" RelativeSize="29.853658536585368" IsNewNode="True" />
+                  <LayoutItem Id="Name" ViewItem="Name" Index="0" RelativeSize="63.97228637413395" IsNewNode="True" />
+                  <LayoutItem Id="Active" ViewItem="Active" SizeConstraintsType="Custom" MinSize="68, 32" Index="1" RelativeSize="9.930715935334874" ShowCaption="False" TextAlignMode="CustomSize" IsNewNode="True" />
+                  <LayoutItem Id="LastExecution" ViewItem="LastExecution" SizeConstraintsType="Custom" MinSize="144, 36" Index="2" RelativeSize="26.09699769053118" IsNewNode="True" />
                 </LayoutGroup>
               </LayoutGroup>
-              <TabbedGroup Id="Item3" CaptionLocation="Top" Index="1" RelativeSize="94.60992907801419" IsNewNode="True">
-                <LayoutGroup Id="Item2" ShowCaption="True" CaptionLocation="Top" Index="0" RelativeSize="100" Caption="Commands" IsNewNode="True">
-                  <LayoutItem Id="Commands" ViewItem="Commands" Index="0" RelativeSize="100" IsNewNode="True" />
-                </LayoutGroup>
-                <LayoutGroup Id="Item4" ShowCaption="True" CaptionLocation="Top" Direction="Vertical" Index="1" Caption="Settings" RelativeSize="100" IsNewNode="True">
-                  <LayoutGroup Id="Autoa5c00c40-a054-448f-a7a9-db9258b297a7" ShowCaption="False" Caption="Autoa5c00c40-a054-448f-a7a9-db9258b297a7(12)" Direction="Horizontal" Index="0" RelativeSize="5.079365079365079" IsNewNode="True">
-                    <LayoutItem Id="Active" ViewItem="Active" SizeConstraintsType="Custom" MinSize="68, 32" Index="0" RelativeSize="49.75074775672981" IsNewNode="True" />
-                    <LayoutItem Id="TelegramBot" ViewItem="TelegramBot" SizeConstraintsType="Custom" MinSize="139, 30" Index="1" RelativeSize="50.24925224327019" IsNewNode="True" />
-                  </LayoutGroup>
-                  <LayoutGroup Id="Auto151aba92-c3cd-48c6-9a8e-60b152fea652" ShowCaption="False" Caption="Auto151aba92-c3cd-48c6-9a8e-60b152fea652(15)" Direction="Horizontal" Index="1" RelativeSize="5.238095238095238" IsNewNode="True">
-                    <LayoutItem Id="AppNotification" ViewItem="AppNotification" Index="0" RelativeSize="23.62911266201396" IsNewNode="True" />
-                    <LayoutItem Id="NotifyEmission" ViewItem="NotifyEmission" SizeConstraintsType="Custom" MinSize="110, 30" Index="1" RelativeSize="26.021934197407777" IsNewNode="True" />
-                    <LayoutItem Id="HideNotification" ViewItem="HideNotification" Index="2" RelativeSize="50.34895314057827" IsNewNode="True" />
-                  </LayoutGroup>
-                  <LayoutItem Id="VerboseNotification" ViewItem="VerboseNotification" Index="2" RelativeSize="3.8095238095238093" IsNewNode="True" />
-                  <LayoutItem Id="Item5" Index="3" RelativeSize="85.87301587301587" IsNewNode="True" />
-                </LayoutGroup>
-              </TabbedGroup>
+              <LayoutItem Id="Commands" TextAlignMode="AutoSize" ViewItem="Commands" Index="1" RelativeSize="94.60992907801419" IsNewNode="True" />
             </LayoutGroup>
           </LayoutGroup>
           <LayoutGroup Id="Commands_Group" Direction="Vertical" Index="2" RelativeSize="24.680851063829788" Removed="True">
@@ -364,32 +349,33 @@
                 <LayoutGroup Id="Auto96b2690a-c54e-4f4a-9a60-cb1518a61824" ShowCaption="False" Caption="Auto96b2690a-c54e-4f4a-9a60-cb1518a61824(9)" Index="0" RelativeSize="100" Direction="Vertical" IsNewNode="True">
                   <LayoutGroup Id="Autoe090cc93-e3de-4ca4-8df0-ab3b7d8a6156" ShowCaption="False" Caption="Autoe090cc93-e3de-4ca4-8df0-ab3b7d8a6156(6)" Index="0" RelativeSize="100" IsNewNode="True">
                     <LayoutGroup Id="Auto3918e277-af46-4ef9-85b6-ba758ff2bfeb" ShowCaption="False" Caption="Auto3918e277-af46-4ef9-85b6-ba758ff2bfeb(7)" Direction="Horizontal" Index="0" RelativeSize="5.390070921985815" IsNewNode="True">
-                      <LayoutItem Id="StartAction" ViewItem="StartAction" Index="0" RelativeSize="88.6829268292683" IsNewNode="True" />
-                      <LayoutItem Id="Active" ViewItem="Active" Index="1" RelativeSize="11.317073170731707" IsNewNode="True" />
+                      <LayoutItem Id="StartAction" ViewItem="StartAction" Index="0" RelativeSize="84.52655889145497" IsNewNode="True" />
+                      <LayoutItem Id="Active" ViewItem="Active" Index="1" RelativeSize="15.473441108545035" IsNewNode="True" />
                     </LayoutGroup>
                     <TabbedGroup Id="Settings" CaptionLocation="Right" Index="1" RelativeSize="94.60992907801419" IsNewNode="True">
                       <LayoutGroup Id="Settings" ShowCaption="True" CaptionLocation="Right" Direction="Horizontal" Index="0" Caption="Settings" ImageName="Settings" RelativeSize="0" IsNewNode="True" />
                       <LayoutGroup Id="Item1" ShowCaption="True" Caption="Common" CaptionLocation="Top" GroupStyle="Light" Direction="Vertical" Index="1" RelativeSize="100" IsNewNode="True">
-                        <LayoutGroup Id="Auto9d801a37-fb07-4819-a229-453b5f58b878" ShowCaption="False" Caption="Auto9d801a37-fb07-4819-a229-453b5f58b878(13)" Index="0" RelativeSize="100" Direction="Horizontal" IsNewNode="True">
-                          <LayoutGroup Id="Auto361a401a-e75c-448c-bc18-aa34689fb4ab" ShowCaption="False" Caption="Auto361a401a-e75c-448c-bc18-aa34689fb4ab(15)" Index="0" RelativeSize="78.50562947799386" IsNewNode="True">
-                            <LayoutGroup Id="Auto01aaa3ce-d1d8-495b-a56d-3d3affbd49f5" ShowCaption="False" Caption="Auto01aaa3ce-d1d8-495b-a56d-3d3affbd49f5(15)" Direction="Horizontal" Index="0" RelativeSize="5.359877488514548" IsNewNode="True">
-                              <LayoutItem Id="HideNotification" ViewItem="HideNotification" Index="0" RelativeSize="49.80443285528031" IsNewNode="True" />
-                              <LayoutItem Id="Returns" ViewItem="Returns" Index="1" RelativeSize="50.19556714471969" IsNewNode="True" />
-                            </LayoutGroup>
-                            <LayoutGroup Id="Auto1db79195-6757-4ea9-b0e4-299f9238ae45" ShowCaption="False" Caption="Auto1db79195-6757-4ea9-b0e4-299f9238ae45(21)" Direction="Vertical" Index="1" RelativeSize="94.64012251148546" IsNewNode="True">
-                              <LayoutGroup Id="Auto6bcf8de4-81ea-45cc-8a04-ce2b1636b3bc" ShowCaption="False" Caption="Auto6bcf8de4-81ea-45cc-8a04-ce2b1636b3bc(19)" Direction="Horizontal" Index="0" RelativeSize="100" IsNewNode="True">
-                                <LayoutItem Id="DisableOnError" ViewItem="DisableOnError" Index="0" RelativeSize="25.423728813559322" IsNewNode="True" />
-                                <LayoutItem Id="NotifyEmission" ViewItem="NotifyEmission" Index="1" RelativeSize="24.2503259452412" IsNewNode="True" />
-                                <LayoutItem Id="ExecuteOnce" ViewItem="ExecuteOnce" Index="2" RelativeSize="25.16297262059974" IsNewNode="True" />
-                                <LayoutItem Id="LogExecutions" ViewItem="LogExecutions" Index="3" RelativeSize="25.16297262059974" IsNewNode="True" />
+                        <LayoutGroup Id="Auto9d801a37-fb07-4819-a229-453b5f58b878" ShowCaption="False" Caption="Auto9d801a37-fb07-4819-a229-453b5f58b878(13)" Index="0" RelativeSize="100" Direction="Horizontal" TextAlignMode="AlignWithChildren" IsNewNode="True">
+                          <LayoutGroup Id="Auto361a401a-e75c-448c-bc18-aa34689fb4ab" ShowCaption="False" Caption="Auto361a401a-e75c-448c-bc18-aa34689fb4ab(15)" Index="0" RelativeSize="63.691931540342296" IsNewNode="True">
+                            <LayoutGroup Id="Auto01aaa3ce-d1d8-495b-a56d-3d3affbd49f5" ShowCaption="False" Caption="Auto01aaa3ce-d1d8-495b-a56d-3d3affbd49f5(15)" Direction="Horizontal" Index="0" RelativeSize="9.03522205206738" IsNewNode="True">
+                              <LayoutGroup Id="Autobaea8ec4-2988-4d88-926c-ba95827c51a1" ShowCaption="False" Caption="" Index="0" RelativeSize="61.42034548944338" IsNewNode="True">
+                                <LayoutItem Id="Returns" ViewItem="Returns" Index="0" RelativeSize="54.23728813559322" IsNewNode="True" />
+                                <LayoutItem Id="DisableOnError" ViewItem="DisableOnError" Index="1" RelativeSize="45.76271186440678" IsNewNode="True" />
+                              </LayoutGroup>
+                              <LayoutGroup Id="Auto1df7cbfa-66b2-4164-955e-858a98eeaba2" ShowCaption="False" Caption="" Index="1" RelativeSize="38.57965451055662" IsNewNode="True">
+                                <LayoutItem Id="LogExecutions" ViewItem="LogExecutions" Index="0" RelativeSize="54.23728813559322" IsNewNode="True" />
+                                <LayoutItem Id="ExecuteOnce" ViewItem="ExecuteOnce" Index="1" RelativeSize="45.76271186440678" IsNewNode="True" />
                               </LayoutGroup>
                             </LayoutGroup>
+                            <LayoutGroup Id="Auto1db79195-6757-4ea9-b0e4-299f9238ae45" ShowCaption="False" Caption="Auto1db79195-6757-4ea9-b0e4-299f9238ae45(21)" Direction="Vertical" Index="1" RelativeSize="90.96477794793262" IsNewNode="True">
+                              <LayoutGroup Id="Auto6bcf8de4-81ea-45cc-8a04-ce2b1636b3bc" ShowCaption="False" Caption="Auto6bcf8de4-81ea-45cc-8a04-ce2b1636b3bc(19)" Direction="Horizontal" Index="0" RelativeSize="100" TextAlignMode="UseParentOptions" IsNewNode="True" />
+                            </LayoutGroup>
                           </LayoutGroup>
-                          <LayoutItem Id="Executions" ViewItem="Executions" Index="1" RelativeSize="21.49437052200614" IsNewNode="True" />
+                          <LayoutItem Id="Executions" ViewItem="Executions" Index="1" RelativeSize="36.308068459657704" IsNewNode="True" />
                         </LayoutGroup>
                       </LayoutGroup>
-                      <LayoutGroup Id="Item2" ShowCaption="True" CaptionLocation="Top" Direction="Vertical" Index="2" Caption="Start Commands" RelativeSize="100" ImageName="WorkflowCommand" IsNewNode="True">
-                        <LayoutItem Id="StartCommands" ViewItem="StartCommands" Index="0" RelativeSize="100" IsNewNode="True" />
+                      <LayoutGroup Id="Item2" ShowCaption="True" CaptionLocation="Top" Direction="Vertical" Index="2" Caption="Start Commands" RelativeSize="100" ImageName="WorkflowCommand" TextAlignMode="AlignWithChildren" IsNewNode="True">
+                        <LayoutItem Id="StartCommands" ViewItem="StartCommands" Index="0" RelativeSize="100" TextAlignMode="AutoSize" IsNewNode="True" />
                       </LayoutGroup>
                     </TabbedGroup>
                   </LayoutGroup>
