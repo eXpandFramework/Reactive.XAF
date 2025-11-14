@@ -29,9 +29,7 @@ namespace Xpand.XAF.Modules.Workflow.BusinessObjects.Commands{
             var startActions = new[] { StartAction }
                 .WhereNotDefault()
                 .Concat(StartCommands.WhereNotDefault()).ToArray();
-            return startActions.Any()
-                ? 1 + startActions.Max(c => c.GetIndex())
-                : 0;
+            return startActions.Any() ? 1 + startActions.Max(c => c.GetIndex()) : 0;
             
         }
 

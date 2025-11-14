@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
@@ -10,7 +9,6 @@ using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.Numeric;
 using Xpand.Extensions.Reactive.Transform;
-using Xpand.Extensions.Reactive.Utility;
 using Xpand.TestsLib.Common;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Workflow.BusinessObjects;
@@ -53,7 +51,7 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
 
             await application.StartWinTest(TestLogic).FirstOrDefaultAsync();
 
-            var messageOptions = await messageOptionsSubject.FirstAsync();
+            var messageOptions = await messageOptionsSubject.FirstAsync().Timeout(10.Seconds());
             messageOptions.ShouldNotBeNull();
             messageOptions.Message.ShouldContain("42");
             messageOptions.Message.ShouldContain("test-string");
@@ -95,11 +93,12 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
 
             await application.StartWinTest(_ => testLogic.ConcatToUnit(sinkReceivedSignal)).FirstOrDefaultAsync();
 
-            var receivedObjects = await sinkReceivedSignal.FirstAsync();
+            var receivedObjects = await sinkReceivedSignal.FirstAsync().Timeout(10.ToSeconds());
     
             receivedObjects.ShouldNotBeNull();
             receivedObjects.Length.ShouldBe(1);
             receivedObjects[0].ShouldBe("42;test-string");
+            
         }
         
         [Test]
@@ -192,60 +191,40 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
         [Apartment(ApartmentState.STA)]
         public async Task Handles_Null_Values_In_Input_Array_Gracefully() {
             await using var application = NewApplication();
-            WorkflowModule(application);
-
-            var sinkExecutedSignal = new ReplaySubject<Unit>();
-            var messageSignal = new ReplaySubject<Unit>();
-
-            application.WhenCustomizeMessage().Take(1)
-                .Do(_ => {
-                    messageSignal.OnNext(Unit.Default);
-                    messageSignal.OnCompleted();
-                })
+            
+            var executedSubject = new ReplaySubject<Unit>();
+            application.WhenSetupComplete().Take(1)
+                .SelectMany(_ => application.UseProviderObjectSpace(space => {
+                    var suite = space.CreateObject<CommandSuite>();
+                    var sourceCmd = space.CreateObject<TestCommand>();
+                    sourceCmd.OutputMessages = "ValidValue;__NULL__";
+                    sourceCmd.CommandSuite = suite;
+                    var messenger = space.CreateObject<MessageWorkflowCommand>();
+                    messenger.StartAction = sourceCmd;
+                    messenger.CommandSuite = suite;
+                    var dataSink = space.CreateObject<TestCommand>();
+                    dataSink.StartAction = messenger;
+                    dataSink.CommandSuite = suite;
+                    return suite.Commit()
+                        .SelectMany(_ => dataSink.WhenExecuted().Do(_ => {
+                            executedSubject.OnNext(Unit.Default);
+                            executedSubject.OnCompleted();
+                        }))
+                        .To(suite);
+                }))
                 .Subscribe();
-
-            application.UseProviderObjectSpace(space => {
-                var suite = space.CreateObject<CommandSuite>();
-
-                var wf1 = space.CreateObject<WF>();
-                wf1.Name = "ValidName";
-                var wf2 = space.CreateObject<WF>();
-                wf2.Name = null;
-
-                var sourceCmd = space.CreateObject<ObjectExistWorkflowCommand>();
-                sourceCmd.Object = sourceCmd.ObjectTypes.First(s => s.Name == typeof(WF).FullName);
-                sourceCmd.OutputProperty = nameof(WF.Name);
-                sourceCmd.CommandSuite = suite;
-
-                var messenger = space.CreateObject<MessageWorkflowCommand>();
-                messenger.StartAction = sourceCmd;
-                messenger.CommandSuite = suite;
-
-                var dataSink = space.CreateObject<TestCommand>();
-                dataSink.Id = "DataSink";
-                dataSink.StartAction = messenger;
-                dataSink.CommandSuite = suite;
-
-                return suite.Commit()
-                    .SelectMany(_ => dataSink.WhenExecuted().Take(1).Do(_ => {
-                        sinkExecutedSignal.OnNext(Unit.Default);
-                        sinkExecutedSignal.OnCompleted();
-                    }))
-                    .To(suite);
-            })
-            .Subscribe();
-
-            await application.StartWinTest(_ => sinkExecutedSignal.Merge(messageSignal));
-
+            WorkflowModule(application);
+            
+            await application.StartWinTest(_ => executedSubject);
             
             BusEvents.ShouldBeEmpty("No errors should be published when handling null input.");
+            
         }
         
         [Test]
         [Apartment(ApartmentState.STA)]
         public async Task Correctly_Formats_IDefaultProperty_Objects_In_Message() {
             await using var application = NewApplication();
-            WorkflowModule(application);
 
             var messageOptionsSubject = new ReplaySubject<MessageOptions>();
 
@@ -260,30 +239,28 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
                 })
                 .Subscribe();
 
-            IObservable<CommandSuite> testLogic = application.UseProviderObjectSpace(space => {
-                var suite = space.CreateObject<CommandSuite>();
+            application.WhenSetupComplete()
+                .SelectMany(_ => application.UseProviderObjectSpace(space => {
+                    var suite = space.CreateObject<CommandSuite>();
 
-                var commandToFind = space.CreateObject<TestCommand>();
-                commandToFind.Id = "FindMe";
-                commandToFind.CommandSuite = suite;
+                    var testCommand = space.CreateObject<TestCommand>();
+                    testCommand.Id = "EmitSelf";
+                    testCommand.CommandSuite = suite;
 
-                var sourceCmd = space.CreateObject<ObjectExistWorkflowCommand>();
-                sourceCmd.Object = sourceCmd.ObjectTypes.First(s => s.Name == typeof(TestCommand).FullName);
-                sourceCmd.CommandSuite = suite;
+                    var messenger = space.CreateObject<MessageWorkflowCommand>();
+                    messenger.StartAction = testCommand;
+                    messenger.CommandSuite = suite;
 
-                var messenger = space.CreateObject<MessageWorkflowCommand>();
-                messenger.StartAction = sourceCmd;
-                messenger.CommandSuite = suite;
+                    return suite.Commit();
+                }))
+                .Subscribe();
+            WorkflowModule(application);
+            await application.StartWinTest(_ => messageOptionsSubject) ;
 
-                return suite.Commit();
-            });
-
-            await application.StartWinTest(_ => testLogic.ConcatToUnit(messageOptionsSubject)) ;
-
-            var messageOptions = await messageOptionsSubject.FirstAsync();
+            var messageOptions = await messageOptionsSubject.FirstAsync().Timeout(10.Seconds());
     
             messageOptions.ShouldNotBeNull();
-            messageOptions.Message.ShouldContain("Test Command: Test Command->Id: FindMe");
+            messageOptions.Message.ShouldContain("Test Command: Test Command->Id: EmitSelf");
             messageOptions.Message.ShouldNotContain(typeof(TestCommand).FullName!);
         }
     }

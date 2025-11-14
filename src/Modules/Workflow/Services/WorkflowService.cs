@@ -4,9 +4,9 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Reactive;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Threading;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.Templates;
@@ -36,17 +36,12 @@ using Xpand.XAF.Modules.Workflow.BusinessObjects.Commands;
 
 namespace Xpand.XAF.Modules.Workflow.Services{
     public static class WorkflowService{
-        static readonly ReplaySubject<SynchronizationContext> ContextSubject = new();
+        
         internal static IObservable<Unit> WorkflowServiceConnect(this ApplicationModulesManager manager){
             return manager.WhenSetupComplete(application => application.MonitorCommandExecutions()
                     .MergeToUnit(application.DeferAction(() => application.Modules.OfType<ValidationModule>().First().InitializeRuleSet()))
                     .MergeToUnit(application.RefreshCommandSuiteDetailView())
                     .MergeToUnit(application.SynchronizeDashboardItem())
-                    .MergeToUnit(application.WhenSynchronizationContext()
-                        .Do(context => {
-                            LogFast($"SynchronizationContext captured.");
-                            ContextSubject.OnNext(context);
-                        }))
                 )
                 .MergeToUnit(manager.ActivateCommand())
                 .MergeToUnit(manager.DeActivateCommand())
@@ -246,8 +241,8 @@ namespace Xpand.XAF.Modules.Workflow.Services{
             return Observable.Defer(() => application.UseObject(suite,commandSuite => {
                     var commands = commandSuite.Commands.Where(command => command.Active && !command.IsSource).ToArray();
                     LogFast($"Found {commands.Length} active commands in suite '{commandSuite.Name}'.");
-                    return commands.ToNowObservable()
-                        .SelectManyItemResilient(command => {
+                    return commands.ToObservable(Scheduler.Default)
+                        .SelectMany(command => {
                             LogFast($"Executing command '{command}' from suite '{commandSuite.Name}'.");
                             return application.ExecuteCommand(command, executing).TakeUntil(suiteChanged);
                         });
@@ -279,35 +274,51 @@ namespace Xpand.XAF.Modules.Workflow.Services{
                 .ToNowObservable().BufferUntilCompleted()
             );
 
-        private static IObservable<object[]> ExecuteCommand(this XafApplication application, WorkflowCommand workflowCommand,Action<WorkflowCommand> executing){
-            LogFast($"Entering {nameof(ExecuteCommand)} for command '{workflowCommand.FullName}'.");
-            return workflowCommand.Validate().FromHierarchyAll(cmd => new[]{ cmd.StartAction?.Validate() }.WhereNotDefault().Where(command => command.Active)
-                    .Concat(cmd.StartCommands.WhereNotDefault().Do(command => command.Validate()).Where(command => command.Active))).ToNowObservable()
-                .SelectManyItemResilient(path => {
-                    LogFast($"Executing path: {string.Join(" -> ", path.Select(c => c.FullName))}");
-                    return path.Reverse().ToNowObservable()
-                        .Aggregate(Array.Empty<object>().Observe(), (previousSource, currentCommand) => previousSource
-                            .ObserveOnDefault()
-                            .SelectManySequentialItemResilient(prevResult => {
-                                LogFast($"Executing step '{currentCommand.FullName}' in path.");
-                                executing?.Invoke(currentCommand);
-                                return application.Execute(currentCommand, prevResult);
-                            }))
-                        .Select(innerResilientObservable => innerResilientObservable.AsObservable())
-                        .Concat();
-                })
-                .ToConsole(_ => $"{workflowCommand.FullName}: {workflowCommand}")
-                .Finally(() => LogFast($"Exiting {nameof(ExecuteCommand)} for command '{workflowCommand.FullName}'."));
-        }
+            internal static IObservable<object[]> ExecuteCommand(this XafApplication application, WorkflowCommand workflowCommand,Action<WorkflowCommand> executing=null){
+                LogFast($"Entering {nameof(ExecuteCommand)} for command '{workflowCommand.FullName}'.");
+                var paths = workflowCommand.Validate().FromHierarchyAll(cmd => new[]{ cmd.StartAction?.Validate() }.WhereNotDefault().Where(command => command.Active)
+                    .Concat(cmd.StartCommands.WhereNotDefault().Do(command => command.Validate()).Where(command => command.Active)));
 
+                return paths.ToObservable()
+                    .SelectMany(path => {
+                        var reversedPath = path.Reverse().ToList();
+                        if (!reversedPath.Any()) {
+                            return Observable.Empty<object[]>();
+                        }
+
+                        var firstStep = reversedPath.First();
+                        var builder = Observable.Defer(() => {
+                                executing?.Invoke(firstStep);
+                                return application.Execute(firstStep, []).WhenNotDefault().SelectMany() ;
+                            })
+                            .BeginWorkflow($"Path-{path.GetHashCode()}", context: [workflowCommand]);
+
+                        var finalBuilder = reversedPath.Skip(1)
+                            .Aggregate(builder, (currentBuilder, command) =>
+                                currentBuilder.Then(previousResults => {
+                                    executing?.Invoke(command);
+                                    var array = previousResults.SelectMany(o => o as IEnumerable<object>??[o]).ToArray();
+                                    return application.Execute(command, array).WhenNotDefault().SelectMany();
+                                }));
+
+                        return finalBuilder.RunFailFast()
+                            .ContinueOnFault(publishWhen: fault => {
+                                var shouldDisable = fault.FindRootCauses()
+                                    .Any(rootCause => firstStep.DisableOnError || rootCause is ValidationException);
+                                return shouldDisable ? application.Disable(firstStep).To(true) : Observable.Return(true);
+                            }, context: [workflowCommand]);
+                    })
+                    .ToConsole(_ => $"{workflowCommand.FullName}: {workflowCommand}")
+                    .Finally(() => LogFast($"Exiting {nameof(ExecuteCommand)} for command '{workflowCommand.FullName}'."));
+            }
         private static readonly ISubject<(WorkflowCommand command, object[] result)> ExecutedSubject = Subject.Synchronize(new Subject<(WorkflowCommand actionObject, object[] result)>());
 
         public static IObservable<object[]> WhenExecuted(this WorkflowCommand workflowCommand) 
             => Observable.Defer(() => {
                 var commandOid = workflowCommand?.Oid;
-                LogFast($"[SUBSCRIBER] Subscribing to executions for command OID: '{commandOid}'.");
+                LogFast($"Subscribing to executions for command OID: '{commandOid}'.");
                 return ExecutedSubject
-                    .Do(t => LogFast($"[SUBSCRIBER] Received event for command OID '{t.command.Oid}' while listening for '{commandOid}'."))
+                    .Do(t => LogFast($"Received event for command OID '{t.command.Oid}' while listening for '{commandOid}'."))
                     .Where(t => t.command.Oid == commandOid).ToSecond();
             });
 
@@ -329,15 +340,7 @@ namespace Xpand.XAF.Modules.Workflow.Services{
                         .TakeUntilModified(application, workflowCommand)
                         .TakeUntil(_ => !workflowCommand.Active)
                         .SelectMany(objects1 => !workflowCommand.ExecuteOnce ? objects1.Observe() : application.Disable(workflowCommand).To(objects1))
-                        .ContinueOnFault(publishWhen: e => {
-                            LogFast($"Error during execution of command '{workflowCommand.FullName}'. Exception: {e.GetType().Name}");
-                            var shouldDisable = workflowCommand.DisableOnError || e is ValidationException;
-                            if (shouldDisable) {
-                                LogFast($"Disabling command '{workflowCommand.FullName}' due to error.");
-                                return application.Disable(workflowCommand).To(true);
-                            }
-                            return Observable.Return(true);
-                        },context:[workflowCommand.CommandSuite,workflowCommand])
+                        
                         .ToConsole(_ => $"{workflowCommand}")
                         .Finally(() => LogFast($"Exiting low-level {nameof(Execute)} for command '{workflowCommand.FullName}'."));
                 }, typeof(WorkflowCommand))

@@ -5,7 +5,6 @@ using DevExpress.ExpressApp;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Numeric;
 using Xpand.Extensions.Reactive.Filter;
-using Xpand.Extensions.Reactive.Relay;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.StringExtensions;
 using Xpand.Extensions.XAF;
@@ -28,20 +27,14 @@ namespace Xpand.XAF.Modules.Workflow.Services {
                         .Select(o => {
                             var suiteMsg = $"Suite: {workflowCommand.CommandSuite}".EncloseHTMLImportant();
                             var commandMsg = $"Command: {((IDefaultProperty)workflowCommand).DefaultPropertyValue}".EncloseHTMLTag("i");
-                            var objectMsg = $"{o}";
-                            if (verboseNotification) {
-                                objectMsg = $"{objects[0].GetType().Name}: ".EncloseHTMLTag("i") + objectMsg;
-                                return new[] { suiteMsg, commandMsg, objectMsg }.JoinNewLine();
-                            }
-
-                            return objectMsg;
+                            return verboseNotification ? new[] { suiteMsg, commandMsg, $"{objects[0].GetType().Name}: ".EncloseHTMLTag("i") + $"{o}" }.JoinNewLine() : $"{o}";
                         })
                         .Publish(shared => {
                             LogFast($"Publishing message content to different channels.");
                             return shared.ShowXafMessage(msgType, workflowCommand.DisplayInterval(), position, null);
                         })
                         .To<object[]>();
-                }).ContinueOnFault(context: [nameof(InvokeMessageWorkflowCommand), workflowCommand.ToString()])
+                })
                 .Finally(() => LogFast($"Exiting {nameof(InvokeMessageWorkflowCommand)} for command '{workflowCommand}'"))
                 .IgnoreElements()
                 .Concat(objects.Observe());

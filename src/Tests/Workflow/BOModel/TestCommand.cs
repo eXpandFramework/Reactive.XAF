@@ -20,7 +20,21 @@ namespace Xpand.XAF.Modules.Workflow.Tests.BOModel{
             set => SetPropertyValue(nameof(ShouldFail), ref _shouldFail, value);
         }
 
+        string _outputMessages;
+
+        public string OutputMessages {
+            get => _outputMessages;
+            set => SetPropertyValue(nameof(OutputMessages), ref _outputMessages, value);
+        }
+        
         public override IObservable<object[]> Execute(XafApplication application, params object[] objects) {
+            if (Id == "EmitSelf") {
+                return new object[] { this }.Observe();
+            }
+            if (OutputMessages != null) {
+                var array = OutputMessages.Split(';').Select(s => s == "__NULL__" ? null : (object)s).ToArray();
+                return Observable.Return(array);
+            }
             if (ReturnEmpty) {
                 return Array.Empty<object>().Observe();
             }

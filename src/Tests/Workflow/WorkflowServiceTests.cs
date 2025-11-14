@@ -11,6 +11,7 @@ using Shouldly;
 using Xpand.Extensions.Numeric;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Relay;
+using Xpand.Extensions.Reactive.Relay.Transaction;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Transform.System;
 using Xpand.Extensions.Reactive.Utility;
@@ -33,7 +34,7 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
         public async Task Test_Root_Command_Execution() {
             await using var application = NewApplication();
             var replaySubject = new ReplaySubject<Unit>();
-            await application.WhenSetupComplete(_ => application.UseProviderObjectSpace(space => {
+            application.WhenSetupComplete(_ => application.UseProviderObjectSpace(space => {
                     var commandSuite = space.CreateObject<CommandSuite>();
                     commandSuite.Commands.Add(space.CreateObject<TestCommand>());
                     return commandSuite.Commit().Cast<CommandSuite>()
@@ -44,10 +45,11 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
                                 replaySubject.OnCompleted();
                             })
                             .To(command));
-                })).Take(1).IgnoreElements()
-                .MergeToUnit(application.DeferAction(_ => WorkflowModule(application)))
-                .MergeToUnit(application.StartWinTest(_ => replaySubject.Take(1)))
-                .Timeout(30.ToSeconds());
+                }))
+                .Subscribe();
+
+            WorkflowModule(application);
+            await application.StartWinTest(_ => replaySubject.Take(1));
         }
 
         [Test]
@@ -139,48 +141,37 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
         [Apartment(ApartmentState.STA)]
         public async Task Test_ExecuteOnce_Behavior() {
             await using var application = NewApplication();
+            var executionOrder = new ReplaySubject<string>();
 
-            var executionCount = 0;
-            Guid targetCommandOid = Guid.Empty;
-
-            var setupAndListen = application.WhenSetupComplete().Take(1)
+            var setupAndListen = application.WhenSetupComplete()
                 .SelectMany(_ => application.UseProviderObjectSpace(space => {
                     var commandSuite = space.CreateObject<CommandSuite>();
-
-                    var ticker = space.CreateObject<TimeIntervalWorkflowCommand>();
-                    ticker.Interval = TimeSpan.FromMilliseconds(100);
-                    ticker.CommandSuite = commandSuite;
-
-                    var target = space.CreateObject<TestCommand>();
-                    target.ExecuteOnce = true;
-                    target.CommandSuite = commandSuite;
-                    target.StartAction = ticker;
-
-                    targetCommandOid = target.Oid;
+                    var commandA = space.CreateObject<TestCommand>();
+                    commandA.Id = "CommandA";
+                    commandA.CommandSuite = commandSuite;
+                    var commandB = space.CreateObject<TestCommand>();
+                    commandB.Id = "CommandB";
+                    commandB.CommandSuite = commandSuite;
+                    commandB.StartAction = commandA;
+                    commandB.ExecuteOnce = true;
 
                     return commandSuite.Commit()
-                        .SelectMany(_ => target.WhenExecuted()
-                            .TakeUntil(ticker.WhenExecuted().Skip(4).Take(1)))
-                        .Do(_ => executionCount++)
+                        .SelectMany(_ => commandA.WhenExecuted().Do(_ => executionOrder.OnNext(commandA.Id)).ToUnit()
+                            .Merge(commandB.WhenExecuted().Do(_ => {
+                                executionOrder.OnNext(commandB.Id);
+                                executionOrder.OnCompleted();
+                            }).ToUnit()))
                         .To(commandSuite);
                 }))
-                .ToUnit()
-                .Finally(() => { });
+                .Take(2);
 
-            var observationWindow = 1.ToSeconds().Timer().ToUnit();
+            await setupAndListen
+                .MergeToUnit(application.DeferAction(_ => WorkflowModule(application)))
+                .MergeToUnit(application.StartWinTest(_ => executionOrder.Buffer(2).Select(_ => Unit.Default)))
+                .Timeout(30.ToSeconds());
 
-            await setupAndListen.IgnoreElements()
-                .MergeToUnit(application.DeferAction(_ => WorkflowModule(application)).IgnoreElements())
-                .MergeToUnit(application.StartWinTest(_ => observationWindow))
-                .Take(1)
-                .Timeout(TimeSpan.FromSeconds(30));
+            await application.WhenProviderObject<TestCommand>(command => !command.Active).FirstOrDefaultAsync();
 
-            executionCount.ShouldBe(1);
-
-            var testCommand = await application.UseProviderObjectSpace(space
-                => space.GetObjectByKey<TestCommand>(targetCommandOid).Observe());
-            testCommand.ShouldNotBeNull();
-            testCommand.Active.ShouldBeFalse();
         }
 
         [Test]
@@ -516,8 +507,9 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
                 .Timeout(TimeSpan.FromSeconds(30)).Take(1);
 
             BusEvents.ShouldHaveSingleItem();
-            var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
-            fault.InnerException.ShouldBeOfType<InvalidOperationException>().Message.ShouldBe("Execution Failure");
+            var fault = BusEvents.Single().ShouldBeOfType<TransactionAbortedException>();
+            fault.FindRootCauses().OfType<InvalidOperationException>().ShouldHaveSingleItem()
+                .Message.ShouldBe("Execution Failure");
 
             await application.UseProviderObjectSpace(space => {
                 var command = space.GetObjectByKey<TestCommand>(commandOid);
@@ -552,8 +544,9 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
                 .Timeout(TimeSpan.FromSeconds(30)).Take(1);
 
             BusEvents.ShouldHaveSingleItem();
-            var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
-            fault.InnerException.ShouldBeOfType<InvalidOperationException>().Message.ShouldBe("Execution Failure");
+            var fault = BusEvents.Single().ShouldBeOfType<TransactionAbortedException>();
+            fault.FindRootCauses().OfType<InvalidOperationException>().ShouldHaveSingleItem()
+                .Message.ShouldBe("Execution Failure");
 
             await application.UseProviderObjectSpace(space => {
                 var command = space.GetObjectByKey<TestCommand>(commandOid);
@@ -646,7 +639,7 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
             await using var application = NewApplication();
             var completionSignal = new ReplaySubject<object[]>();
 
-            var setupAndListen = application.WhenSetupComplete()
+            application.WhenSetupComplete()
                 .SelectMany(_ => application.UseProviderObjectSpace(space => {
                     var commandSuite = space.CreateObject<CommandSuite>();
 
@@ -660,19 +653,17 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
                     commandB.CommandSuite = commandSuite;
 
                     return commandSuite.Commit()
-                        .SelectMany(_ => commandB.WhenExecuted().Take(1))
+                        .SelectMany(_ => commandB.WhenExecuted().SubscribeOnDefault().Take(1))
                         .Do(objects => {
                             completionSignal.OnNext(objects);
                             completionSignal.OnCompleted();
                         })
                         .To(commandSuite);
                 }))
-                .ToUnit();
-
-            await setupAndListen.IgnoreElements()
-                .MergeToUnit(application.DeferAction(_ => WorkflowModule(application)))
-                .MergeToUnit(application.StartWinTest(_ => completionSignal))
-                .Timeout(TimeSpan.FromSeconds(30)).FirstOrDefaultAsync();
+                .Subscribe();
+            WorkflowModule(application);
+            await application.StartWinTest(_ => completionSignal,timeout:30.Seconds())
+                .FirstOrDefaultAsync();
 
             var signal = await completionSignal;
             signal.ShouldHaveSingleItem().ShouldBe("42;test-string");

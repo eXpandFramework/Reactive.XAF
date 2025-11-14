@@ -368,21 +368,16 @@ namespace Xpand.XAF.Modules.Workflow.Tests{
 
         [Test]
         public async Task NextEmission_For_HourlyIntervals_Finds_Next_Time_Tomorrow() {
-            // ARRANGE
             await using var application = NewApplication();
             WorkflowModule(application);
             DateTime? nextEmission = null;
 
-//MODIFICATION: START
             var nowForTest = DateTime.Now;
-            // Create a deterministic time in the past to avoid edge cases.
             var pastTime = nowForTest.AddMinutes(-5);
             var fractionalHour = pastTime.TimeOfDay.TotalHours;
             var intervalString = $"{fractionalHour:F8}";
             var expectedTime = pastTime.AddDays(1);
-//MODIFICATION: END
 
-            // ACT
             await application.UseProviderObjectSpace(space => {
                 var command = space.CreateObject<TimeIntervalWorkflowCommand>();
                 command.HourlyIntervals = intervalString;
@@ -390,12 +385,9 @@ namespace Xpand.XAF.Modules.Workflow.Tests{
                 return command.Commit();
             });
 
-            // ASSERT
             nextEmission.ShouldNotBeNull();
-//MODIFICATION: START
             (nextEmission.Value - expectedTime).TotalSeconds.ShouldBeLessThan(1,
                 "NextEmission should be scheduled for the same time on the next calendar day.");
-//MODIFICATION: END
         }
         
         

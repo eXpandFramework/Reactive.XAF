@@ -9,7 +9,6 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using NUnit.Framework;
 using Shouldly;
-using Xpand.Extensions.Numeric;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;

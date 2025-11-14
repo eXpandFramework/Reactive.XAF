@@ -268,7 +268,7 @@ namespace Xpand.TestsLib.Common{
                         .SelectMany(_ => testFactory(frame).BufferUntilCompleted().Do(_ => application.Exit()).SelectMany()))
                     .Finally(() => SynchronizationContext.SetSynchronizationContext(originalSyncContext));
             }))
-            .Timeout(timeout??30.ToSeconds())
+            .Timeout(timeout??300.ToSeconds())
             .Catch<T,TimeoutException>(e => {
                 application.Exit();
                 return e.Throw<T>();

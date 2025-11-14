@@ -13,7 +13,7 @@ namespace Xpand.Extensions.Reactive.Relay {
     
     public static class ItemResilientOperators {
         private static IObservable<T> ApplyItemResilience<T>(this IObservable<T> source, Func<IObservable<T>, IObservable<T>> retryStrategy,
-            object[] context, string memberName, string filePath, int lineNumber,Func<Exception, IObservable<bool>> publishWhen=null)
+            object[] context, string memberName, string filePath, int lineNumber,Func<FaultHubException, IObservable<bool>> publishWhen=null)
             => FaultHub.Enabled ? (retryStrategy != null ? retryStrategy(source) : source)
                 .Catch((Exception e) => e.ProcessFault(e.CreateNewFaultContext(context, memberName, filePath, lineNumber), 
                     proceedAction: enrichedException => (publishWhen?.Invoke(enrichedException) ?? true.Observe())
@@ -154,7 +154,7 @@ namespace Xpand.Extensions.Reactive.Relay {
         
         
         public static IObservable<T> ContinueOnFault<T>(this IObservable<T> source, Func<IObservable<T>, IObservable<T>> retryStrategy = null,
-            object[] context = null,Func<Exception, IObservable<bool>> publishWhen = null, [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0)
+            object[] context = null,Func<FaultHubException, IObservable<bool>> publishWhen = null, [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0)
             => source.ApplyItemResilience(retryStrategy,  context, memberName, filePath, lineNumber,publishWhen);
     }
 }

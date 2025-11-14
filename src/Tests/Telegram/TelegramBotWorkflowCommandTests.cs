@@ -33,9 +33,11 @@ using Xpand.XAF.Modules.Workflow.BusinessObjects;
 using Xpand.XAF.Modules.Workflow.BusinessObjects.Commands;
 using Xpand.XAF.Modules.Workflow.Services;
 using TelegramBotClient = Xpand.XAF.Modules.Telegram.Services.TelegramBotClient;
+using TransactionAbortedException = Xpand.Extensions.Reactive.Relay.Transaction.TransactionAbortedException;
 
 namespace Xpand.XAF.Modules.Telegram.Tests{
     public class TelegramBotWorkflowCommandTests:BaseTelegramTest {
+
         [Test][Apartment(ApartmentState.STA)]
         public async Task Command_is_available_in_the_new_object_action() {
             await using var application = NewApplication();
@@ -313,10 +315,10 @@ namespace Xpand.XAF.Modules.Telegram.Tests{
                 .Subscribe();
             TelegramModule(application);
     
-            await application.StartWinTest(_ => triggerExecuted, 10.Seconds());
-
+            await application.StartWinTest(_ => triggerExecuted);
+            
             BusEvents.Count.ShouldBe(1);
-            var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
+            var fault = BusEvents.Single().ShouldBeOfType<TransactionAbortedException>();
             fault.FindRootCauses().Single().ShouldBeOfType<HttpRequestException>().Message.ShouldBe("Network unavailable");
         }
         

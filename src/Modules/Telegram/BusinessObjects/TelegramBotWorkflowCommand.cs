@@ -17,6 +17,7 @@ namespace Xpand.XAF.Modules.Telegram.BusinessObjects{
             => TelegramBot is not { Active: true } ? Observable.Empty<object[]>()
                 : objects.Observe().WhenNotEmpty()
                     .SelectMany(_ => TelegramBot.SendText(objects.WhereNotDefault().Select(o => o.ToString()).ToArray()))
+                    .Select(VAR => VAR)
                     .To<object[]>();
 
         TelegramBot _telegramBot;
