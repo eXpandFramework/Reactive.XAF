@@ -19,6 +19,7 @@ using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Relay;
+using Xpand.Extensions.Reactive.Relay.Transaction;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.ActionExtensions;
@@ -26,6 +27,7 @@ using Xpand.Extensions.XAF.Attributes;
 using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.ObjectExtensions;
 using Xpand.Extensions.XAF.ObjectSpaceExtensions;
+using Xpand.Extensions.XAF.TypesInfoExtensions;
 using Xpand.Extensions.XAF.ViewExtensions;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
@@ -220,9 +222,12 @@ namespace Xpand.XAF.Modules.Workflow.Services{
             return application.DeactivateNotUsedModuleCommands()
                 .SelectMany(_ => application.WhenProviderObject<CommandSuite>(suite =>
                         suite.Active && suite.Commands.Any(command => command.Active))
-                    .SelectManyItemResilient(suite => {
-                        LogFast($"Executing active command suite '{suite.Name}'.");
-                        return suite.Execute(application);
+                    .SelectMany(suite => {
+                        LogFast($"Beginning transactional execution for suite '{suite.Name}'.");
+                        return suite.Execute(application)
+                            .BeginWorkflow($"Executing Suite: {suite.Name}", correlationId: suite.Oid)
+                            .RunToEnd()
+                            .ContinueOnFault(context: [suite]);
                     }))
                 .ToUnit()
                 .ContinueOnFault(context:[nameof(WhenExecuteCommands)])
@@ -298,7 +303,13 @@ namespace Xpand.XAF.Modules.Workflow.Services{
         private static readonly ISubject<(WorkflowCommand command, object[] result)> ExecutedSubject = Subject.Synchronize(new Subject<(WorkflowCommand actionObject, object[] result)>());
 
         public static IObservable<object[]> WhenExecuted(this WorkflowCommand workflowCommand) 
-            => ExecutedSubject.Where(t => t.command.Oid == workflowCommand?.Oid).ToSecond();
+            => Observable.Defer(() => {
+                var commandOid = workflowCommand?.Oid;
+                LogFast($"[SUBSCRIBER] Subscribing to executions for command OID: '{commandOid}'.");
+                return ExecutedSubject
+                    .Do(t => LogFast($"[SUBSCRIBER] Received event for command OID '{t.command.Oid}' while listening for '{commandOid}'."))
+                    .Where(t => t.command.Oid == commandOid).ToSecond();
+            });
 
         private static IObservable<object[]> Execute(this XafApplication application, WorkflowCommand workflowCommand, object[] objects){
             LogFast($"Entering low-level {nameof(Execute)} for command '{workflowCommand.FullName}'.");
@@ -309,9 +320,10 @@ namespace Xpand.XAF.Modules.Workflow.Services{
                         return Observable.Empty<object[]>();
                     }
                     LogFast($"Execute: {workflowCommand.FullName}, {workflowCommand}");
-                    return workflowCommand.Defer(() => workflowCommand.Validate().Execute(application, objects))
+                    return workflowCommand.Validate().Execute(application, space.ReloadObjects(objects))
                         .Do(objects1 => {
                             LogFast($"Command '{workflowCommand.FullName}' executed successfully. Emitting results to ExecutedSubject.");
+                            LogFast($"Publishing execution for command OID: '{workflowCommand.Oid}'. Result count: {objects1?.Length ?? 0}.");
                             ExecutedSubject.OnNext((workflowCommand, objects1??[]));
                         })
                         .TakeUntilModified(application, workflowCommand)
@@ -330,6 +342,14 @@ namespace Xpand.XAF.Modules.Workflow.Services{
                         .Finally(() => LogFast($"Exiting low-level {nameof(Execute)} for command '{workflowCommand.FullName}'."));
                 }, typeof(WorkflowCommand))
                 .TakeOrOriginal(workflowCommand.ExecuteOnce ? 1 : 0);
+        }
+
+        private static object[] ReloadObjects(this IObjectSpace space,object[] objects){
+            var list = new List<object>(objects);
+            var dcObjects = objects.WhereNotDefault().GroupBy(o => o.GetType().ToTypeInfo())
+                .Where(types => types.Key.IsDomainComponent)
+                .SelectMany(types => types).Execute(o => list.Remove(o)).ToArray();
+            return space.GetObjects(dcObjects).Concat(list).ToArray();
         }
 
 

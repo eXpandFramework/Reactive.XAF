@@ -255,7 +255,7 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
 
             BusEvents.ShouldHaveSingleItem();
             var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
-            var validationException = fault.InnerException.ShouldBeOfType<ValidationException>();
+            var validationException = fault.FindRootCauses().OfType<ValidationException>().ShouldHaveSingleItem();
             validationException.Result.Results
                 .Any(item => item.ErrorMessage.Contains(nameof(WorkflowCommand.StartAction).CompoundName()))
                 .ShouldBeTrue();
@@ -606,9 +606,9 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
         [Apartment(ApartmentState.STA)]
         public async Task Test_Circular_Dependency_Is_Caught_And_Published() {
             await using var application = NewApplication();
+            WorkflowModule(application);
 
-            var setup = application.WhenSetupComplete().Delay(100.Milliseconds())
-                .SelectMany(_ => application.UseProviderObjectSpace(space => {
+            application.UseProviderObjectSpace(space => {
                     var commandSuite = space.CreateObject<CommandSuite>();
                     commandSuite.Name = "SuiteWithCycle";
 
@@ -628,14 +628,11 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
                     triggerCommand.StartAction = command1;
                     triggerCommand.CommandSuite = commandSuite;
                     return commandSuite.Commit();
-                }));
-
+                })
+                .Subscribe();
             var listenForFault = FaultHub.Bus.Take(1);
 
-            await setup.IgnoreElements()
-                .MergeToUnit(application.DeferAction(_ => WorkflowModule(application)))
-                .MergeToUnit(application.StartWinTest(_ => listenForFault.Merge(BusEvents.ToNowObservable()).Take(1)))
-                .Timeout(TimeSpan.FromSeconds(30)).Take(1);
+            await application.StartWinTest(_ => listenForFault.Merge(BusEvents.ToNowObservable()).Take(1)).Take(1);
 
             BusEvents.ShouldHaveSingleItem();
             var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();

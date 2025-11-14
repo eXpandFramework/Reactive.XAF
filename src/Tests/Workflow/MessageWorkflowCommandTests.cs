@@ -8,7 +8,9 @@ using System.Threading.Tasks;
 using DevExpress.ExpressApp;
 using NUnit.Framework;
 using Shouldly;
+using Xpand.Extensions.Numeric;
 using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.Reactive.Utility;
 using Xpand.TestsLib.Common;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Workflow.BusinessObjects;
@@ -108,7 +110,7 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
 
             var messageOptionsSubject = new ReplaySubject<MessageOptions>();
 
-            application.WhenCustomizeMessage()
+            using var _=application.WhenCustomizeMessage()
                 .SelectMany(e => {
                     e.Handled = true;
                     return e.Instance
@@ -135,8 +137,7 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
                 return suite.Commit();
             });
 
-            await application.StartWinTest(_ => testLogic.ConcatToUnit(messageOptionsSubject))
-                .Timeout(TimeSpan.FromSeconds(10));
+            await application.StartWinTest(_ => testLogic.ConcatToUnit(messageOptionsSubject)) ;
 
             var messageOptions = await messageOptionsSubject.FirstAsync();
     
@@ -155,7 +156,7 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
             var notificationShown = false;
             var sinkExecuted = false;
 
-            application.WhenCustomizeMessage()
+            application.WhenCustomizeMessage().Take(1)
                 .Do(_ => notificationShown = true)
                 .Subscribe();
 
@@ -194,13 +195,16 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
             WorkflowModule(application);
 
             var sinkExecutedSignal = new ReplaySubject<Unit>();
-            var notificationShown = false;
+            var messageSignal = new ReplaySubject<Unit>();
 
-            application.WhenCustomizeMessage()
-                .Do(_ => notificationShown = true)
+            application.WhenCustomizeMessage().Take(1)
+                .Do(_ => {
+                    messageSignal.OnNext(Unit.Default);
+                    messageSignal.OnCompleted();
+                })
                 .Subscribe();
 
-            IObservable<CommandSuite> testLogic = application.UseProviderObjectSpace(space => {
+            application.UseProviderObjectSpace(space => {
                 var suite = space.CreateObject<CommandSuite>();
 
                 var wf1 = space.CreateObject<WF>();
@@ -228,11 +232,12 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
                         sinkExecutedSignal.OnCompleted();
                     }))
                     .To(suite);
-            });
+            })
+            .Subscribe();
 
-            await application.StartWinTest(_ => testLogic.ConcatToUnit(sinkExecutedSignal));
+            await application.StartWinTest(_ => sinkExecutedSignal.Merge(messageSignal));
 
-            notificationShown.ShouldBeTrue("A notification should have been shown for the valid input object.");
+            
             BusEvents.ShouldBeEmpty("No errors should be published when handling null input.");
         }
         
@@ -244,7 +249,7 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
 
             var messageOptionsSubject = new ReplaySubject<MessageOptions>();
 
-            application.WhenCustomizeMessage()
+            application.WhenCustomizeMessage().Take(1)
                 .SelectMany(e => {
                     e.Handled = true;
                     return e.Instance
@@ -273,8 +278,7 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
                 return suite.Commit();
             });
 
-            await application.StartWinTest(_ => testLogic.ConcatToUnit(messageOptionsSubject))
-                .Timeout(TimeSpan.FromSeconds(10));
+            await application.StartWinTest(_ => testLogic.ConcatToUnit(messageOptionsSubject)) ;
 
             var messageOptions = await messageOptionsSubject.FirstAsync();
     

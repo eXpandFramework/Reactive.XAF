@@ -44,8 +44,7 @@ namespace Xpand.XAF.Modules.Workflow.Services {
                 }).ContinueOnFault(context: [nameof(InvokeMessageWorkflowCommand), workflowCommand.ToString()])
                 .Finally(() => LogFast($"Exiting {nameof(InvokeMessageWorkflowCommand)} for command '{workflowCommand}'"))
                 .IgnoreElements()
-                .Concat(objects.Observe())
-                .Select(VAR => VAR);
+                .Concat(objects.Observe());
         }
     }
 }
