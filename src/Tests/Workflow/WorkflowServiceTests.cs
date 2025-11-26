@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Reactive;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading;
@@ -16,10 +17,12 @@ using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Transform.System;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.Attributes;
+using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.ObjectExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.TestsLib.Common;
 using Xpand.XAF.Modules.Reactive.Services;
+using Xpand.XAF.Modules.Reactive.Services.Actions;
 using Xpand.XAF.Modules.Workflow.BusinessObjects;
 using Xpand.XAF.Modules.Workflow.BusinessObjects.Commands;
 using Xpand.XAF.Modules.Workflow.Services;
@@ -137,6 +140,173 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
             executionCount.ShouldBe(2);
         }
 
+        [Apartment(ApartmentState.STA)][Test]
+        public async Task Infinite_Stream_In_The_End_Of_Workflow_Executes_Correctly() {
+            await using var application = NewApplication();
+            
+            var actionId = "MiddleAction";
+
+            using var _ = application.WhenApplicationModulesManager()
+                .SelectMany(manager => manager.RegisterViewSimpleAction(actionId))
+                .Subscribe();
+
+            var endCommandExecuted = new ReplaySubject<Unit>();
+            var executionCount = 0;
+
+            application.WhenSetupComplete()
+                .SelectMany(_ => application.UseProviderObjectSpace(space => {
+                    var suite = space.CreateObject<CommandSuite>();
+
+                    var startCmd = space.CreateObject<TestCommand>();
+                    startCmd.CommandSuite = suite;
+
+                    var endCmd = space.CreateObject<ActionOperationWorkflowCommand>();
+                    endCmd.Action = endCmd.Actions.First(a => a.Name == actionId);
+                    endCmd.CommandSuite = suite;
+                    endCmd.StartAction = startCmd;
+
+                    return suite.Commit()
+                        .SelectMany(_ => endCmd.WhenExecuted())
+                        .Do(_ => {
+                            executionCount++;
+                            endCommandExecuted.OnNext(Unit.Default);
+                            if (executionCount == 2) {
+                                endCommandExecuted.OnCompleted();
+                            }
+                        })
+                        .To(suite);
+                }))
+                .Subscribe();
+
+            WorkflowModule(application);
+
+            await application.StartWinTest(frame => {
+                var action = frame.SimpleAction(actionId);
+                
+
+                action.DoExecute();
+
+                return Observable.Timer(TimeSpan.FromMilliseconds(50)) 
+                    .Do(_ => action.DoExecute()) 
+                    .Delay(TimeSpan.FromMilliseconds(50))
+                    ;
+            },timeout:10.ToSeconds());
+
+            executionCount.ShouldBe(2);
+        }
+        [Apartment(ApartmentState.STA)][Test]
+        public async Task Infinite_Stream_In_The_Middle_End_Of_Workflow_Executes_Correctly() {
+            await using var application = NewApplication();
+            var actionId = nameof(Infinite_Stream_In_The_Middle_End_Of_Workflow_Executes_Correctly);
+            using var _ = application.WhenApplicationModulesManager()
+                .SelectMany(manager => manager.RegisterViewSimpleAction(actionId))
+                .Subscribe();
+
+            var executionCount = 0;
+            var completionSignal = new ReplaySubject<Unit>();
+
+            application.WhenSetupComplete()
+                .SelectMany(_ => application.UseProviderObjectSpace(space => {
+                    var suite = space.CreateObject<CommandSuite>();
+                    
+                    var commandA = space.CreateObject<TestCommand>();
+                    commandA.Id = "Start";
+                    commandA.CommandSuite = suite;
+
+                    var commandB = space.CreateObject<ActionOperationWorkflowCommand>();
+                    commandB.Action = commandB.Actions.First(s => s.Name == actionId);
+                    commandB.StartAction = commandA;
+                    commandB.CommandSuite = suite;
+
+                    var commandC = space.CreateObject<TestCommand>();
+                    commandC.Id = "End";
+                    commandC.StartAction = commandB;
+                    commandC.CommandSuite = suite;
+
+                    return suite.Commit()
+                        .SelectMany(_ => commandC.WhenExecuted())
+                        .Do(_ => {
+                            executionCount++;
+                            if (executionCount == 2) {
+                                completionSignal.OnNext(Unit.Default);
+                                completionSignal.OnCompleted();
+                            }
+                        })
+                        .To(suite);
+                }))
+                .ToUnit()
+                .Subscribe();
+
+            WorkflowModule(application);
+
+            await application.StartWinTest(frame => 
+                    Observable.Timer(100.Milliseconds())
+                        .Do(_ => frame.SimpleAction(actionId).DoExecute())
+                        .Delay(100.Milliseconds())
+                        .Do(_ => frame.SimpleAction(actionId).DoExecute())
+                        .IgnoreElements()
+                        .MergeToUnit(completionSignal)
+                )
+                .Timeout(TimeSpan.FromSeconds(30)).FirstOrDefaultAsync();
+
+            executionCount.ShouldBe(2);
+        }
+        
+        [Test]
+        [Apartment(ApartmentState.STA)]
+        public async Task Infinite_Stream_Triggers_Transaction_Per_Event() {
+            await using var application = NewApplication();
+            var actionId = "InfiniteTriggerAction";
+
+            using var _ = application.WhenApplicationModulesManager()
+                .SelectMany(manager => manager.RegisterViewSimpleAction(actionId))
+                .Subscribe();
+
+            var dependentCommandExecuted = new ReplaySubject<Unit>();
+            var executionCount = 0;
+
+            application.WhenSetupComplete()
+                .SelectMany(_ => application.UseProviderObjectSpace(space => {
+                    var suite = space.CreateObject<CommandSuite>();
+
+                    var trigger = space.CreateObject<ActionOperationWorkflowCommand>();
+                    trigger.Action = trigger.Actions.First(a => a.Name == actionId);
+                    trigger.CommandSuite = suite;
+
+                    var dependent = space.CreateObject<TestCommand>();
+                    dependent.Id = "DependentStep";
+                    dependent.CommandSuite = suite;
+
+                    dependent.StartAction=trigger; 
+
+                    return suite.Commit()
+                        .SelectMany(_ => dependent.WhenExecuted())
+                        .Do(_ => {
+                            executionCount++;
+                            dependentCommandExecuted.OnNext(Unit.Default);
+                            if (executionCount == 2) {
+                                dependentCommandExecuted.OnCompleted();
+                            }
+                        })
+                        .To(suite);
+                }))
+                .Subscribe();
+
+            WorkflowModule(application);
+
+            await application.StartWinTest(frame => {
+                var action = frame.SimpleAction(actionId);
+
+                action.DoExecute();
+
+                return dependentCommandExecuted
+                    .MergeToUnit(action.DeferAction(() => action.DoExecute()));
+            },timeout:30.ToSeconds());
+
+            // await dependentCommandExecuted;
+            executionCount.ShouldBe(2);
+        }
+        
         [Test]
         [Apartment(ApartmentState.STA)]
         public async Task Test_ExecuteOnce_Behavior() {
@@ -486,9 +656,12 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
         [Apartment(ApartmentState.STA)]
         public async Task Test_DisableOnError_Behavior() {
             await using var application = NewApplication();
+            var faultSignal = new ReplaySubject<FaultHubException>();
+            using var subscription = FaultHub.Bus.Select(exception => exception).Take(1).Subscribe(faultSignal);
+
             Guid commandOid = Guid.Empty;
 
-            var setup = application.WhenSetupComplete()
+            application.WhenSetupComplete()
                 .SelectMany(_ => application.UseProviderObjectSpace(space => {
                     var commandSuite = space.CreateObject<CommandSuite>();
                     var command = space.CreateObject<TestCommand>();
@@ -499,15 +672,15 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
                     commandOid = command.Oid;
 
                     return commandSuite.Commit();
-                }));
+                }))
+                .Subscribe();
+            WorkflowModule(application);
+            
+            
+            await application.StartWinTest(_ => faultSignal.Take(1)).FirstOrDefaultAsync();
 
-            await setup.IgnoreElements()
-                .MergeToUnit(application.DeferAction(_ => WorkflowModule(application)))
-                .MergeToUnit(application.StartWinTest(_ => BusEvents.ToNowObservable()))
-                .Timeout(TimeSpan.FromSeconds(30)).Take(1);
-
-            BusEvents.ShouldHaveSingleItem();
-            var fault = BusEvents.Single().ShouldBeOfType<TransactionAbortedException>();
+            var fault = await faultSignal.FirstAsync();
+            fault.ShouldBeOfType<FaultHubException>();
             fault.FindRootCauses().OfType<InvalidOperationException>().ShouldHaveSingleItem()
                 .Message.ShouldBe("Execution Failure");
 
@@ -544,7 +717,7 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
                 .Timeout(TimeSpan.FromSeconds(30)).Take(1);
 
             BusEvents.ShouldHaveSingleItem();
-            var fault = BusEvents.Single().ShouldBeOfType<TransactionAbortedException>();
+            var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
             fault.FindRootCauses().OfType<InvalidOperationException>().ShouldHaveSingleItem()
                 .Message.ShouldBe("Execution Failure");
 

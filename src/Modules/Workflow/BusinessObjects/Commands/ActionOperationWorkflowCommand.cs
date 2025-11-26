@@ -13,12 +13,14 @@ using DevExpress.Persistent.Validation;
 using DevExpress.Xpo;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.StringExtensions;
 using Xpand.Extensions.XAF.ActionExtensions;
 using Xpand.Extensions.XAF.NonPersistentObjects;
 using Xpand.Extensions.XAF.ViewExtensions;
 using Xpand.Extensions.XAF.Xpo.ValueConverters;
 using Xpand.XAF.Modules.Reactive.Services;
+using Xpand.XAF.Modules.Workflow.Services;
 
 namespace Xpand.XAF.Modules.Workflow.BusinessObjects.Commands{
     [DefaultProperty(nameof(Description))]
@@ -35,20 +37,24 @@ namespace Xpand.XAF.Modules.Workflow.BusinessObjects.Commands{
 
 
         public override IObservable<object[]> Execute(XafApplication application, params object[] objects) 
-            => application.WhenActionExecuted(Action)
-                .SelectMany(e => {
-                    var view = e.View();
-                    return view.Id == View?.Name || View == null ? Emission switch {
-                            ActionOperationWorkflowCommandEmission.SelectedObjects => view.SelectedObjects.Cast<object>()
-                                .Select(o => !OutputProperty.IsNotNullOrEmpty() ? o : 
-                                    view.ObjectTypeInfo.FindMember(OutputProperty)?.GetValue(o)).WhereNotDefault().Distinct().ToArray().Observe(),
-                            ActionOperationWorkflowCommandEmission.ViewObjects => view.Objects()
-                                .Select(o => !OutputProperty.IsNotNullOrEmpty() ? o
-                                    : view.ObjectTypeInfo.FindMember(OutputProperty)?.GetValue(o)).WhereNotDefault().Distinct().ToArray().Observe(),
-                            _ => new object[] { e.Action }.Observe()
-                        }
-                        : Observable.Empty<object[]>();
-                }) ;
+            => Observable.Defer(() => application.WhenActionExecuted(Action).ObserveOnDefault()
+                    .SelectMany(e => {
+                        var view = e.View();
+                        return view.Id == View?.Name || View == null ? Emission switch {
+                                ActionOperationWorkflowCommandEmission.SelectedObjects => view.SelectedObjects.Cast<object>()
+                                    .Select(o => !OutputProperty.IsNotNullOrEmpty() ? o : 
+                                        view.ObjectTypeInfo.FindMember(OutputProperty)?.GetValue(o)).WhereNotDefault().Distinct().ToArray().Observe(),
+                                ActionOperationWorkflowCommandEmission.ViewObjects => view.Objects()
+                                    .Select(o => !OutputProperty.IsNotNullOrEmpty() ? o
+                                        : view.ObjectTypeInfo.FindMember(OutputProperty)?.GetValue(o)).WhereNotDefault().Distinct().ToArray().Observe(),
+                                _ => new object[] { e.Action }.Observe()
+                            }
+                            : Observable.Empty<object[]>();
+                    }))
+                
+                // .Repeat()
+                // .RepeatWhen(bus => bus.SelectMany(o => CommandSuite.Commands.Where(command => command.Oid!=this.Oid).ToObservable().SelectMany(command => command.WhenExecuted()))) 
+            ;
 
         protected override Type GetReturnType() => typeof(ActionBase);
 

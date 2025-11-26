@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
@@ -94,7 +96,33 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net {
                 .Cache(cache, requestUrl, method => Observable.FromAsync(() => HttpClient.SendAsync(method.NewHttpRequestMessage( requestUrl,obj, key, secret)))
                         .Do(message => ResponseSubject.OnNext((message, obj))),pollInterval).
                 Send(obj,deserializeResponse);
+        public static string UserAgent { get; } = DetectInstalledUserAgent();
 
+        private static string DetectInstalledUserAgent() {
+            var paths = new[] {
+                @"C:\Program Files\Google\Chrome\Application\chrome.exe",
+                @"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
+                @"C:\Program Files\Microsoft\Edge\Application\msedge.exe",
+                @"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
+            };
+
+            foreach (var path in paths)
+                if (File.Exists(path)) {
+                    var v = FileVersionInfo.GetVersionInfo(path).FileVersion;
+                    return path.Contains("msedge.exe")
+                        ? $"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/{v} Safari/537.36 Edg/{v}"
+                        : $"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/{v} Safari/537.36";
+                }
+
+            return
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
+        }
+        public static void UseSystemBrowserUserAgent(this HttpRequestHeaders headers) {
+            if (headers.Contains("User-Agent")) {
+                headers.Remove("User-Agent");
+            }
+            headers.Add("User-Agent", UserAgent);
+        }
         public static IObservable<T> Send<T>(this HttpClient client, HttpMethod httpMethod, string requestUrl,
             object obj = null, string key = null, string secret = null, Func<HttpResponseMessage, IObservable<T>> deserializeResponse = null) where T : class,new()
             =>  Observable.FromAsync(() => client.SendAsync(httpMethod.NewHttpRequestMessage(requestUrl,obj, key, secret)))

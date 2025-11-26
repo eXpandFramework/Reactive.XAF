@@ -13,5 +13,7 @@ namespace Xpand.Extensions.Reactive.Combine{
             => source.Select(entry => !EqualityComparer<T>.Default.Equals(entry, default) ? Observable.Return(entry) : switchTo)
                 .TakeUntil(stream => stream == switchTo)
                 .Concat();
+        
+        
     }
 }

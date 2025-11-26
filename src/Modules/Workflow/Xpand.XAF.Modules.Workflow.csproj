@@ -89,7 +89,7 @@
     <EmbeddedResource Include="Images\TimeIntervalWorkflowCommand.svg" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DevExpress.ExpressApp.Validation.Win" Version="25.1.6" />
+    <PackageReference Include="DevExpress.ExpressApp.Validation.Win" Version="25.1.7" />
   </ItemGroup>
   <Import Project="..\..\..\.paket\Paket.Restore.targets" />
 </Project>

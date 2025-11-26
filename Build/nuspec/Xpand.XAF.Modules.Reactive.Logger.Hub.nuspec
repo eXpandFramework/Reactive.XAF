@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.Reactive.Logger.Hub</id>
-    <version>4.251.7.4</version>
+    <version>4.251.7.7</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -12,18 +12,18 @@
     <description>The `Reactive.Logger.Hub` transmits or receives the execution pipeLine flow.</description>
     <releaseNotes>https://github.com/eXpandFramework/Reactive.XAF/releases</releaseNotes>
     <copyright>eXpandFramework.com</copyright>
-    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Reactive.Logger.Hub, 25.1.6</tags>
+    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Reactive.Logger.Hub, 25.1.7</tags>
     <dependencies>
       <group targetFramework="net9.0">
-        <dependency id="Xpand.Extensions.Reactive" version="4.251.7.4" />
-        <dependency id="Xpand.Extensions.XAF" version="4.251.7.4" />
-        <dependency id="Xpand.Extensions" version="4.251.7.4" />
-        <dependency id="Xpand.XAF.Modules.Reactive" version="4.251.7.4" />
-        <dependency id="Xpand.XAF.Modules.Reactive.Logger" version="4.251.7.4" />
+        <dependency id="Xpand.Extensions.Reactive" version="4.251.7.7" />
+        <dependency id="Xpand.Extensions.XAF" version="4.251.7.7" />
+        <dependency id="Xpand.Extensions" version="4.251.7.7" />
+        <dependency id="Xpand.XAF.Modules.Reactive" version="4.251.7.7" />
+        <dependency id="Xpand.XAF.Modules.Reactive.Logger" version="4.251.7.7" />
         <dependency id="MagicOnion" version="2.6.3" />
         <dependency id="System.Interactive.Async" version="6.0.1" />
-        <dependency id="DevExpress.ExpressApp" version="25.1.6" />
-        <dependency id="DevExpress.Xpo" version="25.1.6" />
+        <dependency id="DevExpress.ExpressApp" version="25.1.7" />
+        <dependency id="DevExpress.Xpo" version="25.1.7" />
         <dependency id="System.Reactive" version="6.0.1" />
         <dependency id="Fasterflect.Xpand" version="2.0.7" />
         <dependency id="YamlDotNet" version="11.2.1" />
@@ -34,10 +34,10 @@
         <dependency id="System.Threading.Tasks.Dataflow" version="9.0.8" />
       </group>
       <group targetFramework="netstandard2.0">
-        <dependency id="Xpand.VersionConverter" version="4.251.7.4" />
+        <dependency id="Xpand.VersionConverter" version="4.251.7.7" />
       </group>
       <group targetFramework="net6.0">
-        <dependency id="Xpand.VersionConverter" version="4.251.7.4" />
+        <dependency id="Xpand.VersionConverter" version="4.251.7.7" />
       </group>
     </dependencies>
   </metadata>

@@ -46,13 +46,12 @@ namespace Xpand.XAF.Modules.Workflow.Services{
                 .MergeToUnit(manager.ActivateCommand())
                 .MergeToUnit(manager.DeActivateCommand())
                 .MergeToUnit(manager.WhenSetupComplete(application => application.EnsureCommandsDeleted()
-                    .MergeToUnit(application.Modules.OfType<ValidationModule>().ToNowObservable()
-                        .SelectMany(module => module.ProcessEvent(nameof(module.RuleSetInitialized)).Take(1)
-                            .SelectMany(_ => application.WhenExecuteCommands())))
                     .MergeToUnit(application.CleanupExecutions())
                 ))
                 .Finally(() => LogFast($"Exiting {nameof(WorkflowServiceConnect)}"))
-                .ToUnit();
+                .MergeToUnit(manager.WhenApplication(application => application.Modules.OfType<ValidationModule>().ToNowObservable()
+                    .SelectMany(module => module.ProcessEvent(nameof(module.RuleSetInitialized)).Take(1)
+                        .SelectMany(_ => application.WhenExecuteCommands()))));
         }
 
         private static IObservable<Unit> CleanupExecutions(this XafApplication application) {
@@ -74,8 +73,7 @@ namespace Xpand.XAF.Modules.Workflow.Services{
                             space.Delete(commandExecutionsGroup.Key.Executions.Except(commandExecutions).ToArray());
                             return commandExecutionsGroup.Key;
                         })
-                        
-                        .Commit();
+                        .Finally(space.CommitChanges);
                 }))
                 .ToUnit();
         }
@@ -274,43 +272,33 @@ namespace Xpand.XAF.Modules.Workflow.Services{
                 .ToNowObservable().BufferUntilCompleted()
             );
 
-            internal static IObservable<object[]> ExecuteCommand(this XafApplication application, WorkflowCommand workflowCommand,Action<WorkflowCommand> executing=null){
-                LogFast($"Entering {nameof(ExecuteCommand)} for command '{workflowCommand.FullName}'.");
-                var paths = workflowCommand.Validate().FromHierarchyAll(cmd => new[]{ cmd.StartAction?.Validate() }.WhereNotDefault().Where(command => command.Active)
-                    .Concat(cmd.StartCommands.WhereNotDefault().Do(command => command.Validate()).Where(command => command.Active)));
-
-                return paths.ToObservable()
-                    .SelectMany(path => {
-                        var reversedPath = path.Reverse().ToList();
-                        if (!reversedPath.Any()) {
-                            return Observable.Empty<object[]>();
-                        }
-
-                        var firstStep = reversedPath.First();
-                        var builder = Observable.Defer(() => {
-                                executing?.Invoke(firstStep);
-                                return application.Execute(firstStep, []).WhenNotDefault().SelectMany() ;
-                            })
-                            .BeginWorkflow($"Path-{path.GetHashCode()}", context: [workflowCommand]);
-
-                        var finalBuilder = reversedPath.Skip(1)
-                            .Aggregate(builder, (currentBuilder, command) =>
-                                currentBuilder.Then(previousResults => {
-                                    executing?.Invoke(command);
-                                    var array = previousResults.SelectMany(o => o as IEnumerable<object>??[o]).ToArray();
-                                    return application.Execute(command, array).WhenNotDefault().SelectMany();
-                                }));
-
-                        return finalBuilder.RunFailFast()
-                            .ContinueOnFault(publishWhen: fault => {
-                                var shouldDisable = fault.FindRootCauses()
-                                    .Any(rootCause => firstStep.DisableOnError || rootCause is ValidationException);
-                                return shouldDisable ? application.Disable(firstStep).To(true) : Observable.Return(true);
-                            }, context: [workflowCommand]);
-                    })
-                    .ToConsole(_ => $"{workflowCommand.FullName}: {workflowCommand}")
-                    .Finally(() => LogFast($"Exiting {nameof(ExecuteCommand)} for command '{workflowCommand.FullName}'."));
-            }
+        private static IObservable<object[]> ExecuteCommand(this XafApplication application, WorkflowCommand workflowCommand,Action<WorkflowCommand> executing){
+            LogFast($"Entering {nameof(ExecuteCommand)} for command '{workflowCommand.FullName}'.");
+            return workflowCommand.Validate().FromHierarchyAll(cmd => new[]{ cmd.StartAction?.Validate() }.WhereNotDefault().Where(command => command.Active)
+                    .Concat(cmd.StartCommands.WhereNotDefault().Do(command => command.Validate()).Where(command => command.Active))).ToNowObservable()
+                .SelectManyItemResilient(path => {
+                    LogFast($"Executing path: {string.Join(" -> ", path.Select(c => c.FullName))}");
+                    return path.Reverse().ToNowObservable()
+                        .Aggregate(Array.Empty<object>().Observe(), (previousSource, currentCommand) => previousSource
+                            .ObserveOnDefault()
+                            .SelectManySequentialItemResilient(prevResult => {
+                                LogFast($"Executing step '{currentCommand.FullName}' in path.");
+                                executing?.Invoke(currentCommand);
+                                return application.Execute(currentCommand, prevResult)
+                                    .Catch((Exception ex) => {
+                                        var rootCause = ex is FaultHubException fhe ? fhe.FindRootCauses().FirstOrDefault() ?? ex : ex;
+                                        if (workflowCommand.DisableOnError || rootCause is ValidationException) {
+                                            return application.Disable(workflowCommand).SelectMany(_ => Observable.Throw<object[]>(ex));
+                                        }
+                                        return Observable.Throw<object[]>(ex);
+                                    });
+                            },context:[currentCommand,currentCommand.CommandSuite]))
+                        .Select(innerResilientObservable => innerResilientObservable.AsObservable())
+                        .Concat();
+                })
+                .ToConsole(_ => $"{workflowCommand.FullName}: {workflowCommand}")
+                .Finally(() => LogFast($"Exiting {nameof(ExecuteCommand)} for command '{workflowCommand.FullName}'."));
+        }        
         private static readonly ISubject<(WorkflowCommand command, object[] result)> ExecutedSubject = Subject.Synchronize(new Subject<(WorkflowCommand actionObject, object[] result)>());
 
         public static IObservable<object[]> WhenExecuted(this WorkflowCommand workflowCommand) 
