@@ -1,7 +1,6 @@
 using System;
 using System.Linq;
 using System.Reactive;
-using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading;
@@ -12,7 +11,6 @@ using Shouldly;
 using Xpand.Extensions.Numeric;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Relay;
-using Xpand.Extensions.Reactive.Relay.Transaction;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Transform.System;
 using Xpand.Extensions.Reactive.Utility;
@@ -460,7 +458,7 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
             var executionCountB = 0;
             var observationWindow = TimeSpan.FromMilliseconds(250).Timer().ToUnit().Publish().AutoConnect();
 
-            var setupAndListen = application.WhenSetupComplete()
+            application.WhenSetupComplete()
                 .SelectMany(_ => application.UseProviderObjectSpace(space => {
                     var commandSuite = space.CreateObject<CommandSuite>();
                     var commandA = space.CreateObject<TestCommand>();
@@ -474,18 +472,16 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
                     commandB.Id = "B";
                     return commandSuite.Commit()
                         .SelectMany(_ =>
-                            commandA.WhenExecuted().TakeUntil(observationWindow).Do(_ => executionCountA++).ToUnit()
-                                .Merge(commandB.WhenExecuted().TakeUntil(observationWindow).Do(_ => executionCountB++)
+                            commandA.WhenExecuted().Do(_ => executionCountA++).ToUnit()
+                                .Merge(commandB.WhenExecuted().Do(_ => executionCountB++)
                                     .ToUnit())
                         )
                         .To(commandSuite);
                 }))
-                .ToUnit();
-
-            await setupAndListen.IgnoreElements()
-                .MergeToUnit(application.DeferAction(_ => WorkflowModule(application)))
-                .MergeToUnit(application.StartWinTest(_ => observationWindow))
-                .Timeout(TimeSpan.FromSeconds(30)).FirstOrDefaultAsync();
+                .ToUnit()
+                .Subscribe();
+            WorkflowModule(application);
+            await application.StartWinTest(_ => observationWindow).FirstOrDefaultAsync();
 
             executionCountA.ShouldBe(0);
             executionCountB.ShouldBe(1);

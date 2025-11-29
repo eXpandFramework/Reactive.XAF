@@ -143,25 +143,39 @@ The module is **not bound** to **DevExpress versioning**, which means you can us
 
 The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/nuget/reference/package-versioning#version-basics).
 ## Dependencies
-`.NetFramework: net9.0`
+`.NetFramework: net9.0-windows`
 
 |<!-- -->|<!-- -->
 |----|----
-|**DevExpress.ExpressApp**|**Any**
-|**DevExpress.ExpressApp.CloneObject**|**Any**
-|**DevExpress.ExpressApp.Validation**|**Any**
-|Xpand.Extensions.Reactive|4.251.7
-|Xpand.Extensions.XAF|4.251.7
-|[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.251.7
-|[Xpand.XAF.Modules.ViewItemValue](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.ViewItemValue)|4.251.7
-|[Xpand.XAF.Modules.Telegram](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Telegram)|4.251.7
-|[Xpand.XAF.Modules.CloneModelView](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.CloneModelView)|4.251.7
-|[Xpand.XAF.Modules.ModelViewInheritance](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.ModelViewInheritance)|4.251.7
-|[Xpand.XAF.Modules.BulkObjectUpdate](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.BulkObjectUpdate)|4.251.7
-|[Xpand.XAF.Modules.HideToolBar](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.HideToolBar)|4.251.7
-|Xpand.Patcher|9.0.0
-|System.Reactive|6.0.1
-|Humanizer.Core|2.14.1
+|**DevExpress.ExpressApp.Win**|**Any**
+ |**DevExpress.ExpressApp.Validation**|**Any**
+ |**DevExpress.ExpressApp.CloneObject**|**Any**
+ |**DevExpress.ExpressApp.Xpo**|**Any**
+ |**DevExpress.Persistent.BaseImpl.Xpo**|**Any**
+ |**DevExpress.ExpressApp.Validation.Win**|**Any**
+|Xpand.Extensions.Reactive|4.251.8
+ |Xpand.Extensions.XAF|4.251.8
+ |Xpand.Extensions.XAF.Xpo|4.251.8
+ |Xpand.Extensions|4.251.8
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.251.8
+ |[Xpand.XAF.Modules.ViewItemValue](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.ViewItemValue)|4.251.8
+ |[Xpand.XAF.Modules.CloneModelView](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.CloneModelView)|4.251.8
+ |[Xpand.XAF.Modules.Windows](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Windows)|4.251.8
+ |[Xpand.XAF.Modules.ModelViewInheritance](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.ModelViewInheritance)|4.251.8
+ |Xpand.Extensions.Reactive.Relay|4.251.8
+ |[Xpand.XAF.Modules.BulkObjectUpdate](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.BulkObjectUpdate)|4.251.8
+ |[Xpand.XAF.Modules.HideToolBar](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.HideToolBar)|4.251.8
+ |System.Reactive|6.0.1
+ |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
+ |System.Text.Json|9.0.8
+ |Enums.NET|4.0.0
+ |Xpand.Patcher|9.0.0
+ |Microsoft.Extensions.DependencyInjection.Abstractions|9.0.8
+ |Microsoft.CodeAnalysis|4.12.0
+ |Microsoft.Extensions.Options|9.0.8
+ |Microsoft.Extensions.Configuration.Abstractions|9.0.8
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.251.8
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.251.8
 
 ## Issues-Debugging-Troubleshooting
 
@@ -175,3 +189,4 @@ Xpand.XAF.Modules.Reactive.ReactiveModuleBase.Unload(typeof(Xpand.XAF.Modules.Wo
 ### Tests
 The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/Xpand.XAF.s.Workflow.Workflow).
 All Tests run as per our [Compatibility Matrix](https://github.com/eXpandFramework/DevExpress.XAF#compatibility-matrix)
+

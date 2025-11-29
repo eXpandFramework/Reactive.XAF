@@ -95,19 +95,32 @@ The module is **not bound** to **DevExpress versioning**, which means you can us
 
 The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/nuget/reference/package-versioning#version-basics).
 ## Dependencies
-`.NetFramework: net9.0`
+`.NetFramework: net9.0-windows`
 
 |<!-- -->|<!-- -->
 |----|----
-|**DevExpress.ExpressApp**|**Any**
-|Xpand.Extensions.Reactive|4.251.7
-|Xpand.Extensions.XAF|4.251.7
-|[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.251.7
-|[Xpand.XAF.Modules.CloneModelView](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.CloneModelView)|4.251.7
-|[Xpand.XAF.Modules.SuppressConfirmation](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.SuppressConfirmation)|4.251.7
-|Xpand.Patcher|9.0.0
-|System.Reactive|6.0.1
-|Telegram.Bot|22.7.2
+|**DevExpress.ExpressApp.Win**|**Any**
+ |**DevExpress.ExpressApp.Xpo**|**Any**
+|Xpand.Extensions.Reactive|4.251.8
+ |Xpand.Extensions.XAF|4.251.8
+ |Xpand.Extensions.XAF.Xpo|4.251.8
+ |Xpand.Extensions|4.251.8
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.251.8
+ |[Xpand.XAF.Modules.Workflow](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Workflow)|4.251.8
+ |[Xpand.XAF.Modules.CloneModelView](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.CloneModelView)|4.251.8
+ |[Xpand.XAF.Modules.SuppressConfirmation](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.SuppressConfirmation)|4.251.8
+ |System.Reactive|6.0.1
+ |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
+ |System.Text.Json|9.0.8
+ |Enums.NET|4.0.0
+ |Xpand.Patcher|9.0.0
+ |Microsoft.Extensions.DependencyInjection.Abstractions|9.0.8
+ |Microsoft.CodeAnalysis|4.12.0
+ |Microsoft.Extensions.Options|9.0.8
+ |Microsoft.Extensions.Configuration.Abstractions|9.0.8
+ |Telegram.Bot|22.7.2
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.251.8
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.251.8
 
 ## Issues-Debugging-Troubleshooting
 
@@ -121,3 +134,4 @@ Xpand.XAF.Modules.Reactive.ReactiveModuleBase.Unload(typeof(Xpand.XAF.Modules.Te
 ### Tests
 The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/Xpand.XAF.s.Telegram.Telegram).
 All Tests run as per our [Compatibility Matrix](https://github.com/eXpandFramework/DevExpress.XAF#compatibility-matrix)
+

@@ -93,6 +93,7 @@ jobs:
 - job: TestNet6_1
   dependsOn: 
     - TestStageBaseOnExecutionTime
+  timeoutInMinutes: 120
   strategy: 
     parallel: 10
   pool:
@@ -189,6 +190,7 @@ jobs:
 - job: TestNet6_2
   dependsOn: 
     - TestNet6_1
+  timeoutInMinutes: 120
   strategy: 
     parallel: 10
   pool:

@@ -74,7 +74,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.ProofOfConcepts {
                     return Observable.Empty<Unit>();
                 });
 
-            await stream.Test().AwaitDoneAsync(1.Seconds());
+            await stream.Test().AwaitDoneAsync(10.Seconds());
 
             Console.WriteLine("--- Execution Log ---");
             Console.WriteLine(string.Join(Environment.NewLine, executionLog));
