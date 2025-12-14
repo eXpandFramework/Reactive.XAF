@@ -16,20 +16,19 @@ using Xpand.Extensions.Reactive.Channels;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.Tests.FaultHubTests;
+using Xpand.TestsLib.Common;
 
 namespace Xpand.Extensions.Tests {
-    
-    [TestFixture]
-    public class RpcChannelTests:FaultHubTestBase {
+    public class RpcChannelTests : FaultHubTestBase {
         [SetUp]
         public override void Setup() {
             var rpcChannelType = typeof(RpcChannel);
             var fieldInfo = rpcChannelType.GetField("Channels", BindingFlags.Static | BindingFlags.NonPublic);
             fieldInfo.ShouldNotBeNull();
-            
+
             var channelsCache = fieldInfo.GetValue(null) as MemoryCache;
             channelsCache.ShouldNotBeNull();
-            
+
             channelsCache.Compact(1.0);
             base.Setup();
         }
@@ -39,7 +38,7 @@ namespace Xpand.Extensions.Tests {
             var key = "test-service";
             var handler = key.HandleRequest()
                 .With<Unit, string>(_ => Observable.Return("Hello, Test"));
-            
+
             var requester = key.MakeRequest()
                 .With<string>();
 
@@ -51,14 +50,15 @@ namespace Xpand.Extensions.Tests {
             testObserver.Items.Single().ShouldBe("Hello, Test");
             testObserver.CompletionCount.ShouldBe(1);
         }
+
         [Test]
         public void Request_is_keyed_and_does_not_interfere() {
             var keyA = "ServiceA";
             var keyB = "ServiceB";
-            
+
             var handlerA = keyA.HandleRequest()
                 .With(Observable.Return("Response from A"));
-            
+
             var requesterB = keyB.MakeRequest()
                 .With<string>();
 
@@ -74,10 +74,10 @@ namespace Xpand.Extensions.Tests {
         public void Handler_error_is_propagated_to_requester() {
             var key = "error-service";
             var testException = new InvalidOperationException("Handler failed");
-            
+
             var handler = key.HandleRequest()
                 .With(Observable.Defer(() => Observable.Throw<string>(testException)));
-            
+
             var requester = key.MakeRequest()
                 .With<string>();
 
@@ -92,10 +92,10 @@ namespace Xpand.Extensions.Tests {
         [Test]
         public async Task Handler_can_be_asynchronous() {
             var key = "async-service";
-            
+
             var handler = key.HandleRequest()
                 .With(Observable.Return("async-response").Delay(100.Milliseconds()));
-            
+
             var requester = key.MakeRequest()
                 .With<string>();
 
@@ -104,14 +104,14 @@ namespace Xpand.Extensions.Tests {
 
             result.ShouldBe("async-response");
         }
-        
+
         [Test]
         public void Multiple_requests_are_handled_correctly() {
             var key = "multi-request-service";
-            
+
             var handler = key.HandleRequest()
                 .With<int, int>(i => Observable.Return(i * 2));
-            
+
             var request1 = key.MakeRequest().With<int, int>(10);
             var request2 = key.MakeRequest().With<int, int>(20);
 
@@ -125,25 +125,25 @@ namespace Xpand.Extensions.Tests {
             testObserver1.Items.Single().ShouldBe(20);
             testObserver2.Items.Single().ShouldBe(40);
         }
-        
+
         [Test]
         public void HandleRequest_with_value_argument_responds_correctly() {
             var key = "argument-test-service";
             var expectedResponse = "A direct response value";
-            
+
             using var handlerSubscription = key.HandleRequest(expectedResponse).Test();
             var requester = key.MakeRequest().With<string>();
-            
+
             requester.Test().AwaitDone(1.Seconds()).Items.Single().ShouldBe(expectedResponse);
         }
 
-        
+
         [Test]
         public async Task Channel_is_evicted_and_recreated_after_expiration() {
             await using var stringWriter = new StringWriter();
             var originalOutput = Console.Out;
             Console.SetOut(stringWriter);
-    
+
             var key = "expiration-test";
             RpcChannel.SlidingExpiration = TimeSpan.FromMilliseconds(100);
 
@@ -151,13 +151,13 @@ namespace Xpand.Extensions.Tests {
                 using (key.HandleRequest("response 1").Test()) {
                     await key.MakeRequest().With<string>();
                 }
-                
+
                 await Task.Delay(200);
-                
+
                 using (key.HandleRequest("response 2").Test()) {
                     await key.MakeRequest().With<string>();
                 }
-                
+
                 var output = stringWriter.ToString();
                 var constructorCallCount = Regex.Matches(output, "RpcChannel constructor called").Count;
                 constructorCallCount.ShouldBe(2, "The channel should have been evicted and recreated.");
@@ -166,14 +166,14 @@ namespace Xpand.Extensions.Tests {
                 Console.SetOut(originalOutput);
             }
         }
-        
+
         [Test]
         public void Operator_Establishes_Handler_Forwards_Tuple_And_Disposes_Handler_On_Unsubscribe() {
             var source = new Subject<(string key, IntPtr value)>();
             var testData = (key: "test-channel-1", value: new IntPtr(12345));
 
-            var stream = source.MergeIgnored(tuple =>tuple.key.HandleRequest(tuple.value) );
-            
+            var stream = source.MergeIgnored(tuple => tuple.key.HandleRequest(tuple.value));
+
             var observer = stream.Test();
 
             source.OnNext(testData);
@@ -213,10 +213,10 @@ namespace Xpand.Extensions.Tests {
             result.Items.ShouldHaveSingleItem();
             result.Items.Single().ShouldBe("Response from Key2");
         }
-        
+
         [Test]
         public async Task Handler_Failure_Is_Reported_To_FaultHub() {
-            
+
             var key = "test_key";
             var handlerInvocationCount = 0;
 
@@ -234,11 +234,10 @@ namespace Xpand.Extensions.Tests {
             result.Error.ShouldBeOfType<InvalidOperationException>()
                 .Message.ShouldBe("Handler failed intentionally");
 
-            BusEvents.Count.ShouldBe(1, "The handler failure was not published to the FaultHub for system-wide observation.");
+            BusEvents.Count.ShouldBe(1,
+                "The handler failure was not published to the FaultHub for system-wide observation.");
         }
-    }
-    
 
-    
 
     }
+}

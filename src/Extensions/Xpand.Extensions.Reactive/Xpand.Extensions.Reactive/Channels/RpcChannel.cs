@@ -5,6 +5,7 @@ using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Runtime.CompilerServices;
 using Microsoft.Extensions.Caching.Memory;
 using Xpand.Extensions.Reactive.Transform;
 
@@ -44,6 +45,31 @@ namespace Xpand.Extensions.Reactive.Channels {
                 return new RpcChannel<TKey, TRequest, TResponse>();
             });
         }
+        
+        public static IObservable<Unit> Suppress<T, TKey>(this TKey key, Func<T, bool> predicate = null) where TKey : notnull
+            => key.HandleRequest()
+                .With<T, bool>(item => Observable.Return(predicate?.Invoke(item) ?? true)) ;
+
+        public static IObservable<T> Suppress<T>(this IObservable<T> source, [CallerMemberName] string caller = "")
+            => source.Suppress<T, string>(caller);
+        public static IObservable<T> Suppress<T, TKey>(this IObservable<T> source, TKey key) where TKey : notnull
+            => source.SelectMany(item => key.MakeRequest()
+                .TryWith(item, defaultValue: false)
+                .Where(ignore => !ignore)
+                .Select(_ => item));
+        
+        public static IObservable<Unit> Inject<T, TKey>(this TKey key, Func<T, IObservable<T>> selector) where TKey : notnull
+            => key.HandleRequest()
+                .With<T, IObservable<T>>(item => Observable.Return(selector(item)));
+
+        public static IObservable<T> Inject<T>(this IObservable<T> source, [CallerMemberName] string caller = "")
+            => source.Inject<T, string>(caller);
+
+        public static IObservable<T> Inject<T, TKey>(this IObservable<T> source, TKey key) where TKey : notnull
+            => source.SelectMany(item => key.MakeRequest()
+                .TryWith(item, defaultValue: Observable.Return(item))
+                .SelectMany(injectedStream => injectedStream));
+        
     }
 
     internal class RpcChannel<TKey, TRequest, TResponse> where TKey : notnull {
@@ -56,6 +82,7 @@ namespace Xpand.Extensions.Reactive.Channels {
             LogFast($"RpcChannel constructor called for <{typeof(TKey).Name}, {typeof(TRequest).Name}, {typeof(TResponse).Name}>"); 
         }
 
+        internal bool HasSubscribers => (_requests as Subject<RequestMessage>)?.HasObservers ?? false;
         
         internal IObservable<Unit> HandleRequests(TKey key, Func<TRequest, IObservable<TResponse>> handler)
             => _requests.AsObservable().ObserveOn(TaskPoolScheduler.Default)
@@ -120,7 +147,14 @@ namespace Xpand.Extensions.Reactive.Channels {
     public readonly struct RpcRequester<TKey> where TKey : notnull {
         private readonly TKey _key;
         internal RpcRequester(TKey key) => _key = key;
-
+        public IObservable<TResponse> TryWith<TRequest, TResponse>(TRequest request, TResponse defaultValue = default) {
+            var channel = RpcChannel.Get<TKey, TRequest, TResponse>(_key);
+            if (!channel.HasSubscribers) {
+                LogFast($"No subscribers for key '{RpcChannel.KeyString(_key)}'. Returning default value: {defaultValue}");
+                return Observable.Return(defaultValue);
+            }
+            return With<TRequest, TResponse>(request);
+        }
         public IObservable<TResponse> With<TResponse>() {
             LogFast($"Requester for key '{RpcChannel.KeyString(_key)}' making a request with no payload (Unit).");
             return RpcChannel.Get<TKey, Unit, TResponse>(_key).MakeRequest(_key, Unit.Default);
@@ -151,6 +185,7 @@ namespace Xpand.Extensions.Reactive.Channels {
             return RpcChannel.Get<TKey, TRequest, TResponse>(_key).HandleRequests(_key, handler);
         }
 
+    
         
     }
 }

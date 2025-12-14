@@ -62,6 +62,12 @@
     <Compile Update="FastLoggerFilteringTests.cs">
       <DependentUpon>FastLoggerTests.cs</DependentUpon>
     </Compile>
+    <Compile Update="RpcChannelSuppressTests.cs">
+      <DependentUpon>RpcChannelTests.cs</DependentUpon>
+    </Compile>
+    <Compile Update="RpcChannelInjectTests.cs">
+      <DependentUpon>RpcChannelTests.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
   <Import Project="..\..\..\.paket\Paket.Restore.targets" />
 </Project>
