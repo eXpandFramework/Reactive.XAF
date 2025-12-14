@@ -161,11 +161,11 @@ namespace Xpand.XAF.Modules.Windows{
             };
         }
 
-        public static IObservable<Process> WhenNewProcessUIReady(this ProcessStartInfo startInfo) {
+        public static IObservable<Process> WhenNewProcessUIReady(this ProcessStartInfo startInfo,bool headless=false) {
             var processName = Path.GetFileNameWithoutExtension(startInfo.FileName);
             var existing = Process.GetProcessesByName(processName).Select(p=>p.Id).ToHashSet();
             return Observable.Defer(() => Process.GetProcessesByName(processName).Where(p => !existing.Contains(p.Id)).ToNowObservable()
-                    .SelectMany(p =>Observable.Defer(() => p.Parent().Observe().WhenNotDefault().Where(parent =>parent.MainWindowHandle!=IntPtr.Zero )).CompleteOnError() ))
+                    .SelectMany(p =>Observable.Defer(() => p.Parent().Observe().WhenNotDefault().Where(parent =>headless|| parent.MainWindowHandle!=IntPtr.Zero )).CompleteOnError() ))
                 .RepeatWhen(250.ToMilliseconds()).Take(1) ;
         }
         public static void UseGlobalExceptionHandling(this WinApplication _) {
@@ -178,6 +178,14 @@ namespace Xpand.XAF.Modules.Windows{
                 Tracing.Tracer.LogError(e.Exception.ToString());
                 e.SetObserved();
             };
+        }
+        
+        public static void WriteToEventLog(string msg,string source) {
+            const string log = "Application";
+            if (!EventLog.SourceExists(source)) {
+                EventLog.CreateEventSource(source, log);
+            }
+            EventLog.WriteEntry(source, msg, EventLogEntryType.Information);
         }
     }
 

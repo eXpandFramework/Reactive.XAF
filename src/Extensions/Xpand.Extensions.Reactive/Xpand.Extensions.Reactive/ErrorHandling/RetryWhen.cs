@@ -13,6 +13,14 @@ namespace Xpand.Extensions.Reactive.ErrorHandling {
             => source.RetryWhen(obs => obs.OfType<TException>().SelectMany(signal));
         public static IObservable<T> RetryWhen<T,TException>(this IObservable<T> source,TimeSpan signal) where TException : Exception 
             => source.RetryWhen<T,TException>(_ => signal.Timer().ToUnit());
+        public static IObservable<T> RetryWhen<T,TException>(this IObservable<T> source,TimeSpan signal,int retryCount) where TException : Exception 
+            => source.RetryWhen(obs => obs.OfType<TException>()
+                .Select((exception, i) => (exception, i))
+                .SelectMany(t => t.i < retryCount ? signal.Timer().ToUnit() : Observable.Throw<Unit>(t.exception)));
+
+        public static IObservable<T> RetryWhen<T>(this IObservable<T> source, TimeSpan signal, int retryCount)
+            => source.RetryWhen<T, Exception>(signal, retryCount);
+        
         public static IObservable<T> RetryWhen<T>(this IObservable<T> source,TimeSpan signal) 
             => source.RetryWhen<T,Exception>(signal);
         
