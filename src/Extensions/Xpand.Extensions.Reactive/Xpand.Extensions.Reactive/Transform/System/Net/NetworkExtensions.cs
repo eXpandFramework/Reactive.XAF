@@ -176,11 +176,7 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net {
 
         private static IObservable<(HttpResponseMessage[] objects, JsonDocument document)> WhenJsonDocument(this HttpResponseMessage message) 
             => Observable.FromAsync(() => message.Content.ReadAsStreamAsync()).WhenJsonDocument(document =>
-                    new HttpResponseException(document.RootElement.ToString(), message).Throw<HttpResponseMessage>())
-                
-                    
-            ;
-
+                    new HttpResponseException(document.RootElement.ToString(), message).Throw<HttpResponseMessage>());
 
         public static IObservable<(T[] objects, JsonDocument document)> WhenResponseDocument<T>(this HttpClient client,
             HttpRequestMessage httpRequestMessage, Func<(JsonDocument document, HttpResponseMessage message), IObservable<T>> selector) 

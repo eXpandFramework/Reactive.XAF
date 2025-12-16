@@ -68,6 +68,9 @@
     <Compile Update="RpcChannelInjectTests.cs">
       <DependentUpon>RpcChannelTests.cs</DependentUpon>
     </Compile>
+    <Compile Update="RpcChannelInjectWithContextTests.cs">
+      <DependentUpon>RpcChannelTests.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
   <Import Project="..\..\..\.paket\Paket.Restore.targets" />
 </Project>

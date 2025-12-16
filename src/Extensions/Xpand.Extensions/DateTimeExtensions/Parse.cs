@@ -24,6 +24,7 @@ namespace Xpand.Extensions.DateTimeExtensions {
 
             var dateTime = DateTimeOffset.ParseExact(text, [
                 "M/d/yyyy h:mm tt",
+                "MMMM d yyyy h:mm tt",
                 "MM/dd/yyyy HH:mm:ss",
                 "MM/dd/yyyy HH:mm",
                 "d MMM HH:mm yyyy",

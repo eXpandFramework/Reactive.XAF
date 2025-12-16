@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
+using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Utility;
 
 namespace Xpand.Extensions.Reactive.Relay{
@@ -127,7 +128,7 @@ public static class ChainFaultContextService {
                     LogFast($"Skipping duplicate frame: {frame.MemberName}");
                     return source;
                 }
-                LogFast($"Pushing frame '{frame.MemberName}'.");
+                LogFast($"Pushing frame '{frame.MemberName} {frame.Context.JoinCommaSpace()}'.");
                 return Observable.Create<T>(observer => source.Subscribe(new PushStackFrameObserver<T>(observer, frame, preserveContext)));
             });
 
