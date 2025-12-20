@@ -143,7 +143,7 @@ The module is **not bound** to **DevExpress versioning**, which means you can us
 
 The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/nuget/reference/package-versioning#version-basics).
 ## Dependencies
-`.NetFramework: net9.0-windows`
+`.NetFramework: net10.0-windows`
 
 |<!-- -->|<!-- -->
 |----|----
@@ -169,7 +169,7 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
  |System.Text.Json|9.0.8
  |Enums.NET|4.0.0
- |Xpand.Patcher|9.0.0
+ |Lib.Harmony|9.0.0
  |Microsoft.Extensions.DependencyInjection.Abstractions|9.0.8
  |Microsoft.CodeAnalysis|4.12.0
  |Microsoft.Extensions.Options|9.0.8

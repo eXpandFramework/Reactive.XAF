@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <FileUpgradeFlags />
     <UpgradeBackupLocation />
     <LangVersion>latest</LangVersion>
@@ -33,7 +33,7 @@
     <Compile Include="..\..\Common\AssemblyInfoVersion.cs" Link="Properties\AssemblyInfoVersion.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Serialize.Linq" Version="2.0.0" />
+    
   </ItemGroup>
   <ItemGroup>
     <Compile Update="Services\FrameExtensions.cs">
@@ -120,5 +120,22 @@
     <Compile Update="Module.cs" />
     <Compile Update="ReactiveModuleBase.cs" />
   </ItemGroup>
-  <Import Project="..\..\..\.paket\Paket.Restore.targets" />
+    <ItemGroup>
+        <PackageReference Include="DevExpress.ExpressApp" />
+        <PackageReference Include="DevExpress.ExpressApp.ConditionalAppearance" />
+        <PackageReference Include="DevExpress.ExpressApp.Security.Xpo" />
+        <PackageReference Include="DevExpress.ExpressApp.Validation" />
+        <PackageReference Include="DevExpress.ExpressApp.ViewVariantsModule" />
+        <PackageReference Include="DevExpress.Persistent.Base" />
+        <PackageReference Include="Enums.Net" />
+        <PackageReference Include="Fasterflect.Xpand" />
+        <PackageReference Include="Microsoft.Extensions.Hosting" />
+        <PackageReference Include="System.Interactive" />
+        <PackageReference Include="System.Reactive" />
+        <PackageReference Include="Lib.Harmony" />
+        <PackageReference Include="System.Security.Cryptography.ProtectedData" />
+        <PackageReference Include="Microsoft.CodeAnalysis" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
+        <PackageReference Include="System.CodeDom" />
+    </ItemGroup>
 </Project>

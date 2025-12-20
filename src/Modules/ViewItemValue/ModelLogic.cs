@@ -8,6 +8,7 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using DevExpress.Persistent.Base;
 using Xpand.Extensions.LinqExtensions;
+using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.Extensions.XAF.TypesInfoExtensions;
 using Xpand.XAF.Modules.Reactive;
@@ -44,16 +45,16 @@ namespace Xpand.XAF.Modules.ViewItemValue{
 					.SelectMany(view => view.PropertyEditorItems().Where(editor => editor.ModelMember.MemberInfo==t.memberInfo)
 						.Select(editor => (editor,t.attribute))))
 				.GroupBy(t => t.editor.GetParent<IModelDetailView>())
-				.ForEach(views => {
+				.Do(views => {
 					var item = ((IModelViewItemValueItems)node).AddNode<IModelViewItemValueItem>();
 					item.ObjectView = views.Key.AsObjectView;
-					views.Where(t => item.Members[t.editor.ModelMember.Id()] == null).ForEach(t => {
+					views.Where(t => item.Members[t.editor.ModelMember.Id()] == null).Do(t => {
 						var viewItem = item.Members.AddNode<IModelViewItemValueObjectViewItem>();
 						viewItem.MemberViewItem = viewItem.MemberViewItems
 							.First(memberViewItem => memberViewItem.ModelMember==t.editor.ModelMember,() => t.editor.ModelMember.ToString());
 						viewItem.SaveViewItemValueStrategy = t.attribute.SaveViewItemValueStrategy;
-					});
-				});
+					}).Enumerate();
+				}).Enumerate();
 	}
 
 	[KeyProperty(nameof(ObjectViewId))]

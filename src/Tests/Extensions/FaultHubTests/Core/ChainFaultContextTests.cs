@@ -278,7 +278,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Core {
     
             BusEvents.Count.ShouldBe(1);
             var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
-            Clipboard.SetText(BusEvents.First().ToString());
+            // Clipboard.SetText(BusEvents.First().ToString());
             var logicalStack = fault.LogicalStackTrace.Select(f => f.MemberName).ToArray();
 
             var level1Index = Array.IndexOf(logicalStack, nameof(PoC_Level1_Calls_Level2));

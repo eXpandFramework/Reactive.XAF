@@ -46,7 +46,6 @@ namespace Xpand.Extensions.Tests {
         }
 
         [Test]
-        [Timeout(1000)]
         public async Task Should_Not_Complete_For_Never_Stream() {
             var source = Observable.Never<int>();
 

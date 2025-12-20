@@ -13,6 +13,12 @@ using Xpand.XAF.Modules.Reactive.Tests.BOModel;
 using Xpand.XAF.Modules.Reactive.Tests.Common;
 
 namespace Xpand.XAF.Modules.Reactive.Tests.ActionTests{
+    using HarmonyLib;
+using Shouldly;
+using System.Reflection;
+
+namespace Harmony10.Tests { }
+
         public class ActionExecuteTests:ReactiveCommonTest {
 
             [TestCase(false,true)]

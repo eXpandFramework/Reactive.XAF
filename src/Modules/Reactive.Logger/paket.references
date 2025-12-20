@@ -1,8 +1,0 @@
-DevExpress.ExpressApp.ConditionalAppearance
-DevExpress.ExpressApp.Notifications
-System.Reactive
-Fasterflect.Xpand
-Xpand.Patcher
-System.Text.Json
-System.Threading.Tasks.Dataflow
-Microsoft.Extensions.Caching.Memory

@@ -5,6 +5,7 @@ using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.Reactive.Transform;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using akarnokd.reactive_extensions;
 using Xpand.Extensions.Reactive.Combine;
@@ -22,7 +23,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests.FaultContextTests {
     public class MultiModuleErrorHandlingTests:FaultContextTestBase {
         
 
-        [Test]
+        [Test][Apartment(ApartmentState.STA)]
         public async Task Error_In_One_Connection_Does_Not_Affect_Other_Modules_And_Is_Handled() {
             await using var application = Platform.Win.NewApplication<ReactiveModule>(handleExceptions:false);
             application.WhenApplicationModulesManager()

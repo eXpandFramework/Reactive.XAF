@@ -10,7 +10,7 @@ param(
     [string]$branch = "lab",
     [switch]$InstallModules,
     [string[]]$taskList = @("Build"),
-    [string]$XpandPwshVersion = "1.221.0.22",
+    [string]$XpandPwshVersion = "1.252.0.3",
     [switch]$CustomVersion,
     [switch]$OnlyXpwsh
 )
@@ -27,7 +27,12 @@ if (!$OnlyXpwsh){
     }
 }
 $m| ForEach-Object {
-    & "$PSScriptRoot\build\Install-Module.ps1" $_
+    try {
+        & "$PSScriptRoot\build\Install-Module.ps1" $_
+    }
+    catch {
+        
+    }
 }
 "XpandPwshVersion=$((Get-Module XpandPwsh -ListAvailable).Version)"
 if ($InstallModules) {

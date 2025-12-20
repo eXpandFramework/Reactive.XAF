@@ -65,7 +65,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests{
         protected void AssertFaultExceptionReport(string report,[CallerMemberName]string caller="") {
             Console.WriteLine("--- GENERATED REPORT ---");
             Console.WriteLine(report);
-            Clipboard.SetText(report);
+            // Clipboard.SetText(report);
             var reportLines = GetType().Assembly.ReadManifestResources(caller).First().ToLines().ToArray();
             var storeReportLines = report.ToLines().ToArray();
             Console.WriteLine("storeReport:");

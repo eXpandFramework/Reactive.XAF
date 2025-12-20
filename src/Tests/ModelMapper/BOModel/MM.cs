@@ -3,7 +3,7 @@ using DevExpress.Xpo;
 using Xpand.XAF.Persistent.BaseImpl;
 
 namespace Xpand.XAF.Modules.ModelMapper.Tests.BOModel{
-    public class MM : Person{
+    public class MM : CustomBaseObject{
         public MM(Session session) : base(session){
         }
 

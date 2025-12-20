@@ -208,7 +208,7 @@ The module is **not bound** to **DevExpress versioning**, which means you can us
 
 The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/nuget/reference/package-versioning#version-basics).
 ## Dependencies
-`.NetFramework: net9.0`
+`.NetFramework: net10.0`
 
 |<!-- -->|<!-- -->
 |----|----

@@ -372,5 +372,27 @@ namespace Xpand.Extensions.Tests.FaultHubTests.ResilienceModels {
             fault.AllContexts.ShouldContain("UpstreamContext", "The upstream context from ChainFaultContext was lost.");
             fault.AllContexts.ShouldNotContain("DownstreamContext", "The downstream operator incorrectly used the new context for the wrapper.");
         }
+        
+        [Test]
+        public async Task SelectManySequentialItemResilient_Preserves_Context_And_Stack() {
+            var source = Observable.Return("Input");
+            
+            var result = await source.SelectManySequentialItemResilient(s => 
+                    Observable.Throw<string>(new InvalidOperationException("Sequential Failure"))
+                        .PushStackFrame("InnerFrame"), 
+                context: ["OuterContext"]).Capture();
+
+            result.IsCompleted.ShouldBeTrue();
+            BusEvents.Count.ShouldBe(1);
+
+            var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
+            
+            // Verify inner stack frame (PushStackFrame)
+            fault.LogicalStackTrace.ShouldContain(f => f.MemberName == "InnerFrame");
+            
+            // Verify outer context (SelectManySequentialItemResilient context parameter)
+            // This confirms the SafeguardSubscription fix is working
+            fault.AllContexts.ShouldContain("OuterContext");
+        }
     }
 }

@@ -12,7 +12,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Tasks{
 
         static GoogleTasksModule(){
             TraceSource=new ReactiveTraceSource(nameof(GoogleTasksModule));
-            ModelObjectViewDependencyLogic.AddObjectViewMap(typeof(IModelTasks),typeof(ITask));
+            // ModelObjectViewDependencyLogic.AddObjectViewMap(typeof(IModelTasks),typeof(ITask));
         }
 
         public GoogleTasksModule() => GoogleModule.AddRequirements(this);

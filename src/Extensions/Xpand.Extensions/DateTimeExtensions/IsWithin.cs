@@ -2,6 +2,11 @@ using System;
 
 namespace Xpand.Extensions.DateTimeExtensions {
     public static partial class DateTimeExtensions {
+        public static bool? IsPast(this DateTime dt)
+            =>dt==DateTime.MinValue?null: dt < DateTime.Now;
+        public static bool? IsFuture(this DateTime dt)
+            =>dt==DateTime.MinValue?null: dt > DateTime.Now;
+        
         public static bool IsWithinTomorrow(this DateTime dt)
             => !dt.IsWithinADay()&& dt.IsWithinHours(48);
         

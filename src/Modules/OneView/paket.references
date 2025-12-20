@@ -1,7 +1,0 @@
-DevExpress.ExpressApp.Win
-System.Reactive
-Fasterflect.Xpand
-Microsoft.CodeAnalysis
-Microsoft.Extensions.DependencyInjection.Abstractions
-Microsoft.Extensions.Options
-Microsoft.Extensions.Configuration.Abstractions

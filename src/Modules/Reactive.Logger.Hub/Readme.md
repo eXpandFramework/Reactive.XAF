@@ -58,7 +58,7 @@ The module is **not bound** to **DevExpress versioning**, which means you can us
 
 The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/nuget/reference/package-versioning#version-basics).
 ## Dependencies
-`.NetFramework: net9.0`
+`.NetFramework: net10.0`
 
 |<!-- -->|<!-- -->
 |----|----
@@ -74,7 +74,7 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |System.Reactive|6.0.1
  |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
  |YamlDotNet|11.2.1
- |Xpand.Patcher|9.0.0
+ |Lib.Harmony|9.0.0
  |Xpand.Collections|1.0.4
  |System.CodeDom|9.0.8
  |System.Text.Json|9.0.8

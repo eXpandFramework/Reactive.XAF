@@ -84,7 +84,7 @@ The module is **not bound** to **DevExpress versioning**, which means you can us
 
 The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/nuget/reference/package-versioning#version-basics).
 ## Dependencies
-`.NetFramework: net9.0`
+`.NetFramework: net10.0`
 
 |<!-- -->|<!-- -->
 |----|----
@@ -101,7 +101,7 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |System.Text.Json|9.0.8
  |System.Reactive|6.0.1
  |Hangfire.AspNetCore|1.7.35
- |Xpand.Patcher|9.0.0
+ |Lib.Harmony|9.0.0
  |System.Threading.Tasks.Dataflow|9.0.8
  |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.251.8
  |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.251.8

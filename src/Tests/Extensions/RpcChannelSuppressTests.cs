@@ -217,5 +217,59 @@ namespace Xpand.Extensions.Tests{
             observer.Items.Single().ShouldBe(itemToEmit);
             handler.Dispose();
         }
+        
+        private record SuppressionSignal(string Value);
+
+        [Test]
+        public void Suppress_Does_Not_Suppress_By_Default() {
+            var item = "Item";
+
+            var observer = Observable.Return(item)
+                .Suppress(_ => new SuppressionSignal("Context"))
+                .Test();
+
+            observer.AwaitDone(1.Seconds());
+            observer.ItemCount.ShouldBe(1);
+            observer.Items.Single().ShouldBe(item);
+        }
+
+        [Test]
+        public void Suppress_When_Handler_Returns_True() {
+            using var handler = typeof(int).Suppress<int>(ctx => ctx > 50)
+                .Subscribe();
+
+            var observer = Observable.Return("HideMe")
+                .Suppress(_ => 100)
+                .Test();
+
+            observer.AwaitDone(1.Seconds());
+            observer.ItemCount.ShouldBe(0);
+        }
+
+        [Test]
+        public void Suppress_With_Record_Context() {
+            using var handler = typeof(SuppressionSignal).Suppress<SuppressionSignal>(s => s.Value == "Driver")
+                .Subscribe();
+
+            var observer = Observable.Return("Item")
+                .Suppress(_ => new SuppressionSignal("Driver"))
+                .Test();
+
+            observer.AwaitDone(1.Seconds());
+            observer.ItemCount.ShouldBe(0);
+        }
+
+        [Test]
+        public void Suppress_Handles_Tuples() {
+            using var handler = typeof((bool Active, int Count)).Suppress<(bool Active, int Count)>(ctx => ctx.Active)
+                .Subscribe();
+
+            var observer = Observable.Return("Item")
+                .Suppress(_ => (Active: true, Count: 5))
+                .Test();
+
+            observer.AwaitDone(1.Seconds());
+            observer.ItemCount.ShouldBe(0);
+        }
     }
 }

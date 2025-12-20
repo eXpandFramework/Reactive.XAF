@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
@@ -15,7 +16,7 @@ using Xpand.XAF.Modules.Reactive.Tests.BOModel;
 
 namespace Xpand.XAF.Modules.Reactive.Tests.FaultContextTests{
     public class FaultContextFrameTest:FaultContextTestBase {
-        [Test]
+        [Test][Apartment(ApartmentState.STA)]
         public async Task Window_Created_Survives_error() {
             await using var application = Platform.Win.NewApplication<ReactiveModule>(handleExceptions:false);
             using var exceptionSubscription = application.WhenWin().WhenCustomHandleException().Do(t => t.handledEventArgs.Handled=true).Subscribe();
@@ -32,7 +33,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests.FaultContextTests{
             captureResult.Error.ShouldBeNull();
             BusEvents.Count.ShouldBe(2);
         }
-        [Test]
+        [Test][Apartment(ApartmentState.STA)]
         public async Task Frame_Created_Survives_error() {
             await using var application = Platform.Win.NewApplication<ReactiveModule>(handleExceptions:false);
             using var exceptionSubscription = application.WhenWin().WhenCustomHandleException().Do(t => t.handledEventArgs.Handled=true).Subscribe();
@@ -50,7 +51,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests.FaultContextTests{
             BusEvents.Count.ShouldBe(2);
         }
         
-        [Test]
+        [Test][Apartment(ApartmentState.STA)]
         public async Task WhenFrame_Survives_error() {
             await using var application = Platform.Win.NewApplication<ReactiveModule>(handleExceptions:false);
             using var exceptionSubscription = application.WhenWin().WhenCustomHandleException().Do(t => t.handledEventArgs.Handled=true).Subscribe();

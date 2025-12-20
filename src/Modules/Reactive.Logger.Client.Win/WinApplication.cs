@@ -14,8 +14,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Client.Win {
 
         #region Default XAF configuration options (https://www.devexpress.com/kb=T501418)
         static ReactiveLoggerClientWinApplication() {
-            PasswordCryptographer.EnableRfc2898 = true;
-            PasswordCryptographer.SupportLegacySha512 = false;
+            
 			DevExpress.ExpressApp.Utils.ImageLoader.Instance.UseSvgImages = true;
         }
         private void InitializeDefaults(){

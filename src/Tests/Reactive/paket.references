@@ -5,7 +5,7 @@ Shouldly
 NUnit
 NUnit3TestAdapter
 System.Text.Json
-Xpand.Patcher
+Lib.harmony
 FasterFlect.Xpand
 Microsoft.CodeAnalysis
 Microsoft.NET.Test.Sdk

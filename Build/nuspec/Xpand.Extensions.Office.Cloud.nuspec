@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.Extensions.Office.Cloud</id>
-    <version>4.251.8.0</version>
+    <version>4.251.8.1</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -12,25 +12,33 @@
     <description>Xpand.Extensions.Office.Cloud</description>
     <releaseNotes>https://github.com/eXpandFramework/Reactive.XAF/releases</releaseNotes>
     <copyright>eXpandFramework.com</copyright>
-    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Xpand.Extensions.Office.Cloud, 25.1.7</tags>
+    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Xpand.Extensions.Office.Cloud, 25.2.3</tags>
     <dependencies>
-      <group targetFramework="net9.0">
-        <dependency id="Xpand.Extensions" version="4.251.8.0" />
-        <dependency id="Xpand.Extensions.XAF" version="4.251.8.0" />
-        <dependency id="Xpand.XAF.Modules.Reactive" version="4.251.8.0" />
-        <dependency id="Xpand.Extensions.Reactive" version="4.251.8.0" />
+      <group targetFramework="net10.0">
+        <dependency id="Xpand.Extensions" version="4.251.8.1" />
+        <dependency id="Xpand.Extensions.XAF" version="4.251.8.1" />
+        <dependency id="Xpand.XAF.Modules.Reactive" version="4.251.8.1" />
+        <dependency id="Xpand.Extensions.Reactive" version="4.251.8.1" />
+        <dependency id="DevExpress.ExpressApp" version="25.2.3" />
+        <dependency id="DevExpress.Persistent.Base" version="25.2.3" />
         <dependency id="Fasterflect.Xpand" version="2.0.7" />
-        <dependency id="DevExpress.ExpressApp" version="25.1.7" />
         <dependency id="System.Reactive" version="6.0.1" />
-        <dependency id="DevExpress.Persistent.Base" version="25.1.7" />
-        <dependency id="System.Text.Json" version="9.0.8" />
-        <dependency id="System.Threading.Tasks.Dataflow" version="9.0.8" />
+        <dependency id="Xpand.Collections" version="1.0.4" />
+        <dependency id="Lib.Harmony" version="2.4.2" />
+        <dependency id="Microsoft.Extensions.Options" version="10.0.1" />
+        <dependency id="Microsoft.Extensions.DependencyInjection.Abstractions" version="10.0.1" />
+        <dependency id="Microsoft.Extensions.Configuration.Abstractions" version="10.0.1" />
+        <dependency id="Microsoft.Extensions.FileProviders.Abstractions" version="10.0.1" />
+        <dependency id="System.Security.Cryptography.ProtectedData" version="10.0.1" />
+        <dependency id="System.CodeDom" version="10.0.1" />
+        <dependency id="Microsoft.CodeAnalysis" version="5.0.0" />
+        <dependency id="Microsoft.CodeAnalysis.Csharp" version="5.0.0" />
       </group>
     </dependencies>
   </metadata>
   <files>
-    <file src="Xpand.Extensions.Office.Cloud.dll" target="lib\net9.0\Xpand.Extensions.Office.Cloud.dll" />
-    <file src="Xpand.Extensions.Office.Cloud.pdb" target="lib\net9.0\Xpand.Extensions.Office.Cloud.pdb" />
+    <file src="Xpand.Extensions.Office.Cloud.dll" target="lib\net10.0\Xpand.Extensions.Office.Cloud.dll" />
+    <file src="Xpand.Extensions.Office.Cloud.pdb" target="lib\net10.0\Xpand.Extensions.Office.Cloud.pdb" />
     <file src="..\build\Targets\CopySymbols.targets" target="build\Xpand.Extensions.Office.Cloud.targets" />
     <file src="..\build\Targets\CopySymbols.ps1" target="build\CopySymbols.ps1" />
   </files>

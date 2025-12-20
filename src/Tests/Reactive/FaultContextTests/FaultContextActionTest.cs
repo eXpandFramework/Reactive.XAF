@@ -3,6 +3,7 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp;
@@ -33,7 +34,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests.FaultContextTests {
 
         [Test]
         [TestCaseSource(typeof(FaultContextActionEventSelectors),
-            nameof(FaultContextActionEventSelectors.ExecutionSelectors))]
+            nameof(FaultContextActionEventSelectors.ExecutionSelectors))][Apartment(ApartmentState.STA)]
         public async Task Action_Events_Are_Resilient(ResilienceOperator resilienceOperator,
             ActionFactory actionFactory, ActionConfig actionConfig, ActionRepeat actionRepeat) {
             await using var application = Platform.Win.NewApplication<ReactiveModule>();
@@ -79,7 +80,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests.FaultContextTests {
                 )
                 .TakeUntil(application.WhenDisposed());
 
-        [Test]
+        [Test][Apartment(ApartmentState.STA)]
         public async Task Can_Execute_Again_On_error() {
             await using var application = Platform.Win.NewApplication<ReactiveModule>();
 
@@ -99,7 +100,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests.FaultContextTests {
             result.Error.ShouldBeNull();
             BusEvents.Count.ShouldBe(2);
         }
-        [Test]
+        [Test][Apartment(ApartmentState.STA)]
         public async Task Can_Get_Correct_StackTrace_From_Nested_Method() {
             await using var application = Platform.Win.NewApplication<ReactiveModule>(handleExceptions: false);
             using var exceptionSubscription = application.WhenWin().WhenCustomHandleException()
@@ -129,7 +130,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests.FaultContextTests {
         }
 
 
-        [Test]
+        [Test][Apartment(ApartmentState.STA)]
         public async Task Chained_Action_Helpers_Propagate_Correct_Stack_Trace() {
             await using var application = Platform.Win.NewApplication<ReactiveModule>(handleExceptions: false);
             using var testObserver = application.WhenWin().WhenCustomHandleException()
@@ -165,7 +166,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests.FaultContextTests {
                 .PushStackFrame()
                 .TakeUntil(application.WhenDisposed());
 
-        [Test][Ignore("invalid for a push/pop model")]
+        [Test][Ignore("invalid for a push/pop model")][Apartment(ApartmentState.STA)]
         public async Task WhenExecuted_Resets_The_Logical_Stack() {
             
             await using var application = Platform.Win.NewApplication<ReactiveModule>(handleExceptions: false);
@@ -206,7 +207,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests.FaultContextTests {
                 .ShouldContain(context => (string)context == nameof(ActionBase.Executed));
         }
 
-        [Test]
+        [Test][Apartment(ApartmentState.STA)]
         public async Task PushStackFrame_Builds_A_Coherent_Logical_StackTrace_For_Nested_Operations() {
             
             await using var application = Platform.Win.NewApplication<ReactiveModule>(handleExceptions: true);

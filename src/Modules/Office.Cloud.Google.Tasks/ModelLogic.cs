@@ -15,7 +15,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Tasks{
 
     
     public interface IModelTasks:IModelNode{
-        [DefaultValue(GoogleTasksService.DefaultTasksListId)]
+        // [DefaultValue(GoogleTasksService.DefaultTasksListId)]
         [Required]
         string DefaultTaskListName{ get; set; }
         IModelTasksItems Items{ get; }

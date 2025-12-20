@@ -24,7 +24,7 @@ if ($DXLicense){
     Write-Host "Ensuring directory exists: $dir"
     New-Item -ItemType Directory -Force -Path $dir | Out-Null
     Write-Host "Writing license file to: $licensePath"
-    Set-Content -Path $licensePath -Value $env:DXLicense -Encoding UTF8
+    Set-Content -Path $licensePath -Value $DXLicense -Encoding UTF8
     if (Test-Path $licensePath) {
         Write-Host "License file successfully written."
     } else {
@@ -61,8 +61,6 @@ Invoke-Script {
     catch { }
     $LASTEXITCODE=0
     dotnet nuget list source
-    Write-HostFormatted "Installing paket" -Section
-    dotnet tool restore
 }
 Invoke-Script {
     
@@ -90,10 +88,7 @@ Invoke-Script {
         Branch         = $Branch
     }
 
-    $SourcePath | ForEach-Object {
-        Set-Location $_
-        Move-PaketSource 0 $DXApiFeed
-    }
+    
 
     Set-Location "$SourcePath"
     
@@ -105,22 +100,14 @@ Invoke-Script {
     }
     Set-Location "$SourcePath\src"
     Clear-XProjectDirectories
-    Start-XpandProjectConverter -version $CustomVersion -path $SourcePath -SkipInstall
-    "PaketRestore $SourcePath"
-    try {
-        Invoke-PaketRestore -Strict 
-    }
-    catch {
-        Remove-Item "$SourcePath\bin" -Recurse -Force -ErrorAction SilentlyContinue
-        "PaketRestore Failed"
-        Write-HostFormatted "PaketInstall $SourcePath (due to different Version)" -section
-        dotnet paket install 
-    }
+    # Start-XpandProjectConverter -version $CustomVersion -path $SourcePath -SkipInstall
+    # "PaketRestore $SourcePath"
+    
     
 
     & $SourcePath\go.ps1 @bArgs
 
-    Move-PaketSource 0 "c:\DevExpressPackages"
+    
 
 
     if (Test-AzDevops) {

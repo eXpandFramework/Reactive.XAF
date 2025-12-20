@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk.Razor">
   <PropertyGroup>
-    <!-- <RazorLangVersion>3.0</RazorLangVersion> -->
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <LangVersion>latest</LangVersion>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\Xpand.key\xpand.snk</AssemblyOriginatorKeyFile>
@@ -15,7 +14,6 @@
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <DebugType>full</DebugType>
     <AllowPackageReference>true</AllowPackageReference>
-    <!-- <ProduceReferenceAssembly>false</ProduceReferenceAssembly> -->
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
   </PropertyGroup>
   <ItemGroup>
@@ -31,14 +29,7 @@
     <EmbeddedResource Include="Model.DesignedDiffs.xafml" />
   </ItemGroup>
   <ItemGroup>
-    <!--    <PackageReference Include="System.CodeDom" Version="6.0" />-->
-    <!--    <PackageReference Include="System.Configuration.ConfigurationManager" Version="8.0.1" />-->
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
-    <!--    <PackageReference Include="DevExpress.ExpressApp.Blazor" Version="24.2.3" />-->
-    <!--    <PackageReference Include="DevExpress.ExpressApp.Validation.Blazor" Version="24.2.3" />-->
-    <!--    <PackageReference Include="System.ServiceModel.NetTcp" Version="8.1" />-->
-    <!--    <PackageReference Include="System.ServiceModel.Http" Version="8.1" />-->
-    <!--    <PackageReference Include="System.ServiceModel.Security" Version="4.10.2" />-->
     <Reference Include="Xpand.Extensions.Blazor">
       <HintPath>..\..\..\bin\Xpand.Extensions.Blazor.dll</HintPath>
     </Reference>
@@ -58,5 +49,15 @@
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>
     </Reference>
   </ItemGroup>
-  <Import Project="..\..\..\.paket\Paket.Restore.targets" />
+    <ItemGroup>
+        <PackageReference Include="DevExpress.ExpressApp.Blazor" />
+        <PackageReference Include="Fasterflect.Xpand" />
+        <PackageReference Include="System.Interactive" />
+        <PackageReference Include="System.Reactive" />
+        <PackageReference Include="System.Security.Cryptography.ProtectedData" />
+        <PackageReference Include="System.CodeDom" />
+        <PackageReference Include="Microsoft.CodeAnalysis" />
+        <PackageReference Include="Microsoft.CodeAnalysis.Csharp" />
+        
+    </ItemGroup>
 </Project>

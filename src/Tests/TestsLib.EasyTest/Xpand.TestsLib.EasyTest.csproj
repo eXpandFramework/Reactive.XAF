@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <FileUpgradeFlags />
     <UpgradeBackupLocation />
@@ -31,9 +31,7 @@
       <Link>Properties\AssemblyInfoVersion.cs</Link>
     </Compile>
   </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="TextCopy" Version="4.2.0" />
-  </ItemGroup>
+  
   <ItemGroup>
     <Reference Include="Xpand.Extensions">
       <HintPath>..\..\..\bin\Xpand.Extensions.dll</HintPath>
@@ -66,5 +64,37 @@
       <SpecificVersion>false</SpecificVersion>
     </Reference>
   </ItemGroup>
-  <Import Project="..\..\..\.paket\Paket.Restore.targets" />
+    <ItemGroup>
+        <PackageReference Include="DevExpress.ExpressApp" />
+        <PackageReference Include="DevExpress.ExpressApp.Security.Xpo" />
+        <PackageReference Include="DevExpress.Xpo" />
+        <PackageReference Include="DevExpress.Persistent.BaseImpl.Xpo" />
+        <PackageReference Include="DevExpress.ExpressApp.ViewVariantsModule" />
+        <PackageReference Include="Polly" />
+        <PackageReference Include="TextCopy" />
+        <PackageReference Include="akarnokd.reactive_extensions" />
+        <PackageReference Include="Fasterflect.Xpand" />
+        <PackageReference Include="MagicOnion" />
+        <PackageReference Include="Microsoft.CodeAnalysis" />
+        <PackageReference Include="Microsoft.Data.SqlClient" />
+        <PackageReference Include="Microsoft.Extensions.Caching.Memory" />
+        <PackageReference Include="Microsoft.Extensions.Options" />
+        <PackageReference Include="Microsoft.Extensions.FileProviders.Abstractions" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" />
+        <PackageReference Include="Microsoft.Reactive.Testing" />
+        <PackageReference Include="Microsoft.Extensions.Diagnostics.Abstractions" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" />
+        <PackageReference Include="Moq" />
+        <PackageReference Include="NUnit" />
+        <PackageReference Include="Shouldly" />
+        <PackageReference Include="System.CodeDom" />
+        <PackageReference Include="System.Management" />
+        <PackageReference Include="System.Security.Cryptography.ProtectedData" />
+        <PackageReference Include="System.Interactive.Async" />
+        <PackageReference Include="MessagePack" />
+        <PackageReference Include="Lib.Harmony" />
+        <PackageReference Include="DevExpress.EasyTest" />
+        <PackageReference Include="Enums.NET" />
+    </ItemGroup>
 </Project>

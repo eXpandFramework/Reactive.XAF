@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
-    <OutputPath>..\..\..\bin\net9.0</OutputPath>
+    <OutputPath>..\..\..\bin</OutputPath>
     <NoWarn>MSB3277</NoWarn>
-    <TargetFramework>net9.0-windows</TargetFramework>
+    <TargetFramework>net10.0-windows</TargetFramework>
     <AppendTargetFrameworkToOutputPath>False</AppendTargetFrameworkToOutputPath>
     <LangVersion>latest</LangVersion>
     <SignAssembly>true</SignAssembly>
@@ -57,5 +57,24 @@
       <HintPath>..\..\..\bin\Xpand.Extensions.Blazor.dll</HintPath>
     </Reference>
   </ItemGroup>
-  <Import Project="..\..\..\.paket\Paket.Restore.targets" />
+    <ItemGroup>
+
+        <PackageReference Include="akarnokd.reactive_extensions" />
+        <PackageReference Include="Fasterflect.Xpand" />
+        <PackageReference Include="MagicOnion" />
+        <PackageReference Include="Humanizer" />
+        <PackageReference Include="Microsoft.CodeAnalysis" />
+        <PackageReference Include="Microsoft.Data.SqlClient" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" />
+        <PackageReference Include="Microsoft.Reactive.Testing" />
+        <PackageReference Include="Moq" />
+        <PackageReference Include="NUnit" />
+        <PackageReference Include="NUnit3TestAdapter" />
+        <PackageReference Include="Shouldly" />
+        <PackageReference Include="System.Interactive.Async" />
+        <PackageReference Include="Lib.Harmony" />
+        <PackageReference Include="Hangfire.Core" />
+        <PackageReference Include="hangfire.memorystorage" />
+        <PackageReference Include="Hangfire.AspNetCore" />
+    </ItemGroup>
 </Project>

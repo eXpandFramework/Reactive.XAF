@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net9.0-windows</TargetFramework>
+    <TargetFramework>net10.0-windows7.0</TargetFramework>
     <NoWarn>MSB3277;NETSDK1206</NoWarn>
     <UseWindowsForms>true</UseWindowsForms>
     <LangVersion>latest</LangVersion>
@@ -78,5 +78,25 @@
   <ItemGroup>
     <EmbeddedResource Include="Model.DesignedDiffs.xafml" />
   </ItemGroup>
-  <Import Project="..\..\..\.paket\Paket.Restore.targets" />
+    <ItemGroup>
+        <PackageReference Include="DevExpress.ExpressApp" />
+        <PackageReference Include="DevExpress.ExpressApp.ConditionalAppearance" />
+        <PackageReference Include="DevExpress.ExpressApp.Xpo" />
+        <PackageReference Include="Xpand.Collections" />
+        <PackageReference Include="DevExpress.ExpressApp.Validation" />
+        <PackageReference Include="DevExpress.ExpressApp.Notifications" />
+        <PackageReference Include="DevExpress.ExpressApp.ViewVariantsModule" />
+        <PackageReference Include="Microsoft.CognitiveServices.Speech" />
+        <PackageReference Include="NAudio" />
+        <PackageReference Include="Fasterflect.Xpand" />
+        <PackageReference Include="System.Reactive" />
+        <PackageReference Include="Lib.Harmony" />
+        <PackageReference Include="Microsoft.Extensions.Options" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+        
+        <PackageReference Include="Microsoft.CodeAnalysis" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" />
+        
+    </ItemGroup>
 </Project>

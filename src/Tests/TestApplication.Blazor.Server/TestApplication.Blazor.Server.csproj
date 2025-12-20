@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <CheckEolTargetFramework>false</CheckEolTargetFramework>
     <UseRazorSourceGenerator>false</UseRazorSourceGenerator>
     <Deterministic>false</Deterministic>
@@ -25,28 +25,27 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DevExpress.Drawing.Skia" Version="25.1.7" />
-    <PackageReference Include="DevExpress.ExpressApp.Blazor" Version="25.1.7" />
-    <PackageReference Include="DevExpress.ExpressApp.Dashboards.Blazor" Version="25.1.7" />
-    <PackageReference Include="DevExpress.ExpressApp.FileAttachment.Blazor" Version="25.1.7" />
-    <PackageReference Include="DevExpress.ExpressApp.Office.Blazor" Version="25.1.7" />
-    <PackageReference Include="DevExpress.ExpressApp.ReportsV2.Blazor" Version="25.1.7" />
-    <PackageReference Include="DevExpress.ExpressApp.Scheduler.Blazor" Version="25.1.7" />
-    <PackageReference Include="DevExpress.ExpressApp.Security.Xpo" Version="25.1.7" />
-    <PackageReference Include="DevExpress.ExpressApp.Validation.Blazor" Version="25.1.7" />
-    <PackageReference Include="DevExpress.ExpressApp" Version="25.1.7" />
-    <PackageReference Include="DevExpress.ExpressApp.AuditTrail.Xpo" Version="25.1.7" />
-    <PackageReference Include="DevExpress.ExpressApp.ConditionalAppearance" Version="25.1.7" />
-    <PackageReference Include="DevExpress.ExpressApp.Dashboards" Version="25.1.7" />
-    <PackageReference Include="DevExpress.ExpressApp.Objects" Version="25.1.7" />
-    <PackageReference Include="DevExpress.ExpressApp.Office" Version="25.1.7" />
-    <PackageReference Include="DevExpress.ExpressApp.ReportsV2" Version="25.1.7" />
-    <PackageReference Include="DevExpress.ExpressApp.Scheduler" Version="25.1.7" />
-    <PackageReference Include="DevExpress.ExpressApp.StateMachine" Version="25.1.7" />
-    <PackageReference Include="DevExpress.ExpressApp.Validation" Version="25.1.7" />
-    <PackageReference Include="DevExpress.ExpressApp.ViewVariantsModule" Version="25.1.7" />
-    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="25.1.7" />
-    <PackageReference Include="DevExpress.Persistent.Base" Version="25.1.7" />
-    <PackageReference Include="DevExpress.Persistent.BaseImpl.Xpo" Version="25.1.7" />
+    <PackageReference Include="DevExpress.Drawing.Skia" />
+    <PackageReference Include="DevExpress.ExpressApp.Blazor" />
+    <PackageReference Include="DevExpress.ExpressApp.Dashboards.Blazor" />
+    <PackageReference Include="DevExpress.ExpressApp.FileAttachment.Blazor" />
+    <PackageReference Include="DevExpress.ExpressApp.Office.Blazor" />
+    <PackageReference Include="DevExpress.ExpressApp.ReportsV2.Blazor" />
+    <PackageReference Include="DevExpress.ExpressApp.Scheduler.Blazor" />
+    <PackageReference Include="DevExpress.ExpressApp.Security.Xpo" />
+    <PackageReference Include="DevExpress.ExpressApp.Validation.Blazor" />
+    <PackageReference Include="DevExpress.ExpressApp" />
+    <PackageReference Include="DevExpress.ExpressApp.AuditTrail.Xpo" />
+    <PackageReference Include="DevExpress.ExpressApp.ConditionalAppearance" />
+    <PackageReference Include="DevExpress.ExpressApp.Dashboards" />
+    <PackageReference Include="DevExpress.ExpressApp.Office" />
+    <PackageReference Include="DevExpress.ExpressApp.ReportsV2" />
+    <PackageReference Include="DevExpress.ExpressApp.Scheduler" />
+    <PackageReference Include="DevExpress.ExpressApp.StateMachine" />
+    <PackageReference Include="DevExpress.ExpressApp.Validation" />
+    <PackageReference Include="DevExpress.ExpressApp.ViewVariantsModule" />
+    <PackageReference Include="DevExpress.ExpressApp.Xpo" />
+    <PackageReference Include="DevExpress.Persistent.Base" />
+    <PackageReference Include="DevExpress.Persistent.BaseImpl.Xpo" />
   </ItemGroup>
 </Project>

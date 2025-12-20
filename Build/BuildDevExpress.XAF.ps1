@@ -49,11 +49,11 @@ Task Init {
         
         Copy-Item -Path "$root\build\Tests.runsettings" -Destination "$Root\bin\Tests.runsettings" -Force
 
-        dotnet tool restore
-        Set-Location $root
-        Invoke-Script { Invoke-PaketRestore -strict }
         
-        Get-ChildItem "$(Get-NugetInstallationFolder)\grpc.core" "runtimes" -Recurse | Select-Object -Last 1 | Copy-Item -Destination "$root\bin\runtimes" -Recurse -Force
+        Set-Location $root
+        
+        
+        # Get-ChildItem "$(Get-NugetInstallationFolder)\grpc.core" "runtimes" -Recurse | Select-Object -Last 1 | Copy-Item -Destination "$root\bin\runtimes" -Recurse -Force
     }
 }
 

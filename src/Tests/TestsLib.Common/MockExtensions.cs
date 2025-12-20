@@ -29,7 +29,7 @@ using Xpand.Extensions.StringExtensions;
 using WebSocketReceiveResult = System.Net.WebSockets.WebSocketReceiveResult;
 
 namespace Xpand.TestsLib.Common {
-    public class HarmonyTest() : Harmony(TestContext.CurrentContext.Test.FullName);
+    // public class HarmonyTest() : Harmony(TestContext.CurrentContext.Test.FullName);
 
     public class MockHttpClient:HttpClient;
     public static class MockExtensions {

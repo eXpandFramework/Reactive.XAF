@@ -1,7 +1,7 @@
 param(
     $root = [System.IO.Path]::GetFullPath("$PSScriptRoot\..\"),
     [switch]$Release,
-    $dxVersion = "23.2.3",
+    $dxVersion = "25.2.3",
     $branch = "lab"
 )
 
@@ -22,7 +22,7 @@ $filteredProjects=Get-ChildItem "$root\src\" -Include "*.csproj" -Recurse | Wher
 $filteredProjects+=Get-ChildItem "$root\src\" -Include "*Xpand.TestsLib*.csproj" -Recurse # |Where-Object{$_.BaseName -notmatch "Blazor"}
 $dxVersionBuild=Get-VersionPart $dxVersion Build
 $nuspecs=Get-ChildItem "$root\build\nuspec" *.nuspec
-$xpandPatcher=(Get-XpandPackages All All|Where-Object{$_.Id -eq "Xpand.Patcher"}).Version
+
 
 
 
@@ -141,7 +141,7 @@ $filteredProjects|ForEach-Object{
     $project=$_
     $nFileName=($nuspecs|Where-Object{$_.BaseName -eq $project.BaseName})
     $n=Get-XmlContent $nFileName
-    # Add-NuspecDependency Xpand.Patcher $xpandPatcher $n "net6.0"
+    
     $n.package.metadata.dependencies.group|Where-Object{$_.targetFramework -eq "netstandard2.0"}|ForEach-Object{
         $_.dependency|ForEach-Object{
             Add-NuspecDependency $_.Id $_.Version $n "net6.0"

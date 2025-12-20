@@ -123,7 +123,7 @@ namespace Xpand.Extensions.Tests.FaultHubTests.Diagnostics {
 
             var report = fault.ToString();
             Console.WriteLine(report);
-            Clipboard.SetText(report);
+            // Clipboard.SetText(report);
             
             report.ShouldContain("OutermostContext");
             report.ShouldContain("IntermediateContext");

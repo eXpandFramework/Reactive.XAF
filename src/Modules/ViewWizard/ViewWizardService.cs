@@ -10,6 +10,7 @@ using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.SystemModule;
 using DevExpress.Persistent.Base;
+using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Relay;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;

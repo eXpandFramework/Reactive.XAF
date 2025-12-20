@@ -73,7 +73,7 @@ param(
     $proccessor = 2,
     $vmSwitch = "Default Switch",                            
     $user = $env:AgentUser, 
-    $downloadUrl = "https://vstsagentpackage.azureedge.net/agent/3.230.0/vsts-agent-win-x64-3.230.0.zip",
+    $downloadUrl = "https://download.agent.dev.azure.com/agent/4.266.2/vsts-agent-win-x64-4.266.2.zip",
     $organization = "eXpandDevOps",
     $token = $env:AzureToken,
     $agentPool = "Self",

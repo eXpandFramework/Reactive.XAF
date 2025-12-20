@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net9.0-windows7.0</TargetFramework>
+    <TargetFramework>net10.0-windows7.0</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
     <LangVersion>latest</LangVersion>
     <SignAssembly>true</SignAssembly>
@@ -58,5 +58,21 @@
     <None Remove="Dictionaries\EnglishAlphabet.txt" />
     <EmbeddedResource Include="Dictionaries\EnglishAlphabet.txt" />
   </ItemGroup>
-  <Import Project="..\..\..\.paket\Paket.Restore.targets" />
+    <ItemGroup>
+        <PackageReference Include="DevExpress.ExpressApp.Win" />
+        <PackageReference Include="DevExpress.Persistent.Base" />
+        <PackageReference Include="DevExpress.SpellChecker.Core" />
+        <PackageReference Include="DevExpress.Win.SpellChecker" />
+        <PackageReference Include="Fasterflect.Xpand" />
+        <PackageReference Include="System.Reactive" />
+        <PackageReference Include="Xpand.Collections" />
+        <PackageReference Include="Microsoft.Extensions.Options" />
+        <PackageReference Include="Microsoft.CodeAnalysis" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" />
+        <PackageReference Include="Microsoft.Extensions.FileProviders.Abstractions" />
+        <PackageReference Include="Microsoft.Extensions.Diagnostics.Abstractions" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+        <PackageReference Include="Lib.Harmony" />
+    </ItemGroup>
 </Project>

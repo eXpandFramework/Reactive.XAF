@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
-    <TargetFramework>net9.0-windows</TargetFramework>
+    <TargetFramework>net10.0-windows</TargetFramework>
     <FileUpgradeFlags />
     <UpgradeBackupLocation />
     <LangVersion>latest</LangVersion>
@@ -29,7 +29,7 @@
     <NoWarn>NU1701;CS8002;CA1416</NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\TestApplication.Blazor.Server\TestApplication.Blazor.Server.csproj" />
+<!--    <ProjectReference Include="..\TestApplication.Blazor.Server\TestApplication.Blazor.Server.csproj" />-->
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Xpand.Extensions">
@@ -71,9 +71,63 @@
     <Compile Include="..\..\Common\AssemblyInfoVersion.cs" Link="Properties\AssemblyInfoVersion.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Update="Selenium.Support">
-      <Version>4.38.0</Version>
-    </PackageReference>
+    
   </ItemGroup>
-  <Import Project="..\..\..\.paket\Paket.Restore.targets" />
+    <ItemGroup>
+        <PackageReference Include="Selenium.Support" />
+        <PackageReference Include="akarnokd.reactive_extensions" />
+        <PackageReference Include="DevExpress.Drawing.Skia" />
+        <PackageReference Include="DevExpress.ExpressApp" />
+        <PackageReference Include="DevExpress.EasyTest" />
+        <PackageReference Include="DevExpress.ExpressApp.EasyTest.BlazorAdapter" />
+        <PackageReference Include="DevExpress.ExpressApp.AuditTrail.Xpo" />
+        <PackageReference Include="DevExpress.ExpressApp.Blazor" />
+        <PackageReference Include="DevExpress.ExpressApp.ConditionalAppearance" />
+        <PackageReference Include="DevExpress.ExpressApp.Dashboards" />
+        <PackageReference Include="DevExpress.ExpressApp.Dashboards.Blazor" />
+        <PackageReference Include="DevExpress.ExpressApp.FileAttachment.Blazor" />
+        <PackageReference Include="DevExpress.ExpressApp.Office" />
+        <PackageReference Include="DevExpress.ExpressApp.Office.Blazor" />
+        <PackageReference Include="DevExpress.ExpressApp.ReportsV2" />
+        <PackageReference Include="DevExpress.ExpressApp.ReportsV2.Blazor" />
+        <PackageReference Include="DevExpress.ExpressApp.Scheduler" />
+        <PackageReference Include="DevExpress.ExpressApp.Scheduler.Blazor" />
+        <PackageReference Include="DevExpress.ExpressApp.Security.Xpo" />
+        <PackageReference Include="DevExpress.ExpressApp.StateMachine" />
+        <PackageReference Include="DevExpress.ExpressApp.Validation" />
+        <PackageReference Include="DevExpress.ExpressApp.Validation.Blazor" />
+        <PackageReference Include="DevExpress.ExpressApp.ViewVariantsModule" />
+        <PackageReference Include="DevExpress.ExpressApp.Xpo" />
+        <PackageReference Include="DevExpress.Persistent.Base" />
+        <PackageReference Include="DevExpress.Persistent.BaseImpl.Xpo" />
+        <PackageReference Include="DevExpress.Xpo" />
+        <PackageReference Include="Fasterflect.Xpand" />
+<!--        <PackageReference Include="System.Diagnostics.PerformanceCounter" />-->
+<!--        <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" />-->
+<!--        <PackageReference Include="Microsoft.Extensions.Diagnostics.Abstractions" />-->
+<!--        <PackageReference Include="Microsoft.Extensions.FileProviders.Abstractions" />-->
+<!--        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />-->
+        <PackageReference Include="MessagePack" />
+        <PackageReference Include="Microsoft.CodeAnalysis" />
+        <PackageReference Include="Microsoft.Data.SqlClient" />
+<!--        <PackageReference Include="Microsoft.Extensions.Caching.Memory" />-->
+<!--        <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" />-->
+<!--        <PackageReference Include="Microsoft.Extensions.Diagnostics.Abstractions" />-->
+<!--        <PackageReference Include="Microsoft.Extensions.FileProviders.Abstractions" />-->
+<!--        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />-->
+        <PackageReference Include="Microsoft.NET.Test.Sdk" />
+        <PackageReference Include="Microsoft.Reactive.Testing" />
+        <PackageReference Include="Moq" />
+        <PackageReference Include="NUnit" />
+        
+        <PackageReference Include="Polly" />
+        <PackageReference Include="Shouldly" />
+        <PackageReference Include="System.CodeDom" />
+        <PackageReference Include="System.Interactive.Async" />
+        <PackageReference Include="System.Management" />
+        <PackageReference Include="System.Security.Cryptography.ProtectedData" />
+        <PackageReference Include="System.Diagnostics.PerformanceCounter" />
+        <PackageReference Include="TextCopy" />
+        <PackageReference Include="Lib.Harmony" />
+    </ItemGroup>
 </Project>

@@ -79,7 +79,7 @@ The module is **not bound** to **DevExpress versioning**, which means you can us
 
 The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/nuget/reference/package-versioning#version-basics).
 ## Dependencies
-`.NetFramework: net9.0`
+`.NetFramework: net10.0`
 
 |<!-- -->|<!-- -->
 |----|----
@@ -91,7 +91,7 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.251.8
  |System.Reactive|6.0.1
  |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
- |Xpand.Patcher|9.0.0
+ |Lib.Harmony|9.0.0
  |System.Text.Json|9.0.8
  |System.Threading.Tasks.Dataflow|9.0.8
  |Microsoft.Extensions.Caching.Memory|9.0.8

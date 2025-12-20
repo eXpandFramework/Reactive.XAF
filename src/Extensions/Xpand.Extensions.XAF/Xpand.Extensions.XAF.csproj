@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <LangVersion>latest</LangVersion>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\Xpand.key\xpand.snk</AssemblyOriginatorKeyFile>
@@ -37,5 +37,19 @@
       <DependentUpon>NonPersistentBaseObject.cs</DependentUpon>
     </Compile>
   </ItemGroup>
-  <Import Project="..\..\..\.paket\Paket.Restore.targets" />
+    <ItemGroup>
+        <PackageReference Include="DevExpress.ExpressApp.ConditionalAppearance" />
+        <PackageReference Include="DevExpress.Persistent.Base" />
+        <PackageReference Include="Enums.Net" />
+        <PackageReference Include="Fasterflect.Xpand" />
+        <PackageReference Include="Microsoft.Data.SqlClient" />
+        <PackageReference Include="System.Security.Cryptography.ProtectedData" />
+        <PackageReference Include="System.Interactive" />
+        <PackageReference Include="Xpand.Collections" />
+        <PackageReference Include="Lib.Harmony" />
+        <PackageReference Include="System.CodeDom" />
+        <PackageReference Include="Microsoft.CodeAnalysis" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
+        <PackageReference Include="Microsoft.Extensions.Primitives" />
+    </ItemGroup>
 </Project>

@@ -6,9 +6,19 @@ using System.Runtime.CompilerServices;
 
 namespace Xpand.Extensions.Reactive.Channels{
     public static class RpcChannelInject {
+        public static IObservable<TSource> Inject<TSource, TSignal>(this IObservable<TSource> source, Func<TSource, TSignal> signalFactory) 
+            => source.SelectMany(item => {
+                var signal = signalFactory(item);
+                return typeof(TSignal).MakeRequest()
+                    .TryWith(signal, defaultValue: item)
+                    .Do(result => LogFast($"Injection result for {typeof(TSignal).Name}: {result}"));
+            });
+        
         public static IObservable<Unit> Inject<T, TKey>(this TKey key, Func<T, IObservable<T>> selector) where TKey : notnull
             => key.HandleRequest().With<T, IObservable<T>>(item => Observable.Return(selector(item)));
 
+        public static IObservable<T> InjectEmission<T>(this T source) => Observable.Return(source).Inject(typeof(T));
+        public static IObservable<T> Inject<T>(this IObservable<T> source) => source.Inject(typeof(T));
         public static IObservable<T> Inject<T, TKey>(this IObservable<T> source, TKey key) where TKey : notnull
             => source.SelectMany(item => key.MakeRequest()
                 .TryWith(item, defaultValue: Observable.Return(item))

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net9.0-windows7.0</TargetFramework>
+    <TargetFramework>net10.0-windows7.0</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
     <LangVersion>latest</LangVersion>
     <SignAssembly>true</SignAssembly>
@@ -80,5 +80,19 @@
       <DependentUpon>WinApplication.cs</DependentUpon>
     </Compile>
   </ItemGroup>
-  <Import Project="..\..\..\.paket\Paket.Restore.targets" />
+    <ItemGroup>
+        <PackageReference Include="DevExpress.ExpressApp.Win" />
+        <PackageReference Include="DevExpress.ExpressApp.Xpo" />
+        <PackageReference Include="DevExpress.ExpressApp.ConditionalAppearance" />
+        <PackageReference Include="DevExpress.ExpressApp.Notifications" />
+        <PackageReference Include="Fasterflect.Xpand" />
+        <PackageReference Include="Microsoft.Extensions.Caching.Memory" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" />
+        <PackageReference Include="Microsoft.Extensions.FileProviders.Abstractions" />
+        <PackageReference Include="Microsoft.Extensions.Diagnostics.Abstractions" />
+        <PackageReference Include="Microsoft.CodeAnalysis" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
+        <PackageReference Include="System.Reactive" />
+        <PackageReference Include="Lib.Harmony" />
+    </ItemGroup>
 </Project>

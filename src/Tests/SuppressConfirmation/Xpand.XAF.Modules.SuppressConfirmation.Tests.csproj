@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <OutputPath>..\..\..\bin\net9.0</OutputPath>
-    <TargetFramework>net9.0-windows</TargetFramework>
+    <OutputPath>..\..\..\bin</OutputPath>
+    <TargetFramework>net10.0-windows</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
     <AppendTargetFrameworkToOutputPath>False</AppendTargetFrameworkToOutputPath>
     <LangVersion>latest</LangVersion>
@@ -43,5 +43,24 @@
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.SuppressConfirmation.dll</HintPath>
     </Reference>
   </ItemGroup>
-  <Import Project="..\..\..\.paket\Paket.Restore.targets" />
+    <ItemGroup>
+
+        <PackageReference Include="akarnokd.reactive_extensions" />
+        <PackageReference Include="Fasterflect.Xpand" />
+        <PackageReference Include="MagicOnion" />
+        <PackageReference Include="Humanizer" />
+        <PackageReference Include="Microsoft.CodeAnalysis" />
+        <PackageReference Include="Microsoft.Data.SqlClient" />
+        <PackageReference Include="Microsoft.Extensions.Caching.Memory" />
+        <PackageReference Include="Microsoft.Extensions.Options" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" />
+        <PackageReference Include="Microsoft.Reactive.Testing" />
+        <PackageReference Include="Moq" />
+        <PackageReference Include="NUnit" />
+        <PackageReference Include="NUnit3TestAdapter" />
+        <PackageReference Include="Shouldly" />
+        <PackageReference Include="System.Interactive.Async" />
+        <PackageReference Include="Lib.Harmony" />
+        <PackageReference Include="DevExpress.ExpressApp.Win" />
+    </ItemGroup>
 </Project>

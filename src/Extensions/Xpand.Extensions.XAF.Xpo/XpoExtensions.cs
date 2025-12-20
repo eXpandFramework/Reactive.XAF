@@ -7,7 +7,6 @@ using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.DC.Xpo;
-using DevExpress.ExpressApp.Model.Core;
 using DevExpress.Xpo;
 using DevExpress.Xpo.DB;
 using DevExpress.Xpo.Helpers;
@@ -176,16 +175,6 @@ namespace Xpand.Extensions.XAF.Xpo {
         }
 
         
-        public static XPClassInfo FindDCXPClassInfo(this ITypeInfo typeInfo) {
-            var xpoTypeInfoSource = ((XpoTypeInfoSource) ((TypeInfo) typeInfo).Source);
-            if (DesignerOnlyCalculator.IsRunTime) {
-                var generatedEntityType = xpoTypeInfoSource.GetGeneratedEntityType(typeInfo.Type);
-                return generatedEntityType == null ? null : xpoTypeInfoSource.XPDictionary.GetClassInfo(generatedEntityType);
-            }
-            var className = typeInfo.Name + "BaseDCDesignTimeClass";
-            var xpClassInfo = xpoTypeInfoSource.XPDictionary.QueryClassInfo("", className);
-            return xpClassInfo ?? new XPDataObjectClassInfo(xpoTypeInfoSource.XPDictionary, className);
-        }
         
         public static XPClassInfo QueryXPClassInfo(this ITypeInfo typeInfo){
             var typeInfoSource = ((TypeInfo)typeInfo).Source as XpoTypeInfoSource;

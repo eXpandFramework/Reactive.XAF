@@ -1,9 +1,0 @@
-Fasterflect.Xpand
-System.Configuration.ConfigurationManager
-System.Reactive
-System.Text.Json
-Microsoft.CodeAnalysis
-System.Data.SqlClient
-System.Drawing.Common
-System.ServiceModel.Http
-System.ServiceModel.NetTcp

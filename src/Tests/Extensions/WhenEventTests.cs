@@ -2,6 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using NUnit.Framework;
+using Shouldly;
 using Xpand.Extensions.Reactive.Transform;
 
 namespace Xpand.Extensions.Tests {
@@ -19,7 +20,7 @@ namespace Xpand.Extensions.Tests {
             await Task.Delay(100);
 
 
-            Assert.IsTrue(eventHandled);
+            eventHandled.ShouldBeTrue();
             subscription.Dispose();
         }
 
@@ -35,7 +36,7 @@ namespace Xpand.Extensions.Tests {
 
             source.InvokeEvent1(null);
 
-            Assert.IsTrue(eventFired);
+            eventFired.ShouldBeTrue();
         }
 
 
@@ -51,7 +52,7 @@ namespace Xpand.Extensions.Tests {
 
             SampleClass.InvokeStaticEvent1();
 
-            Assert.IsTrue(eventFired);
+            eventFired.ShouldBeTrue();
         }
 
 
@@ -67,7 +68,7 @@ namespace Xpand.Extensions.Tests {
 
             source.InvokeEvent1("Event1 Args");
 
-            Assert.IsTrue(eventFired);
+            eventFired.ShouldBeTrue();
         }
 
 
@@ -83,7 +84,7 @@ namespace Xpand.Extensions.Tests {
 
             source.InvokeEvent3(new CustomEventArgs());
 
-            Assert.IsTrue(eventFired);
+            eventFired.ShouldBeTrue();
         }
 
 

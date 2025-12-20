@@ -1,7 +1,7 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <LangVersion>latest</LangVersion>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\Xpand.key\xpand.snk</AssemblyOriginatorKeyFile>
@@ -21,9 +21,26 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\..\Common\AssemblyInfoVersion.cs" Link="Properties\AssemblyInfoVersion.cs" />
+    <PackageReference Include="TextCopy" />
+    <PackageReference Include="Fasterflect.Xpand" />
+    <PackageReference Include="System.CodeDom" />
+    <PackageReference Include="System.ValueTuple" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
+    <PackageReference Include="Lib.Harmony" />
+    <PackageReference Include="Xpand.Collections" />
+    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" />
+    <PackageReference Include="System.Security.Cryptography.ProtectedData" />
+    <PackageReference Include="System.Interactive" />
+    <PackageReference Include="Humanizer.Core" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" />
+    <PackageReference Include="Mono.Cecil" />
+    <PackageReference Include="MonoMod.Core" />
+    <PackageReference Include="MonoMod.Backports" />
+    <PackageReference Include="MonoMod.Utils" />
+    <PackageReference Include="MonoMod.ILHelpers" />
+    <PackageReference Include="MonoMod.RuntimeDetour" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\ExpressApp.ico" />
   </ItemGroup>
-  <Import Project="..\..\..\.paket\Paket.Restore.targets" />
 </Project>

@@ -38,7 +38,7 @@ public class DependentTransactionTests {
 
         var exception = captureResult.Error;
         Console.WriteLine(exception);
-        Clipboard.SetText(exception.ToString());
+        // Clipboard.SetText(exception.ToString());
         var transactionAbortedException = exception.ShouldBeOfType<TransactionAbortedException>();
 
         transactionAbortedException.FindRootCauses().Count().ShouldBe(2);
