@@ -108,6 +108,77 @@ param(
 }
 
 
+
+function Remove-AzureAgents {
+    param(
+        $token=$env:AzureToken,
+        $organization=$env:AzOrganization,
+        [parameter(Mandatory)]
+        $agentPool,
+        [parameter(Mandatory)]
+        $baseVMName # The prefix to search for (e.g., "B7")
+    )
+
+    Write-Host "Searching for agents starting with '$baseVMName' in pool '$agentPool'..." -ForegroundColor Cyan
+
+    # Primitive Header Construction
+    $base64Auth = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(":$token"))
+    $headers = @{
+        Authorization = "Basic $base64Auth"
+    }
+
+    # 1. Get Pool ID
+    $poolUri = "https://dev.azure.com/$organization/_apis/distributedtask/pools?api-version=6.0"
+    try {
+        $response = Invoke-RestMethod -Uri $poolUri -Method Get -Headers $headers -ContentType "application/json"
+        $poolId = $response.value | Where-Object { $_.name -eq $agentPool } | Select-Object -ExpandProperty id
+    }
+    catch {
+        Write-Error "Failed to retrieve Agent Pools. Check credentials or URL."
+        return
+    }
+    
+    if (-not $poolId) {
+        Write-Warning "Pool '$agentPool' not found."
+        return
+    }
+
+    # 2. Get All Agents in the Pool
+    $agentUri = "https://dev.azure.com/$organization/_apis/distributedtask/pools/$poolId/agents?api-version=6.0"
+    try {
+        $response = Invoke-RestMethod -Uri $agentUri -Method Get -Headers $headers -ContentType "application/json"
+        $allAgents = $response.value
+    }
+    catch {
+        Write-Error "Failed to retrieve Agents list."
+        return
+    }
+
+    # 3. Filter by Prefix
+    $targets = $allAgents | Where-Object { $_.name -like "$baseVMName*" }
+
+    if (-not $targets) {
+        Write-Host "No agents found matching prefix '$baseVMName'." -ForegroundColor Yellow
+        return
+    }
+
+    Write-Host "Found $($targets.Count) matching agents. Proceeding with deletion..." -ForegroundColor Cyan
+
+    # 4. Iterate and Delete
+    foreach ($agent in $targets) {
+        Write-Host "Deleting: $($agent.name) (ID: $($agent.id))..." -NoNewline
+        $deleteUri = "https://dev.azure.com/$organization/_apis/distributedtask/pools/$poolId/agents/$($agent.id)?api-version=6.0"
+        
+        try {
+            Invoke-RestMethod -Uri $deleteUri -Method Delete -Headers $headers -ContentType "application/json" | Out-Null
+            Write-Host " [OK]" -ForegroundColor Green
+        }
+        catch {
+            Write-Host " [FAILED]" -ForegroundColor Red
+            Write-Error $_
+        }
+    }
+}
 function Remove-AzureAgent{
     param(
         [parameter(Mandatory)]

@@ -26,7 +26,7 @@ if ($DXLicense){
     Write-Host "Writing license file to: $licensePath"
     Set-Content -Path $licensePath -Value $DXLicense -Encoding UTF8
     if (Test-Path $licensePath) {
-        Write-Host "License file successfully written."
+        Write-Host "License file successfully written in $licensePath"
     } else {
         Write-Error "License file not found at $licensePath after write."
     }
