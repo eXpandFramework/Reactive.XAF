@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.Speech</id>
-    <version>4.251.8.1</version>
+    <version>4.252.0.0</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -15,19 +15,19 @@
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Speech, 25.2.3</tags>
     <dependencies>
       <group targetFramework="net10.0">
-        <dependency id="Xpand.Extensions.Reactive" version="4.251.8.1" />
-        <dependency id="Xpand.Extensions.XAF" version="4.251.8.1" />
-        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.251.8.1" />
-        <dependency id="Xpand.Extensions" version="4.251.8.1" />
-        <dependency id="Xpand.XAF.Modules.Reactive" version="4.251.8.1" />
-        <dependency id="Xpand.XAF.Modules.StoreToDisk" version="4.251.8.1" />
-        <dependency id="Xpand.XAF.Modules.CloneModelView" version="4.251.8.1" />
-        <dependency id="Xpand.XAF.Modules.HideToolBar" version="4.251.8.1" />
-        <dependency id="Xpand.XAF.Modules.Windows" version="4.251.8.1" />
-        <dependency id="Xpand.XAF.Modules.SpellChecker" version="4.251.8.1" />
-        <dependency id="Xpand.XAF.Modules.ModelViewInheritance" version="4.251.8.1" />
-        <dependency id="Xpand.XAF.Modules.ViewItemValue" version="4.251.8.1" />
-        <dependency id="Xpand.XAF.Modules.SuppressConfirmation" version="4.251.8.1" />
+        <dependency id="Xpand.Extensions.Reactive" version="4.252.0.0" />
+        <dependency id="Xpand.Extensions.XAF" version="4.252.0.0" />
+        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.252.0.0" />
+        <dependency id="Xpand.Extensions" version="4.252.0.0" />
+        <dependency id="Xpand.XAF.Modules.Reactive" version="4.252.0.0" />
+        <dependency id="Xpand.XAF.Modules.StoreToDisk" version="4.252.0.0" />
+        <dependency id="Xpand.XAF.Modules.CloneModelView" version="4.252.0.0" />
+        <dependency id="Xpand.XAF.Modules.HideToolBar" version="4.252.0.0" />
+        <dependency id="Xpand.XAF.Modules.Windows" version="4.252.0.0" />
+        <dependency id="Xpand.XAF.Modules.SpellChecker" version="4.252.0.0" />
+        <dependency id="Xpand.XAF.Modules.ModelViewInheritance" version="4.252.0.0" />
+        <dependency id="Xpand.XAF.Modules.ViewItemValue" version="4.252.0.0" />
+        <dependency id="Xpand.XAF.Modules.SuppressConfirmation" version="4.252.0.0" />
         <dependency id="DevExpress.ExpressApp" version="25.2.3" />
         <dependency id="DevExpress.ExpressApp.ConditionalAppearance" version="25.2.3" />
         <dependency id="DevExpress.ExpressApp.Xpo" version="25.2.3" />
@@ -47,10 +47,10 @@
         <dependency id="Microsoft.Extensions.Configuration.Abstractions" version="10.0.1" />
       </group>
       <group targetFramework="netstandard2.0">
-        <dependency id="Xpand.VersionConverter" version="4.251.8.1" />
+        <dependency id="Xpand.VersionConverter" version="4.252.0.0" />
       </group>
       <group targetFramework="net6.0">
-        <dependency id="Xpand.VersionConverter" version="4.251.8.1" />
+        <dependency id="Xpand.VersionConverter" version="4.252.0.0" />
       </group>
     </dependencies>
   </metadata>

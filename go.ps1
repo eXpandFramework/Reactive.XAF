@@ -10,7 +10,7 @@ param(
     [string]$branch = "lab",
     [switch]$InstallModules,
     [string[]]$taskList = @("Build"),
-    [string]$XpandPwshVersion = "1.252.0.3",
+    [string]$XpandPwshVersion = "1.252.0.6",
     [switch]$CustomVersion,
     [switch]$OnlyXpwsh
 )
@@ -26,20 +26,16 @@ if (!$OnlyXpwsh){
         Version = "4.9.0"
     }
 }
-$m| ForEach-Object {
-    try {
-        & "$PSScriptRoot\build\Install-Module.ps1" $_
-    }
-    catch {
-        
-    }
-}
+
 "XpandPwshVersion=$((Get-Module XpandPwsh -ListAvailable).Version)"
 if ($InstallModules) {
+    $m| ForEach-Object {
+        & "$PSScriptRoot\build\Install-Module.ps1" $_
+    }
     return
 }
 
-Invoke-XPsake  "$PSScriptRoot\build\BuildDevExpress.XAF.ps1" -properties @{
+Invoke-Psake  "$PSScriptRoot\build\BuildDevExpress.XAF.ps1" -properties @{
     "cleanBin"       = $cleanBin;
     "msbuild"        = $msbuild;
     "nugetApiKey"    = $nugetApiKey;

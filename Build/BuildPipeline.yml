@@ -19,6 +19,7 @@ jobs:
         azurePowerShellVersion: 'LatestVersion'
         pwsh: true
         Inline: |
+          Write-Host "Start build"
           $ErrorView="NormalView"
           "Nugetpackage=$env:Nuget_PACKAGES"
           $ErrorActionPreference="stop"
@@ -44,7 +45,7 @@ jobs:
           $env:AzOrganization="eXpandDevops"
           $env:AzProject ="eXpandFramework"
           & '$(System.DefaultWorkingDirectory)\Build\BuildPipeline.ps1' @goArgs
-    - publish: $(System.DefaultWorkingDirectory)\bin\net9.0
+    - publish: $(System.DefaultWorkingDirectory)\bin\
       artifact: TestAssemblies
     - publish: $(Pipeline.Workspace)\.nuget
       artifact: Nuget
@@ -143,7 +144,29 @@ jobs:
                   Move-Item -Path $_.FullName -Destination $destinationPath
               }
           }
-    - task: VSTest@2
+          Write-Host "Locating Visual Studio installation root..."
+          
+          # 1. Get the root path of the installation (ignore components/files for now)
+          $vsRoot = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -property installationPath
+          
+          if (-not $vsRoot) {
+              throw "Visual Studio installation not found via vswhere."
+          }
+          Write-Host "Root found: $vsRoot"
+          
+          # 2. Native PowerShell search for the executable inside the root
+          Write-Host "Searching for vstest.console.exe..."
+          $vstest = Get-ChildItem -Path $vsRoot -Filter "vstest.console.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
+          
+          if (-not $vstest) {
+              Write-Error "Could not find 'vstest.console.exe' anywhere in '$vsRoot'."
+              Write-Error "Please ensure the 'Desktop development with C#' workload or 'Test Adapter for Google Test' component is installed."
+              exit 1
+          }
+          
+          Write-Host "Found VSTest at: $($vstest.FullName)"
+          Write-Host "##vso[task.setvariable variable=VsTestPath]$($vstest.FullName)"
+    - task: VSTest@3
       displayName: 'Run Tests'
       retryCountOnTaskFailure: 2
       env:
@@ -158,6 +181,10 @@ jobs:
           !**\obj\**
         searchFolder: '$(Pipeline.Workspace)/TestAssemblies'
         runSettingsFile: '$(SOURCE_DIRECTORY)\Build\Tests.runsettings'
+        vstestLocationMethod: 'location'
+        vstestLocation: '$(VsTestPath)'
+        otherConsoleOptions: '/Blame /Diag:$(Agent.TempDirectory)\vstest_diag.log'
+        diagnosticsEnabled: true
 - job: PostTestTasks
   dependsOn:
     - Tests
@@ -183,7 +210,7 @@ jobs:
             
             Write-Host "Environment variables set"
             
-            & '$(System.DefaultWorkingDirectory)\go.ps1' -InstallModules
+            # & '$(System.DefaultWorkingDirectory)\go.ps1' -InstallModules
             
             $xafMinors=Get-XAFLatestMinors -Source '$(DXApiFeed)'
             $xafMinor=$xafMinors|select-object -first 1

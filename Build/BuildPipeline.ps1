@@ -15,7 +15,8 @@ param(
     [switch]$SkipVersioning,
     $DXLicense
 )
-
+"XpandPwsh loaded"
+Get-Module XpandPwsh
 if ($DXLicense){
     $env:DevExpress_License=$DXLicense
     $licensePath = "$env:APPDATA\DevExpress\DevExpress_License.txt"
@@ -40,17 +41,18 @@ if (!(Get-Module eXpandFramework -ListAvailable)) {
     $env:AzProject = "eXpandFramework"
     $env:DxFeed = $DxApiFeed
 }
-"XpandPwsh"
+
+"XpandPwsh ListAvailable"
 Get-Module XpandPwsh -ListAvailable
 "CustomVersion=$CustomVersion"
 
 $ErrorActionPreference = "Stop"
 $regex = [regex] '(\d{2}\.\d*)'
 $result = $regex.Match($CustomVersion).Groups[1].Value;
-& "$SourcePath\go.ps1" -InstallModules
 
 
-Clear-NugetCache -Filter XpandPackages
+
+
 Invoke-Script {
     
     Set-Location $SourcePath
@@ -99,7 +101,7 @@ Invoke-Script {
         Get-ChildItem $bin -Recurse -Exclude "*Nupkg*" | Remove-Item -Force -Recurse
     }
     Set-Location "$SourcePath\src"
-    Clear-XProjectDirectories
+    Clear-ProjectDirectories
     # Start-XpandProjectConverter -version $CustomVersion -path $SourcePath -SkipInstall
     # "PaketRestore $SourcePath"
     

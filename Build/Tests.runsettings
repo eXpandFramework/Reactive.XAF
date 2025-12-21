@@ -1,5 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <RunSettings>
+  
   <RunConfiguration>
     <!-- Timeout in milliseconds. 7200000 ms = 120 minutes. -->
     <TestSessionTimeout>7200000</TestSessionTimeout>

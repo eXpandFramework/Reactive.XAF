@@ -31,8 +31,8 @@ Task IndexSources {
     Invoke-Script {
         $sha = Get-GitLastSha "https://github.com/eXpandFramework/Reactive.XAF" $branch
         "Xpand.XAF.Modules.*.pdb", "Xpand.Extensions.*.pdb" | ForEach-Object {
-            Get-ChildItem "$root\bin" $_ | Update-XSymbols -SourcesRoot "$Root" -TargetRoot "https://raw.githubusercontent.com/eXpandFramework/Reactive.XAF/$sha"
-            # Get-ChildItem "$root\bin\net461" $_ | Update-XSymbols -SourcesRoot "$Root" -TargetRoot "https://raw.githubusercontent.com/eXpandFramework/Reactive.XAF/$sha"
+            Get-ChildItem "$root\bin" $_ | Update-Symbols -SourcesRoot "$Root" -TargetRoot "https://raw.githubusercontent.com/eXpandFramework/Reactive.XAF/$sha"
+            # Get-ChildItem "$root\bin\net461" $_ | Update-Symbols -SourcesRoot "$Root" -TargetRoot "https://raw.githubusercontent.com/eXpandFramework/Reactive.XAF/$sha"
         }
         
     }
@@ -67,7 +67,7 @@ Task UpdateProjects {
 Task CompileTests -precondition { return ((Get-VersionPart $DXVersion Minor) -ne "19.2") } {
     Invoke-Script {
         if ((Test-AzDevops)) {
-            $nugetConfigPath = "$root\src\tests\nuget.config"
+            $nugetConfigPath = "$root\src\nuget.config"
             $nugetConfig = Get-XmlContent $nugetConfigPath
             $a = @{
                 key   = "DXAzDevops"
@@ -240,7 +240,7 @@ Task Clean -precondition { return $cleanBin } {
         Get-ChildItem $bin -Recurse -Exclude "*Nupkg*" | Remove-Item -Force -Recurse
     }
     Set-Location "$Root\src"
-    Clear-XProjectDirectories
+    Clear-ProjectDirectories
     Set-Location "$Root\Tools\Xpand.XAF.ModelEditor\IDE"
     Get-ChildItem . -Recurse -Include "build","output",".gradle"|Remove-Item -Force -Recurse        
 }
