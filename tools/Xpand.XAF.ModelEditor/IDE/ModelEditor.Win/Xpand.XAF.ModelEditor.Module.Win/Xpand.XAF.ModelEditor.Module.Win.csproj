@@ -1,12 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net9.0-windows7.0</TargetFramework>
+    <TargetFramework>net10.0-windows7.0</TargetFramework>
     <DisableMSBuildAssemblyCopyCheck>true</DisableMSBuildAssemblyCopyCheck>
     <Deterministic>false</Deterministic>
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
     <FileVersion>1.0.0.0</FileVersion>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-    <OutputPath>..\..\..\..\..\bin\net9.0-windows7.0\</OutputPath>
+    <OutputPath>..\..\..\..\..\bin\</OutputPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <NoWarn>1701;1702;CA1416;XAF0017</NoWarn>
@@ -15,14 +15,13 @@
     <NoWarn>1701;1702;CA1416;XAF0017</NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.Build" Version="17.12.6" />
-    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="17.12.6" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="System.Management" Version="9.0.8" />
-    <PackageReference Include="Xpand.XAF.Modules.OneView" Version="4.251.6.1" />
-    <PackageReference Include="Xpand.XAF.Modules.Windows" Version="4.251.6.1" />
-    <PackageReference Include="Xpand.XAF.Modules.GridListEditor" Version="4.251.6.1" />
-    <PackageReference Include="Xpand.XAF.Modules.ModelMapper" Version="4.251.6.1" />
+    <PackageReference Include="Microsoft.Build"  />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" />
+    <PackageReference Include="System.Management" />
+    <PackageReference Include="Xpand.XAF.Modules.OneView"  />
+    <PackageReference Include="Xpand.XAF.Modules.Windows" />
+    <PackageReference Include="Xpand.XAF.Modules.GridListEditor" />
+    <PackageReference Include="Xpand.XAF.Modules.ModelMapper" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="Model.DesignedDiffs.xafml" />

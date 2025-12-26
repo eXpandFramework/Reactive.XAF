@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using EnumsNET;
 using Fasterflect;
@@ -28,12 +29,20 @@ namespace Xpand.Extensions.Reactive.Utility{
         private static ConcurrentDictionary<Type, Func<object, string>> Serialization{ get; }
         private static readonly Random Random;
 
-        public static Func<object, string> Serializer = o => o.ToString();
+        public static readonly Func<object, string> Serializer = o => o.ToString();
         static Utility() {
             Serialization = new ConcurrentDictionary<Type, Func<object, string>>();
             Random = new Random((int) DateTime.Now.Ticks);
         }
 
+        public static IObservable<T> LogFast<T>(this IObservable<T> source, string message)
+            => source.Do(_ => FastLogger.LogFast($"{message}"));
+        
+        public static IObservable<T> LogFast<T>(this IObservable<T> source,Func<T,string> formatter=null,[CallerMemberName]string caller="") 
+            => source.Do(obj => FastLogger.LogFast($"{caller} - {formatter?.Invoke(obj)}")).LogFastError(caller);
+        
+        public static IObservable<T> LogFastError<T>(this IObservable<T> source,[CallerMemberName]string caller="") 
+            => source.DoOnError(e => FastLogger.LogFast($"{caller} - {e}"));
         public static bool AddTraceSerialization(Type type) => Serialization.TryAdd(type, Serializer);
 
         public static bool AddTraceSerialization<T>(Func<T,string> function) => Serialization.TryAdd(typeof(T), o => function((T) o));

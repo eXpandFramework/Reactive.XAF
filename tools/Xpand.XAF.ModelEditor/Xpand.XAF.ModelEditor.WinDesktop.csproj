@@ -5,7 +5,7 @@
     <OutputType>WinExe</OutputType>
     <AssemblyOriginatorKeyFile>..\..\src\Xpand.key\Xpand.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
-    <TargetFramework>net9.0-windows7.0</TargetFramework>
+    <TargetFramework>net10.0-windows7.0</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <LangVersion>latest</LangVersion>
@@ -14,7 +14,7 @@
     <PublishReadyToRunShowWarnings>true</PublishReadyToRunShowWarnings>
     <PreserveCompilationContext>false</PreserveCompilationContext>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-    <OutputPath>..\..\bin\net9.0-windows7.0\</OutputPath>
+    <OutputPath>..\..\bin\net10.0-windows7.0\</OutputPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -47,17 +47,16 @@
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DevExpress.ExpressApp" Version="25.2.3" />
-    <PackageReference Include="DevExpress.ExpressApp.Win" Version="25.2.3" />
-    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="25.2.3" />
-    <PackageReference Include="DevExpress.Persistent.Base" Version="25.2.3" />
-    <PackageReference Include="DevExpress.Persistent.BaseImpl.Xpo" Version="25.2.3" />
-    <PackageReference Include="Microsoft.CodeAnalysis" Version="4.12.0.0" />
-    <PackageReference Include="System.Security.Cryptography.Xml" Version="9.0.0" />
-    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="9.0.0" />
-    <PackageReference Include="System.Text.Json" Version="9.0.0" />
-    <PackageReference Include="System.ServiceModel.NetTcp" Version="8.1.2" />
-    <PackageReference Include="System.ServiceModel.Security" Version="4.10.2" />
-    <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.8" />
+    <PackageReference Include="DevExpress.ExpressApp" />
+    <PackageReference Include="DevExpress.ExpressApp.Win" />
+    <PackageReference Include="DevExpress.ExpressApp.Xpo" />
+    <PackageReference Include="DevExpress.Persistent.Base" />
+    <PackageReference Include="DevExpress.Persistent.BaseImpl.Xpo" />
+    <PackageReference Include="Microsoft.CodeAnalysis" />
+    <!--    <PackageReference Include="System.Security.Cryptography.Xml" />-->
+    <!--    <PackageReference Include="System.Security.Cryptography.ProtectedData" />-->
+    <!--    <PackageReference Include="System.ServiceModel.NetTcp" />-->
+    <!--    <PackageReference Include="System.ServiceModel.Security" />-->
+    <!--    <PackageReference Include="Microsoft.Extensions.Options" />-->
   </ItemGroup>
 </Project>

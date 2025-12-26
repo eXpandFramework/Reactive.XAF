@@ -2,11 +2,12 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <UseWindowsForms>true</UseWindowsForms>
-    <TargetFramework>net9.0-windows7.0</TargetFramework>
+    <TargetFramework>net10.0-windows7.0</TargetFramework>
     <ApplicationIcon>ExpressApp.ico</ApplicationIcon>
     <Deterministic>false</Deterministic>
-    <OutputPath>..\..\..\..\..\bin\net9.0-windows7.0\</OutputPath>
+    <OutputPath>..\..\..\..\..\bin\</OutputPath>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <NoWarn>1701;1702;CA1416;XAF0017</NoWarn>
@@ -30,10 +31,10 @@
     <EmbeddedResource Include="Images\Logo.svg" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DevExpress.ExpressApp" Version="25.2.3" />
-    <PackageReference Include="DevExpress.ExpressApp.Win" Version="25.2.3" />
-    <PackageReference Include="DevExpress.ExpressApp.Win.All" Version="25.2.3" />
-    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="25.2.3" />
+    <PackageReference Include="DevExpress.ExpressApp"  />
+    <PackageReference Include="DevExpress.ExpressApp.Win" />
+    <PackageReference Include="DevExpress.ExpressApp.Win.All"/>
+    <PackageReference Include="DevExpress.ExpressApp.Xpo"  />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Xpand.XAF.ModelEditor.Module.Win\Xpand.XAF.ModelEditor.Module.Win.csproj">

@@ -12,14 +12,13 @@ using System.Net.Http.Headers;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.SystemModule;
 using DevExpress.Persistent.Base;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.BytesExtensions;
 using Xpand.Extensions.LinqExtensions;
@@ -84,9 +83,10 @@ namespace Xpand.XAF.ModelEditor.Module.Win {
         internal static IObservable<string> WhenMESettings(){
 	        return new FileInfo(GetMESettingsPath()).WhenCreated()
 		        .ToConsole().Finally(() => {})
-		        .SelectMany(info => Observable.Defer(()
-			        => $"{JsonConvert.DeserializeObject<dynamic>(File.ReadAllText(info.FullName))?.Solution}"
-				        .Observe()).Retry())
+		        .SelectMany(info => Observable.Defer(() => {
+			        using var document = JsonDocument.Parse(File.ReadAllText(info.FullName));
+			        return $"{document.RootElement.GetProperty("Solution")}".Observe();
+		        }).Retry())
 		        .ObserveOnContext().Finally(() => {});
 	        // return Observable.Using(() => new FileSystemWatcher(MeInstallationPath), watcher => {
 			      //   watcher.EnableRaisingEvents = true;
@@ -179,7 +179,12 @@ namespace Xpand.XAF.ModelEditor.Module.Win {
 
         private static IObservable<Version> RXXafReleaseVersion(this Version dxVersion, bool preRelease, Func<Version,IObservable<Version>> noFound) 
             => HttpClient.GetStringAsync("https://api.github.com/repos/expandframework/reactive.xaf/tags").ToObservable()
-                .SelectMany(s => JsonConvert.DeserializeObject<JArray>(s)!.Select(token => Version.Parse($"{token["name"]}")))
+	            .SelectMany(s => {
+		            using var document = JsonDocument.Parse(s);
+		            return document.RootElement.EnumerateArray()
+			            .Select(element => Version.Parse(element.GetProperty("name").GetString()!))
+			            .ToArray();
+	            })
                 .Where(version => (version.Revision == 0 && !preRelease)||preRelease)
                 .Where(version => $"{version.Minor}" == $"{dxVersion.Major}{dxVersion.Minor}").Take(1)
                 .SwitchIfEmpty(noFound(dxVersion))

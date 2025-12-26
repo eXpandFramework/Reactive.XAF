@@ -5,6 +5,7 @@
     <RootNamespace>$(AssemblyName)</RootNamespace>
     <IsPackable>false</IsPackable>
     <DefineConstants>$(DefineConstants);RIDER</DefineConstants>
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="JetBrains.Rider.SDK" Version="$(SdkVersion)" />
@@ -23,8 +24,17 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="..\..\..\..\XVSIX64\Resources\Xpand.XAF.ModelEditor.Win.4.251.7.0.zip">
-      <Link>Resources\Xpand.XAF.ModelEditor.Win.4.251.7.0.zip</Link>
+    <EmbeddedResource Include="..\..\..\..\XVSIX64\Resources\Xpand.XAF.ModelEditor.Win.4.252.0.0.zip">
+      <Link>Resources\Xpand.XAF.ModelEditor.Win.4.252.0.0.zip</Link>
     </EmbeddedResource>
   </ItemGroup>
 </Project>
+
+
+
+
+
+
+
+
+

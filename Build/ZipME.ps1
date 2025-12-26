@@ -12,7 +12,7 @@ Push-Location "$Root\Tools\Xpand.XAF.ModelEditor\"
 if (!(Test-Path "$root\bin\zip")){
     New-Item "$root\bin\zip" -ItemType Directory -Verbose
 }
-for ($i = 9; $i -lt 10; $i++) {
+for ($i = 10; $i -lt 11; $i++) {
     [xml]$publishXml = Get-Content "$pwd\Properties\PublishProfiles\FolderProfile.pubxml"
     $publishXml.Project.PropertyGroup.TargetFramework = "net$i.0-windows7.0"
     $publishXml.Project.PropertyGroup.PublishDir = "bin\Release\net$i.0-windows7.0\publish\" 
@@ -37,7 +37,7 @@ if (!(Test-AzDevops) -and !$SkipIDEBuild){
     Write-HostFormatted "Building Xpand.XAF.ModelEditor.Win" -Section
     Set-Location "$Root\tools\Xpand.XAF.ModelEditor\IDE\ModelEditor.Win\Xpand.XAF.ModelEditor.Win"
     dotnet publish -p:PublishProfile="Folderprofile.pubxml" ".\Xpand.XAF.ModelEditor.Win.csproj"
-    Set-Location "$(Get-Location)\bin\Release\net9.0-windows\publish"
+    Set-Location "$(Get-Location)\bin\Release\net10.0-windows\publish"
     Get-ChildItem|Copy-Item -Destination "$env:APPDATA\Xpand.XAF.ModelEditor.Win\Xpand.XAF.ModelEditor.Win" -Force -Recurse
     $zip="$(Get-Location)\..\Xpand.XAF.ModelEditor.Win.zip"
     Compress-Files -zipfileName $zip -Force 
