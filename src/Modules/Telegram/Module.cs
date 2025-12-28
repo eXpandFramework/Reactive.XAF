@@ -27,9 +27,9 @@ namespace Xpand.XAF.Modules.Telegram{
 
         public override void Setup(ApplicationModulesManager moduleManager){
             base.Setup(moduleManager);
-            Connections.ToNowObservable()
-                .SelectMany(func => func(moduleManager))
-                .Subscribe(this);
+            // Connections.ToNowObservable()
+            //     .SelectMany(func => func(moduleManager))
+            //     .Subscribe(this);
         }
 
         public override IEnumerable<ModuleUpdater> GetModuleUpdaters(IObjectSpace objectSpace, Version versionFromDB) 

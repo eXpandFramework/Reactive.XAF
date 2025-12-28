@@ -286,30 +286,29 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 
 |<!-- -->|<!-- -->
 |----|----
-|**DevExpress.ExpressApp.Blazor.All**|**Any**
-|Xpand.Extensions.Blazor|4.251.8
- |Xpand.Extensions.Reactive|4.251.8
- |Xpand.Extensions.XAF|4.251.8
- |Xpand.Extensions|4.251.8
- |Xpand.Extensions.XAF.Xpo|4.251.8
- |[Xpand.XAF.Modules.Blazor](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Blazor)|4.251.8
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.251.8
+|**DevExpress.ExpressApp**|**Any**
+ |**DevExpress.ExpressApp.ConditionalAppearance**|**Any**
+ |**DevExpress.ExpressApp.Blazor**|**Any**
+ |**DevExpress.ExpressApp.Validation**|**Any**
+ |**DevExpress.ExpressApp.Validation.Blazor**|**Any**
+|Xpand.Extensions.Blazor|4.252.1
+ |Xpand.Extensions.Reactive|4.252.1
+ |Xpand.Extensions.XAF|4.252.1
+ |Xpand.Extensions|4.252.1
+ |Xpand.Extensions.XAF.Xpo|4.252.1
+ |[Xpand.XAF.Modules.Blazor](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Blazor)|4.252.1
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.252.1
  |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
  |System.Reactive|6.0.1
- |Lib.Harmony|9.0.0
  |Hangfire.Core|1.7.35
  |Hangfire.AspNetCore|1.7.35
- |Microsoft.CodeAnalysis|4.12.0
- |System.Data.SqlClient|4.9.0
- |System.Threading.Tasks.Dataflow|9.0.8
- |System.Security.Cryptography.ProtectedData|9.0.8
- |System.Configuration.ConfigurationManager|9.0.8
- |System.ServiceModel.NetTcp|8.1.2
- |System.ServiceModel.Http|8.1.2
- |System.CodeDom|9.0.8
- |System.Text.Json|9.0.8
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.251.8
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.251.8
+ |Lib.Harmony|2.4.2
+ |Microsoft.CodeAnalysis|5.0.0
+ |Microsoft.CodeAnalysis.CSharp|5.0.0
+ |System.Security.Cryptography.ProtectedData|10.0.1
+ |System.CodeDom|10.0.1
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.252.1
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.252.1
 
 ## Issues-Debugging-Troubleshooting
 

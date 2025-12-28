@@ -269,27 +269,27 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |<!-- -->|<!-- -->
 |----|----
 |**DevExpress.ExpressApp**|**Any**
- |**DevExpress.ExpressApp.Validation**|**Any**
- |**DevExpress.ExpressApp.ViewVariantsModule**|**Any**
  |**DevExpress.ExpressApp.ConditionalAppearance**|**Any**
  |**DevExpress.ExpressApp.Security.Xpo**|**Any**
+ |**DevExpress.ExpressApp.Validation**|**Any**
+ |**DevExpress.ExpressApp.ViewVariantsModule**|**Any**
  |**DevExpress.Persistent.Base**|**Any**
-|Xpand.Extensions|4.251.8
- |Xpand.Extensions.Reactive|4.251.8
- |Xpand.Extensions.Reactive.Relay|4.251.8
- |Xpand.Extensions.XAF|4.251.8
+|Xpand.Extensions|4.252.1
+ |Xpand.Extensions.Reactive|4.252.1
+ |Xpand.Extensions.Reactive.Relay|4.252.1
+ |Xpand.Extensions.XAF|4.252.1
+ |Enums.Net|4.0.0
+ |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
+ |Microsoft.Extensions.Hosting|10.0.1
  |System.Interactive|6.0.1
  |System.Reactive|6.0.1
- |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
- |Lib.Harmony|9.0.0
- |Microsoft.CSharp|4.7.0
- |System.Text.Json|9.0.8
- |Enums.Net|4.0.0
- |System.Threading.Tasks.Dataflow|9.0.8
- |Microsoft.Extensions.Hosting|6.0.0
- |Serialize.Linq|2.0.0
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.251.8
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.251.8
+ |Lib.Harmony|2.4.2
+ |System.Security.Cryptography.ProtectedData|10.0.1
+ |Microsoft.CodeAnalysis|5.0.0
+ |Microsoft.CodeAnalysis.CSharp|5.0.0
+ |System.CodeDom|10.0.1
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.252.1
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.252.1
 
 ## Issues-Debugging-Troubleshooting
 

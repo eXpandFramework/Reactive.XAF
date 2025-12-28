@@ -155,20 +155,31 @@ The module follows the Nuget [Version Basics](https://docs.Google.com/en-us/nuge
 
 |<!-- -->|<!-- -->
 |----|----
-|**DevExpress.Persistent.Base**|**Any**
-|Xpand.Extensions|4.251.8
- |Xpand.Extensions.Office.Cloud|4.251.8
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.251.8
- |Xpand.Extensions.Reactive|4.251.8
- |Xpand.Extensions.XAF|4.251.8
- |Xpand.Extensions.XAF.Xpo|4.251.8
+|**DevExpress.ExpressApp**|**Any**
+ |**DevExpress.Persistent.Base**|**Any**
+|Xpand.Extensions|4.252.1
+ |Xpand.Extensions.Office.Cloud|4.252.1
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.252.1
+ |Xpand.Extensions.Reactive|4.252.1
+ |Xpand.Extensions.XAF|4.252.1
+ |Xpand.Extensions.XAF.Xpo|4.252.1
  |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
- |System.Text.Json|9.0.8
  |System.Reactive|6.0.1
- |Google.Apis.Auth|1.55.0
- |System.Threading.Tasks.Dataflow|9.0.8
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.251.8
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.251.8
+ |Xpand.Collections|1.0.4
+ |Lib.Harmony|2.4.2
+ |Microsoft.Extensions.Options|10.0.1
+ |Microsoft.Extensions.DependencyInjection.Abstractions|10.0.1
+ |Microsoft.Extensions.Configuration.Abstractions|10.0.1
+ |Microsoft.Extensions.FileProviders.Abstractions|10.0.1
+ |System.Security.Cryptography.ProtectedData|10.0.1
+ |System.CodeDom|10.0.1
+ |Microsoft.CodeAnalysis|5.0.0
+ |Microsoft.CodeAnalysis.Csharp|5.0.0
+ |Google.Apis.People.v1|1.25.0.830
+ |Google.Apis.Tasks.v1|1.55.0.2384
+ |Google.Apis.Calendar.v3|1.55.0.2410
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.252.1
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.252.1
 
 ## Issues-Debugging-Troubleshooting
 

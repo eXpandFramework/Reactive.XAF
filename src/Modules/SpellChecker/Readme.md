@@ -92,27 +92,32 @@ The module is **not bound** to **DevExpress versioning**, which means you can us
 
 The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/nuget/reference/package-versioning#version-basics).
 ## Dependencies
-`.NetFramework: net9.0-windows7.0`
+`.NetFramework: net10.0-windows7.0`
 
 |<!-- -->|<!-- -->
 |----|----
-|**DevExpress.SpellChecker.Core**|**Any**
- |**DevExpress.Win.SpellChecker**|**Any**
+|**DevExpress.ExpressApp.Win**|**Any**
  |**DevExpress.Persistent.Base**|**Any**
- |**DevExpress.ExpressApp.Win**|**Any**
-|Xpand.Extensions.Reactive|4.251.8
- |Xpand.Extensions|4.251.8
- |Xpand.Extensions.XAF|4.251.8
- |Xpand.Extensions.XAF.Xpo|4.251.8
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.251.8
- |Lib.Harmony|9.0.0
- |System.Reactive|6.0.1
+ |**DevExpress.SpellChecker.Core**|**Any**
+ |**DevExpress.Win.SpellChecker**|**Any**
+|Xpand.Extensions.Reactive|4.252.1
+ |Xpand.Extensions|4.252.1
+ |Xpand.Extensions.XAF|4.252.1
+ |Xpand.Extensions.XAF.Xpo|4.252.1
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.252.1
  |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
- |System.Text.Json|9.0.8
+ |System.Reactive|6.0.1
  |Xpand.Collections|1.0.4
- |System.Threading.Tasks.Dataflow|9.0.8
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.251.8
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.251.8
+ |Microsoft.Extensions.Options|10.0.1
+ |Microsoft.CodeAnalysis|5.0.0
+ |Microsoft.CodeAnalysis.CSharp|5.0.0
+ |Microsoft.Extensions.Configuration.Abstractions|10.0.1
+ |Microsoft.Extensions.FileProviders.Abstractions|10.0.1
+ |Microsoft.Extensions.Diagnostics.Abstractions|10.0.1
+ |Microsoft.Extensions.Logging.Abstractions|10.0.1
+ |Lib.Harmony|2.4.2
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.252.1
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.252.1
 
 ## Issues-Debugging-Troubleshooting
 

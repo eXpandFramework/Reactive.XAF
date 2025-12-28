@@ -1,5 +1,10 @@
 <Project>
-  
+  <PropertyGroup>
+    <RestoreIgnoreFailedSources>true</RestoreIgnoreFailedSources>
+    <NoWarn>NU1701;CS8002;CA1416;NU1903;NU1902;NU1507;NU1801;NU1301</NoWarn>
+        <NuGetAudit>disable</NuGetAudit>
+    <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
+  </PropertyGroup>
   <Target Name="ReplaceNuget" AfterTargets="PostBuildEvent">
    <Exec Command="powershell.exe –NonInteractive –ExecutionPolicy Unrestricted –command &quot;&amp; { &amp;&apos;$(MSBuildThisFileDirectory)\..\Build\ReplaceNuget.ps1&apos; &apos;$(ProjectPath)&apos; &apos;$(TargetPath)&apos; &apos;$(skipNugetReplace)&apos; } &quot; " LogStandardErrorAsError="True" ContinueOnError="False" />
    <!-- <Exec Command="powershell.exe –NonInteractive –ExecutionPolicy Unrestricted –command &quot;&amp; { &amp;&apos;$(MSBuildThisFileDirectory)\..\Build\ReplaceNuget.ps1&apos; &apos;$(ProjectPath)&apos; &apos;$(TargetPath)&apos; &apos;$(skipNugetReplace)&apos; -FixVersion; } &quot; " LogStandardErrorAsError="True" ContinueOnError="False" /> -->
