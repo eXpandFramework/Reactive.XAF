@@ -54,32 +54,37 @@ namespace Xpand.TestsLib.Common{
             return startServer.Connect().Do(_ => startServer.MoveToMonitor(inactiveMonitorLocation,alwaysOnTop));
         }
 
-        private static Logger StartServer(this Logger logger,string condition=".*"){
-            var script = $@"function Monitor-Pipe($condition) {{
-                        $pipeName = '{logger.PipeName}'
-                        $pipe = New-Object System.IO.Pipes.NamedPipeServerStream($pipeName)
-                        $pipe.WaitForConnection()
-                        $reader = New-Object System.IO.StreamReader($pipe)
-                        $interactive=$false
-                        while ($true) {{
-                            $message = $reader.ReadLine()
-                            Write-Host $message
-                            if ($message -match $condition){{
-                                $interactive=$true
-                            }}
-                            if ($message -ne '{ExitSignal}') {{
-                                if ($interactive){{
-                                    $null = $host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
-                                }}
-                            }}
-                            else {{
-                                $pipe.Dispose()
-                                Start-Sleep -Seconds 5
-                                Stop-Process -Id $PID
-                            }}
-                        }}
+        private static string GetMonitorScript(this Logger logger, string condition) 
+            => $@"
+        $host.UI.RawUI.BufferSize = New-Object System.Management.Automation.Host.Size(120, 3000)
+        function Monitor-Pipe($condition) {{
+            $pipeName = '{logger.PipeName}'
+            $pipe = New-Object System.IO.Pipes.NamedPipeServerStream($pipeName)
+            $pipe.WaitForConnection()
+            $reader = New-Object System.IO.StreamReader($pipe)
+            $interactive=$false
+            while ($true) {{
+                $message = $reader.ReadLine()
+                Write-Host $message
+                if ($message -match $condition){{
+                    $interactive=$true
+                }}
+                if ($message -ne '{ExitSignal}') {{
+                    if ($interactive){{
+                        $null = $host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
                     }}
-                    Monitor-Pipe {condition}";
+                }}
+                else {{
+                    $pipe.Dispose()
+                    Start-Sleep -Seconds 5
+                    Stop-Process -Id $PID
+                }}
+            }}
+        }}
+        Monitor-Pipe {condition}";
+
+        private static Logger StartServer(this Logger logger,string condition=".*"){
+            var script = logger.GetMonitorScript(condition);
             logger.StartInfo.FileName = logger.PowerShellName;
             logger.StartInfo.Arguments = $"-NoExit -Command {script}";
             logger.StartInfo.UseShellExecute = true;

@@ -29,7 +29,7 @@ For mature codebases, this **Constructor Ceremony** creates friction that preven
 
 ## Documentation
 
-*   **[The Reactive Channel API: Behavioral Injection for Observable Workflows](./The%20Reactive%20Channel%20API%20-%20Behavioral%20Injection%20for%20Observable%20Workflows.md)**
+*   **[The Reactive Channel API: Behavioral Injection for Observable Workflows](./docs/The%20Reactive%20Channel%20API%20-%20Behavioral%20Injection%20for%20Observable%20Workflows.md)**
     The comprehensive architectural guide. It details the "Signature Preservation Problem," the three core behavioral patterns (Injection, Suppression, Contextual Injection), and the memory management model that makes this approach safe for high-frequency trading and production environments.
 
 ## Installation
