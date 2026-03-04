@@ -4,6 +4,7 @@ using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.Tracing;
 using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.TestsLib;
@@ -14,6 +15,10 @@ using Xpand.XAF.Modules.Workflow.Tests.BOModel;
 
 namespace Xpand.XAF.Modules.Workflow.Tests.Common {
 	public abstract class BaseWorkflowTest:BaseTest {
+		protected BaseWorkflowTest() {
+			FastLogger.Enabled = false;
+		}
+
 		protected XafApplication NewApplication() => Platform.Win.NewApplication<ReactiveModule>(mockEditors:false);
 		protected virtual WorkflowModule WorkflowModule(XafApplication application){
 			application.AddModule<TestWorkflowModule>(typeof(WF),typeof(TestCommand));

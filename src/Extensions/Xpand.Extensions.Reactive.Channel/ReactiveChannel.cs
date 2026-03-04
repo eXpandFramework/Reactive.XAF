@@ -32,6 +32,8 @@ namespace Xpand.Extensions.Reactive.Channel {
         
         public static IObservable<Unit> HandleRequestWith<TRequest, TResponse>(this object o,Func<TRequest,IObservable<TResponse>> handler) 
             => typeof(TRequest).HandleRequest().With(handler);
+        public static IObservable<Unit> HandleRequestWith<TRequest>(this object o,Func<TRequest,IObservable<Unit>> handler) 
+            => o.HandleRequestWith<TRequest,Unit>(handler);
 
         public static RpcRequester<TKey> MakeRequest<TKey>(this TKey key) where TKey : notnull
             => new(key);
