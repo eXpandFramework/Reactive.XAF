@@ -157,12 +157,12 @@ The module follows the Nuget [Version Basics](https://docs.Google.com/en-us/nuge
 |----|----
 |**DevExpress.ExpressApp**|**Any**
  |**DevExpress.Persistent.Base**|**Any**
-|Xpand.Extensions|4.252.2
- |Xpand.Extensions.Office.Cloud|4.252.2
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.252.2
- |Xpand.Extensions.Reactive|4.252.2
- |Xpand.Extensions.XAF|4.252.2
- |Xpand.Extensions.XAF.Xpo|4.252.2
+|Xpand.Extensions|4.252.3
+ |Xpand.Extensions.Office.Cloud|4.252.3
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.252.3
+ |Xpand.Extensions.Reactive|4.252.3
+ |Xpand.Extensions.XAF|4.252.3
+ |Xpand.Extensions.XAF.Xpo|4.252.3
  |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
  |System.Reactive|6.0.1
  |Xpand.Collections|1.0.4
@@ -178,8 +178,8 @@ The module follows the Nuget [Version Basics](https://docs.Google.com/en-us/nuge
  |Google.Apis.People.v1|1.25.0.830
  |Google.Apis.Tasks.v1|1.55.0.2384
  |Google.Apis.Calendar.v3|1.55.0.2410
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.252.2
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.252.2
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.252.3
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.252.3
 
 ## Issues-Debugging-Troubleshooting
 

@@ -66,14 +66,14 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |**DevExpress.ExpressApp.Xpo**|**Any**
  |**DevExpress.ExpressApp.ConditionalAppearance**|**Any**
  |**DevExpress.ExpressApp.Notifications**|**Any**
-|[Xpand.XAF.Modules.GridListEditor](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.GridListEditor)|4.252.2
- |[Xpand.XAF.Modules.OneView](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.OneView)|4.252.2
- |[Xpand.XAF.Modules.Windows](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Windows)|4.252.2
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.252.2
- |Xpand.Extensions.XAF.Xpo|4.252.2
- |Xpand.Extensions.XAF|4.252.2
- |[Xpand.XAF.Modules.Reactive.Logger.Hub](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive.Logger.Hub)|4.252.2
- |[Xpand.XAF.Modules.Reactive.Logger](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive.Logger)|4.252.2
+|[Xpand.XAF.Modules.GridListEditor](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.GridListEditor)|4.252.3
+ |[Xpand.XAF.Modules.OneView](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.OneView)|4.252.3
+ |[Xpand.XAF.Modules.Windows](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Windows)|4.252.3
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.252.3
+ |Xpand.Extensions.XAF.Xpo|4.252.3
+ |Xpand.Extensions.XAF|4.252.3
+ |[Xpand.XAF.Modules.Reactive.Logger.Hub](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive.Logger.Hub)|4.252.3
+ |[Xpand.XAF.Modules.Reactive.Logger](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive.Logger)|4.252.3
  |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
  |Microsoft.Extensions.Caching.Memory|10.0.1
  |Microsoft.Extensions.Configuration.Abstractions|10.0.1
@@ -83,8 +83,8 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |Microsoft.CodeAnalysis.CSharp|5.0.0
  |System.Reactive|6.0.1
  |Lib.Harmony.Thin|2.4.2
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.252.2
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.252.2
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.252.3
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.252.3
 
 ## Issues-Debugging-Troubleshooting
 
