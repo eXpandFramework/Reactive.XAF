@@ -170,6 +170,23 @@ jobs:
           
           Write-Host "Found VSTest at: $($vstest.FullName)"
           Write-Host "##vso[task.setvariable variable=VsTestPath]$($vstest.FullName)"
+
+          $env:DevExpress_License = $env:DX_LICENSE
+          $licensePath = "$env:APPDATA\DevExpress\DevExpress_License.txt"
+          
+          Write-Host "Starting DevExpress license setup"
+          $dir = Split-Path $licensePath
+          Write-Host "Ensuring directory exists: $dir"
+          New-Item -ItemType Directory -Force -Path $dir | Out-Null
+          
+          Write-Host "Writing license file to: $licensePath"
+          Set-Content -Path $licensePath -Value $env:DX_LICENSE -Encoding UTF8
+          
+          if (Test-Path $licensePath) {
+              Write-Host "License file successfully written in $licensePath"
+          } else {
+              Write-Error "License file not found at $licensePath after write."
+          }
     - task: VSTest@3
       displayName: 'Run Tests'
       retryCountOnTaskFailure: 2

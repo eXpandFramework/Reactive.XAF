@@ -13,7 +13,7 @@ param(
     $AzureApplicationId=$env:AzApplicationId,
     $AzureTenantId=$env:AzTenantId,
     [switch]$SkipVersioning,
-    $DXLicense
+    $DXLicense=$env:DXLicense
 )
 "XpandPwsh loaded"
 Get-Module XpandPwsh
