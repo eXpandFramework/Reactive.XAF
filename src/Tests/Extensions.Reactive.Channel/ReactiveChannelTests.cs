@@ -236,6 +236,42 @@ namespace Xpand.Extensions.Reactive.Channel.Tests {
                 "The handler failure was not published to the FaultHub for system-wide observation.");
         }
 
+        [Test]
+        public void HandleRequestWith_Infers_Types_From_Lambda() {
+            var receiver = new object(); 
+            var signal = "input";
 
+            using var subscription = receiver.HandleRequestWith<string, string>(s => Observable.Return(s + "-handled"))
+                .Subscribe();
+
+            var observer = typeof(string).MakeRequest()
+                .With<string, string>(signal)
+                .Test();
+
+            observer.AwaitDone(1.Seconds());
+            observer.Items.Single().ShouldBe("input-handled");
+        }
+        
+        [Test]
+        public void HandleRequestWith_Unit_Adapter_Handles_Array_Requests() {
+            var receiver = new object();
+            var signal = "trigger";
+            var handlerCalled = false;
+
+            using var subscription = receiver.HandleRequestWith<string>(_ => {
+                handlerCalled = true;
+                return Observable.Return(Unit.Default);
+            }).Subscribe();
+
+            var observer = typeof(string).MakeRequest()
+                .With<string, Unit[]>(signal)
+                .Test();
+
+            observer.AwaitDone(1.Seconds());
+
+            handlerCalled.ShouldBeTrue();
+            observer.ItemCount.ShouldBe(1);
+            observer.Items.Single().ShouldBeOfType<Unit[]>().ShouldBeEmpty();
+        }
     }
 }

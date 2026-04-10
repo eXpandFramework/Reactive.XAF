@@ -9,6 +9,9 @@ namespace Xpand.Extensions.Reactive.Combine{
                 published.Merge(published.IsEmpty().Where(isEmpty => isEmpty).SelectMany(_ => switchTo))
             );
 
+        public static IObservable<T> SwitchIfEmpty<T>(this IObservable<T> source, Func<IObservable<T>> switchTo)
+            => source.SwitchIfEmpty(Observable.Defer(switchTo));
+
         public static IObservable<T> SwitchIfDefault<T>(this IObservable<T> source, IObservable<T> switchTo)  
             => source.Select(entry => !EqualityComparer<T>.Default.Equals(entry, default) ? Observable.Return(entry) : switchTo)
                 .TakeUntil(stream => stream == switchTo)

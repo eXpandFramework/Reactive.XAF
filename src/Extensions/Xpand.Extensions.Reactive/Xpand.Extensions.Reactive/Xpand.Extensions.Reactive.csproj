@@ -45,7 +45,4 @@
         <PackageReference Include="System.Reactive" />
 
     </ItemGroup>
-    <ItemGroup>
-      <Folder Include="Channels\" />
-    </ItemGroup>
 </Project>
