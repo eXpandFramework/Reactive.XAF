@@ -37,7 +37,7 @@ namespace Xpand.XAF.Modules.GridListEditor.Appearance{
                 .SelectMany(view => view.WhenControlsCreated(true).WhenNotDefault(listView => listView.Editor as DevExpress.ExpressApp.Win.Editors.GridListEditor)
                     .SelectMany(listView => listView.WhenActiveObjectInfo()
                         .MergeIgnored(_ => controller.WhenDeactivated().Take(1)
-                            .Do(_ => ((DevExpress.ExpressApp.Win.Editors.GridListEditor)listView.Editor).Grid.ToolTipController?.Dispose()))));
+                            .Do(_ => ((DevExpress.ExpressApp.Win.Editors.GridListEditor)listView.Editor).Grid?.ToolTipController?.Dispose()))));
 
         private static IObservable<ToolTipControllerGetActiveObjectInfoEventArgs> WhenActiveObjectInfo(this ListView listView){
             var gridControl = ((DevExpress.ExpressApp.Win.Editors.GridListEditor)listView.Editor).Grid;

@@ -215,14 +215,21 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             return links.Finally(objectSpace.CommitChanges).ToNowObservable().PushStackFrame();
         }
 
+        public static IObservable<T> CommitAndValidate<T>(this T link,bool validate=false) where T:IObjectSpaceLink
+            => link.Commit(validate);
+        
         public static IObservable<T> Commit<T>(this T link,bool validate=false) where T:IObjectSpaceLink
             => Observable.If(() => link!=null,link.Defer(() => {
-                if (validate) link.ObjectSpace.Validate();
+                if (validate) link.ObjectSpace.ValidateTargets();
                 return link.ObjectSpace.CommitChangesAsync().ToObservable().To(link);
             })).PushStackFrame();
         
-        public static IObservable<T> Commit<T>(this IObservable<T> source,RXAction action=RXAction.OnCompleted) where T:IObjectSpaceLink 
-            => action == RXAction.OnCompleted ? source.BufferUntilCompleted(true).Do(links => links.First().CommitChanges()).PushStackFrame().SelectMany()
+        public static IObservable<T> CommitAndValidate<T>(this IObservable<T> source,RXAction action=RXAction.OnCompleted) where T:IObjectSpaceLink
+            => source.Commit(action,true);
+        
+        public static IObservable<T> Commit<T>(this IObservable<T> source,RXAction action=RXAction.OnCompleted,bool validate=false) where T:IObjectSpaceLink 
+            => action == RXAction.OnCompleted ? source.BufferUntilCompleted(true)
+                    .DoWhen(_ =>!validate,links => links.First().CommitChanges(),links =>links.First().ObjectSpace.CommitChangesAndValidate()  ).PushStackFrame().SelectMany()
             : action == RXAction.OnNext ? source.Do(link => link.CommitChanges()).PushStackFrame() : throw new NotImplementedException(action.ToString());
 
         public static IObservable<T> Reload<T>(this IObservable<T> source,XafApplication application) where T:IObjectSpaceLink 

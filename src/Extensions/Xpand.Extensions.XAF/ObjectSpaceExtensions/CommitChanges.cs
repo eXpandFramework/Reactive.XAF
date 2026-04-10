@@ -13,7 +13,7 @@ namespace Xpand.Extensions.XAF.ObjectSpaceExtensions {
         }
 
         public static void CommitChangesAndValidate(this IObjectSpace objectSpace) {
-            objectSpace.Validate();
+            objectSpace.ValidateTargets();
             objectSpace.CommitChanges();
         }
     }
