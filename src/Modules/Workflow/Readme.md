@@ -153,18 +153,18 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |**DevExpress.ExpressApp.Win**|**Any**
  |**DevExpress.ExpressApp.Xpo**|**Any**
  |**DevExpress.Persistent.BaseImpl.Xpo**|**Any**
-|Xpand.Extensions.Reactive|4.252.3
- |Xpand.Extensions.XAF|4.252.3
- |Xpand.Extensions.XAF.Xpo|4.252.3
- |Xpand.Extensions|4.252.3
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.252.3
- |[Xpand.XAF.Modules.ViewItemValue](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.ViewItemValue)|4.252.3
- |[Xpand.XAF.Modules.CloneModelView](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.CloneModelView)|4.252.3
- |[Xpand.XAF.Modules.Windows](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Windows)|4.252.3
- |[Xpand.XAF.Modules.ModelViewInheritance](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.ModelViewInheritance)|4.252.3
- |Xpand.Extensions.Reactive.Relay|4.252.3
- |[Xpand.XAF.Modules.BulkObjectUpdate](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.BulkObjectUpdate)|4.252.3
- |[Xpand.XAF.Modules.HideToolBar](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.HideToolBar)|4.252.3
+|Xpand.Extensions.Reactive|4.252.4
+ |Xpand.Extensions.XAF|4.252.4
+ |Xpand.Extensions.XAF.Xpo|4.252.4
+ |Xpand.Extensions|4.252.4
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.252.4
+ |[Xpand.XAF.Modules.ViewItemValue](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.ViewItemValue)|4.252.4
+ |[Xpand.XAF.Modules.CloneModelView](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.CloneModelView)|4.252.4
+ |[Xpand.XAF.Modules.Windows](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Windows)|4.252.4
+ |[Xpand.XAF.Modules.ModelViewInheritance](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.ModelViewInheritance)|4.252.4
+ |Xpand.Extensions.Reactive.Relay|4.252.4
+ |[Xpand.XAF.Modules.BulkObjectUpdate](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.BulkObjectUpdate)|4.252.4
+ |[Xpand.XAF.Modules.HideToolBar](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.HideToolBar)|4.252.4
  |Enums.NET|4.0.0
  |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
  |Microsoft.CodeAnalysis|5.0.0
@@ -177,8 +177,8 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |System.Reactive|6.0.1
  |Lib.Harmony.Thin|2.4.2
  |Humanizer.Core|3.0.1
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.252.3
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.252.3
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.252.4
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.252.4
 
 ## Issues-Debugging-Troubleshooting
 

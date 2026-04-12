@@ -213,10 +213,10 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |<!-- -->|<!-- -->
 |----|----
 |**DevExpress.ExpressApp**|**Any**
-|Xpand.Extensions|4.252.3
- |Xpand.Extensions.Reactive|4.252.3
- |Xpand.Extensions.XAF|4.252.3
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.252.3
+|Xpand.Extensions|4.252.4
+ |Xpand.Extensions.Reactive|4.252.4
+ |Xpand.Extensions.XAF|4.252.4
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.252.4
  |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
  |System.Reactive|6.0.1
  |Lib.Harmony.Thin|2.4.2
@@ -229,8 +229,8 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |Enums.Net|4.0.0
  |Xpand.Collections|1.0.4
  |Mono.Cecil|0.11.6
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.252.3
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.252.3
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.252.4
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.252.4
 
 ## Issues-Debugging-Troubleshooting
 
