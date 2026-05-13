@@ -189,10 +189,10 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |<!-- -->|<!-- -->
 |----|----
 |**DevExpress.ExpressApp**|**Any**
-|Xpand.Extensions|4.252.4
- |Xpand.Extensions.Reactive|4.252.4
- |Xpand.Extensions.XAF|4.252.4
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.252.4
+|Xpand.Extensions|4.252.5
+ |Xpand.Extensions.Reactive|4.252.5
+ |Xpand.Extensions.XAF|4.252.5
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.252.5
  |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
  |System.Reactive|6.0.1
  |Lib.Harmony.Thin|2.4.2
@@ -202,8 +202,8 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |Microsoft.CodeAnalysis.CSharp|5.0.0
  |Microsoft.Extensions.Configuration.Abstractions|10.0.1
  |System.Security.Cryptography.ProtectedData|10.0.1
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.252.4
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.252.4
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.252.5
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.252.5
 
 ## Issues-Debugging-Troubleshooting
 
