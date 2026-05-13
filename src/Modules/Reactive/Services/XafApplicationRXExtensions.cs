@@ -103,7 +103,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<XafApplication> WhenModule(this IObservable<XafApplication> source, Type moduleType) 
             => source.Where(a => a.Modules.FindModule(moduleType)!=null);
         
-        public static IObservable<T> WhenModule<T>(this object value) => FindModules<T>(value).ToNowObservable();
+        public static IObservable<T> WhenModule<T>(this object value) => value.FindModules<T>().ToNowObservable();
 
         public static IEnumerable<T> FindModules<T>(this object value){
             if (value is XafApplication application)
@@ -601,9 +601,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             }
             return Observable.Empty<Unit>();
         }
-
-        // public static IObservable<T> ToObjects<T>(this IObservable<(IObjectSpace objectSpace, IEnumerable<T> objects)> source)
-        //     => source.SelectMany(t => t.objects);
+        
         public static IObservable<T[]> ToObjectsGroup<T>(this IObservable<(IObjectSpace objectSpace, IEnumerable<T> objects)> source)
             => source.Select(t => t.objects.ToArray());
         public static IEnumerable<T> ToObjects<T>(this IEnumerable<(IObjectSpace objectSpace, IEnumerable<T> objects)> source)
@@ -757,9 +755,15 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             TSource instance, Func<TSource, IObservable<TResult>> selector, bool useObjectSpaceProvider = false)
             => Observable.Using(() => application.CreateObjectSpace(useObjectSpaceProvider, typeof(TSource)),
                 space => selector(space.GetObjectFromKey(instance)));
+        public static IObservable<TResult> UseProviderObject<TSource, TResult>(this XafApplication application,
+            TSource instance, Func<TSource, IObservable<TResult>> selector)
+            => application.UseObject(instance,selector,true);
 
         public static IObservable<TResult> UseArray<TSource,TResult>(this XafApplication application,TSource[] instance,Func<TSource[],IObservable<TResult>> selector,bool useObjectSpaceProvider=false) 
-            => application.UseObjectSpace( space => selector(instance.Select(space.GetObject).ToArray()) ,useObjectSpaceProvider);
+            => application.UseArray(instance, (_, arg2) => selector(arg2),useObjectSpaceProvider);
+        
+        public static IObservable<TResult> UseArray<TSource,TResult>(this XafApplication application,TSource[] instance,Func<IObjectSpace,TSource[],IObservable<TResult>> selector,bool useObjectSpaceProvider=false) 
+            => application.UseObjectSpace( space => selector(space, instance.Select(space.GetObject).ToArray()) ,useObjectSpaceProvider);
 
         public static IObservable<T2> UseProviderObjectSpace<T,T2>(this XafApplication application,T obj, Func<T, IObservable<T2>> factory) 
             => application.UseProviderObjectSpace(space => {

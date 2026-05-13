@@ -53,7 +53,7 @@ namespace Xpand.Extensions.BytesExtensions {
         public static SecureString[] UnProtectSecuredString(this byte[] bytes,
             DataProtectionScope scope = DataProtectionScope.LocalMachine) {
             var strings = new List<SecureString>();
-            var unprotectedBytes = UnProtect(bytes, scope);
+            var unprotectedBytes = bytes.UnProtect(scope);
             using var memory = new MemoryStream(unprotectedBytes);
             using var reader = new BinaryReader(memory, Encoding.UTF8);
 
@@ -74,6 +74,13 @@ namespace Xpand.Extensions.BytesExtensions {
         [SuppressMessage("Interoperability", "CA1416:Validate platform compatibility")]
         public static byte[] UnProtect(this byte[] bytes, DataProtectionScope scope=DataProtectionScope.LocalMachine) 
             => ProtectedData.Unprotect(bytes, null, scope);
+        
+        public static string LoadSecret(this Environment.SpecialFolder applicationData,string name,string subdirectory="secrets") {
+            var folderPath = Environment.GetFolderPath(applicationData);
+            var secretsDir = $"{folderPath}\\{subdirectory}";
+            return File.ReadAllBytes($"{secretsDir}\\{name}").UnProtect().GetString();
+        }
+
     }
     
       

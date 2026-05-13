@@ -2,6 +2,7 @@
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Threading;
+using Xpand.Extensions.ObjectExtensions;
 
 namespace Xpand.Extensions.Reactive.Utility {
     public static partial class Utility {
@@ -84,6 +85,9 @@ namespace Xpand.Extensions.Reactive.Utility {
                     actionElse?.Invoke(source1);
                 }
             });
+        
+        public static IObservable<TSource> DoWhenDefault<TSource>(this IObservable<TSource> source,  Action action)
+            =>source.DoWhen(arg => arg.IsDefaultValue(),_ => action());
         
         public static IObservable<TSource> DoWhen<TSource>(this IObservable<TSource> source, Func<int,TSource, bool> predicate, Action<TSource> action)
             => source.Select((source1, i) => {
