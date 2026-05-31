@@ -7,6 +7,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
@@ -279,7 +280,7 @@ namespace Xpand.XAF.Modules.Reactive.Services {
             => objectSpace.ModifiedObjects(objectModification).Where(t => t.instance is T).Select(t => ((T)t.instance,t.modification));
         public static IEnumerable<(object instance, ObjectModification modification)> ModifiedObjects(this IObjectSpace objectSpace,Type objectType, ObjectModification objectModification) 
             => objectSpace.ModifiedObjects(objectModification).Where(t => objectType.IsInstanceOfType(t.instance) ).Select(t => (t.instance,t.modification));
-        public static void CommitChanges(this IObjectSpaceLink link)
+        public static void CommitChanges(this IObjectSpaceLink link,[CallerMemberName]string caller="")
             => link.ObjectSpace.CommitChanges();
         public static bool IsModified(this IObjectSpaceLink link)
             => link.ObjectSpace.ModifiedObjects.Contains(link);

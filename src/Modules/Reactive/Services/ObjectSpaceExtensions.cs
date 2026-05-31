@@ -212,7 +212,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         }
         public static IObservable<T> Commit<T>(this IEnumerable<T> source,IObjectSpaceLink objectSpace) where T:IObjectSpaceLink {
             var links = source as T[] ?? source.ToArray();
-            return links.Finally(objectSpace.CommitChanges).ToNowObservable().PushStackFrame();
+            return links.Finally(() => objectSpace.CommitChanges()).ToNowObservable().PushStackFrame();
         }
 
         public static IObservable<T> CommitAndValidate<T>(this T link,bool validate=false) where T:IObjectSpaceLink

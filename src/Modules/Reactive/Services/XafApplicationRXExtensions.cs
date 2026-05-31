@@ -763,7 +763,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => application.UseArray(instance, (_, arg2) => selector(arg2),useObjectSpaceProvider);
         
         public static IObservable<TResult> UseArray<TSource,TResult>(this XafApplication application,TSource[] instance,Func<IObjectSpace,TSource[],IObservable<TResult>> selector,bool useObjectSpaceProvider=false) 
-            => application.UseObjectSpace( space => selector(space, instance.Select(space.GetObject).ToArray()) ,useObjectSpaceProvider);
+            => application.UseObjectSpace( space => selector(space, space.GetObjects(instance)),useObjectSpaceProvider);
+
 
         public static IObservable<T2> UseProviderObjectSpace<T,T2>(this XafApplication application,T obj, Func<T, IObservable<T2>> factory) 
             => application.UseProviderObjectSpace(space => {
