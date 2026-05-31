@@ -2,8 +2,6 @@
 using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
-using System.Runtime.CompilerServices;
-using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Transform.System;
@@ -15,7 +13,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling {
         public static readonly Func<int, TimeSpan> MilliSecondsBackoffStrategy = n => TimeSpan.FromMilliseconds(Math.Min(Math.Pow(2, n), 180)*200);
         
         public static IObservable<T> RetryWithBackoff<T>(this IObservable<T> source,Func<Exception, IObservable<Unit>> retryOnError , int? retryCount = null, Func<int, TimeSpan> strategy = null,
-            IScheduler scheduler = null,[CallerMemberName]string caller="") {
+            IScheduler scheduler = null) {
             strategy ??= SecondsBackoffStrategy;
             scheduler ??= DefaultScheduler.Instance;
             retryOnError ??= _ => Unit.Default.Observe();
@@ -40,10 +38,11 @@ namespace Xpand.Extensions.Reactive.ErrorHandling {
             => source.Catch<T, Exception>(e => new DoNotRetryWithBackoffException(e).Throw<T>());
         
         public static IObservable<T> RetryWithBackoff<T>(this IObservable<T> source, int? retryCount = null, Func<int, TimeSpan> strategy = null,
-            Func<Exception, bool> retryOnError = null, IScheduler scheduler = null,[CallerMemberName]string caller="")
-            => source.RetryWithBackoff(exception => (retryOnError?.Invoke(exception)??true)?Unit.Default.Observe(): Observable.Empty<Unit>(),retryCount,strategy,scheduler,caller);
-        
+            Func<Exception, bool> retryOnError = null, IScheduler scheduler = null)
+            => source.RetryWithBackoff(exception => (retryOnError?.Invoke(exception)??true)?Unit.Default.Observe(): Observable.Empty<Unit>(),retryCount,strategy,scheduler);
         
     }
+    }
     public class DoNotRetryWithBackoffException(Exception exception) : Exception(exception.Message, exception);
-}
+    
+    

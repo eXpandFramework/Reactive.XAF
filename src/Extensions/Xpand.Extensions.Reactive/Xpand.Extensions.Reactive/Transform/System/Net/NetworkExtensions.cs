@@ -177,16 +177,52 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net {
         private static IObservable<(HttpResponseMessage[] objects, JsonDocument document)> WhenJsonDocument(this HttpResponseMessage message) 
             => message.IsSuccessStatusCode ? Observable.FromAsync(() => message.Content.ReadAsStreamAsync()).WhenJsonDocument(document =>
                     new HttpResponseException(document.RootElement.ToString(), message).Throw<HttpResponseMessage>())
-                : message.Content.ReadAsByteArrayAsync().ToObservable()
+                : Observable.FromAsync(() => message.Content.ReadAsByteArrayAsync())
                     .SelectMany(bytes => new HttpResponseException(bytes.GetString(), message)
                         .Throw<(HttpResponseMessage[] objects, JsonDocument document)>());
 
-        public static IObservable<(T[] objects, JsonDocument document)> WhenResponseDocument<T>(this HttpClient client,
-            HttpRequestMessage httpRequestMessage, Func<(JsonDocument document, HttpResponseMessage message), IObservable<T>> selector) 
-            => client.Request<HttpResponseMessage>(httpRequestMessage)
-                .SelectMany(message => message.Content.ReadAsStreamAsync().ToObservable()
-                    .SelectMany(stream => stream.WhenJsonDocument(document => selector((document, message)))));
+        public static IObservable<HttpResponseMessage> RetryWhenTooManyRequests(this IObservable<HttpResponseMessage> source,bool ensureSuccessStatusCode=true)
+            => source.DoWhen(message => !message.IsSuccessStatusCode && message.StatusCode == HttpStatusCode.TooManyRequests, message => {
+                        var exMessage = $"Response status code does not indicate success: {(int)message.StatusCode} ({message.ReasonPhrase}).";
+                        throw new HttpRequestException(exMessage, null, message.StatusCode) {
+                            Data = { ["RetryAfter"] = message.Headers.RetryAfter?.Delta }
+                        };
+                    }, message => {
+                        if (!ensureSuccessStatusCode||message.IsSuccessStatusCode) return;
+                        message.EnsureSuccessStatusCode();
+                    })
+                .RetryWithBackoff(retryOnError: exception => {
+                        var retryAfter = exception.ExtractRetryAfter();
+                        var b = retryAfter > TimeSpan.Zero;
+                        return b ? retryAfter.Timer().ToUnit() :
+                            exception.IsRateLimited() ? 5.Seconds().Timer().ToUnit() : Observable.Empty<Unit>();
+                    },
+                    retryCount: 5);
+        
+        private static TimeSpan ExtractRetryAfter(this Exception exception){
+            while (exception != null){
+                if (exception.Data.Contains("RetryAfter") && exception.Data["RetryAfter"] is TimeSpan ts)
+                    return ts.Add(1.ToSeconds());
+                exception = exception.InnerException;
+            }
+            return TimeSpan.Zero;
+        }
 
+        private static bool IsRateLimited(this Exception exception){
+            while (exception != null){
+                if (exception.Message.Contains("429") || exception.Message.Contains("Too Many Requests"))
+                    return true;
+                exception = exception.InnerException;
+            }
+            return false;
+        }
+        
+        public static IObservable<(JsonDocument document, HttpResponseMessage message)> WhenEnsureResponseDocument(this HttpClient client, HttpRequestMessage httpRequestMessage)
+            => client.SendAsync(httpRequestMessage, HttpCompletionOption.ResponseHeadersRead).ToObservable()
+                .RetryWhenTooManyRequests()
+                .SelectMany(message => message.Content.ReadAsStreamAsync().ToObservable()
+                    .SelectMany(stream => stream.WhenJsonDocument(false).Select(document => (document,message)) ));
+        
         public static IObservable<(JsonDocument document, HttpResponseMessage message)> WhenResponseDocument(this HttpClient client, HttpRequestMessage httpRequestMessage)
             => client.Request<HttpResponseMessage>(httpRequestMessage)
                 .SelectMany(message => message.Content.ReadAsStreamAsync().ToObservable()
