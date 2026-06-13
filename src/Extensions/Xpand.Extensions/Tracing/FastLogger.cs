@@ -44,11 +44,13 @@ namespace Xpand.Extensions.Tracing{
 
         public static Action<string> Write { get; set; } = Console.WriteLine;
 
+        public static bool IncludeTimestamps { get; set; }
         private static string FormatMessage(ref HighPerformanceLogBuilder builder) {
             var message = builder.GetFormattedText();
+            var timePrefix = IncludeTimestamps ? $"[{DateTime.Now:hh:mm:ss}] " : string.Empty;
             return !string.IsNullOrEmpty(builder.FilePath)
-                ? $"{Path.GetFileNameWithoutExtension(builder.FilePath)} - {builder.MemberName} | {message}"
-                : message;
+                ? $"{timePrefix}{Path.GetFileNameWithoutExtension(builder.FilePath)} - {builder.MemberName} | {message}"
+                : $"{timePrefix}{message}";
         }
         private static readonly AsyncLocal<List<Func<(FastLogLevel level, string method, string path), bool>>> Predicates = new();
 

@@ -1,10 +1,7 @@
 using System;
-using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Reactive;
 using System.Reactive.Linq;
-using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,11 +14,12 @@ namespace Xpand.Extensions.Tests {
 
     [TestFixture]
     public class SelectManySequentialTests {
-        private ConcurrentDictionary<int, ISubject<Func<IObservable<Unit>>>> _sequencerScope;
+        
+        private object _sequencerScope=new();
 
         [SetUp]
         public void SetUp() {
-            _sequencerScope = new ConcurrentDictionary<int, ISubject<Func<IObservable<Unit>>>>();
+            _sequencerScope=new object();
         }
 
         private IObservable<T> CreateRealTimeAction<T>(T value, TimeSpan duration)

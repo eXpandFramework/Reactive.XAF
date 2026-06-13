@@ -25,6 +25,9 @@
     <Compile Remove="Diagnostics\**" />
     <EmbeddedResource Remove="Diagnostics\**" />
     <None Remove="Diagnostics\**" />
+    <Compile Update="Services\ObjectSpaceExtensions.NonPersistentObjectSpace.cs">
+      <DependentUpon>ObjectSpaceExtensions.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Remove="Xpand.XAF.Modules.Reactive.csproj.DotSettings" />

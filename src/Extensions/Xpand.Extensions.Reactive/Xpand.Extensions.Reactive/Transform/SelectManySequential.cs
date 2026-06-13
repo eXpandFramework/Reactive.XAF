@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Reactive;
 using System.Reactive.Linq;
-using System.Reactive.Subjects;
 using System.Runtime.CompilerServices;
 using System.Threading;
 
@@ -57,11 +54,10 @@ namespace Xpand.Extensions.Reactive.Transform{
         
         private static readonly ConditionalWeakTable<object, object> SequencerMap = new();
         
-        public static IObservable<TResult> SelectManySequential<TResult, TKey, T>(this T value, Func<IObservable<TResult>> action, Func<T, TKey> keySelector,
-            ConcurrentDictionary<TKey, ISubject<Func<IObservable<Unit>>>> queues) {
+        public static IObservable<TResult> SelectManySequential<TResult, TKey, T>(this T value, Func<IObservable<TResult>> action, Func<T, TKey> keySelector, object sequencerScope) {
             return Observable.Defer(() => {
                 var key = keySelector(value);
-                return ((AsyncKeyedSequencer<TKey>)SequencerMap.GetValue(queues, _ => new AsyncKeyedSequencer<TKey>()))!
+                return ((AsyncKeyedSequencer<TKey>)SequencerMap.GetValue(sequencerScope, _ => new AsyncKeyedSequencer<TKey>()))!
                     .Enqueue(key, action) ;
             });
         }

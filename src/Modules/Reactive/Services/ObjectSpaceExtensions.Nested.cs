@@ -7,7 +7,6 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
@@ -280,8 +279,13 @@ namespace Xpand.XAF.Modules.Reactive.Services {
             => objectSpace.ModifiedObjects(objectModification).Where(t => t.instance is T).Select(t => ((T)t.instance,t.modification));
         public static IEnumerable<(object instance, ObjectModification modification)> ModifiedObjects(this IObjectSpace objectSpace,Type objectType, ObjectModification objectModification) 
             => objectSpace.ModifiedObjects(objectModification).Where(t => objectType.IsInstanceOfType(t.instance) ).Select(t => (t.instance,t.modification));
-        public static void CommitChanges(this IObjectSpaceLink link,[CallerMemberName]string caller="")
+        public static void CommitChanges(this IObjectSpaceLink link)
             => link.ObjectSpace.CommitChanges();
+        public static void CommitChangesAndValidate(this IObjectSpaceLink link) {
+            link.ObjectSpace.ValidateTargets();
+            link.ObjectSpace.CommitChanges();
+        }
+
         public static bool IsModified(this IObjectSpaceLink link)
             => link.ObjectSpace.ModifiedObjects.Contains(link);
         public static Task CommitChangesAsync(this IObjectSpaceLink link)
@@ -302,8 +306,8 @@ namespace Xpand.XAF.Modules.Reactive.Services {
         public static T Reload<T>(this T value,XafApplication application) where T:IObjectSpaceLink
             => value.Reload(application.CreateObjectSpace);
         public static T Reload<T>(this IObjectSpace objectSpace, T value) where T:class {
-            if (objectSpace is INestedObjectSpace nos) {  
-                Reload(nos.ParentObjectSpace, value);  
+            if (objectSpace is INestedObjectSpace nos) {
+                nos.ParentObjectSpace.Reload(value);  
                 nos.Refresh();  
             }  
             else {  

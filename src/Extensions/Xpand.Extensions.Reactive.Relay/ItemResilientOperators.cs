@@ -153,6 +153,25 @@ namespace Xpand.Extensions.Reactive.Relay {
             => source.SelectManySequentialItemResilient((sourceItem, _) => resilientSelector(sourceItem), retryStrategy, context, memberName,filePath,lineNumber);
         
         
+        public static IObservable<TResult> SelectManyCPUResilient<TSource, TResult>(this IObservable<TSource> source, Func<TSource, IObservable<TResult>> resilientSelector,
+            object[] context = null, [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0)
+            => source.Select(x => Observable.Defer(() => resilientSelector(x))
+                    .ContinueOnFault(null, context ?? [x], null, memberName, filePath, lineNumber))
+                .Merge(Environment.ProcessorCount);
+
+        public static IObservable<TResult> SelectManyCPUResilient<TSource, TResult>(this IObservable<TSource> source, Func<TSource, IObservable<TResult>> resilientSelector,
+            Func<IObservable<TResult>, IObservable<TResult>> retryStrategy, object[] context = null,
+            [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0)
+            => source.Select(x => Observable.Defer(() => resilientSelector(x))
+                    .ContinueOnFault(retryStrategy, context ?? [x], null, memberName, filePath, lineNumber))
+                .Merge(Environment.ProcessorCount);
+
+        public static IObservable<TResult> SelectManyCPUResilient<TSource, TResult>(this IObservable<TSource> source, Func<TSource, int, IObservable<TResult>> resilientSelector,
+            object[] context = null, [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0)
+            => source.Select((x, i) => Observable.Defer(() => resilientSelector(x, i))
+                    .ContinueOnFault(null, context ?? [x], null, memberName, filePath, lineNumber))
+                .Merge(Environment.ProcessorCount);
+        
         public static IObservable<T> ContinueOnFault<T>(this IObservable<T> source, Func<IObservable<T>, IObservable<T>> retryStrategy = null,
             object[] context = null,Func<FaultHubException, IObservable<bool>> publishWhen = null, [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0)
             => source.ApplyItemResilience(retryStrategy,  context, memberName, filePath, lineNumber,publishWhen);
