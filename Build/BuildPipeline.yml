@@ -133,6 +133,8 @@ jobs:
       artifact: Nuget
     - task: PowerShell@2
       displayName: 'Setup Environment'
+      env:
+        DX_LICENSE: $(DXLicense)
       inputs:
         targetType: 'inline'
         script: |

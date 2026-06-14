@@ -64,11 +64,11 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |----|----
 |**DevExpress.ExpressApp**|**Any**
  |**DevExpress.Xpo**|**Any**
-|Xpand.Extensions.Reactive|4.252.5
- |Xpand.Extensions.XAF|4.252.5
- |Xpand.Extensions|4.252.5
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.252.5
- |[Xpand.XAF.Modules.Reactive.Logger](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive.Logger)|4.252.5
+|Xpand.Extensions.Reactive|4.252.6
+ |Xpand.Extensions.XAF|4.252.6
+ |Xpand.Extensions|4.252.6
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.252.6
+ |[Xpand.XAF.Modules.Reactive.Logger](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive.Logger)|4.252.6
  |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
  |MagicOnion|2.6.3
  |System.Interactive.Async|6.0.1
@@ -84,8 +84,8 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |MessagePack|3.1.4
  |Microsoft.Extensions.Primitives|10.0.1
  |System.Security.Cryptography.ProtectedData|10.0.1
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.252.5
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.252.5
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.252.6
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.252.6
 
 ## Issues-Debugging-Troubleshooting
 
