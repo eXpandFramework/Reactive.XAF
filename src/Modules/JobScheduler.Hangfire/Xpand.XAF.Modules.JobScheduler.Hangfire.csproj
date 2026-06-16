@@ -76,5 +76,6 @@
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
         <PackageReference Include="System.Security.Cryptography.ProtectedData" />
         <PackageReference Include="System.CodeDom" />
+        <PackageReference Include="System.Diagnostics.PerformanceCounter" />
     </ItemGroup>
 </Project>

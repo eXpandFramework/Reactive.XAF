@@ -79,6 +79,8 @@
         <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" />
         <PackageReference Include="System.CodeDom" />
         <PackageReference Include="System.Security.Cryptography.ProtectedData" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+        <PackageReference Include="System.Diagnostics.PerformanceCounter" />
         
     </ItemGroup>
 </Project>

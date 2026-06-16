@@ -47,5 +47,6 @@
         <PackageReference Include="System.ServiceModel.Http" />
         <PackageReference Include="System.ServiceModel.NetTcp" />
         <PackageReference Include="System.Security.Cryptography.ProtectedData" />
+        <PackageReference Include="System.Diagnostics.PerformanceCounter" />
     </ItemGroup>
 </Project>

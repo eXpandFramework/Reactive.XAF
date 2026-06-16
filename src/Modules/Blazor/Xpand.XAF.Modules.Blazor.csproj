@@ -58,6 +58,8 @@
         <PackageReference Include="System.CodeDom" />
         <PackageReference Include="Microsoft.CodeAnalysis" />
         <PackageReference Include="Microsoft.CodeAnalysis.Csharp" />
+        <PackageReference Include="System.Diagnostics.PerformanceCounter" />
         
+
     </ItemGroup>
 </Project>

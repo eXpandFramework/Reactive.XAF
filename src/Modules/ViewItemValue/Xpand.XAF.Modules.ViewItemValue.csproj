@@ -68,5 +68,6 @@
         <PackageReference Include="System.Security.Cryptography.ProtectedData" />
         <PackageReference Include="System.CodeDom" />
         <PackageReference Include="Microsoft.Extensions.FileProviders.Abstractions" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
     </ItemGroup>
 </Project>

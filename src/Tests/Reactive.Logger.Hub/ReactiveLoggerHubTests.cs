@@ -102,7 +102,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub.Tests{
             using var clientWinApp = new ClientWinApp();
             clientWinApp.EditorFactory = new EditorsFactory();
             clientWinApp.AddModule<ReactiveLoggerHubModule>();
-            clientWinApp.Model.BOModel.GetClass(typeof(TraceEvent)).DefaultListView.UseServerMode = false;
+            // clientWinApp.Model.BOModel.GetClass(typeof(TraceEvent)).DefaultListView.UseServerMode = false;
             clientWinApp.Logon();
 
                     
@@ -137,7 +137,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub.Tests{
             using var clientWinApp = new ClientWinApp();
             clientWinApp.EditorFactory = new EditorsFactory();
             clientWinApp.AddModule<ReactiveLoggerHubModule>();
-            clientWinApp.Model.BOModel.GetClass(typeof(TraceEvent)).DefaultListView.UseServerMode = false;
+            // clientWinApp.Model.BOModel.GetClass(typeof(TraceEvent)).DefaultListView.UseServerMode = false;
             clientWinApp.Logon();
             var listView = clientWinApp.NewObjectView<ListView>(typeof(TraceEvent));
             var viewWindow = clientWinApp.CreateWindow(TemplateContext.ApplicationWindow, new List<Controller>(),true );

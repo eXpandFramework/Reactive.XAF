@@ -94,5 +94,6 @@
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
         <PackageReference Include="System.Reactive" />
         <PackageReference Include="Lib.Harmony.Thin" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
     </ItemGroup>
 </Project>

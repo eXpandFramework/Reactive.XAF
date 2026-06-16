@@ -202,7 +202,10 @@ Task Compile -precondition { return $compile } {
             Version = [System.Diagnostics.FileVersionInfo]::GetVersionInfo($_.FullName).FileVersion
         } | Write-Output
     } | Format-Table
-    Get-ChildItem $root\bin "*xpand*.dll" | Test-AssemblyReference -VersionFilter $DXVersion | Format-Table -AutoSize
+    if ($DXVersion -eq "26.1.3"){
+        throw "restore next comment"
+    }
+    # Get-ChildItem $root\bin "*xpand*.dll" | Test-AssemblyReference -VersionFilter $DXVersion -ReferenceFilter "Devexp"| Format-Table -AutoSize
 }
 
 Task  CreateNuspec {

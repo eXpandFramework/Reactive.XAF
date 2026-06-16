@@ -53,6 +53,7 @@
         <PackageReference Include="Fasterflect.Xpand" />
         <PackageReference Include="Microsoft.Data.SqlClient" />
         <PackageReference Include="System.Reactive" />
+        <PackageReference Include="System.Diagnostics.PerformanceCounter" />
         <PackageReference Include="Xpand.Collections" />
         <PackageReference Include="DevExpress.ExpressApp.Blazor" />
         

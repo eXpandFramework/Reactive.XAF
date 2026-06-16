@@ -20,7 +20,6 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Client.Win {
         private void InitializeDefaults(){
             Title = "RXLoggerClient";
             LinkNewObjectToParentImmediately = false;
-            OptimizedControllersCreation = true;
             UseLightStyle = true;
             ExecuteStartupLogicBeforeClosingLogonWindow = true;
         }

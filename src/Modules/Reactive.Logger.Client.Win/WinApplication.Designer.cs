@@ -39,7 +39,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Client.Win {
             this.Modules.Add(this.module1);
             this.Modules.Add(this.module2);
             
-            this.UseOldTemplates = false;
+            
             this.DatabaseVersionMismatch += new System.EventHandler<DevExpress.ExpressApp.DatabaseVersionMismatchEventArgs>(this.WindowsFormsApplication_DatabaseVersionMismatch);
             ((XafApplication) this).CustomizeLanguagesList += new System.EventHandler<DevExpress.ExpressApp.CustomizeLanguagesListEventArgs>(this.LanguagesList);
 

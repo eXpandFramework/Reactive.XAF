@@ -56,5 +56,6 @@
         <PackageReference Include="Enums.Net" />
         <PackageReference Include="Xpand.Collections" />
         <PackageReference Include="Mono.Cecil" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
     </ItemGroup>
 </Project>

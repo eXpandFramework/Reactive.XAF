@@ -15,6 +15,7 @@ param(
     [switch]$SkipVersioning,
     $DXLicense=$env:DXLicense
 )
+
 "XpandPwsh loaded"
 Get-Module XpandPwsh
 if ($DXLicense){
@@ -78,7 +79,7 @@ Invoke-Script {
     
     "CustomVersion=$CustomVersion"
 
-    $DXVersion = Get-DevExpressVersion 
+    $CustomVersion="26.1.2"
 
     $taskList = "Build"
     . "$SourcePath\build\UpdateDependencies.ps1" $CustomVersion
