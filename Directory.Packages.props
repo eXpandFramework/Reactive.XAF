@@ -11,6 +11,7 @@
     <PackageVersion Include="DevExpress.Diagram.Core" Version="26.1.2-BETA" />
     <PackageVersion Include="DevExpress.Drawing.Skia" Version="26.1.2-BETA" />
     <PackageVersion Include="DevExpress.DataAccess.UI" Version="26.1.2-BETA" />
+    <PackageVersion Include="DevExpress.ExpressApp.Security" Version="26.1.2-BETA" />
     <PackageVersion Include="DevExpress.DataAccess" Version="26.1.2-BETA" />
     <PackageVersion Include="DevExpress.Dashboard.Core" Version="26.1.2-BETA" />
     <PackageVersion Include="DevExpress.EasyTest" Version="26.1.2-BETA" />
@@ -128,6 +129,8 @@
     <PackageVersion Include="System.ServiceModel.Http" Version="10.0.652802" />
     <PackageVersion Include="System.ServiceModel.NetTcp" Version="10.0.652802" />
     <PackageVersion Include="System.ServiceModel.Security" Version="6.0.0" />
+    <PackageVersion Include="System.IdentityModel.Tokens.Jwt" Version="8.19.1" />
+    <PackageVersion Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="8.19.1" />
     <PackageVersion Include="System.Text.Json" Version="10.0.1" />
     <PackageVersion Include="System.IO.Compression.ZipFile" Version="4.3.0" />
     <PackageVersion Include="System.Threading.Tasks" Version="4.3.0" />
@@ -137,6 +140,6 @@
     <PackageVersion Include="TextCopy" Version="6.2.1" />
     <PackageVersion Include="Xpand.Collections" Version="1.0.4" />
     <PackageVersion Include="YamlDotNet" Version="16.3.0" />
-
+    <PackageVersion Include="Azure.Identity" Version="1.17.1" />
   </ItemGroup>
 </Project>

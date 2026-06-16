@@ -3,8 +3,10 @@ using System.Linq;
 using DevExpress.ExpressApp.Blazor;
 using NUnit.Framework;
 using Xpand.Extensions.XAF.TypesInfoExtensions;
+using Xpand.Extensions.XAF.Xpo.BaseObjects;
 using Xpand.TestsLib.Blazor;
 using Xpand.TestsLib.Common;
+using Xpand.XAF.Persistent.BaseImpl;
 
 namespace Xpand.XAF.Modules.BulkObjectUpdate.Tests.Common {
     public abstract class CommonAppTest:BlazorCommonAppTest{
@@ -13,7 +15,11 @@ namespace Xpand.XAF.Modules.BulkObjectUpdate.Tests.Common {
         protected BlazorApplication NewBlazorApplication() => NewBlazorApplication(typeof(Startup));
 
         protected BulkObjectUpdateModule BulkObjectUpdateModule(BlazorApplication newBlazorApplication) {
-            var module = newBlazorApplication.AddModule<BulkObjectUpdateModule>(GetType().CollectExportedTypesFromAssembly().ToArray());
+            var types = GetType().CollectExportedTypesFromAssembly()
+                .Concat(typeof(XPCustomBaseObject).CollectExportedTypesFromAssembly())
+                .Concat(typeof(CustomBaseObject).CollectExportedTypesFromAssembly())
+                .ToArray();
+            var module = newBlazorApplication.AddModule<BulkObjectUpdateModule>(types);
             newBlazorApplication.Logon();
             using var objectSpace = newBlazorApplication.CreateObjectSpace();
             return module;

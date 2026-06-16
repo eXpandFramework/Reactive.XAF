@@ -414,6 +414,7 @@ namespace Xpand.TestsLib.Common{
 	        else if (platform == Platform.Blazor) {
 		        application =
 			        (XafApplication)ApplicationType.CreateInstance(typeof(TModule), transmitMessage, handleExceptions);
+                application.Modules.Add((ModuleBase)typeof(TModule).CreateInstance());
 		        application.WhenWindowCreated()
 			        .Do(window => {
 				        var windowTemplate = (IWindowTemplate)AppDomain.CurrentDomain

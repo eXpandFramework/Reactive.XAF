@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Net.NetworkInformation;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -55,9 +56,16 @@ namespace Xpand.TestsLib.Blazor {
 		public static int Port { get; set; } = 5000;
 
 		private static string TestBlazorAppPath() {
-			var testBlazorAppPath = Environment.GetEnvironmentVariable("SOURCE_DIRECTORY");
-			Console.WriteLine($"SOURCE_DIRECTORY={testBlazorAppPath}");
-			return testBlazorAppPath != null ? $"{testBlazorAppPath}/src/Tests/TestApplication.Blazor.Server" : "../../src/Tests/TestApplication.Blazor.Server";
+			var dir = new DirectoryInfo(AppContext.BaseDirectory);
+			while (dir is { Parent: not null }) {
+				var candidate = Path.Combine(dir.FullName, "src", "Tests", "TestApplication.Blazor.Server");
+				if (Directory.Exists(candidate)) {
+					return candidate;
+				}
+				dir = dir.Parent;
+			}
+			return Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, 
+				@"..\..\..\..\..\src\Tests\TestApplication.Blazor.Server"));
 		}
 
 		public override void Dispose() {
@@ -66,7 +74,7 @@ namespace Xpand.TestsLib.Blazor {
 		}
 
 		protected void CleanBlazorEnvironment() {
-			this.Await(() => WebHost.StopAsync());
+			this.Await(() => WebHost?.StopAsync());
 			WebHost?.Dispose();
 			typeof(ValueManagerContext).Field("storageHolder", Flags.StaticPrivate).SetValue(null,
 				typeof(AsyncLocal<>).MakeGenericType(AppDomain.CurrentDomain.GetAssemblyType(

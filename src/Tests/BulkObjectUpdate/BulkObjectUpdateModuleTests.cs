@@ -1,15 +1,25 @@
+using System;
 using System.Linq;
+using System.Reactive;
+using System.Reactive.Linq;
+using System.Threading.Tasks;
 using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
+using DevExpress.ExpressApp.Blazor;
 using DevExpress.ExpressApp.SystemModule;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.Numeric;
+using Xpand.Extensions.Reactive.Conditional;
+using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.CollectionSourceExtensions;
 using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.ViewExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
+using Xpand.TestsLib.Blazor;
 using Xpand.TestsLib.Common;
 using Xpand.XAF.Modules.BulkObjectUpdate.Tests.BOModel;
 using Xpand.XAF.Modules.BulkObjectUpdate.Tests.Common;
@@ -17,6 +27,24 @@ using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.BulkObjectUpdate.Tests {
+    class MyClass:BlazorCommonTest {
+        protected IObservable<Unit> StartBulkObjectUpdateTest(Func<BlazorApplication, IObservable<Unit>> test,Func<WebHostBuilderContext, TestStartup> startupFactory=null,TimeSpan? timeOut=null) 
+            => StartTest(test,configureWebHostBuilder:ConfigureWebHostBuilder(),startupFactory:context => startupFactory?.Invoke(context),timeOut:timeOut,configureServices:ConfigureServices);
+        
+        private Action<IWebHostBuilder> ConfigureWebHostBuilder() 
+            => builder => builder.UseSetting(WebHostDefaults.HostingStartupAssembliesKey, GetType().Assembly.GetName().Name);
+        
+        private void ConfigureServices(IServiceCollection services) {
+            
+        }
+
+        [Test]
+        public async Task MethodName() {
+            await StartBulkObjectUpdateTest(application => application.WhenLoggedOn("Admin").TakeFirst()
+                .SelectMany(_ => application.WhenViewOnFrame().TakeFirst().ToUnit()));
+        }
+
+    }
     public class BulkObjectUpdateModuleTests : CommonAppTest {
         private Window _window;
         private IModelBulkObjectUpdate _bulkObjectUpdate;
@@ -26,7 +54,7 @@ namespace Xpand.XAF.Modules.BulkObjectUpdate.Tests {
             ReactiveModuleBase.Scheduler=TestScheduler;
             TestScheduler.AdvanceTimeBy(2.Seconds());
             base.Init();
-            var objectSpace = Application.CreateObjectSpace();
+            var objectSpace = Application.CreateObjectSpace<BOU>();
             objectSpace.CreateObject<BOU>();
             objectSpace.CommitChanges();
             _bulkObjectUpdate = Application.Model.ToReactiveModule<IModelReactiveModulesBulkObjectUpdate>().BulkObjectUpdate;
