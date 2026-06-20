@@ -33,9 +33,26 @@ namespace Xpand.XAF.Modules.BulkObjectUpdate{
 
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) 
             => manager.RegisterAction()
-                .AddItems(action => action.AddItems().ToUnit(),Scheduler)
-                .MergeIgnored(action => action.ShowView().UpdateListViewObjects())
+	            .Publish(source => source.ShowRuleView().UpdateListViewObjects()
+		            .MergeToUnit(source.AddItems(action => action.AddItems().ToUnit(),Scheduler))
+	            )
                 .ToUnit();
+
+        private static IObservable<(Frame listView, Frame detailView, bool? CommitChanges)> ShowRuleView(this IObservable<SingleChoiceAction> source) 
+	        => source.WhenExecuted(e => {
+		        var showViewParameters = e.ShowViewParameters;
+		        var application = e.Action.Application;
+		        var rule = ((IModelBulkObjectUpdateRule)e.SelectedChoiceActionItem.Data);
+		        var modelDetailView = rule.DetailView;
+		        var objectSpace = application.CreateObjectSpace(modelDetailView.ModelClass.TypeInfo.Type);
+		        showViewParameters.CreatedView = application.CreateDetailView(objectSpace, modelDetailView.Id, true,
+			        objectSpace.CreateObject(modelDetailView.ModelClass.TypeInfo.Type));
+		        showViewParameters.TargetWindow=TargetWindow.NewModalWindow;
+		        return application.WhenViewOnFrame(modelDetailView.ModelClass.TypeInfo.Type).WhenFrame(ViewType.DetailView).TakeFirst()
+			        .Do(frame => frame.GetController<DialogController>().SaveOnAccept=false)
+			        .Select(frame => (listView:e.Action.Controller.Frame,detailView:frame,rule.CommitChanges))
+			        ;
+	        });
 
         static IObservable<Unit> UpdateListViewObjects(this IObservable<(Frame listView, Frame detailView, bool? CommitChanges)> source) 
 	        => source.SelectMany(t => t.detailView.GetController<DialogController>().AcceptAction.WhenExecuted(
@@ -59,23 +76,6 @@ namespace Xpand.XAF.Modules.BulkObjectUpdate{
 	        => detailView.GetItems<PropertyEditor>()
                 .Where(editor => ((IAppearanceVisibility)editor).Visibility == ViewItemVisibility.Show&&editor.Model.LayoutItem()!=null);
 
-        static IObservable<(Frame listView, Frame detailView, bool? CommitChanges)> ShowView(this SingleChoiceAction action) 
-            => action.WhenExecuted(e => {
-                    var showViewParameters = e.ShowViewParameters;
-                    var application = e.Action.Application;
-                    var rule = ((IModelBulkObjectUpdateRule)e.SelectedChoiceActionItem.Data);
-                    var modelDetailView = rule.DetailView;
-                    var objectSpace = application.CreateObjectSpace(modelDetailView.ModelClass.TypeInfo.Type);
-                    showViewParameters.CreatedView = application.CreateDetailView(objectSpace, modelDetailView.Id, true,
-                        objectSpace.CreateObject(modelDetailView.ModelClass.TypeInfo.Type));
-                    showViewParameters.TargetWindow=TargetWindow.NewModalWindow;
-                    var dialogController = e.Application().CreateController<DialogController>();
-                    dialogController.SaveOnAccept = false;
-                    showViewParameters.Controllers.Add(dialogController);
-                    return application.WhenViewOnFrame(modelDetailView.ModelClass.TypeInfo.Type).WhenFrame(ViewType.DetailView).TakeFirst()
-	                    .Select(frame => (listView:e.Action.Controller.Frame,detailView:frame,rule.CommitChanges));
-                });
-
         private static IObservable<SingleChoiceAction> RegisterAction(this ApplicationModulesManager manager) 
             => manager.RegisterViewSingleChoiceAction(nameof(BulkUpdate),action => action.ConfigureAction());
 
@@ -89,6 +89,7 @@ namespace Xpand.XAF.Modules.BulkObjectUpdate{
         private static IObservable<ChoiceActionItem> AddItems(this SingleChoiceAction action)
             => action.Model.Application.ModelObjectStateManager().Rules.Where(rule => action.View()?.Model==rule.ListView)
                 .Select(rule => new ChoiceActionItem(rule.Caption, rule)).ToNowObservable()
+                .Where(item => action.Items.Find(item.Data)==null)
                 .Do(item => action.Items.Add(item)).TraceObjectStateManager(item => item.Caption);
         
         internal static IObservable<TSource> TraceObjectStateManager<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<ITraceEvent> traceAction = null,

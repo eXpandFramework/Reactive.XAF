@@ -35,38 +35,37 @@ using Xpand.XAF.Modules.Reactive.Services.Actions;
 namespace Xpand.TestsLib.Blazor {
 	public static class Extensions {
 		public static IObservable<Unit> StartTest<TStartup>(this IObservable<IHostBuilder> source, string url,
-            string contentRoot, string user, Func<BlazorApplication, IObservable<Unit>> test,Func<BlazorApplication,IObservable<Unit>> beforeSetup=null,
-            Action<IServiceCollection> configureServices = null,Action<IWebHostBuilder> configureWebHostBuilder = null,Func<WebHostBuilderContext, TStartup> startupFactory=null,
+            string contentRoot, string user, Func<BlazorApplication, IObservable<Unit>> testSource,Func<BlazorApplication,IObservable<Unit>> beforeSetup=null,
+            Action<IServiceCollection> configureServices = null,Action<IWebHostBuilder> configureWebHostBuilder = null,
             string browser = null,WindowPosition inactiveWindowBrowserPosition=WindowPosition.None,
             LogContext logContext=default,WindowPosition inactiveWindowLogContextPosition=WindowPosition.None) where TStartup : class  
-            => source.SelectMany(builder => builder.StartTest( url, contentRoot, user, test,beforeSetup,
-                configureServices,configureWebHostBuilder,startupFactory, browser, inactiveWindowBrowserPosition, logContext, inactiveWindowLogContextPosition));
+            => source.SelectMany(builder => builder.StartTest<TStartup>( url, contentRoot, user, testSource,beforeSetup,
+                configureServices,configureWebHostBuilder, browser, inactiveWindowBrowserPosition, logContext, inactiveWindowLogContextPosition));
 
-        static IObservable<Unit> StartTest<TStartup>(this IHostBuilder builder, string url,
-            string contentRoot, string user, Func<BlazorApplication, IObservable<Unit>> test,
-            Func<BlazorApplication, IObservable<Unit>> beforeSetup = null,
-            Action<IServiceCollection> configureServices = null,Action<IWebHostBuilder> configureWebHostBuilder = null,Func<WebHostBuilderContext, TStartup> startupFactory=null, string browser = null,
+        static IObservable<Unit> StartTest<TStartup>(this IHostBuilder builder, string url, string contentRoot, string user, 
+            Func<BlazorApplication, IObservable<Unit>> testSource, Func<BlazorApplication, IObservable<Unit>> beforeSetup = null,
+            Action<IServiceCollection> configureServices = null,Action<IWebHostBuilder> configureWebHostBuilder = null, string browser = null,
             WindowPosition inactiveWindowBrowserPosition = WindowPosition.None, LogContext logContext = default,
             WindowPosition inactiveWindowLogContextPosition = WindowPosition.None) where TStartup : class
-            => builder.ConfigureWebHostDefaults(url, contentRoot, configureServices,configureWebHostBuilder,startupFactory).Build()
-                .Observe().SelectMany(host => XafApplicationMonitor.Application.StartTest(host,user,beforeSetup,test)
+            => builder.UseContentRoot(AppContext.BaseDirectory)
+                .ConfigureWebHostDefaults<TStartup>(url, contentRoot, configureServices,configureWebHostBuilder).Build()
+                .Observe().SelectMany(host => XafApplicationMonitor.Application.StartTest(host,user,beforeSetup,testSource)
                     .MergeToUnit(host.Run(url, browser, inactiveWindowBrowserPosition)))
                 .LogError()
-                .Log(logContext, inactiveWindowLogContextPosition, true)
-            ;
+                .Log(logContext, inactiveWindowLogContextPosition, true);
 
             static IObservable<Unit> StartTest(this IObservable<BlazorApplication> source, IHost host,
-                string user, Func<BlazorApplication, IObservable<Unit>> beforeSetup,Func<BlazorApplication, IObservable<Unit>> test)
-                => source
-                    .DoOnFirst(application =>application.DeleteAllData())
+                string user, Func<BlazorApplication, IObservable<Unit>> beforeSetup,Func<BlazorApplication, IObservable<Unit>> testSource)
+                => source.DoOnFirst(application =>application.DeleteAllData())
                     .MergeIgnored(application => beforeSetup?.Invoke(application)
                         .TakeUntil(host.Services.WhenApplicationStopping())?? Observable.Empty<Unit>())
                     .EnsureMultiTenantMainDatabase().DeleteModelDiffs(user)
                     .TakeUntil(host.Services.WhenApplicationStopping())
                     .MergeIgnored(application => application.WhenLoggedOn(user).TakeUntil(host.Services.WhenApplicationStopping())
                         .Select(xafApplication => xafApplication))
-                    .SelectMany(application => test(application).TakeUntil(host.Services.WhenApplicationStopping()).BufferUntilCompleted().WhenNotEmpty().To(application))
-                    .Catch<BlazorApplication,Exception>(_ => host.Services.StopTest().To<BlazorApplication>())
+                    .SelectMany(application => testSource(application).TakeUntil(host.Services.WhenApplicationStopping()).BufferUntilCompleted().WhenNotEmpty().To(application))
+                    // .Catch<BlazorApplication,Exception>(e => host.Services.StopTest().To<BlazorApplication>().CompleteOnError()
+                        // .ConcatDefer(() => e.Throw<BlazorApplication>()))
                     .Take(1)
                     .ConcatToUnit(host.Services.StopTest());
 
@@ -74,12 +73,14 @@ namespace Xpand.TestsLib.Blazor {
             => host.Services.WhenApplicationStopping().Select(unit => unit).Publish(whenHostStop => whenHostStop
                 .Merge(host.Services.WhenApplicationStarted().SelectMany(_ => new Uri(url).Start(browser)
                         .Do(process => process.MoveToMonitor(inactiveWindowPosition))
-                        .SelectMany(process => whenHostStop.DoSafe(_ => AppDomain.CurrentDomain.KillAll(process.ProcessName))))
+                        .Where(process => !process.HasExited)
+                        .Select(process => process.ProcessName)
+                        .SelectMany(process => whenHostStop.DoSafe(_ => AppDomain.CurrentDomain.KillAll(process))))
                     .MergeToUnit(Observable.FromAsync(() => host.RunAsync()))));
 
         
         public static (Guid id, string connectionString) GetTenant(this Microsoft.Data.SqlClient.SqlConnection connection, string user){
-            var query = "SELECT ID, ConnectionString FROM Tenant WHERE Name = @Name";
+            const string query = "SELECT ID, ConnectionString FROM Tenant WHERE Name = @Name";
             using var command = new Microsoft.Data.SqlClient.SqlCommand(query, connection);
             command.Parameters.AddWithValue("@Name", user.Split('@')[1]);
             if (connection.State!=ConnectionState.Open) connection.Open();
@@ -168,17 +169,16 @@ namespace Xpand.TestsLib.Blazor {
 
         private static IHostBuilder ConfigureWebHostDefaults<TStartup>(this IHostBuilder builder, string url,
             string contentRoot, Action<IServiceCollection> configureServices = null,
-            Action<IWebHostBuilder> configureWebHostBuilder = null,Func<WebHostBuilderContext, TStartup> startupFactory=null) where TStartup : class 
+            Action<IWebHostBuilder> configureWebHostBuilder = null) where TStartup : class 
             => builder.ConfigureWebHostDefaults(webBuilder => {
                 webBuilder.UseContentRoot(Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, contentRoot)));
                 webBuilder.UseUrls(url);
-                webBuilder.UseStartup(context =>startupFactory?.Invoke(context)?? typeof(TStartup).CreateInstance(context.Configuration));
+                webBuilder.UseStartup(typeof(TStartup));
                 webBuilder.ConfigureServices(services => {
                     services.AddTransient<XafApplicationMonitor>();
                     services.Decorate<IXafApplicationFactory, XafApplicationMonitor>();
                     configureServices?.Invoke(services);
                 });
-                
                 webBuilder.ConfigureAppConfiguration((context, _) =>
                     context.HostingEnvironment.ApplicationName = (typeof(TStartup).BaseType??typeof(TStartup)).Assembly.GetName().Name!);
                 configureWebHostBuilder?.Invoke(webBuilder);
@@ -212,4 +212,5 @@ namespace Xpand.TestsLib.Blazor {
 		public static IWebDriver Driver(this ICommandAdapter adapter)
 			=> ((CommandAdapter)adapter).Driver;
 	}
+    
 }

@@ -37,32 +37,55 @@ namespace Xpand.TestsLib.Blazor {
 		}
 
 		protected IObservable<Unit> StartTest<TStartup>(Func<BlazorApplication, IObservable<Unit>> test, Func<BlazorApplication, IObservable<Unit>> beforeSetup = null,
-			Action<IServiceCollection> configureServices = null, Action<IWebHostBuilder> configureWebHostBuilder = null,Func<WebHostBuilderContext, TStartup> startupFactory=null,TimeSpan? timeOut=null) where TStartup : class
-			=> StartTest("Admin", test,beforeSetup,configureServices,configureWebHostBuilder,startupFactory,timeOut);
+			Action<IServiceCollection> configureServices = null, Action<IWebHostBuilder> configureWebHostBuilder = null,TimeSpan? timeOut=null) where TStartup : class
+			=> StartTest<TStartup>("Admin", test,beforeSetup,configureServices,configureWebHostBuilder,timeOut);
 
 		
 		protected IObservable<Unit> StartTest<TStartup>(string user, Func<BlazorApplication, IObservable<Unit>> test,
 			Func<BlazorApplication, IObservable<Unit>> beforeSetup = null, Action<IServiceCollection> configureServices = null, 
-			Action<IWebHostBuilder> configureWebHostBuilder = null,Func<WebHostBuilderContext, TStartup> startupFactory=null,TimeSpan? timeOut=null)
+			Action<IWebHostBuilder> configureWebHostBuilder = null,TimeSpan? timeOut=null)
 			where TStartup : class
 			=> Host.CreateDefaultBuilder().Observe()
 				.Do(_ => TestContext.CurrentContext.Test.FullName.WriteSection())
 				.Do(_ => Console.Out.WriteSection(TestContext.CurrentContext.Test.FullName))
-				.StartTest($"http://localhost:{IPGlobalProperties.GetIPGlobalProperties().GetActiveTcpListeners().GetRandomAvailablePort()}",
-					TestBlazorAppPath(), user, test,beforeSetup,configureServices,configureWebHostBuilder,startupFactory,
+				.StartTest<TStartup>($"http://localhost:{IPGlobalProperties.GetIPGlobalProperties().GetActiveTcpListeners().GetRandomAvailablePort()}",
+					TestBlazorAppPath(), user, test,beforeSetup,configureServices,configureWebHostBuilder,
 					Environment.GetEnvironmentVariable("XAFTESTBrowser"), WindowPosition.FullScreen, LogContext.None,WindowPosition.BottomRight)
 				.Timeout(timeOut??120.Seconds());
 
 		public static int Port { get; set; } = 5000;
 
 		private static string TestBlazorAppPath() {
-			var dir = new DirectoryInfo(AppContext.BaseDirectory);
+			var baseDir = AppContext.BaseDirectory;  
+			var dir = new DirectoryInfo(baseDir);
+			Console.WriteLine($"[TestBlazorAppPath] AppContext.BaseDirectory = {baseDir}");
+    
+			var parent = Directory.GetParent(baseDir)?.FullName;
+			Console.WriteLine($"[TestBlazorAppPath] Parent = {parent}");
+    
+			if (parent != null) {
+				var candidate = Path.Combine(parent, "TestBlazorApplication");
+				Console.WriteLine($"[TestBlazorAppPath] Candidate (parent level) = {candidate}");
+				Console.WriteLine($"[TestBlazorAppPath] Candidate exists = {Directory.Exists(candidate)}");
+				if (Directory.Exists(candidate)) {
+					return candidate;
+				}
+			}
+			
 			while (dir is { Parent: not null }) {
 				var candidate = Path.Combine(dir.FullName, "src", "Tests", "TestApplication.Blazor.Server");
 				if (Directory.Exists(candidate)) {
 					return candidate;
 				}
+				var sCandidate = Path.Combine(dir.FullName, "s", "src", "Tests", "TestApplication.Blazor.Server");
+				if (Directory.Exists(sCandidate)) {
+					return sCandidate;
+				}
 				dir = dir.Parent;
+			}
+			var currentCandidate = Path.Combine(Directory.GetCurrentDirectory(), "src", "Tests", "TestApplication.Blazor.Server");
+			if (Directory.Exists(currentCandidate)) {
+				return currentCandidate;
 			}
 			return Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, 
 				@"..\..\..\..\..\src\Tests\TestApplication.Blazor.Server"));
@@ -85,7 +108,7 @@ namespace Xpand.TestsLib.Blazor {
 			var defaultBuilder = Host.CreateDefaultBuilder();
 			WebHost = defaultBuilder
 				.ConfigureWebHostDefaults(webBuilder => {
-					webBuilder.UseStartup(startupType);
+					webBuilder.UseStartup(context => Activator.CreateInstance(startupType, context.Configuration)!);
 					webBuilder.ConfigureKestrel(options => options.ListenAnyIP(0));
 				})
 				.Build();

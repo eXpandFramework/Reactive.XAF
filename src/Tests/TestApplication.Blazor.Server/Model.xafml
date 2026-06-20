@@ -1,7 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Application>
-  <NavigationItems NavigationStyle="Accordion">
-  </NavigationItems>
-  <Views DefaultListEditor="DevExpress.ExpressApp.Blazor.Editors.DxGridListEditor">
-  </Views>
+  <Options UIType="TabbedMDI"
+         FormStyle="Ribbon"
+         RestoreTabbedMdiLayout="True"
+         ShowTabImage="True"
+	 VirtualScrollingEnabled="True">
+  </Options>
+  <NavigationItems NavigationStyle="Accordion" />
 </Application>

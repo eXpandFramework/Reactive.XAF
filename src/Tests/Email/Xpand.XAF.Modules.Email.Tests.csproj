@@ -19,6 +19,10 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\TestsLib.Blazor\Xpand.TestsLib.Blazor.csproj" />
+      <ProjectReference Include="..\TestApplication.Blazor.Server\TestApplication.Blazor.Server.csproj" />
+      <Reference Include="Xpand.XAF.Modules.Blazor">
+          <HintPath>..\..\..\bin\Xpand.XAF.Modules.Blazor.dll</HintPath>
+      </Reference>
     <Reference Include="Xpand.TestsLib.Common">
       <HintPath>..\..\..\bin\Xpand.TestsLib.Common.dll</HintPath>
     </Reference>

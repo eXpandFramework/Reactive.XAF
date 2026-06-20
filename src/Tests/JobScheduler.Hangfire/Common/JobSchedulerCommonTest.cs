@@ -40,7 +40,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests.Common {
         }
 
         protected IObservable<Unit> StartJobSchedulerTest(Func<BlazorApplication, IObservable<Unit>> test,Func<BlazorApplication,IObservable<Unit>> beforeSetup=null,Func<WebHostBuilderContext, TestStartup> startupFactory=null,TimeSpan? timeOut=null) 
-            => StartTest(test,BeforeSetup(),configureWebHostBuilder:ConfigureWebHostBuilder(),startupFactory:context => startupFactory?.Invoke(context),timeOut:timeOut,configureServices:ConfigureServices);
+            => StartTest<TestStartup>(test,BeforeSetup(),configureWebHostBuilder:ConfigureWebHostBuilder(),timeOut:timeOut,configureServices:ConfigureServices);
 
         private void ConfigureServices(IServiceCollection services) {
             

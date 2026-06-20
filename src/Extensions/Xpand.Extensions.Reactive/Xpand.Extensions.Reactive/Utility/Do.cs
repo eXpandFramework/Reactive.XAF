@@ -3,6 +3,8 @@ using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Threading;
 using Xpand.Extensions.ObjectExtensions;
+using Xpand.Extensions.Reactive.ErrorHandling;
+using Xpand.Extensions.Reactive.Transform;
 
 namespace Xpand.Extensions.Reactive.Utility {
     public static partial class Utility {
@@ -35,14 +37,7 @@ namespace Xpand.Extensions.Reactive.Utility {
             });
 
         public static IObservable<T> DoSafe<T>(this IObservable<T> source, Action<T> action)
-            => source.Do(obj => {
-                try {
-                    action(obj);
-                }
-                catch (Exception) {
-                    // ignored
-                }
-            });
+            => source.SelectMany(obj => obj.DeferAction(action).CompleteOnError().To(obj));
         
         public static IObservable<T> DoOnPrevious<T>(this IObservable<T> source, Action<T> onPrevious)
             => source.Select(x => (Item: x, HasValue: true))

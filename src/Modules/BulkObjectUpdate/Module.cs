@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.SystemModule;
@@ -23,9 +24,14 @@ namespace Xpand.XAF.Modules.BulkObjectUpdate{
             base.Setup(moduleManager);
             moduleManager.Connect()
                 .TakeUntilDisposed(this)
+                .Finally(() => { })
                 .Subscribe();
         }
-        
+
+        protected override void Dispose(bool disposing) {
+            base.Dispose(disposing);
+        }
+
         public override void ExtendModelInterfaces(ModelInterfaceExtenders extenders){
             base.ExtendModelInterfaces(extenders);
             extenders.Add<IModelReactiveModules,IModelReactiveModulesBulkObjectUpdate>();

@@ -6,6 +6,7 @@ using Xpand.XAF.Persistent.BaseImpl;
 
 namespace Xpand.XAF.Modules.Email.Tests.BOModel{
     [DefaultProperty(nameof(Name))]
+    [DefaultClassOptions]
     public class E:CustomBaseObject{
         public E(Session session) : base(session){
         }

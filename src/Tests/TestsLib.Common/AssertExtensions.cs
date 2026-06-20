@@ -48,12 +48,15 @@ namespace Xpand.TestsLib.Common {
         public static IObservable<SingleChoiceAction> AssertSetFilterAction(this Frame frame,  int count,string triggerId)
             => frame.AssertSingleChoiceAction("SetFilter", _ => count).ConcatIgnored(action => action.Trigger(() => action.Items.FindItemByID(triggerId)));
         
-        public static IObservable<SingleChoiceAction> AssertSingleChoiceAction(this Frame frame, string actionId, Func<SingleChoiceAction,  int> itemsCount = null)
-            => frame.AssertSingleChoiceAction(actionId, (action, item) => item!=null?-1:itemsCount?.Invoke(action) ?? -1);
+        public static IObservable<SingleChoiceAction> AssertSingleChoiceAction(this Frame frame, string actionId, Func<SingleChoiceAction,  int> itemsCount = null,Func<SingleChoiceAction,IObservable<SingleChoiceAction>> assertSelector=null)
+            => frame.AssertSingleChoiceAction(actionId, (action, item) => item!=null?-1:itemsCount?.Invoke(action) ?? -1,assertSelector);
 
-        public static IObservable<SingleChoiceAction> AssertSingleChoiceAction(this Frame frame,string actionId, Func<SingleChoiceAction, ChoiceActionItem, int> itemsCount=null)
-            => frame.Actions<SingleChoiceAction>(actionId)
-                .Where(action => action.Available() || itemsCount != null && itemsCount(action, null) == -1).ToNowObservable()
+        public static IObservable<SingleChoiceAction> AssertSingleChoiceAction(this Frame frame,string actionId, Func<SingleChoiceAction, ChoiceActionItem, int> itemsCount=null,
+            Func<SingleChoiceAction,IObservable<SingleChoiceAction>> assertSelector=null)
+            => frame.Actions<SingleChoiceAction>(actionId).ToNowObservable()
+                .ConcatIgnored(action => (assertSelector?.Invoke(action) ?? Observable.Empty<SingleChoiceAction>())
+                    .Concat(action.WhenActivated().Where(choiceAction => choiceAction.Items.Count>0).Assert().To(action)))
+                .Where(action => action.Available() || itemsCount != null && itemsCount(action, null) == -1)
                 .Assert($"{nameof(AssertSingleChoiceAction)} {actionId}")
                 .SelectMany(action => {
                     var invoke = itemsCount?.Invoke(action, null) ?? -1;
@@ -113,7 +116,7 @@ namespace Xpand.TestsLib.Common {
             => source.Assert(_ => message,timeout,caller);
 
         
-        public static TimeSpan? DelayOnContextInterval=250.Milliseconds();
+        public static TimeSpan? DelayOnContextInterval=1.Seconds();
         public static IObservable<TSource> Assert<TSource>(this IObservable<TSource> source,Func<TSource,string> messageFactory,TimeSpan? timeout=null,[CallerMemberName]string caller=""){
             var timeoutMessage = messageFactory.MessageFactory(caller);
             return source.ReplayFirstTake().Log(messageFactory,Console.Out, caller).ThrowIfEmpty(timeoutMessage).Timeout(timeout ?? TimeoutInterval, timeoutMessage)

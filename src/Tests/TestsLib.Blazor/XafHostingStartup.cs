@@ -69,14 +69,14 @@ namespace Xpand.TestsLib.Blazor {
 		protected virtual void AddSecurity(IServiceCollection services) 
 			=>services.AddXafSecurity(options => {
 					options.RoleType = typeof(PermissionPolicyRole);
-					options.UserType = UserType();
+					options.UserType = typeof(PermissionPolicyUser);
 					options.Events.OnSecurityStrategyCreated = securityStrategy =>
 						((SecurityStrategy)securityStrategy).RegisterXPOAdapterProviders();
 					options.SupportNavigationPermissionsForTypes = false;
 				}).AddExternalAuthentication<HttpContextPrincipalProvider>()
 				.AddAuthenticationStandard(options => { options.IsSupportChangePassword = true; });
 
-		protected virtual Type UserType() => typeof(PermissionPolicyUser);
+		
 	}
 
 	class MyClass : IExceptionHandlerService {

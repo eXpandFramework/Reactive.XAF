@@ -505,7 +505,14 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                     logonParameters.UserName = userName;
                     logonParameters.Password = pass;
                 })
-                .ToController<DialogController>().WhenAcceptTriggered(application.WhenLoggedOn().Select(t => t.application));
+                .ToController<DialogController>()
+                .WhenAcceptTriggered(application.WhenLoggedOn().Select(t => t.application));
+
+        public static IObservable<Frame> WhenFirstFrame(this XafApplication application, Type objectType=null, string userName="Admin", string pass = null)
+            => application.WhenSetupComplete(_ => application.WhenFrame(objectType?? ((IModelApplicationNavigationItems)application.Model).NavigationItems
+                    .StartupNavigationItem.View.AsObjectView.ModelClass.TypeInfo.Type)
+                .Merge(application.WhenLoggedOn(userName, pass).IgnoreElements().To<Frame>()))
+                .Take(1);
         
         public static IObservable<XafApplication> WhenLoggedOn(this XafApplication application, string userName, string pass=null) 
             => application.WhenLoggedOn<AuthenticationStandardLogonParameters>(userName,pass);

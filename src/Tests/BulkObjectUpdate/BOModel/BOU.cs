@@ -1,9 +1,10 @@
 ﻿using System.ComponentModel;
+using DevExpress.Persistent.Base;
 using DevExpress.Xpo;
 using Xpand.XAF.Persistent.BaseImpl;
 
 namespace Xpand.XAF.Modules.BulkObjectUpdate.Tests.BOModel{
-    [DefaultProperty(nameof(Name))]
+    [DefaultProperty(nameof(Name))][DefaultClassOptions]
     public class BOU:CustomBaseObject{
         public BOU(Session session) : base(session){
         }

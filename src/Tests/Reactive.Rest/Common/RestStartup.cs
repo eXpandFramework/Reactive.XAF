@@ -12,7 +12,7 @@ namespace Xpand.XAF.Modules.Reactive.Rest.Tests.Common {
     public class RestStartup : XafHostingStartup<RestModule> {
         public RestStartup(IConfiguration configuration) : base(configuration) { }
 
-        protected override Type UserType() => typeof(RestUser);
+        protected  Type UserType() => typeof(RestUser);
     }
 
 }

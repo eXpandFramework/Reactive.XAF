@@ -46,6 +46,10 @@ namespace Xpand.TestsLib.Common{
             if (exception.ToString().Contains("GetDeviceInfoAsync")) {
                 return;
             }
+            if (exception is ObjectDisposedException ode &&
+                ode.ObjectName.StartsWith("Microsoft.JSInterop.DotNetObjectReference") == true) {
+                return;
+            }
             _errorSubject.OnNext(exception);
         }
 

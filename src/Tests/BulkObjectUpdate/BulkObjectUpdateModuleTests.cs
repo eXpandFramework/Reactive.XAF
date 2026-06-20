@@ -1,6 +1,5 @@
 using System;
 using System.Linq;
-using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using akarnokd.reactive_extensions;
@@ -8,18 +7,13 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.Blazor;
 using DevExpress.ExpressApp.SystemModule;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
 using Shouldly;
-using Xpand.Extensions.Numeric;
-using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.CollectionSourceExtensions;
 using Xpand.Extensions.XAF.FrameExtensions;
+using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.Extensions.XAF.ViewExtensions;
-using Xpand.Extensions.XAF.XafApplicationExtensions;
-using Xpand.TestsLib.Blazor;
 using Xpand.TestsLib.Common;
 using Xpand.XAF.Modules.BulkObjectUpdate.Tests.BOModel;
 using Xpand.XAF.Modules.BulkObjectUpdate.Tests.Common;
@@ -27,87 +21,66 @@ using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.BulkObjectUpdate.Tests {
-    class MyClass:BlazorCommonTest {
-        protected IObservable<Unit> StartBulkObjectUpdateTest(Func<BlazorApplication, IObservable<Unit>> test,Func<WebHostBuilderContext, TestStartup> startupFactory=null,TimeSpan? timeOut=null) 
-            => StartTest(test,configureWebHostBuilder:ConfigureWebHostBuilder(),startupFactory:context => startupFactory?.Invoke(context),timeOut:timeOut,configureServices:ConfigureServices);
+    public class BulkObjectUpdateModuleTests:BulkObjectUpdateModuleTestsBaseTest {
         
-        private Action<IWebHostBuilder> ConfigureWebHostBuilder() 
-            => builder => builder.UseSetting(WebHostDefaults.HostingStartupAssembliesKey, GetType().Assembly.GetName().Name);
-        
-        private void ConfigureServices(IServiceCollection services) {
-            
-        }
-
         [Test]
-        public async Task MethodName() {
-            await StartBulkObjectUpdateTest(application => application.WhenLoggedOn("Admin").TakeFirst()
-                .SelectMany(_ => application.WhenViewOnFrame().TakeFirst().ToUnit()));
+        public async Task Run() 
+            => await StartBulkObjectUpdateTest(application => application.WhenFirstFrame()
+                .Merge(SetupModel(application)).Take(1)
+                .Do(frame => frame.View.ObjectSpace.CreateObject<BOU>().CommitChanges())
+                .Select(_ => application.Model.ToReactiveModule<IModelReactiveModulesBulkObjectUpdate>().BulkObjectUpdate)
+                .SelectMany(update => application.Navigate(typeof(BOU))
+                    .SelectMany(frame => frame.AssertListViewHasObject<BOU>())
+                    .SelectMany(frame => frame.View.Objects().ToNowObservable().SelectMany(obj => frame.View.ToListView().SelectObject(obj).To(frame)))
+                    .SelectMany(frame =>BulkUpdate_Items_Contain_Model_Rules(frame,update))
+                    .Do(frame => {
+                        var itemDetailView = Shows_Selected_ActionItem_DetailView(frame);
+                        Updates_Selected_ListView_Objects(itemDetailView,frame );
+                        Commit_The_Transaction(frame);
+                    })).Take(1).ToUnit());
+
+        private static IObservable<Frame> SetupModel(BlazorApplication application){
+            return application.WhenSetupComplete().Do(_ => {
+                var bulkObjectUpdate = application.Model.ToReactiveModule<IModelReactiveModulesBulkObjectUpdate>().BulkObjectUpdate;
+                var rule1 = bulkObjectUpdate.Rules.AddNode<IModelBulkObjectUpdateRule>("1");
+                rule1.Caption = rule1.Id();
+                rule1.ListView = application.Model.BOModel.GetClass(typeof(BOU)).DefaultListView;
+                var rule2 = bulkObjectUpdate.Rules.AddNode<IModelBulkObjectUpdateRule>("2");
+                rule2.ListView = application.Model.BOModel.GetClass(typeof(BOU)).DefaultListView;
+                rule2.DetailView = application.Model.BOModel.GetClass(typeof(BOU2)).DefaultDetailView;
+                rule2.Caption = rule2.Id();
+            }).To<Frame>().IgnoreElements();
         }
 
-    }
-    public class BulkObjectUpdateModuleTests : CommonAppTest {
-        private Window _window;
-        private IModelBulkObjectUpdate _bulkObjectUpdate;
-        private Frame _detailViewFrame;
+        IObservable<Frame> BulkUpdate_Items_Contain_Model_Rules(Frame frame,IModelBulkObjectUpdate bulkObjectUpdate) 
+            => frame.AssertSingleChoiceAction(nameof(BulkObjectUpdateService.BulkUpdate), action => {
+                action.Items.First().Caption.ShouldBe(bulkObjectUpdate.Rules.First().Caption);
+                action.Items.Last().Caption.ShouldBe(bulkObjectUpdate.Rules.Last().Caption);
+                return 2;
+            }).To(frame);
 
-        public override void Init() {
-            ReactiveModuleBase.Scheduler=TestScheduler;
-            TestScheduler.AdvanceTimeBy(2.Seconds());
-            base.Init();
-            var objectSpace = Application.CreateObjectSpace<BOU>();
-            objectSpace.CreateObject<BOU>();
-            objectSpace.CommitChanges();
-            _bulkObjectUpdate = Application.Model.ToReactiveModule<IModelReactiveModulesBulkObjectUpdate>().BulkObjectUpdate;
-            var rule1 = _bulkObjectUpdate.Rules.AddNode<IModelBulkObjectUpdateRule>("1");
-            rule1.ListView = Application.Model.BOModel.GetClass(typeof(BOU)).DefaultListView;
-            var rule2 = _bulkObjectUpdate.Rules.AddNode<IModelBulkObjectUpdateRule>("2");
-            rule2.ListView = Application.Model.BOModel.GetClass(typeof(BOU)).DefaultListView;
-            rule2.DetailView = Application.Model.BOModel.GetClass(typeof(BOU2)).DefaultDetailView;
-            
-            _window = Application.CreateViewWindow();
-            _window.SetView(Application.NewView<ListView>(typeof(BOU)));
-            TestScheduler.AdvanceTimeBy(2.Seconds());
-        }
-
-        [Test][Order(0)]
-        public void BulkUpdate_Items_Contain_Model_Rules() {
-            
-            var action = _window.Action(nameof(BulkObjectUpdateService.BulkUpdate)) as SingleChoiceAction;
-            
-            action.ShouldNotBeNull();
-            action.Items.Count.ShouldBe(2);
-            action.Items.First().Caption.ShouldBe(_bulkObjectUpdate.Rules.First().Caption);
-            action.Items.Last().Caption.ShouldBe(_bulkObjectUpdate.Rules.Last().Caption);
-        }
-
-        [Test][Order(10)]
-        public void Shows_Selected_ActionItem_DetailView() {
-            var action = _window.Action(nameof(BulkObjectUpdateService.BulkUpdate)) as SingleChoiceAction;
-            using var testObserver = _window.Application.WhenViewOnFrame().WhenFrame(ViewType.DetailView).Test();
+        Frame Shows_Selected_ActionItem_DetailView(Frame frame) {
+            var action = frame.Action(nameof(BulkObjectUpdateService.BulkUpdate)) as SingleChoiceAction;
+            using var testObserver = frame.Application.WhenViewOnFrame().WhenFrame(ViewType.DetailView).Test();
             
             action.DoExecute(space => space.GetObjectsQuery<BOU>().ToArray());
             
             testObserver.ItemCount.ShouldBe(1);
-            _detailViewFrame = testObserver.Items.First();
+            return testObserver.Items.First();
         }
 
-        [Test][Order(20)]
-        public void Updates_Selected_ListView_Objects() {
-            var dialogController = _detailViewFrame.GetController<DialogController>();
+        void Updates_Selected_ListView_Objects(Frame detailViewFrame, Frame frame) {
+            var dialogController = detailViewFrame.GetController<DialogController>();
             ((BOU)dialogController.Frame.View.CurrentObject).Name = "string";
-            var listView = _window.View.AsListView();
-            listView.Editor.GetMock().Setup(editor => editor.GetSelectedObjects())
-                .Returns(() => listView.CollectionSource.Objects().ToList());
+            var listView = frame.View.AsListView();
             dialogController.AcceptAction.DoExecute();
 
-            var asListView = listView;
-            var bou = asListView.CollectionSource.Objects().Cast<BOU>().First();
+            
+            var bou =  listView.CollectionSource.Objects().Cast<BOU>().First();
             bou.Name.ShouldBe("string");
         }
 
-        [Test][Order(30)]
-        public void Commit_The_Transaction() 
-            => _window.View.ObjectSpace.IsModified.ShouldBeFalse();
-
+        void Commit_The_Transaction(Frame frame) 
+            => frame.View.ObjectSpace.IsModified.ShouldBeFalse();
     }
 }

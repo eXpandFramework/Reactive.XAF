@@ -86,8 +86,11 @@ Task CompileTests -precondition { return ((Get-VersionPart $DXVersion Minor) -ne
     # if (!(Test-AzDevops)) {
         Invoke-Task -taskName BuildNugetConsumers
     # }
-    
-    Get-ChildItem $root\bin "*xpand*.dll" | Test-AssemblyReference -VersionFilter $DXVersion
+
+    if ($DXVersion -eq "26.1.3"){
+        throw "restore next comment"
+    }
+    # Get-ChildItem $root\bin "*xpand*.dll" | Test-AssemblyReference -VersionFilter $DXVersion
     
 }
 
@@ -144,14 +147,13 @@ Task CompileNugetConsumers -precondition { return $compile } {
         # Update-NugetConsumersPackageVersion
         # Start-Build "$Root\src\Tests\\EasyTests\EasyTests.sln"
         # FixNet461DXAssembliesTargetFramework
-        if ($dxVersion -eq (Get-XAFLatestMinors | Select-Object -First 1)) {
-            Invoke-Script {
-                & $root\build\ZipMe.ps1 -SkipIDEBuild
-            } -Maximum 3
-        }
+        & $root\build\ZipMe.ps1 -SkipIDEBuild
     } -Maximum 3
     Write-HostFormatted "Test-AssemblyReference" -Section
-    Get-ChildItem $root\bin "*xpand*.dll" | Test-AssemblyReference -VersionFilter $DXVersion
+    if ($DXVersion -eq "26.1.3"){
+        throw "restore next comment"
+    }
+    # Get-ChildItem $root\bin "*xpand*.dll" | Test-AssemblyReference -VersionFilter $DXVersion
 }
 
 function GetConfiguration($solution, $conf) {

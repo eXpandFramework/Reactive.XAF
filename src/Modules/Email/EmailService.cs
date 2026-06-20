@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -15,6 +16,7 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using Swordfish.NET.Collections.Auxiliary;
 using Xpand.Extensions.EventArgExtensions;
+using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.Tracing;
@@ -48,7 +50,7 @@ namespace Xpand.XAF.Modules.Email{
         private static void DisableIfSent(this SingleChoiceAction singleChoiceAction, View view) {
             var objectSpace = view.ObjectSpace;
             var recipients = singleChoiceAction.Items.Select(item => item.Data).Cast<IModelEmailViewRecipient>()
-                .Select(recipient => recipient.Id()).ToArray();
+                .Select(recipient => recipient.Id());
             var selectedObjects = view.SelectedObjects.Cast<object>().ToArray();
             var sendCount = selectedObjects.Select(o => $"{view.ObjectSpace.GetKeyValue(o)}").Where(s => s!=String.Empty)
                 .SelectMany(key => objectSpace.GetObjectsQuery<EmailStorage>()
@@ -61,7 +63,8 @@ namespace Xpand.XAF.Modules.Email{
                 .SelectMany(t => {
                     var sendToAddresses = e.Action.View().ObjectSpace.GetObjects(SecuritySystem.UserType,
                             CriteriaOperator.Parse(t.receipient.Recipient.RecipientTypeCriteria)).Cast<object>()
-                        .Select(o => new MailAddress($"{t.receipient.Recipient.RecipientType.EmailMember.MemberInfo.GetValue(o)}")).ToArray();
+                        .Select(o => t.receipient.Recipient.RecipientType.EmailMember.MemberInfo.GetValue(o)).WhereNotDefault()
+                        .Select(o => new MailAddress($"{o}")).ToArray();
                     return sendToAddresses.Any() ? e.SendEmail(t.receipient,  sendToAddresses).Do(_ => e.Action.ExecutionFinished()) : Observable.Empty<Unit>();
                 }));
 
@@ -100,8 +103,8 @@ namespace Xpand.XAF.Modules.Email{
 
         private static readonly Subject<GenericEventArgs<(SmtpClient client,MailMessage message,object bo,string viewId)>> CustomizeSendSubject = new();
 
-        public static IObservable<GenericEventArgs<(SmtpClient client, MailMessage message, object o, string viewId)>>
-            WhenSendingEmail(this XafApplication application) 
+        [SuppressMessage("ReSharper", "UnusedParameter.Global")]
+        public static IObservable<GenericEventArgs<(SmtpClient client, MailMessage message, object o, string viewId)>> WhenSendingEmail(this XafApplication application) 
             => CustomizeSendSubject;
         
         private static (SmtpClient client, MailMessage message, object bo, string viewId) NewSmtpClient(

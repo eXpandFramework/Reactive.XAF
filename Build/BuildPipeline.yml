@@ -45,12 +45,23 @@ jobs:
           $env:AzOrganization="eXpandDevops"
           $env:AzProject ="eXpandFramework"
           & '$(System.DefaultWorkingDirectory)\Build\BuildPipeline.ps1' @goArgs
-    - publish: $(System.DefaultWorkingDirectory)\bin\
-      artifact: TestAssemblies
-    - publish: $(Pipeline.Workspace)\.nuget
-      artifact: Nuget
     - task: PublishPipelineArtifact@1
-      name: PublishNugets
+      displayName: 'Publish TestBlazorApplication'
+      inputs:
+        targetPath: '$(System.DefaultWorkingDirectory)\src\Tests\TestApplication.Blazor.Server'
+        artifact: 'TestBlazorApplication'
+    - task: PublishPipelineArtifact@1
+      displayName: 'Publish TestAssemblies'
+      inputs:
+        targetPath: '$(System.DefaultWorkingDirectory)\bin\'
+        artifact: 'TestAssemblies'
+    - task: PublishPipelineArtifact@1
+      displayName: 'Publish Agent Nuget'
+      inputs:
+        targetPath: '$(Pipeline.Workspace)\.nuget'
+        artifact: 'Nuget'
+    - task: PublishPipelineArtifact@1
+      name: PublishXpandNugets
       inputs:
         targetPath: '$(System.DefaultWorkingDirectory)\bin\Nupkg'
         artifact: 'Nupkg'
@@ -127,10 +138,16 @@ jobs:
     - checkout: Self
     - download: current
       artifact: TestAssemblies
+      displayName: TestAssemblies
     - download: current
       artifact: Nupkg
+      displayName: Nupkg
     - download: current
       artifact: Nuget
+      displayName: Nuget
+    - download: current
+      artifact: TestBlazorApplication
+      displayName: TestBlazorApplication
     - task: PowerShell@2
       displayName: 'Setup Environment'
       env:
@@ -150,6 +167,10 @@ jobs:
                   Move-Item -Path $_.FullName -Destination $destinationPath
               }
           }
+          $blazorDest = "$(Build.SourcesDirectory)\src\Tests\TestApplication.Blazor.Server"
+          $blazorSource = "$(Pipeline.Workspace)\TestBlazorApplication"
+          Write-Host "Copying TestBlazorApplication from $blazorSource to $blazorDest"
+          Copy-Item -Path "$blazorSource\*" -Destination $blazorDest -Recurse -Force
           Write-Host "Locating Visual Studio installation root..."
           
           # 1. Get the root path of the installation (ignore components/files for now)
@@ -192,8 +213,6 @@ jobs:
     - task: VSTest@3
       displayName: 'Run Tests'
       retryCountOnTaskFailure: 2
-      env:
-        SOURCE_DIRECTORY: "../s"
       inputs:
         minimumExpectedTests: "1"
         failOnMinTestsNotRun: true
