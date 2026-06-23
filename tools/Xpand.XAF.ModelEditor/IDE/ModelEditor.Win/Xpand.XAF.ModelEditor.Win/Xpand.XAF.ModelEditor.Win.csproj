@@ -7,8 +7,22 @@
     <Deterministic>false</Deterministic>
     <OutputPath>..\..\..\..\..\bin\</OutputPath>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    
+    <!-- Disable static web assets (brought in transitively by DevExpress Blazor/Dashboard packages).
+         Prevents "The target StaticWebAssetsPrepareForRun does not exist" during dotnet publish
+         for this pure WinForms XAF host. -->
+    <StaticWebAssetsEnabled>false</StaticWebAssetsEnabled>
   </PropertyGroup>
+
+  <!-- Stub the target that DevExpress static web asset packages (via Microsoft.NET.Sdk.StaticWebAssets)
+       inject into PrepareForRunDependsOn. This project is WinForms-only; we don't need web assets. -->
+  <Target Name="StaticWebAssetsPrepareForRun" />
+
+  <!-- The Microsoft.AspNetCore.Components.WebView.WindowsForms package (transitively referenced by DevExpress)
+       adds targets that are triggered on FileSystem publish (because of PublishProtocol in the pubxml).
+       These targets call tasks like ComputeStaticWebAssetsTargetPaths which are not available
+       (and not needed) for a pure desktop XAF ModelEditor host. Stub them to allow publish to succeed. -->
+  <Target Name="AddStaticWebAssetsForAppXBundle" />
+  <Target Name="AddStaticWebAssetsForClickOnce" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <NoWarn>1701;1702;CA1416;XAF0017</NoWarn>
   </PropertyGroup>

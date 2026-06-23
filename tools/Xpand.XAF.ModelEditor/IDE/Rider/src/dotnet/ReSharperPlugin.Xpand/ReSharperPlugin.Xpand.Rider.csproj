@@ -66,11 +66,12 @@
     <Error Text="Missing required dependency: %(RequiredRiderDll.Filename)%(RequiredRiderDll.Extension). Ensure PackageReference metadata includes &lt;ExcludeAssets&gt;none&lt;/ExcludeAssets&gt;." Condition="!Exists('%(RequiredRiderDll.FullPath)')" />
   </Target>
   <ItemGroup>
-    <EmbeddedResource Include="..\..\..\..\XVSIX64\Resources\Xpand.XAF.ModelEditor.Win.4.252.1.1.zip">
-      <Link>Resources\Xpand.XAF.ModelEditor.Win.4.252.1.1.zip</Link>
+    <EmbeddedResource Include="..\..\..\..\XVSIX64\Resources\Xpand.XAF.ModelEditor.Win.4.261.1.0.zip">
+      <Link>Resources\Xpand.XAF.ModelEditor.Win.4.261.1.0.zip</Link>
     </EmbeddedResource>
   </ItemGroup>
 </Project>
+
 
 
 

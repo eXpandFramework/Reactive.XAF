@@ -62,6 +62,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests {
                 .ToUnit().Select(unit => unit), startupFactory: context => new TestStartup(context.Configuration,startup => startup.AddObjectSpaceProviders));
         
         
+        
         [Test()]
         [XpandTest(state:ApartmentState.MTA)]
         public async Task Commit_Objects_SecuredProvider()

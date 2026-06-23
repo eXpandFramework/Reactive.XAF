@@ -42,10 +42,10 @@ namespace Xpand.XAF.Modules.BulkObjectUpdate.Tests {
         private static IObservable<Frame> SetupModel(BlazorApplication application){
             return application.WhenSetupComplete().Do(_ => {
                 var bulkObjectUpdate = application.Model.ToReactiveModule<IModelReactiveModulesBulkObjectUpdate>().BulkObjectUpdate;
-                var rule1 = bulkObjectUpdate.Rules.AddNode<IModelBulkObjectUpdateRule>("1");
+                var rule1 =bulkObjectUpdate.Rules["1"]?? bulkObjectUpdate.Rules.AddNode<IModelBulkObjectUpdateRule>("1");
                 rule1.Caption = rule1.Id();
                 rule1.ListView = application.Model.BOModel.GetClass(typeof(BOU)).DefaultListView;
-                var rule2 = bulkObjectUpdate.Rules.AddNode<IModelBulkObjectUpdateRule>("2");
+                var rule2 = bulkObjectUpdate.Rules["2"]??bulkObjectUpdate.Rules.AddNode<IModelBulkObjectUpdateRule>("2");
                 rule2.ListView = application.Model.BOModel.GetClass(typeof(BOU)).DefaultListView;
                 rule2.DetailView = application.Model.BOModel.GetClass(typeof(BOU2)).DefaultDetailView;
                 rule2.Caption = rule2.Id();

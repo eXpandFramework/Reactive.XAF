@@ -87,7 +87,8 @@ namespace Xpand.XAF.Modules.BulkObjectUpdate{
         }
 
         private static IObservable<ChoiceActionItem> AddItems(this SingleChoiceAction action)
-            => action.Model.Application.ModelObjectStateManager().Rules.Where(rule => action.View()?.Model==rule.ListView)
+            => action.Model.Application.ModelObjectStateManager().Rules
+	            .Where(rule => action.View()?.Model==rule.ListView)
                 .Select(rule => new ChoiceActionItem(rule.Caption, rule)).ToNowObservable()
                 .Where(item => action.Items.Find(item.Data)==null)
                 .Do(item => action.Items.Add(item)).TraceObjectStateManager(item => item.Caption);

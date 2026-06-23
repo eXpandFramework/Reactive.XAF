@@ -1,9 +1,9 @@
-﻿using System.Reflection;
-using DevExpress.ExpressApp;
+﻿using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Blazor.DesignTime;
 using DevExpress.ExpressApp.Blazor.Services;
 using DevExpress.ExpressApp.Design;
 using DevExpress.ExpressApp.Utils;
+using System.Reflection;
 
 namespace TestApplication.Blazor.Server
 {

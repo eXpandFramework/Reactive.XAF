@@ -19,20 +19,11 @@
   <ItemGroup>
     <PackageReference Include="DevExpress.Drawing.Skia" />
     <PackageReference Include="DevExpress.ExpressApp.Blazor" />
+    
     <PackageReference Include="DevExpress.ExpressApp.Security.Xpo" />
-    <PackageReference Include="DevExpress.ExpressApp.Validation.Blazor" />
-    <PackageReference Include="DevExpress.ExpressApp" />
-    <PackageReference Include="DevExpress.ExpressApp.ConditionalAppearance" />
-    <PackageReference Include="DevExpress.ExpressApp.Security" />
-    <PackageReference Include="DevExpress.ExpressApp.Validation" />
-    <PackageReference Include="DevExpress.ExpressApp.Xpo" />
-    <PackageReference Include="DevExpress.Persistent.Base" />
     <PackageReference Include="DevExpress.Persistent.BaseImpl.Xpo" />
-    <PackageReference Include="Azure.Identity" />
-    <PackageReference Include="Microsoft.Data.SqlClient" />
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" />    
-  </ItemGroup>
-  <ItemGroup>
+    <PackageReference Include="DevExpress.ExpressApp.Validation.Blazor" />
     
   </ItemGroup>
+  
 </Project>

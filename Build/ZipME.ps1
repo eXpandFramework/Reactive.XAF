@@ -55,16 +55,16 @@ if (!(Test-AzDevops) -and !$SkipIDEBuild){
         }
     }
     
-    Inject-Dependency "system.text.json" "10.0.1" "System.Text.Json.dll"
-    Inject-Dependency "microsoft.visualstudio.solutionpersistence" "1.0.52" "Microsoft.VisualStudio.SolutionPersistence.dll"
-    Inject-Dependency "system.threading.tasks.extensions" "4.6.3" "System.Threading.Tasks.Extensions.dll"
-    Inject-Dependency "system.text.encodings.web" "10.0.1" "System.Text.Encodings.Web.dll"
-    Inject-Dependency "system.memory" "4.6.3" "System.Memory.dll"
-    Inject-Dependency "system.runtime.compilerservices.unsafe" "6.1.2" "System.Runtime.CompilerServices.Unsafe.dll"
-    Inject-Dependency "system.buffers" "4.6.1" "System.Buffers.dll"
-    Inject-Dependency "microsoft.bcl.asyncinterfaces" "10.0.1" "Microsoft.Bcl.AsyncInterfaces.dll"
-    Inject-Dependency "system.io.pipelines" "10.0.1" "System.IO.Pipelines.dll"
-    Inject-Dependency "microsoft.io.redist" "6.1.3" "Microsoft.IO.Redist.dll"
+    # Inject-Dependency "system.text.json" "10.0.1" "System.Text.Json.dll"
+    # Inject-Dependency "microsoft.visualstudio.solutionpersistence" "1.0.52" "Microsoft.VisualStudio.SolutionPersistence.dll"
+    # Inject-Dependency "system.threading.tasks.extensions" "4.6.3" "System.Threading.Tasks.Extensions.dll"
+    # Inject-Dependency "system.text.encodings.web" "10.0.1" "System.Text.Encodings.Web.dll"
+    # Inject-Dependency "system.memory" "4.6.3" "System.Memory.dll"
+    # Inject-Dependency "system.runtime.compilerservices.unsafe" "6.1.2" "System.Runtime.CompilerServices.Unsafe.dll"
+    # Inject-Dependency "system.buffers" "4.6.1" "System.Buffers.dll"
+    # Inject-Dependency "microsoft.bcl.asyncinterfaces" "10.0.1" "Microsoft.Bcl.AsyncInterfaces.dll"
+    # Inject-Dependency "system.io.pipelines" "10.0.1" "System.IO.Pipelines.dll"
+    # Inject-Dependency "microsoft.io.redist" "6.1.3" "Microsoft.IO.Redist.dll"
     Get-ChildItem|Copy-Item -Destination "$env:APPDATA\Xpand.XAF.ModelEditor.Win\Xpand.XAF.ModelEditor.Win" -Force -Recurse
     $zip="$(Get-Location)\..\Xpand.XAF.ModelEditor.Win.zip"
     Compress-Files -zipfileName $zip -Force 

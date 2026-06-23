@@ -77,9 +77,10 @@ Invoke-Script {
         $CustomVersion=$latestMinors
     }
     
-    "CustomVersion=$CustomVersion"
+    
 
-    $CustomVersion="26.1.2"
+    $CustomVersion="26.1.3"
+    "CustomVersion=$CustomVersion"
 
     $taskList = "Build"
     . "$SourcePath\build\UpdateDependencies.ps1" $CustomVersion

@@ -51,20 +51,21 @@ namespace Xpand.XAF.ModelEditor.Module.Win {
                 .TraceModelEditorWindowsFormsModule(TradeParameters);
 
         private static IObservable<ShowViewParameters> ParseProjects(this XafApplication application, SynchronizationContext synchronizationContext, string solutionPath, ShowViewParameters parameters) 
-            => application.CreateObjectSpace()
-                .Use(objectSpace => {
+            => application.UseProviderObjectSpace(objectSpace => {
                     var activeConfiguration = ((IModelApplicationME)application.Model).ModelEditor.ActiveConfiguration;
                     var models = objectSpace.GetObjectsQuery<XafModel>().ToArray();
-                    return SolutionFile.Parse(solutionPath).Projects(objectSpace,activeConfiguration).Models(objectSpace).ToNowObservable()
+                    return SolutionFile.Parse(solutionPath).Projects(objectSpace, activeConfiguration)
+                        .Models(objectSpace).ToNowObservable()
                         .BufferUntilCompleted().Do(_ => {
                             objectSpace.Delete(models);
                             objectSpace.CommitChanges();
                         });
-                }).BufferUntilCompleted().To(parameters).ToConsole()
+                })
+                .BufferUntilCompleted().To(parameters).ToConsole()
                 .TakeUntil(parameters.CreatedView.WhenClosing().ToConsole(_ => "Closed"))
                 .ObserveOnContext(synchronizationContext)
                 .Do(viewParameters => viewParameters.CreatedView.ObjectSpace.Refresh());
-        
+
         private static string TradeParameters(this ShowViewParameters parameters) => parameters.CreatedView.Id;
 
         public static IObservable<Unit> CloseViewWhenNotSettings(this XafApplication application) 

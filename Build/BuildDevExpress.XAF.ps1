@@ -87,7 +87,7 @@ Task CompileTests -precondition { return ((Get-VersionPart $DXVersion Minor) -ne
         Invoke-Task -taskName BuildNugetConsumers
     # }
 
-    if ($DXVersion -eq "26.1.3"){
+    if ($DXVersion -eq "26.1.4"){
         throw "restore next comment"
     }
     # Get-ChildItem $root\bin "*xpand*.dll" | Test-AssemblyReference -VersionFilter $DXVersion
@@ -150,7 +150,7 @@ Task CompileNugetConsumers -precondition { return $compile } {
         & $root\build\ZipMe.ps1 -SkipIDEBuild
     } -Maximum 3
     Write-HostFormatted "Test-AssemblyReference" -Section
-    if ($DXVersion -eq "26.1.3"){
+    if ($DXVersion -eq "26.1.4"){
         throw "restore next comment"
     }
     # Get-ChildItem $root\bin "*xpand*.dll" | Test-AssemblyReference -VersionFilter $DXVersion
@@ -204,7 +204,7 @@ Task Compile -precondition { return $compile } {
             Version = [System.Diagnostics.FileVersionInfo]::GetVersionInfo($_.FullName).FileVersion
         } | Write-Output
     } | Format-Table
-    if ($DXVersion -eq "26.1.3"){
+    if ($DXVersion -eq "26.1.4"){
         throw "restore next comment"
     }
     # Get-ChildItem $root\bin "*xpand*.dll" | Test-AssemblyReference -VersionFilter $DXVersion -ReferenceFilter "Devexp"| Format-Table -AutoSize

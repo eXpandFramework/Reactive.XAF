@@ -3,6 +3,7 @@ using DevExpress.ExpressApp.Security;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.PermissionPolicy;
 using DevExpress.Xpo;
+using TestApplication.Module.BusinessObjects;
 
 namespace TestApplication.Blazor.Server.BusinessObjects
 {

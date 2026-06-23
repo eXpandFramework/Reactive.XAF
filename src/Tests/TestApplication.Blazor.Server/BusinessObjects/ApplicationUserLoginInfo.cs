@@ -2,8 +2,9 @@
 using DevExpress.ExpressApp.Security;
 using DevExpress.Persistent.BaseImpl;
 using DevExpress.Xpo;
+using TestApplication.Blazor.Server.BusinessObjects;
 
-namespace TestApplication.Blazor.Server.BusinessObjects
+namespace TestApplication.Module.BusinessObjects
 {
     [DeferredDeletion(false)]
     [Persistent("PermissionPolicyUserLoginInfo")]

@@ -36,7 +36,7 @@
             this.Modules.Add(this.module1);
             this.Modules.Add(this.module2);
             this.Modules.Add(this.module4);
-            this.UseOldTemplates = false;
+            
             this.DatabaseVersionMismatch += new System.EventHandler<DevExpress.ExpressApp.DatabaseVersionMismatchEventArgs>(this.ModelEditorWindowsFormsApplication_DatabaseVersionMismatch);
             this.CustomizeLanguagesList += new System.EventHandler<DevExpress.ExpressApp.CustomizeLanguagesListEventArgs>(this.ModelEditorWindowsFormsApplication_CustomizeLanguagesList);
 

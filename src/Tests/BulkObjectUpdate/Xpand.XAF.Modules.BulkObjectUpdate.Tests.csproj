@@ -69,5 +69,6 @@
         <PackageReference Include="Shouldly" />
         <PackageReference Include="System.Interactive.Async" />
         <PackageReference Include="Lib.Harmony.Thin" />
+        <PackageReference Include="DevExpress.Persistent.BaseImpl.Xpo" />
     </ItemGroup>
 </Project>

@@ -1,14 +1,8 @@
-﻿using System.ComponentModel;
-using DevExpress.ExpressApp;
-using DevExpress.ExpressApp.Actions;
-using DevExpress.ExpressApp.DC;
-using DevExpress.ExpressApp.Editors;
-using DevExpress.ExpressApp.Model;
-using DevExpress.ExpressApp.Model.Core;
-using DevExpress.ExpressApp.Model.DomainLogics;
-using DevExpress.ExpressApp.Model.NodeGenerators;
+﻿using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Updating;
 using DevExpress.Persistent.BaseImpl;
+using System.ComponentModel;
+using Updater = TestApplication.Blazor.Server.DatabaseUpdate.Updater;
 
 namespace TestApplication.Blazor.Server
 {
@@ -16,6 +10,10 @@ namespace TestApplication.Blazor.Server
     // For more typical usage scenarios, be sure to check out https://docs.devexpress.com/eXpressAppFramework/DevExpress.ExpressApp.ModuleBase.
     public sealed class TestApplicationBlazorModule : ModuleBase
     {
+        public TestApplicationBlazorModule(){
+            AdditionalExportedTypes.Add(typeof(ModelDifference));
+        }
+
         //void Application_CreateCustomModelDifferenceStore(object sender, CreateCustomModelDifferenceStoreEventArgs e) {
         //    e.Store = new ModelDifferenceDbStore((XafApplication)sender, typeof(ModelDifference), true, "Blazor");
         //    e.Handled = true;
@@ -25,14 +23,10 @@ namespace TestApplication.Blazor.Server
             e.Store = new ModelDifferenceDbStore((XafApplication)sender, typeof(ModelDifference), false, "Blazor");
             e.Handled = true;
         }
-        public TestApplicationBlazorModule()
-        {
-            AdditionalExportedTypes.Add(typeof(ModelDifference));
-        }
-        public override IEnumerable<ModuleUpdater> GetModuleUpdaters(IObjectSpace objectSpace, Version versionFromDB)
-        {
-            return [new Updater(objectSpace, versionFromDB)];
-        }
+
+        public override IEnumerable<ModuleUpdater> GetModuleUpdaters(IObjectSpace objectSpace, Version versionFromDB) 
+            => [new Updater(objectSpace, versionFromDB)];
+
         public override void Setup(XafApplication application)
         {
             base.Setup(application);
