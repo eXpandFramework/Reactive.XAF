@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.Numeric;
+using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.TestsLib.Common;
 using Xpand.XAF.Modules.Reactive.Services;
@@ -24,7 +25,7 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
         public async Task Basic_Execution_On_Modification() {
             await using var application = NewApplication();
             
-            var capturedOutput = new ReplaySubject<object[]>();
+            var capturedOutput=Subject.Synchronize(new BehaviorSubject<object[]>(null));
             long oid = -1;
 
             application.WhenSetupComplete()
@@ -40,10 +41,7 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
                     command.CommandSuite = suite;
 
                     return suite.Commit()
-                        .SelectMany(_ => command.WhenExecuted().Do(objects => {
-                            capturedOutput.OnNext(objects);
-                            capturedOutput.OnCompleted();
-                        }))
+                        .SelectMany(_ => command.WhenExecuted().Do(objects => capturedOutput.OnNext(objects)))
                         .To(suite);
                 }))
                 .Take(1)
@@ -58,7 +56,7 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
                 })
                 .FirstOrDefaultAsync();
 
-            var result = await capturedOutput.FirstAsync();
+            var result = await capturedOutput.WhenNotDefault().FirstAsync().ToTaskWithoutConfigureAwait();
             result.Length.ShouldBe(1);
             var modifiedWf = result.Single().ShouldBeOfType<WF>();
             modifiedWf.Oid.ShouldBe(oid);
@@ -105,7 +103,7 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
                 })
                 .FirstOrDefaultAsync();
 
-            var result = await capturedOutput.FirstAsync();
+            var result = await capturedOutput.FirstAsync().ToTaskWithoutConfigureAwait();
             result.Length.ShouldBe(1);
             var modifiedWf = result.Single().ShouldBeOfType<WF>();
             modifiedWf.Oid.ShouldBe(oid);
@@ -229,7 +227,7 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
                 })
                 .FirstOrDefaultAsync();
 
-            var result = await capturedOutput.FirstAsync();
+            var result = await capturedOutput.FirstAsync().ToTaskWithoutConfigureAwait();
             result.Length.ShouldBe(2);
             var resultOids = result.Cast<WF>().Select(wf => wf.Oid).ToArray();
             resultOids.ShouldContain(oid1);
@@ -278,7 +276,7 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
                 })
                 .FirstOrDefaultAsync();
 
-            var result = await capturedOutput.FirstAsync();
+            var result = await capturedOutput.FirstAsync().ToTaskWithoutConfigureAwait();
             result.Length.ShouldBe(1);
             var modifiedWf = result.Single().ShouldBeOfType<WF>();
             modifiedWf.Oid.ShouldBe(oid);

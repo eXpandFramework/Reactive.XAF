@@ -119,7 +119,7 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
             
 
             IObservable<Unit> SetupLogic() {
-                var commandExecuted = application.WhenProviderObject<ActionOperationWorkflowCommand>()
+                var commandExecuted = application.WhenProviderObject<ActionOperationWorkflowCommand>().Take(1)
                     .SelectMany(cmd => cmd.WhenExecuted().Take(1))
                     .Do(output => {
                         capturedOutput.OnNext(output);
@@ -164,7 +164,7 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
             var capturedOutput = new ReplaySubject<object[]>();
 
             IObservable<Unit> SetupLogic() {
-                var commandExecuted = application.WhenProviderObject<ActionOperationWorkflowCommand>()
+                var commandExecuted = application.WhenProviderObject<ActionOperationWorkflowCommand>().Take(1)
                     .SelectMany(cmd => cmd.WhenExecuted().Take(1))
                     .Do(output => {
                         capturedOutput.OnNext(output);
@@ -187,9 +187,9 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
             }
 
             IObservable<Unit> ExecutionLogic(Frame frame) => frame.Application.Navigate(typeof(WF)).Take(1)
-                .Do(_ => {
-                    frame.View.ToListView().CollectionSource.Objects().Count().ShouldBe(2);
-                    frame.SimpleAction(nameof(Outputs_View_Objects_When_Emission_Is_ViewObjects)).DoExecute();
+                .Do(frame1 => {
+                    frame1.View.ToListView().CollectionSource.Objects().Count().ShouldBe(2);
+                    frame1.SimpleAction(nameof(Outputs_View_Objects_When_Emission_Is_ViewObjects)).DoExecute();
                 })
                 .ToUnit();
 
@@ -214,7 +214,7 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
             var capturedOutput = new ReplaySubject<object[]>();
 
             IObservable<Unit> SetupLogic() {
-                var commandExecuted = application.WhenProviderObject<ActionOperationWorkflowCommand>()
+                var commandExecuted = application.WhenProviderObject<ActionOperationWorkflowCommand>().Take(1)
                     .SelectMany(cmd => cmd.WhenExecuted().Take(1))
                     .Do(output => {
                         capturedOutput.OnNext(output);
@@ -261,7 +261,7 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
             long oid = 0;
 
             IObservable<Unit> SetupLogic() {
-                var commandExecuted = application.WhenProviderObject<ActionOperationWorkflowCommand>()
+                var commandExecuted = application.WhenProviderObject<ActionOperationWorkflowCommand>().Take(1)
                     .SelectMany(cmd => cmd.WhenExecuted().Take(1))
                     .Do(output => {
                         capturedOutput.OnNext(output);
@@ -309,7 +309,7 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
             var capturedOutput = new ReplaySubject<object[]>();
 
             IObservable<Unit> SetupLogic() {
-                var commandExecuted = application.WhenProviderObject<ActionOperationWorkflowCommand>()
+                var commandExecuted = application.WhenProviderObject<ActionOperationWorkflowCommand>().Take(1)
                     .SelectMany(cmd => cmd.WhenExecuted().Take(1))
                     .Do(output => {
                         capturedOutput.OnNext(output);
@@ -328,12 +328,14 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
                     return suite.Commit();
                 });
 
-                return setupDatabase.IgnoreElements().ConcatToUnit(commandExecuted);
+                return setupDatabase.IgnoreElements().ConcatToUnit(commandExecuted)
+                    .Finally(() => { });
             }
 
             IObservable<Unit> ExecutionLogic(Frame frame) 
                 => frame.Application.Navigate(typeof(WF)).Take(1)
                     .Do(frame1 => frame1.SimpleAction(nameof(Handles_Invalid_OutputProperty_Gracefully)).DoExecute())
+                    .Finally(() => { })
                     .ToUnit();
 
             await SetupLogic().IgnoreElements()
@@ -355,7 +357,7 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
             var capturedOutput = new ReplaySubject<object[]>();
 
             IObservable<Unit> SetupLogic() {
-                var commandExecuted = application.WhenProviderObject<ActionOperationWorkflowCommand>()
+                var commandExecuted = application.WhenProviderObject<ActionOperationWorkflowCommand>().Take(1)
                     .SelectMany(cmd => cmd.WhenExecuted().Take(1))
                     .Do(output => {
                         capturedOutput.OnNext(output);

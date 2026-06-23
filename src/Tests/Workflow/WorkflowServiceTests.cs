@@ -961,13 +961,13 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
                 .MergeToUnit(application.DeferAction(_ => WorkflowModule(application)))
                 .MergeToUnit(application.StartWinTest(_ => Observable.Empty<Unit>()))
                 .MergeToUnit(listenForCleanup)
-                .Timeout(TimeSpan.FromSeconds(30)).FirstOrDefaultAsync();
+                .Timeout(TimeSpan.FromSeconds(30)).FirstOrDefaultAsync().ToTaskWithoutConfigureAwait();
 
             await application.UseProviderObjectSpace(space => {
                 var cmd = space.GetObjectByKey<TestCommand>(commandOid);
                 cmd.Executions.Count.ShouldBe(10);
                 return cmd.Observe();
-            });
+            }).FirstOrDefaultAsync().ToTaskWithoutConfigureAwait();
         }
         
     }

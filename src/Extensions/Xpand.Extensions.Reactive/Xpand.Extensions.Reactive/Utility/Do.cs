@@ -37,7 +37,7 @@ namespace Xpand.Extensions.Reactive.Utility {
             });
 
         public static IObservable<T> DoSafe<T>(this IObservable<T> source, Action<T> action)
-            => source.SelectMany(obj => obj.DeferAction(action).CompleteOnError().To(obj));
+            => source.SelectMany(obj => obj.DeferAction(action).CompleteOnError().WhenCompleted().To(obj));
         
         public static IObservable<T> DoOnPrevious<T>(this IObservable<T> source, Action<T> onPrevious)
             => source.Select(x => (Item: x, HasValue: true))

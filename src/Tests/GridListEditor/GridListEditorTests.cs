@@ -12,6 +12,7 @@ using Fasterflect;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.Reactive.Conditional;
+using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.ViewExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
@@ -32,8 +33,7 @@ namespace Xpand.XAF.Modules.GridListEditor.Tests{
         [Ignore("Random fail on azure")]
         [Apartment(ApartmentState.STA)]
         public async Task Remember_TopRowIndex_WHen_Refresh_View_DataSource(){
-            
-            using var application = GridListEditorModule().Application;
+            await using var application = GridListEditorModule().Application;
             
             var items = application.Model.ToReactiveModule<IModelReactiveModuleGridListEditor>().GridListEditor;
             var topRow = items.GridListEditorRules.AddNode<IModelGridListEditorTopRow>();
@@ -90,6 +90,7 @@ namespace Xpand.XAF.Modules.GridListEditor.Tests{
             }
         
             var testObserver = application.WhenFrame(ViewType.ListView)
+                .SelectMany(frame => ((Control)application.MainWindow.Template).ProcessEvent(nameof(Form.Activated)).To(frame).Take(1))
                 .Select(frame => {
                     var gridView = ((DevExpress.ExpressApp.Win.Editors.GridListEditor) frame.View.AsListView().Editor).GridView;
                     if (upArrowMoveToRowHandle) {

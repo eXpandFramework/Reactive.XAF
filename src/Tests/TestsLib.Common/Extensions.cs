@@ -38,7 +38,6 @@ using Xpand.Extensions.Numeric;
 using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.ErrorHandling;
 using Xpand.Extensions.Reactive.Filter;
-using Xpand.Extensions.Reactive.Relay;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.ActionExtensions;
@@ -266,7 +265,7 @@ namespace Xpand.TestsLib.Common{
                 return application.WhenFrame(Nesting.Root).Take(1)
                     .SelectMany(frame => (frame.Template)
                         .ProcessEvent("Activated").Take(1).WaitUntilInactive(2.Seconds()).Take(1).ObserveOnContext()
-                        .SelectMany(_ => testFactory(frame).BufferUntilCompleted().Do(_ => application.Exit()).SelectMany()))
+                        .SelectMany(_ => testFactory(frame).BufferUntilCompleted().DoSafe(_ => application.Exit()).SelectMany()))
                     .Finally(() => SynchronizationContext.SetSynchronizationContext(originalSyncContext));
             }))
             .Timeout(timeout??300.ToSeconds())

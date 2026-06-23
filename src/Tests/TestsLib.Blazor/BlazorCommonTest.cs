@@ -56,22 +56,7 @@ namespace Xpand.TestsLib.Blazor {
 		public static int Port { get; set; } = 5000;
 
 		private static string TestBlazorAppPath() {
-			var baseDir = AppContext.BaseDirectory;  
-			var dir = new DirectoryInfo(baseDir);
-			Console.WriteLine($"[TestBlazorAppPath] AppContext.BaseDirectory = {baseDir}");
-    
-			var parent = Directory.GetParent(baseDir)?.FullName;
-			Console.WriteLine($"[TestBlazorAppPath] Parent = {parent}");
-    
-			if (parent != null) {
-				var candidate = Path.Combine(parent, "TestBlazorApplication");
-				Console.WriteLine($"[TestBlazorAppPath] Candidate (parent level) = {candidate}");
-				Console.WriteLine($"[TestBlazorAppPath] Candidate exists = {Directory.Exists(candidate)}");
-				if (Directory.Exists(candidate)) {
-					return candidate;
-				}
-			}
-			
+			var dir = new DirectoryInfo(AppContext.BaseDirectory);
 			while (dir is { Parent: not null }) {
 				var candidate = Path.Combine(dir.FullName, "src", "Tests", "TestApplication.Blazor.Server");
 				if (Directory.Exists(candidate)) {

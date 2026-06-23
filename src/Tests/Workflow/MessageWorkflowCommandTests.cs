@@ -8,6 +8,7 @@ using DevExpress.ExpressApp;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.Numeric;
+using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.TestsLib.Common;
 using Xpand.XAF.Modules.Reactive.Services;
@@ -107,16 +108,13 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
             await using var application = NewApplication();
             WorkflowModule(application);
 
-            var messageOptionsSubject = new ReplaySubject<MessageOptions>();
+            var messageOptionsSubject = Subject.Synchronize(new BehaviorSubject<MessageOptions>(null));
 
             using var _=application.WhenCustomizeMessage()
                 .SelectMany(e => {
                     e.Handled = true;
                     return e.Instance
-                        .Do(options => {
-                            messageOptionsSubject.OnNext(options);
-                            messageOptionsSubject.OnCompleted();
-                        });
+                        .Do(options => messageOptionsSubject.OnNext(options));
                 })
                 .Subscribe();
 
@@ -136,7 +134,7 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
                 return suite.Commit();
             });
 
-            await application.StartWinTest(_ => testLogic.ConcatToUnit(messageOptionsSubject)) ;
+            await application.StartWinTest(_ => testLogic.ConcatToUnit(messageOptionsSubject.WhenNotDefault().Take(1))).FirstOrDefaultAsync() ;
 
             var messageOptions = await messageOptionsSubject.FirstAsync();
     
@@ -226,16 +224,13 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
         public async Task Correctly_Formats_IDefaultProperty_Objects_In_Message() {
             await using var application = NewApplication();
 
-            var messageOptionsSubject = new ReplaySubject<MessageOptions>();
+            var messageOptionsSubject=Subject.Synchronize(new BehaviorSubject<MessageOptions>(null));
 
             application.WhenCustomizeMessage().Take(1)
                 .SelectMany(e => {
                     e.Handled = true;
                     return e.Instance
-                        .Do(options => {
-                            messageOptionsSubject.OnNext(options);
-                            messageOptionsSubject.OnCompleted();
-                        });
+                        .Do(options => messageOptionsSubject.OnNext(options));
                 })
                 .Subscribe();
 
@@ -255,9 +250,9 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
                 }))
                 .Subscribe();
             WorkflowModule(application);
-            await application.StartWinTest(_ => messageOptionsSubject) ;
+            await application.StartWinTest(_ => messageOptionsSubject.WhenNotDefault().Take(1)).FirstOrDefaultAsync() ;
 
-            var messageOptions = await messageOptionsSubject.FirstAsync().Timeout(10.Seconds());
+            var messageOptions = await messageOptionsSubject.WhenNotDefault().FirstAsync().Timeout(10.Seconds());
     
             messageOptions.ShouldNotBeNull();
             messageOptions.Message.ShouldContain("Test Command: Test Command->Id: EmitSelf");

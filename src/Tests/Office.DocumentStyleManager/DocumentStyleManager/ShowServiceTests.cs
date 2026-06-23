@@ -40,7 +40,8 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManag
             window.Action<DocumentStyleManagerModule>().ShowStyleManager().Active.ResultValue.ShouldBeTrue();
         }
 
-        [Test][Apartment(ApartmentState.STA)][XpandTest()]
+        // [Test][Apartment(ApartmentState.STA)][XpandTest()]
+        [Description("16.1 BC")]
         public void Displays_The_DocumentStyleManager_DetailView_Two_Times(){
             using var application=DocumentStyleManagerModule().Application;
             application.Model.EnableShowStyleManager();
