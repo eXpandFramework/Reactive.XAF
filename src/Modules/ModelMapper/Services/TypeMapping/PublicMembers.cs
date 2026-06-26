@@ -149,7 +149,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                         ? !method.IsPrivate
                         : new []{AccessModifier.Public,AccessModifier.Protected}
                             .Contains(((PropertyInfo) info).AccessModifier()))).Select(info => info.Name)
-                .Concat(new[]{"Item", "IsReadOnly", "Remove", "Id", "Nodes", "IsValid"}).Distinct()
+                .Concat(new[]{"Item", "IsReadOnly", "Remove", "Id", "Nodes", "IsValid","Layers"}).Distinct()
                 .ToObservable(Scheduler.Immediate)
                 .Do(name => ReservedPropertyNames.Add(name))
                 .Subscribe();

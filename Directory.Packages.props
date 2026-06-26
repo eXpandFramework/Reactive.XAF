@@ -8,9 +8,14 @@
       <CentralPackageFloatingVersionsEnabled>true</CentralPackageFloatingVersionsEnabled>
     
   </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyInfoFilePath>$(MSBuildThisFileDirectory)src\common\AssemblyInfoVersion.cs</AssemblyInfoFilePath>
+    <AssemblyInfoContent Condition="Exists('$(AssemblyInfoFilePath)')">$([System.IO.File]::ReadAllText('$(AssemblyInfoFilePath)'))</AssemblyInfoContent>
+    <ExtractedVersion>$([System.Text.RegularExpressions.Regex]::Match('$(AssemblyInfoContent)', `Version = "([^"]+)"`).Groups[1].Value)</ExtractedVersion>
+  </PropertyGroup>
   <ItemGroup>
-    <PackageVersion Include="Xpand.XAF.Modules.OneView" Version="*" />
-    <PackageVersion Include="Xpand.XAF.Modules.Windows" Version="*" />
+    <PackageVersion Include="Xpand.XAF.Modules.OneView" Version="$(ExtractedVersion)" />
+    <PackageVersion Include="Xpand.XAF.Modules.Windows" Version="$(ExtractedVersion)" />
     <PackageVersion Include="Xpand.XAF.Modules.GridListEditor" Version="*" />
     <PackageVersion Include="Xpand.XAF.Modules.ModelMapper" Version="*" />
     <PackageVersion Include="akarnokd.reactive_extensions" Version="0.0.27-alpha" />

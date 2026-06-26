@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reflection;
 using Microsoft.CodeAnalysis.CSharp;
@@ -16,18 +14,15 @@ using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.StreamExtensions;
 using Xpand.Extensions.StringExtensions;
-using Xpand.Extensions.XAF.AppDomainExtensions;
 using Xpand.XAF.Modules.ModelMapper.Configuration;
 
 
 namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
 	
     public static partial class TypeMappingService{
-        public static string CustomAssemblyNameSuffix = "Custom";
+        public static readonly string CustomAssemblyNameSuffix = "Custom";
         private static bool _skipAssemblyValidation;
         static readonly Subject<GenericEventArgs<(string code,IEnumerable<string> references,string outputAssembly)>> CustomCompileSubject=new();
-
-        public static IObservable<GenericEventArgs<(string code, IEnumerable<string> references, string outputAssembly)>> CustomCompile1 => CustomCompileSubject.AsObservable();
         
         private static IObservable<Assembly> Compile(this IEnumerable<string> references, string code,bool isCustom){
             var outputAssembly = FormatOutputAssembly(isCustom);
@@ -52,7 +47,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         private static Assembly RemoveRecursiveProperties(string assembly){
 	        using (var assemblyDefinition = AssemblyDefinition.ReadAssembly(assembly,new ReaderParameters(){ReadWrite = true})){
 		        assemblyDefinition.Name = new AssemblyNameDefinition(Path.GetFileNameWithoutExtension(assembly), assemblyDefinition.Name.Version);
-                var typeDefinitions = assemblyDefinition.MainModule.Types.Where(definition => definition.Interfaces.Any(_ => _.InterfaceType.FullName==typeof(IModelModelMap).FullName));
+                var typeDefinitions = assemblyDefinition.MainModule.Types.Where(definition => definition.Interfaces.Any(implementation => implementation.InterfaceType.FullName==typeof(IModelModelMap).FullName));
                 foreach (var type in typeDefinitions){
                     assemblyDefinition.RemoveRecursiveProperties(type,type.FullName);    
                 }
@@ -87,8 +82,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
 
         private static PropertyDefinition[] RecursiveCandidates(this TypeReference type) 
             => type.Resolve().Properties
-                .Where(_ => !_.PropertyType.IsValueType && _.PropertyType.FullName!=typeof(string).FullName)
-                .Where(definition => !definition.PropertyType.Resolve().Interfaces.Any(_ => _.InterfaceType.IsGenericInstance))
+                .Where(definition => !definition.PropertyType.IsValueType && definition.PropertyType.FullName!=typeof(string).FullName)
+                .Where(definition => !definition.PropertyType.Resolve().Interfaces.Any(implementation => implementation.InterfaceType.IsGenericInstance))
                 .ToArray();
 
         private static bool TypeFromPath(this IModelMapperConfiguration configuration,bool isCustom){
@@ -123,19 +118,19 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             });
 
         private static string HashCode() 
-            => string.Join(Environment.NewLine, PropertyMappingRules.Select(_ => _.key)
-                    .Concat(TypeMappingRules.Select(_ => _.key))
-                    .Concat(AdditionalTypesList.Select(_ => _.FullName))
+            => string.Join(Environment.NewLine, PropertyMappingRules.Select(t => t.key)
+                    .Concat(TypeMappingRules.Select(t => t.key))
+                    .Concat(AdditionalTypesList.Select(t => t.FullName))
                     .Concat(ReservedPropertyTypes.WhereNotDefault().Select(type => type.FullName))
                     .Concat(ReservedPropertyNames)
-                    .Concat(ReservedPropertyInstances.Select(_ => _.FullName))
-                    .Concat(new[]{ModelMappersNodeName, MapperAssemblyName, ModelMapperAssemblyName, DefaultContainerSuffix}).OrderBy(s => s))
+                    .Concat(ReservedPropertyInstances.Select(t => t.FullName))
+                    .Concat([ModelMappersNodeName, MapperAssemblyName, ModelMapperAssemblyName, DefaultContainerSuffix]).OrderBy(s => s))
                 .ToGuid().ToString();
 
         private static bool VersionChanged(this AssemblyDefinition assembly) 
             => Version.Parse(assembly.CustomAttributes
                 .First(attribute => attribute.AttributeType.FullName == typeof(AssemblyFileVersionAttribute).FullName).ConstructorArguments
-                .First().Value.ToString()) !=_modelMapperModuleVersion;
+                .First().Value.ToString()!) !=_modelMapperModuleVersion;
 
         private static bool IsMapped(this AssemblyDefinition assembly, IModelMapperConfiguration configuration){
             var typeAssemblyHash = configuration.TypeToMap.Assembly.ManifestModule.ModuleVersionId.ToString();
