@@ -48,7 +48,8 @@ namespace Xpand.TestsLib {
 
         public static IObservable<Unit> StartWinTest(this IObservable<WinApplication> source, Func<WinApplication,IObservable<Unit>> test,TimeSpan timeout) 
             => source.SelectMany(application => Observable.Using(() => application,winApplication => winApplication.StartWinTest(test(winApplication)
-                .Timeout(timeout)))).FirstAsync();
+                .Timeout(timeout,nameof(StartWinTest))
+            ))).FirstAsync();
 
         public static IObservable<T> StartWinTest<T>(this WinApplication application, IObservable<T> test, string user=null) 
             => SynchronizationContext.Current.Observe()

@@ -45,7 +45,7 @@ namespace Xpand.TestsLib.Common{
         internal const string ExitSignal = "exit";
         public string PipeName{ get; set; } = nameof(Logger);
         public string ServerName{ get; set; } = ".";
-        public TimeSpan ConnectionTimeout{ get; set; } = 5.Seconds();
+        public TimeSpan ConnectionTimeout{ get; set; } = 15.Seconds();
         public string PowerShellName{ get; set; } =Directory.Exists("C:\\Program Files\\PowerShell\\")?"pwsh.exe": "powershell.exe";
     }
     public static class LoggerExtensions{
@@ -104,7 +104,8 @@ namespace Xpand.TestsLib.Common{
                 .Select(_ => new NamedPipeClientStream(logger.ServerName, logger.PipeName, PipeDirection.Out))
                 .SelectManySequential(clientStream => clientStream.ConnectAsync().ToObservable()
                     .Catch<Unit,TimeoutException>(_ => Observable.Empty<Unit>()).To(clientStream))
-                .Timeout(logger.ConnectionTimeout).WhenNotDefault(stream => stream.IsConnected).Take(1);
+                .Timeout(logger.ConnectionTimeout,nameof(Logger))
+                .WhenNotDefault(stream => stream.IsConnected).Take(1);
 
         public static IObservable<T> Log<T>(this IObservable<T> source,Func<T,string> messageFactory,TextWriter textWriter=null,[CallerMemberName]string caller="") 
             => source.Do(x => $"{caller}: {messageFactory(x)}".LogValue(textWriter));
