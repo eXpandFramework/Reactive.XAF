@@ -98,7 +98,9 @@ namespace Xpand.XAF.Modules.Reactive{
                 .Merge(manager.ConnectObjectString())
                 .Merge(manager.WhenApplication(application =>application.Connect()
                     .MergeToUnit(application.WhenSynchronizationContext().Do(context => ContextSubject.OnNext(context)))
-                    .Merge(manager.SetupPropertyEditorParentView()))
+                    .Merge(application.CacheSetup())
+                    .Merge(manager.SetupPropertyEditorParentView())
+                    )
         )
         .PushStackFrame();
 

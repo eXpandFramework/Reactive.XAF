@@ -9,6 +9,7 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using DevExpress.Data.Filtering;
@@ -508,12 +509,14 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .ToController<DialogController>()
                 .WhenAcceptTriggered(application.WhenLoggedOn().Select(t => t.application));
 
-        public static IObservable<Frame> WhenFirstFrame(this XafApplication application, Type objectType=null, string userName="Admin", string pass = null)
-            => application.WhenSetupComplete(_ => application.WhenFrame(objectType?? ((IModelApplicationNavigationItems)application.Model).NavigationItems
-                    .StartupNavigationItem.View.AsObjectView.ModelClass.TypeInfo.Type)
-                .Merge(application.WhenLoggedOn(userName, pass).IgnoreElements().To<Frame>()))
-                .Take(1);
-        
+        public static IObservable<Frame> WhenFirstFrame(this XafApplication application, Type objectType=null, string userName="Admin", string pass = null) {
+
+            return application.WhenWeb().SelectMany(_ => application.WhenSetupComplete(_ => application.WhenFrame(objectType ?? ((IModelApplicationNavigationItems)application.Model).NavigationItems.StartupNavigationItem.View.AsObjectView.ModelClass.TypeInfo.Type)
+                    .Merge(application.WhenLoggedOn(userName, pass).IgnoreElements().To<Frame>())))
+                .Merge(application.WhenWin().SelectMany(_ => application.WhenFrame(objectType ?? ((IModelApplicationNavigationItems)application.Model).NavigationItems.StartupNavigationItem.View.AsObjectView.ModelClass.TypeInfo.Type)
+                    .Merge(application.WhenLoggedOn(userName, pass).IgnoreElements().To<Frame>())));
+        }
+
         public static IObservable<XafApplication> WhenLoggedOn(this XafApplication application, string userName, string pass=null) 
             => application.WhenLoggedOn<AuthenticationStandardLogonParameters>(userName,pass);
         
@@ -537,11 +540,16 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<XafApplication> WhenLoggedOff(this XafApplication application) 
             => application.ProcessEvent(nameof(XafApplication.LoggedOff)).To(application);
 
-        
+        private static readonly ConditionalWeakTable<XafApplication, object> CompletedApps = new();
+        internal static IObservable<Unit> CacheSetup(this XafApplication application) 
+            => application.WhenSetupComplete().Do(xafApplication => CompletedApps.TryAdd(xafApplication, null)).ToUnit();
+
         public static IObservable<XafApplication> WhenSetupComplete(this XafApplication application,bool emitIfSetupAlready=true) 
-            => emitIfSetupAlready && application.MainWindow != null ? application.Observe()
-                : application.ProcessEvent(nameof(XafApplication.SetupComplete)).Take(1)
-                    .To(application);
+            => emitIfSetupAlready ? Observable.Defer(() => CompletedApps.TryGetValue(application, out _) ? Observable.Return(application)
+                    : application.ProcessEvent(nameof(XafApplication.SetupComplete)).Take(1)
+                        .Do(xafApplication => CompletedApps.TryAdd(xafApplication, null)).To(application))
+                : application.ProcessEvent(nameof(XafApplication.SetupComplete)).Take(1).To(application);
+
         public static IObservable<T> WhenSetupComplete<T>(this XafApplication application,Func<XafApplication,IObservable<T>> resilientSelector) 
             => application.ProcessEvent(nameof(XafApplication.SetupComplete)).SelectMany(resilientSelector);
 
