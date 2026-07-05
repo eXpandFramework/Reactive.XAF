@@ -39,14 +39,16 @@ namespace Xpand.Extensions.XAF.Xpo.ObjectSpaceExtensions{
 
             using var dbCommand = dbConnection.CreateCommand();
 
-            if (deleteTables) {
-                dbCommand.CommandText = @"
-    EXEC sp_MSForEachTable 'SET QUOTED_IDENTIFIER ON; ALTER TABLE ? NOCHECK CONSTRAINT all'
-    EXEC sp_MSForEachTable 'SET QUOTED_IDENTIFIER ON; DROP TABLE ?'
-";
-            }
-            else {
-                dbCommand.CommandText = @"
+            dbCommand.CommandText = deleteTables ? @"
+        DECLARE @sql NVARCHAR(MAX) = N'';
+        SELECT @sql += 'ALTER TABLE ' + QUOTENAME(OBJECT_SCHEMA_NAME(parent_object_id)) 
+            + '.' + QUOTENAME(OBJECT_NAME(parent_object_id)) 
+            + ' DROP CONSTRAINT ' + QUOTENAME(name) + ';'
+        FROM sys.foreign_keys;
+        EXEC sp_executesql @sql;
+
+        EXEC sp_MSForEachTable 'DROP TABLE ?'
+" : @"
     EXEC sp_MSForEachTable 'SET QUOTED_IDENTIFIER ON; ALTER TABLE ? NOCHECK CONSTRAINT all'
     EXEC sp_MSForEachTable 'SET QUOTED_IDENTIFIER ON;
         IF OBJECTPROPERTY(object_id(''?''), ''TableHasIdentity'') = 1
@@ -56,7 +58,6 @@ namespace Xpand.Extensions.XAF.Xpo.ObjectSpaceExtensions{
         DELETE FROM ?'
     EXEC sp_MSForEachTable 'SET QUOTED_IDENTIFIER ON; ALTER TABLE ? WITH CHECK CHECK CONSTRAINT all'
 ";
-            }
             dbCommand.ExecuteNonQuery();
         }
     }
