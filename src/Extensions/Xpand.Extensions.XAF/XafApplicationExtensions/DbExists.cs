@@ -1,7 +1,6 @@
 using System;
 using System.Data;
 using DevExpress.ExpressApp;
-using Microsoft.Data.SqlClient;
 using SqlConnection = Microsoft.Data.SqlClient.SqlConnection;
 using SqlConnectionStringBuilder = Microsoft.Data.SqlClient.SqlConnectionStringBuilder;
 
