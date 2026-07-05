@@ -19,6 +19,7 @@ using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.StringExtensions;
 using Xpand.Extensions.XAF.TypesInfoExtensions;
+using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.Extensions.XAF.Xpo.Attributes;
 using Xpand.Extensions.XAF.Xpo.ObjectSpaceExtensions;
 
@@ -38,7 +39,7 @@ namespace Xpand.Extensions.XAF.Xpo {
         
         internal static void CustomizeTypesInfo(ITypesInfo typesInfo) {
             CreateXpAttributeValueAttributes();
-            RuntimeAssociationAttributes(typesInfo);
+            typesInfo.RuntimeAssociationAttributes();
         }
 
         private static void RuntimeAssociationAttributes(this ITypesInfo typesInfo) 
@@ -71,7 +72,7 @@ namespace Xpand.Extensions.XAF.Xpo {
             => typeInfo.CreateCollection( typeToCreateOn, typeOfCollection, associationName,  propertyName, refreshTypesInfo, false);
 
         public static XPMemberInfo CreateCollection(this ITypesInfo typeInfo, Type typeToCreateOn, Type typeOfCollection, string associationName,  bool refreshTypesInfo) 
-            => CreateCollection(typeInfo, typeToCreateOn, typeOfCollection, associationName,  refreshTypesInfo, typeOfCollection.Name + "s");
+            => typeInfo.CreateCollection(typeToCreateOn, typeOfCollection, associationName,  refreshTypesInfo, typeOfCollection.Name + "s");
 
         public static XPMemberInfo CreateCollection(this ITypesInfo typeInfo, Type typeToCreateOn, Type typeOfCollection, string associationName,  string collectionName) 
             => typeInfo.CreateCollection( typeToCreateOn, typeOfCollection, associationName,  collectionName, true);
@@ -107,8 +108,8 @@ namespace Xpand.Extensions.XAF.Xpo {
         public static List<XPMemberInfo> CreateBothPartMembers(this ITypesInfo typesInfo, Type typeToCreateOn, Type otherPartMember, bool isManyToMany, string association,
                                                                      string createOnPropertyName, string otherPartPropertyName) {
             var infos = new List<XPMemberInfo>();
-            var member = isManyToMany ? CreateCollection(typesInfo, typeToCreateOn, otherPartMember, association, false, createOnPropertyName, true)
-                                            : CreateMember(typesInfo, typeToCreateOn, otherPartMember, association,  createOnPropertyName, false);
+            var member = isManyToMany ? typesInfo.CreateCollection(typeToCreateOn, otherPartMember, association, false, createOnPropertyName, true)
+                                            : typesInfo.CreateMember(typeToCreateOn, otherPartMember, association,  createOnPropertyName, false);
 
             if (member != null) {
                 infos.Add(member);
@@ -156,13 +157,13 @@ namespace Xpand.Extensions.XAF.Xpo {
         public static List<XPMemberInfo> CreateBothPartMembers(this ITypesInfo typesInfo, Type typeToCreateOn, Type otherPartMember,  bool isManyToMany, string association) {
 
             var infos = new List<XPMemberInfo>();
-            var member = isManyToMany ? CreateCollection(typesInfo, typeToCreateOn, otherPartMember, association,  false)
-                                            : CreateMember(typesInfo, otherPartMember, typeToCreateOn, association,  false);
+            var member = isManyToMany ? typesInfo.CreateCollection(typeToCreateOn, otherPartMember, association,  false)
+                                            : typesInfo.CreateMember(otherPartMember, typeToCreateOn, association,  false);
 
             if (member != null) {
                 infos.Add(member);
-                member = isManyToMany ? CreateCollection(typesInfo, otherPartMember, typeToCreateOn, association, false)
-                             : CreateCollection(typesInfo, typeToCreateOn, otherPartMember, association, false);
+                member = isManyToMany ? typesInfo.CreateCollection(otherPartMember, typeToCreateOn, association, false)
+                             : typesInfo.CreateCollection(typeToCreateOn, otherPartMember, association, false);
 
                 if (member != null)
                     infos.Add(member);
