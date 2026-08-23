@@ -1,0 +1,2 @@
+origBytes=4C 8B DC 48 83 EC 58 48 8B 84 24 A8 00 00 00 49 89 43 F0
+patch=FF 25 00 00 00 00 expect=FF 25 00 00 00 00

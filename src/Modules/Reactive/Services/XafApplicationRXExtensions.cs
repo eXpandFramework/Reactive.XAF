@@ -509,13 +509,18 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .ToController<DialogController>()
                 .WhenAcceptTriggered(application.WhenLoggedOn().Select(t => t.application));
 
-        public static IObservable<Frame> WhenFirstFrame(this XafApplication application, Type objectType=null, string userName="Admin", string pass = null) {
-
-            return application.WhenWeb().SelectMany(_ => application.WhenSetupComplete(_ => application.WhenFrame(objectType ?? ((IModelApplicationNavigationItems)application.Model).NavigationItems.StartupNavigationItem.View.AsObjectView.ModelClass.TypeInfo.Type)
-                    .Merge(application.WhenLoggedOn(userName, pass).IgnoreElements().To<Frame>())))
-                .Merge(application.WhenWin().SelectMany(_ => application.WhenFrame(objectType ?? ((IModelApplicationNavigationItems)application.Model).NavigationItems.StartupNavigationItem.View.AsObjectView.ModelClass.TypeInfo.Type)
-                    .Merge(application.WhenLoggedOn(userName, pass).IgnoreElements().To<Frame>())));
-        }
+        public static IObservable<Frame> WhenFirstFrame(this XafApplication application, Type objectType=null, string userName="Admin", string pass = null) 
+            => application.WhenSetupComplete()
+                .SelectMany(_ => {
+                    var startupView = ((IModelApplicationNavigationItems)application.Model)
+                        .NavigationItems.StartupNavigationItem.View;
+                    var typeInfoType = objectType ?? startupView.AsObjectView?.ModelClass.TypeInfo.Type;
+                    var whenFrame = typeInfoType!=null?application.WhenFrame(typeInfoType):application.WhenFrame()
+                        .Where(frame => frame.View.Model.Id==startupView.Id);
+                    return whenFrame
+                        .Merge(application.WhenLoggedOn(userName, pass).IgnoreElements().To<Frame>());
+                })
+                .Take(1);
 
         public static IObservable<XafApplication> WhenLoggedOn(this XafApplication application, string userName, string pass=null) 
             => application.WhenLoggedOn<AuthenticationStandardLogonParameters>(userName,pass);
@@ -545,15 +550,18 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => application.WhenSetupComplete().Do(xafApplication => CompletedApps.TryAdd(xafApplication, null)).ToUnit();
 
         public static IObservable<XafApplication> WhenSetupComplete(this XafApplication application,bool emitIfSetupAlready=true) 
-            => emitIfSetupAlready ? Observable.Defer(() => CompletedApps.TryGetValue(application, out _) ? Observable.Return(application)
-                    : application.ProcessEvent(nameof(XafApplication.SetupComplete)).Take(1)
+            => application.WhenSetupComplete(emitIfSetupAlready, application.ProcessEvent(nameof(XafApplication.SetupComplete)));
+
+        private static IObservable<XafApplication> WhenSetupComplete(this XafApplication application, bool emitIfSetupAlready, IObservable<XafApplication> processEvent) 
+            => emitIfSetupAlready ? Observable.Defer(() => CompletedApps.TryGetValue(application, out _)
+                    ? Observable.Return(application) : processEvent.Take(1)
                         .Do(xafApplication => CompletedApps.TryAdd(xafApplication, null)).To(application))
-                : application.ProcessEvent(nameof(XafApplication.SetupComplete)).Take(1).To(application);
+                : processEvent.Take(1).To(application);
 
-        public static IObservable<T> WhenSetupComplete<T>(this XafApplication application,Func<XafApplication,IObservable<T>> resilientSelector) 
-            => application.ProcessEvent(nameof(XafApplication.SetupComplete)).SelectMany(resilientSelector);
+        public static IObservable<Unit> WhenSetupComplete(this XafApplication application,Func<XafApplication,IObservable<Unit>> resilientSelector,bool emitIfSetupAlready=true) 
+            => application.WhenSetupComplete(emitIfSetupAlready, application.ProcessEvent<EventArgs>(nameof(XafApplication.SetupComplete),
+                e => resilientSelector(application).To(e)).To(application)).ToUnit();
 
-        
         public static IObservable<(XafApplication application, CreateCustomModelDifferenceStoreEventArgs e)> WhenCreateCustomModelDifferenceStore(this XafApplication application) 
             => application.ProcessEvent<CreateCustomModelDifferenceStoreEventArgs>(nameof(XafApplication.CreateCustomModelDifferenceStore))
                 .Select(e => (application,e));
