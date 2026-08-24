@@ -1,13 +1,10 @@
 /**
  * reactive-xaf-build/build-tests — behavior contract for the /devexpress workflow.
- *
  * Mock-pi harness with injected seams (fake command runner, feed fetcher, pane
  * seams, fixture props) — the real nuget.org, pwsh, psmux, VMs and git are
- * never touched. T1 real index boot; T2 repo guard; T3 Lab happy path (pane
- * build, milestones, conversational close ask); T4 DX already latest; T5 mixed
- * pins; T6 failure (steer, pane kept); T7 Release; T8 abort (silent); T9 VMs
- * running; T10 nothing to commit; T11 pane fallback; T12 close build pane;
- * T13 Starting VM settles without Start-VM; T14-T17 AzDO monitor + status (fake seams): failed → steer with reason + publish stopped; succeeded → published + close ask; canceled → published; status via args shows id + reason. T18-T19 menu delegation (fake delegateWindow): status and Lab build delegate to a new window, nothing runs in-window.
+ * never touched. T1-T13 build/commit/publish/failure/abort/pane flows;
+ * T14-T17 AzDO monitor + status; T18-T19 menu delegation; T20 fail-reason
+ * extraction (wrapper noise filtered, real error steered).
  * Run: npx tsx C:/Work/Reactive.XAF/.pi/extensions/reactive-xaf-build/build-tests.ts
  */
 /* oxlint-disable no-console -- test harness prints PASS/FAIL to stdout */
@@ -16,6 +13,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import activate from "./index.js";
 import { registerBuildCommand } from "./build.js";
+import { defaultWaitForAzDoBuild } from "./azdo.js";
 
 let ok = 0;
 let fail = 0;
@@ -149,8 +147,7 @@ function mkMonitor(outcome: { id: number; result: "succeeded" | "failed" | "canc
     registerBuildCommand(pi, { run: runner.run, fetchFeed: mkFetch(["26.1.3"]) });
     const ctx = mkCtx(["Build", "RX-XAF", "Lab"], tmpdir());
     const result = await pi._cmds.get("devexpress").handler([], ctx);
-    check("loud error outside the repo", result.includes("not inside the Reactive.XAF repo"), result);
-    check("zero commands ran", runner.calls.length === 0);
+    check("loud error outside the repo, zero commands ran", result.includes("not inside the Reactive.XAF repo") && runner.calls.length === 0, result);
   }
   // Section: T3 — Lab happy path with DX update, build in a pane
   {
@@ -172,19 +169,13 @@ function mkMonitor(outcome: { id: number; result: "succeeded" | "failed" | "canc
     const after = propsText(repo);
     check("result published", result.includes("published"), result);
     check("update prompt shown", ctx._prompts.some((p) => p.includes("update all DevExpress")), ctx._prompts.join(" | "));
-    check("all DX pins rewritten to 26.1.4", after.includes('DevExpress.ExpressApp" Version="26.1.4"') && after.includes('DevExpress.Xpo" Version="26.1.4"'), after);
-    check("non-DX pin untouched", after.includes('Xpand.Collections" Version="1.0.4"'), after);
+    check("all DX pins rewritten, non-DX untouched", after.includes('DevExpress.ExpressApp" Version="26.1.4"') && after.includes('DevExpress.Xpo" Version="26.1.4"') && after.includes('Xpand.Collections" Version="1.0.4"'), after);
     check("build pane opened", pane.opened.length === 1, JSON.stringify(pane.opened));
     check("brx sent to the pane", pane.sent.length === 1 && pane.sent[0].startsWith("brx;"), JSON.stringify(pane.sent));
-    check("build-started milestone notified", ctx._notifies.some((n) => n.includes("Build started — pane")), ctx._notifies.join(" | "));
-    check("close ask is conversational", ctx._notifies.some((n) => n.includes("Close build pane")), ctx._notifies.join(" | "));
-    check("no modal close prompt", !ctx._prompts.some((p) => p.includes("Close build pane")), ctx._prompts.join(" | "));
-    check("pane not auto-closed", pane.closed.length === 0, JSON.stringify(pane.closed));
+    check("milestones notified", ctx._notifies.some((n) => n.includes("Build started — pane")) && ctx._notifies.some((n) => n.includes("Checking Hyper-V agents")) && ctx._notifies.some((n) => n.includes("Committing build state")) && ctx._notifies.some((n) => n.includes("Publishing via prx")), ctx._notifies.join(" | "));
+    check("close ask conversational, no modal, pane kept", ctx._notifies.some((n) => n.includes("Close build pane")) && !ctx._prompts.some((p) => p.includes("Close build pane")) && pane.closed.length === 0, ctx._notifies.join(" | ") + " " + JSON.stringify(pane.closed));
     check("commit message carries DX", runner.calls.some((c) => c.startsWith('git commit -m "Update DX to 26.1.4"')), runner.calls.join(" | "));
     check("prx ran last", runner.calls[runner.calls.length - 1] === "prx", runner.calls.join(" | "));
-    check("VM-check milestone notified", ctx._notifies.some((n) => n.includes("Checking Hyper-V agents")), ctx._notifies.join(" | "));
-    check("commit milestone notified", ctx._notifies.some((n) => n.includes("Committing build state")), ctx._notifies.join(" | "));
-    check("publish milestone notified", ctx._notifies.some((n) => n.includes("Publishing via prx")), ctx._notifies.join(" | "));
     check("success: no failure steer", steers.length === 0, JSON.stringify(steers));
   }
   // Section: T4 — DX already latest
@@ -202,8 +193,7 @@ function mkMonitor(outcome: { id: number; result: "succeeded" | "failed" | "canc
     registerBuildCommand(pi, { run: runner.run, fetchFeed: mkFetch(["26.1.3"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1, ...pane });
     const ctx = mkCtx([...MENU, "Lab", "Commit", "Publish"], repo);
     const result = await pi._cmds.get("devexpress").handler([], ctx);
-    check("no update prompt", !ctx._prompts.some((p) => p.includes("update all DevExpress")), ctx._prompts.join(" | "));
-    check("props untouched", propsText(repo).includes('Version="26.1.3"') && !propsText(repo).includes("26.1.4"), "props changed");
+    check("no update prompt, props untouched", !ctx._prompts.some((p) => p.includes("update all DevExpress")) && propsText(repo).includes('Version="26.1.3"') && !propsText(repo).includes("26.1.4"), "props changed");
     check("build ran in pane", pane.sent.length === 1, JSON.stringify(pane.sent));
     check("published", result.includes("published"), result);
   }
@@ -224,8 +214,7 @@ function mkMonitor(outcome: { id: number; result: "succeeded" | "failed" | "canc
     const ctx = mkCtx([...MENU, "Lab", "Publish"], repo);
     const result = await pi._cmds.get("devexpress").handler([], ctx);
     const after = propsText(repo);
-    check("mixed versions surfaced", result.includes("mixed"), result);
-    check("file untouched", after.includes('Version="26.1.2"'), after);
+    check("mixed versions surfaced, file untouched", result.includes("mixed") && after.includes('Version="26.1.2"'), result + " | " + after);
     check("build ran in pane", pane.sent.length === 1, JSON.stringify(pane.sent));
     check("published", result.includes("published"), result);
   }
@@ -240,8 +229,7 @@ function mkMonitor(outcome: { id: number; result: "succeeded" | "failed" | "canc
     const result = await pi._cmds.get("devexpress").handler([], ctx);
     check("FAILED surfaced", result.includes("Build FAILED (exit 1)"), result);
     check("captured pane tail shown", result.includes("warning CS0219"), result);
-    check("pane KEPT (no close)", pane.closed.length === 0, JSON.stringify(pane.closed));
-    check("no close ask on failure", !ctx._notifies.some((n) => n.includes("Close build pane")), ctx._notifies.join(" | "));
+    check("pane KEPT, no close ask on failure", pane.closed.length === 0 && !ctx._notifies.some((n) => n.includes("Close build pane")), JSON.stringify(pane.closed) + " | " + ctx._notifies.join(" | "));
     check("no publish commands", runner.calls.length === 0, runner.calls.join(" | "));
     check("failure steer fired", steers.length === 1 && steers[0].type === "reactive-xaf-build:build-failed" && steers[0].content.includes("Build FAILED"), JSON.stringify(steers));
   }
@@ -259,8 +247,7 @@ function mkMonitor(outcome: { id: number; result: "succeeded" | "failed" | "canc
     const ctx = mkCtx([...MENU, "Release", "Skip", "Publish"], repo);
     const result = await pi._cmds.get("devexpress").handler([], ctx);
     check("brx -Release sent to pane", pane.sent.length === 1 && pane.sent[0].startsWith("brx -Release;"), JSON.stringify(pane.sent));
-    check("prx -Release ran", runner.calls.includes("prx -Release"), runner.calls.join(" | "));
-    check("published", result.includes("published"), result);
+    check("prx -Release ran, published", runner.calls.includes("prx -Release") && result.includes("published"), runner.calls.join(" | ") + " " + result);
   }
   // Section: T8 — abort at the DX prompt
   {
@@ -273,8 +260,7 @@ function mkMonitor(outcome: { id: number; result: "succeeded" | "failed" | "canc
     const ctx = mkCtx([...MENU, "Lab", "Abort"], repo);
     const result = await pi._cmds.get("devexpress").handler([], ctx);
     check("abort surfaced", result.includes("aborted at the DX update prompt"), result);
-    check("nothing ran", runner.calls.length === 0 && pane.opened.length === 0, JSON.stringify({ calls: runner.calls, opened: pane.opened }));
-    check("user abort: no steer", steers.length === 0, JSON.stringify(steers));
+    check("nothing ran, user abort: no steer", runner.calls.length === 0 && pane.opened.length === 0 && steers.length === 0, JSON.stringify({ calls: runner.calls, opened: pane.opened, steers }));
   }
   // Section: T9-T10 — green publish: VMs running / nothing to commit
   {
@@ -294,9 +280,7 @@ function mkMonitor(outcome: { id: number; result: "succeeded" | "failed" | "canc
     registerBuildCommand(pi, { run: runner.run, fetchFeed: mkFetch(["26.1.4"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1, ...pane });
     ctx = mkCtx([...MENU, "Lab", "Skip", "Publish"], repo);
     result = await pi._cmds.get("devexpress").handler([], ctx);
-    check("T10: no commit prompt, no git add", !ctx._prompts.some((p) => p.includes("Commit with message")) && !runner.calls.includes("git add -A"), ctx._prompts.join(" | "));
-    check("T10: prx still ran", runner.calls.includes("prx"), runner.calls.join(" | "));
-    check("T10: published", result.includes("published"), result);
+    check("T10: no commit prompt, prx still ran, published", !ctx._prompts.some((p) => p.includes("Commit with message")) && !runner.calls.includes("git add -A") && runner.calls.includes("prx") && result.includes("published"), ctx._prompts.join(" | ") + " | " + result);
   }
   // Section: T11 — pane open fails → in-process fallback
   {
@@ -314,8 +298,7 @@ function mkMonitor(outcome: { id: number; result: "succeeded" | "failed" | "canc
     const result = await pi._cmds.get("devexpress").handler([], ctx);
     check("fallback note notified", ctx._notifies.some((n) => n.includes("building in-process")), ctx._notifies.join(" | "));
     check("in-process brx ran", runner.calls.includes("brx"), runner.calls.join(" | "));
-    check("no pane sent", pane.sent.length === 0, JSON.stringify(pane.sent));
-    check("published", result.includes("published"), result);
+    check("no pane sent, published", pane.sent.length === 0 && result.includes("published"), JSON.stringify(pane.sent) + " " + result);
   }
   // Section: T12 — /devexpress → Close build pane
   {
@@ -327,9 +310,8 @@ function mkMonitor(outcome: { id: number; result: "succeeded" | "failed" | "canc
     registerBuildCommand(pi, { run: runner.run, fetchFeed: mkFetch(["26.1.4"]), repoRoot: repo, ...pane });
     const ctx = mkCtx(["Close build pane"], repo);
     const result = await pi._cmds.get("devexpress").handler([], ctx);
-    check("close result", result.includes("Build pane closed"), result);
+    check("close result + notified", result.includes("Build pane closed") && ctx._notifies.some((n) => n.includes("closed")), result + " | " + ctx._notifies.join(" | "));
     check("pane closed", pane.closed.length === 1 && pane.closed[0] === "paneX", JSON.stringify(pane.closed));
-    check("close notified", ctx._notifies.some((n) => n.includes("closed")), ctx._notifies.join(" | "));
     check("no build ran", pane.sent.length === 0 && runner.calls.length === 0, JSON.stringify({ sent: pane.sent, calls: runner.calls }));
     check("pane state cleared", (globalThis as any)[Symbol.for("reactive-xaf-build.build-pane")] === undefined);
   }
@@ -345,18 +327,14 @@ function mkMonitor(outcome: { id: number; result: "succeeded" | "failed" | "canc
     registerBuildCommand(pi, { run: runner.run, fetchFeed: mkFetch(["26.1.4"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1, ...pane });
     const ctx = mkCtx([...MENU, "Lab", "Skip", "Publish"], repo);
     const result = await pi._cmds.get("devexpress").handler([], ctx);
-    check("no Start-VM for the booting VM", !runner.calls.some((c) => c.startsWith("Start-VM")), runner.calls.join(" | "));
-    check("booting note surfaced", result.includes("already booting"), result);
-    check("waited for Running then published", result.includes("published"), result);
+    check("no Start-VM for the booting VM, waited then published", !runner.calls.some((c) => c.startsWith("Start-VM")) && result.includes("already booting") && result.includes("published"), runner.calls.join(" | ") + " | " + result);
   }
   // Section: T14-T17 — AzDO monitor + status (fake seams)
   {
     let t = mkMonitor({ id: 35735, result: "failed", reason: "Artifact TestAssemblies was not found for build 35735" });
     let ctx = mkCtx([...MENU, "Lab", "Publish"], t.repo);
     let result = await t.pi._cmds.get("devexpress").handler([], ctx);
-    check("T14: FAILED reason surfaced", result.includes("AzDO build 35735 FAILED") && result.includes("Artifact TestAssemblies"), result);
-    check("T14: steer carries reason", steers.length === 1 && steers[0].content.includes("Artifact TestAssemblies"), JSON.stringify(steers));
-    check("T14: publish stopped", result.includes("publish stopped"), result);
+    check("T14: FAILED reason surfaced, steered, publish stopped", result.includes("AzDO build 35735 FAILED") && result.includes("Artifact TestAssemblies") && steers.length === 1 && steers[0].content.includes("Artifact TestAssemblies") && result.includes("publish stopped"), result);
     t = mkMonitor({ id: 35736, result: "succeeded", reason: "" });
     ctx = mkCtx([...MENU, "Lab", "Publish"], t.repo);
     result = await t.pi._cmds.get("devexpress").handler([], ctx);
@@ -373,6 +351,28 @@ function mkMonitor(outcome: { id: number; result: "succeeded" | "failed" | "canc
     registerBuildCommand(t2.pi, { run: mkRunner([{ match: "$b = Get-AzBuilds*", result: { code: 0, stdout: "STATUS=35735;completed;failed;Artifact TestAssemblies was not found for build 35735", stderr: "" } }]).run, fetchFeed: mkFetch(["26.1.3"]), repoRoot: t2.repo, ...mkPaneSeams() });
     const r2 = await t2.pi._cmds.get("devexpress").handler(["status"], mkCtx([], t2.repo));
     check("T17: status shows id + reason + link", r2.includes("35735") && r2.includes("Artifact TestAssemblies") && r2.includes("definitionId=23"), r2);
+  }
+  // Section: T20 — fail-reason extraction: wrapper noise filtered, real error wins
+  {
+    const logLines = [
+      "Executing Compile",
+      "Building Extensions",
+      "  Extensions.sln",
+      "CSC : error DX1003: For evaluation purposes only. Redistribution prohibited. Expired license key version (v25.2, v26.1)",
+      "Retrying in 10 seconds...",
+      "CSC : error DX1003: For evaluation purposes only. Redistribution prohibited. Expired license key version (v25.2, v26.1)",
+      "Approve-LastExitCode: The term 'Approve-LastExitCode' is not recognized",
+      "ScriptHalted",
+      "##[error]Exception: Build failed",
+      "##[error]PowerShell exited with code '1'",
+    ].join("\n");
+    const repo = mkRepo(DX_PINS);
+    const pi = mkPi();
+    registerBuildCommand(pi, { run: mkRunner(GREEN_PUBLISH).run, fetchFeed: mkFetch(["26.1.3"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1, ...mkPaneSeams(), waitForAzDoBuild: (t: number) => defaultWaitForAzDoBuild(t, async () => ({ code: 0, stdout: "RESULT=35735;failed;\nLOGSTART\n" + logLines + "\nLOGEND", stderr: "" })) });
+    const result = await pi._cmds.get("devexpress").handler([], mkCtx([...MENU, "Lab", "Publish"], repo));
+    const steer = steers[steers.length - 1];
+    check("T20: real error steered, wrapper filtered", !!steer && steer.content.includes("DX1003") && steer.content.includes("[Compile]") && !/ScriptHalted|Retrying|Approve-LastExitCode|PowerShell exited/.test(steer.content), JSON.stringify(steers));
+    check("T20: FAILED surfaced with reason", result.includes("AzDO build 35735 FAILED") && result.includes("DX1003"), result);
   }
   // Section: T18-T19 — menu delegation (fake delegateWindow)
   {

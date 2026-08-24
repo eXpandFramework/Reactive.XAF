@@ -6,7 +6,7 @@
  * on failure, and the AzDO definition link. Info only — no steering.
  */
 
-import { azdoStatusScript, parseStatus, AZDO_BUILD_URL } from "./azdo.js";
+import { azdoStatusScript, parseStatus, extractFailReason, failLogFromStdout, AZDO_BUILD_URL } from "./azdo.js";
 import type { BuildSeams } from "./build.js";
 
 /** Task handed to the delegated status window. */
@@ -25,7 +25,8 @@ export async function statusPhase(ctx: any, seams: BuildSeams): Promise<string> 
   } else if (["notStarted", "inProgress", "cancelling"].includes(s.status)) {
     msg = `AzDO build ${s.id} is ${s.status} — ${AZDO_BUILD_URL}`;
   } else if (s.result === "failed") {
-    msg = `AzDO build ${s.id} FAILED — ${s.reason || "no error lines"} — ${AZDO_BUILD_URL}`;
+    const reason = s.reason || extractFailReason(failLogFromStdout(res.stdout));
+    msg = `AzDO build ${s.id} FAILED — ${reason || "no error lines"} — ${AZDO_BUILD_URL}`;
   } else if (s.result === "canceled") {
     msg = `AzDO build ${s.id} canceled — ${AZDO_BUILD_URL}`;
   } else {
