@@ -8,7 +8,7 @@ Project-specific knowledge distilled from the lab-build workflow session (2026-0
 2. **Build** — `brx` (lab) / `brx -Release` (master) — the eXpandFramework module alias (`C:\Box\PSModules`). Runs the psake pipeline: `go.ps1` → `BuildPipeline.ps1` → `Build/BuildDevExpress.XAF.ps1` (tasks: Clean, Init, UpdateProjects, Compile, CheckVersions, IndexSources, CompileTests).
 3. **Warnings are fatal** — `-WarnAsError` is baked into every compilation: any warning fails the build. Fix the warnings, re-run.
 4. **A full Lab build takes ~39 minutes** — never kill it early; any timeout must exceed it.
-5. **Commit then publish** — commit the build state (props update, `src/Common/AssemblyInfoVersion.cs`, nuspec bumps), then `prx` (stage + force-push `lab` → remote + queue the AzDO `Reactive.XAF` pipeline). Ensure the Hyper-V VMs **C11–C14 are running** before `prx`.
+5. **Commit then publish** — commit the build state (props update, `src/Common/AssemblyInfoVersion.cs`, nuspec bumps), then `prx` (stage + force-push `lab` → remote + queue the AzDO `Reactive.XAF` pipeline). Ensure the Hyper-V VMs **C11–C14 are running** before `prx`. The `/devexpress` publish step does this itself (VM check → commit → confirm → prx); `Build/nuspec/*` and `AssemblyInfoVersion.cs` change on **any** Lab build, from **any** window — treat them as the build's state, decide commit-vs-revert with the user, never claim or dispose of them unilaterally.
 
 ## The /devexpress extension
 
