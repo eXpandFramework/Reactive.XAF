@@ -1,6 +1,7 @@
 /**
- * reactive-xaf-build/build — the /Build workflow engine.
+ * reactive-xaf-build/build — the /devexpress menu workflow engine.
  *
+ * Menu: /devexpress → Build → RX-XAF → Lab | Release.
  * Flow (Lab | Release):
  *   1. getLatestDx — nuget.org flat-container, max stable DevExpress.ExpressApp
  *   2. props compare — Directory.Packages.props DevExpress.* pins:
@@ -260,7 +261,7 @@ function failureResult(choice: string, latest: string, notes: string[], build: R
     `Build FAILED (exit ${build.code})`,
     "--- output tail ---",
     tail(build.stdout + "\n" + build.stderr, 4000),
-    "Fix the warnings, then re-run /Build.",
+    "Fix the warnings, then re-run /devexpress.",
   ].join("\n");
 }
 
@@ -268,19 +269,10 @@ function summaryResult(choice: string, latest: string, notes: string[], pubOk: b
   return [`Reactive.XAF build — ${choice}`, `DX latest: ${latest}`, ...notes, pubOk ? "published" : "publish stopped"].join("\n");
 }
 
-async function runBuildFlow(ctx: any, seams: BuildSeams): Promise<string> {
-  const cwd = ctx?.cwd ?? seams.repoRoot ?? process.cwd();
-  const repo = repoRootOf(cwd);
-  if (!repo) {
-    return `Reactive.XAF build: not inside the Reactive.XAF repo (cwd: ${cwd}) — no commands ran.`;
-  }
-  const propsPath = seams.propsPath ?? path.join(repo, "Directory.Packages.props");
-  const choice = await ctx.ui.select("Build — Reactive.XAF: choose flow", ["Lab", "Release"]);
-  if (choice !== "Lab" && choice !== "Release") {
-    return "Reactive.XAF build: aborted (no flow selected).";
-  }
+async function runBuildFlow(ctx: any, seams: BuildSeams, choice: string, repo: string): Promise<string> {
   try {
     const latest = await getLatestDx(seams.fetchFeed);
+    const propsPath = seams.propsPath ?? path.join(repo, "Directory.Packages.props");
     const dx = await dxPhase(ctx, seams, propsPath, latest);
     const build = await buildPhase(seams, choice, repo);
     const notes = [...dx.notes];
@@ -302,9 +294,24 @@ async function runBuildFlow(ctx: any, seams: BuildSeams): Promise<string> {
   }
 }
 
+async function runDevExpressMenu(ctx: any, seams: BuildSeams): Promise<string> {
+  const cwd = ctx?.cwd ?? seams.repoRoot ?? process.cwd();
+  const repo = repoRootOf(cwd);
+  if (!repo) {
+    return `Reactive.XAF build: not inside the Reactive.XAF repo (cwd: ${cwd}) — no commands ran.`;
+  }
+  const top = await ctx.ui.select("DevExpress", ["Build"]);
+  if (top !== "Build") return "DevExpress menu: aborted.";
+  const build = await ctx.ui.select("Build", ["RX-XAF"]);
+  if (build !== "RX-XAF") return "Build menu: aborted.";
+  const rx = await ctx.ui.select("RX-XAF", ["Lab", "Release"]);
+  if (rx !== "Lab" && rx !== "Release") return "RX-XAF: aborted (no flow selected).";
+  return runBuildFlow(ctx, seams, rx, repo);
+}
+
 export function registerBuildCommand(pi: any, seams?: Partial<BuildSeams>): void {
-  pi.registerCommand("Build", {
-    description: "Reactive.XAF build workflow: DX check → props update → brx → publish (prx). Lab | Release.",
-    handler: async (_args: string | string[], ctx: any) => runBuildFlow(ctx, { ...defaultSeams(), ...seams }),
+  pi.registerCommand("devexpress", {
+    description: "DevExpress menu: Build → RX-XAF (Lab | Release)",
+    handler: async (_args: string | string[], ctx: any) => runDevExpressMenu(ctx, { ...defaultSeams(), ...seams }),
   });
 }

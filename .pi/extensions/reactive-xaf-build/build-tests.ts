@@ -1,5 +1,5 @@
 /**
- * reactive-xaf-build/build-tests — behavior contract for the /Build workflow.
+ * reactive-xaf-build/build-tests — behavior contract for the /devexpress workflow.
  *
  * Exercises the REAL command surface through a mock pi: T1 drives the real
  * index.ts boot (activate(pi)); the remaining tests register the command via
@@ -9,11 +9,11 @@
  * pwsh, Hyper-V VMs and git are never touched.
  *
  * Behaviors pinned:
- *   T1 /Build registers a command with a handler (real index.ts boot)
+ *   T1 /devexpress registers a command with a handler (real index.ts boot)
  *   T2 outside the Reactive.XAF repo → loud error, zero commands ran
- *   T3 Lab happy path: DX 26.1.4 > pins 26.1.3 → update prompt → props rewritten
- *     (non-DX pins untouched) → brx → VM start (C11 off) → commit "Update DX to 26.1.4"
- *     → confirm → prx → "published"
+ *   T3 Lab happy path: menu Build → RX-XAF → Lab; DX 26.1.4 > pins 26.1.3
+ *     → update prompt → props rewritten (non-DX pins untouched) → brx
+ *     → VM start (C11 off) → commit "Update DX to 26.1.4" → confirm → prx → "published"
  *   T4 DX already latest → no update prompt, props untouched, build + publish run
  *   T5 mixed pins → file untouched, surfaced, build still runs
  *   T6 build failure (warnings) → FAILED result with output tail, no publish commands
@@ -107,6 +107,7 @@ function propsText(root: string): string {
 const VM_OFF = "C11=Off\nC12=Running\nC13=Running\nC14=Running\n";
 const VM_RUN = "C11=Running\nC12=Running\nC13=Running\nC14=Running\n";
 const VM_CHECK_PREFIX = "Get-VM -Name C11,C12,C13,C14*";
+const MENU = ["Build", "RX-XAF"];
 const DX_PINS: Array<[string, string]> = [
   ["DevExpress.ExpressApp", "26.1.3"],
   ["DevExpress.Xpo", "26.1.3"],
@@ -119,13 +120,13 @@ function okResult(stdout = ""): any {
 }
 
 (async () => {
-  // Section: T1 — /Build registration through the real index boot
-  console.log("T1: /Build registration\n");
+  // Section: T1 — /devexpress registration through the real index boot
+  console.log("T1: /devexpress registration\n");
   {
     const pi = mkPi();
     activate(pi);
-    const cmd = pi._cmds.get("Build");
-    check("Build command registered via index.ts", typeof cmd?.handler === "function");
+    const cmd = pi._cmds.get("devexpress");
+    check("devexpress command registered via index.ts", typeof cmd?.handler === "function");
   }
 
   // Section: T2 — repo guard
@@ -134,8 +135,8 @@ function okResult(stdout = ""): any {
     const runner = mkRunner([]);
     const pi = mkPi();
     registerBuildCommand(pi, { run: runner.run, fetchFeed: mkFetch(["26.1.3"]) });
-    const ctx = mkCtx(["Lab"], tmpdir());
-    const result = await pi._cmds.get("Build").handler([], ctx);
+    const ctx = mkCtx(["Build", "RX-XAF", "Lab"], tmpdir());
+    const result = await pi._cmds.get("devexpress").handler([], ctx);
     check("loud error outside the repo", result.includes("not inside the Reactive.XAF repo"), result);
     check("zero commands ran", runner.calls.length === 0);
   }
@@ -156,8 +157,8 @@ function okResult(stdout = ""): any {
     ]);
     const pi = mkPi();
     registerBuildCommand(pi, { run: runner.run, fetchFeed: mkFetch(["26.1.2", "26.1.3", "26.1.4"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1 });
-    const ctx = mkCtx(["Lab", "Update", "Commit", "Publish"], repo);
-    const result = await pi._cmds.get("Build").handler([], ctx);
+    const ctx = mkCtx([...MENU, "Lab", "Update", "Commit", "Publish"], repo);
+    const result = await pi._cmds.get("devexpress").handler([], ctx);
     const after = propsText(repo);
     check("result published", result.includes("published"), result);
     check("update prompt shown", ctx._prompts.some((p) => p.includes("update all DevExpress")), ctx._prompts.join(" | "));
@@ -183,8 +184,8 @@ function okResult(stdout = ""): any {
     ]);
     const pi = mkPi();
     registerBuildCommand(pi, { run: runner.run, fetchFeed: mkFetch(["26.1.3"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1 });
-    const ctx = mkCtx(["Lab", "Commit", "Publish"], repo);
-    const result = await pi._cmds.get("Build").handler([], ctx);
+    const ctx = mkCtx([...MENU, "Lab", "Commit", "Publish"], repo);
+    const result = await pi._cmds.get("devexpress").handler([], ctx);
     check("no update prompt", !ctx._prompts.some((p) => p.includes("update all DevExpress")), ctx._prompts.join(" | "));
     check("props untouched", propsText(repo).includes('Version="26.1.3"') && !propsText(repo).includes("26.1.4"), "props changed");
     check("build still ran", runner.calls[0] === "brx", runner.calls.join(" | "));
@@ -206,8 +207,8 @@ function okResult(stdout = ""): any {
     ]);
     const pi = mkPi();
     registerBuildCommand(pi, { run: runner.run, fetchFeed: mkFetch(["26.1.4"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1 });
-    const ctx = mkCtx(["Lab", "Publish"], repo);
-    const result = await pi._cmds.get("Build").handler([], ctx);
+    const ctx = mkCtx([...MENU, "Lab", "Publish"], repo);
+    const result = await pi._cmds.get("devexpress").handler([], ctx);
     const after = propsText(repo);
     check("mixed versions surfaced", result.includes("mixed"), result);
     check("file untouched", after.includes('Version="26.1.2"'), after);
@@ -224,8 +225,8 @@ function okResult(stdout = ""): any {
     ]);
     const pi = mkPi();
     registerBuildCommand(pi, { run: runner.run, fetchFeed: mkFetch(["26.1.4"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1 });
-    const ctx = mkCtx(["Lab"], repo);
-    const result = await pi._cmds.get("Build").handler([], ctx);
+    const ctx = mkCtx([...MENU, "Lab"], repo);
+    const result = await pi._cmds.get("devexpress").handler([], ctx);
     check("FAILED surfaced", result.includes("Build FAILED (exit 1)"), result);
     check("warning tail shown", result.includes("warning CS0219"), result);
     check("no publish commands", !runner.calls.some((c) => c.startsWith("Get-VM") || c === "prx"), runner.calls.join(" | "));
@@ -244,8 +245,8 @@ function okResult(stdout = ""): any {
     ]);
     const pi = mkPi();
     registerBuildCommand(pi, { run: runner.run, fetchFeed: mkFetch(["26.1.4"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1 });
-    const ctx = mkCtx(["Release", "Skip", "Publish"], repo);
-    const result = await pi._cmds.get("Build").handler([], ctx);
+    const ctx = mkCtx([...MENU, "Release", "Skip", "Publish"], repo);
+    const result = await pi._cmds.get("devexpress").handler([], ctx);
     check("brx -Release ran", runner.calls.includes("brx -Release"), runner.calls.join(" | "));
     check("prx -Release ran", runner.calls.includes("prx -Release"), runner.calls.join(" | "));
     check("published", result.includes("published"), result);
@@ -258,8 +259,8 @@ function okResult(stdout = ""): any {
     const runner = mkRunner([]);
     const pi = mkPi();
     registerBuildCommand(pi, { run: runner.run, fetchFeed: mkFetch(["26.1.4"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1 });
-    const ctx = mkCtx(["Lab", "Abort"], repo);
-    const result = await pi._cmds.get("Build").handler([], ctx);
+    const ctx = mkCtx([...MENU, "Lab", "Abort"], repo);
+    const result = await pi._cmds.get("devexpress").handler([], ctx);
     check("abort surfaced", result.includes("aborted at the DX update prompt"), result);
     check("nothing ran", runner.calls.length === 0, runner.calls.join(" | "));
   }
@@ -276,8 +277,8 @@ function okResult(stdout = ""): any {
     ]);
     const pi = mkPi();
     registerBuildCommand(pi, { run: runner.run, fetchFeed: mkFetch(["26.1.4"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1 });
-    const ctx = mkCtx(["Lab", "Skip", "Publish"], repo);
-    const result = await pi._cmds.get("Build").handler([], ctx);
+    const ctx = mkCtx([...MENU, "Lab", "Skip", "Publish"], repo);
+    const result = await pi._cmds.get("devexpress").handler([], ctx);
     check("no Start-VM", !runner.calls.some((c) => c.startsWith("Start-VM")), runner.calls.join(" | "));
     check("already-running noted", result.includes("already running"), result);
     check("published", result.includes("published"), result);
@@ -295,8 +296,8 @@ function okResult(stdout = ""): any {
     ]);
     const pi = mkPi();
     registerBuildCommand(pi, { run: runner.run, fetchFeed: mkFetch(["26.1.4"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1 });
-    const ctx = mkCtx(["Lab", "Skip", "Publish"], repo);
-    const result = await pi._cmds.get("Build").handler([], ctx);
+    const ctx = mkCtx([...MENU, "Lab", "Skip", "Publish"], repo);
+    const result = await pi._cmds.get("devexpress").handler([], ctx);
     check("no commit prompt", !ctx._prompts.some((p) => p.includes("Commit with message")), ctx._prompts.join(" | "));
     check("no git add", !runner.calls.includes("git add -A"), runner.calls.join(" | "));
     check("prx still ran", runner.calls.includes("prx"), runner.calls.join(" | "));
