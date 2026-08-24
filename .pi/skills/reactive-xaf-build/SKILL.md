@@ -21,8 +21,9 @@ publish workflow for the AzDO `Reactive.XAF` pipeline (definition 23).
   DX check, no `brx`.
 
 Menu picks delegate to a NEW psmux window (`pi '<task>'` boot message) so the
-flow survives the invoking session's close; when no window can be spawned the
-flow falls back to running in the invoking session.
+flow survives the invoking session's close; when no window can be spawned,
+or the spawned window dies during the boot grace period, the flow falls back
+to running in the invoking session.
 
 ## Flow (Lab | Release)
 
@@ -47,9 +48,11 @@ flow falls back to running in the invoking session.
 | `menu.ts` | `menu.md` | Command surface: menu picks, direct args, delegation. |
 | `build.ts` | `build.md` | Flow engine: DX/build/publish phases, seams, steer. |
 | `menu-tests.ts` | `menu-tests.md` | Behavior contract for the skip-build surface. |
+| `delegate-tests.ts` | — | Behavior contract for the delegation fallback. |
 | `build-tests.ts` | — | Behavior contract for the full flow (52 checks). |
 | `azdo.ts` / `status.ts` | — | AzDO monitor/status scripts + fail-reason extraction. |
-| `delegate.ts` / `pane.ts` | — | Window delegation, build pane primitives. |
+| `delegate.ts` | `delegate.md` | Window delegation (liveness-verified, fallback). |
+| `pane.ts` | — | Build pane primitives. |
 
 Run the contract tests with:
 `npx tsx C:/Work/Reactive.XAF/.pi/extensions/reactive-xaf-build/menu-tests.ts`
