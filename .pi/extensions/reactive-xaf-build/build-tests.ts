@@ -7,7 +7,7 @@
  * build, milestones, conversational close ask); T4 DX already latest; T5 mixed
  * pins; T6 failure (steer, pane kept); T7 Release; T8 abort (silent); T9 VMs
  * running; T10 nothing to commit; T11 pane fallback; T12 close build pane;
- * T13 Starting VM settles without Start-VM.
+ * T13 Starting VM settles without Start-VM; T14-T16 AzDO monitor (fake seam): failed → steer carries the reason, publish stopped; succeeded → published + close ask; canceled → published, neutral.
  *
  * Run: npx tsx C:/Work/Reactive.XAF/.pi/extensions/reactive-xaf-build/build-tests.ts
  */
@@ -87,6 +87,7 @@ function mkPaneSeams(overrides: Partial<{ open: string | null; exitCode: number 
     waitForPaneExit: async () => ({ code: overrides.exitCode ?? 0, timedOut: overrides.timedOut ?? false }),
     capturePane: async () => overrides.capture ?? "",
     closePane: async (pane: string) => { closed.push(pane); },
+    waitForAzDoBuild: async () => ({ id: 1, result: "succeeded", reason: "" }),
     opened,
     sent,
     closed,
@@ -119,10 +120,21 @@ const DX_PINS: Array<[string, string]> = [
 function okResult(stdout = ""): any {
   return { code: 0, stdout, stderr: "" };
 }
+function mkMonitor(outcome: { id: number; result: "succeeded" | "failed" | "canceled" | "other"; reason: string }): { pi: any; repo: string } {
+  const repo = mkRepo(DX_PINS);
+  const runner = mkRunner([
+    { match: VM_CHECK_PREFIX, result: { code: 0, stdout: VM_RUN, stderr: "" } },
+    { match: "git status --short", result: okResult("") },
+    { match: "prx", result: okResult() },
+  ]);
+  const pane = mkPaneSeams();
+  const pi = mkPi();
+  registerBuildCommand(pi, { run: runner.run, fetchFeed: mkFetch(["26.1.3"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1, ...pane, waitForAzDoBuild: async () => outcome });
+  return { pi, repo };
+}
 
 (async () => {
   // Section: T1 — /devexpress registration through the real index boot
-  console.log("T1: /devexpress registration\n");
   {
     const pi = mkPi();
     activate(pi);
@@ -130,7 +142,6 @@ function okResult(stdout = ""): any {
     check("devexpress command registered via index.ts", typeof cmd?.handler === "function");
   }
   // Section: T2 — repo guard
-  console.log("T2: repo guard\n");
   {
     const runner = mkRunner([]);
     const pane = mkPaneSeams();
@@ -142,7 +153,6 @@ function okResult(stdout = ""): any {
     check("zero commands ran", runner.calls.length === 0 && pane.opened.length === 0);
   }
   // Section: T3 — Lab happy path with DX update, build in a pane
-  console.log("T3: Lab happy path\n");
   {
     steers.length = 0;
     const repo = mkRepo(DX_PINS);
@@ -179,7 +189,6 @@ function okResult(stdout = ""): any {
     check("success: no failure steer", steers.length === 0, JSON.stringify(steers));
   }
   // Section: T4 — DX already latest
-  console.log("T4: DX already latest\n");
   {
     const repo = mkRepo(DX_PINS);
     const runner = mkRunner([
@@ -200,7 +209,6 @@ function okResult(stdout = ""): any {
     check("published", result.includes("published"), result);
   }
   // Section: T5 — mixed pins left untouched
-  console.log("T5: mixed pins\n");
   {
     const repo = mkRepo([
       ["DevExpress.ExpressApp", "26.1.3"],
@@ -223,7 +231,6 @@ function okResult(stdout = ""): any {
     check("published", result.includes("published"), result);
   }
   // Section: T6 — build failure with warnings (pane kept)
-  console.log("T6: build failure\n");
   {
     steers.length = 0;
     const repo = mkRepo(DX_PINS);
@@ -241,7 +248,6 @@ function okResult(stdout = ""): any {
     check("failure steer fired", steers.length === 1 && steers[0].type === "reactive-xaf-build:build-failed" && steers[0].content.includes("Build FAILED"), JSON.stringify(steers));
   }
   // Section: T7 — Release flow (DX update skipped)
-  console.log("T7: Release flow\n");
   {
     const repo = mkRepo(DX_PINS);
     const runner = mkRunner([
@@ -259,7 +265,6 @@ function okResult(stdout = ""): any {
     check("published", result.includes("published"), result);
   }
   // Section: T8 — abort at the DX prompt
-  console.log("T8: abort at DX prompt\n");
   {
     steers.length = 0;
     const repo = mkRepo(DX_PINS);
@@ -274,7 +279,6 @@ function okResult(stdout = ""): any {
     check("user abort: no steer", steers.length === 0, JSON.stringify(steers));
   }
   // Section: T9 — VMs already running (DX update skipped)
-  console.log("T9: VMs already running\n");
   {
     const repo = mkRepo(DX_PINS);
     const runner = mkRunner([
@@ -292,7 +296,6 @@ function okResult(stdout = ""): any {
     check("published", result.includes("published"), result);
   }
   // Section: T10 — nothing to commit (DX update skipped)
-  console.log("T10: nothing to commit\n");
   {
     const repo = mkRepo(DX_PINS);
     const runner = mkRunner([
@@ -311,7 +314,6 @@ function okResult(stdout = ""): any {
     check("published", result.includes("published"), result);
   }
   // Section: T11 — pane open fails → in-process fallback
-  console.log("T11: pane fallback\n");
   {
     const repo = mkRepo(DX_PINS);
     const runner = mkRunner([
@@ -331,7 +333,6 @@ function okResult(stdout = ""): any {
     check("published", result.includes("published"), result);
   }
   // Section: T12 — /devexpress → Close build pane
-  console.log("T12: close build pane\n");
   {
     (globalThis as any)[Symbol.for("reactive-xaf-build.build-pane")] = "paneX";
     const repo = mkRepo(DX_PINS);
@@ -348,7 +349,6 @@ function okResult(stdout = ""): any {
     check("pane state cleared", (globalThis as any)[Symbol.for("reactive-xaf-build.build-pane")] === undefined);
   }
   // Section: T13 — a Starting VM is not Start-VM'd; the flow waits for it
-  console.log("T13: starting VM settles\n");
   {
     const repo = mkRepo(DX_PINS);
     const runner = mkRunner([
@@ -365,6 +365,28 @@ function okResult(stdout = ""): any {
     check("no Start-VM for the booting VM", !runner.calls.some((c) => c.startsWith("Start-VM")), runner.calls.join(" | "));
     check("booting note surfaced", result.includes("already booting"), result);
     check("waited for Running then published", result.includes("published"), result);
+  }
+  // Section: T14-T16 — AzDO monitor outcomes (fake seam)
+  {
+    steers.length = 0;
+    let t = mkMonitor({ id: 35735, result: "failed", reason: "Artifact TestAssemblies was not found for build 35735" });
+    let ctx = mkCtx([...MENU, "Lab", "Publish"], t.repo);
+    let result = await t.pi._cmds.get("devexpress").handler([], ctx);
+    check("T14: FAILED reason surfaced", result.includes("AzDO build 35735 FAILED") && result.includes("Artifact TestAssemblies"), result);
+    check("T14: steer carries reason", steers.length === 1 && steers[0].content.includes("Artifact TestAssemblies"), JSON.stringify(steers));
+    check("T14: publish stopped", result.includes("publish stopped"), result);
+    t = mkMonitor({ id: 35736, result: "succeeded", reason: "" });
+    ctx = mkCtx([...MENU, "Lab", "Publish"], t.repo);
+    result = await t.pi._cmds.get("devexpress").handler([], ctx);
+    check("T15: success noted", result.includes("AzDO build 35736 succeeded"), result);
+    check("T15: published", result.includes("published"), result);
+    check("T15: close ask shown", ctx._notifies.some((n) => n.includes("Close build pane")), ctx._notifies.join(" | "));
+    t = mkMonitor({ id: 35737, result: "canceled", reason: "" });
+    ctx = mkCtx([...MENU, "Lab", "Publish"], t.repo);
+    result = await t.pi._cmds.get("devexpress").handler([], ctx);
+    check("T16: canceled note neutral", result.includes("AzDO build canceled"), result);
+    check("T16: still published", result.includes("published"), result);
+    check("T16: no new failure steer", steers.length === 1, JSON.stringify(steers));
   }
   console.log(`\n${ok} passed, ${fail} failed`);
   process.exit(fail > 0 ? 1 : 0);

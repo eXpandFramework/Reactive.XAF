@@ -16,10 +16,13 @@
  *      the pane is KEPT for reuse. In-process fallback when the pane cannot
  *      be opened.
  *   4. publish — Hyper-V C11-C14 ensured (Start-VM + poll), git commit (message
- *      from changes, confirmed), confirm, prx / prx -Release
+ *      from changes, confirmed), confirm, prx / prx -Release, then the AzDO
+ *      build monitor (waitForAzDoBuild — polls the queued build to completion;
+ *      on failure the failed record's log supplies the ##[error] reason).
  *
  * Seams (injectable, default = real): run, fetchFeed, propsPath, repoRoot,
- * pollMs + the pane seams from pane.ts. Tests pass fakes via
+ * pollMs, waitForAzDoBuild (azdo.ts) + the pane seams from pane.ts. Tests pass
+ * fakes via
  * registerBuildCommand — the real nuget.org, pwsh, psmux, VMs and git are
  * never touched by the test suite.
  */
@@ -32,6 +35,8 @@ import {
   defaultCapturePane, defaultClosePane,
 } from "./pane.js";
 import type { RunResult, PaneOpener, PaneRunner, PaneWaiter, PaneCapturer, PaneCloser } from "./pane.js";
+import { defaultWaitForAzDoBuild } from "./azdo.js";
+import type { AzDoBuildWaiter } from "./azdo.js";
 
 export type { RunResult } from "./pane.js";
 
@@ -49,9 +54,11 @@ export interface BuildSeams {
   waitForPaneExit?: PaneWaiter;
   capturePane?: PaneCapturer;
   closePane?: PaneCloser;
+  waitForAzDoBuild?: AzDoBuildWaiter;
 }
 
 const DX_FEED_URL = "https://api.nuget.org/v3-flatcontainer/devexpress.expressapp/index.json";
+const AZDO_BUILD_URL = "https://dev.azure.com/eXpandDevOps/eXpandFramework/_build?definitionId=23";
 const VM_NAMES = ["C11", "C12", "C13", "C14"];
 const VM_CHECK_CMD = `Get-VM -Name C11,C12,C13,C14 | ForEach-Object { "$($_.Name)=$($_.State)" }`;
 const DX_PIN_RE = /Include="(DevExpress\.[^"]*)"\s+Version="([^"]*)"/g;
@@ -69,6 +76,7 @@ export function defaultSeams(): BuildSeams {
     waitForPaneExit: defaultWaitForPaneExit,
     capturePane: defaultCapturePane,
     closePane: defaultClosePane,
+    waitForAzDoBuild: defaultWaitForAzDoBuild,
   };
 }
 
@@ -241,6 +249,31 @@ async function commitPhase(ctx: any, seams: BuildSeams, repoRoot: string, dxChan
   return { committed: true, failed: false, notes };
 }
 
+/** Await the queued AzDO build (prx queues it; the newest build is ours).
+ *  Failure policy: on failure the agent PLANS a fix and presents it — user
+ *  permission is ALWAYS required before any action. No auto-fix, no auto
+ *  re-run. */
+async function monitorPhase(ctx: any, seams: BuildSeams): Promise<{ ok: boolean; failed: boolean; notes: string[] }> {
+  const notes: string[] = [];
+  await ctx.ui.notify("AzDO build queued — monitoring…", "info");
+  const monitor = await (seams.waitForAzDoBuild ?? defaultWaitForAzDoBuild)(3600000);
+  if (monitor.result === "succeeded") {
+    notes.push(`AzDO build ${monitor.id} succeeded`);
+    return { ok: true, failed: false, notes };
+  }
+  if (monitor.result === "canceled") {
+    notes.push("AzDO build canceled");
+    return { ok: true, failed: false, notes };
+  }
+  if (monitor.result === "failed") {
+    const detail = monitor.reason ? ` — ${monitor.reason}` : "";
+    notes.push(`AzDO build ${monitor.id} FAILED${detail} — ${AZDO_BUILD_URL}`);
+    return { ok: false, failed: true, notes };
+  }
+  notes.push(monitor.reason === "timeout" ? "AzDO build monitoring timed out" : `AzDO build ${monitor.id} ended unexpectedly: ${monitor.reason || monitor.result}`);
+  return { ok: false, failed: true, notes };
+}
+
 async function publishPhase(ctx: any, seams: BuildSeams, choice: string, repoRoot: string, dxChanged: boolean, latest: string): Promise<{ ok: boolean; failed: boolean; notes: string[] }> {
   const notes: string[] = [];
   let failed = false;
@@ -268,7 +301,9 @@ async function publishPhase(ctx: any, seams: BuildSeams, choice: string, repoRoo
     return { ok: false, failed: true, notes };
   }
   notes.push(`prx done (exit ${res.code})`);
-  return { ok: true, failed: false, notes };
+  const monitor = await monitorPhase(ctx, seams);
+  notes.push(...monitor.notes);
+  return { ok: monitor.ok, failed: monitor.failed, notes };
 }
 
 function failureResult(choice: string, latest: string, notes: string[], build: { code: number; stdout: string }): string {
