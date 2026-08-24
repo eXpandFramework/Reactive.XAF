@@ -2,8 +2,9 @@
  * reactive-xaf-build/menu — the /devexpress command surface.
  *
  * Direct args run in the current window: /devexpress status (one-shot AzDO
- * status), /devexpress build lab|release (full flow, no menus — the delegated
- * window runs these). Menu picks delegate to a NEW psmux window (delegate.ts):
+ * status), /devexpress build lab|release (full flow) and /devexpress publish
+ * lab|release (skip-build: publish + monitor only, no brx) — the delegated
+ * window runs these. Menu picks delegate to a NEW psmux window (delegate.ts):
  * the flow continues there with its own prompts, build pane, notifies and
  * steers, and survives the invoking session's close. When no window can be
  * spawned, the flow falls back to running here.
@@ -14,10 +15,15 @@ import { defaultDelegateWindow } from "./delegate.js";
 import { statusPhase, STATUS_TASK } from "./status.js";
 import type { BuildSeams } from "./build.js";
 
-type BuildFlowRunner = (choice: string) => Promise<string>;
+type BuildFlowRunner = (choice: string, skipBuild?: boolean) => Promise<string>;
 
 function buildTask(choice: string): string {
   return `Run the /devexpress build ${choice.toLowerCase()} command now. The DX update, commit and publish confirmations will appear in this window — the user answers them. See the build through to the end and report the outcome.`;
+}
+
+/** Skip-build variant — the delegated window runs /devexpress publish. */
+function publishTask(choice: string): string {
+  return `Run the /devexpress publish ${choice.toLowerCase()} command now. The commit and publish confirmations will appear in this window — the user answers them. See the publish through to the end (the AzDO build monitor included) and report the outcome.`;
 }
 
 /** Delegate to a new window, or run the fallback here when that fails. */
@@ -48,9 +54,11 @@ async function menuFlow(ctx: any, seams: BuildSeams, repo: string, runFlow: Buil
   if (top !== "Build") return "DevExpress menu: aborted.";
   const build = await ctx.ui.select("Build", ["RX-XAF"]);
   if (build !== "RX-XAF") return "Build menu: aborted.";
-  const rx = await ctx.ui.select("RX-XAF", ["Lab", "Release"]);
-  if (rx !== "Lab" && rx !== "Release") return "RX-XAF: aborted (no flow selected).";
-  return delegateOrRun(ctx, seams, repo, buildTask(rx), () => runFlow(rx), `Reactive.XAF ${rx} build`);
+  const rx = await ctx.ui.select("RX-XAF", ["Lab", "Release", "Lab (skip build)", "Release (skip build)"]);
+  const skip = rx.includes("skip build");
+  const choice = skip ? rx.replace(" (skip build)", "") : rx;
+  if (choice !== "Lab" && choice !== "Release") return "RX-XAF: aborted (no flow selected).";
+  return delegateOrRun(ctx, seams, repo, skip ? publishTask(choice) : buildTask(choice), () => runFlow(choice, skip), `Reactive.XAF ${choice} build`);
 }
 
 /** Entry: direct args first, then the menu. The repo guard lives in build.ts. */
@@ -60,6 +68,10 @@ export async function runDevexpressMenu(ctx: any, seams: BuildSeams, repo: strin
   if (parts[0] === "build") {
     const choice = parts[1]?.toLowerCase();
     if (choice === "lab" || choice === "release") return runFlow(choice === "lab" ? "Lab" : "Release");
+  }
+  if (parts[0] === "publish") {
+    const choice = parts[1]?.toLowerCase();
+    if (choice === "lab" || choice === "release") return runFlow(choice === "lab" ? "Lab" : "Release", true);
   }
   return menuFlow(ctx, seams, repo, runFlow);
 }

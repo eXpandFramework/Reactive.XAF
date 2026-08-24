@@ -21,6 +21,8 @@
  *      from changes, confirmed), confirm, prx / prx -Release, then the AzDO
  *      build monitor (waitForAzDoBuild — polls the queued build to completion;
  *      on failure the failed record's log supplies the ##[error] reason).
+ *   4b. skip-build variant (menu "Lab (skip build)" / "Release (skip build)",
+ *      arg publish lab|release): no DX check, no brx — straight to publish.
  *
  * Seams (injectable, default = real): run, fetchFeed, propsPath, repoRoot,
  * pollMs, waitForAzDoBuild (azdo.ts), delegateWindow (delegate.ts) + the pane
@@ -226,7 +228,7 @@ async function ensureVmsRunning(seams: BuildSeams): Promise<{ ok: boolean; notes
   return { ok: false, notes };
 }
 
-async function commitPhase(ctx: any, seams: BuildSeams, repoRoot: string, dxChanged: boolean, latest: string): Promise<{ committed: boolean; failed: boolean; notes: string[] }> {
+async function commitPhase(ctx: any, seams: BuildSeams, repoRoot: string, dxChanged: boolean, latest: string, label = "Build fixes"): Promise<{ committed: boolean; failed: boolean; notes: string[] }> {
   const notes: string[] = [];
   const status = await seams.run("git status --short", { cwd: repoRoot, timeoutMs: 30000 });
   const changed = status.stdout.split("\n").filter((l) => l.trim()).length;
@@ -234,7 +236,7 @@ async function commitPhase(ctx: any, seams: BuildSeams, repoRoot: string, dxChan
     notes.push("nothing to commit");
     return { committed: true, failed: false, notes };
   }
-  const msg = dxChanged ? `Update DX to ${latest}` : `Build fixes (${changed} files)`;
+  const msg = dxChanged ? `Update DX to ${latest}` : `${label} (${changed} files)`;
   const pick = await ctx.ui.select(`Commit with message: "${msg}"?`, ["Commit", "Abort"]);
   if (pick !== "Commit") {
     notes.push("commit aborted");
@@ -280,7 +282,7 @@ async function monitorPhase(ctx: any, seams: BuildSeams): Promise<{ ok: boolean;
   return { ok: false, failed: true, notes };
 }
 
-async function publishPhase(ctx: any, seams: BuildSeams, choice: string, repoRoot: string, dxChanged: boolean, latest: string): Promise<{ ok: boolean; failed: boolean; notes: string[] }> {
+async function publishPhase(ctx: any, seams: BuildSeams, choice: string, repoRoot: string, dxChanged: boolean, latest: string, skipBuild = false): Promise<{ ok: boolean; failed: boolean; notes: string[] }> {
   const notes: string[] = [];
   let failed = false;
   await ctx.ui.notify("Checking Hyper-V agents C11-C14…", "info");
@@ -288,7 +290,7 @@ async function publishPhase(ctx: any, seams: BuildSeams, choice: string, repoRoo
   notes.push(...vms.notes);
   if (!vms.ok) return { ok: false, failed: true, notes };
   await ctx.ui.notify("Committing build state…", "info");
-  const commit = await commitPhase(ctx, seams, repoRoot, dxChanged, latest);
+  const commit = await commitPhase(ctx, seams, repoRoot, dxChanged, latest, skipBuild ? "Publish" : "Build fixes");
   notes.push(...commit.notes);
   if (!commit.committed) {
     failed = commit.failed === true;
@@ -325,7 +327,8 @@ function failureResult(choice: string, latest: string, notes: string[], build: {
 }
 
 function summaryResult(choice: string, latest: string, notes: string[], pubOk: boolean): string {
-  return [`Reactive.XAF build — ${choice}`, `DX latest: ${latest}`, ...notes, pubOk ? "published" : "publish stopped"].join("\n");
+  const dxLine = latest ? `DX latest: ${latest}` : "no DX check (build skipped)";
+  return [`Reactive.XAF build — ${choice}`, dxLine, ...notes, pubOk ? "published" : "publish stopped"].join("\n");
 }
 
 /** Warn the agent with triggerTurn — the failure lands in the agent's context
@@ -338,21 +341,29 @@ function steerFailure(pi: any, msg: string): void {
   }
 }
 
-async function runBuildFlow(pi: any, ctx: any, seams: BuildSeams, choice: string, repo: string): Promise<string> {
+async function runBuildFlow(pi: any, ctx: any, seams: BuildSeams, choice: string, repo: string, skipBuild = false): Promise<string> {
   try {
-    const latest = await getLatestDx(seams.fetchFeed);
-    const propsPath = seams.propsPath ?? path.join(repo, "Directory.Packages.props");
-    const dx = await dxPhase(ctx, seams, propsPath, latest);
-    const build = await buildPhase(ctx, seams, choice, repo);
-    const notes = [...dx.notes];
-    if (build.code !== 0) {
-      const msg = failureResult(choice, latest, notes, build);
-      await ctx.ui.notify(msg, "warning");
-      steerFailure(pi, msg);
-      return msg;
+    const notes: string[] = [];
+    let dxChanged = false;
+    let latest = "";
+    if (!skipBuild) {
+      latest = await getLatestDx(seams.fetchFeed);
+      const propsPath = seams.propsPath ?? path.join(repo, "Directory.Packages.props");
+      const dx = await dxPhase(ctx, seams, propsPath, latest);
+      dxChanged = dx.changed;
+      notes.push(...dx.notes);
+      const build = await buildPhase(ctx, seams, choice, repo);
+      if (build.code !== 0) {
+        const msg = failureResult(choice, latest, notes, build);
+        await ctx.ui.notify(msg, "warning");
+        steerFailure(pi, msg);
+        return msg;
+      }
+      notes.push(`build succeeded (${choice})`);
+    } else {
+      notes.push("build skipped — publish only");
     }
-    notes.push(`build succeeded (${choice})`);
-    const pub = await publishPhase(ctx, seams, choice, repo, dx.changed, latest);
+    const pub = await publishPhase(ctx, seams, choice, repo, dxChanged, latest, skipBuild);
     notes.push(...pub.notes);
     const pane = getBuildPane();
     const closeAsk = pane ? `\nThe build pane ${pane} is left open — close it via /devexpress → "Close build pane" when done.` : "";
@@ -371,7 +382,7 @@ async function runBuildFlow(pi: any, ctx: any, seams: BuildSeams, choice: string
 
 export function registerBuildCommand(pi: any, seams?: Partial<BuildSeams>): void {
   pi.registerCommand("devexpress", {
-    description: "DevExpress menu: Build → RX-XAF (Lab | Release), Last build status; args: status | build lab|release",
+    description: "DevExpress menu: Build → RX-XAF (Lab | Release, skip-build variants), Last build status; args: status | build lab|release | publish lab|release",
     handler: async (args: string | string[], ctx: any) => {
       const merged = { ...defaultSeams(), ...seams };
       const cwd = ctx?.cwd ?? merged.repoRoot ?? process.cwd();
@@ -379,7 +390,7 @@ export function registerBuildCommand(pi: any, seams?: Partial<BuildSeams>): void
       if (!repo) {
         return `Reactive.XAF build: not inside the Reactive.XAF repo (cwd: ${cwd}) — no commands ran.`;
       }
-      const runFlow = (choice: string) => runBuildFlow(pi, ctx, merged, choice, repo);
+      const runFlow = (choice: string, skipBuild = false) => runBuildFlow(pi, ctx, merged, choice, repo, skipBuild);
       return runDevexpressMenu(ctx, merged, repo, args, runFlow);
     },
   });
