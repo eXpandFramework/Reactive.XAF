@@ -1,0 +1,310 @@
+/**
+ * reactive-xaf-build/build — the /Build workflow engine.
+ *
+ * Flow (Lab | Release):
+ *   1. getLatestDx — nuget.org flat-container, max stable DevExpress.ExpressApp
+ *   2. props compare — Directory.Packages.props DevExpress.* pins:
+ *        no pins / single shared version → ask update-all / skip / abort (rewrite on update)
+ *        mixed versions → file left untouched, surfaced
+ *   3. brx / brx -Release — pwsh (profile-loaded: brx alias + env from profile.ps1)
+ *   4. warnings — non-zero exit → failure text with output tail; agent fixes, user re-runs
+ *   5. publish — Hyper-V C11-C14 ensured (Start-VM + poll), git commit (message from
+ *      changes, confirmed), confirm, prx / prx -Release
+ *
+ * Seams (injectable, default = real): run (command runner), fetchFeed (feed GET),
+ * propsPath, repoRoot, pollMs. Tests pass fakes via registerBuildCommand — the real
+ * nuget.org, pwsh, VMs and git are never touched by the test suite.
+ */
+
+import { spawn } from "node:child_process";
+import { once } from "node:events";
+import * as fs from "node:fs";
+import * as path from "node:path";
+
+export interface RunResult {
+  code: number;
+  stdout: string;
+  stderr: string;
+}
+
+export interface RunOpts {
+  cwd?: string;
+  timeoutMs?: number;
+}
+
+export type CommandRunner = (cmd: string, opts?: RunOpts) => Promise<RunResult>;
+export type FeedFetcher = (url: string) => Promise<string>;
+
+export interface BuildSeams {
+  run: CommandRunner;
+  fetchFeed: FeedFetcher;
+  propsPath?: string;
+  repoRoot?: string;
+  pollMs?: number;
+}
+
+const DX_FEED_URL = "https://api.nuget.org/v3-flatcontainer/devexpress.expressapp/index.json";
+const VM_NAMES = ["C11", "C12", "C13", "C14"];
+const VM_CHECK_CMD = `Get-VM -Name C11,C12,C13,C14 | ForEach-Object { "$($_.Name)=$($_.State)" }`;
+const DX_PIN_RE = /Include="(DevExpress\.[^"]*)"\s+Version="([^"]*)"/g;
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function runProcess(cmd: string, opts: RunOpts = {}): Promise<RunResult> {
+  const child = spawn("pwsh", ["-Command", cmd], { cwd: opts.cwd, windowsHide: false });
+  let stdout = "";
+  let stderr = "";
+  child.stdout.on("data", (d: Buffer) => {
+    stdout += d.toString();
+    if (stdout.length > 100000) stdout = stdout.slice(-100000);
+  });
+  child.stderr.on("data", (d: Buffer) => {
+    stderr += d.toString();
+    if (stderr.length > 50000) stderr = stderr.slice(-50000);
+  });
+  const timer = setTimeout(() => {
+    spawn("taskkill", ["/PID", String(child.pid), "/T", "/F"], { stdio: "ignore" });
+  }, opts.timeoutMs ?? 60000);
+  const [code] = await once(child, "close");
+  clearTimeout(timer);
+  return { code: (code as number | null) ?? -1, stdout, stderr };
+}
+
+export function defaultSeams(): BuildSeams {
+  return {
+    run: runProcess,
+    fetchFeed: async (url: string) => {
+      const res = await globalThis.fetch(url);
+      if (!res.ok) throw new Error(`feed query failed: HTTP ${res.status}`);
+      return res.text();
+    },
+  };
+}
+
+export function repoRootOf(cwd: string): string | null {
+  const p = path.resolve(cwd);
+  const hasProps = fs.existsSync(path.join(p, "Directory.Packages.props"));
+  const hasSrc = fs.existsSync(path.join(p, "src", "Extensions"));
+  return hasProps && hasSrc ? p : null;
+}
+
+function compareVersions(a: string, b: string): number {
+  const pa = a.split(".").map(Number);
+  const pb = b.split(".").map(Number);
+  for (let i = 0; i < 3; i++) {
+    if (pa[i] !== pb[i]) return pa[i] - pb[i];
+  }
+  return 0;
+}
+
+export async function getLatestDx(fetchFeed: FeedFetcher): Promise<string> {
+  const text = await fetchFeed(DX_FEED_URL);
+  const versions = JSON.parse(text).versions as string[];
+  const stable = versions.filter((v) => /^\d+\.\d+\.\d+$/.test(v));
+  if (!stable.length) throw new Error("no stable DevExpress.ExpressApp versions on nuget.org");
+  stable.sort((a, b) => compareVersions(b, a));
+  return stable[0];
+}
+
+export function readDxPins(text: string): { count: number; unique: string | null } {
+  const versions = new Set<string>();
+  let m: RegExpExecArray | null;
+  DX_PIN_RE.lastIndex = 0;
+  while ((m = DX_PIN_RE.exec(text)) !== null) versions.add(m[2]);
+  return { count: versions.size, unique: versions.size === 1 ? [...versions][0] : null };
+}
+
+export function rewriteDxVersion(text: string, newVersion: string): string {
+  return text.replace(/(Include="DevExpress\.[^"]*"\s+Version=")[^"]*(")/g, `$1${newVersion}$2`);
+}
+
+function trackedWrite(file: string, data: string): void {
+  const seam = (globalThis as any).__writeFileSync;
+  if (typeof seam !== "function") throw new Error("__writeFileSync seam missing — pi-dev not loaded");
+  seam(file, data);
+}
+
+function tail(s: string, n = 1500): string {
+  const t = s.trim();
+  return t.length <= n ? t : "..." + t.slice(-n);
+}
+
+async function dxPhase(ctx: any, seams: BuildSeams, propsPath: string, latest: string): Promise<{ changed: boolean; notes: string[] }> {
+  const text = fs.readFileSync(propsPath, "utf-8");
+  const { count, unique } = readDxPins(text);
+  const notes: string[] = [];
+  if (count === 0) {
+    notes.push("no DevExpress.* pins found in Directory.Packages.props");
+    return { changed: false, notes };
+  }
+  if (unique === null) {
+    notes.push(`DX pins are mixed (${count} versions) — file left untouched`);
+    return { changed: false, notes };
+  }
+  if (unique === latest) {
+    notes.push(`DX already at latest (${latest})`);
+    return { changed: false, notes };
+  }
+  const pick = await ctx.ui.select(`DX ${unique} → ${latest}: update all DevExpress.* pins?`, ["Update", "Skip", "Abort"]);
+  if (pick === "Abort") throw new Error("aborted at the DX update prompt");
+  if (pick === "Skip") {
+    notes.push(`kept DX ${unique} (latest on feed: ${latest})`);
+    return { changed: false, notes };
+  }
+  trackedWrite(propsPath, rewriteDxVersion(text, latest));
+  notes.push(`updated all DevExpress.* pins ${unique} → ${latest}`);
+  return { changed: true, notes };
+}
+
+async function buildPhase(seams: BuildSeams, choice: string, repoRoot: string): Promise<RunResult> {
+  const cmd = choice === "Release" ? "brx -Release" : "brx";
+  return seams.run(cmd, { cwd: repoRoot, timeoutMs: 1800000 });
+}
+
+function parseVmStates(stdout: string): Map<string, string> {
+  const states = new Map<string, string>();
+  for (const line of stdout.split("\n")) {
+    const m = line.match(/^(C1[1-4])=(.*)$/);
+    if (m) states.set(m[1], m[2].trim());
+  }
+  return states;
+}
+
+async function ensureVmsRunning(seams: BuildSeams): Promise<{ ok: boolean; notes: string[] }> {
+  const notes: string[] = [];
+  const check = async () => seams.run(VM_CHECK_CMD, { timeoutMs: 60000 });
+  const first = await check();
+  const off = VM_NAMES.filter((n) => parseVmStates(first.stdout).get(n) !== "Running");
+  if (!off.length) {
+    notes.push("Hyper-V agents C11-C14 already running");
+    return { ok: true, notes };
+  }
+  notes.push(`starting Hyper-V agents: ${off.join(", ")}`);
+  const start = await seams.run(`Start-VM -Name ${off.join(",")}`, { timeoutMs: 120000 });
+  if (start.code !== 0) {
+    notes.push(`Start-VM failed: ${tail(start.stderr)}`);
+    return { ok: false, notes };
+  }
+  for (let i = 0; i < 18; i++) {
+    await sleep(seams.pollMs ?? 10000);
+    const res = await check();
+    const states = parseVmStates(res.stdout);
+    if (VM_NAMES.every((n) => states.get(n) === "Running")) {
+      notes.push("Hyper-V agents running");
+      return { ok: true, notes };
+    }
+  }
+  notes.push("Hyper-V agents did not reach Running within 3 minutes");
+  return { ok: false, notes };
+}
+
+async function commitPhase(ctx: any, seams: BuildSeams, repoRoot: string, dxChanged: boolean, latest: string): Promise<{ committed: boolean; notes: string[] }> {
+  const notes: string[] = [];
+  const status = await seams.run("git status --short", { cwd: repoRoot, timeoutMs: 30000 });
+  const changed = status.stdout.split("\n").filter((l) => l.trim()).length;
+  if (changed === 0) {
+    notes.push("nothing to commit");
+    return { committed: true, notes };
+  }
+  const msg = dxChanged ? `Update DX to ${latest}` : `Build fixes (${changed} files)`;
+  const pick = await ctx.ui.select(`Commit with message: "${msg}"?`, ["Commit", "Abort"]);
+  if (pick !== "Commit") {
+    notes.push("commit aborted");
+    return { committed: false, notes };
+  }
+  const add = await seams.run("git add -A", { cwd: repoRoot, timeoutMs: 60000 });
+  if (add.code !== 0) {
+    notes.push(`git add failed: ${tail(add.stderr)}`);
+    return { committed: false, notes };
+  }
+  const safeMsg = msg.replace(/"/g, "'");
+  const commit = await seams.run(`git commit -m "${safeMsg}"`, { cwd: repoRoot, timeoutMs: 60000 });
+  if (commit.code !== 0) {
+    notes.push(`git commit failed: ${tail(commit.stderr)}`);
+    return { committed: false, notes };
+  }
+  notes.push(`committed: ${msg}`);
+  return { committed: true, notes };
+}
+
+async function publishPhase(ctx: any, seams: BuildSeams, choice: string, repoRoot: string, dxChanged: boolean, latest: string): Promise<{ ok: boolean; notes: string[] }> {
+  const notes: string[] = [];
+  const vms = await ensureVmsRunning(seams);
+  notes.push(...vms.notes);
+  if (!vms.ok) return { ok: false, notes };
+  const commit = await commitPhase(ctx, seams, repoRoot, dxChanged, latest);
+  notes.push(...commit.notes);
+  if (!commit.committed) return { ok: false, notes };
+  const prxCmd = choice === "Release" ? "prx -Release" : "prx";
+  const pick = await ctx.ui.select(`Publish: ${prxCmd} (stage, force-push, queue AzDO Reactive.XAF)?`, ["Publish", "Abort"]);
+  if (pick !== "Publish") {
+    notes.push("publish aborted");
+    return { ok: false, notes };
+  }
+  const res = await seams.run(prxCmd, { cwd: repoRoot, timeoutMs: 600000 });
+  if (res.code !== 0) {
+    notes.push(`prx failed: ${tail(res.stderr)}`);
+    return { ok: false, notes };
+  }
+  notes.push(`prx done: ${tail(res.stdout)}`);
+  return { ok: true, notes };
+}
+
+function failureResult(choice: string, latest: string, notes: string[], build: RunResult): string {
+  return [
+    `Reactive.XAF build — ${choice}`,
+    `DX latest: ${latest}`,
+    ...notes,
+    `Build FAILED (exit ${build.code})`,
+    "--- output tail ---",
+    tail(build.stdout + "\n" + build.stderr, 4000),
+    "Fix the warnings, then re-run /Build.",
+  ].join("\n");
+}
+
+function summaryResult(choice: string, latest: string, notes: string[], pubOk: boolean): string {
+  return [`Reactive.XAF build — ${choice}`, `DX latest: ${latest}`, ...notes, pubOk ? "published" : "publish stopped"].join("\n");
+}
+
+async function runBuildFlow(ctx: any, seams: BuildSeams): Promise<string> {
+  const cwd = ctx?.cwd ?? seams.repoRoot ?? process.cwd();
+  const repo = repoRootOf(cwd);
+  if (!repo) {
+    return `Reactive.XAF build: not inside the Reactive.XAF repo (cwd: ${cwd}) — no commands ran.`;
+  }
+  const propsPath = seams.propsPath ?? path.join(repo, "Directory.Packages.props");
+  const choice = await ctx.ui.select("Build — Reactive.XAF: choose flow", ["Lab", "Release"]);
+  if (choice !== "Lab" && choice !== "Release") {
+    return "Reactive.XAF build: aborted (no flow selected).";
+  }
+  try {
+    const latest = await getLatestDx(seams.fetchFeed);
+    const dx = await dxPhase(ctx, seams, propsPath, latest);
+    const build = await buildPhase(seams, choice, repo);
+    const notes = [...dx.notes];
+    if (build.code !== 0) {
+      const msg = failureResult(choice, latest, notes, build);
+      await ctx.ui.notify(msg, "warning");
+      return msg;
+    }
+    notes.push(`build succeeded (${choice})`);
+    const pub = await publishPhase(ctx, seams, choice, repo, dx.changed, latest);
+    notes.push(...pub.notes);
+    const msg = summaryResult(choice, latest, notes, pub.ok);
+    await ctx.ui.notify(msg, "info");
+    return msg;
+  } catch (err) {
+    const msg = `Reactive.XAF build aborted: ${err instanceof Error ? err.message : String(err)}`;
+    await ctx.ui.notify(msg, "warning");
+    return msg;
+  }
+}
+
+export function registerBuildCommand(pi: any, seams?: Partial<BuildSeams>): void {
+  pi.registerCommand("Build", {
+    description: "Reactive.XAF build workflow: DX check → props update → brx → publish (prx). Lab | Release.",
+    handler: async (_args: string | string[], ctx: any) => runBuildFlow(ctx, { ...defaultSeams(), ...seams }),
+  });
+}
