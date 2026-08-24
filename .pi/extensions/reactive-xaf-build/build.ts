@@ -311,9 +311,10 @@ async function runBuildFlow(pi: any, ctx: any, seams: BuildSeams, choice: string
     if (!pub.ok && pub.failed) steerFailure(pi, msg);
     return msg;
   } catch (err) {
-    const msg = `Reactive.XAF build aborted: ${err instanceof Error ? err.message : String(err)}`;
+    const detail = err instanceof Error ? err.message : String(err);
+    const msg = `Reactive.XAF build aborted: ${detail}`;
     await ctx.ui.notify(msg, "warning");
-    if (!msg.includes("aborted")) steerFailure(pi, msg);
+    if (!detail.includes("aborted")) steerFailure(pi, msg);
     return msg;
   }
 }
