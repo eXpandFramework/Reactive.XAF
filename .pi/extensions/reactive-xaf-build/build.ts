@@ -1,45 +1,41 @@
 /**
  * reactive-xaf-build/build — the /devexpress menu workflow engine.
  *
- * Menu: /devexpress → Build → RX-XAF → Lab | Release.
+ * Menu: /devexpress → Build → RX-XAF → Lab | Release (+ "Close build pane"
+ * while a build pane is open).
  * Flow (Lab | Release):
  *   1. getLatestDx — nuget.org flat-container, max stable DevExpress.ExpressApp
  *   2. props compare — Directory.Packages.props DevExpress.* pins:
  *        no pins / single shared version → ask update-all / skip / abort (rewrite on update)
  *        mixed versions → file left untouched, surfaced
- *   3. brx / brx -Release — pwsh (profile-loaded: brx alias + env from profile.ps1)
- *   4. warnings — non-zero exit → failure text with output tail; agent fixes, user re-runs
- *   5. publish — Hyper-V C11-C14 ensured (Start-VM + poll), git commit (message from
- *      changes, confirmed), confirm, prx / prx -Release
+ *   3. brx / brx -Release — runs in a NEW psmux pane split to the RIGHT; the
+ *      output streams there live (pane.ts). Milestones are notified in this
+ *      window. Green → conversational ask only (no modal, no auto-close): the
+ *      pane is left open and closed via /devexpress → "Close build pane".
+ *      Red → the failure steer (triggerTurn) with the pane's captured tail;
+ *      the pane is KEPT for reuse. In-process fallback when the pane cannot
+ *      be opened.
+ *   4. publish — Hyper-V C11-C14 ensured (Start-VM + poll), git commit (message
+ *      from changes, confirmed), confirm, prx / prx -Release
  *
- * Failure notification: any FAILED outcome (build, hard publish step, or an
- * unexpected exception) fires a warning steer with triggerTurn through the
- * global __steer sender — the failure lands in the agent's context so it can
- * act. User aborts stay silent. Success stays completely silent (no context
- * pollution).
- *
- * Seams (injectable, default = real): run (command runner), fetchFeed (feed GET),
- * propsPath, repoRoot, pollMs. Tests pass fakes via registerBuildCommand — the real
- * nuget.org, pwsh, VMs and git are never touched by the test suite.
+ * Seams (injectable, default = real): run, fetchFeed, propsPath, repoRoot,
+ * pollMs + the pane seams from pane.ts. Tests pass fakes via
+ * registerBuildCommand — the real nuget.org, pwsh, psmux, VMs and git are
+ * never touched by the test suite.
  */
 
-import { spawn } from "node:child_process";
-import { once } from "node:events";
 import * as fs from "node:fs";
 import * as path from "node:path";
+import {
+  sleep, runProcess, getBuildPane, setBuildPane, exitMarkerPath,
+  defaultOpenBuildPane, defaultRunInPane, defaultWaitForPaneExit,
+  defaultCapturePane, defaultClosePane,
+} from "./pane.js";
+import type { RunResult, PaneOpener, PaneRunner, PaneWaiter, PaneCapturer, PaneCloser } from "./pane.js";
 
-export interface RunResult {
-  code: number;
-  stdout: string;
-  stderr: string;
-}
+export type { RunResult } from "./pane.js";
 
-export interface RunOpts {
-  cwd?: string;
-  timeoutMs?: number;
-}
-
-export type CommandRunner = (cmd: string, opts?: RunOpts) => Promise<RunResult>;
+export type CommandRunner = (cmd: string, opts?: { cwd?: string; timeoutMs?: number }) => Promise<RunResult>;
 export type FeedFetcher = (url: string) => Promise<string>;
 
 export interface BuildSeams {
@@ -48,36 +44,17 @@ export interface BuildSeams {
   propsPath?: string;
   repoRoot?: string;
   pollMs?: number;
+  openBuildPane?: PaneOpener;
+  runInPane?: PaneRunner;
+  waitForPaneExit?: PaneWaiter;
+  capturePane?: PaneCapturer;
+  closePane?: PaneCloser;
 }
 
 const DX_FEED_URL = "https://api.nuget.org/v3-flatcontainer/devexpress.expressapp/index.json";
 const VM_NAMES = ["C11", "C12", "C13", "C14"];
 const VM_CHECK_CMD = `Get-VM -Name C11,C12,C13,C14 | ForEach-Object { "$($_.Name)=$($_.State)" }`;
 const DX_PIN_RE = /Include="(DevExpress\.[^"]*)"\s+Version="([^"]*)"/g;
-
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-async function runProcess(cmd: string, opts: RunOpts = {}): Promise<RunResult> {
-  const child = spawn("pwsh", ["-Command", cmd], { cwd: opts.cwd, windowsHide: false });
-  let stdout = "";
-  let stderr = "";
-  child.stdout.on("data", (d: Buffer) => {
-    stdout += d.toString();
-    if (stdout.length > 100000) stdout = stdout.slice(-100000);
-  });
-  child.stderr.on("data", (d: Buffer) => {
-    stderr += d.toString();
-    if (stderr.length > 50000) stderr = stderr.slice(-50000);
-  });
-  const timer = setTimeout(() => {
-    spawn("taskkill", ["/PID", String(child.pid), "/T", "/F"], { stdio: "ignore" });
-  }, opts.timeoutMs ?? 60000);
-  const [code] = await once(child, "close");
-  clearTimeout(timer);
-  return { code: (code as number | null) ?? -1, stdout, stderr };
-}
 
 export function defaultSeams(): BuildSeams {
   return {
@@ -87,6 +64,11 @@ export function defaultSeams(): BuildSeams {
       if (!res.ok) throw new Error(`feed query failed: HTTP ${res.status}`);
       return res.text();
     },
+    openBuildPane: defaultOpenBuildPane,
+    runInPane: defaultRunInPane,
+    waitForPaneExit: defaultWaitForPaneExit,
+    capturePane: defaultCapturePane,
+    closePane: defaultClosePane,
   };
 }
 
@@ -165,9 +147,26 @@ async function dxPhase(ctx: any, seams: BuildSeams, propsPath: string, latest: s
   return { changed: true, notes };
 }
 
-async function buildPhase(seams: BuildSeams, choice: string, repoRoot: string): Promise<RunResult> {
-  const cmd = choice === "Release" ? "brx -Release" : "brx";
-  return seams.run(cmd, { cwd: repoRoot, timeoutMs: 1800000 });
+async function buildPhase(ctx: any, seams: BuildSeams, choice: string, repo: string): Promise<{ code: number; stdout: string }> {
+  const marker = exitMarkerPath();
+  const pane = await (seams.openBuildPane ?? defaultOpenBuildPane)(repo);
+  if (!pane) {
+    await ctx.ui.notify("Build pane could not be opened — building in-process.", "warning");
+    const res = await seams.run(choice === "Release" ? "brx -Release" : "brx", { cwd: repo, timeoutMs: 1800000 });
+    return { code: res.code, stdout: res.stdout + res.stderr };
+  }
+  setBuildPane(pane);
+  await ctx.ui.notify(`Build started — pane ${pane} on the right.`, "info");
+  const cmd = `brx${choice === "Release" ? " -Release" : ""}; if ($?) { Set-Content -LiteralPath '${marker}' -Value 0 } else { Set-Content -LiteralPath '${marker}' -Value 1 }`;
+  await (seams.runInPane ?? defaultRunInPane)(pane, cmd);
+  const wait = await (seams.waitForPaneExit ?? defaultWaitForPaneExit)(pane, marker, 1800000);
+  if (wait.timedOut) {
+    await (seams.closePane ?? defaultClosePane)(pane);
+    setBuildPane(null);
+    return { code: -1, stdout: "build timed out after 30 minutes — pane closed" };
+  }
+  const captured = await (seams.capturePane ?? defaultCapturePane)(pane);
+  return { code: wait.code ?? -1, stdout: captured };
 }
 
 function parseVmStates(stdout: string): Map<string, string> {
@@ -263,14 +262,14 @@ async function publishPhase(ctx: any, seams: BuildSeams, choice: string, repoRoo
   return { ok: true, failed: false, notes };
 }
 
-function failureResult(choice: string, latest: string, notes: string[], build: RunResult): string {
+function failureResult(choice: string, latest: string, notes: string[], build: { code: number; stdout: string }): string {
   return [
     `Reactive.XAF build — ${choice}`,
     `DX latest: ${latest}`,
     ...notes,
     `Build FAILED (exit ${build.code})`,
-    "--- output tail ---",
-    tail(build.stdout + "\n" + build.stderr, 4000),
+    "--- output tail (from the build pane) ---",
+    tail(build.stdout, 4000),
     "Fix the warnings, then re-run /devexpress.",
   ].join("\n");
 }
@@ -294,7 +293,7 @@ async function runBuildFlow(pi: any, ctx: any, seams: BuildSeams, choice: string
     const latest = await getLatestDx(seams.fetchFeed);
     const propsPath = seams.propsPath ?? path.join(repo, "Directory.Packages.props");
     const dx = await dxPhase(ctx, seams, propsPath, latest);
-    const build = await buildPhase(seams, choice, repo);
+    const build = await buildPhase(ctx, seams, choice, repo);
     const notes = [...dx.notes];
     if (build.code !== 0) {
       const msg = failureResult(choice, latest, notes, build);
@@ -305,7 +304,9 @@ async function runBuildFlow(pi: any, ctx: any, seams: BuildSeams, choice: string
     notes.push(`build succeeded (${choice})`);
     const pub = await publishPhase(ctx, seams, choice, repo, dx.changed, latest);
     notes.push(...pub.notes);
-    const msg = summaryResult(choice, latest, notes, pub.ok);
+    const pane = getBuildPane();
+    const closeAsk = pane ? `\nThe build pane ${pane} is left open — close it via /devexpress → "Close build pane" when done.` : "";
+    const msg = summaryResult(choice, latest, notes, pub.ok) + closeAsk;
     await ctx.ui.notify(msg, "info");
     if (!pub.ok && pub.failed) steerFailure(pi, msg);
     return msg;
@@ -323,7 +324,14 @@ async function runDevExpressMenu(pi: any, ctx: any, seams: BuildSeams): Promise<
   if (!repo) {
     return `Reactive.XAF build: not inside the Reactive.XAF repo (cwd: ${cwd}) — no commands ran.`;
   }
-  const top = await ctx.ui.select("DevExpress", ["Build"]);
+  const pane = getBuildPane();
+  const top = await ctx.ui.select("DevExpress", pane ? ["Build", "Close build pane"] : ["Build"]);
+  if (top === "Close build pane") {
+    await (seams.closePane ?? defaultClosePane)(pane!);
+    setBuildPane(null);
+    await ctx.ui.notify(`Build pane ${pane} closed.`, "info");
+    return "Build pane closed.";
+  }
   if (top !== "Build") return "DevExpress menu: aborted.";
   const build = await ctx.ui.select("Build", ["RX-XAF"]);
   if (build !== "RX-XAF") return "Build menu: aborted.";

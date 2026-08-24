@@ -5,22 +5,27 @@
  * index.ts boot (activate(pi)); the remaining tests register the command via
  * registerBuildCommand and invoke the captured handler with a stubbed ctx.ui
  * (scripted select answers, notify collector) and injected seams (fake command
- * runner, fake feed fetcher, fixture props in a temp repo). The real nuget.org,
- * pwsh, Hyper-V VMs and git are never touched.
+ * runner, fake feed fetcher, fake pane seams, fixture props in a temp repo).
+ * The real nuget.org, pwsh, psmux, Hyper-V VMs and git are never touched.
  *
  * Behaviors pinned:
  *   T1 /devexpress registers a command with a handler (real index.ts boot)
  *   T2 outside the Reactive.XAF repo → loud error, zero commands ran
  *   T3 Lab happy path: menu Build → RX-XAF → Lab; DX 26.1.4 > pins 26.1.3
- *     → update prompt → props rewritten (non-DX pins untouched) → brx
- *     → VM start (C11 off) → commit "Update DX to 26.1.4" → confirm → prx → "published"
+ *     → update prompt → props rewritten (non-DX pins untouched) → build runs in a
+ *     PANE (send-keys "brx…") → milestone notify → commit "Update DX to 26.1.4"
+ *     → confirm → prx → "published"; the close ask is conversational (notify, no
+ *     modal, no auto-close)
  *   T4 DX already latest → no update prompt, props untouched, build + publish run
  *   T5 mixed pins → file untouched, surfaced, build still runs
- *   T6 build failure (warnings) → FAILED result with output tail, no publish commands
+ *   T6 build failure (warnings) → FAILED result with the pane's captured tail,
+ *     failure steer fired, pane KEPT (no close), no close ask
  *   T7 Release flow → brx -Release and prx -Release
  *   T8 abort at the DX prompt → nothing ran
  *   T9 VMs already running → no Start-VM
  *   T10 nothing to commit → commit skipped, prx still runs
+ *   T11 pane open fails → in-process fallback build + note notify
+ *   T12 /devexpress → "Close build pane" closes the remembered pane
  *
  * Run: npx tsx C:/Work/Reactive.XAF/.pi/extensions/reactive-xaf-build/build-tests.ts
  */
@@ -93,6 +98,28 @@ function mkRunner(script: Array<{ match: string; result: any }>): { run: (cmd: s
   };
 }
 
+/** Fake pane seams — records what the pane machinery did. */
+function mkPaneSeams(overrides: Partial<{ open: string | null; exitCode: number | null; timedOut: boolean; capture: string }> = {}): any {
+  const opened: string[] = [];
+  const sent: string[] = [];
+  const closed: string[] = [];
+  return {
+    openBuildPane: async () => {
+      if (overrides.open === null) return null;
+      const id = overrides.open ?? "pane1";
+      opened.push(id);
+      return id;
+    },
+    runInPane: async (_pane: string, cmd: string) => { sent.push(cmd); },
+    waitForPaneExit: async () => ({ code: overrides.exitCode ?? 0, timedOut: overrides.timedOut ?? false }),
+    capturePane: async () => overrides.capture ?? "",
+    closePane: async (pane: string) => { closed.push(pane); },
+    opened,
+    sent,
+    closed,
+  };
+}
+
 function mkFetch(versions: string[]): (url: string) => Promise<string> {
   return async (_url: string) => JSON.stringify({ versions });
 }
@@ -139,21 +166,21 @@ function okResult(stdout = ""): any {
   console.log("T2: repo guard\n");
   {
     const runner = mkRunner([]);
+    const pane = mkPaneSeams();
     const pi = mkPi();
-    registerBuildCommand(pi, { run: runner.run, fetchFeed: mkFetch(["26.1.3"]) });
+    registerBuildCommand(pi, { run: runner.run, fetchFeed: mkFetch(["26.1.3"]), ...pane });
     const ctx = mkCtx(["Build", "RX-XAF", "Lab"], tmpdir());
     const result = await pi._cmds.get("devexpress").handler([], ctx);
     check("loud error outside the repo", result.includes("not inside the Reactive.XAF repo"), result);
-    check("zero commands ran", runner.calls.length === 0);
+    check("zero commands ran", runner.calls.length === 0 && pane.opened.length === 0);
   }
 
-  // Section: T3 — Lab happy path with DX update
+  // Section: T3 — Lab happy path with DX update, build in a pane
   console.log("T3: Lab happy path\n");
   {
     steers.length = 0;
     const repo = mkRepo(DX_PINS);
     const runner = mkRunner([
-      { match: "brx", result: okResult("Build succeeded") },
       { match: VM_CHECK_PREFIX, result: { code: 0, stdout: VM_OFF, stderr: "" } },
       { match: "Start-VM -Name C11", result: okResult() },
       { match: VM_CHECK_PREFIX, result: { code: 0, stdout: VM_RUN, stderr: "" } },
@@ -162,8 +189,9 @@ function okResult(stdout = ""): any {
       { match: "git commit -m *", result: okResult() },
       { match: "prx", result: okResult("Queued build 123") },
     ]);
+    const pane = mkPaneSeams();
     const pi = mkPi();
-    registerBuildCommand(pi, { run: runner.run, fetchFeed: mkFetch(["26.1.2", "26.1.3", "26.1.4"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1 });
+    registerBuildCommand(pi, { run: runner.run, fetchFeed: mkFetch(["26.1.2", "26.1.3", "26.1.4"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1, ...pane });
     const ctx = mkCtx([...MENU, "Lab", "Update", "Commit", "Publish"], repo);
     const result = await pi._cmds.get("devexpress").handler([], ctx);
     const after = propsText(repo);
@@ -171,8 +199,12 @@ function okResult(stdout = ""): any {
     check("update prompt shown", ctx._prompts.some((p) => p.includes("update all DevExpress")), ctx._prompts.join(" | "));
     check("all DX pins rewritten to 26.1.4", after.includes('DevExpress.ExpressApp" Version="26.1.4"') && after.includes('DevExpress.Xpo" Version="26.1.4"'), after);
     check("non-DX pin untouched", after.includes('Xpand.Collections" Version="1.0.4"'), after);
-    check("brx first command", runner.calls[0] === "brx", runner.calls.join(" | "));
-    check("Start-VM invoked for C11", runner.calls.some((c) => c.startsWith("Start-VM -Name C11")), runner.calls.join(" | "));
+    check("build pane opened", pane.opened.length === 1, JSON.stringify(pane.opened));
+    check("brx sent to the pane", pane.sent.length === 1 && pane.sent[0].startsWith("brx;"), JSON.stringify(pane.sent));
+    check("build-started milestone notified", ctx._notifies.some((n) => n.includes("Build started — pane")), ctx._notifies.join(" | "));
+    check("close ask is conversational", ctx._notifies.some((n) => n.includes("Close build pane")), ctx._notifies.join(" | "));
+    check("no modal close prompt", !ctx._prompts.some((p) => p.includes("Close build pane")), ctx._prompts.join(" | "));
+    check("pane not auto-closed", pane.closed.length === 0, JSON.stringify(pane.closed));
     check("commit message carries DX", runner.calls.some((c) => c.startsWith('git commit -m "Update DX to 26.1.4"')), runner.calls.join(" | "));
     check("prx ran last", runner.calls[runner.calls.length - 1] === "prx", runner.calls.join(" | "));
     check("success: no failure steer", steers.length === 0, JSON.stringify(steers));
@@ -183,20 +215,20 @@ function okResult(stdout = ""): any {
   {
     const repo = mkRepo(DX_PINS);
     const runner = mkRunner([
-      { match: "brx", result: okResult() },
       { match: VM_CHECK_PREFIX, result: { code: 0, stdout: VM_RUN, stderr: "" } },
       { match: "git status --short", result: { code: 0, stdout: " M src/x.cs\n", stderr: "" } },
       { match: "git add -A", result: okResult() },
       { match: "git commit -m *", result: okResult() },
       { match: "prx", result: okResult() },
     ]);
+    const pane = mkPaneSeams();
     const pi = mkPi();
-    registerBuildCommand(pi, { run: runner.run, fetchFeed: mkFetch(["26.1.3"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1 });
+    registerBuildCommand(pi, { run: runner.run, fetchFeed: mkFetch(["26.1.3"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1, ...pane });
     const ctx = mkCtx([...MENU, "Lab", "Commit", "Publish"], repo);
     const result = await pi._cmds.get("devexpress").handler([], ctx);
     check("no update prompt", !ctx._prompts.some((p) => p.includes("update all DevExpress")), ctx._prompts.join(" | "));
     check("props untouched", propsText(repo).includes('Version="26.1.3"') && !propsText(repo).includes("26.1.4"), "props changed");
-    check("build still ran", runner.calls[0] === "brx", runner.calls.join(" | "));
+    check("build ran in pane", pane.sent.length === 1, JSON.stringify(pane.sent));
     check("published", result.includes("published"), result);
   }
 
@@ -208,38 +240,38 @@ function okResult(stdout = ""): any {
       ["DevExpress.Xpo", "26.1.2"],
     ]);
     const runner = mkRunner([
-      { match: "brx", result: okResult() },
       { match: VM_CHECK_PREFIX, result: { code: 0, stdout: VM_RUN, stderr: "" } },
       { match: "git status --short", result: okResult("") },
       { match: "prx", result: okResult() },
     ]);
+    const pane = mkPaneSeams();
     const pi = mkPi();
-    registerBuildCommand(pi, { run: runner.run, fetchFeed: mkFetch(["26.1.4"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1 });
+    registerBuildCommand(pi, { run: runner.run, fetchFeed: mkFetch(["26.1.4"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1, ...pane });
     const ctx = mkCtx([...MENU, "Lab", "Publish"], repo);
     const result = await pi._cmds.get("devexpress").handler([], ctx);
     const after = propsText(repo);
     check("mixed versions surfaced", result.includes("mixed"), result);
     check("file untouched", after.includes('Version="26.1.2"'), after);
-    check("build still ran", runner.calls[0] === "brx", runner.calls.join(" | "));
+    check("build ran in pane", pane.sent.length === 1, JSON.stringify(pane.sent));
     check("published", result.includes("published"), result);
   }
 
-  // Section: T6 — build failure with warnings
+  // Section: T6 — build failure with warnings (pane kept)
   console.log("T6: build failure\n");
   {
     steers.length = 0;
     const repo = mkRepo(DX_PINS);
-    const runner = mkRunner([
-      { match: "brx", result: { code: 1, stdout: "warning CS0219: unused variable", stderr: "" } },
-    ]);
+    const runner = mkRunner([]);
+    const pane = mkPaneSeams({ exitCode: 1, capture: "warning CS0219: unused variable" });
     const pi = mkPi();
-    registerBuildCommand(pi, { run: runner.run, fetchFeed: mkFetch(["26.1.4"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1 });
+    registerBuildCommand(pi, { run: runner.run, fetchFeed: mkFetch(["26.1.4"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1, ...pane });
     const ctx = mkCtx([...MENU, "Lab"], repo);
     const result = await pi._cmds.get("devexpress").handler([], ctx);
     check("FAILED surfaced", result.includes("Build FAILED (exit 1)"), result);
-    check("warning tail shown", result.includes("warning CS0219"), result);
-    check("no publish commands", !runner.calls.some((c) => c.startsWith("Get-VM") || c === "prx"), runner.calls.join(" | "));
-    check("warning notify", ctx._notifies.some((n) => n.includes("FAILED")), ctx._notifies.join(" | "));
+    check("captured pane tail shown", result.includes("warning CS0219"), result);
+    check("pane KEPT (no close)", pane.closed.length === 0, JSON.stringify(pane.closed));
+    check("no close ask on failure", !ctx._notifies.some((n) => n.includes("Close build pane")), ctx._notifies.join(" | "));
+    check("no publish commands", runner.calls.length === 0, runner.calls.join(" | "));
     check("failure steer fired", steers.length === 1 && steers[0].type === "reactive-xaf-build:build-failed" && steers[0].content.includes("Build FAILED"), JSON.stringify(steers));
   }
 
@@ -248,16 +280,16 @@ function okResult(stdout = ""): any {
   {
     const repo = mkRepo(DX_PINS);
     const runner = mkRunner([
-      { match: "brx -Release", result: okResult() },
       { match: VM_CHECK_PREFIX, result: { code: 0, stdout: VM_RUN, stderr: "" } },
       { match: "git status --short", result: okResult("") },
       { match: "prx -Release", result: okResult() },
     ]);
+    const pane = mkPaneSeams();
     const pi = mkPi();
-    registerBuildCommand(pi, { run: runner.run, fetchFeed: mkFetch(["26.1.4"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1 });
+    registerBuildCommand(pi, { run: runner.run, fetchFeed: mkFetch(["26.1.4"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1, ...pane });
     const ctx = mkCtx([...MENU, "Release", "Skip", "Publish"], repo);
     const result = await pi._cmds.get("devexpress").handler([], ctx);
-    check("brx -Release ran", runner.calls.includes("brx -Release"), runner.calls.join(" | "));
+    check("brx -Release sent to pane", pane.sent.length === 1 && pane.sent[0].startsWith("brx -Release;"), JSON.stringify(pane.sent));
     check("prx -Release ran", runner.calls.includes("prx -Release"), runner.calls.join(" | "));
     check("published", result.includes("published"), result);
   }
@@ -268,12 +300,13 @@ function okResult(stdout = ""): any {
     steers.length = 0;
     const repo = mkRepo(DX_PINS);
     const runner = mkRunner([]);
+    const pane = mkPaneSeams();
     const pi = mkPi();
-    registerBuildCommand(pi, { run: runner.run, fetchFeed: mkFetch(["26.1.4"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1 });
+    registerBuildCommand(pi, { run: runner.run, fetchFeed: mkFetch(["26.1.4"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1, ...pane });
     const ctx = mkCtx([...MENU, "Lab", "Abort"], repo);
     const result = await pi._cmds.get("devexpress").handler([], ctx);
     check("abort surfaced", result.includes("aborted at the DX update prompt"), result);
-    check("nothing ran", runner.calls.length === 0, runner.calls.join(" | "));
+    check("nothing ran", runner.calls.length === 0 && pane.opened.length === 0, JSON.stringify({ calls: runner.calls, opened: pane.opened }));
     check("user abort: no steer", steers.length === 0, JSON.stringify(steers));
   }
 
@@ -282,13 +315,13 @@ function okResult(stdout = ""): any {
   {
     const repo = mkRepo(DX_PINS);
     const runner = mkRunner([
-      { match: "brx", result: okResult() },
       { match: VM_CHECK_PREFIX, result: { code: 0, stdout: VM_RUN, stderr: "" } },
       { match: "git status --short", result: okResult("") },
       { match: "prx", result: okResult() },
     ]);
+    const pane = mkPaneSeams();
     const pi = mkPi();
-    registerBuildCommand(pi, { run: runner.run, fetchFeed: mkFetch(["26.1.4"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1 });
+    registerBuildCommand(pi, { run: runner.run, fetchFeed: mkFetch(["26.1.4"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1, ...pane });
     const ctx = mkCtx([...MENU, "Lab", "Skip", "Publish"], repo);
     const result = await pi._cmds.get("devexpress").handler([], ctx);
     check("no Start-VM", !runner.calls.some((c) => c.startsWith("Start-VM")), runner.calls.join(" | "));
@@ -301,19 +334,58 @@ function okResult(stdout = ""): any {
   {
     const repo = mkRepo(DX_PINS);
     const runner = mkRunner([
-      { match: "brx", result: okResult() },
       { match: VM_CHECK_PREFIX, result: { code: 0, stdout: VM_RUN, stderr: "" } },
       { match: "git status --short", result: okResult("") },
       { match: "prx", result: okResult() },
     ]);
+    const pane = mkPaneSeams();
     const pi = mkPi();
-    registerBuildCommand(pi, { run: runner.run, fetchFeed: mkFetch(["26.1.4"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1 });
+    registerBuildCommand(pi, { run: runner.run, fetchFeed: mkFetch(["26.1.4"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1, ...pane });
     const ctx = mkCtx([...MENU, "Lab", "Skip", "Publish"], repo);
     const result = await pi._cmds.get("devexpress").handler([], ctx);
     check("no commit prompt", !ctx._prompts.some((p) => p.includes("Commit with message")), ctx._prompts.join(" | "));
     check("no git add", !runner.calls.includes("git add -A"), runner.calls.join(" | "));
     check("prx still ran", runner.calls.includes("prx"), runner.calls.join(" | "));
     check("published", result.includes("published"), result);
+  }
+
+  // Section: T11 — pane open fails → in-process fallback
+  console.log("T11: pane fallback\n");
+  {
+    const repo = mkRepo(DX_PINS);
+    const runner = mkRunner([
+      { match: "brx", result: okResult("Build succeeded") },
+      { match: VM_CHECK_PREFIX, result: { code: 0, stdout: VM_RUN, stderr: "" } },
+      { match: "git status --short", result: okResult("") },
+      { match: "prx", result: okResult() },
+    ]);
+    const pane = mkPaneSeams({ open: null });
+    const pi = mkPi();
+    registerBuildCommand(pi, { run: runner.run, fetchFeed: mkFetch(["26.1.4"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1, ...pane });
+    const ctx = mkCtx([...MENU, "Lab", "Skip", "Publish"], repo);
+    const result = await pi._cmds.get("devexpress").handler([], ctx);
+    check("fallback note notified", ctx._notifies.some((n) => n.includes("building in-process")), ctx._notifies.join(" | "));
+    check("in-process brx ran", runner.calls.includes("brx"), runner.calls.join(" | "));
+    check("no pane sent", pane.sent.length === 0, JSON.stringify(pane.sent));
+    check("published", result.includes("published"), result);
+  }
+
+  // Section: T12 — /devexpress → Close build pane
+  console.log("T12: close build pane\n");
+  {
+    (globalThis as any)[Symbol.for("reactive-xaf-build.build-pane")] = "paneX";
+    const repo = mkRepo(DX_PINS);
+    const runner = mkRunner([]);
+    const pane = mkPaneSeams();
+    const pi = mkPi();
+    registerBuildCommand(pi, { run: runner.run, fetchFeed: mkFetch(["26.1.4"]), repoRoot: repo, ...pane });
+    const ctx = mkCtx(["Close build pane"], repo);
+    const result = await pi._cmds.get("devexpress").handler([], ctx);
+    check("close result", result.includes("Build pane closed"), result);
+    check("pane closed", pane.closed.length === 1 && pane.closed[0] === "paneX", JSON.stringify(pane.closed));
+    check("close notified", ctx._notifies.some((n) => n.includes("closed")), ctx._notifies.join(" | "));
+    check("no build ran", pane.sent.length === 0 && runner.calls.length === 0, JSON.stringify({ sent: pane.sent, calls: runner.calls }));
+    check("pane state cleared", (globalThis as any)[Symbol.for("reactive-xaf-build.build-pane")] === undefined);
   }
 
   console.log(`\n${ok} passed, ${fail} failed`);
