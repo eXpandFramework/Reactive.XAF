@@ -12,6 +12,12 @@
  *   5. publish — Hyper-V C11-C14 ensured (Start-VM + poll), git commit (message from
  *      changes, confirmed), confirm, prx / prx -Release
  *
+ * Failure notification: any FAILED outcome (build, hard publish step, or an
+ * unexpected exception) fires a warning steer with triggerTurn through the
+ * global __steer sender — the failure lands in the agent's context so it can
+ * act. User aborts stay silent. Success stays completely silent (no context
+ * pollution).
+ *
  * Seams (injectable, default = real): run (command runner), fetchFeed (feed GET),
  * propsPath, repoRoot, pollMs. Tests pass fakes via registerBuildCommand — the real
  * nuget.org, pwsh, VMs and git are never touched by the test suite.
@@ -201,56 +207,60 @@ async function ensureVmsRunning(seams: BuildSeams): Promise<{ ok: boolean; notes
   return { ok: false, notes };
 }
 
-async function commitPhase(ctx: any, seams: BuildSeams, repoRoot: string, dxChanged: boolean, latest: string): Promise<{ committed: boolean; notes: string[] }> {
+async function commitPhase(ctx: any, seams: BuildSeams, repoRoot: string, dxChanged: boolean, latest: string): Promise<{ committed: boolean; failed: boolean; notes: string[] }> {
   const notes: string[] = [];
   const status = await seams.run("git status --short", { cwd: repoRoot, timeoutMs: 30000 });
   const changed = status.stdout.split("\n").filter((l) => l.trim()).length;
   if (changed === 0) {
     notes.push("nothing to commit");
-    return { committed: true, notes };
+    return { committed: true, failed: false, notes };
   }
   const msg = dxChanged ? `Update DX to ${latest}` : `Build fixes (${changed} files)`;
   const pick = await ctx.ui.select(`Commit with message: "${msg}"?`, ["Commit", "Abort"]);
   if (pick !== "Commit") {
     notes.push("commit aborted");
-    return { committed: false, notes };
+    return { committed: false, failed: false, notes };
   }
   const add = await seams.run("git add -A", { cwd: repoRoot, timeoutMs: 60000 });
   if (add.code !== 0) {
     notes.push(`git add failed: ${tail(add.stderr)}`);
-    return { committed: false, notes };
+    return { committed: false, failed: true, notes };
   }
   const safeMsg = msg.replace(/"/g, "'");
   const commit = await seams.run(`git commit -m "${safeMsg}"`, { cwd: repoRoot, timeoutMs: 60000 });
   if (commit.code !== 0) {
     notes.push(`git commit failed: ${tail(commit.stderr)}`);
-    return { committed: false, notes };
+    return { committed: false, failed: true, notes };
   }
   notes.push(`committed: ${msg}`);
-  return { committed: true, notes };
+  return { committed: true, failed: false, notes };
 }
 
-async function publishPhase(ctx: any, seams: BuildSeams, choice: string, repoRoot: string, dxChanged: boolean, latest: string): Promise<{ ok: boolean; notes: string[] }> {
+async function publishPhase(ctx: any, seams: BuildSeams, choice: string, repoRoot: string, dxChanged: boolean, latest: string): Promise<{ ok: boolean; failed: boolean; notes: string[] }> {
   const notes: string[] = [];
+  let failed = false;
   const vms = await ensureVmsRunning(seams);
   notes.push(...vms.notes);
-  if (!vms.ok) return { ok: false, notes };
+  if (!vms.ok) return { ok: false, failed: true, notes };
   const commit = await commitPhase(ctx, seams, repoRoot, dxChanged, latest);
   notes.push(...commit.notes);
-  if (!commit.committed) return { ok: false, notes };
+  if (!commit.committed) {
+    failed = commit.failed === true;
+    return { ok: false, failed, notes };
+  }
   const prxCmd = choice === "Release" ? "prx -Release" : "prx";
   const pick = await ctx.ui.select(`Publish: ${prxCmd} (stage, force-push, queue AzDO Reactive.XAF)?`, ["Publish", "Abort"]);
   if (pick !== "Publish") {
     notes.push("publish aborted");
-    return { ok: false, notes };
+    return { ok: false, failed: false, notes };
   }
   const res = await seams.run(prxCmd, { cwd: repoRoot, timeoutMs: 600000 });
   if (res.code !== 0) {
     notes.push(`prx failed: ${tail(res.stderr)}`);
-    return { ok: false, notes };
+    return { ok: false, failed: true, notes };
   }
-  notes.push(`prx done: ${tail(res.stdout)}`);
-  return { ok: true, notes };
+  notes.push(`prx done (exit ${res.code})`);
+  return { ok: true, failed: false, notes };
 }
 
 function failureResult(choice: string, latest: string, notes: string[], build: RunResult): string {
@@ -269,7 +279,17 @@ function summaryResult(choice: string, latest: string, notes: string[], pubOk: b
   return [`Reactive.XAF build — ${choice}`, `DX latest: ${latest}`, ...notes, pubOk ? "published" : "publish stopped"].join("\n");
 }
 
-async function runBuildFlow(ctx: any, seams: BuildSeams, choice: string, repo: string): Promise<string> {
+/** Warn the agent with triggerTurn — the failure lands in the agent's context
+ *  so it can act (fix warnings) instead of waiting for the user to relay it.
+ *  User aborts never reach this path. */
+function steerFailure(pi: any, msg: string): void {
+  const steer = (globalThis as any).__steer;
+  if (typeof steer === "function") {
+    steer(pi, "reactive-xaf-build:build-failed", msg, "", "steer", { triggerTurn: true, severity: "warning" });
+  }
+}
+
+async function runBuildFlow(pi: any, ctx: any, seams: BuildSeams, choice: string, repo: string): Promise<string> {
   try {
     const latest = await getLatestDx(seams.fetchFeed);
     const propsPath = seams.propsPath ?? path.join(repo, "Directory.Packages.props");
@@ -279,6 +299,7 @@ async function runBuildFlow(ctx: any, seams: BuildSeams, choice: string, repo: s
     if (build.code !== 0) {
       const msg = failureResult(choice, latest, notes, build);
       await ctx.ui.notify(msg, "warning");
+      steerFailure(pi, msg);
       return msg;
     }
     notes.push(`build succeeded (${choice})`);
@@ -286,15 +307,17 @@ async function runBuildFlow(ctx: any, seams: BuildSeams, choice: string, repo: s
     notes.push(...pub.notes);
     const msg = summaryResult(choice, latest, notes, pub.ok);
     await ctx.ui.notify(msg, "info");
+    if (!pub.ok && pub.failed) steerFailure(pi, msg);
     return msg;
   } catch (err) {
     const msg = `Reactive.XAF build aborted: ${err instanceof Error ? err.message : String(err)}`;
     await ctx.ui.notify(msg, "warning");
+    if (!msg.includes("aborted")) steerFailure(pi, msg);
     return msg;
   }
 }
 
-async function runDevExpressMenu(ctx: any, seams: BuildSeams): Promise<string> {
+async function runDevExpressMenu(pi: any, ctx: any, seams: BuildSeams): Promise<string> {
   const cwd = ctx?.cwd ?? seams.repoRoot ?? process.cwd();
   const repo = repoRootOf(cwd);
   if (!repo) {
@@ -306,12 +329,12 @@ async function runDevExpressMenu(ctx: any, seams: BuildSeams): Promise<string> {
   if (build !== "RX-XAF") return "Build menu: aborted.";
   const rx = await ctx.ui.select("RX-XAF", ["Lab", "Release"]);
   if (rx !== "Lab" && rx !== "Release") return "RX-XAF: aborted (no flow selected).";
-  return runBuildFlow(ctx, seams, rx, repo);
+  return runBuildFlow(pi, ctx, seams, rx, repo);
 }
 
 export function registerBuildCommand(pi: any, seams?: Partial<BuildSeams>): void {
   pi.registerCommand("devexpress", {
     description: "DevExpress menu: Build → RX-XAF (Lab | Release)",
-    handler: async (_args: string | string[], ctx: any) => runDevExpressMenu(ctx, { ...defaultSeams(), ...seams }),
+    handler: async (_args: string | string[], ctx: any) => runDevExpressMenu(pi, ctx, { ...defaultSeams(), ...seams }),
   });
 }

@@ -45,6 +45,12 @@ function check(label: string, cond: boolean, detail?: string): void {
   }
 }
 
+// The flow steers failures through globalThis.__steer — collect them here.
+const steers: Array<{ type: string; content: string }> = [];
+(globalThis as any).__steer = (_pi: any, type: string, content: string) => {
+  steers.push({ type, content });
+};
+
 function mkPi(): any {
   const cmds = new Map<string, any>();
   return {
@@ -144,6 +150,7 @@ function okResult(stdout = ""): any {
   // Section: T3 — Lab happy path with DX update
   console.log("T3: Lab happy path\n");
   {
+    steers.length = 0;
     const repo = mkRepo(DX_PINS);
     const runner = mkRunner([
       { match: "brx", result: okResult("Build succeeded") },
@@ -168,6 +175,7 @@ function okResult(stdout = ""): any {
     check("Start-VM invoked for C11", runner.calls.some((c) => c.startsWith("Start-VM -Name C11")), runner.calls.join(" | "));
     check("commit message carries DX", runner.calls.some((c) => c.startsWith('git commit -m "Update DX to 26.1.4"')), runner.calls.join(" | "));
     check("prx ran last", runner.calls[runner.calls.length - 1] === "prx", runner.calls.join(" | "));
+    check("success: no failure steer", steers.length === 0, JSON.stringify(steers));
   }
 
   // Section: T4 — DX already latest
@@ -219,6 +227,7 @@ function okResult(stdout = ""): any {
   // Section: T6 — build failure with warnings
   console.log("T6: build failure\n");
   {
+    steers.length = 0;
     const repo = mkRepo(DX_PINS);
     const runner = mkRunner([
       { match: "brx", result: { code: 1, stdout: "warning CS0219: unused variable", stderr: "" } },
@@ -231,6 +240,7 @@ function okResult(stdout = ""): any {
     check("warning tail shown", result.includes("warning CS0219"), result);
     check("no publish commands", !runner.calls.some((c) => c.startsWith("Get-VM") || c === "prx"), runner.calls.join(" | "));
     check("warning notify", ctx._notifies.some((n) => n.includes("FAILED")), ctx._notifies.join(" | "));
+    check("failure steer fired", steers.length === 1 && steers[0].type === "reactive-xaf-build:build-failed" && steers[0].content.includes("Build FAILED"), JSON.stringify(steers));
   }
 
   // Section: T7 — Release flow (DX update skipped)
@@ -255,6 +265,7 @@ function okResult(stdout = ""): any {
   // Section: T8 — abort at the DX prompt
   console.log("T8: abort at DX prompt\n");
   {
+    steers.length = 0;
     const repo = mkRepo(DX_PINS);
     const runner = mkRunner([]);
     const pi = mkPi();
@@ -263,6 +274,7 @@ function okResult(stdout = ""): any {
     const result = await pi._cmds.get("devexpress").handler([], ctx);
     check("abort surfaced", result.includes("aborted at the DX update prompt"), result);
     check("nothing ran", runner.calls.length === 0, runner.calls.join(" | "));
+    check("user abort: no steer", steers.length === 0, JSON.stringify(steers));
   }
 
   // Section: T9 — VMs already running (DX update skipped)
