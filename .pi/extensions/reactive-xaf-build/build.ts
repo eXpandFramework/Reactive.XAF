@@ -1,8 +1,10 @@
 /**
  * reactive-xaf-build/build — the /devexpress menu workflow engine.
  *
- * Menu: /devexpress → Build → RX-XAF → Lab | Release (+ "Close build pane"
- * while a build pane is open).
+ * Menu: /devexpress → Build → RX-XAF → Lab | Release, "Last build status"
+ * (+ "Close build pane" while a build pane is open). Menu picks delegate to
+ * a NEW psmux window (delegate.ts); direct args run here: /devexpress status,
+ * /devexpress build lab|release (the delegated window uses these).
  * Flow (Lab | Release):
  *   1. getLatestDx — nuget.org flat-container, max stable DevExpress.ExpressApp
  *   2. props compare — Directory.Packages.props DevExpress.* pins:
@@ -21,8 +23,8 @@
  *      on failure the failed record's log supplies the ##[error] reason).
  *
  * Seams (injectable, default = real): run, fetchFeed, propsPath, repoRoot,
- * pollMs, waitForAzDoBuild (azdo.ts) + the pane seams from pane.ts. Tests pass
- * fakes via
+ * pollMs, waitForAzDoBuild (azdo.ts), delegateWindow (delegate.ts) + the pane
+ * seams from pane.ts. Tests pass fakes via
  * registerBuildCommand — the real nuget.org, pwsh, psmux, VMs and git are
  * never touched by the test suite.
  */
@@ -35,8 +37,11 @@ import {
   defaultCapturePane, defaultClosePane,
 } from "./pane.js";
 import type { RunResult, PaneOpener, PaneRunner, PaneWaiter, PaneCapturer, PaneCloser } from "./pane.js";
-import { defaultWaitForAzDoBuild } from "./azdo.js";
+import { defaultWaitForAzDoBuild, AZDO_BUILD_URL } from "./azdo.js";
 import type { AzDoBuildWaiter } from "./azdo.js";
+import { runDevexpressMenu } from "./menu.js";
+import { defaultDelegateWindow } from "./delegate.js";
+import type { WindowDelegator } from "./delegate.js";
 
 export type { RunResult } from "./pane.js";
 
@@ -55,10 +60,10 @@ export interface BuildSeams {
   capturePane?: PaneCapturer;
   closePane?: PaneCloser;
   waitForAzDoBuild?: AzDoBuildWaiter;
+  delegateWindow?: WindowDelegator;
 }
 
 const DX_FEED_URL = "https://api.nuget.org/v3-flatcontainer/devexpress.expressapp/index.json";
-const AZDO_BUILD_URL = "https://dev.azure.com/eXpandDevOps/eXpandFramework/_build?definitionId=23";
 const VM_NAMES = ["C11", "C12", "C13", "C14"];
 const VM_CHECK_CMD = `Get-VM -Name C11,C12,C13,C14 | ForEach-Object { "$($_.Name)=$($_.State)" }`;
 const DX_PIN_RE = /Include="(DevExpress\.[^"]*)"\s+Version="([^"]*)"/g;
@@ -77,6 +82,7 @@ export function defaultSeams(): BuildSeams {
     capturePane: defaultCapturePane,
     closePane: defaultClosePane,
     waitForAzDoBuild: defaultWaitForAzDoBuild,
+    delegateWindow: defaultDelegateWindow,
   };
 }
 
@@ -363,31 +369,18 @@ async function runBuildFlow(pi: any, ctx: any, seams: BuildSeams, choice: string
   }
 }
 
-async function runDevExpressMenu(pi: any, ctx: any, seams: BuildSeams): Promise<string> {
-  const cwd = ctx?.cwd ?? seams.repoRoot ?? process.cwd();
-  const repo = repoRootOf(cwd);
-  if (!repo) {
-    return `Reactive.XAF build: not inside the Reactive.XAF repo (cwd: ${cwd}) — no commands ran.`;
-  }
-  const pane = getBuildPane();
-  const top = await ctx.ui.select("DevExpress", pane ? ["Build", "Close build pane"] : ["Build"]);
-  if (top === "Close build pane") {
-    await (seams.closePane ?? defaultClosePane)(pane!);
-    setBuildPane(null);
-    await ctx.ui.notify(`Build pane ${pane} closed.`, "info");
-    return "Build pane closed.";
-  }
-  if (top !== "Build") return "DevExpress menu: aborted.";
-  const build = await ctx.ui.select("Build", ["RX-XAF"]);
-  if (build !== "RX-XAF") return "Build menu: aborted.";
-  const rx = await ctx.ui.select("RX-XAF", ["Lab", "Release"]);
-  if (rx !== "Lab" && rx !== "Release") return "RX-XAF: aborted (no flow selected).";
-  return runBuildFlow(pi, ctx, seams, rx, repo);
-}
-
 export function registerBuildCommand(pi: any, seams?: Partial<BuildSeams>): void {
   pi.registerCommand("devexpress", {
-    description: "DevExpress menu: Build → RX-XAF (Lab | Release)",
-    handler: async (_args: string | string[], ctx: any) => runDevExpressMenu(pi, ctx, { ...defaultSeams(), ...seams }),
+    description: "DevExpress menu: Build → RX-XAF (Lab | Release), Last build status; args: status | build lab|release",
+    handler: async (args: string | string[], ctx: any) => {
+      const merged = { ...defaultSeams(), ...seams };
+      const cwd = ctx?.cwd ?? merged.repoRoot ?? process.cwd();
+      const repo = repoRootOf(cwd);
+      if (!repo) {
+        return `Reactive.XAF build: not inside the Reactive.XAF repo (cwd: ${cwd}) — no commands ran.`;
+      }
+      const runFlow = (choice: string) => runBuildFlow(pi, ctx, merged, choice, repo);
+      return runDevexpressMenu(ctx, merged, repo, args, runFlow);
+    },
   });
 }

@@ -77,7 +77,7 @@ export async function runProcess(cmd: string, opts: RunOpts = {}): Promise<RunRe
 }
 
 /** psmux CLI args with the socket-isolation seam (tests / parallel servers). */
-function psmuxArgs(args: string[]): string[] {
+export function psmuxArgs(args: string[]): string[] {
   const sock = process.env.PSMUX_SOCKET;
   return sock ? ["-L", sock, ...args] : args;
 }

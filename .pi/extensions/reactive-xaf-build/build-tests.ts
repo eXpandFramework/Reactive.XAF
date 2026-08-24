@@ -7,8 +7,7 @@
  * build, milestones, conversational close ask); T4 DX already latest; T5 mixed
  * pins; T6 failure (steer, pane kept); T7 Release; T8 abort (silent); T9 VMs
  * running; T10 nothing to commit; T11 pane fallback; T12 close build pane;
- * T13 Starting VM settles without Start-VM; T14-T16 AzDO monitor (fake seam): failed → steer carries the reason, publish stopped; succeeded → published + close ask; canceled → published, neutral.
- *
+ * T13 Starting VM settles without Start-VM; T14-T17 AzDO monitor + status (fake seams): failed → steer with reason + publish stopped; succeeded → published + close ask; canceled → published; status via args shows id + reason. T18-T19 menu delegation (fake delegateWindow): status and Lab build delegate to a new window, nothing runs in-window.
  * Run: npx tsx C:/Work/Reactive.XAF/.pi/extensions/reactive-xaf-build/build-tests.ts
  */
 /* oxlint-disable no-console -- test harness prints PASS/FAIL to stdout */
@@ -88,6 +87,7 @@ function mkPaneSeams(overrides: Partial<{ open: string | null; exitCode: number 
     capturePane: async () => overrides.capture ?? "",
     closePane: async (pane: string) => { closed.push(pane); },
     waitForAzDoBuild: async () => ({ id: 1, result: "succeeded", reason: "" }),
+    delegateWindow: async () => null,
     opened,
     sent,
     closed,
@@ -120,13 +120,14 @@ const DX_PINS: Array<[string, string]> = [
 function okResult(stdout = ""): any {
   return { code: 0, stdout, stderr: "" };
 }
+const GREEN_PUBLISH = [
+  { match: VM_CHECK_PREFIX, result: { code: 0, stdout: VM_RUN, stderr: "" } },
+  { match: "git status --short", result: okResult("") },
+  { match: "prx", result: okResult() },
+];
 function mkMonitor(outcome: { id: number; result: "succeeded" | "failed" | "canceled" | "other"; reason: string }): { pi: any; repo: string } {
   const repo = mkRepo(DX_PINS);
-  const runner = mkRunner([
-    { match: VM_CHECK_PREFIX, result: { code: 0, stdout: VM_RUN, stderr: "" } },
-    { match: "git status --short", result: okResult("") },
-    { match: "prx", result: okResult() },
-  ]);
+  const runner = mkRunner(GREEN_PUBLISH);
   const pane = mkPaneSeams();
   const pi = mkPi();
   registerBuildCommand(pi, { run: runner.run, fetchFeed: mkFetch(["26.1.3"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1, ...pane, waitForAzDoBuild: async () => outcome });
@@ -144,17 +145,15 @@ function mkMonitor(outcome: { id: number; result: "succeeded" | "failed" | "canc
   // Section: T2 — repo guard
   {
     const runner = mkRunner([]);
-    const pane = mkPaneSeams();
     const pi = mkPi();
-    registerBuildCommand(pi, { run: runner.run, fetchFeed: mkFetch(["26.1.3"]), ...pane });
+    registerBuildCommand(pi, { run: runner.run, fetchFeed: mkFetch(["26.1.3"]) });
     const ctx = mkCtx(["Build", "RX-XAF", "Lab"], tmpdir());
     const result = await pi._cmds.get("devexpress").handler([], ctx);
     check("loud error outside the repo", result.includes("not inside the Reactive.XAF repo"), result);
-    check("zero commands ran", runner.calls.length === 0 && pane.opened.length === 0);
+    check("zero commands ran", runner.calls.length === 0);
   }
   // Section: T3 — Lab happy path with DX update, build in a pane
   {
-    steers.length = 0;
     const repo = mkRepo(DX_PINS);
     const runner = mkRunner([
       { match: VM_CHECK_PREFIX, result: { code: 0, stdout: VM_OFF, stderr: "" } },
@@ -232,7 +231,6 @@ function mkMonitor(outcome: { id: number; result: "succeeded" | "failed" | "canc
   }
   // Section: T6 — build failure with warnings (pane kept)
   {
-    steers.length = 0;
     const repo = mkRepo(DX_PINS);
     const runner = mkRunner([]);
     const pane = mkPaneSeams({ exitCode: 1, capture: "warning CS0219: unused variable" });
@@ -278,40 +276,27 @@ function mkMonitor(outcome: { id: number; result: "succeeded" | "failed" | "canc
     check("nothing ran", runner.calls.length === 0 && pane.opened.length === 0, JSON.stringify({ calls: runner.calls, opened: pane.opened }));
     check("user abort: no steer", steers.length === 0, JSON.stringify(steers));
   }
-  // Section: T9 — VMs already running (DX update skipped)
+  // Section: T9-T10 — green publish: VMs running / nothing to commit
   {
     const repo = mkRepo(DX_PINS);
-    const runner = mkRunner([
-      { match: VM_CHECK_PREFIX, result: { code: 0, stdout: VM_RUN, stderr: "" } },
-      { match: "git status --short", result: okResult("") },
-      { match: "prx", result: okResult() },
-    ]);
-    const pane = mkPaneSeams();
-    const pi = mkPi();
+    let runner = mkRunner(GREEN_PUBLISH);
+    let pane = mkPaneSeams();
+    let pi = mkPi();
     registerBuildCommand(pi, { run: runner.run, fetchFeed: mkFetch(["26.1.4"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1, ...pane });
-    const ctx = mkCtx([...MENU, "Lab", "Skip", "Publish"], repo);
-    const result = await pi._cmds.get("devexpress").handler([], ctx);
-    check("no Start-VM", !runner.calls.some((c) => c.startsWith("Start-VM")), runner.calls.join(" | "));
-    check("already-running noted", result.includes("already running"), result);
-    check("published", result.includes("published"), result);
-  }
-  // Section: T10 — nothing to commit (DX update skipped)
-  {
-    const repo = mkRepo(DX_PINS);
-    const runner = mkRunner([
-      { match: VM_CHECK_PREFIX, result: { code: 0, stdout: VM_RUN, stderr: "" } },
-      { match: "git status --short", result: okResult("") },
-      { match: "prx", result: okResult() },
-    ]);
-    const pane = mkPaneSeams();
-    const pi = mkPi();
+    let ctx = mkCtx([...MENU, "Lab", "Skip", "Publish"], repo);
+    let result = await pi._cmds.get("devexpress").handler([], ctx);
+    check("T9: no Start-VM", !runner.calls.some((c) => c.startsWith("Start-VM")), runner.calls.join(" | "));
+    check("T9: already-running noted", result.includes("already running"), result);
+    check("T9: published", result.includes("published"), result);
+    runner = mkRunner(GREEN_PUBLISH);
+    pane = mkPaneSeams();
+    pi = mkPi();
     registerBuildCommand(pi, { run: runner.run, fetchFeed: mkFetch(["26.1.4"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1, ...pane });
-    const ctx = mkCtx([...MENU, "Lab", "Skip", "Publish"], repo);
-    const result = await pi._cmds.get("devexpress").handler([], ctx);
-    check("no commit prompt", !ctx._prompts.some((p) => p.includes("Commit with message")), ctx._prompts.join(" | "));
-    check("no git add", !runner.calls.includes("git add -A"), runner.calls.join(" | "));
-    check("prx still ran", runner.calls.includes("prx"), runner.calls.join(" | "));
-    check("published", result.includes("published"), result);
+    ctx = mkCtx([...MENU, "Lab", "Skip", "Publish"], repo);
+    result = await pi._cmds.get("devexpress").handler([], ctx);
+    check("T10: no commit prompt, no git add", !ctx._prompts.some((p) => p.includes("Commit with message")) && !runner.calls.includes("git add -A"), ctx._prompts.join(" | "));
+    check("T10: prx still ran", runner.calls.includes("prx"), runner.calls.join(" | "));
+    check("T10: published", result.includes("published"), result);
   }
   // Section: T11 — pane open fails → in-process fallback
   {
@@ -353,9 +338,7 @@ function mkMonitor(outcome: { id: number; result: "succeeded" | "failed" | "canc
     const repo = mkRepo(DX_PINS);
     const runner = mkRunner([
       { match: VM_CHECK_PREFIX, result: { code: 0, stdout: "C11=Starting\nC12=Running\nC13=Running\nC14=Running\n", stderr: "" } },
-      { match: VM_CHECK_PREFIX, result: { code: 0, stdout: VM_RUN, stderr: "" } },
-      { match: "git status --short", result: okResult("") },
-      { match: "prx", result: okResult() },
+      ...GREEN_PUBLISH,
     ]);
     const pane = mkPaneSeams();
     const pi = mkPi();
@@ -366,9 +349,8 @@ function mkMonitor(outcome: { id: number; result: "succeeded" | "failed" | "canc
     check("booting note surfaced", result.includes("already booting"), result);
     check("waited for Running then published", result.includes("published"), result);
   }
-  // Section: T14-T16 — AzDO monitor outcomes (fake seam)
+  // Section: T14-T17 — AzDO monitor + status (fake seams)
   {
-    steers.length = 0;
     let t = mkMonitor({ id: 35735, result: "failed", reason: "Artifact TestAssemblies was not found for build 35735" });
     let ctx = mkCtx([...MENU, "Lab", "Publish"], t.repo);
     let result = await t.pi._cmds.get("devexpress").handler([], ctx);
@@ -387,6 +369,29 @@ function mkMonitor(outcome: { id: number; result: "succeeded" | "failed" | "canc
     check("T16: canceled note neutral", result.includes("AzDO build canceled"), result);
     check("T16: still published", result.includes("published"), result);
     check("T16: no new failure steer", steers.length === 1, JSON.stringify(steers));
+    const t2 = { repo: mkRepo(DX_PINS), pi: mkPi() };
+    registerBuildCommand(t2.pi, { run: mkRunner([{ match: "$b = Get-AzBuilds*", result: { code: 0, stdout: "STATUS=35735;completed;failed;Artifact TestAssemblies was not found for build 35735", stderr: "" } }]).run, fetchFeed: mkFetch(["26.1.3"]), repoRoot: t2.repo, ...mkPaneSeams() });
+    const r2 = await t2.pi._cmds.get("devexpress").handler(["status"], mkCtx([], t2.repo));
+    check("T17: status shows id + reason + link", r2.includes("35735") && r2.includes("Artifact TestAssemblies") && r2.includes("definitionId=23"), r2);
+  }
+  // Section: T18-T19 — menu delegation (fake delegateWindow)
+  {
+    const repo = mkRepo(DX_PINS);
+    const tasks: string[] = [];
+    const runner = mkRunner([]);
+    const pi = mkPi();
+    const dw = async (_r: string, task: string) => {
+      tasks.push(task);
+      return "W7";
+    };
+    registerBuildCommand(pi, { run: runner.run, fetchFeed: mkFetch(["26.1.3"]), repoRoot: repo, pollMs: 1, delegateWindow: dw });
+    let ctx = mkCtx(["Last build status"], repo);
+    let result = await pi._cmds.get("devexpress").handler([], ctx);
+    check("T18: status delegated with task", result.includes("W7") && tasks.length === 1 && tasks[0].includes("status"), result + " | " + JSON.stringify(tasks));
+    ctx = mkCtx([...MENU, "Lab"], repo);
+    result = await pi._cmds.get("devexpress").handler([], ctx);
+    check("T19: Lab delegated with task", result.includes("W7") && tasks.some((t) => t.includes("/devexpress build lab")), result + " | " + JSON.stringify(tasks));
+    check("T19: nothing built in this window", runner.calls.length === 0, JSON.stringify(runner.calls));
   }
   console.log(`\n${ok} passed, ${fail} failed`);
   process.exit(fail > 0 ? 1 : 0);
