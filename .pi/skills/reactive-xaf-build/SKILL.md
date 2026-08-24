@@ -48,7 +48,7 @@ to running in the invoking session.
 | `menu.ts` | `menu.md` | Command surface: menu picks, direct args, delegation. |
 | `build.ts` | `build.md` | Flow engine: DX/build/publish phases, seams, steer. |
 | `menu-tests.ts` | `menu-tests.md` | Behavior contract for the skip-build surface. |
-| `delegate-tests.ts` | — | Behavior contract for the delegation fallback. |
+| `delegate-tests.ts` | `delegate-tests.md` | Behavior contract for the delegation fallback. |
 | `build-tests.ts` | — | Behavior contract for the full flow (52 checks). |
 | `azdo.ts` / `status.ts` | — | AzDO monitor/status scripts + fail-reason extraction. |
 | `delegate.ts` | `delegate.md` | Window delegation (liveness-verified, fallback). |
