@@ -45,7 +45,7 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
                                 replaySubject.OnNext(Unit.Default);
                                 replaySubject.OnCompleted();
                             })
-                            .To(command));
+                            .ToUnit()));
                 }))
                 .Subscribe();
 
