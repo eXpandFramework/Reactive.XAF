@@ -85,13 +85,13 @@ function psmuxArgs(args: string[]): string[] {
 export async function defaultOpenBuildPane(repo: string): Promise<string | null> {
   const self = process.env.TMUX_PANE;
   const target = self ? ["-t", self] : [];
-  const res = await runArgv(psmuxArgs(["split-window", "-h", ...target, "-P", "-F", "#{pane_id}", "-c", repo.replace(/\\/g, "/")]), 15000);
+  const res = await runArgv(psmuxArgs(["psmux", "split-window", "-h", ...target, "-P", "-F", "#{pane_id}", "-c", repo.replace(/\\/g, "/")]), 15000);
   const id = res.stdout.trim().split("\n").pop() ?? "";
   return res.code === 0 && id ? id : null;
 }
 
 export async function defaultRunInPane(pane: string, cmd: string): Promise<void> {
-  await runArgv(psmuxArgs(["send-keys", "-t", pane, cmd, "Enter"]), 15000);
+  await runArgv(psmuxArgs(["psmux", "send-keys", "-t", pane, cmd, "Enter"]), 15000);
 }
 
 export async function defaultWaitForPaneExit(pane: string, marker: string, timeoutMs: number): Promise<{ code: number | null; timedOut: boolean }> {
@@ -112,12 +112,12 @@ export async function defaultWaitForPaneExit(pane: string, marker: string, timeo
 }
 
 export async function defaultCapturePane(pane: string): Promise<string> {
-  const res = await runArgv(psmuxArgs(["capture-pane", "-t", pane, "-p", "-S", "-40"]), 15000);
+  const res = await runArgv(psmuxArgs(["psmux", "capture-pane", "-t", pane, "-p", "-S", "-40"]), 15000);
   return res.stdout;
 }
 
 export async function defaultClosePane(pane: string): Promise<void> {
-  await runArgv(psmuxArgs(["kill-pane", "-t", pane]), 15000);
+  await runArgv(psmuxArgs(["psmux", "kill-pane", "-t", pane]), 15000);
 }
 
 /** A transient consume-on-read marker path for the pane's exit code. */
