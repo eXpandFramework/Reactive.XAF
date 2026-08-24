@@ -11,9 +11,9 @@ publish workflow for the AzDO `Reactive.XAF` pipeline (definition 23).
 
 ## Command surface
 
-- `/devexpress` — interactive menu: Build → RX-XAF → **Lab** | **Release** |
-  **Lab (skip build)** | **Release (skip build)**, plus "Last build status"
-  and "Close build pane" while a build pane is open.
+- `/devexpress` — interactive menu: Build → RX-XAF (**Lab** | **Release**,
+  full flow) or Publish → RX-XAF (**Lab** | **Release**, skip-build flow),
+  plus "Last build status" and "Close build pane" while a build pane is open.
 - `/devexpress status` — one-shot AzDO status of the newest Reactive.XAF build.
 - `/devexpress build lab|release` — full flow: DX check → props update
   (ask-first) → `brx` local build in a pane → publish.

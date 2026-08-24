@@ -1,6 +1,6 @@
 ---
 name: reactive-xaf-build/menu-tests
-description: Behavior contract for the /devexpress skip-build publish surface — menu picks "Lab (skip build)"/"Release (skip build)", the /devexpress publish lab|release arg, delegation task text, and the "Publish (N files)" commit label. Read before changing the skip-build flow or these tests.
+description: Behavior contract for the /devexpress skip-build publish surface — the top-level Publish menu (Publish → RX-XAF → Lab | Release), the /devexpress publish lab|release arg, delegation task text, and the "Publish (N files)" commit label. Read before changing the skip-build flow or these tests.
 ---
 
 # menu-tests.ts — skip-build behavior contract
@@ -23,13 +23,14 @@ never touched.
 ## Contracts
 
 - **S0** — the command registers through the real index boot (`activate(pi)`).
-- **S1** — menu "Lab (skip build)" + Publish: no `brx`, no pane opened/sent,
-  `prx` runs, monitor awaited ("AzDO build 1 succeeded"), result "published".
+- **S1** — menu Publish → RX-XAF → Lab + Publish confirm: no `brx`, no pane
+  opened/sent, `prx` runs, monitor awaited ("AzDO build 1 succeeded"), result
+  "published".
 - **S2** — direct arg `["publish", "lab"]` + Publish confirm: same — no `brx`,
   `prx` runs, published.
 - **S3** — skip-build with a dirty tree: commit message is
   `Publish (1 files)`, not `Build fixes (1 files)`; then published.
-- **S4** — the skip-build menu pick delegates with the `publishTask` text
+- **S4** — the Publish menu pick delegates with the `publishTask` text
   (contains `/devexpress publish lab`).
 
 ## Notes
