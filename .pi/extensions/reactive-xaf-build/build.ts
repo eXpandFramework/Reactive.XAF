@@ -182,22 +182,28 @@ async function ensureVmsRunning(seams: BuildSeams): Promise<{ ok: boolean; notes
   const notes: string[] = [];
   const check = async () => seams.run(VM_CHECK_CMD, { timeoutMs: 60000 });
   const first = await check();
-  const off = VM_NAMES.filter((n) => parseVmStates(first.stdout).get(n) !== "Running");
-  if (!off.length) {
+  const states = parseVmStates(first.stdout);
+  const off = VM_NAMES.filter((n) => states.get(n) === "Off");
+  const starting = VM_NAMES.filter((n) => states.get(n) === "Starting");
+  if (off.length > 0) {
+    if (starting.length > 0) notes.push(`already booting: ${starting.join(", ")}`);
+    notes.push(`starting Hyper-V agents: ${off.join(", ")}`);
+    const start = await seams.run(`Start-VM -Name ${off.join(",")}`, { timeoutMs: 120000 });
+    if (start.code !== 0) {
+      notes.push(`Start-VM failed: ${tail(start.stderr)}`);
+      return { ok: false, notes };
+    }
+  } else if (starting.length > 0) {
+    notes.push(`Hyper-V agents already booting: ${starting.join(", ")} — waiting for Running`);
+  } else {
     notes.push("Hyper-V agents C11-C14 already running");
     return { ok: true, notes };
-  }
-  notes.push(`starting Hyper-V agents: ${off.join(", ")}`);
-  const start = await seams.run(`Start-VM -Name ${off.join(",")}`, { timeoutMs: 120000 });
-  if (start.code !== 0) {
-    notes.push(`Start-VM failed: ${tail(start.stderr)}`);
-    return { ok: false, notes };
   }
   for (let i = 0; i < 18; i++) {
     await sleep(seams.pollMs ?? 10000);
     const res = await check();
-    const states = parseVmStates(res.stdout);
-    if (VM_NAMES.every((n) => states.get(n) === "Running")) {
+    const st = parseVmStates(res.stdout);
+    if (VM_NAMES.every((n) => st.get(n) === "Running")) {
       notes.push("Hyper-V agents running");
       return { ok: true, notes };
     }
@@ -238,9 +244,11 @@ async function commitPhase(ctx: any, seams: BuildSeams, repoRoot: string, dxChan
 async function publishPhase(ctx: any, seams: BuildSeams, choice: string, repoRoot: string, dxChanged: boolean, latest: string): Promise<{ ok: boolean; failed: boolean; notes: string[] }> {
   const notes: string[] = [];
   let failed = false;
+  await ctx.ui.notify("Checking Hyper-V agents C11-C14…", "info");
   const vms = await ensureVmsRunning(seams);
   notes.push(...vms.notes);
   if (!vms.ok) return { ok: false, failed: true, notes };
+  await ctx.ui.notify("Committing build state…", "info");
   const commit = await commitPhase(ctx, seams, repoRoot, dxChanged, latest);
   notes.push(...commit.notes);
   if (!commit.committed) {
@@ -248,6 +256,7 @@ async function publishPhase(ctx: any, seams: BuildSeams, choice: string, repoRoo
     return { ok: false, failed, notes };
   }
   const prxCmd = choice === "Release" ? "prx -Release" : "prx";
+  await ctx.ui.notify(`Publishing via ${prxCmd}…`, "info");
   const pick = await ctx.ui.select(`Publish: ${prxCmd} (stage, force-push, queue AzDO Reactive.XAF)?`, ["Publish", "Abort"]);
   if (pick !== "Publish") {
     notes.push("publish aborted");

@@ -1,35 +1,16 @@
 /**
  * reactive-xaf-build/build-tests — behavior contract for the /devexpress workflow.
  *
- * Exercises the REAL command surface through a mock pi: T1 drives the real
- * index.ts boot (activate(pi)); the remaining tests register the command via
- * registerBuildCommand and invoke the captured handler with a stubbed ctx.ui
- * (scripted select answers, notify collector) and injected seams (fake command
- * runner, fake feed fetcher, fake pane seams, fixture props in a temp repo).
- * The real nuget.org, pwsh, psmux, Hyper-V VMs and git are never touched.
- *
- * Behaviors pinned:
- *   T1 /devexpress registers a command with a handler (real index.ts boot)
- *   T2 outside the Reactive.XAF repo → loud error, zero commands ran
- *   T3 Lab happy path: menu Build → RX-XAF → Lab; DX 26.1.4 > pins 26.1.3
- *     → update prompt → props rewritten (non-DX pins untouched) → build runs in a
- *     PANE (send-keys "brx…") → milestone notify → commit "Update DX to 26.1.4"
- *     → confirm → prx → "published"; the close ask is conversational (notify, no
- *     modal, no auto-close)
- *   T4 DX already latest → no update prompt, props untouched, build + publish run
- *   T5 mixed pins → file untouched, surfaced, build still runs
- *   T6 build failure (warnings) → FAILED result with the pane's captured tail,
- *     failure steer fired, pane KEPT (no close), no close ask
- *   T7 Release flow → brx -Release and prx -Release
- *   T8 abort at the DX prompt → nothing ran
- *   T9 VMs already running → no Start-VM
- *   T10 nothing to commit → commit skipped, prx still runs
- *   T11 pane open fails → in-process fallback build + note notify
- *   T12 /devexpress → "Close build pane" closes the remembered pane
+ * Mock-pi harness with injected seams (fake command runner, feed fetcher, pane
+ * seams, fixture props) — the real nuget.org, pwsh, psmux, VMs and git are
+ * never touched. T1 real index boot; T2 repo guard; T3 Lab happy path (pane
+ * build, milestones, conversational close ask); T4 DX already latest; T5 mixed
+ * pins; T6 failure (steer, pane kept); T7 Release; T8 abort (silent); T9 VMs
+ * running; T10 nothing to commit; T11 pane fallback; T12 close build pane;
+ * T13 Starting VM settles without Start-VM.
  *
  * Run: npx tsx C:/Work/Reactive.XAF/.pi/extensions/reactive-xaf-build/build-tests.ts
  */
-
 /* oxlint-disable no-console -- test harness prints PASS/FAIL to stdout */
 import { mkdtempSync, mkdirSync, writeFileSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -39,7 +20,6 @@ import { registerBuildCommand } from "./build.js";
 
 let ok = 0;
 let fail = 0;
-
 function check(label: string, cond: boolean, detail?: string): void {
   if (cond) {
     ok++;
@@ -49,13 +29,10 @@ function check(label: string, cond: boolean, detail?: string): void {
     console.log("FAIL " + label + (detail ? " — " + detail : ""));
   }
 }
-
-// The flow steers failures through globalThis.__steer — collect them here.
 const steers: Array<{ type: string; content: string }> = [];
 (globalThis as any).__steer = (_pi: any, type: string, content: string) => {
   steers.push({ type, content });
 };
-
 function mkPi(): any {
   const cmds = new Map<string, any>();
   return {
@@ -63,7 +40,6 @@ function mkPi(): any {
     _cmds: cmds,
   };
 }
-
 function mkCtx(selects: string[], cwd: string): any {
   const prompts: string[] = [];
   const notifies: string[] = [];
@@ -80,7 +56,6 @@ function mkCtx(selects: string[], cwd: string): any {
     _notifies: notifies,
   };
 }
-
 function mkRunner(script: Array<{ match: string; result: any }>): { run: (cmd: string) => Promise<any>; calls: string[] } {
   const calls: string[] = [];
   let i = 0;
@@ -97,8 +72,6 @@ function mkRunner(script: Array<{ match: string; result: any }>): { run: (cmd: s
     calls,
   };
 }
-
-/** Fake pane seams — records what the pane machinery did. */
 function mkPaneSeams(overrides: Partial<{ open: string | null; exitCode: number | null; timedOut: boolean; capture: string }> = {}): any {
   const opened: string[] = [];
   const sent: string[] = [];
@@ -119,11 +92,9 @@ function mkPaneSeams(overrides: Partial<{ open: string | null; exitCode: number 
     closed,
   };
 }
-
 function mkFetch(versions: string[]): (url: string) => Promise<string> {
   return async (_url: string) => JSON.stringify({ versions });
 }
-
 function mkRepo(pins: Array<[string, string]>): string {
   const root = mkdtempSync(join(tmpdir(), "rxaf-build-"));
   mkdirSync(join(root, "src", "Extensions"), { recursive: true });
@@ -132,11 +103,9 @@ function mkRepo(pins: Array<[string, string]>): string {
   writeFileSync(join(root, "Directory.Packages.props"), props);
   return root;
 }
-
 function propsText(root: string): string {
   return readFileSync(join(root, "Directory.Packages.props"), "utf-8");
 }
-
 const VM_OFF = "C11=Off\nC12=Running\nC13=Running\nC14=Running\n";
 const VM_RUN = "C11=Running\nC12=Running\nC13=Running\nC14=Running\n";
 const VM_CHECK_PREFIX = "Get-VM -Name C11,C12,C13,C14*";
@@ -147,7 +116,6 @@ const DX_PINS: Array<[string, string]> = [
   ["DevExpress.Utils", "26.1.3"],
   ["Xpand.Collections", "1.0.4"],
 ];
-
 function okResult(stdout = ""): any {
   return { code: 0, stdout, stderr: "" };
 }
@@ -161,7 +129,6 @@ function okResult(stdout = ""): any {
     const cmd = pi._cmds.get("devexpress");
     check("devexpress command registered via index.ts", typeof cmd?.handler === "function");
   }
-
   // Section: T2 — repo guard
   console.log("T2: repo guard\n");
   {
@@ -174,7 +141,6 @@ function okResult(stdout = ""): any {
     check("loud error outside the repo", result.includes("not inside the Reactive.XAF repo"), result);
     check("zero commands ran", runner.calls.length === 0 && pane.opened.length === 0);
   }
-
   // Section: T3 — Lab happy path with DX update, build in a pane
   console.log("T3: Lab happy path\n");
   {
@@ -207,9 +173,11 @@ function okResult(stdout = ""): any {
     check("pane not auto-closed", pane.closed.length === 0, JSON.stringify(pane.closed));
     check("commit message carries DX", runner.calls.some((c) => c.startsWith('git commit -m "Update DX to 26.1.4"')), runner.calls.join(" | "));
     check("prx ran last", runner.calls[runner.calls.length - 1] === "prx", runner.calls.join(" | "));
+    check("VM-check milestone notified", ctx._notifies.some((n) => n.includes("Checking Hyper-V agents")), ctx._notifies.join(" | "));
+    check("commit milestone notified", ctx._notifies.some((n) => n.includes("Committing build state")), ctx._notifies.join(" | "));
+    check("publish milestone notified", ctx._notifies.some((n) => n.includes("Publishing via prx")), ctx._notifies.join(" | "));
     check("success: no failure steer", steers.length === 0, JSON.stringify(steers));
   }
-
   // Section: T4 — DX already latest
   console.log("T4: DX already latest\n");
   {
@@ -231,7 +199,6 @@ function okResult(stdout = ""): any {
     check("build ran in pane", pane.sent.length === 1, JSON.stringify(pane.sent));
     check("published", result.includes("published"), result);
   }
-
   // Section: T5 — mixed pins left untouched
   console.log("T5: mixed pins\n");
   {
@@ -255,7 +222,6 @@ function okResult(stdout = ""): any {
     check("build ran in pane", pane.sent.length === 1, JSON.stringify(pane.sent));
     check("published", result.includes("published"), result);
   }
-
   // Section: T6 — build failure with warnings (pane kept)
   console.log("T6: build failure\n");
   {
@@ -274,7 +240,6 @@ function okResult(stdout = ""): any {
     check("no publish commands", runner.calls.length === 0, runner.calls.join(" | "));
     check("failure steer fired", steers.length === 1 && steers[0].type === "reactive-xaf-build:build-failed" && steers[0].content.includes("Build FAILED"), JSON.stringify(steers));
   }
-
   // Section: T7 — Release flow (DX update skipped)
   console.log("T7: Release flow\n");
   {
@@ -293,7 +258,6 @@ function okResult(stdout = ""): any {
     check("prx -Release ran", runner.calls.includes("prx -Release"), runner.calls.join(" | "));
     check("published", result.includes("published"), result);
   }
-
   // Section: T8 — abort at the DX prompt
   console.log("T8: abort at DX prompt\n");
   {
@@ -309,7 +273,6 @@ function okResult(stdout = ""): any {
     check("nothing ran", runner.calls.length === 0 && pane.opened.length === 0, JSON.stringify({ calls: runner.calls, opened: pane.opened }));
     check("user abort: no steer", steers.length === 0, JSON.stringify(steers));
   }
-
   // Section: T9 — VMs already running (DX update skipped)
   console.log("T9: VMs already running\n");
   {
@@ -328,7 +291,6 @@ function okResult(stdout = ""): any {
     check("already-running noted", result.includes("already running"), result);
     check("published", result.includes("published"), result);
   }
-
   // Section: T10 — nothing to commit (DX update skipped)
   console.log("T10: nothing to commit\n");
   {
@@ -348,7 +310,6 @@ function okResult(stdout = ""): any {
     check("prx still ran", runner.calls.includes("prx"), runner.calls.join(" | "));
     check("published", result.includes("published"), result);
   }
-
   // Section: T11 — pane open fails → in-process fallback
   console.log("T11: pane fallback\n");
   {
@@ -369,7 +330,6 @@ function okResult(stdout = ""): any {
     check("no pane sent", pane.sent.length === 0, JSON.stringify(pane.sent));
     check("published", result.includes("published"), result);
   }
-
   // Section: T12 — /devexpress → Close build pane
   console.log("T12: close build pane\n");
   {
@@ -387,7 +347,25 @@ function okResult(stdout = ""): any {
     check("no build ran", pane.sent.length === 0 && runner.calls.length === 0, JSON.stringify({ sent: pane.sent, calls: runner.calls }));
     check("pane state cleared", (globalThis as any)[Symbol.for("reactive-xaf-build.build-pane")] === undefined);
   }
-
+  // Section: T13 — a Starting VM is not Start-VM'd; the flow waits for it
+  console.log("T13: starting VM settles\n");
+  {
+    const repo = mkRepo(DX_PINS);
+    const runner = mkRunner([
+      { match: VM_CHECK_PREFIX, result: { code: 0, stdout: "C11=Starting\nC12=Running\nC13=Running\nC14=Running\n", stderr: "" } },
+      { match: VM_CHECK_PREFIX, result: { code: 0, stdout: VM_RUN, stderr: "" } },
+      { match: "git status --short", result: okResult("") },
+      { match: "prx", result: okResult() },
+    ]);
+    const pane = mkPaneSeams();
+    const pi = mkPi();
+    registerBuildCommand(pi, { run: runner.run, fetchFeed: mkFetch(["26.1.4"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1, ...pane });
+    const ctx = mkCtx([...MENU, "Lab", "Skip", "Publish"], repo);
+    const result = await pi._cmds.get("devexpress").handler([], ctx);
+    check("no Start-VM for the booting VM", !runner.calls.some((c) => c.startsWith("Start-VM")), runner.calls.join(" | "));
+    check("booting note surfaced", result.includes("already booting"), result);
+    check("waited for Running then published", result.includes("published"), result);
+  }
   console.log(`\n${ok} passed, ${fail} failed`);
   process.exit(fail > 0 ? 1 : 0);
 })();
