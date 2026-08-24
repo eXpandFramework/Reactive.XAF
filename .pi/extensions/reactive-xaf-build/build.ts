@@ -152,18 +152,18 @@ async function buildPhase(ctx: any, seams: BuildSeams, choice: string, repo: str
   const pane = await (seams.openBuildPane ?? defaultOpenBuildPane)(repo);
   if (!pane) {
     await ctx.ui.notify("Build pane could not be opened — building in-process.", "warning");
-    const res = await seams.run(choice === "Release" ? "brx -Release" : "brx", { cwd: repo, timeoutMs: 1800000 });
+    const res = await seams.run(choice === "Release" ? "brx -Release" : "brx", { cwd: repo, timeoutMs: 3600000 });
     return { code: res.code, stdout: res.stdout + res.stderr };
   }
   setBuildPane(pane);
   await ctx.ui.notify(`Build started — pane ${pane} on the right.`, "info");
   const cmd = `brx${choice === "Release" ? " -Release" : ""}; if ($?) { Set-Content -LiteralPath '${marker}' -Value 0 } else { Set-Content -LiteralPath '${marker}' -Value 1 }`;
   await (seams.runInPane ?? defaultRunInPane)(pane, cmd);
-  const wait = await (seams.waitForPaneExit ?? defaultWaitForPaneExit)(pane, marker, 1800000);
+  const wait = await (seams.waitForPaneExit ?? defaultWaitForPaneExit)(pane, marker, 3600000);
   if (wait.timedOut) {
     await (seams.closePane ?? defaultClosePane)(pane);
     setBuildPane(null);
-    return { code: -1, stdout: "build timed out after 30 minutes — pane closed" };
+    return { code: -1, stdout: "build timed out after 60 minutes — pane closed" };
   }
   const captured = await (seams.capturePane ?? defaultCapturePane)(pane);
   return { code: wait.code ?? -1, stdout: captured };
