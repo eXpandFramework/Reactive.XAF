@@ -264,7 +264,7 @@ async function commitPhase(ctx: any, seams: BuildSeams, repoRoot: string, dxChan
 async function monitorPhase(ctx: any, seams: BuildSeams): Promise<{ ok: boolean; failed: boolean; notes: string[] }> {
   const notes: string[] = [];
   await ctx.ui.notify("AzDO build queued — monitoring…", "info");
-  const monitor = await (seams.waitForAzDoBuild ?? defaultWaitForAzDoBuild)(3600000);
+  const monitor = await (seams.waitForAzDoBuild ?? defaultWaitForAzDoBuild)(7200000);
   if (monitor.result === "succeeded") {
     notes.push(`AzDO build ${monitor.id} succeeded`);
     return { ok: true, failed: false, notes };

@@ -29,14 +29,14 @@ pwsh, psmux, Hyper-V VMs and git are never touched).
    `Build fixes (N files)` — skip-build mode labels it `Publish (N files)`;
    nothing to commit → skip) → confirm `prx` / `prx -Release` (600 s timeout)
    → `monitorPhase`.
-5. **Monitor** (`monitorPhase`) — `waitForAzDoBuild` (azdo.ts, 1 h deadline):
+5. **Monitor** (`monitorPhase`) — `waitForAzDoBuild` (azdo.ts, 2 h deadline):
    polls the newest Reactive.XAF build; succeeded/canceled → ok, failed →
    reason + `AZDO_BUILD_URL`, timeout/other → failed with note. Failure steers
    via `steerFailure` (no auto-fix, no auto re-run — the agent plans and asks).
 
 ## Skip-build variant
 
-`skipBuild = true` (menu "Lab (skip build)" / "Release (skip build)", arg
+`skipBuild = true` (menu Publish → RX-XAF → Lab | Release, arg
 `publish lab|release`): phases 1–3 are omitted (no DX feed call, no pane, no
 `brx`), the summary notes "build skipped — publish only", and the DX line
 reads "no DX check (build skipped)". Publish + monitor run unchanged.

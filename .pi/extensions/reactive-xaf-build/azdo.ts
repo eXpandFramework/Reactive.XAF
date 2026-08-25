@@ -43,7 +43,6 @@ export type AzDoBuildWaiter = (timeoutMs: number) => Promise<AzDoBuildOutcome>;
 
 export const AZDO_BUILD_URL = "https://dev.azure.com/eXpandDevOps/eXpandFramework/_build?definitionId=23";
 
-const POLL_MS = 30000;
 const KNOWN_RESULTS = new Set(["succeeded", "failed", "canceled", "other"]);
 
 /** Wrapper markers that carry no real error: psake/AzDO noise + retry chatter. */
@@ -180,9 +179,12 @@ export function extractFailReason(lines: string[]): string {
   return err && err.task ? `${text} [${err.task}]`.slice(0, 600) : text.slice(0, 600);
 }
 
-/** Poll the newest Reactive.XAF build until it finishes (default seam). */
+/** Poll the newest Reactive.XAF build until it finishes (default seam).
+ *  The spawn timeout carries a 5-minute margin over the script's own deadline
+ *  so pwsh boot overhead and the final RESULT= print never lose the race to
+ *  the taskkill. */
 export async function defaultWaitForAzDoBuild(timeoutMs: number, run: (argv: string[], timeoutMs: number) => Promise<RunResult> = runArgv): Promise<AzDoBuildOutcome> {
-  const res = await run(["pwsh", "-Command", monitorScript(timeoutMs)], timeoutMs + POLL_MS + 15000);
+  const res = await run(["pwsh", "-Command", monitorScript(timeoutMs)], timeoutMs + 300000);
   const outcome = parseOutcome(res.stdout);
   if (outcome) {
     if (outcome.result === "failed" && !outcome.reason) {
