@@ -14,7 +14,8 @@ cancel surface in `status.ts`). One pwsh spawn per query; the profile loads
 
 Lab and Release builds run the SAME Reactive.XAF pipeline (`LAB_DEF =
 "23"`); Release (`prx -Release`) queues branch master. There is no separate
-Release definition — the def-39 premise was wrong; the chain's PublishNugets
+Release definition — the def-39 premise was wrong (reverted 2026-08-25);
+the chain's PublishNugets
 trigger listens to 23. `azdoBuildUrl(definition)` builds the AzDO link
 (`AZDO_BUILD_URL` = def 23).
 

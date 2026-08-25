@@ -20,7 +20,7 @@ Run: `npx tsx d:/Reactive.XAF/.pi/extensions/reactive-xaf-build/build-tests.ts`
 - T6 — build failure: FAILED surfaced, pane kept, failure delivery fired.
 - T7 — Release flow: `brx -Release` in the pane, `prx -Release` runs (stage,
   force-push `lab:master`, queue def 23 on master — prx knows the right
-  pipe), published.
+  pipe; the def-39 queue script was removed 2026-08-25), published.
 - T8 — user aborts never deliver.
 - T9-T13 — publish flows: VMs, commit, pane fallback, close pane, Starting
   VM wait.

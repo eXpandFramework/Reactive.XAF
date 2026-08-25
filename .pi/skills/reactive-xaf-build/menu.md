@@ -34,7 +34,7 @@ The flow runner type is `(choice: string, skipBuild?: boolean) => Promise<string
 
 ## In-window execution
 
-Every menu pick runs in the invoking window — the build pane splits it to the right (pane.ts), with milestones notified there.
+Every menu pick runs in the invoking window — the build pane splits it to the right (pane.ts), with milestones notified there. Direct args behave the same: everything runs in the invoking window (2026-08-25, delegation removed).
 
 ## Guards
 

@@ -41,7 +41,8 @@ Run: `npx tsx d:/Reactive.XAF/.pi/extensions/reactive-xaf-build/watcher-tests.ts
 - W11 — missing GH_TOKEN: warning + steer naming the token (never a
   silent skip), watcher stops.
 - W12 — empty first polls (queue API lag): retried with a "no build found
-  yet" toast, chain completes, no give-up, no steer.
+  yet" toast, chain completes, no give-up, no steer (pins the
+  checkDeadline/notifyEmptyPoll split in pollTick).
 
 W1 counts running toasts — that's the toast-per-poll contract. Steers
 assert delivery (recorded `_userMessages`), not the steer type.

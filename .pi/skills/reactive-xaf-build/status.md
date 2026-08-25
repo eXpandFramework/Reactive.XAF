@@ -23,6 +23,9 @@ link reflects the definition:
 - canceled / succeeded / none → the plain outcome;
 - no STATUS= line → the script's stderr tail.
 
+There is no release-arg variant — Lab and Release both run def 23, so the
+definition parameter is internal (the watcher threads its own).
+
 ## `cancelPhase(ctx, seams)` — `/devexpress cancel`
 
 Runs `cancelAzDoScript(definition)` (azdo.md — PATCH

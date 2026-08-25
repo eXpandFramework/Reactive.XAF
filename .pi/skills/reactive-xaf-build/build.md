@@ -1,6 +1,6 @@
 ---
 name: reactive-xaf-build/build
-description: The /devexpress flow engine — DX check, props update, brx build in a pane, publish (VM check → commit → queue Lab prx / Release def-39 script → AzDO background watcher), failure steer, and the skip-build publish-only variant. Read when changing build/publish behavior, seams, or the failure path.
+description: The /devexpress flow engine — DX check, props update, brx build in a pane, publish (VM check → commit → queue Lab prx / Release prx -Release → AzDO background watcher), failure steer, and the skip-build publish-only variant. Read when changing build/publish behavior, seams, or the failure path.
 ---
 
 # build.ts — the /devexpress flow engine

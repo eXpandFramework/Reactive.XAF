@@ -16,7 +16,8 @@ that locked the chat for up to 2 h.
 - `startAzDoWatcher(pi, ctx, seams, opts?)` — one per session; a new start
   stops the previous. Defaults: 60 s interval, 2 h give-up per chain step.
   `opts.choice` ("Lab" | "Release", default Lab) picks the label and the
-  GitHub prerelease flag.
+  GitHub prerelease flag. `pollTick` delegates the deadline check and the
+  empty-poll toast to the `checkDeadline` / `notifyEmptyPoll` helpers.
 - Every poll runs `azdoStatusScript(definition, minId)` via `seams.run` and
   NOTIFIES (toast per check; same-type notifies self-replace → live status
   line). Running → `AzDO <id>: <status> (<elapsed> min) — link`.
