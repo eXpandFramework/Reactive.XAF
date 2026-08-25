@@ -50,7 +50,9 @@ pwsh, psmux, Hyper-V VMs and git are never touched). The default
 `defaultGhFetch` from azdo.ts sends Authorization from GH_TOKEN /
 GITHUB_TOKEN, never logs the token); the watcher's GitHub draft publish
 needs it. `/devexpress watch` accepts an optional `release` arg for the
-def-39 chain (`watch release`).
+def-39 chain (`watch release`). The `delegateWindow` seam was REMOVED
+(2026-08-25) — menu picks run in the invoking window and the build pane
+splits it to the right; delegate.ts stays dormant.
 
 ## Skip-build variant
 

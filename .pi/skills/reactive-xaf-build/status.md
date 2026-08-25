@@ -7,7 +7,8 @@ description: The one-shot AzDO status and cancel surface — statusPhase (newest
 
 Companion of `.pi/extensions/reactive-xaf-build/status.ts`. Both commands
 run one pwsh spawn via the run seam and notify the outcome in the invoking
-window. Info only — no steering.
+window. Info only — no steering. The delegated STATUS_TASK was removed
+(2026-08-25) — the menu runs statusPhase directly in the invoking window.
 
 ## `statusPhase(ctx, seams)` — `/devexpress status`
 
