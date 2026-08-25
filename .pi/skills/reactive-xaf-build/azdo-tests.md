@@ -1,29 +1,29 @@
 ---
 name: reactive-xaf-build/azdo-tests
-description: Behavior contract for the AzDO monitor/status parse path — CRLF (pwsh-shaped) RESULT=/STATUS= output must parse. Read when changing parseOutcome/parseStatus in azdo.ts, or when the monitor reports "no RESULT= line in monitor output".
+description: Behavior contract for the AzDO status/cancel parse path — CRLF (pwsh-shaped) STATUS=/CANCEL= output must parse through the registered command.
 ---
 
 # azdo-tests.ts — AzDO parse contract
 
 Companion of `.pi/extensions/reactive-xaf-build/azdo-tests.ts`. Pins the
-CRLF parse contract: the monitor/status scripts print RESULT=/STATUS=
-lines with \r\n (pwsh pipe output), and parseOutcome/parseStatus must
+CRLF parse contract: the status/cancel scripts print STATUS=/CANCEL=
+lines with \r\n (pwsh pipe output), and parseStatus/parseCancel must
 split on /\r?\n/. A regression to a bare \n split leaves \r on every line
-and the (.*)$ regex cannot cross it — every real run then reports the
-fake "no RESULT= line in monitor output" (2026-08-25 fix).
+and the (.*)$ regex cannot cross it — the old monitor reported the fake
+"no RESULT= line in monitor output" (2026-08-25 fix).
 
 Run: `npx tsx d:/Reactive.XAF/.pi/extensions/reactive-xaf-build/azdo-tests.ts`
 
 ## Pinned behaviors
 
-- T1 — a failed build's CRLF output (LOGSTART/LOGEND block +
-  `RESULT=35742;failed;`) parses to the failed outcome, and the fail
-  reason is extracted from the CRLF log lines.
-- T2 — canceled / succeeded / timeout CRLF outcomes parse to their
-  expected outcomes (timeout → id 0, other, "timeout").
-- T3 — the devexpress command registers through the real index boot,
-  and `/devexpress status` parses CRLF STATUS= output (id + reason
-  surfaced).
+- T1 — `/devexpress status` on CRLF output (LOGSTART/LOGEND block +
+  `STATUS=35735;completed;failed;`) surfaces the id AND the extracted
+  fail reason (`error DX1003` beats the wrapper noise).
+- T2 — `/devexpress cancel` on `CANCEL=35735;ok;inProgress` reports the
+  cancel request.
+- T3 — `/devexpress cancel` on `CANCEL=35735;notrunning;completed`
+  reports nothing to cancel.
+- T4 — the devexpress command registers through the real index boot.
 
 All fixtures are CRLF — bare-LF fakes would not exercise the bug class
 this file pins. Real pwsh, AzDO and pi are never spawned.

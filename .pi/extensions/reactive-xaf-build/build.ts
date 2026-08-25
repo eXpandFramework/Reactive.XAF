@@ -1,10 +1,11 @@
 /**
  * reactive-xaf-build/build — the /devexpress menu workflow engine.
  *
- * Menu: /devexpress → Build → RX-XAF → Lab | Release, "Last build status"
- * (+ "Close build pane" while a build pane is open). Menu picks delegate to
- * a NEW psmux window (delegate.ts); direct args run here: /devexpress status,
- * /devexpress build lab|release (the delegated window uses these).
+ * Menu: /devexpress → Build → RX-XAF → Lab | Release, "Last build status",
+ * "Cancel AzDO build" (+ "Close build pane" while a build pane is open).
+ * Menu picks delegate to a NEW psmux window (delegate.ts); direct args run
+ * here: /devexpress status | cancel | build lab|release | publish lab|release
+ * (the delegated window uses these).
  * Flow (Lab | Release):
  *   1. getLatestDx — nuget.org flat-container, max stable DevExpress.ExpressApp
  *   2. props compare — Directory.Packages.props DevExpress.* pins:
@@ -19,16 +20,17 @@
  *      fallback when the pane cannot be opened.
  *   4. publish — Hyper-V C11-C14 ensured (Start-VM + poll), git commit (message
  *      from changes, confirmed), confirm, prx / prx -Release, then the AzDO
- *      build monitor (waitForAzDoBuild — polls the queued build to completion;
- *      on failure the failed record's log supplies the ##[error] reason).
+ *      background watcher (watcher.ts — toasts on every check, steers on
+ *      terminal failure; the turn returns immediately, the chat is never
+ *      locked).
  *   4b. skip-build variant (menu "Lab (skip build)" / "Release (skip build)",
  *      arg publish lab|release): no DX check, no brx — straight to publish.
  *
  * Seams (injectable, default = real): run, fetchFeed, propsPath, repoRoot,
- * pollMs, waitForAzDoBuild (azdo.ts), delegateWindow (delegate.ts) + the pane
- * seams from pane.ts. Tests pass fakes via
- * registerBuildCommand — the real nuget.org, pwsh, psmux, VMs and git are
- * never touched by the test suite.
+ * pollMs, startAzDoWatcher (watcher.ts), delegateWindow (delegate.ts) + the
+ * pane seams from pane.ts. Tests pass fakes via registerBuildCommand — the
+ * real nuget.org, pwsh, psmux, VMs and git are never touched by the test
+ * suite.
  */
 
 import * as fs from "node:fs";
@@ -39,8 +41,8 @@ import {
   defaultCapturePane, defaultClosePane,
 } from "./pane.js";
 import type { RunResult, PaneOpener, PaneRunner, PaneWaiter, PaneCapturer, PaneCloser } from "./pane.js";
-import { defaultWaitForAzDoBuild, AZDO_BUILD_URL } from "./azdo.js";
-import type { AzDoBuildWaiter } from "./azdo.js";
+import { startAzDoWatcher } from "./watcher.js";
+import type { AzDoWatcherStarter } from "./watcher.js";
 import { runDevexpressMenu } from "./menu.js";
 import { defaultDelegateWindow } from "./delegate.js";
 import type { WindowDelegator } from "./delegate.js";
@@ -61,7 +63,7 @@ export interface BuildSeams {
   waitForPaneExit?: PaneWaiter;
   capturePane?: PaneCapturer;
   closePane?: PaneCloser;
-  waitForAzDoBuild?: AzDoBuildWaiter;
+  startAzDoWatcher?: AzDoWatcherStarter;
   delegateWindow?: WindowDelegator;
 }
 
@@ -83,7 +85,7 @@ export function defaultSeams(): BuildSeams {
     waitForPaneExit: defaultWaitForPaneExit,
     capturePane: defaultCapturePane,
     closePane: defaultClosePane,
-    waitForAzDoBuild: defaultWaitForAzDoBuild,
+    startAzDoWatcher,
     delegateWindow: defaultDelegateWindow,
   };
 }
@@ -257,32 +259,22 @@ async function commitPhase(ctx: any, seams: BuildSeams, repoRoot: string, dxChan
   return { committed: true, failed: false, notes };
 }
 
-/** Await the queued AzDO build (prx queues it; the newest build is ours).
- *  Failure policy: on failure the agent PLANS a fix and presents it — user
- *  permission is ALWAYS required before any action. No auto-fix, no auto
- *  re-run. */
-async function monitorPhase(ctx: any, seams: BuildSeams): Promise<{ ok: boolean; failed: boolean; notes: string[] }> {
+/** Start the background AzDO watcher (prx queued the build; the newest build
+ *  is ours). The turn returns immediately — the watcher toasts on every
+ *  check and steers on a terminal failure; the chat is never locked.
+ *  Failure policy: on an AzDO failure the agent PLANS a fix and presents it
+ *  — user permission is ALWAYS required before any action. No auto-fix, no
+ *  auto re-run. */
+async function monitorPhase(pi: any, ctx: any, seams: BuildSeams): Promise<{ ok: boolean; failed: boolean; notes: string[] }> {
   const notes: string[] = [];
-  await ctx.ui.notify("AzDO build queued — monitoring…", "info");
-  const monitor = await (seams.waitForAzDoBuild ?? defaultWaitForAzDoBuild)(7200000);
-  if (monitor.result === "succeeded") {
-    notes.push(`AzDO build ${monitor.id} succeeded`);
-    return { ok: true, failed: false, notes };
-  }
-  if (monitor.result === "canceled") {
-    notes.push("AzDO build canceled");
-    return { ok: true, failed: false, notes };
-  }
-  if (monitor.result === "failed") {
-    const detail = monitor.reason ? ` — ${monitor.reason}` : "";
-    notes.push(`AzDO build ${monitor.id} FAILED${detail} — ${AZDO_BUILD_URL}`);
-    return { ok: false, failed: true, notes };
-  }
-  notes.push(monitor.reason === "timeout" ? "AzDO build monitoring timed out" : `AzDO build ${monitor.id} ended unexpectedly: ${monitor.reason || monitor.result}`);
-  return { ok: false, failed: true, notes };
+  await ctx.ui.notify("AzDO build queued — monitoring in background (toast on every check).", "info");
+  const starter = seams.startAzDoWatcher ?? startAzDoWatcher;
+  starter(pi, ctx, seams);
+  notes.push("AzDO monitoring in background — status toasts on every check, failure steers when the build ends");
+  return { ok: true, failed: false, notes };
 }
 
-async function publishPhase(ctx: any, seams: BuildSeams, choice: string, repoRoot: string, dxChanged: boolean, latest: string, skipBuild = false): Promise<{ ok: boolean; failed: boolean; notes: string[] }> {
+async function publishPhase(pi: any, ctx: any, seams: BuildSeams, choice: string, repoRoot: string, dxChanged: boolean, latest: string, skipBuild = false): Promise<{ ok: boolean; failed: boolean; notes: string[] }> {
   const notes: string[] = [];
   let failed = false;
   await ctx.ui.notify("Checking Hyper-V agents C11-C14…", "info");
@@ -309,7 +301,7 @@ async function publishPhase(ctx: any, seams: BuildSeams, choice: string, repoRoo
     return { ok: false, failed: true, notes };
   }
   notes.push(`prx done (exit ${res.code})`);
-  const monitor = await monitorPhase(ctx, seams);
+  const monitor = await monitorPhase(pi, ctx, seams);
   notes.push(...monitor.notes);
   return { ok: monitor.ok, failed: monitor.failed, notes };
 }
@@ -363,7 +355,7 @@ async function runBuildFlow(pi: any, ctx: any, seams: BuildSeams, choice: string
     } else {
       notes.push("build skipped — publish only");
     }
-    const pub = await publishPhase(ctx, seams, choice, repo, dxChanged, latest, skipBuild);
+    const pub = await publishPhase(pi, ctx, seams, choice, repo, dxChanged, latest, skipBuild);
     notes.push(...pub.notes);
     const pane = getBuildPane();
     const closeAsk = pane ? `\nThe build pane ${pane} is left open — close it via /devexpress → "Close build pane" when done.` : "";
@@ -382,7 +374,7 @@ async function runBuildFlow(pi: any, ctx: any, seams: BuildSeams, choice: string
 
 export function registerBuildCommand(pi: any, seams?: Partial<BuildSeams>): void {
   pi.registerCommand("devexpress", {
-    description: "DevExpress menu: Build → RX-XAF (Lab | Release, skip-build variants), Last build status; args: status | build lab|release | publish lab|release",
+    description: "DevExpress menu: Build → RX-XAF (Lab | Release, skip-build variants), Last build status, Cancel AzDO build; args: status | cancel | build lab|release | publish lab|release",
     handler: async (args: string | string[], ctx: any) => {
       const merged = { ...defaultSeams(), ...seams };
       const cwd = ctx?.cwd ?? merged.repoRoot ?? process.cwd();

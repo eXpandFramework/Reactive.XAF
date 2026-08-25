@@ -1,6 +1,6 @@
 ---
 name: reactive-xaf-build/build
-description: The /devexpress flow engine — DX check, props update, brx build in a pane, publish (VM check → commit → prx → AzDO monitor), failure steer, and the skip-build publish-only variant. Read when changing build/publish behavior, seams, or the failure path.
+description: The /devexpress flow engine — DX check, props update, brx build in a pane, publish (VM check → commit → prx → AzDO background watcher), failure steer, and the skip-build publish-only variant. Read when changing build/publish behavior, seams, or the failure path.
 ---
 
 # build.ts — the /devexpress flow engine
@@ -15,37 +15,33 @@ pwsh, psmux, Hyper-V VMs and git are never touched).
 1. **DX check** — `getLatestDx`: max stable `DevExpress.ExpressApp` version
    from the nuget.org flat-container.
 2. **Props compare** (`dxPhase`) — `Directory.Packages.props` DevExpress.*
-   pins via `readDxPins`: no pins → noted; mixed versions → surfaced, file
-   untouched; single shared version ≠ latest → `ctx.ui.select` Update | Skip |
-   Abort (Update rewrites all DevExpress.* pins via `rewriteDxVersion` +
-   `trackedWrite`, i.e. `__writeFileSync`).
+   pins via `readDxPins`: no pins → noted; mixed → surfaced, untouched;
+   single shared version ≠ latest → `ctx.ui.select` Update | Skip | Abort
+   (Update rewrites pins via `rewriteDxVersion` + `trackedWrite` =
+   `__writeFileSync`).
 3. **Build** (`buildPhase`) — `brx` / `brx -Release` in a new right-side pane
-   (pane.ts seams); in-process fallback when the pane cannot be opened.
-   Red → `failureResult` (captured tail), notify, `steerFailure`
-   (`pi.sendUserMessage(msg, { deliverAs: "steer" })` — a triggered turn, so
-   the failure ALWAYS lands in the agent's context; the triggerTurn steer
-   was delivered but started no turn in long-lived sessions, 2026-08-25
-   fix), pane kept.
-4. **Publish** (`publishPhase`) — `ensureVmsRunning` (C11–C14; Off → Start-VM
-   + poll, Starting → wait) → `commitPhase` (git status → confirm → add -A →
-   commit; message `Update DX to X` when props changed, else
-   `Build fixes (N files)` — skip-build mode labels it `Publish (N files)`;
-   nothing to commit → skip) → confirm `prx` / `prx -Release` (600 s timeout)
-   → `monitorPhase`.
-5. **Monitor** (`monitorPhase`) — `waitForAzDoBuild` (azdo.ts, 2 h deadline):
-   polls the newest Reactive.XAF build; succeeded/canceled → ok, failed →
-   reason + `AZDO_BUILD_URL`, timeout/other → failed with note. Failure steers
-   via `steerFailure` (no auto-fix, no auto re-run — the agent plans and asks).
-   RESULT=/STATUS= parsing splits on `/\r?\n/`: pwsh pipe output is CRLF and
-   a bare `\n` split left `\r` on every line, silently breaking the parse of
-   every real monitor run (2026-08-25 fix — contract: azdo-tests.ts).
+   (pane.ts seams); in-process fallback. Red → `failureResult` (captured
+   tail), notify, `steerFailure` (`pi.sendUserMessage(msg, { deliverAs:
+   "steer" })` — a triggered turn; the triggerTurn steer started no turn in
+   long-lived sessions, 2026-08-25 fix), pane kept.
+4. **Publish** (`publishPhase`) — `ensureVmsRunning` (C11–C14; Off →
+   Start-VM + poll, Starting → wait) → `commitPhase` (git status → confirm →
+   add -A → commit; `Update DX to X` when props changed, else
+   `Build fixes (N files)` / skip-build `Publish (N files)`; nothing to
+   commit → skip) → confirm `prx` / `prx -Release` (600 s timeout) →
+   `monitorPhase`.
+5. **Monitor** (`monitorPhase`) — starts the background watcher
+   (`seams.startAzDoWatcher`, default watcher.ts) and RETURNS IMMEDIATELY:
+   the chat is never locked. The watcher toasts on every check; a terminal
+   failure steers via `pi.sendUserMessage(msg, { deliverAs: "steer" })`
+   (turn-independent) with the real reason. No auto-fix, no auto re-run —
+   the agent plans and asks.
 
 ## Skip-build variant
 
 `skipBuild = true` (menu Publish → RX-XAF → Lab | Release, arg
-`publish lab|release`): phases 1–3 are omitted (no DX feed call, no pane, no
-`brx`), the summary notes "build skipped — publish only", and the DX line
-reads "no DX check (build skipped)". Publish + monitor run unchanged.
+`publish lab|release`): phases 1–3 are omitted; the summary notes "build
+skipped — publish only". Publish + watcher run unchanged.
 
 ## Outcome strings
 

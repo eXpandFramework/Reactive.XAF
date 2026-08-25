@@ -6,7 +6,7 @@
  * on failure, and the AzDO definition link. Info only — no steering.
  */
 
-import { azdoStatusScript, parseStatus, extractFailReason, failLogFromStdout, AZDO_BUILD_URL } from "./azdo.js";
+import { azdoStatusScript, parseStatus, extractFailReason, failLogFromStdout, AZDO_BUILD_URL, cancelAzDoScript, parseCancel } from "./azdo.js";
 import type { BuildSeams } from "./build.js";
 
 /** Task handed to the delegated status window. */
@@ -31,6 +31,25 @@ export async function statusPhase(ctx: any, seams: BuildSeams): Promise<string> 
     msg = `AzDO build ${s.id} canceled — ${AZDO_BUILD_URL}`;
   } else {
     msg = `AzDO build ${s.id} ${s.result} — ${AZDO_BUILD_URL}`;
+  }
+  await ctx.ui.notify(msg, "info");
+  return msg;
+}
+
+/** PATCH-cancel the newest running build and notify the outcome. */
+export async function cancelPhase(ctx: any, seams: BuildSeams): Promise<string> {
+  const res = await seams.run(cancelAzDoScript(), { timeoutMs: 60000 });
+  const c = parseCancel(res.stdout);
+  let msg: string;
+  if (!c) {
+    const err = res.stderr.trim().slice(-300);
+    msg = err ? `AzDO cancel failed: ${err}` : "AzDO cancel failed: no CANCEL= line";
+  } else if (c.id === 0) {
+    msg = "No AzDO Reactive.XAF builds found to cancel.";
+  } else if (c.ok) {
+    msg = `Cancel requested for AzDO build ${c.id} — the agent stops it within ~2 min.`;
+  } else {
+    msg = `AzDO build ${c.id} is ${c.status} — nothing to cancel.`;
   }
   await ctx.ui.notify(msg, "info");
   return msg;

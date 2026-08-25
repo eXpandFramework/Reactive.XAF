@@ -15,7 +15,7 @@ Run: `npx tsx C:/Work/Reactive.XAF/.pi/extensions/reactive-xaf-build/menu-tests.
 `registerBuildCommand(pi, { run, fetchFeed, repoRoot, pollMs, ...paneSeams,
 delegateWindow })` with fakes: a scripted command runner, a feed fetcher that
 would throw on use (`"[]"` — proves the DX check never runs), pane seams that
-record opens/sends, a monitor seam returning a fixed succeeded outcome. The
+record opens/sends, a watcher seam recording starts. The
 repo fixture is a temp dir with `src/Extensions` + a `Directory.Packages.props`
 so the repo guard passes. The real nuget.org, pwsh, psmux, VMs and git are
 never touched.
@@ -24,7 +24,7 @@ never touched.
 
 - **S0** — the command registers through the real index boot (`activate(pi)`).
 - **S1** — menu Publish → RX-XAF → Lab + Publish confirm: no `brx`, no pane
-  opened/sent, `prx` runs, monitor awaited ("AzDO build 1 succeeded"), result
+  opened/sent, `prx` runs, watcher started ("monitoring in background"), result
   "published".
 - **S2** — direct arg `["publish", "lab"]` + Publish confirm: same — no `brx`,
   `prx` runs, published.

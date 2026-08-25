@@ -1,56 +1,54 @@
 ---
 name: reactive-xaf-build/azdo
-description: The AzDO monitor/status scripts behind /devexpress — the RESULT=/STATUS= line protocol, the CRLF parse contract, and fail-reason extraction. Read when changing waitForAzDoBuild, the monitor poll loop, outcome/status parsing, or the ##[error] reason scoring.
+description: The AzDO status/cancel scripts behind /devexpress — the STATUS=/CANCEL= line protocol, the CRLF parse contract, the PATCH cancel, and fail-reason extraction.
 ---
 
-# azdo.ts / status.ts — AzDO monitor + status
+# azdo.ts / status.ts — AzDO status + cancel
 
-Companion of `.pi/extensions/reactive-xaf-build/azdo.ts` (the one-shot
-status surface lives in `status.ts`). One pwsh spawn per query; the profile
-loads `Invoke-AzureRestMethod` (XpandPwsh) and sets
-`$env:AzProject` / `$env:AzOrganization`.
+Companion of `.pi/extensions/reactive-xaf-build/azdo.ts` (one-shot status +
+cancel surface in `status.ts`). One pwsh spawn per query; the profile loads
+`Invoke-AzureRestMethod` (XpandPwsh) and sets `$env:AzProject` /
+`$env:AzOrganization`.
 
-## Monitor (`defaultWaitForAzDoBuild`)
+## Status script (`azdoStatusScript`)
 
-- Spawns `pwsh -Command <monitorScript>` via the run seam (pane.ts
-  `runArgv` default); the spawn timeout carries a 5-minute margin over the
-  script's own deadline so the final RESULT= print never loses the race to
-  the taskkill.
-- The script polls the newest build every 30 s via `Invoke-AzureRestMethod`
-  `build/builds?definitions=23&$top=1&queryOrder=queueTimeDescending`
-  (definition 23 — the AZDO_BUILD_URL definition) until the build leaves
-  inProgress/notStarted/cancelling, or the deadline passes. The explicit
-  queue-time ordering is REQUIRED: the module's `Get-AzBuilds` omits
-  `queryOrder`, and the API default buries in-progress builds, so a bare
-  `-Top 1` returned the newest COMPLETED build while the just-queued one
-  ran unseen (2026-08-25 fix). prx cancels in-progress builds before
-  queueing, so the newest build is ours.
-- On a failed build, the failed timeline record's log is fetched and printed
-  between LOGSTART/LOGEND markers (bounded to the last 500 lines).
-- Prints one `RESULT=<id>;<result>;<reason>` line, or
-  `RESULT=timeout;;` / `RESULT=0;other;no AzDO build found`.
+Queries the newest Reactive.XAF build via
+`build/builds?definitions=23&$top=1&queryOrder=queueTimeDescending`
+(definition 23 = AZDO_BUILD_URL). The queue-time ordering is REQUIRED:
+`Get-AzBuilds` omits it and the API default buries in-progress builds, so a
+bare `-Top 1` returned the newest COMPLETED build (2026-08-25 fix). On
+failure the failed record's log prints between LOGSTART/LOGEND markers
+(last 500 lines). Output: `STATUS=<id>;<status>;<result>;<reason>` or
+`STATUS=0;none;none;`.
+
+## Cancel script (`cancelAzDoScript`)
+
+Same fetch; when the build is in inProgress/notStarted/postponed/cancelling
+it PATCHes `{"status":"cancelling"}` (the documented cancel; DELETE is
+rejected on running builds — `CannotDeleteRunningBuildException` — which
+silently broke prx's cancel and left zombie builds holding the pool, fixed
+2026-08-25 in XpandPwsh). Output: `CANCEL=<id>;ok;<status>` /
+`CANCEL=<id>;notrunning;<status>` / `CANCEL=0;none;none`.
 
 ## Parsing (the CRLF contract)
 
-pwsh pipe output is CRLF: `parseOutcome` / `parseStatus` split on
-`/\r?\n/`. A bare `\n` split left `\r` on every line and the `(.*)$` regex
-could not cross it — every real monitor run reported the fake "no RESULT=
-line in monitor output" (2026-08-25 fix, pinned by `azdo-tests.ts`).
+pwsh pipe output is CRLF: `parseStatus` / `parseCancel` split on `/\r?\n/`.
+A bare `\n` split leaves `\r` on every line and the `(.*)$` regex cannot
+cross it (2026-08-25 fix, pinned by `azdo-tests.ts`).
 
 ## Fail-reason extraction
 
-`extractFailReason` scores the fetched log for the ONE real error: tier-1
+`extractFailReason` scores the log for the ONE real error: tier-1
 compiler/MSBuild/DX lines (`error CS|MSB|DX|NU...`) beat the generic
 "Build FAILED" marker; wrapper noise (ScriptHalted, Approve-LastExitCode,
 `##[error]Exception`, "PowerShell exited with code", retry lines) is
-filtered; identical retry lines dedupe; the nearest "Executing <task>"
-line becomes context.
+filtered; identical retry lines dedupe; the nearest "Executing <task>" line
+becomes context. Consumed by `statusPhase` and the watcher's terminal toast.
 
-## Status (`status.ts`)
+## Status / cancel (`status.ts`)
 
-`statusPhase` runs the one-shot `azdoStatusScript` (same fetch, same
-protocol: `STATUS=<id>;<status>;<result>;<reason>`) and notifies the
-outcome with the AzDO definition link. Info only — no steering.
+`statusPhase` notifies the status outcome with the AzDO link. `cancelPhase`
+notifies whether the cancel was requested. Info only — no steering.
 
 ## Failure policy
 

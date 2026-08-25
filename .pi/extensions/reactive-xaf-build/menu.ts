@@ -14,7 +14,7 @@
 
 import { getBuildPane, setBuildPane, defaultClosePane } from "./pane.js";
 import { defaultDelegateWindow } from "./delegate.js";
-import { statusPhase, STATUS_TASK } from "./status.js";
+import { statusPhase, STATUS_TASK, cancelPhase } from "./status.js";
 import type { BuildSeams } from "./build.js";
 
 type BuildFlowRunner = (choice: string, skipBuild?: boolean) => Promise<string>;
@@ -43,7 +43,8 @@ async function delegateOrRun(ctx: any, seams: BuildSeams, repo: string, task: st
 /** The interactive menu (used when no direct args were given). */
 async function menuFlow(ctx: any, seams: BuildSeams, repo: string, runFlow: BuildFlowRunner): Promise<string> {
   const pane = getBuildPane();
-  const top = await ctx.ui.select("DevExpress", pane ? ["Build", "Publish", "Last build status", "Close build pane"] : ["Build", "Publish", "Last build status"]);
+  const base = ["Build", "Publish", "Last build status", "Cancel AzDO build"];
+  const top = await ctx.ui.select("DevExpress", pane ? [...base, "Close build pane"] : base);
   if (top === "Close build pane") {
     await (seams.closePane ?? defaultClosePane)(pane!);
     setBuildPane(null);
@@ -52,6 +53,9 @@ async function menuFlow(ctx: any, seams: BuildSeams, repo: string, runFlow: Buil
   }
   if (top === "Last build status") {
     return delegateOrRun(ctx, seams, repo, STATUS_TASK, () => statusPhase(ctx, seams), "AzDO status check");
+  }
+  if (top === "Cancel AzDO build") {
+    return cancelPhase(ctx, seams);
   }
   if (top === "Publish") {
     const rx = await ctx.ui.select("RX-XAF", ["Lab", "Release"]);
@@ -70,6 +74,7 @@ async function menuFlow(ctx: any, seams: BuildSeams, repo: string, runFlow: Buil
 export async function runDevexpressMenu(ctx: any, seams: BuildSeams, repo: string, args: string | string[], runFlow: BuildFlowRunner): Promise<string> {
   const parts = (typeof args === "string" ? args.split(/\s+/) : args ?? []).filter(Boolean);
   if (parts[0] === "status") return statusPhase(ctx, seams);
+  if (parts[0] === "cancel") return cancelPhase(ctx, seams);
   if (parts[0] === "build") {
     const choice = parts[1]?.toLowerCase();
     if (choice === "lab" || choice === "release") return runFlow(choice === "lab" ? "Lab" : "Release");

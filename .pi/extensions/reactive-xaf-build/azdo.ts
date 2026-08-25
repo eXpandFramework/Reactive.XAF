@@ -1,40 +1,29 @@
 /**
- * reactive-xaf-build/azdo — AzDO build monitor + status for the publish step.
+ * reactive-xaf-build/azdo — AzDO status + cancel scripts for the publish step.
  *
- * waitForAzDoBuild polls the newest Reactive.XAF build until its status leaves
- * inProgress/notStarted. prx cancels in-progress builds before queueing
- * (Publish-ReactiveXAF in eXpandFramework.psm1), so the newest build is always
- * ours. On failure the failed timeline record's log is fetched and printed
- * between LOGSTART/LOGEND markers; extractFailReason scores it for the ONE
- * real error, filtering wrapper noise (ScriptHalted, ##[error]Exception,
- * "PowerShell exited with code", retry lines) and attaching the nearest
- * "Executing <task>" line as context. azdoStatusScript is the one-shot
- * variant — same fetch, same TS-side extraction.
+ * The one-shot status script (azdoStatusScript) queries the newest
+ * Reactive.XAF build by QUEUE TIME (queryOrder=queueTimeDescending) — the
+ * module's Get-AzBuilds omits the ordering, and the API default buries
+ * in-progress builds, so a bare -Top 1 returned the newest COMPLETED build
+ * instead of the just-queued one (2026-08-25 fix). On a failed build, the
+ * failed timeline record's log is fetched and printed between
+ * LOGSTART/LOGEND markers (bounded to the last 500 lines); extractFailReason
+ * scores it for the ONE real error, filtering wrapper noise (ScriptHalted,
+ * ##[error]Exception, "PowerShell exited with code", retry lines) and
+ * attaching the nearest "Executing <task>" line as context.
+ *
+ * The cancel script (cancelAzDoScript) PATCHes {"status":"cancelling"} on a
+ * running build — the documented cancel; DELETE is rejected by the API on
+ * running builds (CannotDeleteRunningBuildException), which silently broke
+ * prx's cancel and left zombie builds holding the pool (2026-08-25, fixed in
+ * XpandPwsh Remove-AzBuild).
  *
  * One pwsh spawn per query: the profile loads Invoke-AzureRestMethod
- * (XpandPwsh, on PSModulePath) and sets $env:AzProject /
- * $env:AzOrganization. The scripts query the newest build by QUEUE TIME
- * (queryOrder=queueTimeDescending) — the module's Get-AzBuilds omits the
- * ordering, and the API default buries in-progress builds, so a bare -Top 1
- * returned the newest COMPLETED build instead of the just-queued one
- * (2026-08-25 fix). The scripts print a single RESULT= / STATUS= line (the
- * log section before it) and exit.
- *
- * Failure policy (agent behavior): on an AzDO failure the agent PLANS a fix
- * and presents it — user permission is ALWAYS required before any action.
- * No auto-fix, no auto re-run.
+ * (XpandPwsh, on PSModulePath) and sets $env:AzProject / $env:AzOrganization.
+ * Scripts print a single STATUS= / CANCEL= line and exit.
  */
 
-import { runArgv } from "./pane.js";
-import type { RunResult } from "./pane.js";
-
 export type AzDoBuildResult = "succeeded" | "failed" | "canceled" | "other";
-
-export interface AzDoBuildOutcome {
-  id: number;
-  result: AzDoBuildResult;
-  reason: string;
-}
 
 export interface AzDoStatus {
   id: number;
@@ -43,11 +32,13 @@ export interface AzDoStatus {
   reason: string;
 }
 
-export type AzDoBuildWaiter = (timeoutMs: number) => Promise<AzDoBuildOutcome>;
+export interface AzDoCancel {
+  id: number;
+  ok: boolean;
+  status: string;
+}
 
 export const AZDO_BUILD_URL = "https://dev.azure.com/eXpandDevOps/eXpandFramework/_build?definitionId=23";
-
-const KNOWN_RESULTS = new Set(["succeeded", "failed", "canceled", "other"]);
 
 /** Wrapper markers that carry no real error: psake/AzDO noise + retry chatter. */
 const WRAPPER_NOISE = /ScriptHalted|Approve-LastExitCode|##\[error\]Exception|PowerShell exited with code|The term '|Retrying in/;
@@ -58,7 +49,7 @@ const BUILD_FAILED = /Build FAILED/i;
 
 /** PS: fetch the failed timeline record's log and print a bounded tail between
  *  LOGSTART/LOGEND markers for TS-side extraction; $reason carries only the
- *  fetch-failure fallback. Shared by the monitor and the status script. */
+ *  fetch-failure fallback. */
 const LOG_BLOCK = `
   try {
     $t = Invoke-AzureRestMethod ("build/builds/" + $b.id + "/timeline") @cred
@@ -73,25 +64,6 @@ const LOG_BLOCK = `
     $reason = "log fetch failed: " + $_.Exception.Message
   }`;
 
-/** The poll script; timeoutMs is embedded as the poll deadline. */
-function monitorScript(timeoutMs: number): string {
-  return `$cred = @{ Project = $env:AzProject; Organization = $env:AzOrganization }
-$deadline = (Get-Date).AddMilliseconds(${timeoutMs})
-$b = $null
-while ((Get-Date) -lt $deadline) {
-  $b = (Invoke-AzureRestMethod 'build/builds?definitions=23&$top=1&queryOrder=queueTimeDescending' @cred)[0]
-  if ($null -eq $b) { break }
-  if ($b.status -and $b.status -ne "inProgress" -and $b.status -ne "notStarted" -and $b.status -ne "cancelling") { break }
-  Start-Sleep -Seconds 30
-}
-if ($null -eq $b) { "RESULT=0;other;no AzDO build found"; exit 0 }
-if (-not $b.status -or $b.status -eq "inProgress" -or $b.status -eq "notStarted" -or $b.status -eq "cancelling") { "RESULT=timeout;;"; exit 0 }
-$reason = ""
-if ($b.result -eq "failed") {${LOG_BLOCK}
-}
-"RESULT=$($b.id);$($b.result);$reason"`;
-}
-
 /** The one-shot status script: newest build, current state, reason on failure. */
 export function azdoStatusScript(): string {
   return `$cred = @{ Project = $env:AzProject; Organization = $env:AzOrganization }
@@ -103,28 +75,23 @@ if ($b.result -eq "failed") {${LOG_BLOCK}
 "STATUS=$($b.id);$($b.status);$($b.result);$reason"`;
 }
 
-/** Parse the script's last RESULT= line; null when the script produced none.
- *  pwsh pipe output is CRLF — split on /\r?\n/ so the trailing \r never
- *  reaches the regex below (a bare \n split silently broke every real parse;
- *  2026-08-25 fix, contract: azdo-tests.ts). */
-function parseOutcome(stdout: string): AzDoBuildOutcome | null {
-  let line = "";
-  for (const l of stdout.split(/\r?\n/)) {
-    if (l.startsWith("RESULT=")) line = l;
-  }
-  if (!line) return null;
-  if (line.startsWith("RESULT=timeout")) return { id: 0, result: "other", reason: "timeout" };
-  const m = line.match(/^RESULT=([^;]*);([^;]*);(.*)$/);
-  if (!m) return null;
-  return {
-    id: Number(m[1]),
-    result: (KNOWN_RESULTS.has(m[2]) ? m[2] : "other") as AzDoBuildResult,
-    reason: m[3].trim(),
-  };
+/** The one-shot cancel script: PATCH-cancel the newest build if it is running. */
+export function cancelAzDoScript(): string {
+  return `$cred = @{ Project = $env:AzProject; Organization = $env:AzOrganization }
+$b = (Invoke-AzureRestMethod 'build/builds?definitions=23&$top=1&queryOrder=queueTimeDescending' @cred)[0]
+if ($null -eq $b) { "CANCEL=0;none;none"; exit 0 }
+if ($b.status -in @("inProgress","notStarted","postponed","cancelling")) {
+  Invoke-AzureRestMethod ("build/builds/" + $b.id) -Method Patch -Body '{"status":"cancelling"}' @cred | Out-Null
+  "CANCEL=$($b.id);ok;$($b.status)"
+} else {
+  "CANCEL=$($b.id);notrunning;$($b.status)"
+}`;
 }
 
 /** Parse the status script's last STATUS= line; null when none was printed.
- *  CRLF — same split as parseOutcome so the STATUS= line parses cleanly. */
+ *  CRLF — split on /\r?\n/ so the trailing \r never reaches the regex (a bare
+ *  \n split silently broke every real parse; 2026-08-25 fix, contract:
+ *  azdo-tests.ts). */
 export function parseStatus(stdout: string): AzDoStatus | null {
   let line = "";
   for (const l of stdout.split(/\r?\n/)) {
@@ -134,6 +101,18 @@ export function parseStatus(stdout: string): AzDoStatus | null {
   const m = line.match(/^STATUS=([^;]*);([^;]*);([^;]*);(.*)$/);
   if (!m) return null;
   return { id: Number(m[1]), status: m[2], result: m[3], reason: m[4].trim() };
+}
+
+/** Parse the cancel script's last CANCEL= line; null when none was printed. */
+export function parseCancel(stdout: string): AzDoCancel | null {
+  let line = "";
+  for (const l of stdout.split(/\r?\n/)) {
+    if (l.startsWith("CANCEL=")) line = l;
+  }
+  if (!line) return null;
+  const m = line.match(/^CANCEL=([^;]*);([^;]*);([^;]*)$/);
+  if (!m) return null;
+  return { id: Number(m[1]), ok: m[2] === "ok", status: m[3] };
 }
 
 /** Lines of the failed record's log between the LOGSTART/LOGEND markers. */
@@ -186,21 +165,4 @@ export function extractFailReason(lines: string[]): string {
   const text = err ? err.text : fallback.join(" | ");
   if (!text) return "";
   return err && err.task ? `${text} [${err.task}]`.slice(0, 600) : text.slice(0, 600);
-}
-
-/** Poll the newest Reactive.XAF build until it finishes (default seam).
- *  The spawn timeout carries a 5-minute margin over the script's own deadline
- *  so pwsh boot overhead and the final RESULT= print never lose the race to
- *  the taskkill. */
-export async function defaultWaitForAzDoBuild(timeoutMs: number, run: (argv: string[], timeoutMs: number) => Promise<RunResult> = runArgv): Promise<AzDoBuildOutcome> {
-  const res = await run(["pwsh", "-Command", monitorScript(timeoutMs)], timeoutMs + 300000);
-  const outcome = parseOutcome(res.stdout);
-  if (outcome) {
-    if (outcome.result === "failed" && !outcome.reason) {
-      outcome.reason = extractFailReason(failLogFromStdout(res.stdout));
-    }
-    return outcome;
-  }
-  const err = (res.stderr || "no RESULT= line in monitor output").trim().slice(-500);
-  return { id: 0, result: "other", reason: `monitor failed: ${err}` };
 }

@@ -13,7 +13,6 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import activate from "./index.js";
 import { registerBuildCommand } from "./build.js";
-import { defaultWaitForAzDoBuild } from "./azdo.js";
 
 let ok = 0;
 let fail = 0;
@@ -72,6 +71,7 @@ function mkPaneSeams(overrides: Partial<{ open: string | null; exitCode: number 
   const opened: string[] = [];
   const sent: string[] = [];
   const closed: string[] = [];
+  const watcherStarts: number[] = [];
   return {
     openBuildPane: async () => {
       if (overrides.open === null) return null;
@@ -83,11 +83,15 @@ function mkPaneSeams(overrides: Partial<{ open: string | null; exitCode: number 
     waitForPaneExit: async () => ({ code: overrides.exitCode ?? 0, timedOut: overrides.timedOut ?? false }),
     capturePane: async () => overrides.capture ?? "",
     closePane: async (pane: string) => { closed.push(pane); },
-    waitForAzDoBuild: async () => ({ id: 1, result: "succeeded", reason: "" }),
+    startAzDoWatcher: async () => {
+      watcherStarts.push(1);
+      return { stop: () => {}, active: () => false, lastBuildId: () => null };
+    },
     delegateWindow: async () => null,
     opened,
     sent,
     closed,
+    watcherStarts,
   };
 }
 function mkFetch(versions: string[]): (url: string) => Promise<string> {
@@ -122,13 +126,13 @@ const GREEN_PUBLISH = [
   { match: "git status --short", result: okResult("") },
   { match: "prx", result: okResult() },
 ];
-function mkMonitor(outcome: { id: number; result: "succeeded" | "failed" | "canceled" | "other"; reason: string }): { pi: any; repo: string } {
+function mkMonitor(): { pi: any; repo: string; starts: number[] } {
   const repo = mkRepo(DX_PINS);
   const runner = mkRunner(GREEN_PUBLISH);
   const pane = mkPaneSeams();
   const pi = mkPi();
-  registerBuildCommand(pi, { run: runner.run, fetchFeed: mkFetch(["26.1.3"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1, ...pane, waitForAzDoBuild: async () => outcome });
-  return { pi, repo };
+  registerBuildCommand(pi, { run: runner.run, fetchFeed: mkFetch(["26.1.3"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1, ...pane });
+  return { pi, repo, starts: pane.watcherStarts };
 }
 
 (async () => {
@@ -327,50 +331,22 @@ function mkMonitor(outcome: { id: number; result: "succeeded" | "failed" | "canc
     const result = await pi._cmds.get("devexpress").handler([], ctx);
     check("no Start-VM for the booting VM, waited then published", !runner.calls.some((c) => c.startsWith("Start-VM")) && result.includes("already booting") && result.includes("published"), runner.calls.join(" | ") + " | " + result);
   }
-  // Section: T14-T17 — AzDO monitor + status (fake seams)
+  // Section: T14-T16 — publish starts the background watcher and returns immediately
   {
-    let t = mkMonitor({ id: 35735, result: "failed", reason: "Artifact TestAssemblies was not found for build 35735" });
+    let t = mkMonitor();
     let ctx = mkCtx([...MENU, "Lab", "Publish"], t.repo);
     let result = await t.pi._cmds.get("devexpress").handler([], ctx);
-    check("T14: FAILED reason surfaced, delivered, publish stopped", result.includes("AzDO build 35735 FAILED") && result.includes("Artifact TestAssemblies") && t.pi._userMessages.length === 1 && t.pi._userMessages[0].content.includes("Artifact TestAssemblies") && result.includes("publish stopped"), result);
-    t = mkMonitor({ id: 35736, result: "succeeded", reason: "" });
+    check("T14: publish returns immediately, monitoring in background", result.includes("monitoring in background") && result.includes("published"), result);
+    check("T14: watcher started once", t.starts.length === 1, JSON.stringify(t.starts));
+    check("T14: no failure steer from the flow (the watcher steers at the end)", t.pi._userMessages.length === 0, JSON.stringify(t.pi._userMessages));
+    t = mkMonitor();
     ctx = mkCtx([...MENU, "Lab", "Publish"], t.repo);
     result = await t.pi._cmds.get("devexpress").handler([], ctx);
-    check("T15: success noted", result.includes("AzDO build 35736 succeeded"), result);
-    check("T15: published", result.includes("published"), result);
-    check("T15: close ask shown", ctx._notifies.some((n) => n.includes("Close build pane")), ctx._notifies.join(" | "));
-    t = mkMonitor({ id: 35737, result: "canceled", reason: "" });
-    ctx = mkCtx([...MENU, "Lab", "Publish"], t.repo);
-    result = await t.pi._cmds.get("devexpress").handler([], ctx);
-    check("T16: canceled note neutral", result.includes("AzDO build canceled"), result);
-    check("T16: still published", result.includes("published"), result);
-    check("T16: no failure delivery (canceled)", t.pi._userMessages.length === 0, JSON.stringify(t.pi._userMessages));
+    check("T15: second publish also starts the watcher and publishes", t.starts.length === 1 && result.includes("published"), result);
     const t2 = { repo: mkRepo(DX_PINS), pi: mkPi() };
     registerBuildCommand(t2.pi, { run: mkRunner([{ match: "$cred = @{ Project*", result: { code: 0, stdout: "STATUS=35735;completed;failed;Artifact TestAssemblies was not found for build 35735", stderr: "" } }]).run, fetchFeed: mkFetch(["26.1.3"]), repoRoot: t2.repo, ...mkPaneSeams() });
     const r2 = await t2.pi._cmds.get("devexpress").handler(["status"], mkCtx([], t2.repo));
-    check("T17: status shows id + reason + link", r2.includes("35735") && r2.includes("Artifact TestAssemblies") && r2.includes("definitionId=23"), r2);
-  }
-  // Section: T20 — fail-reason extraction: wrapper noise filtered, real error wins
-  {
-    const logLines = [
-      "Executing Compile",
-      "Building Extensions",
-      "  Extensions.sln",
-      "CSC : error DX1003: For evaluation purposes only. Redistribution prohibited. Expired license key version (v25.2, v26.1)",
-      "Retrying in 10 seconds...",
-      "CSC : error DX1003: For evaluation purposes only. Redistribution prohibited. Expired license key version (v25.2, v26.1)",
-      "Approve-LastExitCode: The term 'Approve-LastExitCode' is not recognized",
-      "ScriptHalted",
-      "##[error]Exception: Build failed",
-      "##[error]PowerShell exited with code '1'",
-    ].join("\n");
-    const repo = mkRepo(DX_PINS);
-    const pi = mkPi();
-    registerBuildCommand(pi, { run: mkRunner(GREEN_PUBLISH).run, fetchFeed: mkFetch(["26.1.3"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1, ...mkPaneSeams(), waitForAzDoBuild: (t: number) => defaultWaitForAzDoBuild(t, async () => ({ code: 0, stdout: "RESULT=35735;failed;\nLOGSTART\n" + logLines + "\nLOGEND", stderr: "" })) });
-    const result = await pi._cmds.get("devexpress").handler([], mkCtx([...MENU, "Lab", "Publish"], repo));
-    const steer = pi._userMessages[pi._userMessages.length - 1];
-    check("T20: real error delivered, wrapper filtered", !!steer && steer.content.includes("DX1003") && steer.content.includes("[Compile]") && !/ScriptHalted|Retrying|Approve-LastExitCode|PowerShell exited/.test(steer.content), JSON.stringify(pi._userMessages));
-    check("T20: FAILED surfaced with reason", result.includes("AzDO build 35735 FAILED") && result.includes("DX1003"), result);
+    check("T16: status shows id + reason + link", r2.includes("35735") && r2.includes("Artifact TestAssemblies") && r2.includes("definitionId=23"), r2);
   }
   // Section: T18-T19 — menu delegation (fake delegateWindow)
   {

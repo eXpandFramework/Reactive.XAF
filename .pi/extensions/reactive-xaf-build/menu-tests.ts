@@ -78,7 +78,7 @@ function mkPaneSeams(): any {
     waitForPaneExit: async () => ({ code: 0, timedOut: false }),
     capturePane: async () => "",
     closePane: async () => {},
-    waitForAzDoBuild: async () => ({ id: 1, result: "succeeded", reason: "" }),
+    startAzDoWatcher: async () => ({ stop: () => {}, active: () => false, lastBuildId: () => null }),
     delegateWindow: async () => null,
     opened,
     sent,
@@ -109,7 +109,7 @@ function okResult(stdout = ""): any {
     activate(pi);
     check("S0: devexpress command registered via index.ts", typeof pi._cmds.get("devexpress")?.handler === "function");
   }
-  // Section: S1 — menu Publish → RX-XAF → Lab: no pane, no brx, prx runs, monitor awaited
+  // Section: S1 — menu Publish → RX-XAF → Lab: no pane, no brx, prx runs, watcher started
   {
     const repo = mkRepo();
     const runner = mkRunner(GREEN_PUBLISH);
@@ -119,7 +119,7 @@ function okResult(stdout = ""): any {
     const ctx = mkCtx([...MENU, "Publish"], repo);
     const result = await pi._cmds.get("devexpress").handler([], ctx);
     check("S1: no brx, no pane opened or sent", !runner.calls.some((c) => c.startsWith("brx")) && pane.opened.length === 0 && pane.sent.length === 0, JSON.stringify({ calls: runner.calls, opened: pane.opened, sent: pane.sent }));
-    check("S1: prx ran, monitor awaited, published", runner.calls.includes("prx") && result.includes("AzDO build 1 succeeded") && result.includes("published"), result);
+    check("S1: prx ran, watcher started, published", runner.calls.includes("prx") && result.includes("monitoring in background") && result.includes("published"), result);
   }
   // Section: S2 — direct arg /devexpress publish lab (publish confirm answered)
   {

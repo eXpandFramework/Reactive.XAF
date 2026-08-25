@@ -1,6 +1,6 @@
 ---
 name: reactive-xaf-build/menu
-description: The /devexpress command surface — menu picks (Build → RX-XAF → Lab | Release, Publish → RX-XAF → Lab | Release, Last build status, Close build pane) and direct args (status | build lab|release | publish lab|release). Read when changing or invoking the /devexpress menu, delegation, or task strings.
+description: The /devexpress command surface — menu picks (Build → RX-XAF → Lab | Release, Publish → RX-XAF → Lab | Release, Last build status, Cancel AzDO build, Close build pane) and direct args (status | cancel | build lab|release | publish lab|release).
 ---
 
 # menu.ts — the /devexpress command surface
@@ -14,6 +14,7 @@ Args are split on whitespace and matched in order:
 | Args | Behavior |
 |---|---|
 | `status` | One-shot AzDO status (statusPhase). |
+| `cancel` | PATCH-cancel the newest running build (cancelPhase). |
 | `build lab` / `build release` | Full flow: `runFlow("Lab"|"Release", false)`. |
 | `publish lab` / `publish release` | Skip-build flow: `runFlow("Lab"|"Release", true)`. |
 | none / anything else | Interactive menu (menuFlow). |
@@ -23,8 +24,9 @@ The flow runner type is `(choice: string, skipBuild?: boolean) => Promise<string
 
 ## Menu (`menuFlow`)
 
-- Top: **DevExpress** → Build | Publish | Last build status (+ Close build
-  pane while a pane is open).
+- Top: **DevExpress** → Build | Publish | Last build status | Cancel AzDO
+  build (+ Close build pane while a pane is open). Cancel runs `cancelPhase`
+  in this window (no delegation).
 - Build → **RX-XAF** → Lab | Release — full flow (`buildTask`).
 - Publish → **RX-XAF** → Lab | Release — skip-build flow
   (`runFlow(choice, true)`, `publishTask` delegation text).

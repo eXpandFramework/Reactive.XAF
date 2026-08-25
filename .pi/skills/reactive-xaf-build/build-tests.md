@@ -1,6 +1,6 @@
 ---
 name: reactive-xaf-build/build-tests
-description: Behavior contract for the /devexpress workflow — build/commit/publish flows, the AzDO monitor + status surface, and the failure delivery. Read when changing build.ts, azdo.ts, or the mock-pi harness.
+description: Behavior contract for the /devexpress workflow — build/commit/publish flows, the background watcher start, the status/cancel surface, and the failure delivery.
 ---
 
 # build-tests.ts — the /devexpress workflow contract
@@ -21,11 +21,15 @@ Run: `npx tsx d:/Reactive.XAF/.pi/extensions/reactive-xaf-build/build-tests.ts`
 - T7-T8 — Release flow; user aborts never deliver.
 - T9-T13 — publish flows: VMs, commit, pane fallback, close pane, Starting
   VM wait.
-- T14-T17 — AzDO monitor + status (fake seams): FAILED delivers the reason,
-  success/canceled are neutral, `/devexpress status` parses the STATUS=
-  line.
+- T14-T15 — publish starts the background watcher (seam) and returns
+  immediately — no blocking monitor, no failure steer from the flow (the
+  watcher steers at the end; its contract lives in watcher-tests.ts).
+- T16 — `/devexpress status` parses the STATUS= line (id + reason + link).
 - T18-T19 — menu delegation.
-- T20 — fail-reason extraction: wrapper noise filtered, real error wins.
+
+The watcher's own contract (toast per poll, terminal steer, give-up,
+replace) is pinned by `watcher-tests.ts`; the CRLF status/cancel parse
+contract by `azdo-tests.ts`.
 
 ## Failure delivery (the contract that changed 2026-08-25)
 
