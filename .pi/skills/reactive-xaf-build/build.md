@@ -33,6 +33,12 @@ pwsh, psmux, Hyper-V VMs and git are never touched).
    polls the newest Reactive.XAF build; succeeded/canceled → ok, failed →
    reason + `AZDO_BUILD_URL`, timeout/other → failed with note. Failure steers
    via `steerFailure` (no auto-fix, no auto re-run — the agent plans and asks).
+   RESULT=/STATUS= parsing splits on `/\r?\n/`: pwsh pipe output is CRLF and
+   a bare `\n` split left `\r` on every line, silently breaking the parse of
+   every real monitor run (2026-08-25 fix — contract: azdo-tests.ts).
+   RESULT=/STATUS= parsing splits on `/\r?\n/`: pwsh pipe output is CRLF and
+   a bare `\n` split left `\r` on every line, silently breaking the parse of
+   every real monitor run (2026-08-25 fix — contract: azdo-tests.ts).
 
 ## Skip-build variant
 

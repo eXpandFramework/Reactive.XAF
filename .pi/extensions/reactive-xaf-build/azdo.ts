@@ -98,10 +98,13 @@ if ($b.result -eq "failed") {${LOG_BLOCK}
 "STATUS=$($b.id);$($b.status);$($b.result);$reason"`;
 }
 
-/** Parse the script's last RESULT= line; null when the script produced none. */
+/** Parse the script's last RESULT= line; null when the script produced none.
+ *  pwsh pipe output is CRLF — split on /\r?\n/ so the trailing \r never
+ *  reaches the regex below (a bare \n split silently broke every real parse;
+ *  2026-08-25 fix, contract: azdo-tests.ts). */
 function parseOutcome(stdout: string): AzDoBuildOutcome | null {
   let line = "";
-  for (const l of stdout.split("\n")) {
+  for (const l of stdout.split(/\r?\n/)) {
     if (l.startsWith("RESULT=")) line = l;
   }
   if (!line) return null;
@@ -115,10 +118,11 @@ function parseOutcome(stdout: string): AzDoBuildOutcome | null {
   };
 }
 
-/** Parse the status script's last STATUS= line; null when none was printed. */
+/** Parse the status script's last STATUS= line; null when none was printed.
+ *  CRLF — same split as parseOutcome so the STATUS= line parses cleanly. */
 export function parseStatus(stdout: string): AzDoStatus | null {
   let line = "";
-  for (const l of stdout.split("\n")) {
+  for (const l of stdout.split(/\r?\n/)) {
     if (l.startsWith("STATUS=")) line = l;
   }
   if (!line) return null;
