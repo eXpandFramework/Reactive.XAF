@@ -21,8 +21,11 @@ pwsh, psmux, Hyper-V VMs and git are never touched).
    `trackedWrite`, i.e. `__writeFileSync`).
 3. **Build** (`buildPhase`) — `brx` / `brx -Release` in a new right-side pane
    (pane.ts seams); in-process fallback when the pane cannot be opened.
-   Red → `failureResult` (captured tail), notify, `steerFailure` (warning
-   steer with triggerTurn, type `reactive-xaf-build:build-failed`), pane kept.
+   Red → `failureResult` (captured tail), notify, `steerFailure`
+   (`pi.sendUserMessage(msg, { deliverAs: "steer" })` — a triggered turn, so
+   the failure ALWAYS lands in the agent's context; the triggerTurn steer
+   was delivered but started no turn in long-lived sessions, 2026-08-25
+   fix), pane kept.
 4. **Publish** (`publishPhase`) — `ensureVmsRunning` (C11–C14; Off → Start-VM
    + poll, Starting → wait) → `commitPhase` (git status → confirm → add -A →
    commit; message `Update DX to X` when props changed, else
@@ -33,9 +36,6 @@ pwsh, psmux, Hyper-V VMs and git are never touched).
    polls the newest Reactive.XAF build; succeeded/canceled → ok, failed →
    reason + `AZDO_BUILD_URL`, timeout/other → failed with note. Failure steers
    via `steerFailure` (no auto-fix, no auto re-run — the agent plans and asks).
-   RESULT=/STATUS= parsing splits on `/\r?\n/`: pwsh pipe output is CRLF and
-   a bare `\n` split left `\r` on every line, silently breaking the parse of
-   every real monitor run (2026-08-25 fix — contract: azdo-tests.ts).
    RESULT=/STATUS= parsing splits on `/\r?\n/`: pwsh pipe output is CRLF and
    a bare `\n` split left `\r` on every line, silently breaking the parse of
    every real monitor run (2026-08-25 fix — contract: azdo-tests.ts).
@@ -56,6 +56,7 @@ reads "no DX check (build skipped)". Publish + monitor run unchanged.
 
 ## Failure policy
 
-User aborts (DX Skip/Abort, commit Abort, publish Abort) never steer. Real
-failures (build or AzDO) steer with triggerTurn so the agent plans a fix and
-presents it — user permission is ALWAYS required before any action.
+User aborts (DX Skip/Abort, commit Abort, publish Abort) never deliver.
+Real failures (build or AzDO) deliver a triggered turn (`sendUserMessage`,
+deliverAs "steer") so the agent plans a fix and presents it — user
+permission is ALWAYS required before any action.

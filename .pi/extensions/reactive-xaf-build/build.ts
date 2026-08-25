@@ -14,9 +14,9 @@
  *      output streams there live (pane.ts). Milestones are notified in this
  *      window. Green → conversational ask only (no modal, no auto-close): the
  *      pane is left open and closed via /devexpress → "Close build pane".
- *      Red → the failure steer (triggerTurn) with the pane's captured tail;
- *      the pane is KEPT for reuse. In-process fallback when the pane cannot
- *      be opened.
+ *      Red → the failure delivery (sendUserMessage — a triggered turn) with
+ *      the pane's captured tail; the pane is KEPT for reuse. In-process
+ *      fallback when the pane cannot be opened.
  *   4. publish — Hyper-V C11-C14 ensured (Start-VM + poll), git commit (message
  *      from changes, confirmed), confirm, prx / prx -Release, then the AzDO
  *      build monitor (waitForAzDoBuild — polls the queued build to completion;
@@ -331,14 +331,14 @@ function summaryResult(choice: string, latest: string, notes: string[], pubOk: b
   return [`Reactive.XAF build — ${choice}`, dxLine, ...notes, pubOk ? "published" : "publish stopped"].join("\n");
 }
 
-/** Warn the agent with triggerTurn — the failure lands in the agent's context
- *  so it can act (fix warnings) instead of waiting for the user to relay it.
- *  User aborts never reach this path. */
+/** Deliver the failure so it ALWAYS lands in the agent's context: a user
+ *  message via sendUserMessage triggers a turn unconditionally (pi core:
+ *  "Always triggers a turn"). The triggerTurn steer was delivered as a
+ *  custom_message but started no turn in long-lived sessions (2026-08-25,
+ *  reproduced + validated via steer-repro). User aborts never reach this
+ *  path. */
 function steerFailure(pi: any, msg: string): void {
-  const steer = (globalThis as any).__steer;
-  if (typeof steer === "function") {
-    steer(pi, "reactive-xaf-build:build-failed", msg, "", "steer", { triggerTurn: true, severity: "warning" });
-  }
+  pi.sendUserMessage(msg, { deliverAs: "steer" });
 }
 
 async function runBuildFlow(pi: any, ctx: any, seams: BuildSeams, choice: string, repo: string, skipBuild = false): Promise<string> {
