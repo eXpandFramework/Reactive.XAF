@@ -12,11 +12,12 @@ cancel surface in `status.ts`). One pwsh spawn per query; the profile loads
 
 ## Status script (`azdoStatusScript`)
 
-Queries the newest Reactive.XAF build via
-`build/builds?definitions=23&$top=1&queryOrder=queueTimeDescending`
+`azdoStatusScript(definitions = "23", minId = 0)` queries the newest build of
+a definition: `build/builds?definitions=<id>&$top=5&queryOrder=queueTimeDescending`
 (definition 23 = AZDO_BUILD_URL). The queue-time ordering is REQUIRED:
 `Get-AzBuilds` omits it and the API default buries in-progress builds, so a
-bare `-Top 1` returned the newest COMPLETED build (2026-08-25 fix). On
+bare `-Top 1` returned the newest COMPLETED build (2026-08-25 fix). The
+`minId` filter (`id > minId`) drops builds the chain already passed. On
 failure the failed record's log prints between LOGSTART/LOGEND markers
 (last 500 lines). Output: `STATUS=<id>;<status>;<result>;<reason>` or
 `STATUS=0;none;none;`.

@@ -1,6 +1,6 @@
 ---
 name: reactive-xaf-build/menu
-description: The /devexpress command surface — menu picks (Build → RX-XAF → Lab | Release, Publish → RX-XAF → Lab | Release, Last build status, Cancel AzDO build, Close build pane) and direct args (status | cancel | build lab|release | publish lab|release).
+description: The /devexpress command surface — menu picks (Build → RX-XAF → Lab | Release, Publish → RX-XAF → Lab | Release, Last build status, Cancel AzDO build, Close build pane) and direct args (status | cancel | watch | build lab|release | publish lab|release).
 ---
 
 # menu.ts — the /devexpress command surface
@@ -15,6 +15,7 @@ Args are split on whitespace and matched in order:
 |---|---|
 | `status` | One-shot AzDO status (statusPhase). |
 | `cancel` | PATCH-cancel the newest running build (cancelPhase). |
+| `watch` | Start the chain watcher for the current build (no publish flow). |
 | `build lab` / `build release` | Full flow: `runFlow("Lab"|"Release", false)`. |
 | `publish lab` / `publish release` | Skip-build flow: `runFlow("Lab"|"Release", true)`. |
 | none / anything else | Interactive menu (menuFlow). |

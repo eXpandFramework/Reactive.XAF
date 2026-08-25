@@ -31,11 +31,12 @@ pwsh, psmux, Hyper-V VMs and git are never touched).
    commit → skip) → confirm `prx` / `prx -Release` (600 s timeout) →
    `monitorPhase`.
 5. **Monitor** (`monitorPhase`) — starts the background watcher
-   (`seams.startAzDoWatcher`, default watcher.ts) and RETURNS IMMEDIATELY:
-   the chat is never locked. The watcher toasts on every check; a terminal
-   failure steers via `pi.sendUserMessage(msg, { deliverAs: "steer" })`
-   (turn-independent) with the real reason. No auto-fix, no auto re-run —
-   the agent plans and asks.
+   (`seams.startAzDoWatcher`, default watcher.ts) with `followNugets` and
+   RETURNS IMMEDIATELY — the chat is never locked. The watcher toasts on
+   every check and walks the chain (Reactive.XAF → PublishNugets → release
+   consumers), asserting the nugets on the eXpand server at the nugets
+   step; any failure steers (`pi.sendUserMessage`, deliverAs "steer").
+   No auto-fix, no auto re-run — the agent plans and asks.
 
 ## Skip-build variant
 

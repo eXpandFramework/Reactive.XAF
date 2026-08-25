@@ -4,8 +4,8 @@
  * Menu: /devexpress → Build → RX-XAF → Lab | Release, "Last build status",
  * "Cancel AzDO build" (+ "Close build pane" while a build pane is open).
  * Menu picks delegate to a NEW psmux window (delegate.ts); direct args run
- * here: /devexpress status | cancel | build lab|release | publish lab|release
- * (the delegated window uses these).
+ * here: /devexpress status | cancel | watch | build lab|release |
+ * publish lab|release (the delegated window uses these).
  * Flow (Lab | Release):
  *   1. getLatestDx — nuget.org flat-container, max stable DevExpress.ExpressApp
  *   2. props compare — Directory.Packages.props DevExpress.* pins:
@@ -20,8 +20,9 @@
  *      fallback when the pane cannot be opened.
  *   4. publish — Hyper-V C11-C14 ensured (Start-VM + poll), git commit (message
  *      from changes, confirmed), confirm, prx / prx -Release, then the AzDO
- *      background watcher (watcher.ts — toasts on every check, steers on
- *      terminal failure; the turn returns immediately, the chat is never
+ *      chain watcher (watcher.ts — toasts on every check, follows
+ *      Reactive.XAF → PublishNugets → release consumers, asserts the nugets
+ *      on the eXpand server; the turn returns immediately, the chat is never
  *      locked).
  *   4b. skip-build variant (menu "Lab (skip build)" / "Release (skip build)",
  *      arg publish lab|release): no DX check, no brx — straight to publish.
@@ -259,18 +260,18 @@ async function commitPhase(ctx: any, seams: BuildSeams, repoRoot: string, dxChan
   return { committed: true, failed: false, notes };
 }
 
-/** Start the background AzDO watcher (prx queued the build; the newest build
- *  is ours). The turn returns immediately — the watcher toasts on every
- *  check and steers on a terminal failure; the chat is never locked.
- *  Failure policy: on an AzDO failure the agent PLANS a fix and presents it
- *  — user permission is ALWAYS required before any action. No auto-fix, no
- *  auto re-run. */
-async function monitorPhase(pi: any, ctx: any, seams: BuildSeams): Promise<{ ok: boolean; failed: boolean; notes: string[] }> {
+/** Start the background AzDO chain watcher (prx queued the build; the newest
+ *  build is ours). The turn returns immediately — the watcher toasts on
+ *  every check, walks the publish chain and asserts the nugets; the chat is
+ *  never locked. Failure policy: on an AzDO failure the agent PLANS a fix
+ *  and presents it — user permission is ALWAYS required before any action.
+ *  No auto-fix, no auto re-run. */
+async function monitorPhase(pi: any, ctx: any, seams: BuildSeams, repo: string): Promise<{ ok: boolean; failed: boolean; notes: string[] }> {
   const notes: string[] = [];
   await ctx.ui.notify("AzDO build queued — monitoring in background (toast on every check).", "info");
   const starter = seams.startAzDoWatcher ?? startAzDoWatcher;
-  starter(pi, ctx, seams);
-  notes.push("AzDO monitoring in background — status toasts on every check, failure steers when the build ends");
+  starter(pi, ctx, seams, { followNugets: true, repoRoot: repo });
+  notes.push("AzDO monitoring in background — toasts on every check; follows the nuget + release publish chain and asserts the nugets");
   return { ok: true, failed: false, notes };
 }
 
@@ -301,7 +302,7 @@ async function publishPhase(pi: any, ctx: any, seams: BuildSeams, choice: string
     return { ok: false, failed: true, notes };
   }
   notes.push(`prx done (exit ${res.code})`);
-  const monitor = await monitorPhase(pi, ctx, seams);
+  const monitor = await monitorPhase(pi, ctx, seams, repoRoot);
   notes.push(...monitor.notes);
   return { ok: monitor.ok, failed: monitor.failed, notes };
 }
@@ -374,13 +375,19 @@ async function runBuildFlow(pi: any, ctx: any, seams: BuildSeams, choice: string
 
 export function registerBuildCommand(pi: any, seams?: Partial<BuildSeams>): void {
   pi.registerCommand("devexpress", {
-    description: "DevExpress menu: Build → RX-XAF (Lab | Release, skip-build variants), Last build status, Cancel AzDO build; args: status | cancel | build lab|release | publish lab|release",
+    description: "DevExpress menu: Build → RX-XAF (Lab | Release, skip-build variants), Last build status, Cancel AzDO build; args: status | cancel | watch | build lab|release | publish lab|release",
     handler: async (args: string | string[], ctx: any) => {
       const merged = { ...defaultSeams(), ...seams };
       const cwd = ctx?.cwd ?? merged.repoRoot ?? process.cwd();
       const repo = repoRootOf(cwd);
       if (!repo) {
         return `Reactive.XAF build: not inside the Reactive.XAF repo (cwd: ${cwd}) — no commands ran.`;
+      }
+      const parts = (typeof args === "string" ? args.split(/\s+/) : args ?? []).filter(Boolean);
+      if (parts[0] === "watch") {
+        startAzDoWatcher(pi, ctx, merged, { followNugets: true, repoRoot: repo });
+        await ctx.ui.notify("AzDO watcher started — it follows the build, the nuget publish and the release consumers chain, toasting on every check.", "info");
+        return "AzDO watcher started in the background — toasts on every check, nuget assertion on the eXpand server at the nugets step, release consumers watched last.";
       }
       const runFlow = (choice: string, skipBuild = false) => runBuildFlow(pi, ctx, merged, choice, repo, skipBuild);
       return runDevexpressMenu(ctx, merged, repo, args, runFlow);

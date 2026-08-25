@@ -1,14 +1,16 @@
 /**
  * reactive-xaf-build/azdo — AzDO status + cancel scripts for the publish step.
  *
- * The one-shot status script (azdoStatusScript) queries the newest
- * Reactive.XAF build by QUEUE TIME (queryOrder=queueTimeDescending) — the
- * module's Get-AzBuilds omits the ordering, and the API default buries
- * in-progress builds, so a bare -Top 1 returned the newest COMPLETED build
- * instead of the just-queued one (2026-08-25 fix). On a failed build, the
- * failed timeline record's log is fetched and printed between
- * LOGSTART/LOGEND markers (bounded to the last 500 lines); extractFailReason
- * scores it for the ONE real error, filtering wrapper noise (ScriptHalted,
+ * The one-shot status script (azdoStatusScript) queries the newest build of a
+ * definition by QUEUE TIME (queryOrder=queueTimeDescending) — the module's
+ * Get-AzBuilds omits the ordering, and the API default buries in-progress
+ * builds, so a bare -Top 1 returned the newest COMPLETED build instead of the
+ * just-queued one (2026-08-25 fix). The optional minId filters out builds the
+ * chain has already passed (the next pipeline's build is the newest with
+ * id > the previous pipeline's build id). On a failed build, the failed
+ * timeline record's log is fetched and printed between LOGSTART/LOGEND
+ * markers (bounded to the last 500 lines); extractFailReason scores it for
+ * the ONE real error, filtering wrapper noise (ScriptHalted,
  * ##[error]Exception, "PowerShell exited with code", retry lines) and
  * attaching the nearest "Executing <task>" line as context.
  *
@@ -64,10 +66,12 @@ const LOG_BLOCK = `
     $reason = "log fetch failed: " + $_.Exception.Message
   }`;
 
-/** The one-shot status script: newest build, current state, reason on failure. */
-export function azdoStatusScript(): string {
+/** The one-shot status script: newest build of a definition, current state,
+ *  reason on failure. definitions defaults to 23 (Reactive.XAF); minId
+ *  filters out builds the chain already passed (id <= minId). */
+export function azdoStatusScript(definitions = "23", minId = 0): string {
   return `$cred = @{ Project = $env:AzProject; Organization = $env:AzOrganization }
-$b = (Invoke-AzureRestMethod 'build/builds?definitions=23&$top=1&queryOrder=queueTimeDescending' @cred)[0]
+$b = (Invoke-AzureRestMethod 'build/builds?definitions=${definitions}&$top=5&queryOrder=queueTimeDescending' @cred) | Where-Object { $_.id -gt ${minId} } | Select-Object -First 1
 if ($null -eq $b) { "STATUS=0;none;none;"; exit 0 }
 $reason = ""
 if ($b.result -eq "failed") {${LOG_BLOCK}
