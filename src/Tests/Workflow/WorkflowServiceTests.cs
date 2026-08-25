@@ -38,8 +38,8 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
             application.WhenSetupComplete(_ => application.UseProviderObjectSpace(space => {
                     var commandSuite = space.CreateObject<CommandSuite>();
                     commandSuite.Commands.Add(space.CreateObject<TestCommand>());
-                    return commandSuite.Commit()
-                        .SelectMany(_ => commandSuite.Commands)
+                    return commandSuite.Commit().Cast<CommandSuite>()
+                        .SelectMany(suite => suite.Commands)
                         .SelectMany(command => command.WhenExecuted()
                             .Do(_ => {
                                 replaySubject.OnNext(Unit.Default);
