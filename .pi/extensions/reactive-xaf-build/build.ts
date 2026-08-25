@@ -9,7 +9,7 @@
  *
  * Seams (injectable, default = real): run, fetchFeed, ghFetch (GitHub API
  * with GH_TOKEN Authorization), propsPath, repoRoot, pollMs,
- * startAzDoWatcher, delegateWindow + the pane seams from pane.ts. Tests
+ * startAzDoWatcher + the pane seams from pane.ts. Tests
  * pass fakes — the real nuget.org, pwsh, psmux, VMs, git and GitHub are
  * never touched.
  */
@@ -26,8 +26,6 @@ import { startAzDoWatcher } from "./watcher.js";
 import type { AzDoWatcherStarter } from "./watcher.js";
 import { releaseQueueScript, defaultGhFetch } from "./azdo.js";
 import { runDevexpressMenu } from "./menu.js";
-import { defaultDelegateWindow } from "./delegate.js";
-import type { WindowDelegator } from "./delegate.js";
 
 export type { RunResult } from "./pane.js";
 
@@ -49,7 +47,6 @@ export interface BuildSeams {
   capturePane?: PaneCapturer;
   closePane?: PaneCloser;
   startAzDoWatcher?: AzDoWatcherStarter;
-  delegateWindow?: WindowDelegator;
 }
 
 const DX_FEED_URL = "https://api.nuget.org/v3-flatcontainer/devexpress.expressapp/index.json";
@@ -72,7 +69,6 @@ export function defaultSeams(): BuildSeams {
     capturePane: defaultCapturePane,
     closePane: defaultClosePane,
     startAzDoWatcher,
-    delegateWindow: defaultDelegateWindow,
   };
 }
 
@@ -384,7 +380,7 @@ export function registerBuildCommand(pi: any, seams?: Partial<BuildSeams>): void
         return "AzDO watcher started in the background — toasts on every check, nuget assertion on the eXpand server at the nugets step, release consumers watched last.";
       }
       const runFlow = (choice: string, skipBuild = false) => runBuildFlow(pi, ctx, merged, choice, repo, skipBuild);
-      return runDevexpressMenu(ctx, merged, repo, args, runFlow);
+      return runDevexpressMenu(ctx, merged, args, runFlow);
     },
   });
 }

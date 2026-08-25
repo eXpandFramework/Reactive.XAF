@@ -349,24 +349,22 @@ function mkMonitor(): { pi: any; repo: string; starts: number[] } {
     const r2 = await t2.pi._cmds.get("devexpress").handler(["status"], mkCtx([], t2.repo));
     check("T16: status shows id + reason + link", r2.includes("35735") && r2.includes("Artifact TestAssemblies") && r2.includes("definitionId=23"), r2);
   }
-  // Section: T18-T19 — menu delegation (fake delegateWindow)
+  // Section: T18-T19 — menu picks run in the invoking window (no delegation)
   {
     const repo = mkRepo(DX_PINS);
-    const tasks: string[] = [];
-    const runner = mkRunner([]);
+    const runner = mkRunner([
+      { match: "$cred = @{ Project*", result: okResult("STATUS=35735;completed;succeeded;") },
+      ...GREEN_PUBLISH,
+    ]);
+    const pane = mkPaneSeams();
     const pi = mkPi();
-    const dw = async (_r: string, task: string) => {
-      tasks.push(task);
-      return "W7";
-    };
-    registerBuildCommand(pi, { run: runner.run, fetchFeed: mkFetch(["26.1.3"]), repoRoot: repo, pollMs: 1, delegateWindow: dw });
+    registerBuildCommand(pi, { run: runner.run, fetchFeed: mkFetch(["26.1.3"]), repoRoot: repo, pollMs: 1, ...pane });
     let ctx = mkCtx(["Last build status"], repo);
     let result = await pi._cmds.get("devexpress").handler([], ctx);
-    check("T18: status delegated with task", result.includes("W7") && tasks.length === 1 && tasks[0].includes("status"), result + " | " + JSON.stringify(tasks));
-    ctx = mkCtx([...MENU, "Lab"], repo);
+    check("T18: status pick runs in this window (no delegation)", result.includes("35735") && result.includes("succeeded"), result);
+    ctx = mkCtx([...MENU, "Lab", "Publish"], repo);
     result = await pi._cmds.get("devexpress").handler([], ctx);
-    check("T19: Lab delegated with task", result.includes("W7") && tasks.some((t) => t.includes("/devexpress build lab")), result + " | " + JSON.stringify(tasks));
-    check("T19: nothing built in this window", runner.calls.length === 0, JSON.stringify(runner.calls));
+    check("T19: Lab pick runs the full flow in this window (pane opened, published)", result.includes("published") && pane.opened.length === 1 && pane.sent.length === 1 && pane.sent[0].startsWith("brx;"), result + " | " + JSON.stringify(pane.opened) + " | " + JSON.stringify(pane.sent));
   }
   console.log(`\n${ok} passed, ${fail} failed`);
   process.exit(fail > 0 ? 1 : 0);

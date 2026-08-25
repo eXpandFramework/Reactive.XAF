@@ -28,7 +28,8 @@ Run: `npx tsx d:/Reactive.XAF/.pi/extensions/reactive-xaf-build/build-tests.ts`
   immediately — no blocking monitor, no failure steer from the flow (the
   watcher steers at the end; its contract lives in watcher-tests.ts).
 - T16 — `/devexpress status` parses the STATUS= line (id + reason + link).
-- T18-T19 — menu delegation.
+- T18-T19 — menu picks run in the invoking window (status in-window; the
+  Lab pick opens the build pane and publishes here).
 
 The watcher's own contract (toast per poll, terminal steer, give-up,
 replace) is pinned by `watcher-tests.ts`; the CRLF status/cancel parse

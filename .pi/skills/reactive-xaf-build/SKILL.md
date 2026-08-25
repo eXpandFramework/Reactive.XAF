@@ -29,10 +29,10 @@ consumers (**def 89**).
 - `/devexpress publish lab|release` — skip-build variant: publish only, no
   DX check, no `brx`.
 
-Menu picks delegate to a NEW psmux window (`pi '<task>'` boot message) so the
-flow survives the invoking session's close; when no window can be spawned,
-or the spawned window dies during the boot grace period, the flow falls back
-to running in the invoking session.
+Menu picks run in the INVOKING window — the build pane splits it to the
+right (pane.ts), with milestones notified there. No delegation (removed
+2026-08-25: the user wants the build visible in the window that started
+it, not in spawned windows; delegate.ts stays dormant).
 
 ## Flow (Lab | Release)
 
@@ -67,7 +67,7 @@ to running in the invoking session.
 | Module | Doc | Purpose |
 |---|---|---|
 | `index.ts` | — | Boot: registers the command (thin). |
-| `menu.ts` | `menu.md` | Command surface: menu picks, direct args, delegation. |
+| `menu.ts` | `menu.md` | Command surface: menu picks, direct args. |
 | `build.ts` | `build.md` | Flow engine: DX/build/publish phases, seams, steer. |
 | `watcher.ts` | `watcher.md` | Background AzDO chain watcher: toast per poll, choice-aware chain (Lab 23 / Release 39 → 72 → 89), nuget assertion, GitHub draft publish. |
 | `menu-tests.ts` | `menu-tests.md` | Behavior contract for the skip-build surface. |
@@ -75,7 +75,7 @@ to running in the invoking session.
 | `build-tests.ts` | `build-tests.md` | Behavior contract for the full flow. |
 | `watcher-tests.ts` | `watcher-tests.md` | Behavior contract for the watcher (watcher.md). |
 | `azdo.ts` / `status.ts` | `azdo.md` | AzDO status/cancel scripts, the Release queue script (def 39), the GitHub fetch seam, fail-reason extraction. |
-| `delegate.ts` | `delegate.md` | Window delegation (liveness-verified, fallback). |
+| `delegate.ts` | `delegate.md` | Dormant — window delegation (unwired 2026-08-25; the flow runs in the invoking window). |
 | `pane.ts` | — | Build pane primitives. |
 
 Run the contract tests with:

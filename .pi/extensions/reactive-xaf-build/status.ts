@@ -12,9 +12,6 @@
 import { azdoStatusScript, parseStatus, extractFailReason, failLogFromStdout, azdoBuildUrl, cancelAzDoScript, parseCancel, LAB_DEF } from "./azdo.js";
 import type { BuildSeams } from "./build.js";
 
-/** Task handed to the delegated status window. */
-export const STATUS_TASK = "Run the /devexpress status command and report its result.";
-
 /** Query the last build and notify the outcome; returns the message. */
 export async function statusPhase(ctx: any, seams: BuildSeams, definition = LAB_DEF): Promise<string> {
   const url = azdoBuildUrl(definition);

@@ -148,20 +148,15 @@ function okResult(stdout = ""): any {
     check("S3: commit labeled Publish, not Build fixes", runner.calls.some((c) => c.startsWith('git commit -m "Publish (1 files)"')), runner.calls.join(" | "));
     check("S3: published", result.includes("published"), result);
   }
-  // Section: S4 — Publish menu pick delegates with the publish task
+  // Section: S4 — Publish menu pick runs in the invoking window (no delegation)
   {
     const repo = mkRepo();
-    const tasks: string[] = [];
-    const runner = mkRunner([]);
+    const runner = mkRunner(GREEN_PUBLISH);
     const pi = mkPi();
-    const dw = async (_r: string, task: string) => {
-      tasks.push(task);
-      return "W8";
-    };
-    registerBuildCommand(pi, { run: runner.run, fetchFeed: async () => "[]", repoRoot: repo, pollMs: 1, delegateWindow: dw });
-    const ctx = mkCtx([...MENU], repo);
+    registerBuildCommand(pi, { run: runner.run, fetchFeed: async () => "[]", repoRoot: repo, pollMs: 1, ...mkPaneSeams() });
+    const ctx = mkCtx([...MENU, "Publish"], repo);
     const result = await pi._cmds.get("devexpress").handler([], ctx);
-    check("S4: delegated with /devexpress publish lab task", result.includes("W8") && tasks.some((t) => t.includes("/devexpress publish lab")), result + " | " + JSON.stringify(tasks));
+    check("S4: publish pick ran in this window, published", runner.calls.includes("prx") && result.includes("published"), result);
   }
   console.log(`\n${ok} passed, ${fail} failed`);
   process.exit(fail > 0 ? 1 : 0);
