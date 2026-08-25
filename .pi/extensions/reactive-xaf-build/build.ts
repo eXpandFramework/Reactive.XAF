@@ -77,7 +77,7 @@ export function defaultSeams(): BuildSeams {
   return {
     run: runProcess,
     fetchFeed: async (url: string) => {
-      const res = await globalThis.fetch(url);
+      const res = await globalThis.fetch(url, { headers: { "User-Agent": "rxaf-watcher" } });
       if (!res.ok) throw new Error(`feed query failed: HTTP ${res.status}`);
       return res.text();
     },

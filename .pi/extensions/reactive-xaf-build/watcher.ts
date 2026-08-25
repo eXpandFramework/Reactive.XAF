@@ -13,9 +13,11 @@
  * the watcher ASSERTS the nugets landed on the eXpand nuget server
  * (xpandnugetserver.azurewebsites.net — the lab feed; version read from
  * AssemblyInfoVersion.cs, checked against the v2 FindPackagesById OData
- * feed). A failed pipeline — or a failed assertion — steers via
- * pi.sendUserMessage (deliverAs "steer"), the same turn-independent failure
- * path steerFailure uses.
+ * feed). At the final step it ASSERTS the GitHub PRE-RELEASE for the lab
+ * build (tag = the same version, prerelease=true), retrying a few times to
+ * absorb the release-creation race. A failed pipeline — or a failed
+ * assertion — steers via pi.sendUserMessage (deliverAs "steer"), the same
+ * turn-independent failure path steerFailure uses.
  *
  * Registry lives on globalThis (Symbol key) — module-level state would
  * duplicate on Windows path-casing double loads. One watcher at a time:
@@ -24,6 +26,7 @@
 
 import * as fs from "node:fs";
 import * as path from "node:path";
+import { setTimeout as sleep } from "node:timers/promises";
 import { azdoStatusScript, parseStatus, AZDO_BUILD_URL } from "./azdo.js";
 import type { BuildSeams } from "./build.js";
 
@@ -32,12 +35,15 @@ export interface AzDoWatcherOptions {
   intervalMs?: number;
   /** Give-up deadline per chain step (default 2 h). */
   maxMs?: number;
-  /** Walk the publish chain (def 23 → 72 → 89) and assert the nugets at the
-   *  nugets step. Off = watch only the Reactive.XAF build. */
+  /** Walk the publish chain (def 23 → 72 → 89) and assert the nugets +
+   *  GitHub pre-release. Off = watch only the Reactive.XAF build. */
   followNugets?: boolean;
-  /** Repo root — the nuget assertion reads the version from
+  /** Repo root — the assertions read the version from
    *  src/Common/AssemblyInfoVersion.cs. */
   repoRoot?: string;
+  /** GitHub pre-release assertion attempts (default 6) and delay (default 30 s). */
+  ghRetries?: number;
+  ghRetryMs?: number;
 }
 
 export interface AzDoWatcherHandle {
@@ -52,6 +58,8 @@ const WATCHER_KEY = Symbol.for("reactive-xaf-build.azdo-watcher");
 /** The eXpand nuget server (lab feed) — v2 OData FindPackagesById. */
 const NUGET_ASSERT_URL = "https://xpandnugetserver.azurewebsites.net/nuget/FindPackagesById()?id=%27xpand.extensions%27";
 const NUGET_VERSION_RE = /Version='([^']+)'/g;
+/** The GitHub releases API for the lab pre-releases. */
+const GITHUB_RELEASES_URL = "https://api.github.com/repos/eXpandFramework/Reactive.XAF/releases?per_page=20";
 const VERSION_RE = /Version\s*=\s*"([^"]+)"/;
 
 interface ChainStep {
@@ -138,6 +146,32 @@ async function assertNugets(ctx: any, seams: BuildSeams, repoRoot: string | unde
   }
 }
 
+/** Assert the GitHub pre-release for the lab build; retries absorb the
+ *  release-creation race (the release lags the build completion). */
+async function assertGitHubRelease(ctx: any, seams: BuildSeams, repoRoot: string | undefined, opts: AzDoWatcherOptions): Promise<{ ok: boolean; detail: string; version: string | null }> {
+  const version = publishedVersion(repoRoot);
+  if (!version) {
+    return { ok: false, detail: "no version read from AssemblyInfoVersion.cs", version: null };
+  }
+  const attempts = opts.ghRetries ?? 6;
+  const delayMs = opts.ghRetryMs ?? 30_000;
+  for (let i = 0; i < attempts; i++) {
+    try {
+      const text = await seams.fetchFeed(GITHUB_RELEASES_URL);
+      const releases = JSON.parse(text) as Array<{ tag_name?: string; prerelease?: boolean }>;
+      if (releases.some((r) => r.prerelease === true && r.tag_name === version)) {
+        return { ok: true, detail: `GitHub pre-release ${version} found`, version };
+      }
+    } catch (err) {
+      if (i === attempts - 1) {
+        return { ok: false, detail: `GitHub query failed: ${err instanceof Error ? err.message : String(err)}`, version };
+      }
+    }
+    if (i < attempts - 1) await sleep(delayMs);
+  }
+  return { ok: false, detail: `GitHub pre-release ${version} NOT found after ${attempts} tries`, version };
+}
+
 /** Advance to the next chain step after a succeeded build. */
 async function advanceStep(state: WatcherState, ctx: any, s: { id: number; result: string }, next: ChainStep): Promise<void> {
   const previous = CHAIN[state.step];
@@ -165,7 +199,14 @@ async function handleTerminal(state: WatcherState, pi: any, ctx: any, seams: Bui
     return;
   }
   if (s.result === "succeeded") {
-    await ctx.ui.notify(`${step.label} ${s.id} succeeded — chain complete.`, "info");
+    const gh = await assertGitHubRelease(ctx, seams, opts.repoRoot, opts);
+    if (gh.ok) {
+      await ctx.ui.notify(`${step.label} ${s.id} succeeded — ${gh.detail} — chain complete.`, "info");
+    } else {
+      const msg = `${step.label} ${s.id} succeeded but the GitHub pre-release was NOT confirmed: ${gh.detail}`;
+      await ctx.ui.notify(msg, "warning");
+      pi.sendUserMessage(msg, { deliverAs: "steer" });
+    }
     state.stop();
     return;
   }

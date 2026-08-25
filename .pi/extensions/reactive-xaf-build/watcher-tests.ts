@@ -4,10 +4,11 @@
  * a mock pi: publish starts the watcher and returns immediately (chat not
  * locked); the watcher toasts on EVERY poll; it walks the chain
  * (Reactive.XAF → PublishNugets → release consumers), asserts the nugets on
- * the eXpand server at the nugets step, and steers on any failure. Real
- * watcher timers with SHORT injected intervals; fake run seam (CRLF STATUS=
- * fixtures per chain step, scripted flow commands); fake feed (v2 OData
- * fixture for the assertion). No real pwsh/AzDO/nuget feeds.
+ * the eXpand server at the nugets step, asserts the GitHub pre-release at
+ * the final step (with retries for the creation race), and steers on any
+ * failure. Real watcher timers with SHORT injected intervals; fake run seam
+ * (CRLF STATUS= fixtures per chain step, scripted flow commands); fake feed
+ * (v2 OData fixture + GitHub releases fixture). No real pwsh/AzDO/nuget/GitHub.
  * Run: npx tsx C:/Work/Reactive.XAF/.pi/extensions/reactive-xaf-build/watcher-tests.ts
  */
 /* oxlint-disable no-console -- test harness prints PASS/FAIL to stdout */
@@ -104,20 +105,28 @@ function mkSeams(statusQueue: string[]): { run: (cmd: string) => Promise<any>; c
 function fastWatcher(p: any, c: any, s: any, opts?: any): ReturnType<typeof startAzDoWatcher> {
   return startAzDoWatcher(p, c, s, { ...opts, intervalMs: 20, maxMs: 5000 });
 }
-/** Feed seam: the assertion feed returns the given versions; DX feed is static. */
-function mkFetch(nugetVersions: string[]): (url: string) => Promise<string> {
-  return async (url: string) =>
-    url.includes("xpandnugetserver") ? JSON.stringify({ feed: oDataFeed(nugetVersions) }) : JSON.stringify({ versions: ["26.1.3"] });
+/** Feed seam: assertion feeds per URL; gh receives the attempt number. */
+function mkFetch(nugetVersions: string[], gh: (attempt: number) => string): (url: string) => Promise<string> {
+  let ghCalls = 0;
+  return async (url: string) => {
+    if (url.includes("xpandnugetserver")) return JSON.stringify({ feed: oDataFeed(nugetVersions) });
+    if (url.includes("api.github.com")) {
+      ghCalls++;
+      return gh(ghCalls);
+    }
+    return JSON.stringify({ versions: ["26.1.3"] });
+  };
 }
+const GH_PRESENT = () => JSON.stringify([{ tag_name: "4.261.2.1", prerelease: true }]);
 
 (async () => {
-  // Section: W1 — full chain green: toast per poll, nugets asserted, chain complete
+  // Section: W1 — full chain green: toast per poll, nugets + GitHub asserted, chain complete
   {
     const repo = mkRepo();
     const pi = mkPi();
     const seams = mkSeams([running(35760), running(35760), done(35760, "succeeded"), done(35780, "succeeded"), done(35790, "succeeded")]);
     const ctx = mkCtx(repo);
-    registerBuildCommand(pi, { run: seams.run, fetchFeed: mkFetch(["4.261.2.1"]), repoRoot: repo, startAzDoWatcher: fastWatcher });
+    registerBuildCommand(pi, { run: seams.run, fetchFeed: mkFetch(["4.261.2.1"], GH_PRESENT), repoRoot: repo, startAzDoWatcher: fastWatcher });
     const result = await pi._cmds.get("devexpress").handler(["publish", "lab"], ctx);
     check("W1: publish returns immediately, monitoring in background", result.includes("monitoring in background") && result.includes("published"), result);
     check("W1: watcher active right after publish", isAzDoWatcherActive());
@@ -126,7 +135,7 @@ function mkFetch(nugetVersions: string[]): (url: string) => Promise<string> {
     check("W1: toast on every poll (both running checks toasted)", runningToasts.length >= 2, JSON.stringify(ctx._notifies));
     check("W1: nugets asserted on the eXpand server", ctx._notifies.some((n) => n.msg.includes("Nugets published") && n.msg.includes("eXpand nuget server")), JSON.stringify(ctx._notifies));
     check("W1: chain advanced to the release consumers pipeline", ctx._notifies.some((n) => n.msg.includes("release consumers pipeline")), JSON.stringify(ctx._notifies));
-    check("W1: chain complete toast + watcher stopped", ctx._notifies.some((n) => n.msg.includes("chain complete")) && !isAzDoWatcherActive(), JSON.stringify(ctx._notifies));
+    check("W1: GitHub pre-release asserted + chain complete + watcher stopped", ctx._notifies.some((n) => n.msg.includes("GitHub pre-release 4.261.2.1 found") && n.msg.includes("chain complete")) && !isAzDoWatcherActive(), JSON.stringify(ctx._notifies));
     check("W1: no steer on success", pi._userMessages.length === 0, JSON.stringify(pi._userMessages));
   }
   // Section: W2 — a failed Reactive.XAF build toasts a warning and steers
@@ -135,7 +144,7 @@ function mkFetch(nugetVersions: string[]): (url: string) => Promise<string> {
     const pi = mkPi();
     const seams = mkSeams([done(35761, "failed")]);
     const ctx = mkCtx(repo);
-    registerBuildCommand(pi, { run: seams.run, fetchFeed: mkFetch(["4.261.2.1"]), repoRoot: repo, startAzDoWatcher: fastWatcher });
+    registerBuildCommand(pi, { run: seams.run, fetchFeed: mkFetch(["4.261.2.1"], GH_PRESENT), repoRoot: repo, startAzDoWatcher: fastWatcher });
     await pi._cmds.get("devexpress").handler(["publish", "lab"], ctx);
     await sleep(200);
     check("W2: failure toast is a warning", ctx._notifies.some((n) => n.type === "warning" && n.msg.includes("FAILED")), JSON.stringify(ctx._notifies));
@@ -150,7 +159,7 @@ function mkFetch(nugetVersions: string[]): (url: string) => Promise<string> {
     const ctx = mkCtx(repo);
     registerBuildCommand(pi, {
       run: seams.run,
-      fetchFeed: mkFetch(["4.261.2.1"]),
+      fetchFeed: mkFetch(["4.261.2.1"], GH_PRESENT),
       repoRoot: repo,
       startAzDoWatcher: (p: any, c: any, s: any, opts?: any) => startAzDoWatcher(p, c, s, { ...opts, intervalMs: 10, maxMs: 60 }),
     });
@@ -163,12 +172,12 @@ function mkFetch(nugetVersions: string[]): (url: string) => Promise<string> {
     const repo = mkRepo();
     const pi1 = mkPi();
     const seams1 = mkSeams([]);
-    registerBuildCommand(pi1, { run: seams1.run, fetchFeed: mkFetch(["4.261.2.1"]), repoRoot: repo, startAzDoWatcher: fastWatcher });
+    registerBuildCommand(pi1, { run: seams1.run, fetchFeed: mkFetch(["4.261.2.1"], GH_PRESENT), repoRoot: repo, startAzDoWatcher: fastWatcher });
     await pi1._cmds.get("devexpress").handler(["publish", "lab"], mkCtx(repo));
     check("W4: first watcher active", isAzDoWatcherActive());
     const pi2 = mkPi();
     const seams2 = mkSeams([]);
-    registerBuildCommand(pi2, { run: seams2.run, fetchFeed: mkFetch(["4.261.2.1"]), repoRoot: repo, startAzDoWatcher: fastWatcher });
+    registerBuildCommand(pi2, { run: seams2.run, fetchFeed: mkFetch(["4.261.2.1"], GH_PRESENT), repoRoot: repo, startAzDoWatcher: fastWatcher });
     await pi2._cmds.get("devexpress").handler(["publish", "lab"], mkCtx(repo));
     check("W4: second publish keeps exactly one watcher active", isAzDoWatcherActive());
     stopAzDoWatcher();
@@ -181,13 +190,13 @@ function mkFetch(nugetVersions: string[]): (url: string) => Promise<string> {
     const cmd = pi._cmds.get("devexpress");
     check("W5: devexpress command registered via index.ts", typeof cmd?.handler === "function");
   }
-  // Section: W6 — assertion failure steers but the chain continues
+  // Section: W6 — missing nuget version steers but the chain continues
   {
     const repo = mkRepo();
     const pi = mkPi();
     const seams = mkSeams([done(35760, "succeeded"), done(35780, "succeeded"), done(35790, "succeeded")]);
     const ctx = mkCtx(repo);
-    registerBuildCommand(pi, { run: seams.run, fetchFeed: mkFetch(["4.242.3"]), repoRoot: repo, startAzDoWatcher: fastWatcher });
+    registerBuildCommand(pi, { run: seams.run, fetchFeed: mkFetch(["4.242.3"], GH_PRESENT), repoRoot: repo, startAzDoWatcher: fastWatcher });
     await pi._cmds.get("devexpress").handler(["publish", "lab"], ctx);
     await sleep(400);
     check("W6: missing version → warning + steer", ctx._notifies.some((n) => n.type === "warning" && n.msg.includes("Nugets NOT confirmed")) && pi._userMessages.length === 1 && pi._userMessages[0].content.includes("NOT found"), JSON.stringify(ctx._notifies) + " | " + JSON.stringify(pi._userMessages));
@@ -199,10 +208,45 @@ function mkFetch(nugetVersions: string[]): (url: string) => Promise<string> {
     const pi = mkPi();
     const seams = mkSeams([done(35760, "succeeded"), done(35780, "succeeded"), done(35790, "failed")]);
     const ctx = mkCtx(repo);
-    registerBuildCommand(pi, { run: seams.run, fetchFeed: mkFetch(["4.261.2.1"]), repoRoot: repo, startAzDoWatcher: fastWatcher });
+    registerBuildCommand(pi, { run: seams.run, fetchFeed: mkFetch(["4.261.2.1"], GH_PRESENT), repoRoot: repo, startAzDoWatcher: fastWatcher });
     await pi._cmds.get("devexpress").handler(["publish", "lab"], ctx);
     await sleep(400);
     check("W7: release failure steers + stops", pi._userMessages.length === 1 && pi._userMessages[0].content.includes("FAILED") && !isAzDoWatcherActive(), JSON.stringify(pi._userMessages));
+  }
+  // Section: W8 — missing GitHub pre-release warns + steers after retries
+  {
+    const repo = mkRepo();
+    const pi = mkPi();
+    const seams = mkSeams([done(35760, "succeeded"), done(35780, "succeeded"), done(35790, "succeeded")]);
+    const ctx = mkCtx(repo);
+    const ghMissing = () => JSON.stringify([{ tag_name: "4.242.3", prerelease: true }]);
+    registerBuildCommand(pi, {
+      run: seams.run,
+      fetchFeed: mkFetch(["4.261.2.1"], ghMissing),
+      repoRoot: repo,
+      startAzDoWatcher: (p: any, c: any, s: any, opts?: any) => startAzDoWatcher(p, c, s, { ...opts, intervalMs: 20, maxMs: 5000, ghRetries: 2, ghRetryMs: 10 }),
+    });
+    await pi._cmds.get("devexpress").handler(["publish", "lab"], ctx);
+    await sleep(500);
+    check("W8: missing GitHub pre-release → warning + steer", ctx._notifies.some((n) => n.type === "warning" && n.msg.includes("GitHub pre-release was NOT confirmed")) && pi._userMessages.length === 1 && pi._userMessages[0].content.includes("NOT found after 2 tries"), JSON.stringify(ctx._notifies) + " | " + JSON.stringify(pi._userMessages));
+    check("W8: watcher stopped", !isAzDoWatcherActive());
+  }
+  // Section: W9 — the release appears on a retry (creation race absorbed)
+  {
+    const repo = mkRepo();
+    const pi = mkPi();
+    const seams = mkSeams([done(35760, "succeeded"), done(35780, "succeeded"), done(35790, "succeeded")]);
+    const ctx = mkCtx(repo);
+    const ghLate = (attempt: number) => (attempt === 1 ? "[]" : JSON.stringify([{ tag_name: "4.261.2.1", prerelease: true }]));
+    registerBuildCommand(pi, {
+      run: seams.run,
+      fetchFeed: mkFetch(["4.261.2.1"], ghLate),
+      repoRoot: repo,
+      startAzDoWatcher: (p: any, c: any, s: any, opts?: any) => startAzDoWatcher(p, c, s, { ...opts, intervalMs: 20, maxMs: 5000, ghRetries: 3, ghRetryMs: 10 }),
+    });
+    await pi._cmds.get("devexpress").handler(["publish", "lab"], ctx);
+    await sleep(500);
+    check("W9: release found on retry → success toast, no steer", ctx._notifies.some((n) => n.msg.includes("GitHub pre-release 4.261.2.1 found")) && pi._userMessages.length === 0, JSON.stringify(ctx._notifies) + " | " + JSON.stringify(pi._userMessages));
   }
   console.log(`\n${ok} passed, ${fail} failed`);
   process.exit(fail > 0 ? 1 : 0);

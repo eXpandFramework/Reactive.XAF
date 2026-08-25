@@ -8,7 +8,8 @@ description: The /devexpress flow engine — DX check, props update, brx build i
 Companion of `.pi/extensions/reactive-xaf-build/build.ts`. Registers the
 `devexpress` command via `registerBuildCommand(pi, seams?)`; all side effects
 go through injectable `BuildSeams` (tests pass fakes — the real nuget.org,
-pwsh, psmux, Hyper-V VMs and git are never touched).
+pwsh, psmux, Hyper-V VMs and git are never touched). The default
+`fetchFeed` sends a `User-Agent` header (GitHub's API rejects bare fetches).
 
 ## Phases (`runBuildFlow(pi, ctx, seams, choice, repo, skipBuild = false)`)
 

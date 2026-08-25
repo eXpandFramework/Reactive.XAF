@@ -18,8 +18,8 @@ publish workflow for the AzDO `Reactive.XAF` pipeline (definition 23).
 - `/devexpress cancel` — PATCH-cancel the newest running Reactive.XAF build.
 - `/devexpress watch` — start the chain watcher for the current build (no
   publish flow): toasts per check, follows Reactive.XAF → PublishNugets →
-  release consumers, asserts the nugets on the eXpand server, steers on
-  failure.
+  release consumers, asserts the nugets on the eXpand server and the GitHub
+  pre-release, steers on failure.
 - `/devexpress build lab|release` — full flow: DX check → props update
   (ask-first) → `brx` local build in a pane → publish.
 - `/devexpress publish lab|release` — skip-build variant: publish only, no
@@ -44,7 +44,8 @@ to running in the invoking session.
     consumers) and TOASTS ON EVERY CHECK; a terminal failure steers via
     `sendUserMessage` (turn-independent) with the real `##[error]` reason
     (wrapper noise filtered); the nugets step asserts the packages on the
-    eXpand nuget server. The chat is never locked.
+    eXpand nuget server and the final step asserts the GitHub pre-release
+    (with retries for the creation race). The chat is never locked.
 5. **Skip-build variant** — steps 1–3 omitted; commit message label becomes
    "Publish (N files)" instead of "Build fixes (N files)".
 
