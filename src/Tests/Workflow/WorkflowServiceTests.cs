@@ -34,7 +34,7 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
         [Apartment(ApartmentState.STA)]
         public async Task Test_Root_Command_Execution() {
             Xpand.Extensions.Tracing.FastLogger.Enabled = true;
-            Xpand.Extensions.Tracing.FastLogger.Write = message => System.IO.File.AppendAllText(System.IO.Path.Combine(System.IO.Path.GetTempPath(), "wf-fastlog.txt"), message + System.Environment.NewLine);
+            Xpand.Extensions.Tracing.FastLogger.Write = message => System.IO.File.AppendAllText(@"D:\Reactive.XAF\bin\wf-fastlog.txt", message + System.Environment.NewLine);
             await using var application = NewApplication();
             var replaySubject = new ReplaySubject<Unit>();
             application.WhenSetupComplete(_ => application.UseProviderObjectSpace(space => {
