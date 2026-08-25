@@ -1,6 +1,6 @@
 ---
 name: reactive-xaf-build/azdo
-description: The AzDO status/cancel scripts behind /devexpress — the STATUS=/CANCEL= line protocol, the CRLF parse contract, the PATCH cancel, and fail-reason extraction.
+description: The AzDO status/cancel scripts behind /devexpress — the STATUS=/CANCEL= line protocol, the CRLF parse contract, the PATCH cancel, the choice-aware definitions (Lab 23 / Release 39), the Release queue script, the GitHub fetch seam, and fail-reason extraction.
 ---
 
 # azdo.ts / status.ts — AzDO status + cancel
@@ -9,6 +9,13 @@ Companion of `.pi/extensions/reactive-xaf-build/azdo.ts` (one-shot status +
 cancel surface in `status.ts`). One pwsh spawn per query; the profile loads
 `Invoke-AzureRestMethod` (XpandPwsh) and sets `$env:AzProject` /
 `$env:AzOrganization`.
+
+## Definitions (choice-aware)
+
+`LAB_DEF = "23"`, `RELEASE_DEF = "39"`, `definitionOf(choice)` picks per
+build choice (Lab 23, Release 39); `azdoBuildUrl(definition)` builds the
+AzDO link (`AZDO_BUILD_URL` = the Lab URL). The status/cancel scripts, the
+Release queue script and the watcher chain thread the definition through.
 
 ## Status script (`azdoStatusScript`)
 
@@ -24,12 +31,34 @@ failure the failed record's log prints between LOGSTART/LOGEND markers
 
 ## Cancel script (`cancelAzDoScript`)
 
-Same fetch; when the build is in inProgress/notStarted/postponed/cancelling
+Same fetch; `cancelAzDoScript` now takes the definition
+(`cancelAzDoScript(definitions = LAB_DEF)` — default Lab def 23). When the
+build is in inProgress/notStarted/postponed/cancelling
 it PATCHes `{"status":"cancelling"}` (the documented cancel; DELETE is
 rejected on running builds — `CannotDeleteRunningBuildException` — which
 silently broke prx's cancel and left zombie builds holding the pool, fixed
 2026-08-25 in XpandPwsh). Output: `CANCEL=<id>;ok;<status>` /
 `CANCEL=<id>;notrunning;<status>` / `CANCEL=0;none;none`.
+
+## Release queue script (`releaseQueueScript`)
+
+The Release publish does NOT use `prx -Release` — prx queues the pipeline BY
+NAME ("Reactive.XAF" = def 23) even with -Release, which would queue the
+LAB pipeline on master. `releaseQueueScript()` mirrors prx's logic targeting
+**def 39 by ID**: stage (`Add-DevExpressXAFGitChanges` +
+`Submit-GitStage`), force-push `lab:master` (`Push-GitSSH`), PATCH-cancel
+in-progress def-39 builds, then queue a def-39 build on master with
+`CustomVersion` = the latest Xpand minor (REST `builds` POST, the same
+parameter prx passes). Prints `QUEUED=<id>` per build; the flow keys off
+the exit code.
+
+## GitHub fetch (`defaultGhFetch`)
+
+`defaultGhFetch(url, {method?, body?})` — the GitHub API fetch with
+`Authorization: Bearer` from **GH_TOKEN** / **GITHUB_TOKEN** when set
+(GitHub drafts are only returned to authenticated callers) + the required
+User-Agent. The token is NEVER logged. The watcher's draft publish uses
+`seams.ghFetch` (default = this).
 
 ## Parsing (the CRLF contract)
 

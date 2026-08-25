@@ -1,6 +1,6 @@
 ---
 name: reactive-xaf-build/build
-description: The /devexpress flow engine — DX check, props update, brx build in a pane, publish (VM check → commit → prx → AzDO background watcher), failure steer, and the skip-build publish-only variant. Read when changing build/publish behavior, seams, or the failure path.
+description: The /devexpress flow engine — DX check, props update, brx build in a pane, publish (VM check → commit → queue Lab prx / Release def-39 script → AzDO background watcher), failure steer, and the skip-build publish-only variant. Read when changing build/publish behavior, seams, or the failure path.
 ---
 
 # build.ts — the /devexpress flow engine
@@ -29,15 +29,28 @@ pwsh, psmux, Hyper-V VMs and git are never touched). The default
    Start-VM + poll, Starting → wait) → `commitPhase` (git status → confirm →
    add -A → commit; `Update DX to X` when props changed, else
    `Build fixes (N files)` / skip-build `Publish (N files)`; nothing to
-   commit → skip) → confirm `prx` / `prx -Release` (600 s timeout) →
-   `monitorPhase`.
+   commit → skip) → confirm the queue command (600 s timeout): **Lab =
+   `prx`** (stage + force-push lab → remote + queue def 23), **Release =
+   `releaseQueueScript()`** (azdo.ts — stage + force-push lab:master +
+   queue **def 39**; `prx -Release` queues the name-resolved LAB pipeline
+   and is never used) → `monitorPhase`.
 5. **Monitor** (`monitorPhase`) — starts the background watcher
-   (`seams.startAzDoWatcher`, default watcher.ts) with `followNugets` and
+   (`seams.startAzDoWatcher`, default watcher.ts) with `followNugets`,
+   `choice` (Lab | Release) and
    RETURNS IMMEDIATELY — the chat is never locked. The watcher toasts on
-   every check and walks the chain (Reactive.XAF → PublishNugets → release
-   consumers), asserting the nugets on the eXpand server at the nugets
-   step; any failure steers (`pi.sendUserMessage`, deliverAs "steer").
+   every check and walks the choice-aware chain (Lab 23 → 72 → 89 /
+   Release 39 → 72 → 89), asserting the nugets on the eXpand server at the
+   nugets step and publishing the GitHub draft at the final step; any
+   failure steers (`pi.sendUserMessage`, deliverAs "steer").
    No auto-fix, no auto re-run — the agent plans and asks.
+
+## Seams
+
+`BuildSeams` gains `ghFetch` (GitHub API fetch — the default
+`defaultGhFetch` from azdo.ts sends Authorization from GH_TOKEN /
+GITHUB_TOKEN, never logs the token); the watcher's GitHub draft publish
+needs it. `/devexpress watch` accepts an optional `release` arg for the
+def-39 chain (`watch release`).
 
 ## Skip-build variant
 

@@ -1,37 +1,17 @@
 /**
- * reactive-xaf-build/build — the /devexpress menu workflow engine.
+ * reactive-xaf-build/build — the /devexpress workflow engine.
  *
- * Menu: /devexpress → Build → RX-XAF → Lab | Release, "Last build status",
- * "Cancel AzDO build" (+ "Close build pane" while a build pane is open).
- * Menu picks delegate to a NEW psmux window (delegate.ts); direct args run
- * here: /devexpress status | cancel | watch | build lab|release |
- * publish lab|release (the delegated window uses these).
- * Flow (Lab | Release):
- *   1. getLatestDx — nuget.org flat-container, max stable DevExpress.ExpressApp
- *   2. props compare — Directory.Packages.props DevExpress.* pins:
- *        no pins / single shared version → ask update-all / skip / abort (rewrite on update)
- *        mixed versions → file left untouched, surfaced
- *   3. brx / brx -Release — runs in a NEW psmux pane split to the RIGHT; the
- *      output streams there live (pane.ts). Milestones are notified in this
- *      window. Green → conversational ask only (no modal, no auto-close): the
- *      pane is left open and closed via /devexpress → "Close build pane".
- *      Red → the failure delivery (sendUserMessage — a triggered turn) with
- *      the pane's captured tail; the pane is KEPT for reuse. In-process
- *      fallback when the pane cannot be opened.
- *   4. publish — Hyper-V C11-C14 ensured (Start-VM + poll), git commit (message
- *      from changes, confirmed), confirm, prx / prx -Release, then the AzDO
- *      chain watcher (watcher.ts — toasts on every check, follows
- *      Reactive.XAF → PublishNugets → release consumers, asserts the nugets
- *      on the eXpand server; the turn returns immediately, the chat is never
- *      locked).
- *   4b. skip-build variant (menu "Lab (skip build)" / "Release (skip build)",
- *      arg publish lab|release): no DX check, no brx — straight to publish.
+ * Flow (Lab | Release): DX check → props compare → brx / brx -Release in a
+ * pane → publish (VMs C11-C14 → commit → queue: Lab prx / Release the
+ * releaseQueueScript targeting def 39) → background chain watcher
+ * (watcher.ts; the chat is never locked). Skip-build variant: no DX check,
+ * no brx. Details live in skills/reactive-xaf-build/build.md.
  *
- * Seams (injectable, default = real): run, fetchFeed, propsPath, repoRoot,
- * pollMs, startAzDoWatcher (watcher.ts), delegateWindow (delegate.ts) + the
- * pane seams from pane.ts. Tests pass fakes via registerBuildCommand — the
- * real nuget.org, pwsh, psmux, VMs and git are never touched by the test
- * suite.
+ * Seams (injectable, default = real): run, fetchFeed, ghFetch (GitHub API
+ * with GH_TOKEN Authorization), propsPath, repoRoot, pollMs,
+ * startAzDoWatcher, delegateWindow + the pane seams from pane.ts. Tests
+ * pass fakes — the real nuget.org, pwsh, psmux, VMs, git and GitHub are
+ * never touched.
  */
 
 import * as fs from "node:fs";
@@ -44,6 +24,7 @@ import {
 import type { RunResult, PaneOpener, PaneRunner, PaneWaiter, PaneCapturer, PaneCloser } from "./pane.js";
 import { startAzDoWatcher } from "./watcher.js";
 import type { AzDoWatcherStarter } from "./watcher.js";
+import { releaseQueueScript, defaultGhFetch } from "./azdo.js";
 import { runDevexpressMenu } from "./menu.js";
 import { defaultDelegateWindow } from "./delegate.js";
 import type { WindowDelegator } from "./delegate.js";
@@ -56,6 +37,9 @@ export type FeedFetcher = (url: string) => Promise<string>;
 export interface BuildSeams {
   run: CommandRunner;
   fetchFeed: FeedFetcher;
+  /** GitHub API fetch; the default sends Authorization from GH_TOKEN /
+   *  GITHUB_TOKEN (drafts are only visible to authenticated callers). */
+  ghFetch?: (url: string, opts?: { method?: string; body?: string }) => Promise<{ ok: boolean; status: number; text: string }>;
   propsPath?: string;
   repoRoot?: string;
   pollMs?: number;
@@ -81,6 +65,7 @@ export function defaultSeams(): BuildSeams {
       if (!res.ok) throw new Error(`feed query failed: HTTP ${res.status}`);
       return res.text();
     },
+    ghFetch: defaultGhFetch,
     openBuildPane: defaultOpenBuildPane,
     runInPane: defaultRunInPane,
     waitForPaneExit: defaultWaitForPaneExit,
@@ -260,24 +245,45 @@ async function commitPhase(ctx: any, seams: BuildSeams, repoRoot: string, dxChan
   return { committed: true, failed: false, notes };
 }
 
-/** Start the background AzDO chain watcher (prx queued the build; the newest
+/** Start the background AzDO chain watcher (the queue ran; the newest
  *  build is ours). The turn returns immediately — the watcher toasts on
  *  every check, walks the publish chain and asserts the nugets; the chat is
  *  never locked. Failure policy: on an AzDO failure the agent PLANS a fix
  *  and presents it — user permission is ALWAYS required before any action.
  *  No auto-fix, no auto re-run. */
-async function monitorPhase(pi: any, ctx: any, seams: BuildSeams, repo: string): Promise<{ ok: boolean; failed: boolean; notes: string[] }> {
+async function monitorPhase(pi: any, ctx: any, seams: BuildSeams, repo: string, choice: string): Promise<{ ok: boolean; failed: boolean; notes: string[] }> {
   const notes: string[] = [];
   await ctx.ui.notify("AzDO build queued — monitoring in background (toast on every check).", "info");
   const starter = seams.startAzDoWatcher ?? startAzDoWatcher;
-  starter(pi, ctx, seams, { followNugets: true, repoRoot: repo });
+  starter(pi, ctx, seams, { followNugets: true, repoRoot: repo, choice: choice === "Release" ? "Release" : "Lab" });
   notes.push("AzDO monitoring in background — toasts on every check; follows the nuget + release publish chain and asserts the nugets");
   return { ok: true, failed: false, notes };
 }
 
+/** Confirm and run the queue command: prx (Lab) or the Release queue script
+ *  (def 39). failed=true on a queue error; false on user abort. */
+async function queuePhase(ctx: any, seams: BuildSeams, repoRoot: string, choice: string): Promise<{ failed: boolean; notes: string[] }> {
+  const notes: string[] = [];
+  const release = choice === "Release";
+  const queueCmd = release ? releaseQueueScript() : "prx";
+  const queueLabel = release ? "the Release queue script (stage, force-push lab:master, queue AzDO def 39)" : "prx (stage, force-push, queue AzDO Reactive.XAF)";
+  await ctx.ui.notify(`Publishing via ${release ? "the Release queue script (def 39)" : "prx"}…`, "info");
+  const pick = await ctx.ui.select(`Publish: ${queueLabel}?`, ["Publish", "Abort"]);
+  if (pick !== "Publish") {
+    notes.push("publish aborted");
+    return { failed: false, notes };
+  }
+  const res = await seams.run(queueCmd, { cwd: repoRoot, timeoutMs: 600000 });
+  if (res.code !== 0) {
+    notes.push(`${release ? "release queue" : "prx"} failed: ${tail(res.stderr)}`);
+    return { failed: true, notes };
+  }
+  notes.push(`${release ? "release queue script" : "prx"} done (exit ${res.code})`);
+  return { failed: false, notes };
+}
+
 async function publishPhase(pi: any, ctx: any, seams: BuildSeams, choice: string, repoRoot: string, dxChanged: boolean, latest: string, skipBuild = false): Promise<{ ok: boolean; failed: boolean; notes: string[] }> {
   const notes: string[] = [];
-  let failed = false;
   await ctx.ui.notify("Checking Hyper-V agents C11-C14…", "info");
   const vms = await ensureVmsRunning(seams);
   notes.push(...vms.notes);
@@ -285,24 +291,11 @@ async function publishPhase(pi: any, ctx: any, seams: BuildSeams, choice: string
   await ctx.ui.notify("Committing build state…", "info");
   const commit = await commitPhase(ctx, seams, repoRoot, dxChanged, latest, skipBuild ? "Publish" : "Build fixes");
   notes.push(...commit.notes);
-  if (!commit.committed) {
-    failed = commit.failed === true;
-    return { ok: false, failed, notes };
-  }
-  const prxCmd = choice === "Release" ? "prx -Release" : "prx";
-  await ctx.ui.notify(`Publishing via ${prxCmd}…`, "info");
-  const pick = await ctx.ui.select(`Publish: ${prxCmd} (stage, force-push, queue AzDO Reactive.XAF)?`, ["Publish", "Abort"]);
-  if (pick !== "Publish") {
-    notes.push("publish aborted");
-    return { ok: false, failed: false, notes };
-  }
-  const res = await seams.run(prxCmd, { cwd: repoRoot, timeoutMs: 600000 });
-  if (res.code !== 0) {
-    notes.push(`prx failed: ${tail(res.stderr)}`);
-    return { ok: false, failed: true, notes };
-  }
-  notes.push(`prx done (exit ${res.code})`);
-  const monitor = await monitorPhase(pi, ctx, seams, repoRoot);
+  if (!commit.committed) return { ok: false, failed: commit.failed === true, notes };
+  const queue = await queuePhase(ctx, seams, repoRoot, choice);
+  notes.push(...queue.notes);
+  if (queue.failed) return { ok: false, failed: true, notes };
+  const monitor = await monitorPhase(pi, ctx, seams, repoRoot, choice);
   notes.push(...monitor.notes);
   return { ok: monitor.ok, failed: monitor.failed, notes };
 }
@@ -385,7 +378,8 @@ export function registerBuildCommand(pi: any, seams?: Partial<BuildSeams>): void
       }
       const parts = (typeof args === "string" ? args.split(/\s+/) : args ?? []).filter(Boolean);
       if (parts[0] === "watch") {
-        startAzDoWatcher(pi, ctx, merged, { followNugets: true, repoRoot: repo });
+        const choice = parts[1] === "release" ? "Release" : "Lab";
+        startAzDoWatcher(pi, ctx, merged, { followNugets: true, repoRoot: repo, choice });
         await ctx.ui.notify("AzDO watcher started — it follows the build, the nuget publish and the release consumers chain, toasting on every check.", "info");
         return "AzDO watcher started in the background — toasts on every check, nuget assertion on the eXpand server at the nugets step, release consumers watched last.";
       }

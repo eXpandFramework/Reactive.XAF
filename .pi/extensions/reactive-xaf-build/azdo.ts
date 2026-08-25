@@ -23,6 +23,16 @@
  * One pwsh spawn per query: the profile loads Invoke-AzureRestMethod
  * (XpandPwsh, on PSModulePath) and sets $env:AzProject / $env:AzOrganization.
  * Scripts print a single STATUS= / CANCEL= line and exit.
+ *
+ * Definitions are choice-aware: Lab builds run the Reactive.XAF pipeline
+ * (def 23), Release builds the Release pipeline (def 39). The Release queue
+ * script (releaseQueueScript) mirrors Publish-ReactiveXAF (prx) but targets
+ * def 39 by ID — prx -Release queues the name-resolved lab pipeline on
+ * master, which is the wrong pipe.
+ *
+ * defaultGhFetch is the GitHub API fetch with Authorization from
+ * GH_TOKEN / GITHUB_TOKEN when set (drafts are invisible to unauthenticated
+ * callers). The token is never logged.
  */
 
 export type AzDoBuildResult = "succeeded" | "failed" | "canceled" | "other";
@@ -40,7 +50,20 @@ export interface AzDoCancel {
   status: string;
 }
 
-export const AZDO_BUILD_URL = "https://dev.azure.com/eXpandDevOps/eXpandFramework/_build?definitionId=23";
+export const LAB_DEF = "23";
+export const RELEASE_DEF = "39";
+export type BuildChoice = "Lab" | "Release";
+
+/** The pipeline definition for a build choice: Lab 23, Release 39. */
+export function definitionOf(choice: BuildChoice): string {
+  return choice === "Release" ? RELEASE_DEF : LAB_DEF;
+}
+
+export function azdoBuildUrl(definition: string): string {
+  return `https://dev.azure.com/eXpandDevOps/eXpandFramework/_build?definitionId=${definition}`;
+}
+
+export const AZDO_BUILD_URL = azdoBuildUrl(LAB_DEF);
 
 /** Wrapper markers that carry no real error: psake/AzDO noise + retry chatter. */
 const WRAPPER_NOISE = /ScriptHalted|Approve-LastExitCode|##\[error\]Exception|PowerShell exited with code|The term '|Retrying in/;
@@ -69,7 +92,7 @@ const LOG_BLOCK = `
 /** The one-shot status script: newest build of a definition, current state,
  *  reason on failure. definitions defaults to 23 (Reactive.XAF); minId
  *  filters out builds the chain already passed (id <= minId). */
-export function azdoStatusScript(definitions = "23", minId = 0): string {
+export function azdoStatusScript(definitions = LAB_DEF, minId = 0): string {
   return `$cred = @{ Project = $env:AzProject; Organization = $env:AzOrganization }
 $b = (Invoke-AzureRestMethod 'build/builds?definitions=${definitions}&$top=5&queryOrder=queueTimeDescending' @cred) | Where-Object { $_.id -gt ${minId} } | Select-Object -First 1
 if ($null -eq $b) { "STATUS=0;none;none;"; exit 0 }
@@ -79,10 +102,11 @@ if ($b.result -eq "failed") {${LOG_BLOCK}
 "STATUS=$($b.id);$($b.status);$($b.result);$reason"`;
 }
 
-/** The one-shot cancel script: PATCH-cancel the newest build if it is running. */
-export function cancelAzDoScript(): string {
+/** The one-shot cancel script: PATCH-cancel the newest build if it is running.
+ *  definitions defaults to 23 (Reactive.XAF). */
+export function cancelAzDoScript(definitions = LAB_DEF): string {
   return `$cred = @{ Project = $env:AzProject; Organization = $env:AzOrganization }
-$b = (Invoke-AzureRestMethod 'build/builds?definitions=23&$top=1&queryOrder=queueTimeDescending' @cred)[0]
+$b = (Invoke-AzureRestMethod 'build/builds?definitions=${definitions}&$top=1&queryOrder=queueTimeDescending' @cred)[0]
 if ($null -eq $b) { "CANCEL=0;none;none"; exit 0 }
 if ($b.status -in @("inProgress","notStarted","postponed","cancelling")) {
   Invoke-AzureRestMethod ("build/builds/" + $b.id) -Method Patch -Body '{"status":"cancelling"}' @cred | Out-Null
@@ -90,6 +114,43 @@ if ($b.status -in @("inProgress","notStarted","postponed","cancelling")) {
 } else {
   "CANCEL=$($b.id);notrunning;$($b.status)"
 }`;
+}
+
+/** The Release queue script: mirrors Publish-ReactiveXAF (prx) but targets
+ *  the Release pipeline (def 39) by ID — prx queues the name-resolved lab
+ *  pipeline (def 23) even with -Release, so the Release publish cannot use
+ *  it. Stages and force-pushes lab → master, cancels in-progress def-39
+ *  builds (PATCH, the same cancel azdo.ts uses), then queues a def-39 build
+ *  on master with CustomVersion = the latest Xpand minor (same parameter
+ *  prx passes). Prints QUEUED=<id> per queued build; the flow keys off the
+ *  exit code. */
+export function releaseQueueScript(): string {
+  return `$cred = @{ Project = $env:AzProject; Organization = $env:AzOrganization }
+Set-Location $env:DevExpressXAFprojectPath
+Add-DevExpressXAFGitChanges
+Submit-GitStage
+Push-GitSSH -Force -Remote "Remote" -Branch "lab:master"
+$running = Invoke-AzureRestMethod 'build/builds?definitions=39&statusFilter=inProgress&$top=10&queryOrder=queueTimeDescending' @cred
+foreach ($r in $running) {
+  Invoke-AzureRestMethod ("build/builds/" + $r.id) -Method Patch -Body '{"status":"cancelling"}' @cred | Out-Null
+}
+$versions = Get-XAFLatestMinors | Select-Object -First 1
+foreach ($v in $versions) {
+  $body = @{ definition = @{ id = 39 }; sourceBranch = "refs/heads/master"; parameters = ('{"CustomVersion":"' + $v + '"}') } | ConvertTo-Json -Depth 5
+  $b = Invoke-AzureRestMethod "build/builds" -Method Post -Body $body @cred
+  "QUEUED=$($b.id)"
+}`;
+}
+
+/** Default GitHub API fetch: Authorization from GH_TOKEN / GITHUB_TOKEN when
+ *  set (GitHub drafts are only returned to authenticated callers), plus the
+ *  required User-Agent. The token is never logged. */
+export async function defaultGhFetch(url: string, opts: { method?: string; body?: string } = {}): Promise<{ ok: boolean; status: number; text: string }> {
+  const token = process.env.GH_TOKEN ?? process.env.GITHUB_TOKEN;
+  const headers: Record<string, string> = { "User-Agent": "rxaf-watcher", Accept: "application/vnd.github+json" };
+  if (token) headers.Authorization = `Bearer ${token}`;
+  const res = await globalThis.fetch(url, { method: opts.method ?? "GET", headers, body: opts.body });
+  return { ok: res.ok, status: res.status, text: await res.text() };
 }
 
 /** Parse the status script's last STATUS= line; null when none was printed.
