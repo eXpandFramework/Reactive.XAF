@@ -11,10 +11,14 @@
  * "Executing <task>" line as context. azdoStatusScript is the one-shot
  * variant — same fetch, same TS-side extraction.
  *
- * One pwsh spawn per query: the profile loads Get-AzBuilds +
- * Invoke-AzureRestMethod (XpandPwsh, on PSModulePath) and sets
- * $env:AzProject / $env:AzOrganization. The scripts print a single RESULT= /
- * STATUS= line (the log section before it) and exit.
+ * One pwsh spawn per query: the profile loads Invoke-AzureRestMethod
+ * (XpandPwsh, on PSModulePath) and sets $env:AzProject /
+ * $env:AzOrganization. The scripts query the newest build by QUEUE TIME
+ * (queryOrder=queueTimeDescending) — the module's Get-AzBuilds omits the
+ * ordering, and the API default buries in-progress builds, so a bare -Top 1
+ * returned the newest COMPLETED build instead of the just-queued one
+ * (2026-08-25 fix). The scripts print a single RESULT= / STATUS= line (the
+ * log section before it) and exit.
  *
  * Failure policy (agent behavior): on an AzDO failure the agent PLANS a fix
  * and presents it — user permission is ALWAYS required before any action.
@@ -56,7 +60,6 @@ const BUILD_FAILED = /Build FAILED/i;
  *  LOGSTART/LOGEND markers for TS-side extraction; $reason carries only the
  *  fetch-failure fallback. Shared by the monitor and the status script. */
 const LOG_BLOCK = `
-  $cred = @{ Project = $env:AzProject; Organization = $env:AzOrganization }
   try {
     $t = Invoke-AzureRestMethod ("build/builds/" + $b.id + "/timeline") @cred
     $rec = $t.records | Where-Object { $_.result -eq "failed" -and $_.log.id } | Select-Object -First 1
@@ -72,10 +75,11 @@ const LOG_BLOCK = `
 
 /** The poll script; timeoutMs is embedded as the poll deadline. */
 function monitorScript(timeoutMs: number): string {
-  return `$deadline = (Get-Date).AddMilliseconds(${timeoutMs})
+  return `$cred = @{ Project = $env:AzProject; Organization = $env:AzOrganization }
+$deadline = (Get-Date).AddMilliseconds(${timeoutMs})
 $b = $null
 while ((Get-Date) -lt $deadline) {
-  $b = Get-AzBuilds -Definition Reactive.XAF -Top 1
+  $b = (Invoke-AzureRestMethod 'build/builds?definitions=23&$top=1&queryOrder=queueTimeDescending' @cred)[0]
   if ($null -eq $b) { break }
   if ($b.status -and $b.status -ne "inProgress" -and $b.status -ne "notStarted" -and $b.status -ne "cancelling") { break }
   Start-Sleep -Seconds 30
@@ -90,7 +94,8 @@ if ($b.result -eq "failed") {${LOG_BLOCK}
 
 /** The one-shot status script: newest build, current state, reason on failure. */
 export function azdoStatusScript(): string {
-  return `$b = Get-AzBuilds -Definition Reactive.XAF -Top 1
+  return `$cred = @{ Project = $env:AzProject; Organization = $env:AzOrganization }
+$b = (Invoke-AzureRestMethod 'build/builds?definitions=23&$top=1&queryOrder=queueTimeDescending' @cred)[0]
 if ($null -eq $b) { "STATUS=0;none;none;"; exit 0 }
 $reason = ""
 if ($b.result -eq "failed") {${LOG_BLOCK}

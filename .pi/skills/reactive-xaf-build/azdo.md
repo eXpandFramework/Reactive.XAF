@@ -7,7 +7,7 @@ description: The AzDO monitor/status scripts behind /devexpress — the RESULT=/
 
 Companion of `.pi/extensions/reactive-xaf-build/azdo.ts` (the one-shot
 status surface lives in `status.ts`). One pwsh spawn per query; the profile
-loads `Get-AzBuilds` + `Invoke-AzureRestMethod` (XpandPwsh) and sets
+loads `Invoke-AzureRestMethod` (XpandPwsh) and sets
 `$env:AzProject` / `$env:AzOrganization`.
 
 ## Monitor (`defaultWaitForAzDoBuild`)
@@ -16,10 +16,15 @@ loads `Get-AzBuilds` + `Invoke-AzureRestMethod` (XpandPwsh) and sets
   `runArgv` default); the spawn timeout carries a 5-minute margin over the
   script's own deadline so the final RESULT= print never loses the race to
   the taskkill.
-- The script polls `Get-AzBuilds -Definition Reactive.XAF -Top 1` every 30 s
-  until the build leaves inProgress/notStarted/cancelling, or the deadline
-  passes. prx cancels in-progress builds before queueing, so the newest
-  build is ours.
+- The script polls the newest build every 30 s via `Invoke-AzureRestMethod`
+  `build/builds?definitions=23&$top=1&queryOrder=queueTimeDescending`
+  (definition 23 — the AZDO_BUILD_URL definition) until the build leaves
+  inProgress/notStarted/cancelling, or the deadline passes. The explicit
+  queue-time ordering is REQUIRED: the module's `Get-AzBuilds` omits
+  `queryOrder`, and the API default buries in-progress builds, so a bare
+  `-Top 1` returned the newest COMPLETED build while the just-queued one
+  ran unseen (2026-08-25 fix). prx cancels in-progress builds before
+  queueing, so the newest build is ours.
 - On a failed build, the failed timeline record's log is fetched and printed
   between LOGSTART/LOGEND markers (bounded to the last 500 lines).
 - Prints one `RESULT=<id>;<result>;<reason>` line, or
