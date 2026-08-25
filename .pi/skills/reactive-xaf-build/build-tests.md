@@ -18,9 +18,9 @@ Run: `npx tsx d:/Reactive.XAF/.pi/extensions/reactive-xaf-build/build-tests.ts`
   outside the repo.
 - T3-T5 — DX update flows (happy path, already-latest, mixed pins).
 - T6 — build failure: FAILED surfaced, pane kept, failure delivery fired.
-- T7 — Release flow: `brx -Release` in the pane, the RELEASE QUEUE script
-  runs (stage, `lab:master` push, def 39 — NOT `prx -Release`, which queues
-  the lab pipeline), published.
+- T7 — Release flow: `brx -Release` in the pane, `prx -Release` runs (stage,
+  force-push `lab:master`, queue def 23 on master — prx knows the right
+  pipe), published.
 - T8 — user aborts never deliver.
 - T9-T13 — publish flows: VMs, commit, pane fallback, close pane, Starting
   VM wait.

@@ -24,10 +24,8 @@ Run: `npx tsx d:/Reactive.XAF/.pi/extensions/reactive-xaf-build/azdo-tests.ts`
 - T3 — `/devexpress cancel` on `CANCEL=35735;notrunning;completed`
   reports nothing to cancel.
 - T4 — the devexpress command registers through the real index boot.
-- T5 — `status release` queries the Release pipeline (def 39) and surfaces
-  the id + the def-39 link.
-- T6 — `cancel release` targets def 39.
-- T7 — plain `status` keeps the Lab definition (23).
+- T5 — plain `status` queries the Reactive.XAF definition (23) — Lab and
+  Release both run def 23, there is no release-arg variant.
 
 All fixtures are CRLF — bare-LF fakes would not exercise the bug class
 this file pins. Real pwsh, AzDO and pi are never spawned.

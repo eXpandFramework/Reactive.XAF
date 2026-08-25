@@ -30,17 +30,19 @@ pwsh, psmux, Hyper-V VMs and git are never touched). The default
    add -A → commit; `Update DX to X` when props changed, else
    `Build fixes (N files)` / skip-build `Publish (N files)`; nothing to
    commit → skip) → confirm the queue command (600 s timeout): **Lab =
-   `prx`** (stage + force-push lab → remote + queue def 23), **Release =
-   `releaseQueueScript()`** (azdo.ts — stage + force-push lab:master +
-   queue **def 39**; `prx -Release` queues the name-resolved LAB pipeline
-   and is never used) → `monitorPhase`.
+   `prx`** (stage + force-push lab → remote + queue def 23 on lab),
+   **Release = `prx -Release`** (stage + force-push lab:master + queue
+   **def 23 on master** — prx knows the right pipe; the def-39 queue
+   script was removed 2026-08-25) → `monitorPhase`.
 5. **Monitor** (`monitorPhase`) — starts the background watcher
    (`seams.startAzDoWatcher`, default watcher.ts) with `followNugets`,
    `choice` (Lab | Release) and
    RETURNS IMMEDIATELY — the chat is never locked. The watcher toasts on
-   every check and walks the choice-aware chain (Lab 23 → 72 → 89 /
-   Release 39 → 72 → 89), asserting the nugets on the eXpand server at the
-   nugets step and publishing the GitHub draft at the final step; any
+   every check and walks the chain (23 → 72 → 89 for both choices —
+   Release differs only in the label and the GitHub prerelease flag),
+   asserting the nugets on the eXpand server at the
+   nugets step and publishing the GitHub draft at the final step; empty
+   polls retry, never fatal; any
    failure steers (`pi.sendUserMessage`, deliverAs "steer").
    No auto-fix, no auto re-run — the agent plans and asks.
 
@@ -49,8 +51,7 @@ pwsh, psmux, Hyper-V VMs and git are never touched). The default
 `BuildSeams` gains `ghFetch` (GitHub API fetch — the default
 `defaultGhFetch` from azdo.ts sends Authorization from GH_TOKEN /
 GITHUB_TOKEN, never logs the token); the watcher's GitHub draft publish
-needs it. `/devexpress watch` accepts an optional `release` arg for the
-def-39 chain (`watch release`). The `delegateWindow` seam was REMOVED
+needs it. The `delegateWindow` seam was REMOVED
 (2026-08-25) — menu picks run in the invoking window and the build pane
 splits it to the right; delegate.ts stays dormant.
 

@@ -17,10 +17,10 @@ consumers (**def 89**).
 - `/devexpress` — interactive menu: Build → RX-XAF (**Lab** | **Release**,
   full flow) or Publish → RX-XAF (**Lab** | **Release**, skip-build flow),
   plus "Last build status", "Cancel AzDO build" and "Close build pane" while a build pane is open.
-- `/devexpress status` — one-shot AzDO status of the newest build (`status release` for def 39).
-- `/devexpress cancel` — PATCH-cancel the newest running build (`cancel release` for def 39).
+- `/devexpress status` — one-shot AzDO status of the newest build.
+- `/devexpress cancel` — PATCH-cancel the newest running build.
 - `/devexpress watch` — start the chain watcher for the current build (no
-  publish flow; `watch release` for the def-39 chain): toasts per check,
+  publish flow): toasts per check,
   follows Reactive.XAF → PublishNugets →
   release consumers, asserts the nugets on the eXpand server and PUBLISHES
   the GitHub draft, steers on failure.

@@ -1,13 +1,13 @@
 ---
 name: reactive-xaf-build/watcher
-description: The background AzDO chain watcher — polls the publish chain (Lab: def 23 → 72 → 89 / Release: def 39 → 72 → 89), toasts on every check, asserts the nugets on the eXpand nuget server and PUBLISHES the GitHub draft (PATCH, GH_TOKEN), steers on failure.
+description: The background AzDO chain watcher — polls the publish chain (23 → 72 → 89 for both Lab and Release), toasts on every check, retries empty polls, asserts the nugets on the eXpand nuget server and PUBLISHES the GitHub draft (PATCH, GH_TOKEN), steers on failure.
 ---
 
 # watcher.ts — background AzDO chain watcher
 
 Companion of `.pi/extensions/reactive-xaf-build/watcher.ts`. Started by
-`monitorPhase` (build.ts) after prx (Lab) / the Release queue script
-(Release), or by `/devexpress watch` for a running
+`monitorPhase` (build.ts) after prx (Lab) / prx -Release (Release), or by
+`/devexpress watch` for a running
 build. Replaces the blocking `defaultWaitForAzDoBuild` (deleted 2026-08-25)
 that locked the chat for up to 2 h.
 
@@ -15,14 +15,14 @@ that locked the chat for up to 2 h.
 
 - `startAzDoWatcher(pi, ctx, seams, opts?)` — one per session; a new start
   stops the previous. Defaults: 60 s interval, 2 h give-up per chain step.
-  `opts.choice` ("Lab" | "Release", default Lab) picks the chain and the
+  `opts.choice` ("Lab" | "Release", default Lab) picks the label and the
   GitHub prerelease flag.
 - Every poll runs `azdoStatusScript(definition, minId)` via `seams.run` and
   NOTIFIES (toast per check; same-type notifies self-replace → live status
   line). Running → `AzDO <id>: <status> (<elapsed> min) — link`.
-- With `followNugets` the watcher walks the choice-aware chain
+- With `followNugets` the watcher walks the chain
   `23 (Reactive.XAF) → 72 (PublishNugets) → 89 (release consumers)` for
-  Lab, `39 (Reactive.XAF Release) → 72 → 89` for Release,
+  BOTH choices (Release differs only in the label and the prerelease flag),
   advancing on each success (next build = newest with id > finished id,
   via `minId`). Advance toast: `... succeeded — watching the <next>…`.
 - Nugets step ASSERTS: version from `src/Common/AssemblyInfoVersion.cs`
@@ -45,7 +45,11 @@ that locked the chat for up to 2 h.
 - Failed pipeline → warning toast (FAILED label) + steer via
   `pi.sendUserMessage(msg, { deliverAs: "steer" })` (turn-independent),
   then stop. The agent plans a fix; user permission ALWAYS required.
-- Give-up (deadline, script failure, no build) → warning + stop; check
+- Empty polls (no build yet — the queue API can lag the POST by seconds)
+  RETRY with a "no build found yet" toast until the deadline, never fatal
+  (2026-08-25: the watcher used to give up on poll #1 and the just-queued
+  build ran unwatched).
+- Give-up (deadline, script failure) → warning + stop; check
   `/devexpress status`.
 
 ## State
@@ -60,5 +64,6 @@ the timer with the process.
 `BuildSeams.ghFetch` (default = `defaultGhFetch`, azdo.ts — Authorization
 from GH_TOKEN / GITHUB_TOKEN; never logs the token); tests inject short
 intervals + retries. Contract: `watcher-tests.ts` (toast per poll, chain
-advance, nuget assertion, draft publish + race retry, Release chain def 39,
-missing-token steer, terminal steer, give-up, replace).
+advance, nuget assertion, draft publish + race retry, Release chain on
+def 23, empty-poll retry, missing-token steer, terminal steer, give-up,
+replace).

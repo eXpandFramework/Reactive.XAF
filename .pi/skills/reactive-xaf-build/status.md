@@ -13,9 +13,9 @@ window. Info only — no steering. The delegated STATUS_TASK was removed
 ## `statusPhase(ctx, seams)` — `/devexpress status`
 
 Runs `azdoStatusScript(definition)` (azdo.md), parses the CRLF `STATUS=`
-line via `parseStatus` and notifies. `definition` defaults to Lab (def 23);
-the direct arg `status release` queries the Release pipeline (def 39). The
-AzDO link reflects the definition:
+line via `parseStatus` and notifies. `definition` defaults to the
+Reactive.XAF pipeline (def 23) — Lab and Release both run it. The AzDO
+link reflects the definition:
 
 - running (notStarted/inProgress/cancelling) → id + state + AzDO link;
 - failed → id + `extractFailReason(failLogFromStdout(...))` when the script
@@ -28,8 +28,8 @@ AzDO link reflects the definition:
 Runs `cancelAzDoScript(definition)` (azdo.md — PATCH
 `{"status":"cancelling"}` on a
 running build; DELETE is rejected by the API on running builds), parses
-`CANCEL=` via `parseCancel` and notifies. `definition` defaults to Lab (def
-23); the direct arg `cancel release` targets the Release pipeline (def 39):
+`CANCEL=` via `parseCancel` and notifies. `definition` defaults to the
+Reactive.XAF pipeline (def 23):
 
 - `ok` → "Cancel requested for AzDO build <id> — the agent stops it within
   ~2 min";

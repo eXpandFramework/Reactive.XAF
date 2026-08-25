@@ -13,9 +13,9 @@ Args are split on whitespace and matched in order:
 
 | Args | Behavior |
 |---|---|
-| `status` / `status release` | One-shot AzDO status — Lab def 23 by default, `release` queries def 39 (statusPhase). |
-| `cancel` / `cancel release` | PATCH-cancel the newest running build — def 23 by default, `release` targets def 39 (cancelPhase). |
-| `watch` / `watch release` | Start the chain watcher for the current build (no publish flow); `release` walks the def-39 chain. |
+| `status` | One-shot AzDO status — def 23 (statusPhase). |
+| `cancel` | PATCH-cancel the newest running build — def 23 (cancelPhase). |
+| `watch` | Start the chain watcher for the current build (no publish flow). |
 | `build lab` / `build release` | Full flow: `runFlow("Lab"|"Release", false)`. |
 | `publish lab` / `publish release` | Skip-build flow: `runFlow("Lab"|"Release", true)`. |
 | none / anything else | Interactive menu (menuFlow). |

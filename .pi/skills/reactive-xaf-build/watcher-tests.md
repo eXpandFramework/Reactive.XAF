@@ -1,6 +1,6 @@
 ---
 name: reactive-xaf-build/watcher-tests
-description: Behavior contract for the AzDO chain watcher — toast per poll, choice-aware chain advance (Lab def 23 / Release def 39) with nuget assertion and GitHub DRAFT publish (PATCH, GH_TOKEN; race retry), missing-token steer, terminal steer, give-up, replace — via the /devexpress command with short injected intervals.
+description: Behavior contract for the AzDO chain watcher — toast per poll, chain advance (23 → 72 → 89 for both choices) with nuget assertion and GitHub DRAFT publish (PATCH, GH_TOKEN; race retry), empty-poll retry, missing-token steer, terminal steer, give-up, replace — via the /devexpress command with short injected intervals.
 ---
 
 # watcher-tests.ts — watcher behavior contract
@@ -36,10 +36,12 @@ Run: `npx tsx d:/Reactive.XAF/.pi/extensions/reactive-xaf-build/watcher-tests.ts
   ("NOT found after N tries"), watcher stops.
 - W9 — the draft appears on a retry (creation race absorbed): published
   toast, no steer.
-- W10 — Release chain: polls def 39, publishes the draft as a FULL
-  release (`prerelease:false`), no steer.
+- W10 — Release chain: polls def 23 (same pipeline as lab), publishes the
+  draft as a FULL release (`prerelease:false`), no steer.
 - W11 — missing GH_TOKEN: warning + steer naming the token (never a
   silent skip), watcher stops.
+- W12 — empty first polls (queue API lag): retried with a "no build found
+  yet" toast, chain completes, no give-up, no steer.
 
 W1 counts running toasts — that's the toast-per-poll contract. Steers
 assert delivery (recorded `_userMessages`), not the steer type.

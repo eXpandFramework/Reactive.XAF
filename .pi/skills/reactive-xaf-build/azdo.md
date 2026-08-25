@@ -1,6 +1,6 @@
 ---
 name: reactive-xaf-build/azdo
-description: The AzDO status/cancel scripts behind /devexpress — the STATUS=/CANCEL= line protocol, the CRLF parse contract, the PATCH cancel, the choice-aware definitions (Lab 23 / Release 39), the Release queue script, the GitHub fetch seam, and fail-reason extraction.
+description: The AzDO status/cancel scripts behind /devexpress — the STATUS=/CANCEL= line protocol, the CRLF parse contract, the PATCH cancel, the one-pipeline (def 23) model, the Release queue via prx -Release, the GitHub fetch seam, and fail-reason extraction.
 ---
 
 # azdo.ts / status.ts — AzDO status + cancel
@@ -10,12 +10,13 @@ cancel surface in `status.ts`). One pwsh spawn per query; the profile loads
 `Invoke-AzureRestMethod` (XpandPwsh) and sets `$env:AzProject` /
 `$env:AzOrganization`.
 
-## Definitions (choice-aware)
+## One pipeline (def 23)
 
-`LAB_DEF = "23"`, `RELEASE_DEF = "39"`, `definitionOf(choice)` picks per
-build choice (Lab 23, Release 39); `azdoBuildUrl(definition)` builds the
-AzDO link (`AZDO_BUILD_URL` = the Lab URL). The status/cancel scripts, the
-Release queue script and the watcher chain thread the definition through.
+Lab and Release builds run the SAME Reactive.XAF pipeline (`LAB_DEF =
+"23"`); Release (`prx -Release`) queues branch master. There is no separate
+Release definition — the def-39 premise was wrong; the chain's PublishNugets
+trigger listens to 23. `azdoBuildUrl(definition)` builds the AzDO link
+(`AZDO_BUILD_URL` = def 23).
 
 ## Status script (`azdoStatusScript`)
 
@@ -40,17 +41,12 @@ silently broke prx's cancel and left zombie builds holding the pool, fixed
 2026-08-25 in XpandPwsh). Output: `CANCEL=<id>;ok;<status>` /
 `CANCEL=<id>;notrunning;<status>` / `CANCEL=0;none;none`.
 
-## Release queue script (`releaseQueueScript`)
+## Release queue (`prx -Release`)
 
-The Release publish does NOT use `prx -Release` — prx queues the pipeline BY
-NAME ("Reactive.XAF" = def 23) even with -Release, which would queue the
-LAB pipeline on master. `releaseQueueScript()` mirrors prx's logic targeting
-**def 39 by ID**: stage (`Add-DevExpressXAFGitChanges` +
-`Submit-GitStage`), force-push `lab:master` (`Push-GitSSH`), PATCH-cancel
-in-progress def-39 builds, then queue a def-39 build on master with
-`CustomVersion` = the latest Xpand minor (REST `builds` POST, the same
-parameter prx passes). Prints `QUEUED=<id>` per build; the flow keys off
-the exit code.
+The Release publish uses `prx -Release` — prx stages, force-pushes
+`lab:master` and queues the Reactive.XAF pipeline (def 23) on master with
+the Release tag. prx knows the right pipe; the def-39 queue script was
+removed (2026-08-25).
 
 ## GitHub fetch (`defaultGhFetch`)
 
