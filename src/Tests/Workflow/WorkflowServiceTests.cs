@@ -33,27 +33,26 @@ namespace Xpand.XAF.Modules.Workflow.Tests {
         [Test]
         [Apartment(ApartmentState.STA)]
         public async Task Test_Root_Command_Execution() {
-            Xpand.Extensions.Tracing.FastLogger.Enabled = true;
-            Xpand.Extensions.Tracing.FastLogger.Write = message => System.IO.File.AppendAllText(@"D:\Reactive.XAF\bin\wf-fastlog.txt", message + System.Environment.NewLine);
-            Xpand.Extensions.Reactive.Relay.FaultHub.Bus.Subscribe(ex => System.IO.File.AppendAllText(@"D:\Reactive.XAF\bin\wf-fastlog.txt", "FAULT: " + ex + System.Environment.NewLine));
             await using var application = NewApplication();
             var replaySubject = new ReplaySubject<Unit>();
-            application.WhenSetupComplete(_ => application.UseProviderObjectSpace(space => {
-                    var commandSuite = space.CreateObject<CommandSuite>();
-                    commandSuite.Commands.Add(space.CreateObject<TestCommand>());
-                    return commandSuite.Commit().Cast<CommandSuite>()
-                        .SelectMany(suite => suite.Commands)
-                        .SelectMany(command => command.WhenExecuted()
-                            .Do(_ => {
-                                replaySubject.OnNext(Unit.Default);
-                                replaySubject.OnCompleted();
-                            })
-                            .ToUnit());
-                }))
-                .Subscribe();
-
-            WorkflowModule(application);
-            await application.StartWinTest(_ => replaySubject.Take(1));
+            await application.WhenSetupComplete()
+                .SelectMany(_ => application.UseProviderObjectSpace(space => {
+                        var commandSuite = space.CreateObject<CommandSuite>();
+                        commandSuite.Commands.Add(space.CreateObject<TestCommand>());
+                        return commandSuite.Commit()
+                            .SelectMany(_ => commandSuite.Commands)
+                            .SelectMany(command => command.WhenExecuted()
+                                .Do(_ => {
+                                    replaySubject.OnNext(Unit.Default);
+                                    replaySubject.OnCompleted();
+                                })
+                                .ToUnit())
+                            .To(commandSuite);
+                    }))
+                .Take(1).IgnoreElements()
+                .MergeToUnit(application.DeferAction(_ => WorkflowModule(application)))
+                .MergeToUnit(application.StartWinTest(_ => replaySubject.Take(1)))
+                .Timeout(30.ToSeconds());
         }
 
         [Test]
