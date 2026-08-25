@@ -109,26 +109,12 @@ function registerCapture(repo: string, stdout: string): { pi: any; calls: string
     const cmd = pi._cmds.get("devexpress");
     check("T4: devexpress command registered via index.ts", typeof cmd?.handler === "function");
   }
-  // Section: T5 — status release queries the Release pipeline (def 39)
-  {
-    const repo = mkRepo();
-    const { pi, calls } = registerCapture(repo, crlf(["STATUS=40001;completed;succeeded;"]));
-    const r = await pi._cmds.get("devexpress").handler(["status", "release"], mkCtx(repo));
-    check("T5: status release queries def 39 and surfaces the id + link", calls.some((c) => c.includes("definitions=39")) && r.includes("40001") && r.includes("definitionId=39"), JSON.stringify(calls) + " | " + r);
-  }
-  // Section: T6 — cancel release targets the Release pipeline (def 39)
-  {
-    const repo = mkRepo();
-    const { pi, calls } = registerCapture(repo, crlf(["CANCEL=40002;ok;inProgress"]));
-    const r = await pi._cmds.get("devexpress").handler(["cancel", "release"], mkCtx(repo));
-    check("T6: cancel release targets def 39", calls.some((c) => c.includes("definitions=39")) && r.includes("Cancel requested for AzDO build 40002"), JSON.stringify(calls) + " | " + r);
-  }
-  // Section: T7 — status without args keeps the Lab definition (23)
+  // Section: T5 — status without args queries the Reactive.XAF definition (23)
   {
     const repo = mkRepo();
     const { pi, calls } = registerCapture(repo, crlf(["STATUS=35735;completed;failed;"]));
     await pi._cmds.get("devexpress").handler(["status"], mkCtx(repo));
-    check("T7: plain status keeps def 23", calls.some((c) => c.includes("definitions=23")), JSON.stringify(calls));
+    check("T5: plain status keeps def 23", calls.some((c) => c.includes("definitions=23")), JSON.stringify(calls));
   }
   console.log(`\n${ok} passed, ${fail} failed`);
   process.exit(fail > 0 ? 1 : 0);

@@ -11,7 +11,6 @@
 
 import { getBuildPane, setBuildPane, defaultClosePane } from "./pane.js";
 import { statusPhase, cancelPhase } from "./status.js";
-import { definitionOf } from "./azdo.js";
 import type { BuildSeams } from "./build.js";
 
 type BuildFlowRunner = (choice: string, skipBuild?: boolean) => Promise<string>;
@@ -49,8 +48,8 @@ async function menuFlow(ctx: any, seams: BuildSeams, runFlow: BuildFlowRunner): 
 /** Entry: direct args first, then the menu. The repo guard lives in build.ts. */
 export async function runDevexpressMenu(ctx: any, seams: BuildSeams, args: string | string[], runFlow: BuildFlowRunner): Promise<string> {
   const parts = (typeof args === "string" ? args.split(/\s+/) : args ?? []).filter(Boolean);
-  if (parts[0] === "status") return statusPhase(ctx, seams, definitionOf(parts[1] === "release" ? "Release" : "Lab"));
-  if (parts[0] === "cancel") return cancelPhase(ctx, seams, definitionOf(parts[1] === "release" ? "Release" : "Lab"));
+  if (parts[0] === "status") return statusPhase(ctx, seams);
+  if (parts[0] === "cancel") return cancelPhase(ctx, seams);
   if (parts[0] === "build") {
     const choice = parts[1]?.toLowerCase();
     if (choice === "lab" || choice === "release") return runFlow(choice === "lab" ? "Lab" : "Release");

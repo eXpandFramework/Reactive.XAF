@@ -7,9 +7,9 @@ description: Use when working on or invoking the /devexpress extension in Reacti
 
 Repo-local extension at `.pi/extensions/reactive-xaf-build/` (auto-loads in
 Reactive.XAF sessions). One command: `/devexpress` — the Lab/Release build +
-publish workflow. Pipelines are choice-aware: Lab builds run the
-`Reactive.XAF` pipeline (**def 23**), Release builds the Release pipeline
-(**def 39**), both followed by PublishNugets (**def 72**) and release
+publish workflow. Both choices run the `Reactive.XAF` pipeline (**def 23**)
+— Lab queues branch lab, Release (`prx -Release`) queues branch master —
+followed by PublishNugets (**def 72**) and release
 consumers (**def 89**).
 
 ## Command surface
@@ -43,12 +43,12 @@ it, not in spawned windows; delegate.ts stays dormant).
    in-process fallback. Red → failure steer with `triggerTurn`, pane kept.
 4. **Publish** — Hyper-V agents C11–C14 ensured running, git commit of build
    state (confirmed), confirm, then the queue: Lab = `prx` (stage +
-   force-push `lab` → remote + queue def 23), Release = the Release queue
-   script (azdo.ts — stage + force-push `lab:master` + queue **def 39**;
-   `prx -Release` queues the name-resolved LAB pipeline and is never used),
-   then the **AzDO
+   force-push `lab` → remote + queue def 23 on lab), Release = `prx -Release`
+   (stage + force-push `lab:master` + queue **def 23 on master** — prx
+   knows the right pipe; the def-39 premise was wrong and was reverted
+   2026-08-25), then the **AzDO
     background watcher** (watcher.md): the turn returns immediately — a
-    timer polls the chain (Lab: 23 → 72 → 89 / Release: 39 → 72 → 89)
+    timer polls the chain (**23 → 72 → 89 for both choices**)
     and TOASTS ON EVERY CHECK; a terminal failure steers via
     `sendUserMessage` (turn-independent) with the real `##[error]` reason
     (wrapper noise filtered); the nugets step asserts the packages on the
@@ -58,7 +58,8 @@ it, not in spawned windows; delegate.ts stays dormant).
     Release as a full release), with retries for the creation race and a
     loud steer when **GH_TOKEN** is missing (set it via `setx GH_TOKEN
     <token>`; the token must be visible to the pi session that runs the
-    watcher). The chat is never locked.
+    watcher). Empty first polls (the queue API can lag the POST) are
+    retried, never fatal. The chat is never locked.
 5. **Skip-build variant** — steps 1–3 omitted; commit message label becomes
    "Publish (N files)" instead of "Build fixes (N files)".
 
@@ -69,12 +70,12 @@ it, not in spawned windows; delegate.ts stays dormant).
 | `index.ts` | — | Boot: registers the command (thin). |
 | `menu.ts` | `menu.md` | Command surface: menu picks, direct args. |
 | `build.ts` | `build.md` | Flow engine: DX/build/publish phases, seams, steer. |
-| `watcher.ts` | `watcher.md` | Background AzDO chain watcher: toast per poll, choice-aware chain (Lab 23 / Release 39 → 72 → 89), nuget assertion, GitHub draft publish. |
+| `watcher.ts` | `watcher.md` | Background AzDO chain watcher: toast per poll, chain 23 → 72 → 89 (both choices), nuget assertion, GitHub draft publish. |
 | `menu-tests.ts` | `menu-tests.md` | Behavior contract for the skip-build surface. |
 | `delegate-tests.ts` | `delegate-tests.md` | Behavior contract for the delegation fallback. |
 | `build-tests.ts` | `build-tests.md` | Behavior contract for the full flow. |
 | `watcher-tests.ts` | `watcher-tests.md` | Behavior contract for the watcher (watcher.md). |
-| `azdo.ts` / `status.ts` | `azdo.md` | AzDO status/cancel scripts, the Release queue script (def 39), the GitHub fetch seam, fail-reason extraction. |
+| `azdo.ts` / `status.ts` | `azdo.md` | AzDO status/cancel scripts, the GitHub fetch seam, fail-reason extraction. |
 | `delegate.ts` | `delegate.md` | Dormant — window delegation (unwired 2026-08-25; the flow runs in the invoking window). |
 | `pane.ts` | — | Build pane primitives. |
 

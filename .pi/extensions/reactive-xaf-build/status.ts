@@ -4,9 +4,9 @@
  * statusPhase queries the newest build of a definition (azdoStatusScript via
  * the run seam) and notifies the outcome: id, current state, the ##[error]
  * reason on failure, and the AzDO definition link. cancelPhase PATCH-cancels
- * the newest running build of a definition. Both default to Lab (def 23);
- * the direct args accept `status release` / `cancel release` for the
- * Release pipeline (def 39). Info only — no steering.
+ * the newest running build of a definition. Both default to the Reactive.XAF
+ * definition (def 23) — Lab and Release builds run on the same pipeline
+ * (Release queues branch master). Info only — no steering.
  */
 
 import { azdoStatusScript, parseStatus, extractFailReason, failLogFromStdout, azdoBuildUrl, cancelAzDoScript, parseCancel, LAB_DEF } from "./azdo.js";

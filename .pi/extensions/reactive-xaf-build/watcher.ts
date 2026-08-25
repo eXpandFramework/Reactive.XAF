@@ -2,14 +2,15 @@
  * reactive-xaf-build/watcher — background AzDO watcher for the full publish
  * chain.
  *
- * After prx (Lab) / the Release queue script (Release) queues a build,
+ * After prx (Lab) / prx -Release (Release) queues a build,
  * monitorPhase starts a watcher instead of blocking
  * the agent turn: a timer polls the chain's current pipeline via
  * azdoStatusScript and NOTIFIES ON EVERY CHECK (the user asked for a toast
  * each time the build is looked at — same-type notifies self-replace, so the
  * toast acts as a live status line). With followNugets the watcher walks the
- * whole chain — choice-aware: Lab = Reactive.XAF (def 23) → PublishNugets
- * (def 72) → release consumers (def 89); Release = def 39 → 72 → 89 —
+ * whole chain — both choices run the same Reactive.XAF pipeline (def 23) →
+ * PublishNugets (def 72) → release consumers (def 89); Release differs only
+ * in the branch (master) and the GitHub prerelease flag —
  * advancing when each pipeline succeeds (each next
  * build is the newest with id > the finished build's id). At the nugets step
  * the watcher ASSERTS the nugets landed on the eXpand nuget server
@@ -21,7 +22,8 @@
  * (prerelease=true), Release as a full release (prerelease=false). Auth via
  * GH_TOKEN / GITHUB_TOKEN (drafts are invisible to unauthenticated callers;
  * a missing token steers loudly instead of pretending). Retries absorb the
- * release-creation race. A failed pipeline — or a failed
+ * release-creation race. Empty first polls (the queue API can lag the POST)
+ * are retried, never fatal. A failed pipeline — or a failed
  * assertion — steers via pi.sendUserMessage (deliverAs "steer"), the same
  * turn-independent failure path steerFailure uses.
  *
@@ -41,13 +43,11 @@ export interface AzDoWatcherOptions {
   intervalMs?: number;
   /** Give-up deadline per chain step (default 2 h). */
   maxMs?: number;
-  /** Walk the publish chain (Lab: 23 → 72 → 89, Release: 39 → 72 → 89) and
-   *  assert the nugets + publish the GitHub draft. Off = watch only the
-   *  first pipeline. */
+  /** Walk the publish chain (23 → 72 → 89) and assert the nugets + publish
+   *  the GitHub draft. Off = watch only the first pipeline. */
   followNugets?: boolean;
-  /** Build choice — picks the chain (Lab def 23, Release def 39) and the
-   *  GitHub prerelease flag when publishing the draft (Lab true, Release
-   *  false). Default Lab. */
+  /** Build choice — picks the label and the GitHub prerelease flag when
+   *  publishing the draft (Lab true, Release false). Default Lab. */
   choice?: "Lab" | "Release";
   /** GitHub token override (defaults to GH_TOKEN / GITHUB_TOKEN env). */
   ghToken?: string;
@@ -81,12 +81,11 @@ interface ChainStep {
   assertNugets?: boolean;
 }
 
-/** The publish chain per choice: Lab builds run def 23, Release runs def 39;
- *  the nuget publish (72) and release consumers (89) legs are shared. */
+/** The publish chain: both choices run the Reactive.XAF pipeline (def 23) →
+ *  nuget publish (72) → release consumers (89); Release queues branch
+ *  master and only differs in the label + GitHub prerelease flag. */
 function chainFor(choice: "Lab" | "Release"): ChainStep[] {
-  const head: ChainStep = choice === "Release"
-    ? { definition: "39", label: "Reactive.XAF Release build" }
-    : { definition: "23", label: "Reactive.XAF build" };
+  const head: ChainStep = { definition: "23", label: choice === "Release" ? "Reactive.XAF Release build" : "Reactive.XAF build" };
   return [
     head,
     { definition: "72", label: "nuget publish pipeline", assertNugets: true },
@@ -294,14 +293,27 @@ async function handleTerminal(state: WatcherState, pi: any, ctx: any, seams: Bui
   if (failed) pi.sendUserMessage(msg, { deliverAs: "steer" });
 }
 
+/** True when the per-step deadline expired — the watcher gives up. */
+async function checkDeadline(ctx: any, state: WatcherState, opts: AzDoWatcherOptions): Promise<boolean> {
+  const maxMs = opts.maxMs ?? 7_200_000;
+  if (Date.now() - state.startedAt <= maxMs) return false;
+  await giveUp(ctx, state, `AzDO watcher gave up after ${Math.round(maxMs / 60_000)} min — check /devexpress status.`);
+  return true;
+}
+
+/** No build visible yet — the queue API can lag the POST by a few seconds.
+ *  Keep polling until the deadline instead of dying on the first empty poll
+ *  (2026-08-25: the watcher gave up instantly and the just-queued release
+ *  build ran unwatched). */
+async function notifyEmptyPoll(ctx: any, state: WatcherState): Promise<void> {
+  const elapsed = Math.round((Date.now() - state.startedAt) / 60_000);
+  await ctx.ui.notify(`AzDO: no build found yet (${elapsed} min) — waiting…`, "info");
+}
+
 /** One poll tick: query, toast, stop or advance on terminal. */
 async function pollTick(state: WatcherState, pi: any, ctx: any, seams: BuildSeams, opts: AzDoWatcherOptions): Promise<void> {
   if (state.stopped) return;
-  const maxMs = opts.maxMs ?? 7_200_000;
-  if (Date.now() - state.startedAt > maxMs) {
-    await giveUp(ctx, state, `AzDO watcher gave up after ${Math.round(maxMs / 60_000)} min — check /devexpress status.`);
-    return;
-  }
+  if (await checkDeadline(ctx, state, opts)) return;
   const step = state.chain[state.step];
   let res;
   try {
@@ -311,9 +323,13 @@ async function pollTick(state: WatcherState, pi: any, ctx: any, seams: BuildSeam
     return;
   }
   const s = parseStatus(res.stdout);
-  if (!s || s.id === 0) {
+  if (!s) {
     const err = (res.stderr || "no STATUS= line").trim().slice(-200);
     await giveUp(ctx, state, `AzDO watcher: ${err} — check /devexpress status.`);
+    return;
+  }
+  if (s.id === 0) {
+    await notifyEmptyPoll(ctx, state);
     return;
   }
   state.lastId = s.id;

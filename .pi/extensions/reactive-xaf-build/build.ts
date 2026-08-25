@@ -2,8 +2,9 @@
  * reactive-xaf-build/build — the /devexpress workflow engine.
  *
  * Flow (Lab | Release): DX check → props compare → brx / brx -Release in a
- * pane → publish (VMs C11-C14 → commit → queue: Lab prx / Release the
- * releaseQueueScript targeting def 39) → background chain watcher
+ * pane → publish (VMs C11-C14 → commit → queue: Lab prx / Release
+ * prx -Release, both on the Reactive.XAF pipeline def 23 — Release queues
+ * branch master) → background chain watcher
  * (watcher.ts; the chat is never locked). Skip-build variant: no DX check,
  * no brx. Details live in skills/reactive-xaf-build/build.md.
  *
@@ -24,7 +25,7 @@ import {
 import type { RunResult, PaneOpener, PaneRunner, PaneWaiter, PaneCapturer, PaneCloser } from "./pane.js";
 import { startAzDoWatcher } from "./watcher.js";
 import type { AzDoWatcherStarter } from "./watcher.js";
-import { releaseQueueScript, defaultGhFetch } from "./azdo.js";
+import { defaultGhFetch } from "./azdo.js";
 import { runDevexpressMenu } from "./menu.js";
 
 export type { RunResult } from "./pane.js";
@@ -256,14 +257,14 @@ async function monitorPhase(pi: any, ctx: any, seams: BuildSeams, repo: string, 
   return { ok: true, failed: false, notes };
 }
 
-/** Confirm and run the queue command: prx (Lab) or the Release queue script
- *  (def 39). failed=true on a queue error; false on user abort. */
+/** Confirm and run the queue command: prx (Lab, def 23 on lab) or
+ *  prx -Release (Release, def 23 on master — prx knows the right pipe).
+ *  failed=true on a queue error; false on user abort. */
 async function queuePhase(ctx: any, seams: BuildSeams, repoRoot: string, choice: string): Promise<{ failed: boolean; notes: string[] }> {
   const notes: string[] = [];
-  const release = choice === "Release";
-  const queueCmd = release ? releaseQueueScript() : "prx";
-  const queueLabel = release ? "the Release queue script (stage, force-push lab:master, queue AzDO def 39)" : "prx (stage, force-push, queue AzDO Reactive.XAF)";
-  await ctx.ui.notify(`Publishing via ${release ? "the Release queue script (def 39)" : "prx"}…`, "info");
+  const queueCmd = choice === "Release" ? "prx -Release" : "prx";
+  const queueLabel = choice === "Release" ? "prx -Release (stage, force-push lab:master, queue def 23 on master)" : "prx (stage, force-push, queue AzDO Reactive.XAF)";
+  await ctx.ui.notify(`Publishing via ${queueCmd}…`, "info");
   const pick = await ctx.ui.select(`Publish: ${queueLabel}?`, ["Publish", "Abort"]);
   if (pick !== "Publish") {
     notes.push("publish aborted");
@@ -271,10 +272,10 @@ async function queuePhase(ctx: any, seams: BuildSeams, repoRoot: string, choice:
   }
   const res = await seams.run(queueCmd, { cwd: repoRoot, timeoutMs: 600000 });
   if (res.code !== 0) {
-    notes.push(`${release ? "release queue" : "prx"} failed: ${tail(res.stderr)}`);
+    notes.push(`${queueCmd} failed: ${tail(res.stderr)}`);
     return { failed: true, notes };
   }
-  notes.push(`${release ? "release queue script" : "prx"} done (exit ${res.code})`);
+  notes.push(`${queueCmd} done (exit ${res.code})`);
   return { failed: false, notes };
 }
 

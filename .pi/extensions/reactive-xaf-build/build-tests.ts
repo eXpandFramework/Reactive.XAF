@@ -242,7 +242,7 @@ function mkMonitor(): { pi: any; repo: string; starts: number[] } {
     const runner = mkRunner([
       { match: VM_CHECK_PREFIX, result: { code: 0, stdout: VM_RUN, stderr: "" } },
       { match: "git status --short", result: okResult("") },
-      { match: "$cred = @{ Project*", result: okResult("QUEUED=4444") },
+      { match: "prx -Release", result: okResult() },
     ]);
     const pane = mkPaneSeams();
     const pi = mkPi();
@@ -250,8 +250,7 @@ function mkMonitor(): { pi: any; repo: string; starts: number[] } {
     const ctx = mkCtx([...MENU, "Release", "Skip", "Publish"], repo);
     const result = await pi._cmds.get("devexpress").handler([], ctx);
     check("brx -Release sent to pane", pane.sent.length === 1 && pane.sent[0].startsWith("brx -Release;"), JSON.stringify(pane.sent));
-    const queued = runner.calls.filter((c) => c.startsWith("$cred = @{ Project") && c.includes("Push-GitSSH"));
-    check("T7: release queue script ran (stage, lab:master, def 39), NOT prx, published", queued.length === 1 && queued[0].includes("lab:master") && queued[0].includes("definitions=39") && !runner.calls.includes("prx") && result.includes("published"), runner.calls.join(" | ") + " " + result);
+    check("T7: prx -Release ran (def 23 on master), published", runner.calls.includes("prx -Release") && !runner.calls.some((c) => c.startsWith("$cred") && c.includes("Push-GitSSH")) && result.includes("published"), runner.calls.join(" | ") + " " + result);
   }
   // Section: T8 — abort at the DX prompt
   {

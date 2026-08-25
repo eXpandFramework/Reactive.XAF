@@ -136,6 +136,9 @@ function mkGh(list: (attempt: number) => string): { gh: (url: string, opts?: any
 const GH_DRAFT = () => JSON.stringify([{ id: 111, tag_name: "4.261.2.1", draft: true }]);
 const GH_MISSING = () => JSON.stringify([{ id: 222, tag_name: "4.242.3", draft: true }]);
 const GH_LATE = (attempt: number) => (attempt === 1 ? "[]" : GH_DRAFT());
+function empty(): string {
+  return crlf(["STATUS=0;none;none;"]);
+}
 
 (async () => {
   // Section: W1 — full chain green: toast per poll, nugets asserted, draft published, chain complete
@@ -268,7 +271,7 @@ const GH_LATE = (attempt: number) => (attempt === 1 ? "[]" : GH_DRAFT());
     await sleep(500);
     check("W9: draft found on retry → published toast, no steer", ctx._notifies.some((n) => n.msg.includes("GitHub pre-release 4.261.2.1 published from draft")) && pi._userMessages.length === 0, JSON.stringify(ctx._notifies) + " | " + JSON.stringify(pi._userMessages));
   }
-  // Section: W10 — Release chain watches def 39 and publishes the draft as a FULL release
+  // Section: W10 — Release chain runs the same def-23 pipeline and publishes the draft as a FULL release
   {
     const repo = mkRepo();
     const pi = mkPi();
@@ -278,7 +281,7 @@ const GH_LATE = (attempt: number) => (attempt === 1 ? "[]" : GH_DRAFT());
     registerBuildCommand(pi, { run: seams.run, fetchFeed: mkFetch(["4.261.2.1"]), ghFetch: gh.gh, repoRoot: repo, startAzDoWatcher: fastWatcher });
     await pi._cmds.get("devexpress").handler(["publish", "release"], ctx);
     await sleep(400);
-    check("W10: release chain polls def 39", seams.calls.some((c) => c.includes("definitions=39")), JSON.stringify(seams.calls));
+    check("W10: release chain polls def 23 (same pipeline as lab)", seams.calls.some((c) => c.includes("definitions=23")), JSON.stringify(seams.calls));
     check("W10: release draft published as a FULL release + chain complete", ctx._notifies.some((n) => n.msg.includes("GitHub release 4.261.2.1 published from draft") && n.msg.includes("chain complete")) && gh.patches.length === 1 && JSON.parse(gh.patches[0]).prerelease === false, JSON.stringify(ctx._notifies) + " | " + JSON.stringify(gh.patches));
     check("W10: no steer on success", pi._userMessages.length === 0, JSON.stringify(pi._userMessages));
   }
@@ -302,6 +305,18 @@ const GH_LATE = (attempt: number) => (attempt === 1 ? "[]" : GH_DRAFT());
       if (savedToken !== undefined) process.env.GH_TOKEN = savedToken;
       if (savedAlt !== undefined) process.env.GITHUB_TOKEN = savedAlt;
     }
+  }
+  // Section: W12 — empty first polls (queue API lag) retry instead of giving up
+  {
+    const repo = mkRepo();
+    const pi = mkPi();
+    const seams = mkSeams([empty(), done(35760, "succeeded"), done(35780, "succeeded"), done(35790, "succeeded")]);
+    const ctx = mkCtx(repo);
+    registerBuildCommand(pi, { run: seams.run, fetchFeed: mkFetch(["4.261.2.1"]), ghFetch: mkGh(GH_DRAFT).gh, repoRoot: repo, startAzDoWatcher: fastWatcher });
+    await pi._cmds.get("devexpress").handler(["publish", "lab"], ctx);
+    await sleep(400);
+    check("W12: empty poll retried (no build found yet), chain completed, no give-up", ctx._notifies.some((n) => n.msg.includes("no build found yet")) && ctx._notifies.some((n) => n.msg.includes("chain complete")) && !isAzDoWatcherActive(), JSON.stringify(ctx._notifies));
+    check("W12: no steer on success", pi._userMessages.length === 0, JSON.stringify(pi._userMessages));
   }
   console.log(`\n${ok} passed, ${fail} failed`);
   process.exit(fail > 0 ? 1 : 0);
