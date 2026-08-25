@@ -28,25 +28,13 @@ The flow runner type is `(choice: string, skipBuild?: boolean) => Promise<string
 - Top: **DevExpress** → Build | Publish | Last build status | Cancel AzDO
   build (+ Close build pane while a pane is open). Cancel runs `cancelPhase`
   in this window (no delegation).
-- Build → **RX-XAF** → Lab | Release — full flow (`buildTask`).
+- Build → **RX-XAF** → Lab | Release — full flow, run in this window.
 - Publish → **RX-XAF** → Lab | Release — skip-build flow
-  (`runFlow(choice, true)`, `publishTask` delegation text).
+  (`runFlow(choice, true)`), run in this window.
 
-## Delegation (`delegateOrRun`)
+## In-window execution
 
-Every pick delegates to a NEW psmux window via `delegateWindow` (default:
-`defaultDelegateWindow` from delegate.ts — spawns `psmux new-window ... pwsh
--c "pi '<task>'"`, so the task text must contain NO single quotes). The
-delegated window runs the corresponding direct-arg command. On failure to
-spawn, the flow falls back to running in the invoking session with a warning
-notify.
-
-Task strings (menu.ts):
-
-- `buildTask(choice)` — "Run the /devexpress build lab|release command now..."
-  (DX update, commit and publish confirmations appear in the delegated window).
-- `publishTask(choice)` — "Run the /devexpress publish lab|release command
-  now..." (commit and publish confirmations; AzDO monitor included).
+Every menu pick runs in the invoking window — the build pane splits it to the right (pane.ts), with milestones notified there.
 
 ## Guards
 

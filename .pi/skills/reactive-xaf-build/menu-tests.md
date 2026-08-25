@@ -1,6 +1,6 @@
 ---
 name: reactive-xaf-build/menu-tests
-description: Behavior contract for the /devexpress skip-build publish surface — the top-level Publish menu (Publish → RX-XAF → Lab | Release), the /devexpress publish lab|release arg, delegation task text, and the "Publish (N files)" commit label. Read before changing the skip-build flow or these tests.
+description: Behavior contract for the /devexpress skip-build publish surface — the top-level Publish menu (Publish → RX-XAF → Lab | Release), the /devexpress publish lab|release arg, and the "Publish (N files)" commit label. Read before changing the skip-build flow or these tests.
 ---
 
 # menu-tests.ts — skip-build behavior contract
@@ -12,8 +12,8 @@ Run: `npx tsx C:/Work/Reactive.XAF/.pi/extensions/reactive-xaf-build/menu-tests.
 
 ## Harness (mock pi, injected seams)
 
-`registerBuildCommand(pi, { run, fetchFeed, repoRoot, pollMs, ...paneSeams,
-delegateWindow })` with fakes: a scripted command runner, a feed fetcher that
+`registerBuildCommand(pi, { run, fetchFeed, repoRoot, pollMs, ...paneSeams })`
+with fakes: a scripted command runner, a feed fetcher that
 would throw on use (`"[]"` — proves the DX check never runs), pane seams that
 record opens/sends, a watcher seam recording starts. The
 repo fixture is a temp dir with `src/Extensions` + a `Directory.Packages.props`
@@ -30,8 +30,8 @@ never touched.
   `prx` runs, published.
 - **S3** — skip-build with a dirty tree: commit message is
   `Publish (1 files)`, not `Build fixes (1 files)`; then published.
-- **S4** — the Publish menu pick delegates with the `publishTask` text
-  (contains `/devexpress publish lab`).
+- **S4** — the Publish menu pick runs the publish flow in the invoking
+  window (`prx` runs, published).
 
 ## Notes
 
@@ -39,5 +39,6 @@ never touched.
   400-line gate and runs its suite on import, so it cannot be imported.
 - Placeholder checks fail loudly — e.g. a regression that reintroduces the DX
   feed call throws inside the fake fetcher.
-- The full-flow suite (build/publish/failure/monitor/delegation, 52 checks)
+- The full-flow suite (build/publish/failure/monitor/in-window picks, 52
+  checks)
   lives in `build-tests.ts`; keep its Section T1–T20 numbering untouched.
