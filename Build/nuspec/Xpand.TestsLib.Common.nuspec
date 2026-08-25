@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.TestsLib.Common</id>
-    <version>4.261.2.0</version>
+    <version>4.261.3.0</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -15,19 +15,19 @@
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Xpand.TestsLib.Common, 26.1.3</tags>
     <dependencies>
       <group targetFramework="net10.0">
-        <dependency id="Xpand.Extensions" version="4.261.2.0" />
-        <dependency id="Xpand.Extensions.Reactive" version="4.261.2.0" />
-        <dependency id="Xpand.Extensions.Reactive.Relay" version="4.261.2.0" />
-        <dependency id="Xpand.Extensions.XAF" version="4.261.2.0" />
-        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.261.2.0" />
-        <dependency id="Xpand.XAF.Modules.Reactive" version="4.261.2.0" />
-        <dependency id="Xpand.XAF.Modules.Reactive.Logger" version="4.261.2.0" />
-        <dependency id="Xpand.XAF.Modules.Reactive.Logger.Hub" version="4.261.2.0" />
-        <dependency id="DevExpress.ExpressApp" version="26.1.3" />
-        <dependency id="DevExpress.ExpressApp.Security.Xpo" version="26.1.3" />
-        <dependency id="DevExpress.Xpo" version="26.1.3" />
-        <dependency id="DevExpress.Persistent.BaseImpl.Xpo" version="26.1.3" />
-        <dependency id="DevExpress.ExpressApp.ViewVariantsModule" version="26.1.3" />
+        <dependency id="Xpand.Extensions" version="4.261.3.0" />
+        <dependency id="Xpand.Extensions.Reactive" version="4.261.3.0" />
+        <dependency id="Xpand.Extensions.Reactive.Relay" version="4.261.3.0" />
+        <dependency id="Xpand.Extensions.XAF" version="4.261.3.0" />
+        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.261.3.0" />
+        <dependency id="Xpand.XAF.Modules.Reactive" version="4.261.3.0" />
+        <dependency id="Xpand.XAF.Modules.Reactive.Logger" version="4.261.3.0" />
+        <dependency id="Xpand.XAF.Modules.Reactive.Logger.Hub" version="4.261.3.0" />
+        <dependency id="DevExpress.ExpressApp" version="26.1.4" />
+        <dependency id="DevExpress.ExpressApp.Security.Xpo" version="26.1.4" />
+        <dependency id="DevExpress.Xpo" version="26.1.4" />
+        <dependency id="DevExpress.Persistent.BaseImpl.Xpo" version="26.1.4" />
+        <dependency id="DevExpress.ExpressApp.ViewVariantsModule" version="26.1.4" />
         <dependency id="Polly" version="8.6.5" />
         <dependency id="TextCopy" version="6.2.1" />
         <dependency id="akarnokd.reactive_extensions" version="0.0.27-alpha" />
