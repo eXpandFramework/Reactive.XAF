@@ -186,7 +186,7 @@ function mkMonitor(): { pi: any; repo: string; starts: number[] } {
   // Section: T4 — DX already latest
   {
     const repo = mkRepo(DX_PINS);
-    writeFileSync(join(repo, "build.ps1"), "& .\\support\\build\\go.ps1 -version \"26.1.400.0\"\n");
+    writeFileSync(join(repo, "build.ps1"), "& .\\support\\build\\go.ps1 -version \"26.1.300.0\"\n");
     const runner = mkRunner([
       { match: VM_CHECK_PREFIX, result: { code: 0, stdout: VM_RUN, stderr: "" } },
       { match: "git status --short", result: { code: 0, stdout: " M src/x.cs\n", stderr: "" } },
@@ -200,9 +200,33 @@ function mkMonitor(): { pi: any; repo: string; starts: number[] } {
     const ctx = mkCtx([...MENU, "Lab", "Commit", "Publish"], repo);
     const result = await pi._cmds.get("devexpress").handler([], ctx);
     check("no update prompt, props untouched", !ctx._prompts.some((p) => p.includes("update all DevExpress")) && propsText(repo).includes('Version="26.1.3"') && !propsText(repo).includes("26.1.4"), "props changed");
-    check("build.ps1 untouched when DX already latest", readFileSync(join(repo, "build.ps1"), "utf-8").includes('-version "26.1.400.0"'), "build.ps1 changed");
+    check("build.ps1 untouched when DX already latest", readFileSync(join(repo, "build.ps1"), "utf-8").includes('-version "26.1.300.0"'), "build.ps1 changed");
     check("build ran in pane", pane.sent.length === 1, JSON.stringify(pane.sent));
     check("published", result.includes("published"), result);
+  }
+  // Section: T4b — DX already latest but build.ps1 stale: repaired once, no creep on rerun
+  {
+    const repo = mkRepo([
+      ["DevExpress.ExpressApp", "26.1.4"],
+      ["DevExpress.Xpo", "26.1.4"],
+      ["DevExpress.Utils", "26.1.4"],
+      ["Xpand.Collections", "1.0.4"],
+    ]);
+    writeFileSync(join(repo, "build.ps1"), "& .\\support\\build\\go.ps1 -version \"26.1.301.0\"\n");
+    const runner = mkRunner([
+      { match: VM_CHECK_PREFIX, result: { code: 0, stdout: VM_RUN, stderr: "" } },
+      { match: "git status --short", result: { code: 0, stdout: " M build.ps1\n", stderr: "" } },
+      { match: "git add -A", result: okResult() },
+      { match: "git commit -m *", result: okResult() },
+      { match: "prx", result: okResult() },
+    ]);
+    const pane = mkPaneSeams();
+    const pi = mkPi();
+    registerBuildCommand(pi, { run: runner.run, fetchFeed: mkFetch(["26.1.4"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1, ...pane });
+    const ctx = mkCtx([...MENU, "Lab", "Commit", "Publish"], repo);
+    const result = await pi._cmds.get("devexpress").handler([], ctx);
+    check("T4b: stale build.ps1 repaired to DX base", readFileSync(join(repo, "build.ps1"), "utf-8").includes('-version "26.1.400.0"'), readFileSync(join(repo, "build.ps1"), "utf-8"));
+    check("T4b: published", result.includes("published"), result);
   }
   // Section: T5 — mixed pins left untouched
   {

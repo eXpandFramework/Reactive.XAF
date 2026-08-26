@@ -109,6 +109,19 @@ function trackedWrite(file: string, data: string): void {
   seam(file, data);
 }
 
+/** Rewrite build.ps1's -version to the DX-derived base when it mismatches.
+ *  Returns true when the file changed; a correct version is never touched. */
+function bumpBuildPs1(repoRoot: string, dxVersion: string, notes: string[]): boolean {
+  const buildPs1 = path.join(repoRoot, "build.ps1");
+  if (!fs.existsSync(buildPs1)) return false;
+  const bp = fs.readFileSync(buildPs1, "utf-8");
+  const bumped = rewriteBuildVersion(bp, dxVersion);
+  if (bumped === bp) return false;
+  trackedWrite(buildPs1, bumped);
+  notes.push(`bumped build.ps1 -version to ${dxBaseVersion(dxVersion)}`);
+  return true;
+}
+
 function tail(s: string, n = 1500): string {
   const t = s.trim();
   return t.length <= n ? t : "..." + t.slice(-n);
@@ -128,7 +141,8 @@ async function dxPhase(ctx: any, seams: BuildSeams, propsPath: string, latest: s
   }
   if (unique === latest) {
     notes.push(`DX already at latest (${latest})`);
-    return { changed: false, notes };
+    const repaired = bumpBuildPs1(path.dirname(propsPath), latest, notes);
+    return { changed: repaired, notes };
   }
   const pick = await ctx.ui.select(`DX ${unique} → ${latest}: update all DevExpress.* pins?`, ["Update", "Skip", "Abort"]);
   if (pick === "Abort") throw new Error("aborted at the DX update prompt");
@@ -138,15 +152,7 @@ async function dxPhase(ctx: any, seams: BuildSeams, propsPath: string, latest: s
   }
   trackedWrite(propsPath, rewriteDxVersion(text, latest));
   notes.push(`updated all DevExpress.* pins ${unique} → ${latest}`);
-  const buildPs1 = path.join(path.dirname(propsPath), "build.ps1");
-  if (fs.existsSync(buildPs1)) {
-    const bp = fs.readFileSync(buildPs1, "utf-8");
-    const bumped = rewriteBuildVersion(bp, latest);
-    if (bumped !== bp) {
-      trackedWrite(buildPs1, bumped);
-      notes.push(`bumped build.ps1 -version to ${dxBaseVersion(latest)}`);
-    }
-  }
+  bumpBuildPs1(path.dirname(propsPath), latest, notes);
   return { changed: true, notes };
 }
 
