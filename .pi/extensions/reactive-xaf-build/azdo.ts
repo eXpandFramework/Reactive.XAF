@@ -65,13 +65,14 @@ const REAL_ERROR = /CSC : error\b|\berror (?:CS|MSB|DX|NU)\d+\b|\berror :\b/;
 /** Generic build-level failure marker (tier 2 — used only when no tier-1 line). */
 const BUILD_FAILED = /Build FAILED/i;
 
-/** PS: fetch the failed timeline record's log and print a bounded tail between
- *  LOGSTART/LOGEND markers for TS-side extraction; $reason carries only the
- *  fetch-failure fallback. */
+/** PS: fetch the failed TASK record's log (the Job record's log is a summary
+ *  without the real error) and print a bounded tail between LOGSTART/LOGEND
+ *  markers for TS-side extraction; $reason carries only the fetch-failure
+ *  fallback. */
 const LOG_BLOCK = `
   try {
     $t = Invoke-AzureRestMethod ("build/builds/" + $b.id + "/timeline") @cred
-    $rec = $t.records | Where-Object { $_.result -eq "failed" -and $_.log.id } | Select-Object -First 1
+    $rec = $t.records | Where-Object { $_.type -eq "Task" -and $_.result -eq "failed" -and $_.log.id } | Select-Object -First 1
     if ($rec) {
       $log = Invoke-AzureRestMethod ("build/builds/" + $b.id + "/logs/" + $rec.log.id) @cred
       "LOGSTART"

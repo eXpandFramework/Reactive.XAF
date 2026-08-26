@@ -127,6 +127,17 @@ function registerCapture(repo: string, stdout: string): { pi: any; calls: string
       JSON.stringify(calls)
     );
   }
+  // Section: T7 — status log block targets the failed TASK record (the Job record's log has no error lines)
+  {
+    const repo = mkRepo();
+    const { pi, calls } = registerCapture(repo, crlf(["STATUS=35797;completed;failed;"]));
+    await pi._cmds.get("devexpress").handler(["status"], mkCtx(repo));
+    check(
+      "T7: status log block filters failed Task records",
+      calls.some((c) => c.includes('$_.type -eq "Task" -and $_.result -eq "failed"')),
+      JSON.stringify(calls)
+    );
+  }
   console.log(`\n${ok} passed, ${fail} failed`);
   process.exit(fail > 0 ? 1 : 0);
 })();
