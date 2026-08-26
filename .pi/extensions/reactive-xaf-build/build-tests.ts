@@ -155,6 +155,7 @@ function mkMonitor(): { pi: any; repo: string; starts: number[] } {
   // Section: T3 — Lab happy path with DX update, build in a pane
   {
     const repo = mkRepo(DX_PINS);
+    writeFileSync(join(repo, "build.ps1"), "& .\\support\\build\\go.ps1 -version \"26.1.300.0\"\n");
     const runner = mkRunner([
       { match: VM_CHECK_PREFIX, result: { code: 0, stdout: VM_OFF, stderr: "" } },
       { match: "Start-VM -Name C11", result: okResult() },
@@ -178,12 +179,14 @@ function mkMonitor(): { pi: any; repo: string; starts: number[] } {
     check("milestones notified", ctx._notifies.some((n) => n.includes("Build started — pane")) && ctx._notifies.some((n) => n.includes("Checking Hyper-V agents")) && ctx._notifies.some((n) => n.includes("Committing build state")) && ctx._notifies.some((n) => n.includes("Publishing via prx")), ctx._notifies.join(" | "));
     check("close ask conversational, no modal, pane kept", ctx._notifies.some((n) => n.includes("Close build pane")) && !ctx._prompts.some((p) => p.includes("Close build pane")) && pane.closed.length === 0, ctx._notifies.join(" | ") + " " + JSON.stringify(pane.closed));
     check("commit message carries DX", runner.calls.some((c) => c.startsWith('git commit -m "Update DX to 26.1.4"')), runner.calls.join(" | "));
+    check("build.ps1 version bumped with DX", readFileSync(join(repo, "build.ps1"), "utf-8").includes('-version "26.1.400.0"'), readFileSync(join(repo, "build.ps1"), "utf-8"));
     check("prx ran last", runner.calls[runner.calls.length - 1] === "prx", runner.calls.join(" | "));
     check("success: no failure delivery", pi._userMessages.length === 0, JSON.stringify(pi._userMessages));
   }
   // Section: T4 — DX already latest
   {
     const repo = mkRepo(DX_PINS);
+    writeFileSync(join(repo, "build.ps1"), "& .\\support\\build\\go.ps1 -version \"26.1.400.0\"\n");
     const runner = mkRunner([
       { match: VM_CHECK_PREFIX, result: { code: 0, stdout: VM_RUN, stderr: "" } },
       { match: "git status --short", result: { code: 0, stdout: " M src/x.cs\n", stderr: "" } },
@@ -197,6 +200,7 @@ function mkMonitor(): { pi: any; repo: string; starts: number[] } {
     const ctx = mkCtx([...MENU, "Lab", "Commit", "Publish"], repo);
     const result = await pi._cmds.get("devexpress").handler([], ctx);
     check("no update prompt, props untouched", !ctx._prompts.some((p) => p.includes("update all DevExpress")) && propsText(repo).includes('Version="26.1.3"') && !propsText(repo).includes("26.1.4"), "props changed");
+    check("build.ps1 untouched when DX already latest", readFileSync(join(repo, "build.ps1"), "utf-8").includes('-version "26.1.400.0"'), "build.ps1 changed");
     check("build ran in pane", pane.sent.length === 1, JSON.stringify(pane.sent));
     check("published", result.includes("published"), result);
   }

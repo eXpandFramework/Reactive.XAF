@@ -90,6 +90,19 @@ export function rewriteDxVersion(text: string, newVersion: string): string {
   return text.replace(/(Include="DevExpress\.[^"]*"\s+Version=")[^"]*(")/g, `$1${newVersion}$2`);
 }
 
+/** The eXpand base version for a DX version: 26.1.4 → 26.1.400.0 (minor × 100). */
+export function dxBaseVersion(dxVersion: string): string | null {
+  const m = dxVersion.match(/^(\d+)\.(\d+)\.(\d+)$/);
+  return m ? `${m[1]}.${m[2]}.${Number(m[3]) * 100}.0` : null;
+}
+
+/** Rewrite build.ps1's `-version "X.Y.Z.W"` to the DX-derived base.
+ *  Untouched when the DX version has no ×100 mapping. */
+export function rewriteBuildVersion(text: string, dxVersion: string): string {
+  const base = dxBaseVersion(dxVersion);
+  return base ? text.replace(/-version "(\d+\.\d+\.\d+\.\d+)"/, `-version "${base}"`) : text;
+}
+
 function trackedWrite(file: string, data: string): void {
   const seam = (globalThis as any).__writeFileSync;
   if (typeof seam !== "function") throw new Error("__writeFileSync seam missing — pi-dev not loaded");
@@ -125,6 +138,15 @@ async function dxPhase(ctx: any, seams: BuildSeams, propsPath: string, latest: s
   }
   trackedWrite(propsPath, rewriteDxVersion(text, latest));
   notes.push(`updated all DevExpress.* pins ${unique} → ${latest}`);
+  const buildPs1 = path.join(path.dirname(propsPath), "build.ps1");
+  if (fs.existsSync(buildPs1)) {
+    const bp = fs.readFileSync(buildPs1, "utf-8");
+    const bumped = rewriteBuildVersion(bp, latest);
+    if (bumped !== bp) {
+      trackedWrite(buildPs1, bumped);
+      notes.push(`bumped build.ps1 -version to ${dxBaseVersion(latest)}`);
+    }
+  }
   return { changed: true, notes };
 }
 
