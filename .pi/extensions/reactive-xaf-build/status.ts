@@ -4,8 +4,9 @@
  * statusPhase queries the newest build of a definition (azdoStatusScript via
  * the run seam) and notifies the outcome: id, current state, the ##[error]
  * reason on failure, and the AzDO definition link. cancelPhase PATCH-cancels
- * the newest running build of a definition. Definition comes from
- * profile.statusDef (RX default Lab = 23). Info only — no steering.
+ * EVERY running/queued build of the project (project-wide, no definition
+ * filter). Definition comes from profile.statusDef (RX default Lab = 23).
+ * Info only — no steering.
  */
 
 import { azdoStatusScript, parseStatus, extractFailReason, failLogFromStdout, azdoBuildUrl, cancelAzDoScript, parseCancel } from "./azdo.js";
@@ -38,10 +39,10 @@ export async function statusPhase(ctx: any, seams: BuildSeams, definition?: stri
   return msg;
 }
 
-/** PATCH-cancel the newest running build and notify the outcome. */
-export async function cancelPhase(ctx: any, seams: BuildSeams, definition?: string): Promise<string> {
-  definition ??= profileOf(seams).statusDef("Lab");
-  const res = await seams.run(cancelAzDoScript(definition), { timeoutMs: 60000 });
+/** PATCH-cancel every running/queued build of the project and notify the
+ *  outcome with the canceled count. */
+export async function cancelPhase(ctx: any, seams: BuildSeams): Promise<string> {
+  const res = await seams.run(cancelAzDoScript(), { timeoutMs: 60000 });
   const c = parseCancel(res.stdout);
   let msg: string;
   if (!c) {
@@ -50,7 +51,8 @@ export async function cancelPhase(ctx: any, seams: BuildSeams, definition?: stri
   } else if (c.id === 0) {
     msg = "No AzDO builds found to cancel.";
   } else if (c.ok) {
-    msg = `Cancel requested for AzDO build ${c.id} — the agent stops it within ~2 min.`;
+    const n = Number(c.status);
+    msg = `Cancel requested for ${c.status} AzDO build${n === 1 ? "" : "s"} — agents stop them within ~2 min.`;
   } else {
     msg = `AzDO build ${c.id} is ${c.status} — nothing to cancel.`;
   }

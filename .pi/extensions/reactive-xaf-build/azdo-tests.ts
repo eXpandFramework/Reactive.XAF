@@ -88,19 +88,19 @@ function registerCapture(repo: string, stdout: string): { pi: any; calls: string
     const r = await pi._cmds.get("devexpress").handler(["status"], mkCtx(repo));
     check("T1: status surfaces id + extracted reason from CRLF", r.includes("35735") && r.includes("DX1003"), r);
   }
-  // Section: T2 — running build: cancel PATCHes it (CRLF CANCEL=)
+  // Section: T2 — running builds: cancel requests project-wide cancel (CRLF CANCEL=)
   {
     const repo = mkRepo();
-    const pi = register(repo, crlf(["CANCEL=35735;ok;inProgress"]));
+    const pi = register(repo, crlf(["CANCEL=35735;ok;3"]));
     const r = await pi._cmds.get("devexpress").handler(["cancel"], mkCtx(repo));
-    check("T2: cancel requested surfaced from CRLF", r.includes("Cancel requested for AzDO build 35735"), r);
+    check("T2: cancel requested for all builds surfaced from CRLF", r.includes("Cancel requested for 3 AzDO builds"), r);
   }
-  // Section: T3 — finished build: cancel is a no-op note
+  // Section: T3 — nothing running: cancel is a no-op note
   {
     const repo = mkRepo();
-    const pi = register(repo, crlf(["CANCEL=35735;notrunning;completed"]));
+    const pi = register(repo, crlf(["CANCEL=0;none;none"]));
     const r = await pi._cmds.get("devexpress").handler(["cancel"], mkCtx(repo));
-    check("T3: not-running cancel surfaced", r.includes("nothing to cancel"), r);
+    check("T3: no-builds cancel surfaced", r.includes("No AzDO builds found to cancel"), r);
   }
   // Section: T4 — registration through the real index boot
   {
@@ -115,6 +115,17 @@ function registerCapture(repo: string, stdout: string): { pi: any; calls: string
     const { pi, calls } = registerCapture(repo, crlf(["STATUS=35735;completed;failed;"]));
     await pi._cmds.get("devexpress").handler(["status"], mkCtx(repo));
     check("T5: plain status keeps def 23", calls.some((c) => c.includes("definitions=23")), JSON.stringify(calls));
+  }
+  // Section: T6 — cancel is project-wide: no definition filter, statusFilter query
+  {
+    const repo = mkRepo();
+    const { pi, calls } = registerCapture(repo, crlf(["CANCEL=0;none;none"]));
+    await pi._cmds.get("devexpress").handler(["cancel"], mkCtx(repo));
+    check(
+      "T6: cancel queries all builds project-wide",
+      calls.some((c) => c.includes("statusFilter=inProgress,notStarted,postponed") && !c.includes("definitions=")),
+      JSON.stringify(calls)
+    );
   }
   console.log(`\n${ok} passed, ${fail} failed`);
   process.exit(fail > 0 ? 1 : 0);

@@ -14,11 +14,12 @@
  * ##[error]Exception, "PowerShell exited with code", retry lines) and
  * attaching the nearest "Executing <task>" line as context.
  *
- * The cancel script (cancelAzDoScript) PATCHes {"status":"cancelling"} on a
- * running build — the documented cancel; DELETE is rejected by the API on
- * running builds (CannotDeleteRunningBuildException), which silently broke
- * prx's cancel and left zombie builds holding the pool (2026-08-25, fixed in
- * XpandPwsh Remove-AzBuild).
+ * The cancel script (cancelAzDoScript) PATCHes {"status":"cancelling"} on
+ * EVERY running/queued build of the project — the documented cancel; DELETE
+ * is rejected by the API on running builds
+ * (CannotDeleteRunningBuildException), which silently broke prx's cancel
+ * and left zombie builds holding the pool (2026-08-25, fixed in XpandPwsh
+ * Remove-AzBuild).
  *
  * One pwsh spawn per query: the profile loads Invoke-AzureRestMethod
  * (XpandPwsh, on PSModulePath) and sets $env:AzProject / $env:AzOrganization.
@@ -94,18 +95,19 @@ if ($b.result -eq "failed") {${LOG_BLOCK}
 "STATUS=$($b.id);$($b.status);$($b.result);$reason"`;
 }
 
-/** The one-shot cancel script: PATCH-cancel the newest build if it is running.
- *  definitions defaults to 23 (Reactive.XAF). */
-export function cancelAzDoScript(definitions = LAB_DEF): string {
+/** The project-wide cancel script: PATCH-cancel EVERY running/queued build of
+ *  the project (statusFilter=inProgress,notStarted,postponed, no definition
+ *  filter), so "Cancel AzDO build" stops the whole chain at once. CANCEL=
+ *  carries the first canceled id and the total count. */
+export function cancelAzDoScript(): string {
   return `$cred = @{ Project = $env:AzProject; Organization = $env:AzOrganization }
-$b = (Invoke-AzureRestMethod 'build/builds?definitions=${definitions}&$top=1&queryOrder=queueTimeDescending' @cred)[0]
-if ($null -eq $b) { "CANCEL=0;none;none"; exit 0 }
-if ($b.status -in @("inProgress","notStarted","postponed","cancelling")) {
+$bs = Invoke-AzureRestMethod 'build/builds?statusFilter=inProgress,notStarted,postponed&$top=100' @cred
+$running = @($bs | Where-Object { $_.status -in @("inProgress","notStarted","postponed") })
+if ($running.Count -eq 0) { "CANCEL=0;none;none"; exit 0 }
+foreach ($b in $running) {
   Invoke-AzureRestMethod ("build/builds/" + $b.id) -Method Patch -Body '{"status":"cancelling"}' @cred | Out-Null
-  "CANCEL=$($b.id);ok;$($b.status)"
-} else {
-  "CANCEL=$($b.id);notrunning;$($b.status)"
-}`;
+}
+"CANCEL=$($running[0].id);ok;$($running.Count)"`;
 }
 
 /** Default GitHub API fetch: Authorization from GH_TOKEN / GITHUB_TOKEN when
