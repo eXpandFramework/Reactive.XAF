@@ -85,7 +85,7 @@ function rxChain(choice: Choice): ChainStep[] {
 function expandChain(choice: Choice): ChainStep[] {
   const head = choice === "Release"
     ? { definition: "39", label: "eXpand Release build" }
-    : { definition: "32", label: "eXpand Lab build" };
+    : { definition: "94", label: "eXpand Lab build" };
   return [
     head,
     { definition: "38", label: "nuget publish pipeline", assertNugets: true },
@@ -128,10 +128,10 @@ export const expandProfile: RepoProfile = {
   queueCmd: (choice) => choice === "Release" ? "px -Release" : "px",
   queueLabel: (choice) => choice === "Release"
     ? "git push eXpand then px -Release (queue Xpand-Release def 39)"
-    : "git push lab then px (queue Xpand-Lab def 32)",
+    : "git push lab then px (queue Xpand-Lab def 94)",
   pushRemote: (choice) => choice === "Release" ? "eXpand" : "lab",
   chain: expandChain,
-  statusDef: (choice) => choice === "Release" ? "39" : "32",
+  statusDef: (choice) => choice === "Release" ? "39" : "94",
   githubRepo: (choice) => choice === "Release"
     ? "eXpandFramework/eXpand"
     : "eXpandFramework/eXpand.lab",

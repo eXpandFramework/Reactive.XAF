@@ -113,13 +113,11 @@ const GREEN_EXPAND = [
 ];
 
 (async () => {
-  // Section: P0 — index still registers /devexpress
   {
     const pi = mkPi();
     activate(pi);
     check("P0: devexpress registered via index.ts", typeof pi._cmds.get("devexpress")?.handler === "function");
   }
-  // Section: P1 — RX detect rejects a tree that is neither RX nor expand
   {
     const other = mkdtempSync(join(tmpdir(), "neither-"));
     const runner = mkRunner([]);
@@ -128,7 +126,6 @@ const GREEN_EXPAND = [
     const result = await pi._cmds.get("devexpress").handler([], mkCtx(["Build", "RX-XAF", "Lab"], other));
     check("P1: RX loud-rejects foreign tree, zero commands", result.includes("not inside the Reactive.XAF repo") && runner.calls.length === 0, result);
   }
-  // Section: P2 — expand pick from an expand cwd: menu offers Project, then bx/px
   {
     const repo = mkExpandRepo();
     const runner = mkRunner(GREEN_EXPAND);
@@ -149,7 +146,6 @@ const GREEN_EXPAND = [
     check("P2: bx lab sent to pane", pane.sent.length === 1 && pane.sent[0].startsWith("bx lab;"), JSON.stringify(pane.sent));
     check("P2: git push lab then px, published", runner.calls.includes("git push lab HEAD:master") && runner.calls.includes("px") && result.includes("published"), runner.calls.join(" | ") + " " + result);
   }
-  // Section: P3 — expand status queries def 32, RX status still queries def 23
   {
     const expand = mkExpandRepo();
     const rx = mkRxRepo();
@@ -176,10 +172,9 @@ const GREEN_EXPAND = [
       repoRoot: rx,
     });
     await rxPi._cmds.get("devexpress").handler(["status"], mkCtx([], rx));
-    check("P3: expand status queries def 32", expCalls.some((c) => c.includes("definitions=32")), JSON.stringify(expCalls));
+    check("P3: expand status queries def 94", expCalls.some((c) => c.includes("definitions=94")), JSON.stringify(expCalls));
     check("P3: RX status still queries def 23", rxCalls.some((c) => c.includes("definitions=23")), JSON.stringify(rxCalls));
   }
-  // Section: P4 — RX happy path still uses brx/prx after RX-XAF pick
   {
     const repo = mkRxRepo();
     const runner = mkRunner(GREEN_RX);

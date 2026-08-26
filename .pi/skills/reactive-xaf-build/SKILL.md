@@ -14,6 +14,9 @@ Both RX choices run the `Reactive.XAF` pipeline (**def 23**) — Lab queues
 branch lab, Release (`prx -Release`) queues branch master — followed by
 PublishNugets (**def 72**) and release consumers (**def 89**).
 
+Expand Lab queues **def 94** (`Xpand-Lab`; `px`). Def 32 is `_Xpand-Lab`,
+a 2023 leftover. Release is def 39 → 38 → 37.
+
 ## Command surface
 
 - `/devexpress` — interactive menu: Build | Publish → **RX-XAF | eXpand**
@@ -51,7 +54,7 @@ Menu picks run in the INVOKING window. The eXpand pick uses
 | `menu-tests.ts` | `menu-tests.md` | Skip-build contract. |
 | `delegate-tests.ts` | `delegate-tests.md` | Delegation fallback. |
 | `build-tests.ts` | `build-tests.md` | Full flow. |
-| `watcher-tests.ts` | `watcher-tests.md` | Watcher. |
+| `watcher-tests.ts` | `watcher-tests.md` | Watcher W1–W16. |
 | `profile-tests.ts` | `profile-tests.md` | RepoProfile (RX vs expand). |
 | `azdo.ts` / `status.ts` | `azdo.md` | AzDO status/cancel. |
 | `delegate.ts` | `delegate.md` | Dormant. |

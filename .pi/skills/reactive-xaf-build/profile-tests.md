@@ -12,5 +12,5 @@ Run: `npx tsx C:/Work/Reactive.XAF/.pi/extensions/reactive-xaf-build/profile-tes
 - P0 — index still registers `/devexpress`.
 - P1 — RX detect rejects an expand-shaped tree (loud, zero commands).
 - P2 — expandProfile: menu skips RX-XAF, `bx lab` in the pane, `git push lab` then `px`, published.
-- P3 — expand status queries def 32; RX status still queries def 23.
+- P3 — expand status queries def 94; RX status still queries def 23.
 - P4 — default profile still sends `brx` and `prx`.

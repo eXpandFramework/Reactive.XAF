@@ -6,27 +6,19 @@ description: Behavior contract for the AzDO status/cancel parse path — CRLF (p
 # azdo-tests.ts — AzDO parse contract
 
 Companion of `.pi/extensions/reactive-xaf-build/azdo-tests.ts`. Pins the
-CRLF parse contract: the status/cancel scripts print STATUS=/CANCEL=
-lines with \r\n (pwsh pipe output), and parseStatus/parseCancel must
-split on /\r?\n/. A regression to a bare \n split leaves \r on every line
-and the (.*)$ regex cannot cross it — the old monitor reported the fake
-"no RESULT= line in monitor output" (2026-08-25 fix).
+CRLF parse contract.
 
 Run: `npx tsx d:/Reactive.XAF/.pi/extensions/reactive-xaf-build/azdo-tests.ts`
 
 ## Pinned behaviors
 
-- T1 — `/devexpress status` on CRLF output (LOGSTART/LOGEND block +
-  `STATUS=35735;completed;failed;`) surfaces the id AND the extracted
+- T1 — `/devexpress status` on CRLF output surfaces the id AND the extracted
   fail reason (`error DX1003` beats the wrapper noise).
-- T2 — `/devexpress cancel` on `CANCEL=35735;ok;inProgress` reports the
-  cancel request.
-- T3 — `/devexpress cancel` on `CANCEL=35735;notrunning;completed`
-  reports nothing to cancel.
+- T2 — `/devexpress cancel` on `CANCEL=35735;ok;3` reports the cancel request.
+- T3 — `/devexpress cancel` on `CANCEL=0;none;none` reports nothing to cancel.
 - T4 — the devexpress command registers through the real index boot.
-- T5 — plain `status` queries the Reactive.XAF definition (23) — Lab and
-  Release both run def 23, there is no release-arg variant (the def-39
-  variants were removed 2026-08-25).
-
-All fixtures are CRLF — bare-LF fakes would not exercise the bug class
-this file pins. Real pwsh, AzDO and pi are never spawned.
+- T5 — plain `status` queries the Reactive.XAF definition (23).
+- T6 — cancel is project-wide: no definition filter, statusFilter query.
+- T7 — the status log block targets the failed Task record.
+- T8 — 5-field `STATUS=id;status;result;buildNumber;reason` still
+  extracts the log reason (`Release 26.1.301.1 exists`).

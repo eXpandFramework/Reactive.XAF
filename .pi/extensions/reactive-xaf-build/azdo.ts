@@ -23,7 +23,9 @@
  *
  * One pwsh spawn per query: the profile loads Invoke-AzureRestMethod
  * (XpandPwsh, on PSModulePath) and sets $env:AzProject / $env:AzOrganization.
- * Scripts print a single STATUS= / CANCEL= line and exit.
+ * Scripts print a single STATUS= / CANCEL= line and exit. STATUS is
+ * `id;status;result;buildNumber;reason` (parseStatus also accepts the
+ * older 4-field line with no buildNumber).
  *
  * The publish chain runs on ONE pipeline — the Reactive.XAF definition
  * (def 23); Lab builds queue branch lab, Release (prx -Release) queues
@@ -41,6 +43,7 @@ export interface AzDoStatus {
   id: number;
   status: string;
   result: string;
+  buildNumber: string;
   reason: string;
 }
 
@@ -93,7 +96,7 @@ if ($null -eq $b) { "STATUS=0;none;none;"; exit 0 }
 $reason = ""
 if ($b.result -eq "failed") {${LOG_BLOCK}
 }
-"STATUS=$($b.id);$($b.status);$($b.result);$reason"`;
+"STATUS=$($b.id);$($b.status);$($b.result);$($b.buildNumber);$reason"`;
 }
 
 /** The project-wide cancel script: PATCH-cancel EVERY running/queued build of
@@ -125,16 +128,21 @@ export async function defaultGhFetch(url: string, opts: { method?: string; body?
 /** Parse the status script's last STATUS= line; null when none was printed.
  *  CRLF — split on /\r?\n/ so the trailing \r never reaches the regex (a bare
  *  \n split silently broke every real parse; 2026-08-25 fix, contract:
- *  azdo-tests.ts). */
+ *  azdo-tests.ts). Five-field (id;status;result;buildNumber;reason) first;
+ *  four-field (no buildNumber) still parses so existing fixtures keep working. */
 export function parseStatus(stdout: string): AzDoStatus | null {
   let line = "";
   for (const l of stdout.split(/\r?\n/)) {
     if (l.startsWith("STATUS=")) line = l;
   }
   if (!line) return null;
-  const m = line.match(/^STATUS=([^;]*);([^;]*);([^;]*);(.*)$/);
-  if (!m) return null;
-  return { id: Number(m[1]), status: m[2], result: m[3], reason: m[4].trim() };
+  const five = line.match(/^STATUS=([^;]*);([^;]*);([^;]*);([^;]*);(.*)$/);
+  if (five) {
+    return { id: Number(five[1]), status: five[2], result: five[3], buildNumber: five[4], reason: five[5].trim() };
+  }
+  const four = line.match(/^STATUS=([^;]*);([^;]*);([^;]*);(.*)$/);
+  if (!four) return null;
+  return { id: Number(four[1]), status: four[2], result: four[3], buildNumber: "", reason: four[4].trim() };
 }
 
 /** Parse the cancel script's last CANCEL= line; null when none was printed. */

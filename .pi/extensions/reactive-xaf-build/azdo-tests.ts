@@ -1,13 +1,6 @@
 /**
  * reactive-xaf-build/azdo-tests — behavior contract for the AzDO status +
  * cancel parse path against REAL pwsh-shaped output (CRLF line endings).
- *
- * The status/cancel scripts print STATUS=/CANCEL= lines with \r\n (pwsh
- * pipe output). parseStatus/parseCancel split on /\r?\n/ — a regression to a
- * bare \n split leaves \r on every line and the (.*)$ regex cannot cross a
- * line terminator (2026-08-25 fix; the old monitor's "no RESULT= line"
- * symptom). These tests drive the status and cancel commands through the
- * registered command with CRLF fixtures and assert the surfaced messages.
  * Run: npx tsx C:/Work/Reactive.XAF/.pi/extensions/reactive-xaf-build/azdo-tests.ts
  */
 /* oxlint-disable no-console -- test harness prints PASS/FAIL to stdout */
@@ -64,7 +57,6 @@ function register(repo: string, stdout: string): any {
   });
   return pi;
 }
-/** register with a call-capturing run seam (for definition assertions). */
 function registerCapture(repo: string, stdout: string): { pi: any; calls: string[] } {
   const pi = mkPi();
   const calls: string[] = [];
@@ -80,7 +72,6 @@ function registerCapture(repo: string, stdout: string): { pi: any; calls: string
 }
 
 (async () => {
-  // Section: T1 — failed build: CRLF STATUS= + LOG block surfaces id and the real reason
   {
     const repo = mkRepo();
     const logLines = ["Executing Compile", "CSC : error DX1003: Expired license key version", "##[error]PowerShell exited with code '1'"];
@@ -88,35 +79,30 @@ function registerCapture(repo: string, stdout: string): { pi: any; calls: string
     const r = await pi._cmds.get("devexpress").handler(["status"], mkCtx(repo));
     check("T1: status surfaces id + extracted reason from CRLF", r.includes("35735") && r.includes("DX1003"), r);
   }
-  // Section: T2 — running builds: cancel requests project-wide cancel (CRLF CANCEL=)
   {
     const repo = mkRepo();
     const pi = register(repo, crlf(["CANCEL=35735;ok;3"]));
     const r = await pi._cmds.get("devexpress").handler(["cancel"], mkCtx(repo));
     check("T2: cancel requested for all builds surfaced from CRLF", r.includes("Cancel requested for 3 AzDO builds"), r);
   }
-  // Section: T3 — nothing running: cancel is a no-op note
   {
     const repo = mkRepo();
     const pi = register(repo, crlf(["CANCEL=0;none;none"]));
     const r = await pi._cmds.get("devexpress").handler(["cancel"], mkCtx(repo));
     check("T3: no-builds cancel surfaced", r.includes("No AzDO builds found to cancel"), r);
   }
-  // Section: T4 — registration through the real index boot
   {
     const pi = mkPi();
     activate(pi);
     const cmd = pi._cmds.get("devexpress");
     check("T4: devexpress command registered via index.ts", typeof cmd?.handler === "function");
   }
-  // Section: T5 — status without args queries the Reactive.XAF definition (23)
   {
     const repo = mkRepo();
     const { pi, calls } = registerCapture(repo, crlf(["STATUS=35735;completed;failed;"]));
     await pi._cmds.get("devexpress").handler(["status"], mkCtx(repo));
     check("T5: plain status keeps def 23", calls.some((c) => c.includes("definitions=23")), JSON.stringify(calls));
   }
-  // Section: T6 — cancel is project-wide: no definition filter, statusFilter query
   {
     const repo = mkRepo();
     const { pi, calls } = registerCapture(repo, crlf(["CANCEL=0;none;none"]));
@@ -127,7 +113,6 @@ function registerCapture(repo: string, stdout: string): { pi: any; calls: string
       JSON.stringify(calls)
     );
   }
-  // Section: T7 — status log block targets the failed TASK record (the Job record's log has no error lines)
   {
     const repo = mkRepo();
     const { pi, calls } = registerCapture(repo, crlf(["STATUS=35797;completed;failed;"]));
@@ -137,6 +122,12 @@ function registerCapture(repo: string, stdout: string): { pi: any; calls: string
       calls.some((c) => c.includes('$_.type -eq "Task" -and $_.result -eq "failed"')),
       JSON.stringify(calls)
     );
+  }
+  {
+    const repo = mkRepo();
+    const pi = register(repo, crlf(["LOGSTART", "##[error]Release 26.1.301.1 exists", "LOGEND", "STATUS=35802;completed;failed;26.1.301.1;"]));
+    const r = await pi._cmds.get("devexpress").handler(["status"], mkCtx(repo));
+    check("T8: 5-field STATUS surfaces id + log reason", r.includes("35802") && r.includes("Release 26.1.301.1 exists"), r);
   }
   console.log(`\n${ok} passed, ${fail} failed`);
   process.exit(fail > 0 ? 1 : 0);

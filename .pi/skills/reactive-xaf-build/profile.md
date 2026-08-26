@@ -21,8 +21,8 @@ never tests `label === "eXpand"`.
 - `buildCmd` / `queueCmd` / `queueLabel` / `pushRemote` — RX: `brx`/`prx`,
   push null (`prx` already pushes). Expand: `bx lab`/`bx Release`, `px` /
   `px -Release`, push `lab` or `eXpand` then queue.
-- `chain` — RX 23 → 72 (assert nugets) → 89. Expand Lab 32 / Release 39
-  → 38 (nugets) → 37.
+- `chain` — RX 23 → 72 (assert nugets) → 89. Expand Lab 94 / Release 39
+  → 38 (nugets) → 37. Def 32 is `_Xpand-Lab`, a 2023 leftover; `px` queues 94.
 - `versionFile` — RX `src/Common/AssemblyInfoVersion.cs`. Expand
   `Xpand/Xpand.Utils/Properties/XpandAssemblyInfo.cs` (build writes it;
   we never edit it).

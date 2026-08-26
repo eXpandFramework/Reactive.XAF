@@ -2,16 +2,18 @@
  * reactive-xaf-build/watcher — background AzDO watcher for the publish chain.
  *
  * Chain, nuget id, version file, GitHub repo and on-success action come
- * from RepoProfile. RX is the default. One watcher at a time.
+ * from RepoProfile. RX is the default. One watcher at a time. A finished
+ * build whose buildNumber does not match versionFile is not this run
+ * (wait, then give-up steers). Failed polls use extractFailReason.
  */
 
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { setTimeout as sleep } from "node:timers/promises";
-import { azdoStatusScript, parseStatus, azdoBuildUrl, defaultGhFetch } from "./azdo.js";
+import { azdoStatusScript, parseStatus, azdoBuildUrl, defaultGhFetch, extractFailReason, failLogFromStdout } from "./azdo.js";
 import type { BuildSeams } from "./build.js";
 import {
-  rxProfile, nugetAssertUrl, nugetOrgNuspecUrl, githubReleasesUrl, githubReleaseUrl,
+  rxProfile, nugetAssertUrl, nugetOrgNuspecUrl, githubReleasesUrl, githubReleaseUrl, compareVersions,
 } from "./profile.js";
 import type { RepoProfile, Choice, ChainStep, GithubOnSuccess } from "./profile.js";
 
@@ -74,8 +76,9 @@ export function isAzDoWatcherActive(): boolean {
   return !!state && !state.stopped;
 }
 
-async function giveUp(ctx: any, state: WatcherState, msg: string): Promise<void> {
+async function giveUp(ctx: any, state: WatcherState, msg: string, pi?: any): Promise<void> {
   await ctx.ui.notify(msg, "warning");
+  if (pi) pi.sendUserMessage(msg, { deliverAs: "steer" });
   state.stop();
 }
 
@@ -120,7 +123,7 @@ async function assertNugets(ctx: any, seams: BuildSeams, repoRoot: string | unde
   try {
     const text = await seams.fetchFeed(nugetAssertUrl(p.nugetId));
     const versions = [...text.matchAll(NUGET_VERSION_RE)].map((m) => m[1]);
-    const found = versions.includes(version);
+    const found = versions.some((v) => compareVersions(v, version) === 0);
     return { ok: found, detail: `${p.nugetId} ${version} ${found ? "found" : "NOT found"} on the eXpand nuget server` };
   } catch (err) {
     return { ok: false, detail: `feed query failed: ${err instanceof Error ? err.message : String(err)}` };
@@ -214,9 +217,13 @@ async function advanceStep(state: WatcherState, ctx: any, s: { id: number; resul
   await ctx.ui.notify(`${previous.label} ${s.id} succeeded — watching the ${next.label}…`, "info");
 }
 
-async function handleTerminal(state: WatcherState, pi: any, ctx: any, seams: BuildSeams, opts: AzDoWatcherOptions, s: { id: number; result: string; reason: string }): Promise<void> {
+function failReason(s: { reason: string }, stdout: string): string {
+  return s.reason || extractFailReason(failLogFromStdout(stdout));
+}
+
+async function handleSucceeded(state: WatcherState, pi: any, ctx: any, seams: BuildSeams, opts: AzDoWatcherOptions, s: { id: number; result: string }): Promise<void> {
   const step = state.chain[state.step];
-  if (s.result === "succeeded" && state.step < state.chainLength - 1) {
+  if (state.step < state.chainLength - 1) {
     if (step.assertNugets) {
       const assert = await assertNugets(ctx, seams, opts.repoRoot, opts.choice ?? "Lab");
       if (assert.ok) {
@@ -230,28 +237,43 @@ async function handleTerminal(state: WatcherState, pi: any, ctx: any, seams: Bui
     await advanceStep(state, ctx, s, state.chain[state.step + 1]);
     return;
   }
+  const gh = await publishGitHubRelease(ctx, seams, opts.repoRoot, opts);
+  if (gh.ok) {
+    await ctx.ui.notify(`${step.label} ${s.id} succeeded — ${gh.detail} — chain complete.`, "info");
+  } else {
+    const msg = `${step.label} ${s.id} succeeded but the GitHub release was NOT confirmed: ${gh.detail}`;
+    await ctx.ui.notify(msg, "warning");
+    pi.sendUserMessage(msg, { deliverAs: "steer" });
+  }
+  state.stop();
+}
+
+async function handleTerminal(state: WatcherState, pi: any, ctx: any, seams: BuildSeams, opts: AzDoWatcherOptions, s: { id: number; result: string; reason: string }, stdout: string): Promise<void> {
   if (s.result === "succeeded") {
-    const gh = await publishGitHubRelease(ctx, seams, opts.repoRoot, opts);
-    if (gh.ok) {
-      await ctx.ui.notify(`${step.label} ${s.id} succeeded — ${gh.detail} — chain complete.`, "info");
-    } else {
-      const msg = `${step.label} ${s.id} succeeded but the GitHub release was NOT confirmed: ${gh.detail}`;
-      await ctx.ui.notify(msg, "warning");
-      pi.sendUserMessage(msg, { deliverAs: "steer" });
-    }
-    state.stop();
+    await handleSucceeded(state, pi, ctx, seams, opts, s);
     return;
   }
-  const { msg, failed } = terminalMessage(s, step.definition);
+  const step = state.chain[state.step];
+  const { msg, failed } = terminalMessage({ ...s, reason: failReason(s, stdout) }, step.definition);
   await ctx.ui.notify(msg, failed ? "warning" : "info");
   state.stop();
   if (failed) pi.sendUserMessage(msg, { deliverAs: "steer" });
 }
 
-async function checkDeadline(ctx: any, state: WatcherState, opts: AzDoWatcherOptions): Promise<boolean> {
+function thisRun(s: { buildNumber: string }, expected: string | null): boolean {
+  if (!s.buildNumber || !expected) return true;
+  return compareVersions(s.buildNumber, expected) === 0;
+}
+
+async function notifyWrongVersion(ctx: any, state: WatcherState, s: { id: number; buildNumber: string }, expected: string): Promise<void> {
+  const elapsed = Math.round((Date.now() - state.startedAt) / 60_000);
+  await ctx.ui.notify(`AzDO ${s.id} ${s.buildNumber} is not this run (${expected}) — waiting (${elapsed} min)…`, "info");
+}
+
+async function checkDeadline(ctx: any, state: WatcherState, opts: AzDoWatcherOptions, pi: any): Promise<boolean> {
   const maxMs = opts.maxMs ?? 7_200_000;
   if (Date.now() - state.startedAt <= maxMs) return false;
-  await giveUp(ctx, state, `AzDO watcher gave up after ${Math.round(maxMs / 60_000)} min — check /devexpress status.`);
+  await giveUp(ctx, state, `AzDO watcher gave up after ${Math.round(maxMs / 60_000)} min — check /devexpress status.`, pi);
   return true;
 }
 
@@ -262,32 +284,42 @@ async function notifyEmptyPoll(ctx: any, state: WatcherState): Promise<void> {
 
 async function pollTick(state: WatcherState, pi: any, ctx: any, seams: BuildSeams, opts: AzDoWatcherOptions): Promise<void> {
   if (state.stopped) return;
-  if (await checkDeadline(ctx, state, opts)) return;
+  if (await checkDeadline(ctx, state, opts, pi)) return;
   const step = state.chain[state.step];
   let res;
   try {
     res = await seams.run(azdoStatusScript(step.definition, state.minId), { timeoutMs: 60_000 });
   } catch (err) {
-    await giveUp(ctx, state, `AzDO watcher failed: ${err instanceof Error ? err.message : String(err)} — check /devexpress status.`);
+    await giveUp(ctx, state, `AzDO watcher failed: ${err instanceof Error ? err.message : String(err)} — check /devexpress status.`, pi);
     return;
   }
+  await applyPoll(state, pi, ctx, seams, opts, step, res);
+}
+
+async function applyPoll(state: WatcherState, pi: any, ctx: any, seams: BuildSeams, opts: AzDoWatcherOptions, step: ChainStep, res: { stdout: string; stderr?: string }): Promise<void> {
   const s = parseStatus(res.stdout);
   if (!s) {
     const err = (res.stderr || "no STATUS= line").trim().slice(-200);
-    await giveUp(ctx, state, `AzDO watcher: ${err} — check /devexpress status.`);
+    await giveUp(ctx, state, `AzDO watcher: ${err} — check /devexpress status.`, pi);
     return;
   }
   if (s.id === 0) {
     await notifyEmptyPoll(ctx, state);
     return;
   }
-  state.lastId = s.id;
   if (["notStarted", "inProgress", "cancelling"].includes(s.status)) {
     const elapsed = Math.round((Date.now() - state.startedAt) / 60_000);
+    state.lastId = s.id;
     await ctx.ui.notify(`AzDO ${s.id}: ${s.status} (${elapsed} min) — ${azdoBuildUrl(step.definition)}`, "info");
     return;
   }
-  await handleTerminal(state, pi, ctx, seams, opts, s);
+  const expected = publishedVersion(opts.repoRoot, profileOf(seams).versionFile);
+  if (!thisRun(s, expected)) {
+    await notifyWrongVersion(ctx, state, s, expected!);
+    return;
+  }
+  state.lastId = s.id;
+  await handleTerminal(state, pi, ctx, seams, opts, s, res.stdout);
 }
 
 export function startAzDoWatcher(pi: any, ctx: any, seams: BuildSeams, opts: AzDoWatcherOptions = {}): AzDoWatcherHandle {

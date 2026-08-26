@@ -12,7 +12,7 @@ window. Info only — no steering.
 ## `statusPhase(ctx, seams)` — `/devexpress status`
 
 Runs `azdoStatusScript(definition)` (azdo.md). `definition` defaults to
-`profile.statusDef("Lab")` (RX: 23; expand: 32). The AzDO link reflects
+`profile.statusDef("Lab")` (RX: 23; expand: 94). The AzDO link reflects
 the definition.
 
 - running → id + state + AzDO link
@@ -21,8 +21,8 @@ the definition.
 
 ## `cancelPhase(ctx, seams)` — `/devexpress cancel`
 
-Runs `cancelAzDoScript(definition)` — PATCH `{"status":"cancelling"}` on a
-running build. Same default definition as status.
+Runs `cancelAzDoScript()` — PATCH `{"status":"cancelling"}` on every
+running/queued build.
 
 - `ok` → "Cancel requested for AzDO build <id>"
 - `notrunning` → id + current status, nothing to cancel
