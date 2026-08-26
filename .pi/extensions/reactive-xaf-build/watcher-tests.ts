@@ -282,6 +282,7 @@ function empty(): string {
     await pi._cmds.get("devexpress").handler(["publish", "release"], ctx);
     await sleep(400);
     check("W10: release chain polls def 23 (same pipeline as lab)", seams.calls.some((c) => c.includes("definitions=23")), JSON.stringify(seams.calls));
+    check("W10: release nugets asserted on nuget.org (normalized version)", ctx._notifies.some((n) => n.msg.includes("Nugets published") && n.msg.includes("nuget.org")), JSON.stringify(ctx._notifies));
     check("W10: release draft published as a FULL release + chain complete", ctx._notifies.some((n) => n.msg.includes("GitHub release 4.261.2.1 published from draft") && n.msg.includes("chain complete")) && gh.patches.length === 1 && JSON.parse(gh.patches[0]).prerelease === false, JSON.stringify(ctx._notifies) + " | " + JSON.stringify(gh.patches));
     check("W10: no steer on success", pi._userMessages.length === 0, JSON.stringify(pi._userMessages));
   }
@@ -317,6 +318,21 @@ function empty(): string {
     await sleep(400);
     check("W12: empty poll retried (no build found yet), chain completed, no give-up", ctx._notifies.some((n) => n.msg.includes("no build found yet")) && ctx._notifies.some((n) => n.msg.includes("chain complete")) && !isAzDoWatcherActive(), JSON.stringify(ctx._notifies));
     check("W12: no steer on success", pi._userMessages.length === 0, JSON.stringify(pi._userMessages));
+  }
+  // Section: W13 — Release nugets missing on nuget.org warns + steers, chain continues
+  {
+    const repo = mkRepo();
+    const pi = mkPi();
+    const seams = mkSeams([done(35760, "succeeded"), done(35780, "succeeded"), done(35790, "succeeded")]);
+    const ctx = mkCtx(repo);
+    const fetchThrow = async (url: string) => {
+      if (url.includes("api.nuget.org")) throw new Error("404");
+      return JSON.stringify({ feed: oDataFeed(["4.261.2.1"]) });
+    };
+    registerBuildCommand(pi, { run: seams.run, fetchFeed: fetchThrow, ghFetch: mkGh(GH_DRAFT).gh, repoRoot: repo, startAzDoWatcher: fastWatcher });
+    await pi._cmds.get("devexpress").handler(["publish", "release"], ctx);
+    await sleep(400);
+    check("W13: release nugets missing on nuget.org → warning + steer, chain continues", ctx._notifies.some((n) => n.type === "warning" && n.msg.includes("nuget.org")) && pi._userMessages.length === 1 && ctx._notifies.some((n) => n.msg.includes("release consumers pipeline")), JSON.stringify(ctx._notifies) + " | " + JSON.stringify(pi._userMessages));
   }
   console.log(`\n${ok} passed, ${fail} failed`);
   process.exit(fail > 0 ? 1 : 0);

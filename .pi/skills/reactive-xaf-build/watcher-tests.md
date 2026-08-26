@@ -36,13 +36,16 @@ Run: `npx tsx d:/Reactive.XAF/.pi/extensions/reactive-xaf-build/watcher-tests.ts
   ("NOT found after N tries"), watcher stops.
 - W9 — the draft appears on a retry (creation race absorbed): published
   toast, no steer.
-- W10 — Release chain: polls def 23 (same pipeline as lab), publishes the
+- W10 — Release chain: polls def 23 (same pipeline as lab), nugets
+  asserted on **nuget.org** with the normalized version, publishes the
   draft as a FULL release (`prerelease:false`), no steer.
 - W11 — missing GH_TOKEN: warning + steer naming the token (never a
   silent skip), watcher stops.
 - W12 — empty first polls (queue API lag): retried with a "no build found
   yet" toast, chain completes, no give-up, no steer (pins the
   checkDeadline/notifyEmptyPoll split in pollTick).
+- W13 — Release nugets missing on nuget.org: warning + steer, chain
+  continues to the release consumers step.
 
 W1 counts running toasts — that's the toast-per-poll contract. Steers
 assert delivery (recorded `_userMessages`), not the steer type.

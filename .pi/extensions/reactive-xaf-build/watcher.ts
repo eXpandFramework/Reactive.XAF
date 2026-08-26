@@ -149,11 +149,31 @@ function publishedVersion(repoRoot: string | undefined): string | null {
   }
 }
 
-/** Assert the nugets landed: the version must appear on the eXpand server. */
-async function assertNugets(ctx: any, seams: BuildSeams, repoRoot: string | undefined): Promise<{ ok: boolean; detail: string }> {
+/** Normalize a NuGet version the way nuget.org does: trim trailing zero
+ *  segments, keep at least two components (4.261.3.0 → 4.261.3). */
+function normalizeNugetVersion(version: string): string {
+  const parts = version.split(".");
+  while (parts.length > 2 && parts[parts.length - 1] === "0") parts.pop();
+  return parts.join(".");
+}
+
+/** Assert the nugets landed — choice-aware feed: Lab publishes to the
+ *  eXpand server (raw version string), Release to nuget.org under the
+ *  NORMALIZED version (4.261.3.0 → 4.261.3; the Xpand server is the lab
+ *  feed only — 2026-08-25 first Release run warned falsely against it). */
+async function assertNugets(ctx: any, seams: BuildSeams, repoRoot: string | undefined, choice: "Lab" | "Release"): Promise<{ ok: boolean; detail: string }> {
   const version = publishedVersion(repoRoot);
   if (!version) {
     return { ok: false, detail: "no version read from AssemblyInfoVersion.cs" };
+  }
+  if (choice === "Release") {
+    const normalized = normalizeNugetVersion(version);
+    try {
+      await seams.fetchFeed(`https://api.nuget.org/v3-flatcontainer/xpand.extensions/${normalized}/xpand.extensions.nuspec`);
+      return { ok: true, detail: `xpand.extensions ${normalized} found on nuget.org` };
+    } catch {
+      return { ok: false, detail: `xpand.extensions ${normalized} NOT found on nuget.org` };
+    }
   }
   try {
     const text = await seams.fetchFeed(NUGET_ASSERT_URL);
@@ -263,7 +283,7 @@ async function handleTerminal(state: WatcherState, pi: any, ctx: any, seams: Bui
   const step = state.chain[state.step];
   if (s.result === "succeeded" && state.step < state.chainLength - 1) {
     if (step.assertNugets) {
-      const assert = await assertNugets(ctx, seams, opts.repoRoot);
+      const assert = await assertNugets(ctx, seams, opts.repoRoot, opts.choice ?? "Lab");
       if (assert.ok) {
         await ctx.ui.notify(`Nugets published: ${assert.detail}`, "info");
       } else {

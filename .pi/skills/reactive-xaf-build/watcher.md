@@ -26,10 +26,13 @@ that locked the chat for up to 2 h.
   BOTH choices (Release differs only in the label and the prerelease flag),
   advancing on each success (next build = newest with id > finished id,
   via `minId`). Advance toast: `... succeeded — watching the <next>…`.
-- Nugets step ASSERTS: version from `src/Common/AssemblyInfoVersion.cs`
-  checked on the eXpand nuget server (`xpandnugetserver.azurewebsites.net`
-  v2 FindPackagesById — NOT nuget.org; the lab chain publishes to the Xpand
-  server). Found → `Nugets published: ...`; missing → warning + steer; the
+- Nugets step ASSERTS — choice-aware feed: the version from
+  `src/Common/AssemblyInfoVersion.cs` is checked on the eXpand nuget server
+  (`xpandnugetserver.azurewebsites.net` v2 FindPackagesById) for LAB, and
+  on **nuget.org** (flatcontainer nuspec blob) under the NORMALIZED version
+  (4.261.3.0 → 4.261.3) for RELEASE — Release nugets never touch the Xpand
+  server (2026-08-25 first Release run warned falsely). Found →
+  `Nugets published: ...`; missing → warning + steer; the
   chain CONTINUES either way.
 - Final step FINDS the GitHub release for the build version
   (`api.github.com/repos/eXpandFramework/Reactive.XAF/releases` — tag =
