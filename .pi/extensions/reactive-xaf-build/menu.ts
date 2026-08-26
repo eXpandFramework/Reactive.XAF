@@ -1,21 +1,31 @@
 /**
  * reactive-xaf-build/menu — the /devexpress command surface.
  *
- * Direct args run in the current window: /devexpress status (one-shot AzDO
- * status), /devexpress build lab|release (full flow) and /devexpress publish
- * lab|release (skip-build: publish + monitor only, no brx). Menu picks run
- * in the INVOKING window too — the build pane splits it to the right
- * (pane.ts); no delegation (removed 2026-08-25: the user wants the build
- * visible in the window that started it, not in spawned windows).
+ * Build / Publish always pick RX-XAF | eXpand, then Lab | Release.
+ * Direct args (build lab, publish release) stay on the current profile.
  */
 
 import { getBuildPane, setBuildPane, defaultClosePane } from "./pane.js";
 import { statusPhase, cancelPhase } from "./status.js";
 import type { BuildSeams } from "./build.js";
+import { rxProfile, expandProfile } from "./profile.js";
 
-type BuildFlowRunner = (choice: string, skipBuild?: boolean) => Promise<string>;
+type BuildFlowRunner = (choice: string, skipBuild?: boolean, projectPick?: string) => Promise<string>;
 
-/** The interactive menu (used when no direct args were given). */
+const PROJECT_PICKS = [rxProfile.menuProjectPick, expandProfile.menuProjectPick];
+
+async function pickProject(ctx: any): Promise<string | null> {
+  const pick = await ctx.ui.select("Project", PROJECT_PICKS);
+  if (pick !== rxProfile.menuProjectPick && pick !== expandProfile.menuProjectPick) return null;
+  return pick;
+}
+
+async function pickChoice(ctx: any, title: string): Promise<string | null> {
+  const rx = await ctx.ui.select(title, ["Lab", "Release"]);
+  if (rx !== "Lab" && rx !== "Release") return null;
+  return rx;
+}
+
 async function menuFlow(ctx: any, seams: BuildSeams, runFlow: BuildFlowRunner): Promise<string> {
   const pane = getBuildPane();
   const base = ["Build", "Publish", "Last build status", "Cancel AzDO build"];
@@ -26,26 +36,17 @@ async function menuFlow(ctx: any, seams: BuildSeams, runFlow: BuildFlowRunner): 
     await ctx.ui.notify(`Build pane ${pane} closed.`, "info");
     return "Build pane closed.";
   }
-  if (top === "Last build status") {
-    return statusPhase(ctx, seams);
-  }
-  if (top === "Cancel AzDO build") {
-    return cancelPhase(ctx, seams);
-  }
-  if (top === "Publish") {
-    const rx = await ctx.ui.select("RX-XAF", ["Lab", "Release"]);
-    if (rx !== "Lab" && rx !== "Release") return "RX-XAF: aborted (no flow selected).";
-    return runFlow(rx, true);
-  }
-  if (top !== "Build") return "DevExpress menu: aborted.";
-  const build = await ctx.ui.select("Build", ["RX-XAF"]);
-  if (build !== "RX-XAF") return "Build menu: aborted.";
-  const rx = await ctx.ui.select("RX-XAF", ["Lab", "Release"]);
-  if (rx !== "Lab" && rx !== "Release") return "RX-XAF: aborted (no flow selected).";
-  return runFlow(rx);
+  if (top === "Last build status") return statusPhase(ctx, seams);
+  if (top === "Cancel AzDO build") return cancelPhase(ctx, seams);
+  if (top !== "Build" && top !== "Publish") return "DevExpress menu: aborted.";
+  const skipBuild = top === "Publish";
+  const project = await pickProject(ctx);
+  if (!project) return "Project: aborted (no project selected).";
+  const rx = await pickChoice(ctx, project);
+  if (!rx) return `${project}: aborted (no flow selected).`;
+  return runFlow(rx, skipBuild, project);
 }
 
-/** Entry: direct args first, then the menu. The repo guard lives in build.ts. */
 export async function runDevexpressMenu(ctx: any, seams: BuildSeams, args: string | string[], runFlow: BuildFlowRunner): Promise<string> {
   const parts = (typeof args === "string" ? args.split(/\s+/) : args ?? []).filter(Boolean);
   if (parts[0] === "status") return statusPhase(ctx, seams);

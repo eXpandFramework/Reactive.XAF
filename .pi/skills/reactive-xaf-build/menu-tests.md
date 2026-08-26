@@ -1,6 +1,6 @@
 ---
 name: reactive-xaf-build/menu-tests
-description: Behavior contract for the /devexpress skip-build publish surface — the top-level Publish menu (Publish → RX-XAF → Lab | Release), the /devexpress publish lab|release arg, and the "Publish (N files)" commit label. Read before changing the skip-build flow or these tests.
+description: Use when changing the /devexpress skip-build publish surface — Publish → RX-XAF | eXpand → Lab | Release, the /devexpress publish lab|release arg, and the "Publish (N files)" commit label.
 ---
 
 # menu-tests.ts — skip-build behavior contract
@@ -13,12 +13,8 @@ Run: `npx tsx C:/Work/Reactive.XAF/.pi/extensions/reactive-xaf-build/menu-tests.
 ## Harness (mock pi, injected seams)
 
 `registerBuildCommand(pi, { run, fetchFeed, repoRoot, pollMs, ...paneSeams })`
-with fakes: a scripted command runner, a feed fetcher that
-would throw on use (`"[]"` — proves the DX check never runs), pane seams that
-record opens/sends, a watcher seam recording starts. The
-repo fixture is a temp dir with `src/Extensions` + a `Directory.Packages.props`
-so the repo guard passes. The real nuget.org, pwsh, psmux, VMs and git are
-never touched.
+with fakes. The repo fixture is a temp dir with `src/Extensions` + a
+`Directory.Packages.props` so the repo guard passes.
 
 ## Contracts
 
@@ -27,18 +23,8 @@ never touched.
   opened/sent, `prx` runs, watcher started ("monitoring in background"), result
   "published".
 - **S2** — direct arg `["publish", "lab"]` + Publish confirm: same — no `brx`,
-  `prx` runs, published.
+  `prx` runs, published (no project pick; current profile).
 - **S3** — skip-build with a dirty tree: commit message is
   `Publish (1 files)`, not `Build fixes (1 files)`; then published.
 - **S4** — the Publish menu pick runs the publish flow in the invoking
   window (`prx` runs, published).
-
-## Notes
-
-- The file is deliberately self-contained: `build-tests.ts` sits at the
-  400-line gate and runs its suite on import, so it cannot be imported.
-- Placeholder checks fail loudly — e.g. a regression that reintroduces the DX
-  feed call throws inside the fake fetcher.
-- The full-flow suite (build/publish/failure/monitor/in-window picks, 52
-  checks)
-  lives in `build-tests.ts`; keep its Section T1–T20 numbering untouched.

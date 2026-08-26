@@ -1,6 +1,6 @@
 ---
 name: reactive-xaf-build/menu
-description: The /devexpress command surface — menu picks (Build → RX-XAF → Lab | Release, Publish → RX-XAF → Lab | Release, Last build status, Cancel AzDO build, Close build pane) and direct args (status | cancel | watch | build lab|release | publish lab|release).
+description: Use when changing the /devexpress command surface — menu picks (Build / Publish → RX-XAF | eXpand → Lab | Release), Last build status, Cancel AzDO build, Close build pane, and direct args.
 ---
 
 # menu.ts — the /devexpress command surface
@@ -13,31 +13,21 @@ Args are split on whitespace and matched in order:
 
 | Args | Behavior |
 |---|---|
-| `status` | One-shot AzDO status — def 23 (statusPhase). |
-| `cancel` | PATCH-cancel the newest running build — def 23 (cancelPhase). |
-| `watch` | Start the chain watcher for the current build (no publish flow). |
-| `build lab` / `build release` | Full flow: `runFlow("Lab"|"Release", false)`. |
-| `publish lab` / `publish release` | Skip-build flow: `runFlow("Lab"|"Release", true)`. |
+| `status` | One-shot AzDO status (`profile.statusDef`). |
+| `cancel` | PATCH-cancel the newest running build. |
+| `watch` | Start the chain watcher (handled in build.ts). |
+| `build lab` / `build release` | Full flow on the current profile. |
+| `publish lab` / `publish release` | Skip-build flow on the current profile. |
 | none / anything else | Interactive menu (menuFlow). |
-
-The flow runner type is `(choice: string, skipBuild?: boolean) => Promise<string>`
-— `build.ts`'s `runBuildFlow` closure.
 
 ## Menu (`menuFlow`)
 
 - Top: **DevExpress** → Build | Publish | Last build status | Cancel AzDO
-  build (+ Close build pane while a pane is open). Cancel runs `cancelPhase`
-  in this window (no delegation).
-- Build → **RX-XAF** → Lab | Release — full flow, run in this window.
-- Publish → **RX-XAF** → Lab | Release — skip-build flow
-  (`runFlow(choice, true)`), run in this window.
+  build (+ Close build pane while a pane is open).
+- Build and Publish always pick **Project** → RX-XAF | eXpand, then Lab |
+  Release. The pick is passed to `runFlow` as `projectPick`; build.ts
+  switches `seams.profile` and `resolveRepo` finds that tree (cwd, then
+  `C:/Work` and `D:/` known roots).
+- Direct args stay on the current profile (no project pick).
 
-## In-window execution
-
-Every menu pick runs in the invoking window — the build pane splits it to the right (pane.ts), with milestones notified there. Direct args behave the same: everything runs in the invoking window (2026-08-25, delegation removed).
-
-## Guards
-
-- `repoRootOf(cwd)` (build.ts) rejects invocation outside the Reactive.XAF
-  repo before anything runs.
-- User aborts (menu returns early) never reach the flow engine.
+Every pick runs in the invoking window.

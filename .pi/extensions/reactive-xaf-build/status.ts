@@ -4,16 +4,17 @@
  * statusPhase queries the newest build of a definition (azdoStatusScript via
  * the run seam) and notifies the outcome: id, current state, the ##[error]
  * reason on failure, and the AzDO definition link. cancelPhase PATCH-cancels
- * the newest running build of a definition. Both default to the Reactive.XAF
- * definition (def 23) — Lab and Release builds run on the same pipeline
- * (Release queues branch master). Info only — no steering.
+ * the newest running build of a definition. Definition comes from
+ * profile.statusDef (RX default Lab = 23). Info only — no steering.
  */
 
-import { azdoStatusScript, parseStatus, extractFailReason, failLogFromStdout, azdoBuildUrl, cancelAzDoScript, parseCancel, LAB_DEF } from "./azdo.js";
+import { azdoStatusScript, parseStatus, extractFailReason, failLogFromStdout, azdoBuildUrl, cancelAzDoScript, parseCancel } from "./azdo.js";
 import type { BuildSeams } from "./build.js";
+import { profileOf } from "./profile.js";
 
 /** Query the last build and notify the outcome; returns the message. */
-export async function statusPhase(ctx: any, seams: BuildSeams, definition = LAB_DEF): Promise<string> {
+export async function statusPhase(ctx: any, seams: BuildSeams, definition?: string): Promise<string> {
+  definition ??= profileOf(seams).statusDef("Lab");
   const url = azdoBuildUrl(definition);
   const res = await seams.run(azdoStatusScript(definition), { timeoutMs: 60000 });
   const s = parseStatus(res.stdout);
@@ -38,7 +39,8 @@ export async function statusPhase(ctx: any, seams: BuildSeams, definition = LAB_
 }
 
 /** PATCH-cancel the newest running build and notify the outcome. */
-export async function cancelPhase(ctx: any, seams: BuildSeams, definition = LAB_DEF): Promise<string> {
+export async function cancelPhase(ctx: any, seams: BuildSeams, definition?: string): Promise<string> {
+  definition ??= profileOf(seams).statusDef("Lab");
   const res = await seams.run(cancelAzDoScript(definition), { timeoutMs: 60000 });
   const c = parseCancel(res.stdout);
   let msg: string;

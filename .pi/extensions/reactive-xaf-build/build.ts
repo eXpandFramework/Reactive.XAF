@@ -1,24 +1,14 @@
 /**
  * reactive-xaf-build/build — the /devexpress workflow engine.
  *
- * Flow (Lab | Release): DX check → props compare → brx / brx -Release in a
- * pane → publish (VMs C11-C14 → commit → queue: Lab prx / Release
- * prx -Release, both on the Reactive.XAF pipeline def 23 — Release queues
- * branch master) → background chain watcher
- * (watcher.ts; the chat is never locked). Skip-build variant: no DX check,
- * no brx. Details live in skills/reactive-xaf-build/build.md.
- *
- * Seams (injectable, default = real): run, fetchFeed, ghFetch (GitHub API
- * with GH_TOKEN Authorization), propsPath, repoRoot, pollMs,
- * startAzDoWatcher + the pane seams from pane.ts. Tests
- * pass fakes — the real nuget.org, pwsh, psmux, VMs, git and GitHub are
- * never touched.
+ * DX check → optional depPins → profile.buildCmd in a pane → publish.ts.
+ * Menu pick RX-XAF | eXpand switches the profile and finds that tree.
  */
 
 import * as fs from "node:fs";
 import * as path from "node:path";
 import {
-  sleep, runProcess, getBuildPane, setBuildPane, exitMarkerPath,
+  runProcess, getBuildPane, setBuildPane, exitMarkerPath,
   defaultOpenBuildPane, defaultRunInPane, defaultWaitForPaneExit,
   defaultCapturePane, defaultClosePane,
 } from "./pane.js";
@@ -27,8 +17,13 @@ import { startAzDoWatcher } from "./watcher.js";
 import type { AzDoWatcherStarter } from "./watcher.js";
 import { defaultGhFetch } from "./azdo.js";
 import { runDevexpressMenu } from "./menu.js";
+import { rxProfile, compareVersions, profileOf, profileByPick, resolveRepo } from "./profile.js";
+import type { RepoProfile, Choice } from "./profile.js";
+import { depPinsPhase } from "./pins.js";
+import { publishPhase } from "./publish.js";
 
 export type { RunResult } from "./pane.js";
+export { profileOf };
 
 export type CommandRunner = (cmd: string, opts?: { cwd?: string; timeoutMs?: number }) => Promise<RunResult>;
 export type FeedFetcher = (url: string) => Promise<string>;
@@ -36,8 +31,6 @@ export type FeedFetcher = (url: string) => Promise<string>;
 export interface BuildSeams {
   run: CommandRunner;
   fetchFeed: FeedFetcher;
-  /** GitHub API fetch; the default sends Authorization from GH_TOKEN /
-   *  GITHUB_TOKEN (drafts are only visible to authenticated callers). */
   ghFetch?: (url: string, opts?: { method?: string; body?: string }) => Promise<{ ok: boolean; status: number; text: string }>;
   propsPath?: string;
   repoRoot?: string;
@@ -48,11 +41,10 @@ export interface BuildSeams {
   capturePane?: PaneCapturer;
   closePane?: PaneCloser;
   startAzDoWatcher?: AzDoWatcherStarter;
+  profile?: RepoProfile;
 }
 
 const DX_FEED_URL = "https://api.nuget.org/v3-flatcontainer/devexpress.expressapp/index.json";
-const VM_NAMES = ["C11", "C12", "C13", "C14"];
-const VM_CHECK_CMD = `Get-VM -Name C11,C12,C13,C14 | ForEach-Object { "$($_.Name)=$($_.State)" }`;
 const DX_PIN_RE = /Include="(DevExpress\.[^"]*)"\s+Version="([^"]*)"/g;
 
 export function defaultSeams(): BuildSeams {
@@ -73,25 +65,13 @@ export function defaultSeams(): BuildSeams {
   };
 }
 
-export function repoRootOf(cwd: string): string | null {
-  const p = path.resolve(cwd);
-  const hasProps = fs.existsSync(path.join(p, "Directory.Packages.props"));
-  const hasSrc = fs.existsSync(path.join(p, "src", "Extensions"));
-  return hasProps && hasSrc ? p : null;
-}
-
-function compareVersions(a: string, b: string): number {
-  const pa = a.split(".").map(Number);
-  const pb = b.split(".").map(Number);
-  for (let i = 0; i < 3; i++) {
-    if (pa[i] !== pb[i]) return pa[i] - pb[i];
-  }
-  return 0;
+export function repoRootOf(cwd: string, profile: RepoProfile = rxProfile): string | null {
+  return resolveRepo(profile, cwd);
 }
 
 export async function getLatestDx(fetchFeed: FeedFetcher): Promise<string> {
   const text = await fetchFeed(DX_FEED_URL);
-  const versions = JSON.parse(text).versions as string[];
+  const versions = (JSON.parse(text).versions as string[] | undefined) ?? [];
   const stable = versions.filter((v) => /^\d+\.\d+\.\d+$/.test(v));
   if (!stable.length) throw new Error("no stable DevExpress.ExpressApp versions on nuget.org");
   stable.sort((a, b) => compareVersions(b, a));
@@ -150,16 +130,17 @@ async function dxPhase(ctx: any, seams: BuildSeams, propsPath: string, latest: s
 
 async function buildPhase(ctx: any, seams: BuildSeams, choice: string, repo: string): Promise<{ code: number; stdout: string }> {
   const marker = exitMarkerPath();
+  const cmd = profileOf(seams).buildCmd(choice as Choice);
   const pane = await (seams.openBuildPane ?? defaultOpenBuildPane)(repo);
   if (!pane) {
     await ctx.ui.notify("Build pane could not be opened — building in-process.", "warning");
-    const res = await seams.run(choice === "Release" ? "brx -Release" : "brx", { cwd: repo, timeoutMs: 3600000 });
+    const res = await seams.run(cmd, { cwd: repo, timeoutMs: 3600000 });
     return { code: res.code, stdout: res.stdout + res.stderr };
   }
   setBuildPane(pane);
   await ctx.ui.notify(`Build started — pane ${pane} on the right.`, "info");
-  const cmd = `brx${choice === "Release" ? " -Release" : ""}; if ($?) { Set-Content -LiteralPath '${marker}' -Value 0 } else { Set-Content -LiteralPath '${marker}' -Value 1 }`;
-  await (seams.runInPane ?? defaultRunInPane)(pane, cmd);
+  const wrapped = `${cmd}; if ($?) { Set-Content -LiteralPath '${marker}' -Value 0 } else { Set-Content -LiteralPath '${marker}' -Value 1 }`;
+  await (seams.runInPane ?? defaultRunInPane)(pane, wrapped);
   const wait = await (seams.waitForPaneExit ?? defaultWaitForPaneExit)(pane, marker, 3600000);
   if (wait.timedOut) {
     await (seams.closePane ?? defaultClosePane)(pane);
@@ -170,136 +151,9 @@ async function buildPhase(ctx: any, seams: BuildSeams, choice: string, repo: str
   return { code: wait.code ?? -1, stdout: captured };
 }
 
-function parseVmStates(stdout: string): Map<string, string> {
-  const states = new Map<string, string>();
-  for (const line of stdout.split("\n")) {
-    const m = line.match(/^(C1[1-4])=(.*)$/);
-    if (m) states.set(m[1], m[2].trim());
-  }
-  return states;
-}
-
-async function ensureVmsRunning(seams: BuildSeams): Promise<{ ok: boolean; notes: string[] }> {
-  const notes: string[] = [];
-  const check = async () => seams.run(VM_CHECK_CMD, { timeoutMs: 60000 });
-  const first = await check();
-  const states = parseVmStates(first.stdout);
-  const off = VM_NAMES.filter((n) => states.get(n) === "Off");
-  const starting = VM_NAMES.filter((n) => states.get(n) === "Starting");
-  if (off.length > 0) {
-    if (starting.length > 0) notes.push(`already booting: ${starting.join(", ")}`);
-    notes.push(`starting Hyper-V agents: ${off.join(", ")}`);
-    const start = await seams.run(`Start-VM -Name ${off.join(",")}`, { timeoutMs: 120000 });
-    if (start.code !== 0) {
-      notes.push(`Start-VM failed: ${tail(start.stderr)}`);
-      return { ok: false, notes };
-    }
-  } else if (starting.length > 0) {
-    notes.push(`Hyper-V agents already booting: ${starting.join(", ")} — waiting for Running`);
-  } else {
-    notes.push("Hyper-V agents C11-C14 already running");
-    return { ok: true, notes };
-  }
-  for (let i = 0; i < 18; i++) {
-    await sleep(seams.pollMs ?? 10000);
-    const res = await check();
-    const st = parseVmStates(res.stdout);
-    if (VM_NAMES.every((n) => st.get(n) === "Running")) {
-      notes.push("Hyper-V agents running");
-      return { ok: true, notes };
-    }
-  }
-  notes.push("Hyper-V agents did not reach Running within 3 minutes");
-  return { ok: false, notes };
-}
-
-async function commitPhase(ctx: any, seams: BuildSeams, repoRoot: string, dxChanged: boolean, latest: string, label = "Build fixes"): Promise<{ committed: boolean; failed: boolean; notes: string[] }> {
-  const notes: string[] = [];
-  const status = await seams.run("git status --short", { cwd: repoRoot, timeoutMs: 30000 });
-  const changed = status.stdout.split("\n").filter((l) => l.trim()).length;
-  if (changed === 0) {
-    notes.push("nothing to commit");
-    return { committed: true, failed: false, notes };
-  }
-  const msg = dxChanged ? `Update DX to ${latest}` : `${label} (${changed} files)`;
-  const pick = await ctx.ui.select(`Commit with message: "${msg}"?`, ["Commit", "Abort"]);
-  if (pick !== "Commit") {
-    notes.push("commit aborted");
-    return { committed: false, failed: false, notes };
-  }
-  const add = await seams.run("git add -A", { cwd: repoRoot, timeoutMs: 60000 });
-  if (add.code !== 0) {
-    notes.push(`git add failed: ${tail(add.stderr)}`);
-    return { committed: false, failed: true, notes };
-  }
-  const safeMsg = msg.replace(/"/g, "'");
-  const commit = await seams.run(`git commit -m "${safeMsg}"`, { cwd: repoRoot, timeoutMs: 60000 });
-  if (commit.code !== 0) {
-    notes.push(`git commit failed: ${tail(commit.stderr)}`);
-    return { committed: false, failed: true, notes };
-  }
-  notes.push(`committed: ${msg}`);
-  return { committed: true, failed: false, notes };
-}
-
-/** Start the background AzDO chain watcher (the queue ran; the newest
- *  build is ours). The turn returns immediately — the watcher toasts on
- *  every check, walks the publish chain and asserts the nugets; the chat is
- *  never locked. Failure policy: on an AzDO failure the agent PLANS a fix
- *  and presents it — user permission is ALWAYS required before any action.
- *  No auto-fix, no auto re-run. */
-async function monitorPhase(pi: any, ctx: any, seams: BuildSeams, repo: string, choice: string): Promise<{ ok: boolean; failed: boolean; notes: string[] }> {
-  const notes: string[] = [];
-  await ctx.ui.notify("AzDO build queued — monitoring in background (toast on every check).", "info");
-  const starter = seams.startAzDoWatcher ?? startAzDoWatcher;
-  starter(pi, ctx, seams, { followNugets: true, repoRoot: repo, choice: choice === "Release" ? "Release" : "Lab" });
-  notes.push("AzDO monitoring in background — toasts on every check; follows the nuget + release publish chain and asserts the nugets");
-  return { ok: true, failed: false, notes };
-}
-
-/** Confirm and run the queue command: prx (Lab, def 23 on lab) or
- *  prx -Release (Release, def 23 on master — prx knows the right pipe).
- *  failed=true on a queue error; false on user abort. */
-async function queuePhase(ctx: any, seams: BuildSeams, repoRoot: string, choice: string): Promise<{ failed: boolean; notes: string[] }> {
-  const notes: string[] = [];
-  const queueCmd = choice === "Release" ? "prx -Release" : "prx";
-  const queueLabel = choice === "Release" ? "prx -Release (stage, force-push lab:master, queue def 23 on master)" : "prx (stage, force-push, queue AzDO Reactive.XAF)";
-  await ctx.ui.notify(`Publishing via ${queueCmd}…`, "info");
-  const pick = await ctx.ui.select(`Publish: ${queueLabel}?`, ["Publish", "Abort"]);
-  if (pick !== "Publish") {
-    notes.push("publish aborted");
-    return { failed: false, notes };
-  }
-  const res = await seams.run(queueCmd, { cwd: repoRoot, timeoutMs: 600000 });
-  if (res.code !== 0) {
-    notes.push(`${queueCmd} failed: ${tail(res.stderr)}`);
-    return { failed: true, notes };
-  }
-  notes.push(`${queueCmd} done (exit ${res.code})`);
-  return { failed: false, notes };
-}
-
-async function publishPhase(pi: any, ctx: any, seams: BuildSeams, choice: string, repoRoot: string, dxChanged: boolean, latest: string, skipBuild = false): Promise<{ ok: boolean; failed: boolean; notes: string[] }> {
-  const notes: string[] = [];
-  await ctx.ui.notify("Checking Hyper-V agents C11-C14…", "info");
-  const vms = await ensureVmsRunning(seams);
-  notes.push(...vms.notes);
-  if (!vms.ok) return { ok: false, failed: true, notes };
-  await ctx.ui.notify("Committing build state…", "info");
-  const commit = await commitPhase(ctx, seams, repoRoot, dxChanged, latest, skipBuild ? "Publish" : "Build fixes");
-  notes.push(...commit.notes);
-  if (!commit.committed) return { ok: false, failed: commit.failed === true, notes };
-  const queue = await queuePhase(ctx, seams, repoRoot, choice);
-  notes.push(...queue.notes);
-  if (queue.failed) return { ok: false, failed: true, notes };
-  const monitor = await monitorPhase(pi, ctx, seams, repoRoot, choice);
-  notes.push(...monitor.notes);
-  return { ok: monitor.ok, failed: monitor.failed, notes };
-}
-
-function failureResult(choice: string, latest: string, notes: string[], build: { code: number; stdout: string }): string {
+function failureResult(id: string, choice: string, latest: string, notes: string[], build: { code: number; stdout: string }): string {
   return [
-    `Reactive.XAF build — ${choice}`,
+    `${id} build — ${choice}`,
     `DX latest: ${latest}`,
     ...notes,
     `Build FAILED (exit ${build.code})`,
@@ -309,79 +163,117 @@ function failureResult(choice: string, latest: string, notes: string[], build: {
   ].join("\n");
 }
 
-function summaryResult(choice: string, latest: string, notes: string[], pubOk: boolean): string {
+function summaryResult(id: string, choice: string, latest: string, notes: string[], pubOk: boolean): string {
   const dxLine = latest ? `DX latest: ${latest}` : "no DX check (build skipped)";
-  return [`Reactive.XAF build — ${choice}`, dxLine, ...notes, pubOk ? "published" : "publish stopped"].join("\n");
+  return [`${id} build — ${choice}`, dxLine, ...notes, pubOk ? "published" : "publish stopped"].join("\n");
 }
 
-/** Deliver the failure so it ALWAYS lands in the agent's context: a user
- *  message via sendUserMessage triggers a turn unconditionally (pi core:
- *  "Always triggers a turn"). The triggerTurn steer was delivered as a
- *  custom_message but started no turn in long-lived sessions (2026-08-25,
- *  reproduced + validated via steer-repro). User aborts never reach this
- *  path. */
 function steerFailure(pi: any, msg: string): void {
   pi.sendUserMessage(msg, { deliverAs: "steer" });
 }
 
+async function runLocalBuild(
+  pi: any, ctx: any, seams: BuildSeams, choice: string, repo: string, notes: string[],
+): Promise<{ dxChanged: boolean; latest: string; failed?: string }> {
+  const id = profileOf(seams).label;
+  const latest = await getLatestDx(seams.fetchFeed);
+  const propsPath = seams.propsPath ?? path.join(repo, "Directory.Packages.props");
+  const dx = await dxPhase(ctx, seams, propsPath, latest);
+  notes.push(...dx.notes);
+  const pins = await depPinsPhase(ctx, seams, propsPath, choice);
+  notes.push(...pins.notes);
+  const build = await buildPhase(ctx, seams, choice, repo);
+  if (build.code !== 0) {
+    const msg = failureResult(id, choice, latest, notes, build);
+    await ctx.ui.notify(msg, "warning");
+    steerFailure(pi, msg);
+    return { dxChanged: dx.changed || pins.changed, latest, failed: msg };
+  }
+  notes.push(`build succeeded (${choice})`);
+  return { dxChanged: dx.changed || pins.changed, latest };
+}
+
+async function finishPublish(
+  pi: any, ctx: any, seams: BuildSeams, choice: string, repo: string,
+  notes: string[], dxChanged: boolean, latest: string, id: string, skipBuild: boolean,
+): Promise<string> {
+  const pub = await publishPhase(pi, ctx, seams, choice, repo, dxChanged, latest, skipBuild);
+  notes.push(...pub.notes);
+  const pane = getBuildPane();
+  const closeAsk = pane ? `\nThe build pane ${pane} is left open — close it via /devexpress → "Close build pane" when done.` : "";
+  const msg = summaryResult(id, choice, latest, notes, pub.ok) + closeAsk;
+  await ctx.ui.notify(msg, "info");
+  if (!pub.ok && pub.failed) steerFailure(pi, msg);
+  return msg;
+}
+
 async function runBuildFlow(pi: any, ctx: any, seams: BuildSeams, choice: string, repo: string, skipBuild = false): Promise<string> {
+  const id = profileOf(seams).label;
   try {
     const notes: string[] = [];
     let dxChanged = false;
     let latest = "";
     if (!skipBuild) {
-      latest = await getLatestDx(seams.fetchFeed);
-      const propsPath = seams.propsPath ?? path.join(repo, "Directory.Packages.props");
-      const dx = await dxPhase(ctx, seams, propsPath, latest);
-      dxChanged = dx.changed;
-      notes.push(...dx.notes);
-      const build = await buildPhase(ctx, seams, choice, repo);
-      if (build.code !== 0) {
-        const msg = failureResult(choice, latest, notes, build);
-        await ctx.ui.notify(msg, "warning");
-        steerFailure(pi, msg);
-        return msg;
-      }
-      notes.push(`build succeeded (${choice})`);
+      const local = await runLocalBuild(pi, ctx, seams, choice, repo, notes);
+      if (local.failed) return local.failed;
+      dxChanged = local.dxChanged;
+      latest = local.latest;
     } else {
       notes.push("build skipped — publish only");
     }
-    const pub = await publishPhase(pi, ctx, seams, choice, repo, dxChanged, latest, skipBuild);
-    notes.push(...pub.notes);
-    const pane = getBuildPane();
-    const closeAsk = pane ? `\nThe build pane ${pane} is left open — close it via /devexpress → "Close build pane" when done.` : "";
-    const msg = summaryResult(choice, latest, notes, pub.ok) + closeAsk;
-    await ctx.ui.notify(msg, "info");
-    if (!pub.ok && pub.failed) steerFailure(pi, msg);
-    return msg;
+    return finishPublish(pi, ctx, seams, choice, repo, notes, dxChanged, latest, id, skipBuild);
   } catch (err) {
     const detail = err instanceof Error ? err.message : String(err);
-    const msg = `Reactive.XAF build aborted: ${detail}`;
+    const msg = `${id} build aborted: ${detail}`;
     await ctx.ui.notify(msg, "warning");
     if (!detail.includes("aborted")) steerFailure(pi, msg);
     return msg;
   }
 }
 
+function seamsForPick(merged: BuildSeams, projectPick: string | undefined, cwd: string): { seams: BuildSeams; repo: string | null } {
+  if (!projectPick) {
+    const p = profileOf(merged);
+    return { seams: merged, repo: repoRootOf(cwd, p) };
+  }
+  const p = profileByPick(projectPick);
+  return { seams: { ...merged, profile: p }, repo: resolveRepo(p, cwd) };
+}
+
+function missingRepo(p: RepoProfile, cwd: string): string {
+  return `${p.label} build: not inside the ${p.label} repo (cwd: ${cwd}) — no commands ran.`;
+}
+
+async function watchPhase(pi: any, ctx: any, merged: BuildSeams, cwd: string, parts: string[]): Promise<string> {
+  const p = profileOf(merged);
+  const repo = repoRootOf(cwd, p);
+  if (!repo) return missingRepo(p, cwd);
+  const choice = parts[1] === "release" ? "Release" : "Lab";
+  startAzDoWatcher(pi, ctx, merged, { followNugets: true, repoRoot: repo, choice });
+  await ctx.ui.notify("AzDO watcher started — it follows the build, the nuget publish and the release consumers chain, toasting on every check.", "info");
+  return "AzDO watcher started in the background — toasts on every check, nuget assertion on the eXpand server at the nugets step, release consumers watched last.";
+}
+
+function flowRunner(pi: any, ctx: any, merged: BuildSeams, cwd: string) {
+  return (choice: string, skipBuild = false, projectPick?: string) => {
+    const { seams: s, repo } = seamsForPick(merged, projectPick, cwd);
+    if (!repo) return Promise.resolve(missingRepo(profileOf(s), cwd));
+    return runBuildFlow(pi, ctx, s, choice, repo, skipBuild);
+  };
+}
+
+async function handleDevexpress(pi: any, ctx: any, merged: BuildSeams, args: string | string[]): Promise<string> {
+  const cwd = ctx?.cwd ?? merged.repoRoot ?? process.cwd();
+  const parts = (typeof args === "string" ? args.split(/\s+/) : args ?? []).filter(Boolean);
+  if (parts[0] === "watch") return watchPhase(pi, ctx, merged, cwd, parts);
+  return runDevexpressMenu(ctx, merged, args, flowRunner(pi, ctx, merged, cwd));
+}
+
 export function registerBuildCommand(pi: any, seams?: Partial<BuildSeams>): void {
   pi.registerCommand("devexpress", {
-    description: "DevExpress menu: Build → RX-XAF (Lab | Release, skip-build variants), Last build status, Cancel AzDO build; args: status | cancel | watch | build lab|release | publish lab|release",
+    description: "DevExpress menu: Build → RX-XAF | eXpand → Lab | Release; args: status | cancel | watch | build lab|release | publish lab|release",
     handler: async (args: string | string[], ctx: any) => {
-      const merged = { ...defaultSeams(), ...seams };
-      const cwd = ctx?.cwd ?? merged.repoRoot ?? process.cwd();
-      const repo = repoRootOf(cwd);
-      if (!repo) {
-        return `Reactive.XAF build: not inside the Reactive.XAF repo (cwd: ${cwd}) — no commands ran.`;
-      }
-      const parts = (typeof args === "string" ? args.split(/\s+/) : args ?? []).filter(Boolean);
-      if (parts[0] === "watch") {
-        const choice = parts[1] === "release" ? "Release" : "Lab";
-        startAzDoWatcher(pi, ctx, merged, { followNugets: true, repoRoot: repo, choice });
-        await ctx.ui.notify("AzDO watcher started — it follows the build, the nuget publish and the release consumers chain, toasting on every check.", "info");
-        return "AzDO watcher started in the background — toasts on every check, nuget assertion on the eXpand server at the nugets step, release consumers watched last.";
-      }
-      const runFlow = (choice: string, skipBuild = false) => runBuildFlow(pi, ctx, merged, choice, repo, skipBuild);
-      return runDevexpressMenu(ctx, merged, args, runFlow);
+      return handleDevexpress(pi, ctx, { ...defaultSeams(), ...seams }, args);
     },
   });
 }

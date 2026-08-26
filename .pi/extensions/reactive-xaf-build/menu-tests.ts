@@ -92,7 +92,7 @@ function mkRepo(): string {
 }
 const VM_RUN = "C11=Running\nC12=Running\nC13=Running\nC14=Running\n";
 const VM_CHECK_PREFIX = "Get-VM -Name C11,C12,C13,C14*";
-const MENU = ["Publish", "Lab"];
+const MENU = ["Publish", "RX-XAF", "Lab"];
 const GREEN_PUBLISH = [
   { match: VM_CHECK_PREFIX, result: { code: 0, stdout: VM_RUN, stderr: "" } },
   { match: "git status --short", result: { code: 0, stdout: "", stderr: "" } },
