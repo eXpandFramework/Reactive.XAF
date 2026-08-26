@@ -201,7 +201,10 @@ const GREEN = [done(35760, "succeeded"), done(35780, "succeeded"), done(35790, "
     const repo = mkRepo();
     const pi = mkPi();
     const ctx = mkCtx(repo);
-    registerBuildCommand(pi, { run: mkSeams(GREEN).run, fetchFeed: mkFetch(["4.242.3"]), ghFetch: mkGh(GH_DRAFT).gh, repoRoot: repo, startAzDoWatcher: fastWatcher });
+    registerBuildCommand(pi, {
+      run: mkSeams(GREEN).run, fetchFeed: mkFetch(["4.242.3"]), ghFetch: mkGh(GH_DRAFT).gh, repoRoot: repo,
+      startAzDoWatcher: (p: any, c: any, s: any, opts?: any) => startAzDoWatcher(p, c, s, { ...opts, intervalMs: 20, maxMs: 5000, nugetRetries: 1, nugetRetryMs: 0 }),
+    });
     await pi._cmds.get("devexpress").handler(["publish", "lab"], ctx);
     await sleep(400);
     check("W6: missing version → warning + steer", ctx._notifies.some((n) => n.type === "warning" && n.msg.includes("Nugets NOT confirmed")) && pi._userMessages.length === 1 && pi._userMessages[0].content.includes("NOT found"), JSON.stringify(ctx._notifies) + " | " + JSON.stringify(pi._userMessages));
@@ -291,7 +294,10 @@ const GREEN = [done(35760, "succeeded"), done(35780, "succeeded"), done(35790, "
       if (url.includes("api.nuget.org")) throw new Error("404");
       return JSON.stringify({ feed: oDataFeed(LAB) });
     };
-    registerBuildCommand(pi, { run: mkSeams(GREEN).run, fetchFeed: fetchThrow, ghFetch: mkGh(GH_DRAFT).gh, repoRoot: repo, startAzDoWatcher: fastWatcher });
+    registerBuildCommand(pi, {
+      run: mkSeams(GREEN).run, fetchFeed: fetchThrow, ghFetch: mkGh(GH_DRAFT).gh, repoRoot: repo,
+      startAzDoWatcher: (p: any, c: any, s: any, opts?: any) => startAzDoWatcher(p, c, s, { ...opts, intervalMs: 20, maxMs: 5000, nugetRetries: 1, nugetRetryMs: 0 }),
+    });
     await pi._cmds.get("devexpress").handler(["publish", "release"], ctx);
     await sleep(400);
     check("W13: release nugets missing on nuget.org → warning + steer, chain continues", ctx._notifies.some((n) => n.type === "warning" && n.msg.includes("nuget.org")) && pi._userMessages.length === 1 && ctx._notifies.some((n) => n.msg.includes("release consumers pipeline")), JSON.stringify(ctx._notifies) + " | " + JSON.stringify(pi._userMessages));
@@ -332,6 +338,27 @@ const GREEN = [done(35760, "succeeded"), done(35780, "succeeded"), done(35790, "
     await sleep(250);
     check("W16: wrong-version toast, no chain advance", ctx._notifies.some((n) => n.msg.includes("is not this run")) && !ctx._notifies.some((n) => n.msg.includes("release consumers pipeline")), JSON.stringify(ctx._notifies));
     check("W16: give-up steers + watcher stopped", pi._userMessages.length === 1 && pi._userMessages[0].content.includes("gave up") && !isAzDoWatcherActive(), JSON.stringify(pi._userMessages));
+  }
+  {
+    const repo = mkRepo();
+    const pi = mkPi();
+    const ctx = mkCtx(repo);
+    let calls = 0;
+    const fetchLate = async (url: string) => {
+      if (url.includes("api.nuget.org")) {
+        calls++;
+        if (calls === 1) throw new Error("404 — flatcontainer not indexed yet");
+        return "<package><metadata><id>Xpand.Extensions</id></metadata></package>";
+      }
+      return JSON.stringify({ feed: oDataFeed(LAB) });
+    };
+    registerBuildCommand(pi, {
+      run: mkSeams(GREEN).run, fetchFeed: fetchLate, ghFetch: mkGh(GH_DRAFT).gh, repoRoot: repo,
+      startAzDoWatcher: (p: any, c: any, s: any, opts?: any) => startAzDoWatcher(p, c, s, { ...opts, intervalMs: 20, maxMs: 5000, nugetRetries: 3, nugetRetryMs: 10 }),
+    });
+    await pi._cmds.get("devexpress").handler(["publish", "release"], ctx);
+    await sleep(500);
+    check("W17: nugets confirmed on retry after index lag — no warning, no steer", calls >= 2 && ctx._notifies.some((n) => n.msg.includes("Nugets published") && n.msg.includes("nuget.org")) && !ctx._notifies.some((n) => n.msg.includes("NOT confirmed")) && pi._userMessages.length === 0, JSON.stringify(ctx._notifies) + " | " + JSON.stringify(pi._userMessages));
   }
   console.log(`\n${ok} passed, ${fail} failed`);
   process.exit(fail > 0 ? 1 : 0);

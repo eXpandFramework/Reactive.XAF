@@ -34,3 +34,5 @@ Run: `npx tsx d:/Reactive.XAF/.pi/extensions/reactive-xaf-build/watcher-tests.ts
   `Release 26.1.301.1 exists`, not "no error lines".
 - W16 — finished build of a different version is not this run: wait
   toast, then give-up steers.
+- W17 — nugets missing on the first assert, present on retry (index
+  lag): confirmed toast, no warning, no steer.

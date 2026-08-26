@@ -30,6 +30,8 @@ export interface AzDoWatcherOptions {
   repoRoot?: string;
   ghRetries?: number;
   ghRetryMs?: number;
+  nugetRetries?: number;
+  nugetRetryMs?: number;
 }
 
 export interface AzDoWatcherHandle {
@@ -105,12 +107,7 @@ function normalizeNugetVersion(version: string): string {
   return parts.join(".");
 }
 
-async function assertNugets(ctx: any, seams: BuildSeams, repoRoot: string | undefined, choice: "Lab" | "Release"): Promise<{ ok: boolean; detail: string }> {
-  const p = profileOf(seams);
-  const version = publishedVersion(repoRoot, p.versionFile);
-  if (!version) {
-    return { ok: false, detail: `no version read from ${p.versionFile}` };
-  }
+async function tryAssertNugets(seams: BuildSeams, p: RepoProfile, choice: "Lab" | "Release", version: string): Promise<{ ok: boolean; detail: string }> {
   if (p.nugetFeed(choice) === "nuget.org") {
     const normalized = normalizeNugetVersion(version);
     try {
@@ -128,6 +125,21 @@ async function assertNugets(ctx: any, seams: BuildSeams, repoRoot: string | unde
   } catch (err) {
     return { ok: false, detail: `feed query failed: ${err instanceof Error ? err.message : String(err)}` };
   }
+}
+
+async function assertNugets(ctx: any, seams: BuildSeams, repoRoot: string | undefined, choice: "Lab" | "Release", retries: number, retryMs: number): Promise<{ ok: boolean; detail: string }> {
+  const p = profileOf(seams);
+  const version = publishedVersion(repoRoot, p.versionFile);
+  if (!version) {
+    return { ok: false, detail: `no version read from ${p.versionFile}` };
+  }
+  let last: { ok: boolean; detail: string } | null = null;
+  for (let i = 0; i < retries; i++) {
+    last = await tryAssertNugets(seams, p, choice, version);
+    if (last.ok) return last;
+    if (i < retries - 1) await sleep(retryMs);
+  }
+  return last!;
 }
 
 type GhFetch = (url: string, opts?: { method?: string; body?: string }) => Promise<{ ok: boolean; status: number; text: string }>;
@@ -225,7 +237,7 @@ async function handleSucceeded(state: WatcherState, pi: any, ctx: any, seams: Bu
   const step = state.chain[state.step];
   if (state.step < state.chainLength - 1) {
     if (step.assertNugets) {
-      const assert = await assertNugets(ctx, seams, opts.repoRoot, opts.choice ?? "Lab");
+      const assert = await assertNugets(ctx, seams, opts.repoRoot, opts.choice ?? "Lab", opts.nugetRetries ?? 10, opts.nugetRetryMs ?? 30_000);
       if (assert.ok) {
         await ctx.ui.notify(`Nugets published: ${assert.detail}`, "info");
       } else {

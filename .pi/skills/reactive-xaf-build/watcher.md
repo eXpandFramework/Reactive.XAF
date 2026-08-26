@@ -16,6 +16,10 @@ Companion of `.pi/extensions/reactive-xaf-build/watcher.ts`. Started by
 - Version is read from `profile.versionFile`.
 - Nugets step ASSERTS `profile.nugetId` on `profile.nugetFeed(choice)`.
   Lab uses `compareVersions` so `26.1.400.0` matches feed `26.1.400`.
+  The assert RETRIES `nugetRetries` (default 10) × `nugetRetryMs`
+  (default 30s) before warning — nuget.org's flatcontainer lags a push
+  by minutes (observed 2026-08-26: pushed 17:59Z, indexed 18:03Z, false
+  warning), so a single 404 is an index delay, not a missing publish.
 - A finished build whose `buildNumber` does not match `versionFile` is
   not this run — wait (toast), then give-up **steers**. Empty polls retry,
   never fatal.
