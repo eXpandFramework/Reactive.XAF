@@ -34,7 +34,9 @@ Menu picks run in the INVOKING window. The eXpand pick uses
 ## Flow (Lab | Release)
 
 1. **DX check** — nuget.org flat-container, max stable `DevExpress.ExpressApp`.
-2. **Props compare** — `Directory.Packages.props` DevExpress.* pins.
+2. **Props compare** — `Directory.Packages.props` DevExpress.* pins. `build.ps1`
+   version: Lab → DX base; Release → next after the last published version on
+   the feeds (Xpand server + nuget.org, e.g. 26.1.401.0 after 26.1.400).
 3. **depPins** (expand only) — latest `Xpand.Extensions` from the matching feed.
 4. **Build** — `profile.buildCmd` in a right-side pane.
 5. **Publish** — VMs C11–C14, commit, optional `git push`, `profile.queueCmd`,
@@ -50,10 +52,12 @@ Menu picks run in the INVOKING window. The eXpand pick uses
 | `publish.ts` | `publish.md` | VMs, commit, queue, watcher start. |
 | `menu.ts` | `menu.md` | Command surface: RX-XAF | eXpand then Lab | Release. |
 | `build.ts` | `build.md` | Flow engine (DX, local build, menu wiring). |
+| `release.ts` | `release.md` | Release version bump (feed consultation). |
 | `watcher.ts` | `watcher.md` | Background AzDO chain watcher. |
 | `menu-tests.ts` | `menu-tests.md` | Skip-build contract. |
 | `delegate-tests.ts` | `delegate-tests.md` | Delegation fallback. |
 | `build-tests.ts` | `build-tests.md` | Full flow. |
+| `release-tests.ts` | `release-tests.md` | build.ps1 version bump (Release feed consultation). |
 | `watcher-tests.ts` | `watcher-tests.md` | Watcher W1–W16. |
 | `profile-tests.ts` | `profile-tests.md` | RepoProfile (RX vs expand). |
 | `azdo.ts` / `status.ts` | `azdo.md` | AzDO status/cancel. |

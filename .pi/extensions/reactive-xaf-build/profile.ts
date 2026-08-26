@@ -189,6 +189,21 @@ export async function getLatestPackage(
   return maxVersion(versions);
 }
 
+/** Next release version on the DX minor: max(dxBase.Build, last published build + 1), revision 0.
+ *  Published versions on other DX minors are ignored (26.1.400.0 + [26.1.400, 26.1.301] → 26.1.401.0). */
+export function nextReleaseVersion(dxBase: string, published: string[]): string {
+  const base = dxBase.split(".").map(Number);
+  const minorKey = `${base[0]}.${base[1]}`;
+  let build = base[2] ?? 0;
+  for (const v of published) {
+    const p = v.split(".").map(Number);
+    if (p.length < 3 || `${p[0]}.${p[1]}` !== minorKey) continue;
+    const pb = p[2] ?? 0;
+    if (pb >= build) build = pb + 1;
+  }
+  return `${base[0]}.${base[1]}.${build}.0`;
+}
+
 export function readPrefixedPins(text: string, prefixes: string[]): { count: number; unique: string | null; ids: string[] } {
   const versions = new Set<string>();
   const ids: string[] = [];

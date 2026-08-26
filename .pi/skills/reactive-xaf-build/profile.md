@@ -36,5 +36,6 @@ never tests `label === "eXpand"`.
 
 Helpers: `profileByPick`, `resolveRepo`, `nugetAssertUrl`,
 `nugetOrgNuspecUrl`, `githubReleasesUrl`, `githubReleaseUrl`,
-`getLatestPackage`, `readPrefixedPins`, `rewritePrefixedPins`,
-`compareVersions`, `profileOf`.
+`getLatestPackage`, `nextReleaseVersion` (next release on the DX minor:
+max(dxBase.Build, last published build + 1), revision 0), `readPrefixedPins`,
+`rewritePrefixedPins`, `compareVersions`, `profileOf`.

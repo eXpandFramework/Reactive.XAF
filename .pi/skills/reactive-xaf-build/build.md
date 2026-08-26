@@ -14,7 +14,12 @@ come from `seams.profile ?? rxProfile` (`profile.ts`).
 
 1. **DX check** — `getLatestDx`: max stable `DevExpress.ExpressApp`.
 2. **Props compare** (`dxPhase`) — DevExpress.* pins: mixed → untouched;
-   single shared version ≠ latest → Update | Skip | Abort.
+   single shared version ≠ latest → Update | Skip | Abort. `build.ps1 -version`
+   is aligned when the pins are at latest (or after an update): Lab → the
+   DX-derived base (`dxBaseVersion`, 26.1.4 → 26.1.400.0); Release → the next
+   release after the last published `profile.nugetId` on the Xpand server and
+   nuget.org (same DX minor, build + 1, revision 0 — 26.1.400 → 26.1.401.0).
+   A failed consultation aborts the flow; no silent fallback to the DX base.
 3. **depPins** (`depPinsPhase`) — skipped when `profile.depPins` is unset
    (RX). Expand: latest `Xpand.Extensions` from the matching feed, rewrite
    `Xpand.Extensions*` / `Xpand.XAF.*` ask-first.

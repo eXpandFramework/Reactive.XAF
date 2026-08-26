@@ -19,6 +19,7 @@ import { defaultGhFetch } from "./azdo.js";
 import { runDevexpressMenu } from "./menu.js";
 import { rxProfile, compareVersions, profileOf, profileByPick, resolveRepo } from "./profile.js";
 import type { RepoProfile, Choice } from "./profile.js";
+import { releaseVersionTarget } from "./release.js";
 import { depPinsPhase } from "./pins.js";
 import { publishPhase } from "./publish.js";
 
@@ -90,35 +91,29 @@ export function rewriteDxVersion(text: string, newVersion: string): string {
   return text.replace(/(Include="DevExpress\.[^"]*"\s+Version=")[^"]*(")/g, `$1${newVersion}$2`);
 }
 
-/** The eXpand base version for a DX version: 26.1.4 → 26.1.400.0 (minor × 100). */
-export function dxBaseVersion(dxVersion: string): string | null {
-  const m = dxVersion.match(/^(\d+)\.(\d+)\.(\d+)$/);
-  return m ? `${m[1]}.${m[2]}.${Number(m[3]) * 100}.0` : null;
-}
-
-/** Rewrite build.ps1's `-version "X.Y.Z.W"` to the DX-derived base.
- *  Untouched when the DX version has no ×100 mapping. */
-export function rewriteBuildVersion(text: string, dxVersion: string): string {
-  const base = dxBaseVersion(dxVersion);
-  return base ? text.replace(/-version "(\d+\.\d+\.\d+\.\d+)"/, `-version "${base}"`) : text;
-}
-
 function trackedWrite(file: string, data: string): void {
   const seam = (globalThis as any).__writeFileSync;
   if (typeof seam !== "function") throw new Error("__writeFileSync seam missing — pi-dev not loaded");
   seam(file, data);
 }
 
-/** Rewrite build.ps1's -version to the DX-derived base when it mismatches.
+/** Rewrite build.ps1's `-version "X.Y.Z.W"` when it mismatches the target. */
+function writeBuildVersion(text: string, version: string): string {
+  return text.replace(/-version "(\d+\.\d+\.\d+\.\d+)"/, `-version "${version}"`);
+}
+
+/** Rewrite build.ps1's -version when it mismatches the target version.
  *  Returns true when the file changed; a correct version is never touched. */
-function bumpBuildPs1(repoRoot: string, dxVersion: string, notes: string[]): boolean {
+async function bumpBuildPs1(repoRoot: string, dxVersion: string, notes: string[], seams: BuildSeams, choice: string): Promise<boolean> {
   const buildPs1 = path.join(repoRoot, "build.ps1");
   if (!fs.existsSync(buildPs1)) return false;
   const bp = fs.readFileSync(buildPs1, "utf-8");
-  const bumped = rewriteBuildVersion(bp, dxVersion);
+  const target = await releaseVersionTarget(seams, dxVersion, choice);
+  if (!target) return false;
+  const bumped = writeBuildVersion(bp, target);
   if (bumped === bp) return false;
   trackedWrite(buildPs1, bumped);
-  notes.push(`bumped build.ps1 -version to ${dxBaseVersion(dxVersion)}`);
+  notes.push(`bumped build.ps1 -version to ${target}`);
   return true;
 }
 
@@ -127,7 +122,7 @@ function tail(s: string, n = 1500): string {
   return t.length <= n ? t : "..." + t.slice(-n);
 }
 
-async function dxPhase(ctx: any, seams: BuildSeams, propsPath: string, latest: string): Promise<{ changed: boolean; notes: string[] }> {
+async function dxPhase(ctx: any, seams: BuildSeams, propsPath: string, latest: string, choice: string): Promise<{ changed: boolean; notes: string[] }> {
   const text = fs.readFileSync(propsPath, "utf-8");
   const { count, unique } = readDxPins(text);
   const notes: string[] = [];
@@ -141,7 +136,7 @@ async function dxPhase(ctx: any, seams: BuildSeams, propsPath: string, latest: s
   }
   if (unique === latest) {
     notes.push(`DX already at latest (${latest})`);
-    const repaired = bumpBuildPs1(path.dirname(propsPath), latest, notes);
+    const repaired = await bumpBuildPs1(path.dirname(propsPath), latest, notes, seams, choice);
     return { changed: repaired, notes };
   }
   const pick = await ctx.ui.select(`DX ${unique} → ${latest}: update all DevExpress.* pins?`, ["Update", "Skip", "Abort"]);
@@ -152,7 +147,7 @@ async function dxPhase(ctx: any, seams: BuildSeams, propsPath: string, latest: s
   }
   trackedWrite(propsPath, rewriteDxVersion(text, latest));
   notes.push(`updated all DevExpress.* pins ${unique} → ${latest}`);
-  bumpBuildPs1(path.dirname(propsPath), latest, notes);
+  await bumpBuildPs1(path.dirname(propsPath), latest, notes, seams, choice);
   return { changed: true, notes };
 }
 
@@ -206,7 +201,7 @@ async function runLocalBuild(
   const id = profileOf(seams).label;
   const latest = await getLatestDx(seams.fetchFeed);
   const propsPath = seams.propsPath ?? path.join(repo, "Directory.Packages.props");
-  const dx = await dxPhase(ctx, seams, propsPath, latest);
+  const dx = await dxPhase(ctx, seams, propsPath, latest, choice);
   notes.push(...dx.notes);
   const pins = await depPinsPhase(ctx, seams, propsPath, choice);
   notes.push(...pins.notes);
