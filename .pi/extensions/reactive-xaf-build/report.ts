@@ -63,6 +63,18 @@ export function steerStarted(pi: any, msg: string): void {
   if (typeof send === "function") send(pi, "reactive-xaf-build:build", msg, "", "steer", {});
 }
 
+/** A warning the user must see without spending a model turn: the build is
+ *  already running and nothing in the flow is blocked by it (the pre-warm's VM
+ *  layer needs attention, the publish gate still decides later). */
+export function steerWatch(pi: any, msg: string): void {
+  const send = (globalThis as any).__steer;
+  if (typeof send === "function") {
+    send(pi, "reactive-xaf-build:build", msg, "", "steer", { severity: "warning" });
+    return;
+  }
+  pi.sendUserMessage(msg, { deliverAs: "steer" });
+}
+
 /** The watch's two report-only backstops. Neither stops or kills anything. */
 export function watchMessage(event: RunEvent, id: string): string | null {
   if (event.kind === "stall") {

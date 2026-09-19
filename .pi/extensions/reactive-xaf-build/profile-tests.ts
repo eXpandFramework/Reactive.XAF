@@ -122,10 +122,12 @@ const VM_RUN = "C11=Running\nC12=Running\nC13=Running\nC14=Running\n";
 const VM_PREFIX = "Get-VM -Name C11,C12,C13,C14*";
 const GREEN_RX = [
   { match: VM_PREFIX, result: { code: 0, stdout: VM_RUN, stderr: "" } },
+  { match: VM_PREFIX, result: { code: 0, stdout: VM_RUN, stderr: "" } },
   { match: "git status --short", result: { code: 0, stdout: "", stderr: "" } },
   { match: "prx", result: { code: 0, stdout: "", stderr: "" } },
 ];
 const GREEN_EXPAND = [
+  { match: VM_PREFIX, result: { code: 0, stdout: VM_RUN, stderr: "" } },
   { match: VM_PREFIX, result: { code: 0, stdout: VM_RUN, stderr: "" } },
   { match: "git status --short", result: { code: 0, stdout: "", stderr: "" } },
   { match: "git push lab HEAD:master", result: { code: 0, stdout: "", stderr: "" } },

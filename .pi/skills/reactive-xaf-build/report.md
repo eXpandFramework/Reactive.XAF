@@ -35,3 +35,8 @@ unchanged: the same strings, the same delivery.
 - `steerStarted(pi, msg)` — the started notice on the same sender with no
   severity and no turn (a started build needs no agent action). Absent the
   shared sender it is dropped and only the toast shows it.
+- `steerWatch(pi, msg)` — a warning on the same sender with
+  `severity: "warning"` and NO `triggerTurn`: the build is already running, so
+  the user must see it but no agent action follows (the pre-warm's "VM layer
+  needs attention" lines). Falls back to `pi.sendUserMessage` like
+  `steerWarning`.

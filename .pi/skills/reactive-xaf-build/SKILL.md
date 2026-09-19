@@ -47,8 +47,15 @@ Menu picks run in the INVOKING window. The eXpand pick uses
    band (marker, pane death, a 10-minute silence-plus-CPU-idle stall, a
    20-minute overrun) and reports. Nothing in the watch kills a build —
    `/devexpress` → "Abort build" is the only deliberate stop.
-5. **Publish** — VMs C11–C14, commit, optional `git push`, `profile.queueCmd`,
-   AzDO watcher (`publish.ts`).
+5. **Publish** — `publishPhase` gates on the VM probe first: C11–C14 must
+   answer Running, `Off`/`Saved` are Start-VM'd, and anything unreadable,
+   missing or unstartable THROWS `VmProbeError` out of `planVms`, stopping the
+   publish before the commit with a warning steer. The probe runs profile-free
+   and is retried once. The agents are pre-warmed at build start
+   (`prewarmVms`): a readable probe starts what can start, an unreadable one
+   blind-starts C11-C14, and the build never fails over it (a `steerWatch`
+   warning, no model turn). Then commit, optional `git push`,
+   `profile.queueCmd`, AzDO watcher (`publish.ts`).
 
 ## Module map
 

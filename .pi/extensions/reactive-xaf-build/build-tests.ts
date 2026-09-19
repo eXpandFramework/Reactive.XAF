@@ -4,7 +4,8 @@
  * seams, fixture props) — the real nuget.org, pwsh, psmux, VMs and git are
  * never touched. T1-T13 build/commit/publish/failure/abort/pane flows;
  * T14-T17 AzDO monitor + status; T18-T19 menu delegation; T20 fail-reason
- * extraction (wrapper noise filtered, real error delivered).
+ * extraction (wrapper noise filtered, real error delivered); T31-T40 the VM
+ * contract (a failed probe stops the publish, a build pre-warms the agents).
  * Run: npx tsx C:/Work/Reactive.XAF/.pi/extensions/reactive-xaf-build/build-tests.ts
  */
 /* oxlint-disable no-console -- test harness prints PASS/FAIL to stdout */
@@ -154,6 +155,7 @@ function propsText(root: string): string {
   return readFileSync(join(root, "Directory.Packages.props"), "utf-8");
 }
 const VM_OFF = "C11=Off\nC12=Running\nC13=Running\nC14=Running\n";
+const VM_STARTING = "C11=Starting\nC12=Running\nC13=Running\nC14=Running\n";
 const VM_RUN = "C11=Running\nC12=Running\nC13=Running\nC14=Running\n";
 const VM_CHECK_PREFIX = "Get-VM -Name C11,C12,C13,C14*";
 const MENU = ["Build", "RX-XAF"];
@@ -166,7 +168,10 @@ const DX_PINS: Array<[string, string]> = [
 function okResult(stdout = ""): any {
   return { code: 0, stdout, stderr: "" };
 }
+/** The green publish fixture. Two probes: a build probes once at build start
+ *  and the gate probes again, so every build-path flow consumes both. */
 const GREEN_PUBLISH = [
+  { match: VM_CHECK_PREFIX, result: { code: 0, stdout: VM_RUN, stderr: "" } },
   { match: VM_CHECK_PREFIX, result: { code: 0, stdout: VM_RUN, stderr: "" } },
   { match: "git status --short", result: okResult("") },
   { match: "prx", result: okResult() },
@@ -238,6 +243,7 @@ function mkMonitor(): { pi: any; repo: string; starts: number[]; pane: any } {
     writeFileSync(join(repo, "build.ps1"), "& .\\support\\build\\go.ps1 -version \"26.1.300.0\"\n");
     const runner = mkRunner([
       { match: VM_CHECK_PREFIX, result: { code: 0, stdout: VM_RUN, stderr: "" } },
+      { match: VM_CHECK_PREFIX, result: { code: 0, stdout: VM_RUN, stderr: "" } },
       { match: "git status --short", result: { code: 0, stdout: " M src/x.cs\n", stderr: "" } },
       { match: "git add -A", result: okResult() },
       { match: "git commit -m *", result: okResult() },
@@ -266,6 +272,7 @@ function mkMonitor(): { pi: any; repo: string; starts: number[]; pane: any } {
     writeFileSync(join(repo, "build.ps1"), "& .\\support\\build\\go.ps1 -version \"26.1.301.0\"\n");
     const runner = mkRunner([
       { match: VM_CHECK_PREFIX, result: { code: 0, stdout: VM_RUN, stderr: "" } },
+      { match: VM_CHECK_PREFIX, result: { code: 0, stdout: VM_RUN, stderr: "" } },
       { match: "git status --short", result: { code: 0, stdout: " M build.ps1\n", stderr: "" } },
       { match: "git add -A", result: okResult() },
       { match: "git commit -m *", result: okResult() },
@@ -290,6 +297,7 @@ function mkMonitor(): { pi: any; repo: string; starts: number[]; pane: any } {
     ]);
     const runner = mkRunner([
       { match: VM_CHECK_PREFIX, result: { code: 0, stdout: VM_RUN, stderr: "" } },
+      { match: VM_CHECK_PREFIX, result: { code: 0, stdout: VM_RUN, stderr: "" } },
       { match: "git status --short", result: okResult("") },
       { match: "prx", result: okResult() },
     ]);
@@ -310,7 +318,7 @@ function mkMonitor(): { pi: any; repo: string; starts: number[]; pane: any } {
     clearSteers();
     stopBuildRun();
     const repo = mkRepo(DX_PINS);
-    const runner = mkRunner([]);
+    const runner = mkRunner([{ match: VM_CHECK_PREFIX, result: { code: 0, stdout: VM_RUN, stderr: "" } }]);
     const pane = mkPaneSeams({ capture: "warning CS0219: unused variable" });
     const pi = mkPi();
     registerBuildCommand(pi, { run: runner.run, fetchFeed: mkFetch(["26.1.4"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1, ...pane });
@@ -323,13 +331,14 @@ function mkMonitor(): { pi: any; repo: string; starts: number[]; pane: any } {
     check("T6: FAILED surfaced with the exit code", msg.includes("Build FAILED (exit 1)"), msg);
     check("T6: captured pane tail shown", msg.includes("warning CS0219"), msg);
     check("T6: pane KEPT, no close on failure", pane.closed.length === 0 && !ctx._notifies.some((n) => n.includes("Close build pane")), JSON.stringify(pane.closed) + " | " + ctx._notifies.join(" | "));
-    check("T6: no publish commands", runner.calls.length === 0, runner.calls.join(" | "));
+    check("T6: no publish commands", !runner.calls.some((c) => c.startsWith("git") || c.includes("prx")), runner.calls.join(" | "));
     check("T6: one warning steer, forces a turn", warnings().length === 1 && steers.some((s) => s.opts?.severity === "warning" && s.opts?.triggerTurn === true), JSON.stringify(steers));
   }
   // Section: T7 — Release flow (DX update skipped)
   {
     const repo = mkRepo(DX_PINS);
     const runner = mkRunner([
+      { match: VM_CHECK_PREFIX, result: { code: 0, stdout: VM_RUN, stderr: "" } },
       { match: VM_CHECK_PREFIX, result: { code: 0, stdout: VM_RUN, stderr: "" } },
       { match: "git status --short", result: okResult("") },
       { match: "prx -Release", result: okResult() },
@@ -386,6 +395,7 @@ function mkMonitor(): { pi: any; repo: string; starts: number[]; pane: any } {
   {
     const repo = mkRepo(DX_PINS);
     const runner = mkRunner([
+      { match: VM_CHECK_PREFIX, result: { code: 0, stdout: VM_RUN, stderr: "" } },
       { match: "brx", result: okResult("Build succeeded") },
       { match: VM_CHECK_PREFIX, result: { code: 0, stdout: VM_RUN, stderr: "" } },
       { match: "git status --short", result: okResult("") },
@@ -421,8 +431,11 @@ function mkMonitor(): { pi: any; repo: string; starts: number[]; pane: any } {
   {
     const repo = mkRepo(DX_PINS);
     const runner = mkRunner([
-      { match: VM_CHECK_PREFIX, result: { code: 0, stdout: "C11=Starting\nC12=Running\nC13=Running\nC14=Running\n", stderr: "" } },
-      ...GREEN_PUBLISH,
+      { match: VM_CHECK_PREFIX, result: { code: 0, stdout: VM_STARTING, stderr: "" } },
+      { match: VM_CHECK_PREFIX, result: { code: 0, stdout: VM_STARTING, stderr: "" } },
+      { match: VM_CHECK_PREFIX, result: { code: 0, stdout: VM_RUN, stderr: "" } },
+      { match: "git status --short", result: okResult("") },
+      { match: "prx", result: okResult() },
     ]);
     const pane = mkPaneSeams();
     const pi = mkPi();
@@ -514,7 +527,7 @@ function mkMonitor(): { pi: any; repo: string; starts: number[]; pane: any } {
     const repo = mkRepo(DX_PINS);
     const pane = mkPaneSeams({ capture: "unchanged", cpu: (n) => n * 0.5, runCadence: { ...TEST_CADENCE, stallMs: 60 } });
     const pi = mkPi();
-    registerBuildCommand(pi, { run: mkRunner([]).run, fetchFeed: mkFetch(["26.1.4"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1, ...pane });
+    registerBuildCommand(pi, { run: mkRunner([{ match: VM_CHECK_PREFIX, result: { code: 0, stdout: VM_RUN, stderr: "" } }]).run, fetchFeed: mkFetch(["26.1.4"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1, ...pane });
     await pi._cmds.get("devexpress").handler([], mkCtx([...MENU, "Lab", "Skip"], repo));
     await sleep(300);
     check("T23: CPU progress suppresses the stall entirely", warnings().length === 0, JSON.stringify(warnings()));
@@ -541,7 +554,7 @@ function mkMonitor(): { pi: any; repo: string; starts: number[]; pane: any } {
     const pi = mkPi();
     registerBuildCommand(pi, { run: runner.run, fetchFeed: mkFetch(["26.1.4"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1, ...pane });
     await pi._cmds.get("devexpress").handler([], mkCtx([...MENU, "Lab", "Skip"], repo));
-    await waitFor(() => warnings().length > 0);
+    await waitFor(() => warnings().some((w) => w.includes("build pane is gone")));
     check("T25: reported as a failure with no exit code", warnings().some((w) => w.includes("build pane is gone")), JSON.stringify(warnings()));
     check("T25: no publish from a dead build", !runner.calls.includes("prx"), runner.calls.join(" | "));
   }
@@ -571,7 +584,7 @@ function mkMonitor(): { pi: any; repo: string; starts: number[]; pane: any } {
     registerBuildCommand(pi, { run: mkRunner([]).run, fetchFeed: mkFetch(["26.1.4"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1, ...pane });
     await pi._cmds.get("devexpress").handler([], mkCtx([...MENU, "Lab", "Skip"], repo));
     finishRun(pane, 1);
-    await waitFor(() => warnings().length > 0);
+    await waitFor(() => warnings().some((w) => w.includes("Build FAILED")));
     const msg = warnings().join("");
     check("T27: bounded tail that keeps its end", msg.length < 6000 && msg.includes("TAILEND"), `len=${msg.length}`);
   }
@@ -585,8 +598,8 @@ function mkMonitor(): { pi: any; repo: string; starts: number[]; pane: any } {
     registerBuildCommand(pi, { run: mkRunner([]).run, fetchFeed: mkFetch(["26.1.4"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1, ...pane });
     await pi._cmds.get("devexpress").handler([], mkCtx([...MENU, "Lab", "Skip"], repo));
     finishRun(pane, 1);
-    await waitFor(() => pi._userMessages.length > 0);
-    check("T28: the runtime message API carries the failure", pi._userMessages.length === 1 && pi._userMessages[0].opts?.deliverAs === "steer" && pi._userMessages[0].content.includes("Build FAILED"), JSON.stringify(pi._userMessages));
+    await waitFor(() => pi._userMessages.some((m: any) => m.content.includes("Build FAILED")));
+    check("T28: the runtime message API carries the failure", pi._userMessages.some((m: any) => m.opts?.deliverAs === "steer" && m.content.includes("Build FAILED")), JSON.stringify(pi._userMessages));
     (globalThis as any).__steer = saved;
   }
   // Section: T29 — the supervisor's exit code survives an exit inside the build
@@ -608,8 +621,221 @@ function mkMonitor(): { pi: any; repo: string; starts: number[]; pane: any } {
     registerBuildCommand(pi, { run: mkRunner([]).run, fetchFeed: mkFetch(["26.1.4"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1, ...pane });
     await pi._cmds.get("devexpress").handler([], mkCtx([...MENU, "Lab", "Skip"], repo));
     writeFileSync(markerOf(pane.sent[0]), "not-a-code");
-    await waitFor(() => warnings().length > 0);
+    await waitFor(() => warnings().some((w) => w.includes("no readable code")));
     check("T30: reported as a failure naming the raw marker", warnings().some((w) => w.includes("no readable code")), JSON.stringify(warnings()));
+  }
+  // Section: T31 — an unreadable VM probe stops the publish before any commit
+  {
+    clearSteers();
+    const repo = mkRepo(DX_PINS);
+    const runner = mkRunner([
+      { match: VM_CHECK_PREFIX, result: { code: 1, stdout: "", stderr: "Get-VM: Access is denied." } },
+      { match: VM_CHECK_PREFIX, result: { code: 1, stdout: "", stderr: "Get-VM: Access is denied." } },
+    ]);
+    const pi = mkPi();
+    registerBuildCommand(pi, { run: runner.run, fetchFeed: mkFetch(["26.1.4"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1, ...mkPaneSeams() });
+    const ctx = mkCtx(["Publish", "RX-XAF", "Lab"], repo);
+    const result = await pi._cmds.get("devexpress").handler([], ctx);
+    check("T31: the failed probe is retried once, then refused", runner.calls.filter((c) => c.startsWith("Get-VM")).length === 2, runner.calls.join(" | "));
+    check("T31: nothing committed or queued", !runner.calls.some((c) => c.startsWith("git") || c.includes("prx")), runner.calls.join(" | "));
+    check("T31: exit code and stderr reach the warning", warnings().some((w) => w.includes("Get-VM failed (exit 1)") && w.includes("Access is denied")), JSON.stringify(warnings()));
+    check("T31: the summary says the publish stopped", result.includes("publish stopped"), result);
+  }
+  // Section: T32 — a probe that reported nothing is loud, never "already running"
+  {
+    clearSteers();
+    const repo = mkRepo(DX_PINS);
+    const runner = mkRunner([{ match: VM_CHECK_PREFIX, result: okResult("") }]);
+    const pi = mkPi();
+    registerBuildCommand(pi, { run: runner.run, fetchFeed: mkFetch(["26.1.4"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1, ...mkPaneSeams() });
+    await pi._cmds.get("devexpress").handler([], mkCtx(["Publish", "RX-XAF", "Lab"], repo));
+    const msg = warnings().join("\n");
+    check("T32: every unseen agent named", msg.includes("did not report C11, C12, C13, C14"), msg);
+    check("T32: no already-running claim", !msg.includes("already running"), msg);
+    check("T32: no commit, no queue", !runner.calls.some((c) => c.startsWith("git") || c.includes("prx")), runner.calls.join(" | "));
+  }
+  // Section: T33 — a partial probe names exactly the agent it missed
+  {
+    clearSteers();
+    const repo = mkRepo(DX_PINS);
+    const runner = mkRunner([{ match: VM_CHECK_PREFIX, result: okResult("C12=Running\nC13=Running\nC14=Running\n") }]);
+    const pi = mkPi();
+    registerBuildCommand(pi, { run: runner.run, fetchFeed: mkFetch(["26.1.4"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1, ...mkPaneSeams() });
+    await pi._cmds.get("devexpress").handler([], mkCtx(["Publish", "RX-XAF", "Lab"], repo));
+    const msg = warnings().join("\n");
+    check("T33: names C11", msg.includes("did not report C11"), msg);
+    check("T33: the agents it did see are not blamed", !msg.includes("C12") && !msg.includes("C13"), msg);
+  }
+  // Section: T34 — a state nothing can start fails the gate with the state named
+  {
+    clearSteers();
+    const repo = mkRepo(DX_PINS);
+    const runner = mkRunner([{ match: VM_CHECK_PREFIX, result: okResult("C11=Paused\nC12=Running\nC13=Running\nC14=Running\n") }]);
+    const pi = mkPi();
+    registerBuildCommand(pi, { run: runner.run, fetchFeed: mkFetch(["26.1.4"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1, ...mkPaneSeams() });
+    const ctx = mkCtx(["Publish", "RX-XAF", "Lab"], repo);
+    await pi._cmds.get("devexpress").handler([], ctx);
+    check("T34: the state is named, the publish stopped", warnings().some((w) => w.includes("C11 is Paused") && w.includes("publish stopped")), JSON.stringify(warnings()));
+    check("T34: no blind Start-VM, no already-running claim", !runner.calls.some((c) => c.startsWith("Start-VM")) && !ctx._notifies.some((n) => n.includes("already running")), runner.calls.join(" | "));
+  }
+  // Section: T35 — a Saved agent is startable and gets started
+  {
+    clearSteers();
+    const repo = mkRepo(DX_PINS);
+    const runner = mkRunner([
+      { match: VM_CHECK_PREFIX, result: okResult("C11=Saved\nC12=Running\nC13=Running\nC14=Running\n") },
+      { match: "Start-VM -Name C11", result: okResult() },
+      { match: VM_CHECK_PREFIX, result: okResult(VM_RUN) },
+      { match: "git status --short", result: okResult("") },
+      { match: "prx", result: okResult() },
+    ]);
+    const pi = mkPi();
+    registerBuildCommand(pi, { run: runner.run, fetchFeed: mkFetch(["26.1.4"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1, ...mkPaneSeams() });
+    const result = await pi._cmds.get("devexpress").handler([], mkCtx(["Publish", "RX-XAF", "Lab", "Publish"], repo));
+    check("T35: the Saved agent was started", runner.calls.includes("Start-VM -Name C11"), runner.calls.join(" | "));
+    check("T35: published once the queue confirm came", result.includes("published") && runner.calls.includes("prx") && warnings().length === 0, result + " | " + runner.calls.join(" | ") + " | " + JSON.stringify(steers));
+  }
+  // Section: T36 — a build start pre-warms the agents and does not wait
+  {
+    stopBuildRun();
+    clearSteers();
+    const repo = mkRepo(DX_PINS);
+    const runner = mkRunner([
+      { match: VM_CHECK_PREFIX, result: okResult(VM_OFF) },
+      { match: "Start-VM -Name C11", result: okResult() },
+      { match: VM_CHECK_PREFIX, result: okResult(VM_RUN) },
+      { match: "git status --short", result: okResult("") },
+      { match: "prx", result: okResult() },
+    ]);
+    const pane = mkPaneSeams();
+    const pi = mkPi();
+    registerBuildCommand(pi, { run: runner.run, fetchFeed: mkFetch(["26.1.4"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1, ...pane });
+    const ctx = mkCtx([...MENU, "Lab", "Skip", "Publish"], repo);
+    const result = await pi._cmds.get("devexpress").handler([], ctx);
+    check("T36: the agents are started before the pane takes the build", runner.calls[0].startsWith("Get-VM") && runner.calls[1].startsWith("Start-VM -Name C11") && pane.opened.length === 1, runner.calls.join(" | "));
+    check("T36: the pre-warm does not wait", runner.calls.filter((c) => c.startsWith("Get-VM")).length === 1, runner.calls.join(" | "));
+    check("T36: the started notice says they are booting", result.includes("booting during the build: C11") && result.includes("Build started in pane"), result);
+    finishRun(pane, 0);
+    await waitFor(() => ctx._notifies.some((n) => n.includes("published")));
+    check("T36: the gate finds them running and publishes", ctx._notifies.some((n) => n.includes("published")) && runner.calls.filter((c) => c.startsWith("Start-VM")).length === 1, runner.calls.join(" | "));
+  }
+  // Section: T37 — a broken pre-warm never stops the build
+  {
+    stopBuildRun();
+    clearSteers();
+    const repo = mkRepo(DX_PINS);
+    const runner = mkRunner([
+      { match: VM_CHECK_PREFIX, result: { code: 1, stdout: "", stderr: "Get-VM: Access is denied." } },
+      { match: VM_CHECK_PREFIX, result: { code: 1, stdout: "", stderr: "Get-VM: Access is denied." } },
+      { match: "Start-VM -Name C11,C12,C13,C14", result: okResult() },
+    ]);
+    const pi = mkPi();
+    registerBuildCommand(pi, { run: runner.run, fetchFeed: mkFetch(["26.1.4"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1, ...mkPaneSeams() });
+    const result = await pi._cmds.get("devexpress").handler([], mkCtx([...MENU, "Lab", "Skip"], repo));
+    check("T37: the build started with the probe broken", result.includes("Build started in pane") && result.includes("Get-VM failed (exit 1)"), result);
+    check("T37: all four agents were blind-started anyway", runner.calls.includes("Start-VM -Name C11,C12,C13,C14"), runner.calls.join(" | "));
+    check("T37: the broken probe steers a warning that spends no model turn", steers.some((s) => s.opts?.severity === "warning" && s.opts?.triggerTurn !== true && s.content.includes("Get-VM failed (exit 1)")), JSON.stringify(steers));
+    stopBuildRun();
+    const boom = { run: async () => { throw new Error("pwsh missing"); } };
+    const pi2 = mkPi();
+    registerBuildCommand(pi2, { run: boom.run, fetchFeed: mkFetch(["26.1.4"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1, ...mkPaneSeams() });
+    const r2 = await pi2._cmds.get("devexpress").handler([], mkCtx([...MENU, "Lab", "Skip"], repo));
+    check("T37: a probe seam that throws is a note too", r2.includes("Build started") && r2.includes("Get-VM did not run: pwsh missing"), r2);
+    stopBuildRun();
+  }
+  // Section: T38 — a failed Start-VM in the pre-warm is a note
+  {
+    stopBuildRun();
+    clearSteers();
+    const repo = mkRepo(DX_PINS);
+    const runner = mkRunner([
+      { match: VM_CHECK_PREFIX, result: okResult(VM_OFF) },
+      { match: "Start-VM -Name C11", result: { code: 1, stdout: "", stderr: "Start-VM: not enough memory" } },
+    ]);
+    const pi = mkPi();
+    registerBuildCommand(pi, { run: runner.run, fetchFeed: mkFetch(["26.1.4"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1, ...mkPaneSeams() });
+    const result = await pi._cmds.get("devexpress").handler([], mkCtx([...MENU, "Lab", "Skip"], repo));
+    check("T38: the build starts, the failed start is a note", result.includes("Build started in pane") && result.includes("Start-VM failed: Start-VM: not enough memory"), result);
+    check("T38: the failed start steers a warning that spends no model turn", steers.some((s) => s.opts?.severity === "warning" && s.opts?.triggerTurn !== true && s.content.includes("not enough memory")), JSON.stringify(steers));
+    check("T38: no publish attempt", !runner.calls.some((c) => c.startsWith("git")), runner.calls.join(" | "));
+    stopBuildRun();
+  }
+  // Section: T39 — the publish-only flow probes once and never pre-warms
+  {
+    clearSteers();
+    const repo = mkRepo(DX_PINS);
+    const runner = mkRunner([
+      { match: VM_CHECK_PREFIX, result: okResult(VM_RUN) },
+      { match: "git status --short", result: okResult("") },
+      { match: "prx", result: okResult() },
+    ]);
+    const pi = mkPi();
+    registerBuildCommand(pi, { run: runner.run, fetchFeed: mkFetch(["26.1.4"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1, ...mkPaneSeams() });
+    const result = await pi._cmds.get("devexpress").handler([], mkCtx(["Publish", "RX-XAF", "Lab", "Publish"], repo));
+    check("T39: one probe, then the queue", runner.calls.filter((c) => c.startsWith("Get-VM")).length === 1 && runner.calls.includes("prx"), runner.calls.join(" | "));
+    check("T39: published", result.includes("published"), result);
+  }
+  // Section: T40 — an agent that never boots fails the publish at the wait timeout
+  {
+    clearSteers();
+    const repo = mkRepo(DX_PINS);
+    const calls: string[] = [];
+    const stuck = {
+      run: async (cmd: string) => {
+        calls.push(cmd);
+        if (cmd.startsWith("Get-VM -Name C11,C12,C13,C14")) return okResult(VM_OFF);
+        return okResult();
+      },
+    };
+    const pi = mkPi();
+    registerBuildCommand(pi, { run: stuck.run, fetchFeed: mkFetch(["26.1.4"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1, ...mkPaneSeams() });
+    await pi._cmds.get("devexpress").handler([], mkCtx(["Publish", "RX-XAF", "Lab"], repo));
+    const msg = warnings().join("\n");
+    check("T40: the wait ends loudly", msg.includes("did not reach Running within 3 minutes"), msg || "(no warning)");
+    check("T40: still nothing committed or queued", !calls.some((c) => c.startsWith("git") || c.includes("prx")), calls.join(" | "));
+  }
+  // Section: T41 — a probe killed mid-list refuses instead of acting on part of a plan
+  {
+    clearSteers();
+    const repo = mkRepo(DX_PINS);
+    const KILLED = "C11=Off\nC12=Running\n";
+    const runner = mkRunner([
+      { match: VM_CHECK_PREFIX, result: { code: 1, stdout: KILLED, stderr: "" } },
+      { match: VM_CHECK_PREFIX, result: { code: 1, stdout: KILLED, stderr: "" } },
+    ]);
+    const pi = mkPi();
+    registerBuildCommand(pi, { run: runner.run, fetchFeed: mkFetch(["26.1.4"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1, ...mkPaneSeams() });
+    await pi._cmds.get("devexpress").handler([], mkCtx(["Publish", "RX-XAF", "Lab"], repo));
+    const msg = warnings().join("\n");
+    check("T41: the kill is reported, not the truncated list", msg.includes("Get-VM failed (exit 1)"), msg || "(no warning)");
+    check("T41: no commit and no queue from a partial probe", !runner.calls.some((c) => c.startsWith("git") || c.includes("prx")), runner.calls.join(" | "));
+  }
+  // Section: T42 — a probe that answers the retry publishes, and asks for a profile-free pwsh
+  {
+    clearSteers();
+    const repo = mkRepo(DX_PINS);
+    const calls: string[] = [];
+    const opts: any[] = [];
+    const flaky = {
+      run: async (cmd: string, o?: any) => {
+        calls.push(cmd);
+        opts.push(o);
+        if (cmd.startsWith("Get-VM -Name C11,C12,C13,C14")) {
+          return calls.filter((c) => c.startsWith("Get-VM")).length === 1
+            ? { code: 1, stdout: "", stderr: "Get-VM: killed" }
+            : okResult(VM_RUN);
+        }
+        if (cmd === "git status --short") return okResult("");
+        return okResult();
+      },
+    };
+    const pi = mkPi();
+    registerBuildCommand(pi, { run: flaky.run, fetchFeed: mkFetch(["26.1.4"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1, ...mkPaneSeams() });
+    const result = await pi._cmds.get("devexpress").handler([], mkCtx(["Publish", "RX-XAF", "Lab", "Publish"], repo));
+    const probeCalls = calls.map((cmd, i) => ({ cmd, o: opts[i] })).filter((x) => x.cmd.startsWith("Get-VM"));
+    check("T42: the retry answered and the publish went through", result.includes("published") && probeCalls.length === 2, result + " | " + calls.join(" | "));
+    check("T42: the probe asked for a profile-free, prompt-free pwsh", probeCalls.every((x) => x.o?.noProfile === true), JSON.stringify(probeCalls.map((x) => x.o)));
+    check("T42: one retry was enough, no warning", warnings().length === 0, JSON.stringify(warnings()));
   }
   console.log(`\n${ok} passed, ${fail} failed`);
   process.exit(fail > 0 ? 1 : 0);

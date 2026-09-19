@@ -40,6 +40,17 @@ Run: `npx tsx d:/Reactive.XAF/.pi/extensions/reactive-xaf-build/build-tests.ts`
   overrun never closes the pane, abort reports no failure, a second build is
   refused, the supervisor's real exit code survives an `exit`, and a green
   marker publishes.
+- T31-T42 — the VM probe contract: a probe that exits nonzero twice refuses
+  the publish before any commit and steers the exit code plus stderr (T31);
+  nothing parsable names all four agents (T32); a partial list names exactly
+  the agent it missed (T33), and the killed-mid-list shape (nonzero code,
+  truncated stdout) refuses on the code (T41); `Paused` is refused, `Saved`
+  is started and publishes (T34-T35); a build start pre-warms the agents
+  before the pane opens and never waits (T36), blind-starts all four when the
+  probe is unreadable and steers a no-turn warning (T37), a failed Start-VM
+  stays a note plus that warning (T38); the publish-only flow probes once
+  (T39); an agent that never boots fails at the timeout (T40); a probe that
+  answers the retry publishes and asked for a profile-free invocation (T42).
 
 The watcher's own contract (toast per poll, terminal steer, give-up,
 replace) is pinned by `watcher-tests.ts`; the CRLF status/cancel parse
@@ -56,3 +67,20 @@ not loaded. The harness installs a capturing `__steer` (the `steers` array,
 with `warnings()` filtering on severity), and T28 pins the fallback path with
 `__steer` deleted — there the mock pi's `_userMessages` records the delivery.
 The old `steerFailure` name is gone from the module.
+
+## Write-gate conformance (2026-09-19, the VM-probe rework)
+
+The T31-T42 additions and the sibling fixture edits were re-derived against
+`test-runner/write-gate.md` before commit:
+
+- rule 1 — every added block sits under a `// Section:` comment;
+- rule 4 — every case drives the registered command handler through the
+  mock-pi harness (`activate(pi)` / `registerBuildCommand`), no helper-only
+  assertions;
+- rule 6 — no assertion description repeats within this file or across the
+  sibling suites: the new labels are unique strings, and `profile-tests.ts`
+  and `release-tests.ts` only gained fixture entries, no new assertions;
+- rules 7 and 9 — no speed section is added here. The extension has no
+  canonical `<ext>-tests.ts` speed host yet, so rule 7 constrains no file in
+  this batch (pre-existing gap, not introduced by this change);
+- rule 10 — no import was added, so the typebox-free import graph is intact.

@@ -29,20 +29,30 @@ to `run.ts`.
 3. **depPins** (`depPinsPhase`) — skipped when `profile.depPins` is unset
    (RX). Expand: latest `Xpand.Extensions` from the matching feed, rewrite
    `Xpand.Extensions*` / `Xpand.XAF.*` ask-first.
-4. **Build** (`startBuildPhase`) — `profile.buildCmd` in a right-side pane,
+4. **VM pre-warm** (`prewarmPhase` → `prewarmVms`, publish.ts) — after the DX/pin phase and
+   before the pane takes the build. A readable probe starts exactly the agents
+   that can start, an unreadable one blind-starts C11-C14 (Hyper-V's "already in
+   its current state" answer for the agents that are up is tolerated). Never
+   waits for Running, never throws. Returns `{ notes, attention }`: the notes
+   ride the started message, `attention` adds a `steerWatch` warning that spends
+   no model turn. A flow that aborts earlier (DX prompt, feed consultation)
+   leaves the VMs alone.
+5. **Build** (`startBuildPhase`) — `profile.buildCmd` in a right-side pane,
    now via the run's supervisor script (`run.ts`): the pane is opened, the
    supervisor line is typed, and the phase returns on a STARTED build, where
    `startBuildRun` takes over. No pane → the same command runs in-process
    through `watchInProcessRun`. Either way the command never awaits the build,
    so the agent stays reachable.
-5. **Publish** (`publishPhase`) — runs from the watch when the marker reports
-   exit 0: VMs C11–C14 → commit → optional
-   `git push ${profile.pushRemote} HEAD:master` → `profile.queueCmd` →
-   `monitorPhase` (the AzDO watcher starts and the report returns).
+6. **Publish** (`publishPhase`) — runs from the watch when the marker reports
+   exit 0: the VM gate (C11–C14 must answer Running, see `publish.md`) → commit
+   → optional `git push ${profile.pushRemote} HEAD:master` → `profile.queueCmd`
+   → `monitorPhase` (the AzDO watcher starts and the report returns).
 
 ## The watch's half (`buildRunReporter`)
 
-- `done` 0 → `notes.push("build succeeded")`, then `finishPublish`.
+- `done` 0 → `notes.push("build succeeded")`, then `finishPublish`. A throw
+  inside the publish is caught and reported as a warning steer (with the notes
+  so far), never as a swallowed rejection.
 - `done` ≠ 0 → `finishMessage` → `failureResult` with the exit code and the
   bounded pane tail, plus the marker note when the code was unreadable.
 - `died` → "the build pane is gone and no exit code was written" plus the tail.
@@ -52,6 +62,11 @@ The strings and the delivery live in `report.ts`; `warn(pi, ctx, msg)` pairs a
 toast with a steer.
 
 ## Seams
+
+`CommandRunner` is `(cmd, opts?: RunOpts)`; `RunOpts` (pane.ts) carries `cwd`,
+`timeoutMs` and `noProfile` — the VM probe is the one caller that sets
+`noProfile`, because what the user profile loads must never decide whether a
+probe answers.
 
 `BuildSeams.profile?: RepoProfile` (default `rxProfile`). `ghFetch` for the
 watcher's GitHub step. The run watch adds `probePane`, `sampleCpu`, `runPaths`

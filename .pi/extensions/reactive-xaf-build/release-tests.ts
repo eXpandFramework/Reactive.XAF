@@ -154,6 +154,7 @@ function register(pi: any, runner: { run: (cmd: string) => Promise<any> }, pane:
     writeFileSync(join(repo, "build.ps1"), "& .\\support\\build\\go.ps1 -version \"26.1.400.0\"\n");
     const runner = mkRunner([
       { match: VM_CHECK_PREFIX, result: { code: 0, stdout: VM_RUN, stderr: "" } },
+      { match: VM_CHECK_PREFIX, result: { code: 0, stdout: VM_RUN, stderr: "" } },
       { match: "git status --short", result: okResult(" M build.ps1\n") },
       { match: "git add -A", result: okResult() },
       { match: "git commit -m *", result: okResult() },
@@ -181,6 +182,7 @@ function register(pi: any, runner: { run: (cmd: string) => Promise<any> }, pane:
     writeFileSync(join(repo, "build.ps1"), "& .\\support\\build\\go.ps1 -version \"26.1.300.0\"\n");
     const runner = mkRunner([
       { match: VM_CHECK_PREFIX, result: { code: 0, stdout: VM_RUN, stderr: "" } },
+      { match: VM_CHECK_PREFIX, result: { code: 0, stdout: VM_RUN, stderr: "" } },
       { match: "git status --short", result: okResult(" M build.ps1\n") },
       { match: "git add -A", result: okResult() },
       { match: "git commit -m *", result: okResult() },
@@ -206,6 +208,7 @@ function register(pi: any, runner: { run: (cmd: string) => Promise<any> }, pane:
     ]);
     writeFileSync(join(repo, "build.ps1"), "& .\\support\\build\\go.ps1 -version \"26.1.301.0\"\n");
     const runner = mkRunner([
+      { match: VM_CHECK_PREFIX, result: { code: 0, stdout: VM_RUN, stderr: "" } },
       { match: VM_CHECK_PREFIX, result: { code: 0, stdout: VM_RUN, stderr: "" } },
       { match: "git status --short", result: okResult(" M build.ps1\n") },
       { match: "git add -A", result: okResult() },

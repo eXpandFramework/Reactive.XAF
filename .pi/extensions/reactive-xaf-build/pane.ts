@@ -24,6 +24,10 @@ export interface RunResult {
 export interface RunOpts {
   cwd?: string;
   timeoutMs?: number;
+  /** Run pwsh without the user profile and without a prompt. The VM probe sets
+   *  it: what the profile loads must never decide whether a probe answers (a
+   *  profile stall is what killed the probe in the incident). */
+  noProfile?: boolean;
 }
 
 export type PaneOpener = (repo: string) => Promise<string | null>;
@@ -77,7 +81,10 @@ export async function runArgv(argv: string[], timeoutMs: number, cwd?: string): 
 
 /** Run a command through pwsh (the default command runner seam). */
 export async function runProcess(cmd: string, opts: RunOpts = {}): Promise<RunResult> {
-  return runArgv(["pwsh", "-Command", cmd], opts.timeoutMs ?? 60000, opts.cwd);
+  const argv = opts.noProfile
+    ? ["pwsh", "-NoProfile", "-NonInteractive", "-Command", cmd]
+    : ["pwsh", "-Command", cmd];
+  return runArgv(argv, opts.timeoutMs ?? 60000, opts.cwd);
 }
 
 /** psmux CLI args with the socket-isolation seam (tests / parallel servers). */

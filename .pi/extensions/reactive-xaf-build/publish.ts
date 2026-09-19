@@ -3,6 +3,11 @@
  *
  * Called after a local build (or skip-build). Repo-specific queue/push
  * come from RepoProfile.
+ *
+ * The VM gate reads the agents through one classifier: a probe that failed, or
+ * that did not name every agent, stops a publish instead of reading as "already
+ * running". Queueing a pipeline onto agents nothing started is the failure the
+ * gate exists to prevent. `prewarmVms` boots what it can while the build runs.
  */
 
 import { sleep } from "./pane.js";
@@ -13,6 +18,18 @@ import type { BuildSeams } from "./build.js";
 
 const VM_NAMES = ["C11", "C12", "C13", "C14"];
 const VM_CHECK_CMD = `Get-VM -Name C11,C12,C13,C14 | ForEach-Object { "$($_.Name)=$($_.State)" }`;
+/** The one state an AzDO agent answers work in. */
+const VM_READY = "Running";
+/** States a Start-VM brings up. */
+const VM_STARTABLE = ["Off", "Saved"];
+/** On the way up or down: wait for the agent, never start it mid-transition. */
+const VM_BOOTING = ["Starting", "Pausing", "Resuming", "Saving", "Stopping"];
+const VM_PROBE_TIMEOUT_MS = 60_000;
+/** The first pwsh of a session is the slow one: one retry before refusing. */
+const VM_PROBE_ATTEMPTS = 2;
+const VM_WAIT_POLLS = 18;
+/** Hyper-V's answer for an agent that is already up — expected on a blind start. */
+const VM_STATE_ERROR_RE = /current state/i;
 
 function tail(s: string, n = 1500): string {
   const t = s.trim();
@@ -28,38 +45,183 @@ function parseVmStates(stdout: string): Map<string, string> {
   return states;
 }
 
-async function ensureVmsRunning(seams: BuildSeams): Promise<{ ok: boolean; notes: string[] }> {
-  const notes: string[] = [];
-  const check = async () => seams.run(VM_CHECK_CMD, { timeoutMs: 60000 });
-  const first = await check();
-  const states = parseVmStates(first.stdout);
-  const off = VM_NAMES.filter((n) => states.get(n) === "Off");
-  const starting = VM_NAMES.filter((n) => states.get(n) === "Starting");
-  if (off.length > 0) {
-    if (starting.length > 0) notes.push(`already booting: ${starting.join(", ")}`);
-    notes.push(`starting Hyper-V agents: ${off.join(", ")}`);
-    const start = await seams.run(`Start-VM -Name ${off.join(",")}`, { timeoutMs: 120000 });
-    if (start.code !== 0) {
-      notes.push(`Start-VM failed: ${tail(start.stderr)}`);
+/** The agents to start and the agents to wait for. There is no "unreadable"
+ *  member on purpose: a probe that cannot be read THROWS (VmProbeError), so a
+ *  caller that does not handle it stops the flow loudly instead of acting on an
+ *  empty agent list. */
+export interface VmPlan {
+  start: string[];
+  booting: string[];
+}
+
+/** The probe could not be read. `planVms` throws it and `probeVms` rethrows it:
+ *  the publish gate is the one place that turns it into a refusal. */
+export class VmProbeError extends Error {
+  constructor(reason: string) {
+    super(reason);
+    this.name = "VmProbeError";
+  }
+}
+
+/** The refusal's message, whatever shape the failure arrived in. */
+function reasonOf(err: unknown): string {
+  if (err instanceof VmProbeError) return err.message;
+  return `Get-VM did not run: ${err instanceof Error ? err.message : String(err)}`;
+}
+
+/** pwsh exited nonzero: killed at the timeout, or the command failed. */
+function exitReason(probe: { code: number; stderr: string }): string {
+  return `Get-VM failed (exit ${probe.code}): ${tail(probe.stderr) || "no stderr"}`;
+}
+
+export function planVms(probe: { code: number; stdout: string; stderr: string }): VmPlan {
+  if (probe.code !== 0) {
+    throw new VmProbeError(exitReason(probe));
+  }
+  const states = parseVmStates(probe.stdout);
+  const missing = VM_NAMES.filter((n) => !states.has(n));
+  if (missing.length > 0) {
+    throw new VmProbeError(`Get-VM did not report ${missing.join(", ")} — no state to act on`);
+  }
+  const start: string[] = [];
+  const booting: string[] = [];
+  for (const name of VM_NAMES) {
+    const state = states.get(name) as string;
+    if (state === VM_READY) continue;
+    if (VM_STARTABLE.includes(state)) {
+      start.push(name);
+      continue;
+    }
+    if (VM_BOOTING.includes(state)) {
+      booting.push(name);
+      continue;
+    }
+    throw new VmProbeError(`${name} is ${state} — neither running nor startable, fix it before publishing`);
+  }
+  return { start, booting };
+}
+
+/** The probe as a plan, or a VmProbeError. Only a TRANSPORT failure is retried
+ *  once (the seam threw, or pwsh exited nonzero: the first pwsh of a session is
+ *  the slow one, and a killed probe must not take the agent list with it). A
+ *  readable answer that cannot be acted on is refused on the spot — retrying a
+ *  state or a truncated list would only report the same thing twice. The
+ *  invocation skips the user profile: a profile stall is what killed the probe
+ *  that started this fix. */
+async function probeVms(seams: BuildSeams): Promise<VmPlan> {
+  let failure = "";
+  for (let attempt = 0; attempt < VM_PROBE_ATTEMPTS; attempt++) {
+    let probe: { code: number; stdout: string; stderr: string } | null = null;
+    try {
+      probe = await seams.run(VM_CHECK_CMD, { timeoutMs: VM_PROBE_TIMEOUT_MS, noProfile: true });
+    } catch (err) {
+      failure = `Get-VM did not run: ${err instanceof Error ? err.message : String(err)}`;
+    }
+    if (probe !== null && probe.code === 0) return planVms(probe);
+    if (probe !== null) failure = exitReason(probe);
+  }
+  throw new VmProbeError(failure || "Get-VM did not answer");
+}
+
+/** Start-VM for the named agents: null when it ran, the reason when it did not. */
+async function startVms(seams: BuildSeams, names: string[]): Promise<string | null> {
+  try {
+    const res = await seams.run(`Start-VM -Name ${names.join(",")}`, { timeoutMs: 120_000 });
+    if (res.code === 0) return null;
+    return `Start-VM failed: ${tail(res.stderr) || `exit ${res.code}`}`;
+  } catch (err) {
+    return `Start-VM did not run: ${err instanceof Error ? err.message : String(err)}`;
+  }
+}
+
+/** Poll until every agent answers Running. A poll that cannot be read, or a
+ *  state nothing can start, ends the wait loudly instead of burning the clock. */
+async function waitForRunning(seams: BuildSeams, notes: string[]): Promise<{ ok: boolean; notes: string[] }> {
+  for (let i = 0; i < VM_WAIT_POLLS; i++) {
+    await sleep(seams.pollMs ?? 10_000);
+    let plan: VmPlan;
+    try {
+      plan = await probeVms(seams);
+    } catch (err) {
+      notes.push(reasonOf(err));
       return { ok: false, notes };
     }
-  } else if (starting.length > 0) {
-    notes.push(`Hyper-V agents already booting: ${starting.join(", ")} — waiting for Running`);
-  } else {
-    notes.push("Hyper-V agents C11-C14 already running");
-    return { ok: true, notes };
-  }
-  for (let i = 0; i < 18; i++) {
-    await sleep(seams.pollMs ?? 10000);
-    const res = await check();
-    const st = parseVmStates(res.stdout);
-    if (VM_NAMES.every((n) => st.get(n) === "Running")) {
+    if (plan.start.length === 0 && plan.booting.length === 0) {
       notes.push("Hyper-V agents running");
       return { ok: true, notes };
     }
   }
   notes.push("Hyper-V agents did not reach Running within 3 minutes");
   return { ok: false, notes };
+}
+
+/** The publish gate: the only place a probe becomes a decision. A probe that
+ *  cannot be read refuses here, so nothing reaches the commit or the queue on an
+ *  agent list nobody could read. */
+async function ensureVmsRunning(seams: BuildSeams): Promise<{ ok: boolean; notes: string[] }> {
+  const notes: string[] = [];
+  let plan: VmPlan;
+  try {
+    plan = await probeVms(seams);
+  } catch (err) {
+    notes.push(reasonOf(err));
+    return { ok: false, notes };
+  }
+  if (plan.start.length > 0) {
+    if (plan.booting.length > 0) notes.push(`already booting: ${plan.booting.join(", ")}`);
+    notes.push(`starting Hyper-V agents: ${plan.start.join(", ")}`);
+    const failed = await startVms(seams, plan.start);
+    if (failed !== null) {
+      notes.push(failed);
+      return { ok: false, notes };
+    }
+  } else if (plan.booting.length > 0) {
+    notes.push(`Hyper-V agents already booting: ${plan.booting.join(", ")} — waiting for Running`);
+  } else {
+    notes.push("Hyper-V agents C11-C14 already running");
+    return { ok: true, notes };
+  }
+  return waitForRunning(seams, notes);
+}
+
+/** The pre-warm's outcome: the lines the started notice shows, and whether the
+ *  VM layer needs attention (an unreadable probe, or a start that did not run). */
+export interface PrewarmOutcome {
+  notes: string[];
+  attention: boolean;
+}
+
+/** Boot the agents while the build runs. A readable probe starts exactly the
+ *  agents that can start; an unreadable one blind-starts all four. Never waits
+ *  for Running, never throws: the publish gate is still the authority. */
+export async function prewarmVms(seams: BuildSeams): Promise<PrewarmOutcome> {
+  let plan: VmPlan;
+  try {
+    plan = await probeVms(seams);
+  } catch (err) {
+    return blindPrewarm(seams, reasonOf(err));
+  }
+  if (plan.start.length === 0) {
+    if (plan.booting.length > 0) return { notes: [`Hyper-V agents already booting: ${plan.booting.join(", ")}`], attention: false };
+    return { notes: ["Hyper-V agents C11-C14 already running"], attention: false };
+  }
+  const failed = await startVms(seams, plan.start);
+  if (failed !== null) return { notes: [`Hyper-V agents: ${failed}`], attention: true };
+  return { notes: [`Hyper-V agents booting during the build: ${plan.start.join(", ")}`], attention: false };
+}
+
+/** The probe could not be read, so the pre-warm cannot tell which agent needs a
+ *  start: start all four by name. The agents already up answer with Hyper-V's
+ *  state error, which is not a failure — the build window is used either way. */
+async function blindPrewarm(seams: BuildSeams, reason: string): Promise<PrewarmOutcome> {
+  const failed = await startVms(seams, VM_NAMES);
+  if (failed !== null && !VM_STATE_ERROR_RE.test(failed)) {
+    return { notes: [`Hyper-V agents: ${reason}`, failed], attention: true };
+  }
+  return {
+    notes: [`Hyper-V agents: ${reason}`, "blind Start-VM for C11-C14 (an agent already up answers with a state error)"],
+    attention: true,
+  };
 }
 
 async function commitPhase(ctx: any, seams: BuildSeams, repoRoot: string, dxChanged: boolean, latest: string, label = "Build fixes"): Promise<{ committed: boolean; failed: boolean; notes: string[] }> {

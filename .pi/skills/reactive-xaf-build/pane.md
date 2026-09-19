@@ -63,7 +63,10 @@ the test suite.
   stderr (bounded 50 KB); on timeout it tree-kills via
   `taskkill /PID <pid> /T /F`; resolves `{ code, stdout, stderr }` on close.
 - `runProcess(cmd, opts)` — `pwsh -Command <cmd>` through `runArgv`,
-  default 60 s timeout.
+  default 60 s timeout. `RunOpts.noProfile` swaps in
+  `pwsh -NoProfile -NonInteractive -Command`: the VM probe sets it, because
+  what the user profile loads must never decide whether a probe answers (a
+  profile stall is what killed the probe in the incident).
 - `psmuxArgs(args)` — prepends `-L $PSMUX_SOCKET` when the env var is set
   (socket isolation for tests and parallel servers).
 - `sleep(ms)` — promise-based delay, used by the dormant delegation helper.

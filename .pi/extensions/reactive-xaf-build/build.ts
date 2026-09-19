@@ -17,14 +17,14 @@ import {
   defaultClosePane, defaultProbePane, defaultSampleCpu,
 } from "./pane.js";
 import type {
-  RunResult, PaneOpener, PaneRunner, PaneCapturer, PaneCloser, PaneProber, CpuSampler,
+  RunResult, RunOpts, PaneOpener, PaneRunner, PaneCapturer, PaneCloser, PaneProber, CpuSampler,
 } from "./pane.js";
 import {
   startBuildRun, watchInProcessRun, activeBuildRun, newRunId, runPaths, writeRunScript, supervisorCommand,
   pruneRunDirs, trackedWrite,
 } from "./run.js";
 import type { BuildRunSeams, RunCadence, RunPaths, RunReporter } from "./run.js";
-import { finishMessage, steerStarted, steerWarning, summaryResult, warn, watchMessage } from "./report.js";
+import { finishMessage, steerStarted, steerWarning, steerWatch, summaryResult, warn, watchMessage } from "./report.js";
 import { startAzDoWatcher } from "./watcher.js";
 import type { AzDoWatcherStarter } from "./watcher.js";
 import { defaultGhFetch } from "./azdo.js";
@@ -32,12 +32,12 @@ import { rxProfile, compareVersions, profileOf, profileByPick, resolveRepo } fro
 import type { RepoProfile, Choice } from "./profile.js";
 import { releaseVersionTarget } from "./release.js";
 import { depPinsPhase } from "./pins.js";
-import { publishPhase } from "./publish.js";
+import { prewarmVms, publishPhase } from "./publish.js";
 
 export type { RunResult } from "./pane.js";
 export { profileOf };
 
-export type CommandRunner = (cmd: string, opts?: { cwd?: string; timeoutMs?: number }) => Promise<RunResult>;
+export type CommandRunner = (cmd: string, opts?: RunOpts) => Promise<RunResult>;
 export type FeedFetcher = (url: string) => Promise<string>;
 
 export interface BuildSeams {
@@ -226,7 +226,12 @@ function buildRunReporter(
     }
     if (event.kind === "done" && event.code === 0) {
       notes.push(`build succeeded (${choice})`);
-      await finishPublish(pi, ctx, seams, choice, repo, notes, dxChanged, latest, id, false);
+      try {
+        await finishPublish(pi, ctx, seams, choice, repo, notes, dxChanged, latest, id, false);
+      } catch (err) {
+        const detail = err instanceof Error ? err.message : String(err);
+        await warn(pi, ctx, `${id} publish threw after a green build: ${detail}\n${notes.join("\n")}`);
+      }
       return;
     }
     if (event.kind === "done" || event.kind === "died") {
@@ -264,6 +269,17 @@ async function finishPublish(
   return msg;
 }
 
+/** Boot the agents while the build runs: the publish gate then finds them
+ *  Running instead of meeting a cold start at the queue. A flow that aborts
+ *  before this point (DX prompt, feed consultation) leaves the VMs alone. The
+ *  pre-warm never fails the build: a VM layer that needs attention steers a
+ *  warning that spends no model turn. */
+async function prewarmPhase(pi: any, seams: BuildSeams, notes: string[], id: string, choice: string): Promise<void> {
+  const pre = await prewarmVms(seams);
+  notes.push(...pre.notes);
+  if (pre.attention) steerWatch(pi, `${id} build — ${choice}\n${pre.notes.join("\n")}`);
+}
+
 async function runBuildFlow(pi: any, ctx: any, seams: BuildSeams, choice: string, repo: string, skipBuild = false): Promise<string> {
   const id = profileOf(seams).label;
   try {
@@ -277,6 +293,7 @@ async function runBuildFlow(pi: any, ctx: any, seams: BuildSeams, choice: string
       return `${id} build is already running in pane ${running.pane ?? "the build host"} — stop it with /devexpress → "Abort build" first.`;
     }
     const local = await runLocalBuild(ctx, seams, choice, repo, notes);
+    await prewarmPhase(pi, seams, notes, id, choice);
     const report = buildRunReporter(pi, ctx, seams, choice, repo, notes, local.dxChanged, local.latest, id);
     const started = await startBuildPhase(ctx, seams, choice, repo, report);
     const msg = startedMessage(id, choice, local.latest, notes, started);
