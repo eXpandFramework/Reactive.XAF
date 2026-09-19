@@ -42,7 +42,7 @@ Menu picks run in the INVOKING window. The eXpand pick uses
    the feeds (Xpand server + nuget.org, e.g. 26.1.401.0 after 26.1.400).
 3. **depPins** (expand only) — latest `Xpand.Extensions` from the matching feed.
 4. **Build** — `profile.buildCmd` in a right-side pane, driven by a per-run
-   supervisor script (`pane.ts`) whose exit code lands in a transient marker.
+   supervisor script (`run.ts`) whose exit code lands in a transient marker.
    The command returns on a STARTED build; `run.ts` watches the run out of
    band (marker, pane death, a 10-minute silence-plus-CPU-idle stall, a
    20-minute overrun) and reports. Nothing in the watch kills a build —
@@ -74,13 +74,13 @@ Menu picks run in the INVOKING window. The eXpand pick uses
 | `release.ts` | `release.md` | Release version bump (feed consultation). |
 | `watcher.ts` | `watcher.md` | Background AzDO chain watcher. |
 | `menu-tests.ts` | `menu-tests.md` | Skip-build contract. |
-| `delegate-tests.ts` | `delegate-tests.md` | Delegation fallback. |
+| `delegate-tests.ts` | `delegate-tests.md` | Dormant delegation helper plus the flow publishing locally. |
 | `build-tests.ts` | `build-tests.md` | Full flow. |
 | `release-tests.ts` | `release-tests.md` | build.ps1 version bump (Release feed consultation). |
-| `watcher-tests.ts` | `watcher-tests.md` | Watcher W1–W16. |
+| `watcher-tests.ts` | `watcher-tests.md` | Watcher W1–W18. |
 | `profile-tests.ts` | `profile-tests.md` | RepoProfile (RX vs expand). |
 | `azdo.ts` / `status.ts` | `azdo.md` | AzDO status/cancel. |
 | `delegate.ts` | `delegate.md` | Dormant. |
 | `pane.ts` | `pane.md` | Pane seams: open, send, capture, close, probe, CPU sample. |
 
-Run: `npx tsx C:/Work/Reactive.XAF/.pi/extensions/reactive-xaf-build/{menu,build,watcher,azdo,profile}-tests.ts`
+Run: `npx tsx C:/Work/Reactive.XAF/.pi/extensions/reactive-xaf-build/{menu,build,watcher,azdo,profile,release,delegate}-tests.ts`
