@@ -21,7 +21,12 @@ Companion of `.pi/extensions/reactive-xaf-build/publish.ts`.
 
 One probe (`Get-VM -Name C11,C12,C13,C14 | ForEach-Object { "$($_.Name)=$($_.State)" }`),
 run through the seam with `noProfile: true` (pwsh without the user profile and
-without a prompt: a profile stall is what killed the probe in the incident). Two
+without a prompt: a profile stall is what killed the probe in the incident).
+The read is split on `/\r?\n/`: pwsh writes CRLF and terminates the last line,
+and a bare `"\n"` split leaves the `\r` on every line, where the anchored
+`(.*)$` never matches (JS `$` without `/m` is end-of-input). That defect read a
+healthy lab as "did not report C11, C12, C13, C14" (2026-09-19) — the same
+convention `azdo.ts`'s STATUS/CANCEL parse already carries. Two
 shapes are retried once: a TRANSPORT failure (the seam threw, or pwsh exited
 nonzero — the first pwsh of a session is the slow one) and an exit-0 read that
 named NO agent at all, which is an unreadable probe rather than an answer about

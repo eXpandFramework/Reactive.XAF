@@ -154,9 +154,14 @@ function mkRepo(pins: Array<[string, string]>): string {
 function propsText(root: string): string {
   return readFileSync(join(root, "Directory.Packages.props"), "utf-8");
 }
-const VM_OFF = "C11=Off\nC12=Running\nC13=Running\nC14=Running\n";
-const VM_STARTING = "C11=Starting\nC12=Running\nC13=Running\nC14=Running\n";
-const VM_RUN = "C11=Running\nC12=Running\nC13=Running\nC14=Running\n";
+/** The probe's real shape: pwsh writes CRLF and terminates the last line too.
+ *  A bare "\n" split left the \r on every line and read the answer as no
+ *  agents at all (2026-09-19 incident) — these fixtures are CRLF so the suite
+ *  fails with it. VM_LF keeps the other shape a seam may hand back. */
+const VM_OFF = "C11=Off\r\nC12=Running\r\nC13=Running\r\nC14=Running\r\n";
+const VM_STARTING = "C11=Starting\r\nC12=Running\r\nC13=Running\r\nC14=Running\r\n";
+const VM_RUN = "C11=Running\r\nC12=Running\r\nC13=Running\r\nC14=Running\r\n";
+const VM_LF = "C11=Running\nC12=Running\nC13=Running\nC14=Running\n";
 const VM_CHECK_PREFIX = "Get-VM -Name C11,C12,C13,C14*";
 const MENU = ["Build", "RX-XAF"];
 const DX_PINS: Array<[string, string]> = [
@@ -659,7 +664,7 @@ function mkMonitor(): { pi: any; repo: string; starts: number[]; pane: any } {
   {
     clearSteers();
     const repo = mkRepo(DX_PINS);
-    const runner = mkRunner([{ match: VM_CHECK_PREFIX, result: okResult("C12=Running\nC13=Running\nC14=Running\n") }]);
+    const runner = mkRunner([{ match: VM_CHECK_PREFIX, result: okResult("C12=Running\r\nC13=Running\r\nC14=Running\r\n") }]);
     const pi = mkPi();
     registerBuildCommand(pi, { run: runner.run, fetchFeed: mkFetch(["26.1.4"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1, ...mkPaneSeams() });
     await pi._cmds.get("devexpress").handler([], mkCtx(["Publish", "RX-XAF", "Lab"], repo));
@@ -671,7 +676,7 @@ function mkMonitor(): { pi: any; repo: string; starts: number[]; pane: any } {
   {
     clearSteers();
     const repo = mkRepo(DX_PINS);
-    const runner = mkRunner([{ match: VM_CHECK_PREFIX, result: okResult("C11=Paused\nC12=Running\nC13=Running\nC14=Running\n") }]);
+    const runner = mkRunner([{ match: VM_CHECK_PREFIX, result: okResult("C11=Paused\r\nC12=Running\r\nC13=Running\r\nC14=Running\r\n") }]);
     const pi = mkPi();
     registerBuildCommand(pi, { run: runner.run, fetchFeed: mkFetch(["26.1.4"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1, ...mkPaneSeams() });
     const ctx = mkCtx(["Publish", "RX-XAF", "Lab"], repo);
@@ -684,7 +689,7 @@ function mkMonitor(): { pi: any; repo: string; starts: number[]; pane: any } {
     clearSteers();
     const repo = mkRepo(DX_PINS);
     const runner = mkRunner([
-      { match: VM_CHECK_PREFIX, result: okResult("C11=Saved\nC12=Running\nC13=Running\nC14=Running\n") },
+      { match: VM_CHECK_PREFIX, result: okResult("C11=Saved\r\nC12=Running\r\nC13=Running\r\nC14=Running\r\n") },
       { match: "Start-VM -Name C11", result: okResult() },
       { match: VM_CHECK_PREFIX, result: okResult(VM_RUN) },
       { match: "git status --short", result: okResult("") },
@@ -799,7 +804,7 @@ function mkMonitor(): { pi: any; repo: string; starts: number[]; pane: any } {
   {
     clearSteers();
     const repo = mkRepo(DX_PINS);
-    const KILLED = "C11=Off\nC12=Running\n";
+    const KILLED = "C11=Off\r\nC12=Running\r\n";
     const runner = mkRunner([
       { match: VM_CHECK_PREFIX, result: { code: 1, stdout: KILLED, stderr: "" } },
       { match: VM_CHECK_PREFIX, result: { code: 1, stdout: KILLED, stderr: "" } },
@@ -879,6 +884,66 @@ function mkMonitor(): { pi: any; repo: string; starts: number[]; pane: any } {
     const result = await pi._cmds.get("devexpress").handler([], mkCtx(["Publish", "RX-XAF", "Lab", "Publish"], repo));
     check("T44: the empty read answered on the retry and the publish went through", result.includes("published") && calls.filter((c) => c.startsWith("Get-VM")).length === 2, result + " | " + calls.join(" | "));
     check("T44: no warning out of a recovered read", warnings().length === 0, JSON.stringify(warnings()));
+  }
+  // Section: T45 — the probe's real CRLF shape reads every agent
+  {
+    clearSteers();
+    const repo = mkRepo(DX_PINS);
+    const calls: string[] = [];
+    const crlfRead = {
+      run: async (cmd: string) => {
+        calls.push(cmd);
+        if (cmd.startsWith("Get-VM -Name C11,C12,C13,C14")) return okResult(VM_RUN);
+        if (cmd === "git status --short") return okResult("");
+        return okResult();
+      },
+    };
+    const pi = mkPi();
+    registerBuildCommand(pi, { run: crlfRead.run, fetchFeed: mkFetch(["26.1.4"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1, ...mkPaneSeams() });
+    const result = await pi._cmds.get("devexpress").handler([], mkCtx(["Publish", "RX-XAF", "Lab", "Publish"], repo));
+    check("T45: no agent started from a complete CRLF read", !calls.some((c) => c.startsWith("Start-VM")), calls.join(" | "));
+    check("T45: one probe from a complete CRLF read, no warning", calls.filter((c) => c.startsWith("Get-VM")).length === 1 && warnings().length === 0, calls.join(" | ") + " | " + warnings().join(" | "));
+    check("T45: the CRLF read published", result.includes("published"), result);
+  }
+  // Section: T46 — a CRLF read that names one agent Off starts exactly that agent
+  {
+    clearSteers();
+    const repo = mkRepo(DX_PINS);
+    const calls: string[] = [];
+    const oneOff = {
+      run: async (cmd: string) => {
+        calls.push(cmd);
+        if (cmd.startsWith("Get-VM -Name C11,C12,C13,C14")) {
+          return okResult(calls.filter((c) => c.startsWith("Get-VM")).length === 1 ? VM_OFF : VM_RUN);
+        }
+        if (cmd === "git status --short") return okResult("");
+        return okResult();
+      },
+    };
+    const pi = mkPi();
+    registerBuildCommand(pi, { run: oneOff.run, fetchFeed: mkFetch(["26.1.4"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1, ...mkPaneSeams() });
+    const result = await pi._cmds.get("devexpress").handler([], mkCtx(["Publish", "RX-XAF", "Lab", "Publish"], repo));
+    const started = calls.filter((c) => c.startsWith("Start-VM"));
+    check("T46: a CRLF read that names C11 Off starts exactly C11", started.length === 1 && started[0] === "Start-VM -Name C11", calls.join(" | "));
+    check("T46: the wait saw them running and the publish went through", result.includes("published") && warnings().length === 0, result + " | " + warnings().join(" | "));
+  }
+  // Section: T47 — a bare-LF read, the other seam shape, still parses
+  {
+    clearSteers();
+    const repo = mkRepo(DX_PINS);
+    const calls: string[] = [];
+    const lfRead = {
+      run: async (cmd: string) => {
+        calls.push(cmd);
+        if (cmd.startsWith("Get-VM -Name C11,C12,C13,C14")) return okResult(VM_LF);
+        if (cmd === "git status --short") return okResult("");
+        return okResult();
+      },
+    };
+    const pi = mkPi();
+    registerBuildCommand(pi, { run: lfRead.run, fetchFeed: mkFetch(["26.1.4"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1, ...mkPaneSeams() });
+    const result = await pi._cmds.get("devexpress").handler([], mkCtx(["Publish", "RX-XAF", "Lab", "Publish"], repo));
+    check("T47: an LF read is still read as four agents and publishes", result.includes("published") && warnings().length === 0 && calls.filter((c) => c.startsWith("Get-VM")).length === 1, result + " | " + calls.join(" | "));
   }
   console.log(`\n${ok} passed, ${fail} failed`);
   process.exit(fail > 0 ? 1 : 0);

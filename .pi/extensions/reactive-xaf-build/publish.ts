@@ -36,9 +36,14 @@ function tail(s: string, n = 1500): string {
   return t.length <= n ? t : "..." + t.slice(-n);
 }
 
+/** pwsh writes CRLF on Windows and terminates the last line: the read is split
+ *  on it. A bare "\n" split leaves the \r on every line, where the anchored
+ *  `(.*)$` never matches (JS `$` without /m is end-of-input) — a complete read
+ *  parsed as no agents at all and a healthy lab refused to publish. Same
+ *  convention as azdo.ts's STATUS/CANCEL parse. */
 function parseVmStates(stdout: string): Map<string, string> {
   const states = new Map<string, string>();
-  for (const line of stdout.split("\n")) {
+  for (const line of stdout.split(/\r?\n/)) {
     const m = line.match(/^(C1[1-4])=(.*)$/);
     if (m) states.set(m[1], m[2].trim());
   }

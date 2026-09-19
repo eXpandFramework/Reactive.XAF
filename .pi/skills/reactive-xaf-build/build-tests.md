@@ -40,7 +40,7 @@ Run: `npx tsx d:/Reactive.XAF/.pi/extensions/reactive-xaf-build/build-tests.ts`
   overrun never closes the pane, abort reports no failure, a second build is
   refused, the supervisor's real exit code survives an `exit`, and a green
   marker publishes.
-- T31-T44 — the VM probe contract: a probe that exits nonzero twice refuses
+- T31-T47 — the VM probe contract: a probe that exits nonzero twice refuses
   the publish before any commit and steers the exit code plus stderr (T31);
   a silent exit-0 read is probed twice, is named as silent instead of as an
   empty agent list, and still names all four agents (T32); a partial list names
@@ -54,7 +54,11 @@ Run: `npx tsx d:/Reactive.XAF/.pi/extensions/reactive-xaf-build/build-tests.ts`
   that answers the retry publishes and asked for a profile-free invocation
   (T42); an exit-0 read that listed nobody is probed twice and its own stderr
   reaches the refusal (T43), and the same shape that answers on that retry
-  publishes (T44).
+  publishes (T44). The probe fixtures carry the real seam shape (CRLF, the
+  last line terminated too; the read is split on its line terminator, see
+  `publish.md`; `VM_LF` keeps the bare-LF one): a CRLF read names every
+  agent, probes once and publishes without a Start-VM (T45); a CRLF read that
+  names C11 `Off` starts exactly C11 (T46); a bare-LF read still parses (T47).
 
 The watcher's own contract (toast per poll, terminal steer, give-up,
 replace) is pinned by `watcher-tests.ts`; the CRLF status/cancel parse
@@ -74,17 +78,27 @@ The old `steerFailure` name is gone from the module.
 
 ## Write-gate conformance (2026-09-19, the VM-probe rework)
 
-The T31-T42 additions and the sibling fixture edits were re-derived against
-`test-runner/write-gate.md` before commit:
+The VM-probe cases (T31-T44, then the CRLF read in T45-T47) and the sibling
+fixture edits were re-derived against `test-runner/write-gate.md` — that
+doc's CURRENT eight-rule list is the index below. The numbering this section
+carried earlier (a "rule 9", a "rule 10") is retired: the gate file holds
+eight rules, and the checks those lines named are rules 7 and 8 here.
 
-- rule 1 — every added block sits under a `// Section:` comment;
+- rule 1 — every added block sits under a `// Section:` comment (T31-T44, and
+  the three CRLF sections);
 - rule 4 — every case drives the registered command handler through the
   mock-pi harness (`activate(pi)` / `registerBuildCommand`), no helper-only
-  assertions;
+  assertions; the CRLF cases are no exception — they run `/devexpress`
+  Publish end to end with the probe injected as a seam;
 - rule 6 — no assertion description repeats within this file or across the
-  sibling suites: the new labels are unique strings, and `profile-tests.ts`
-  and `release-tests.ts` only gained fixture entries, no new assertions;
-- rules 7 and 9 — no speed section is added here. The extension has no
-  canonical `<ext>-tests.ts` speed host yet, so rule 7 constrains no file in
-  this batch (pre-existing gap, not introduced by this change);
-- rule 10 — no import was added, so the typebox-free import graph is intact.
+  sibling suites: the added labels are unique strings (`T45: the CRLF read
+  published`, `T45: one probe from a complete CRLF read, no warning`,
+  `T45: no agent started from a complete CRLF read`, the two `T46:` labels,
+  the `T47:` label), and `profile-tests.ts` / `release-tests.ts` only gained
+  fixture entries, no new assertions;
+- rule 7 — no assertion sits inside an iteration construct: the CRLF/LF
+  choice is data (a fixture constant and a ternary), never a loop;
+- rule 8 — neither batch added an import, so the typebox-free import graph is
+  intact;
+- rules 2, 3 and 5 — untouched: no `test()` wrapper pattern beside `check()`,
+  no pi spawn, no process-boundary mock enters these cases.
