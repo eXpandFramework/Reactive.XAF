@@ -1,5 +1,5 @@
 /**
- * reactive-xaf-build/watcher-tests — W1-W16. Mock pi; no real pwsh/AzDO.
+ * reactive-xaf-build/watcher-tests — W1-W18. Mock pi; no real pwsh/AzDO.
  * Run: npx tsx C:/Work/Reactive.XAF/.pi/extensions/reactive-xaf-build/watcher-tests.ts
  */
 /* oxlint-disable no-console -- test harness prints PASS/FAIL to stdout */
@@ -365,6 +365,26 @@ const GREEN = [done(35760, "succeeded"), done(35780, "succeeded"), done(35790, "
     await pi._cmds.get("devexpress").handler(["publish", "release"], ctx);
     await sleep(500);
     check("W17: nugets confirmed on retry after index lag — no warning, no steer", calls >= 2 && ctx._notifies.some((n) => n.msg.includes("Nugets published") && n.msg.includes("nuget.org")) && !ctx._notifies.some((n) => n.msg.includes("NOT confirmed")) && pi._userMessages.length === 0, JSON.stringify(ctx._notifies) + " | " + JSON.stringify(pi._userMessages));
+  }
+  // Section: W18 — the real AzDO build numbers: the chain head is
+  // `<version>-<dxVersion>`, its downstream pipelines are date-numbered.
+  {
+    const repo = mkRepo();
+    const pi = mkPi();
+    const ctx = mkCtx(repo);
+    const seams = mkSeams([
+      doneNum(35926, "succeeded", "4.261.2.1-26.1.3"),
+      doneNum(35927, "succeeded", "20260919.1"),
+      doneNum(35930, "succeeded", "20260919.1"),
+    ]);
+    registerBuildCommand(pi, {
+      run: seams.run, fetchFeed: mkFetch(LAB), ghFetch: mkGh(GH_DRAFT).gh, repoRoot: repo,
+      startAzDoWatcher: (p: any, c: any, s: any, opts?: any) => startAzDoWatcher(p, c, s, { ...opts, intervalMs: 20, maxMs: 400 }),
+    });
+    await pi._cmds.get("devexpress").handler(["publish", "lab"], ctx);
+    await sleep(600);
+    check("W18: the version-suffixed head and the date-numbered steps run the chain to completion", ctx._notifies.some((n) => n.msg.includes("release consumers pipeline")) && ctx._notifies.some((n) => n.msg.includes("chain complete")), JSON.stringify(ctx._notifies));
+    check("W18: no wrong-version wait and no cap give-up on real build numbers", !ctx._notifies.some((n) => n.msg.includes("is not this run")) && !ctx._notifies.some((n) => n.msg.includes("gave up")) && pi._userMessages.length === 0, JSON.stringify(ctx._notifies) + " | " + JSON.stringify(pi._userMessages));
   }
   console.log(`\n${ok} passed, ${fail} failed`);
   process.exit(fail > 0 ? 1 : 0);
