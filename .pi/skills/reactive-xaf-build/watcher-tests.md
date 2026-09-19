@@ -34,7 +34,10 @@ Run: `npx tsx d:/Reactive.XAF/.pi/extensions/reactive-xaf-build/watcher-tests.ts
 - W14 — expand lab polls def 94; `26.1.400.0` matches feed `26.1.400`.
 - W15 — failed poll with a LOGSTART block: steer carries
   `Release 26.1.301.1 exists`, not "no error lines".
-- W16 — finished build of a different version is not this run: wait
+- W16 — finished HEAD build of a different version is not this run: wait
   toast, then give-up steers.
 - W17 — nugets missing on the first assert, present on retry (index
   lag): confirmed toast, no warning, no steer.
+- W18 — the real AzDO build numbers (`<version>-<dxVersion>` head,
+  `yyyyMMdd.N` downstream): the chain runs to completion, no wrong-version
+  wait toast, no give-up steer.

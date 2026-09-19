@@ -385,6 +385,7 @@ const GREEN = [done(35760, "succeeded"), done(35780, "succeeded"), done(35790, "
     await sleep(600);
     check("W18: the version-suffixed head and the date-numbered steps run the chain to completion", ctx._notifies.some((n) => n.msg.includes("release consumers pipeline")) && ctx._notifies.some((n) => n.msg.includes("chain complete")), JSON.stringify(ctx._notifies));
     check("W18: no wrong-version wait and no cap give-up on real build numbers", !ctx._notifies.some((n) => n.msg.includes("is not this run")) && !ctx._notifies.some((n) => n.msg.includes("gave up")) && pi._userMessages.length === 0, JSON.stringify(ctx._notifies) + " | " + JSON.stringify(pi._userMessages));
+    check("W18: the downstream polls carried the chain's id baseline", seams.calls.some((c) => c.includes("definitions=72") && c.includes("-gt 35926")) && seams.calls.some((c) => c.includes("definitions=89") && c.includes("-gt 35927")), JSON.stringify(seams.calls));
   }
   console.log(`\n${ok} passed, ${fail} failed`);
   process.exit(fail > 0 ? 1 : 0);

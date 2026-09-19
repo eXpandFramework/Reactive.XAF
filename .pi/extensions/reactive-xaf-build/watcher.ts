@@ -3,15 +3,17 @@
  *
  * Chain, nuget id, version file, GitHub repo and on-success action come
  * from RepoProfile. RX is the default. One watcher at a time. A finished
- * build whose buildNumber does not match versionFile is not this run
- * (wait, then give-up steers). Failed polls use extractFailReason.
+ * HEAD build whose buildNumber version does not match versionFile is not
+ * this run (wait, then give-up steers); the downstream pipelines report
+ * date numbers and are fenced by the build-id baseline. Failed polls use
+ * extractFailReason.
  */
 
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { setTimeout as sleep } from "node:timers/promises";
 import { azdoStatusScript, parseStatus, azdoBuildUrl, defaultGhFetch, extractFailReason, failLogFromStdout } from "./azdo.js";
 import type { BuildSeams } from "./build.js";
+import { sleep } from "./pane.js";
 import {
   rxProfile, nugetAssertUrl, nugetOrgNuspecUrl, githubReleasesUrl, githubReleaseUrl, compareVersions,
 } from "./profile.js";
@@ -272,9 +274,15 @@ async function handleTerminal(state: WatcherState, pi: any, ctx: any, seams: Bui
   if (failed) pi.sendUserMessage(msg, { deliverAs: "steer" });
 }
 
+/** The head pipeline is named `<version>-<dxVersion>` (4.261.3.1-26.1.3) —
+ *  only its leading version token is the package version. */
+function buildVersion(buildNumber: string): string {
+  return buildNumber.match(/^\d+(?:\.\d+)+/)?.[0] ?? buildNumber;
+}
+
 function thisRun(s: { buildNumber: string }, expected: string | null): boolean {
   if (!s.buildNumber || !expected) return true;
-  return compareVersions(s.buildNumber, expected) === 0;
+  return compareVersions(buildVersion(s.buildNumber), expected) === 0;
 }
 
 async function notifyWrongVersion(ctx: any, state: WatcherState, s: { id: number; buildNumber: string }, expected: string): Promise<void> {
@@ -325,8 +333,11 @@ async function applyPoll(state: WatcherState, pi: any, ctx: any, seams: BuildSea
     await ctx.ui.notify(`AzDO ${s.id}: ${s.status} (${elapsed} min) — ${azdoBuildUrl(step.definition)}`, "info");
     return;
   }
+  // Only the chain head is queued by this run, so only it can be a stale
+  // finished build; the downstream date-numbered builds are fenced by the
+  // minId baseline (the newest build with id > the previous step's id).
   const expected = publishedVersion(opts.repoRoot, profileOf(seams).versionFile);
-  if (!thisRun(s, expected)) {
+  if (state.step === 0 && !thisRun(s, expected)) {
     await notifyWrongVersion(ctx, state, s, expected!);
     return;
   }
