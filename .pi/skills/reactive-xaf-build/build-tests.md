@@ -40,17 +40,21 @@ Run: `npx tsx d:/Reactive.XAF/.pi/extensions/reactive-xaf-build/build-tests.ts`
   overrun never closes the pane, abort reports no failure, a second build is
   refused, the supervisor's real exit code survives an `exit`, and a green
   marker publishes.
-- T31-T42 — the VM probe contract: a probe that exits nonzero twice refuses
+- T31-T44 — the VM probe contract: a probe that exits nonzero twice refuses
   the publish before any commit and steers the exit code plus stderr (T31);
-  nothing parsable names all four agents (T32); a partial list names exactly
-  the agent it missed (T33), and the killed-mid-list shape (nonzero code,
-  truncated stdout) refuses on the code (T41); `Paused` is refused, `Saved`
-  is started and publishes (T34-T35); a build start pre-warms the agents
-  before the pane opens and never waits (T36), blind-starts all four when the
-  probe is unreadable and steers a no-turn warning (T37), a failed Start-VM
-  stays a note plus that warning (T38); the publish-only flow probes once
-  (T39); an agent that never boots fails at the timeout (T40); a probe that
-  answers the retry publishes and asked for a profile-free invocation (T42).
+  a silent exit-0 read is probed twice, is named as silent instead of as an
+  empty agent list, and still names all four agents (T32); a partial list names
+  exactly the agent it missed (T33), and the killed-mid-list shape (nonzero
+  code, truncated stdout) refuses on the code (T41); `Paused` is refused,
+  `Saved` is started and publishes (T34-T35); a build start pre-warms the
+  agents before the pane opens and never waits (T36), blind-starts all four
+  when the probe is unreadable and steers a no-turn warning (T37), a failed
+  Start-VM stays a note plus that warning (T38); the publish-only flow probes
+  once (T39); an agent that never boots fails at the timeout (T40); a probe
+  that answers the retry publishes and asked for a profile-free invocation
+  (T42); an exit-0 read that listed nobody is probed twice and its own stderr
+  reaches the refusal (T43), and the same shape that answers on that retry
+  publishes (T44).
 
 The watcher's own contract (toast per poll, terminal steer, give-up,
 replace) is pinned by `watcher-tests.ts`; the CRLF status/cancel parse

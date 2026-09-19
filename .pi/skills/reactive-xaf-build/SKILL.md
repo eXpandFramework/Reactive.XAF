@@ -51,7 +51,9 @@ Menu picks run in the INVOKING window. The eXpand pick uses
    answer Running, `Off`/`Saved` are Start-VM'd, and anything unreadable,
    missing or unstartable THROWS `VmProbeError` out of `planVms`, stopping the
    publish before the commit with a warning steer. The probe runs profile-free
-   and is retried once. The agents are pre-warmed at build start
+   and is retried once (a nonzero exit, a thrown seam, or an exit-0 read that
+   named no agent); a refusal carries the probe's own output. The agents are
+   pre-warmed at build start
    (`prewarmVms`): a readable probe starts what can start, an unreadable one
    blind-starts C11-C14, and the build never fails over it (a `steerWatch`
    warning, no model turn). Then commit, optional `git push`,

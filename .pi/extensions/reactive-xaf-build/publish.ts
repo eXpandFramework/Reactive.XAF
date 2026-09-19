@@ -74,6 +74,21 @@ function exitReason(probe: { code: number; stderr: string }): string {
   return `Get-VM failed (exit ${probe.code}): ${tail(probe.stderr) || "no stderr"}`;
 }
 
+/** The refusal's evidence: what the probe itself printed. Naming the agents is
+ *  not enough — an exit-0 read that listed nobody reads exactly like a probe that
+ *  printed nothing at all, and that ambiguity is why one incident reached the
+ *  report with no explanation in it. The stdout tail is added only when no agent
+ *  was read at all: on a partial read it would read as a claim about the agents
+ *  that did answer. */
+function missingReason(missing: string[], probe: { stdout: string; stderr: string }): string {
+  const head = `Get-VM did not report ${missing.join(", ")} — no state to act on`;
+  const err = tail(probe.stderr, 400);
+  if (err) return `${head} (stderr: ${err})`;
+  if (missing.length < VM_NAMES.length) return head;
+  const out = tail(probe.stdout, 400);
+  return `${head} (${out ? `stdout: ${out}` : "no output on either stream"})`;
+}
+
 export function planVms(probe: { code: number; stdout: string; stderr: string }): VmPlan {
   if (probe.code !== 0) {
     throw new VmProbeError(exitReason(probe));
@@ -81,7 +96,7 @@ export function planVms(probe: { code: number; stdout: string; stderr: string })
   const states = parseVmStates(probe.stdout);
   const missing = VM_NAMES.filter((n) => !states.has(n));
   if (missing.length > 0) {
-    throw new VmProbeError(`Get-VM did not report ${missing.join(", ")} — no state to act on`);
+    throw new VmProbeError(missingReason(missing, probe));
   }
   const start: string[] = [];
   const booting: string[] = [];
@@ -101,13 +116,16 @@ export function planVms(probe: { code: number; stdout: string; stderr: string })
   return { start, booting };
 }
 
-/** The probe as a plan, or a VmProbeError. Only a TRANSPORT failure is retried
- *  once (the seam threw, or pwsh exited nonzero: the first pwsh of a session is
- *  the slow one, and a killed probe must not take the agent list with it). A
- *  readable answer that cannot be acted on is refused on the spot — retrying a
- *  state or a truncated list would only report the same thing twice. The
- *  invocation skips the user profile: a profile stall is what killed the probe
- *  that started this fix. */
+/** The probe as a plan, or a VmProbeError. Two shapes are retried once: a
+ *  TRANSPORT failure (the seam threw, or pwsh exited nonzero — the first pwsh of
+ *  a session is the slow one, and a killed probe must not take the agent list
+ *  with it) and an exit-0 read that named NO agent at all, which is not an
+ *  answer about the agents: Hyper-V exits nonzero for a name it cannot find, so
+ *  a silent exit-0 read is an unreadable probe, and the incident that produced
+ *  one took a publish down with no cause in the report. A readable answer that
+ *  cannot be acted on is refused on the spot — retrying a state or a truncated
+ *  list would only report the same thing twice. The invocation skips the user
+ *  profile: a profile stall is what killed the probe that started this fix. */
 async function probeVms(seams: BuildSeams): Promise<VmPlan> {
   let failure = "";
   for (let attempt = 0; attempt < VM_PROBE_ATTEMPTS; attempt++) {
@@ -117,8 +135,12 @@ async function probeVms(seams: BuildSeams): Promise<VmPlan> {
     } catch (err) {
       failure = `Get-VM did not run: ${err instanceof Error ? err.message : String(err)}`;
     }
-    if (probe !== null && probe.code === 0) return planVms(probe);
-    if (probe !== null) failure = exitReason(probe);
+    if (probe !== null && probe.code === 0) {
+      if (parseVmStates(probe.stdout).size > 0) return planVms(probe);
+      failure = missingReason(VM_NAMES, probe);
+    } else if (probe !== null) {
+      failure = exitReason(probe);
+    }
   }
   throw new VmProbeError(failure || "Get-VM did not answer");
 }

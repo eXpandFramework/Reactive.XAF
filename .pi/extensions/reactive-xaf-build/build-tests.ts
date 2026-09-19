@@ -651,6 +651,7 @@ function mkMonitor(): { pi: any; repo: string; starts: number[]; pane: any } {
     await pi._cmds.get("devexpress").handler([], mkCtx(["Publish", "RX-XAF", "Lab"], repo));
     const msg = warnings().join("\n");
     check("T32: every unseen agent named", msg.includes("did not report C11, C12, C13, C14"), msg);
+    check("T32: the silent read is named as silent", msg.includes("no output on either stream"), msg);
     check("T32: no already-running claim", !msg.includes("already running"), msg);
     check("T32: no commit, no queue", !runner.calls.some((c) => c.startsWith("git") || c.includes("prx")), runner.calls.join(" | "));
   }
@@ -836,6 +837,48 @@ function mkMonitor(): { pi: any; repo: string; starts: number[]; pane: any } {
     check("T42: the retry answered and the publish went through", result.includes("published") && probeCalls.length === 2, result + " | " + calls.join(" | "));
     check("T42: the probe asked for a profile-free, prompt-free pwsh", probeCalls.every((x) => x.o?.noProfile === true), JSON.stringify(probeCalls.map((x) => x.o)));
     check("T42: one retry was enough, no warning", warnings().length === 0, JSON.stringify(warnings()));
+  }
+  // Section: T43 — an exit-0 read that listed nobody is retried and carries the probe's own words
+  {
+    clearSteers();
+    const repo = mkRepo(DX_PINS);
+    const calls: string[] = [];
+    const silent = {
+      run: async (cmd: string) => {
+        calls.push(cmd);
+        if (cmd.startsWith("Get-VM -Name C11,C12,C13,C14")) return { code: 0, stdout: "", stderr: "Get-VM: The service cannot be started." };
+        return okResult();
+      },
+    };
+    const pi = mkPi();
+    registerBuildCommand(pi, { run: silent.run, fetchFeed: mkFetch(["26.1.4"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1, ...mkPaneSeams() });
+    const result = await pi._cmds.get("devexpress").handler([], mkCtx(["Publish", "RX-XAF", "Lab"], repo));
+    const msg = warnings().join("\n");
+    check("T43: the silent read is probed twice before it refuses", calls.filter((c) => c.startsWith("Get-VM")).length === 2, calls.join(" | "));
+    check("T43: the refusal names the agents and quotes the probe", msg.includes("did not report C11, C12, C13, C14") && msg.includes("The service cannot be started"), msg || "(no warning)");
+    check("T43: nothing committed or queued from a silent read", !calls.some((c) => c.startsWith("git") || c.includes("prx")), calls.join(" | "));
+    check("T43: the summary says the publish stopped", result.includes("publish stopped"), result);
+  }
+  // Section: T44 — an empty read that answers the retry publishes
+  {
+    clearSteers();
+    const repo = mkRepo(DX_PINS);
+    const calls: string[] = [];
+    const onceEmpty = {
+      run: async (cmd: string) => {
+        calls.push(cmd);
+        if (cmd.startsWith("Get-VM -Name C11,C12,C13,C14")) {
+          return calls.filter((c) => c.startsWith("Get-VM")).length === 1 ? { code: 0, stdout: "", stderr: "" } : okResult(VM_RUN);
+        }
+        if (cmd === "git status --short") return okResult("");
+        return okResult();
+      },
+    };
+    const pi = mkPi();
+    registerBuildCommand(pi, { run: onceEmpty.run, fetchFeed: mkFetch(["26.1.4"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1, ...mkPaneSeams() });
+    const result = await pi._cmds.get("devexpress").handler([], mkCtx(["Publish", "RX-XAF", "Lab", "Publish"], repo));
+    check("T44: the empty read answered on the retry and the publish went through", result.includes("published") && calls.filter((c) => c.startsWith("Get-VM")).length === 2, result + " | " + calls.join(" | "));
+    check("T44: no warning out of a recovered read", warnings().length === 0, JSON.stringify(warnings()));
   }
   console.log(`\n${ok} passed, ${fail} failed`);
   process.exit(fail > 0 ? 1 : 0);

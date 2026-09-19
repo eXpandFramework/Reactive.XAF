@@ -21,17 +21,21 @@ Companion of `.pi/extensions/reactive-xaf-build/publish.ts`.
 
 One probe (`Get-VM -Name C11,C12,C13,C14 | ForEach-Object { "$($_.Name)=$($_.State)" }`),
 run through the seam with `noProfile: true` (pwsh without the user profile and
-without a prompt: a profile stall is what killed the probe in the incident). A
-TRANSPORT failure (the seam threw, or pwsh exited nonzero) is retried once — the
-first pwsh of a session is the slow one. A readable answer that cannot be acted
-on is refused on the spot: retrying a state or a truncated list would only report
-the same thing twice.
+without a prompt: a profile stall is what killed the probe in the incident). Two
+shapes are retried once: a TRANSPORT failure (the seam threw, or pwsh exited
+nonzero — the first pwsh of a session is the slow one) and an exit-0 read that
+named NO agent at all, which is an unreadable probe rather than an answer about
+the agents (Hyper-V exits nonzero for a name it cannot find). A readable answer
+that cannot be acted on is refused on the spot: retrying a state or a truncated
+list would only report the same thing twice.
 
 `planVms` is the single place that decides what a probe means, and it THROWS
 `VmProbeError` instead of returning a refusal:
 
 - probe exit ≠ 0 → `Get-VM failed (exit N): <stderr tail>`
-- an agent missing from the output → `Get-VM did not report C11, ... — no state to act on`
+- an agent missing from the output → `Get-VM did not report C11, ... — no state to act on`,
+  with the probe's own words appended: its stderr tail, or (when no agent was read
+  at all) its stdout tail, or `no output on either stream`
 - `Off` / `Saved` → Start-VM
 - `Starting` / `Pausing` / `Resuming` / `Saving` / `Stopping` → wait for Running
 - `Running` → nothing to do
