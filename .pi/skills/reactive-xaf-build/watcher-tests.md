@@ -5,8 +5,10 @@ description: Behavior contract for the AzDO chain watcher — toast per poll, ch
 
 # watcher-tests.ts — watcher behavior contract
 
-Companion of `.pi/extensions/reactive-xaf-build/watcher-tests.ts`. Drives
-`/devexpress publish lab|release` with a mock pi; the flow starts the REAL
+Companion of `.pi/extensions/reactive-xaf-build/watcher-tests.ts`. Drives the
+Publish menu item (the retired `/devexpress publish lab|release` args) with a
+mock pi, through per-suite pick lists (`PUBLISH_PICKS`,
+`PUBLISH_RELEASE_PICKS`, `PUBLISH_EXPAND_PICKS`); the flow starts the REAL
 watcher through an injected 20 ms interval seam. Fake run seam serves CRLF
 STATUS= fixtures per chain step. `mkSeams` copies the poll queue so a
 shared GREEN fixture is not emptied across tests.

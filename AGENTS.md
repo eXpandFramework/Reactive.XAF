@@ -14,11 +14,11 @@ Project-specific knowledge distilled from the lab-build workflow session (2026-0
 
 `.pi/extensions/reactive-xaf-build/` (repo-local, auto-loads in this project's sessions):
 
-- `/devexpress` → Build → RX-XAF → **Lab** | **Release**.
-- The build runs in a new right-side psmux pane (live output there); milestones notify in the invoking window.
-- Failure → warning steer with `triggerTurn` (the agent is notified automatically); the pane is kept for reuse.
-- Success → silent; a conversational ask offers closing the pane; close via `/devexpress → "Close build pane"` (no modal, no auto-close).
-- Falls back to an in-process build when the pane cannot be opened.
+- `/devexpress` takes no arguments: the menu opens on Build | Publish | Last build status | Cancel AzDO build | Start AzDO watcher, and the build/publish/watcher items then pick RX-XAF | eXpand and Lab | Release. The old word forms (`/devexpress status`, `cancel`, `watch`, `build lab`, `publish lab`) were retired with the menu-only surface.
+- The build runs in a new right-side psmux pane (live output there), driven by a per-run supervisor script whose exit code lands in a transient marker. The command returns on a STARTED build and a background watch reports the outcome, so a build never holds the agent.
+- Failure → warning steer (shared sender, `triggerTurn`). A build that goes silent for 10 minutes with no CPU progress, or runs past 20 minutes, is reported once. The watch never kills a build; `/devexpress → "Abort build"` stops it deliberately and reports no failure.
+- Success → the publish continuation runs from the watch; the pane is kept for reuse and a conversational ask offers closing it via `/devexpress → "Close build pane"`.
+- Falls back to an in-process build when the pane cannot be opened, still reported by the watch.
 - The extension lives in the repo — changes need the project-local extension write allowance (see below).
 
 ## Environment gotchas

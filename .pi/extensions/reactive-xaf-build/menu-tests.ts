@@ -14,7 +14,7 @@ import { mkdtempSync, mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import activate from "./index.js";
-import { registerBuildCommand } from "./build.js";
+import { registerBuildCommand } from "./menu.js";
 
 let ok = 0;
 let fail = 0;
@@ -75,7 +75,6 @@ function mkPaneSeams(): any {
       return "pane1";
     },
     runInPane: async (_pane: string, cmd: string) => { sent.push(cmd); },
-    waitForPaneExit: async () => ({ code: 0, timedOut: false }),
     capturePane: async () => "",
     closePane: async () => {},
     startAzDoWatcher: async () => ({ stop: () => {}, active: () => false, lastBuildId: () => null }),
@@ -121,14 +120,14 @@ function okResult(stdout = ""): any {
     check("S1: no brx, no pane opened or sent", !runner.calls.some((c) => c.startsWith("brx")) && pane.opened.length === 0 && pane.sent.length === 0, JSON.stringify({ calls: runner.calls, opened: pane.opened, sent: pane.sent }));
     check("S1: prx ran, watcher started, published", runner.calls.includes("prx") && result.includes("monitoring in background") && result.includes("published"), result);
   }
-  // Section: S2 — direct arg /devexpress publish lab (publish confirm answered)
+  // Section: S2 — menu Publish → RX-XAF → Lab (the publish confirm answered)
   {
     const repo = mkRepo();
     const runner = mkRunner(GREEN_PUBLISH);
     const pi = mkPi();
     registerBuildCommand(pi, { run: runner.run, fetchFeed: async () => "[]", repoRoot: repo, pollMs: 1, ...mkPaneSeams() });
-    const ctx = mkCtx(["Publish"], repo);
-    const result = await pi._cmds.get("devexpress").handler(["publish", "lab"], ctx);
+    const ctx = mkCtx([...MENU, "Publish"], repo);
+    const result = await pi._cmds.get("devexpress").handler([], ctx);
     check("S2: no brx, prx ran, published", !runner.calls.some((c) => c.startsWith("brx")) && runner.calls.includes("prx") && result.includes("published"), result);
   }
   // Section: S3 — skip-build commit label "Publish (N files)"

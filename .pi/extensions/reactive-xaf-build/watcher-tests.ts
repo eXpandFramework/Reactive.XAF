@@ -3,12 +3,13 @@
  * Run: npx tsx C:/Work/Reactive.XAF/.pi/extensions/reactive-xaf-build/watcher-tests.ts
  */
 /* oxlint-disable no-console -- test harness prints PASS/FAIL to stdout */
-import { setTimeout as sleep } from "node:timers/promises";
+/** Local delay: the test harness owns its own clock. */
+const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
 import { mkdtempSync, mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import activate from "./index.js";
-import { registerBuildCommand } from "./build.js";
+import { registerBuildCommand } from "./menu.js";
 import { startAzDoWatcher, stopAzDoWatcher, isAzDoWatcherActive } from "./watcher.js";
 import { expandProfile } from "./profile.js";
 
@@ -75,12 +76,17 @@ function mkPi(): any {
     _userMessages: msgs,
   };
 }
-function mkCtx(repo: string): any {
+/** The menu's picks for a publish flow: Publish → RX-XAF | eXpand → Lab | Release. */
+const PUBLISH_PICKS = ["Publish", "RX-XAF", "Lab"];
+const PUBLISH_RELEASE_PICKS = ["Publish", "RX-XAF", "Release"];
+const PUBLISH_EXPAND_PICKS = ["Publish", "eXpand", "Lab"];
+function mkCtx(repo: string, picks: string[] = PUBLISH_PICKS): any {
   const notifies: Array<{ msg: string; type: string }> = [];
+  const queue = [...picks];
   return {
     cwd: repo,
     ui: {
-      select: async () => "Publish",
+      select: async () => queue.shift() ?? "Publish",
       notify: async (msg: string, type: string) => {
         notifies.push({ msg, type });
       },
@@ -145,7 +151,7 @@ const GREEN = [done(35760, "succeeded"), done(35780, "succeeded"), done(35790, "
     const ctx = mkCtx(repo);
     const gh = mkGh(GH_DRAFT);
     registerBuildCommand(pi, { run: seams.run, fetchFeed: mkFetch(LAB), ghFetch: gh.gh, repoRoot: repo, startAzDoWatcher: fastWatcher });
-    const result = await pi._cmds.get("devexpress").handler(["publish", "lab"], ctx);
+    const result = await pi._cmds.get("devexpress").handler([], ctx);
     check("W1: publish returns immediately, monitoring in background", result.includes("monitoring in background") && result.includes("published"), result);
     check("W1: watcher active right after publish", isAzDoWatcherActive());
     await sleep(400);
@@ -247,10 +253,10 @@ const GREEN = [done(35760, "succeeded"), done(35780, "succeeded"), done(35790, "
     const repo = mkRepo();
     const pi = mkPi();
     const seams = mkSeams([done(40010, "succeeded"), done(40020, "succeeded"), done(40030, "succeeded")]);
-    const ctx = mkCtx(repo);
+    const ctx = mkCtx(repo, PUBLISH_RELEASE_PICKS);
     const gh = mkGh(GH_DRAFT);
     registerBuildCommand(pi, { run: seams.run, fetchFeed: mkFetch(LAB), ghFetch: gh.gh, repoRoot: repo, startAzDoWatcher: fastWatcher });
-    await pi._cmds.get("devexpress").handler(["publish", "release"], ctx);
+    await pi._cmds.get("devexpress").handler([], ctx);
     await sleep(400);
     check("W10: release chain polls def 23 (same pipeline as lab)", seams.calls.some((c) => c.includes("definitions=23")), JSON.stringify(seams.calls));
     check("W10: release nugets asserted on nuget.org (normalized version)", ctx._notifies.some((n) => n.msg.includes("Nugets published") && n.msg.includes("nuget.org")), JSON.stringify(ctx._notifies));
@@ -289,7 +295,7 @@ const GREEN = [done(35760, "succeeded"), done(35780, "succeeded"), done(35790, "
   {
     const repo = mkRepo();
     const pi = mkPi();
-    const ctx = mkCtx(repo);
+    const ctx = mkCtx(repo, PUBLISH_RELEASE_PICKS);
     const fetchThrow = async (url: string) => {
       if (url.includes("api.nuget.org")) throw new Error("404");
       return JSON.stringify({ feed: oDataFeed(LAB) });
@@ -306,7 +312,7 @@ const GREEN = [done(35760, "succeeded"), done(35780, "succeeded"), done(35790, "
     const repo = mkExpandRepo();
     const pi = mkPi();
     const seams = mkSeams([done(35805, "succeeded"), done(35806, "succeeded"), done(35807, "succeeded")]);
-    const ctx = mkCtx(repo);
+    const ctx = mkCtx(repo, PUBLISH_EXPAND_PICKS);
     registerBuildCommand(pi, {
       run: seams.run, fetchFeed: mkFetch(["26.1.400"]), ghFetch: mkGh(GH_EXPAND).gh, repoRoot: repo,
       profile: expandProfile, startAzDoWatcher: fastWatcher,
@@ -342,7 +348,7 @@ const GREEN = [done(35760, "succeeded"), done(35780, "succeeded"), done(35790, "
   {
     const repo = mkRepo();
     const pi = mkPi();
-    const ctx = mkCtx(repo);
+    const ctx = mkCtx(repo, PUBLISH_RELEASE_PICKS);
     let calls = 0;
     const fetchLate = async (url: string) => {
       if (url.includes("api.nuget.org")) {

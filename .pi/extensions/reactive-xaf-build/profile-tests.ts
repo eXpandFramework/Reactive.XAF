@@ -5,11 +5,12 @@
  * Run: npx tsx C:/Work/Reactive.XAF/.pi/extensions/reactive-xaf-build/profile-tests.ts
  */
 /* oxlint-disable no-console -- test harness prints PASS/FAIL to stdout */
-import { mkdtempSync, mkdirSync, writeFileSync } from "node:fs";
+import { mkdtempSync, mkdirSync, writeFileSync, existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import activate from "./index.js";
-import { registerBuildCommand } from "./build.js";
+import { registerBuildCommand } from "./menu.js";
+import { activeBuildRun, isBuildRunActive } from "./run.js";
 import { expandProfile } from "./profile.js";
 
 let ok = 0;
@@ -68,6 +69,24 @@ function mkRunner(script: Array<{ match: string; result: any }>): { run: (cmd: s
     calls,
   };
 }
+async function waitFor(cond: () => boolean, ms = 4000): Promise<boolean> {
+  const deadline = Date.now() + ms;
+  while (Date.now() < deadline) {
+    if (cond()) return true;
+    await new Promise((resolve) => setTimeout(resolve, 20));
+  }
+  return cond();
+}
+/** Finish a started run the way the supervisor would; returns the marker it
+ *  wrote so a failing check can show which run it finished. */
+function finishRun(pane: any, code: number): string {
+  const run = activeBuildRun();
+  const script = /-File "([^"]+)"/.exec(pane?.sent?.[0] ?? "")?.[1] ?? "";
+  const marker = run ? run.marker : script.replace(/run\.ps1$/, "exit.code");
+  if (!marker) return "no run and no supervisor line";
+  writeFileSync(marker, String(code));
+  return `run=${run?.runId ?? "none"} marker=${marker}`;
+}
 function mkPane(): any {
   const sent: string[] = [];
   return {
@@ -75,8 +94,9 @@ function mkPane(): any {
     runInPane: async (_p: string, cmd: string) => {
       sent.push(cmd);
     },
-    waitForPaneExit: async () => ({ code: 0, timedOut: false }),
     capturePane: async () => "",
+    probePane: async () => ({ alive: true, pid: 4242 }),
+    runCadence: { signalMs: 10, probeMs: 10, cpuMs: 10, stallMs: 3_600_000, overrunMs: 3_600_000 },
     closePane: async () => {},
     startAzDoWatcher: () => ({
       stop: () => {},
@@ -143,8 +163,12 @@ const GREEN_EXPAND = [
     const ctx = mkCtx(["Build", "eXpand", "Lab", "Publish"], repo);
     const result = await pi._cmds.get("devexpress").handler([], ctx);
     check("P2: menu offered Project pick", ctx._prompts.includes("Project"), ctx._prompts.join(" | "));
-    check("P2: bx lab sent to pane", pane.sent.length === 1 && pane.sent[0].startsWith("bx lab;"), JSON.stringify(pane.sent));
-    check("P2: git push lab then px, published", runner.calls.includes("git push lab HEAD:master") && runner.calls.includes("px") && result.includes("published"), runner.calls.join(" | ") + " " + result);
+    check("P2: the pane got the supervisor script running bx lab", pane.sent.length === 1 && /-File ".*run\.ps1"$/.test(pane.sent[0]) && result.includes("Build started in pane"), JSON.stringify(pane.sent) + " " + result);
+    const run = activeBuildRun();
+    const where = finishRun(pane, 0);
+    const published = await waitFor(() => ctx._notifies.some((n) => n.includes("published")));
+    const left = run ? existsSync(run.marker) : false;
+    check("P2: git push lab then px, published", published && runner.calls.includes("git push lab HEAD:master") && runner.calls.includes("px"), `${where} active=${isBuildRunActive()} markerLeft=${left} calls=${runner.calls.join("|")} notifies=${ctx._notifies.join("|")}`);
   }
   {
     const expand = mkExpandRepo();
@@ -161,7 +185,7 @@ const GREEN_EXPAND = [
       repoRoot: expand,
       profile: expandProfile,
     });
-    await expPi._cmds.get("devexpress").handler(["status"], mkCtx([], expand));
+    await expPi._cmds.get("devexpress").handler([], mkCtx(["Last build status"], expand));
     const rxPi = mkPi();
     registerBuildCommand(rxPi, {
       run: async (cmd: string) => {
@@ -171,7 +195,7 @@ const GREEN_EXPAND = [
       fetchFeed: async () => "[]",
       repoRoot: rx,
     });
-    await rxPi._cmds.get("devexpress").handler(["status"], mkCtx([], rx));
+    await rxPi._cmds.get("devexpress").handler([], mkCtx(["Last build status"], rx));
     check("P3: expand status queries def 94", expCalls.some((c) => c.includes("definitions=94")), JSON.stringify(expCalls));
     check("P3: RX status still queries def 23", rxCalls.some((c) => c.includes("definitions=23")), JSON.stringify(rxCalls));
   }
@@ -190,7 +214,10 @@ const GREEN_EXPAND = [
     });
     const ctx = mkCtx(["Build", "RX-XAF", "Lab", "Publish"], repo);
     const result = await pi._cmds.get("devexpress").handler([], ctx);
-    check("P4: RX still sends brx and prx, published", pane.sent[0]?.startsWith("brx;") && runner.calls.includes("prx") && result.includes("published"), JSON.stringify(pane.sent) + " | " + runner.calls.join(" | "));
+    check("P4: RX still starts brx in a pane", /-File ".*run\.ps1"$/.test(pane.sent[0] ?? "") && result.includes("Build started in pane"), JSON.stringify(pane.sent) + " | " + result);
+    finishRun(pane, 0);
+    await waitFor(() => runner.calls.includes("prx"));
+    check("P4: prx still ran", runner.calls.includes("prx"), runner.calls.join(" | "));
   }
   console.log(`\n${ok} passed, ${fail} failed`);
   process.exit(fail > 0 ? 1 : 0);

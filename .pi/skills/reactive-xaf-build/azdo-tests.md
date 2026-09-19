@@ -12,12 +12,14 @@ Run: `npx tsx d:/Reactive.XAF/.pi/extensions/reactive-xaf-build/azdo-tests.ts`
 
 ## Pinned behaviors
 
-- T1 — `/devexpress status` on CRLF output surfaces the id AND the extracted
-  fail reason (`error DX1003` beats the wrapper noise).
-- T2 — `/devexpress cancel` on `CANCEL=35735;ok;3` reports the cancel request.
-- T3 — `/devexpress cancel` on `CANCEL=0;none;none` reports nothing to cancel.
+- T1 — "Last build status" (the retired `/devexpress status` word) on CRLF
+  output surfaces the id AND the extracted fail reason (`error DX1003` beats
+  the wrapper noise).
+- T2 — "Cancel AzDO build" (the retired `/devexpress cancel` word) on
+  `CANCEL=35735;ok;3` reports the cancel request.
+- T3 — "Cancel AzDO build" on `CANCEL=0;none;none` reports nothing to cancel.
 - T4 — the devexpress command registers through the real index boot.
-- T5 — plain `status` queries the Reactive.XAF definition (23).
+- T5 — "Last build status" queries the Reactive.XAF definition (23).
 - T6 — cancel is project-wide: no definition filter, statusFilter query.
 - T7 — the status log block targets the failed Task record.
 - T8 — 5-field `STATUS=id;status;result;buildNumber;reason` still

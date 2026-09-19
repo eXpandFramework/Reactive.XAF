@@ -1,22 +1,19 @@
 /**
  * reactive-xaf-build/pane — psmux pane machinery for the build step.
  *
- * The brx build runs in a NEW psmux pane split to the right; the output
- * streams there live. Completion is signaled by a transient exit-code
- * marker (consume-on-read, in %TEMP%). Green leaves the pane open for the
- * user to close (/devexpress → "Close build pane"); failure keeps it for
- * reuse. In-process fallback happens in build.ts when the pane cannot be
- * opened.
+ * The brx build runs in a NEW psmux pane split to the right of the invoking
+ * window, and its output streams there live. This module owns the pane and the
+ * machine it exposes: open a pane, send a command to it, capture its tail,
+ * close it, and probe what the pane's process is doing (liveness, pid, CPU).
+ * Everything about the RUN itself — its id, temp dir, supervisor script, exit
+ * marker, TTL cleanup and the background watch — lives in `run.ts`.
  *
- * All seams are injectable (tests pass fakes via registerBuildCommand) —
- * the real psmux CLI is never touched by the test suite.
+ * All seams are injectable (tests pass fakes via registerBuildCommand) — the
+ * real psmux CLI is never touched by the test suite.
  */
 
 import { spawn } from "node:child_process";
 import { once } from "node:events";
-import * as fs from "node:fs";
-import * as os from "node:os";
-import * as path from "node:path";
 
 export interface RunResult {
   code: number;
@@ -31,9 +28,16 @@ export interface RunOpts {
 
 export type PaneOpener = (repo: string) => Promise<string | null>;
 export type PaneRunner = (pane: string, cmd: string) => Promise<void>;
-export type PaneWaiter = (pane: string, marker: string, timeoutMs: number) => Promise<{ code: number | null; timedOut: boolean }>;
 export type PaneCapturer = (pane: string) => Promise<string>;
 export type PaneCloser = (pane: string) => Promise<void>;
+export type PaneProber = (pane: string) => Promise<PaneState>;
+export type CpuSampler = (pid: number) => Promise<number | null>;
+
+/** Liveness of a pane and, while it still answers, its shell pid. */
+export interface PaneState {
+  alive: boolean;
+  pid: number | null;
+}
 
 const BUILD_PANE_KEY = Symbol.for("reactive-xaf-build.build-pane");
 
@@ -94,23 +98,6 @@ export async function defaultRunInPane(pane: string, cmd: string): Promise<void>
   await runArgv(psmuxArgs(["psmux", "send-keys", "-t", pane, cmd, "Enter"]), 15000);
 }
 
-export async function defaultWaitForPaneExit(pane: string, marker: string, timeoutMs: number): Promise<{ code: number | null; timedOut: boolean }> {
-  const deadline = Date.now() + timeoutMs;
-  while (Date.now() < deadline) {
-    if (fs.existsSync(marker)) {
-      try {
-        const code = Number(fs.readFileSync(marker, "utf-8").trim());
-        fs.rmSync(marker, { force: true });
-        return { code, timedOut: false };
-      } catch {
-        return { code: null, timedOut: false };
-      }
-    }
-    await sleep(2000);
-  }
-  return { code: null, timedOut: true };
-}
-
 export async function defaultCapturePane(pane: string): Promise<string> {
   const res = await runArgv(psmuxArgs(["psmux", "capture-pane", "-t", pane, "-p", "-S", "-40"]), 15000);
   return res.stdout;
@@ -120,7 +107,22 @@ export async function defaultClosePane(pane: string): Promise<void> {
   await runArgv(psmuxArgs(["psmux", "kill-pane", "-t", pane]), 15000);
 }
 
-/** A transient consume-on-read marker path for the pane's exit code. */
-export function exitMarkerPath(): string {
-  return path.join(os.tmpdir(), `rxaf-build-${Date.now()}.exit`);
+/** Is the pane still there, and what is its shell pid? A `pane_dead` pane
+ *  (shell gone, remain-on-exit) answers, but is dead all the same. */
+export async function defaultProbePane(pane: string): Promise<PaneState> {
+  const res = await runArgv(psmuxArgs(["psmux", "display-message", "-t", pane, "-p", "#{pane_dead} #{pane_pid}"]), 10000);
+  if (res.code !== 0) return { alive: false, pid: null };
+  const [dead, pid] = res.stdout.trim().split(/\s+/);
+  const parsed = Number(pid);
+  return { alive: dead !== "1", pid: Number.isFinite(parsed) ? parsed : null };
+}
+
+/** CPU seconds burned by the pane's shell and its descendants. A hung wait
+ *  burns none, a slow compile keeps burning: the stall signal that does not
+ *  depend on the build printing anything. */
+export async function defaultSampleCpu(pid: number): Promise<number | null> {
+  const script = `$r=${pid};$all=@($r)+@(Get-CimInstance Win32_Process -Filter "ParentProcessId=$r" -ErrorAction SilentlyContinue|Select-Object -ExpandProperty ProcessId);$s=0.0;foreach($p in $all){$x=Get-Process -Id $p -ErrorAction SilentlyContinue;if($x){$s+=$x.CPU}};("{0:F1}" -f $s)`;
+  const res = await runArgv(["pwsh", "-NoProfile", "-Command", script], 10000);
+  const value = Number(res.stdout.trim());
+  return res.code === 0 && Number.isFinite(value) ? value : null;
 }

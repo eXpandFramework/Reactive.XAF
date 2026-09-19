@@ -11,7 +11,7 @@ import { mkdtempSync, mkdirSync, writeFileSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import activate from "./index.js";
-import { registerBuildCommand } from "./build.js";
+import { registerBuildCommand } from "./menu.js";
 
 let ok = 0;
 let fail = 0;
@@ -66,6 +66,19 @@ function mkRunner(script: Array<{ match: string; result: any }>): { run: (cmd: s
     calls,
   };
 }
+async function waitFor(cond: () => boolean, ms = 4000): Promise<boolean> {
+  const deadline = Date.now() + ms;
+  while (Date.now() < deadline) {
+    if (cond()) return true;
+    await new Promise((resolve) => setTimeout(resolve, 20));
+  }
+  return cond();
+}
+/** Finish a started run the way the supervisor would. */
+function finishRun(pane: any, code: number): void {
+  const script = /-File "([^"]+)"/.exec(pane.sent[0])?.[1] ?? "";
+  writeFileSync(script.replace(/run\.ps1$/, "exit.code"), String(code));
+}
 function mkPaneSeams(): any {
   const opened: string[] = [];
   const sent: string[] = [];
@@ -77,8 +90,9 @@ function mkPaneSeams(): any {
       return "pane1";
     },
     runInPane: async (_pane: string, cmd: string) => { sent.push(cmd); },
-    waitForPaneExit: async () => ({ code: 0, timedOut: false }),
     capturePane: async () => "",
+    probePane: async () => ({ alive: true, pid: 4242 }),
+    runCadence: { signalMs: 10, probeMs: 10, cpuMs: 10, stallMs: 3_600_000, overrunMs: 3_600_000 },
     closePane: async (pane: string) => { closed.push(pane); },
     startAzDoWatcher: async () => {
       watcherStarts.push(1);
@@ -153,7 +167,10 @@ function register(pi: any, runner: { run: (cmd: string) => Promise<any> }, pane:
     const result = await pi._cmds.get("devexpress").handler([], ctx);
     check("R1: build.ps1 bumped to the next release (26.1.401.0, past feed 26.1.400)", readFileSync(join(repo, "build.ps1"), "utf-8").includes('-version "26.1.401.0"'), readFileSync(join(repo, "build.ps1"), "utf-8"));
     check("R1: bump noted", ctx._notifies.some((n) => n.includes("bumped build.ps1 -version to 26.1.401.0")), ctx._notifies.join(" | "));
-    check("R1: expand Release published via px -Release", result.includes("published") && runner.calls.includes("px -Release"), result + " | " + runner.calls.join(" | "));
+    check("R1: the command returned on a started build", result.includes("Build started in pane"), result);
+    finishRun(pane, 0);
+    await waitFor(() => runner.calls.includes("px -Release"));
+    check("R1: expand Release published via px -Release", runner.calls.includes("px -Release"), runner.calls.join(" | "));
   }
   // Section: R2 — expand Release with nothing published on the DX minor keeps the DX base
   {
@@ -176,7 +193,10 @@ function register(pi: any, runner: { run: (cmd: string) => Promise<any> }, pane:
     const ctx = mkCtx(["Build", "eXpand", "Release", "Commit", "Publish"], repo);
     const result = await pi._cmds.get("devexpress").handler([], ctx);
     check("R2: other minors ignored → DX base 26.1.400.0", readFileSync(join(repo, "build.ps1"), "utf-8").includes('-version "26.1.400.0"'), readFileSync(join(repo, "build.ps1"), "utf-8"));
-    check("R2: published", result.includes("published"), result);
+    check("R2: the command returned on a started build", result.includes("Build started in pane"), result);
+    finishRun(pane, 0);
+    await waitFor(() => ctx._notifies.some((n) => n.includes("published")));
+    check("R2: published", ctx._notifies.some((n) => n.includes("published")), ctx._notifies.join(" | "));
   }
   // Section: R3 — expand Lab bumps to the DX base without consulting the feeds
   {
@@ -199,7 +219,10 @@ function register(pi: any, runner: { run: (cmd: string) => Promise<any> }, pane:
     const ctx = mkCtx(["Build", "eXpand", "Lab", "Commit", "Publish"], repo);
     const result = await pi._cmds.get("devexpress").handler([], ctx);
     check("R3: lab bumps to DX base 26.1.400.0 (no feed consult — org/xpand urls would throw)", readFileSync(join(repo, "build.ps1"), "utf-8").includes('-version "26.1.400.0"'), readFileSync(join(repo, "build.ps1"), "utf-8"));
-    check("R3: lab published via px", result.includes("published") && runner.calls.includes("px"), result + " | " + runner.calls.join(" | "));
+    check("R3: the command returned on a started build", result.includes("Build started in pane"), result);
+    finishRun(pane, 0);
+    await waitFor(() => runner.calls.includes("px"));
+    check("R3: lab published via px", runner.calls.includes("px"), runner.calls.join(" | "));
   }
   // Section: R4 — expand Release feed consultation failure aborts loudly, no build
   {

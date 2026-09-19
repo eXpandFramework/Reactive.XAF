@@ -20,13 +20,16 @@ a 2023 leftover. Release is def 39 → 38 → 37.
 ## Command surface
 
 - `/devexpress` — interactive menu: Build | Publish → **RX-XAF | eXpand**
-  → Lab | Release, plus "Last build status", "Cancel AzDO build" and
-  "Close build pane" while a build pane is open.
-- `/devexpress status` — one-shot AzDO status of the newest build (`profile.statusDef`).
-- `/devexpress cancel` — PATCH-cancel the newest running build.
-- `/devexpress watch` — start the chain watcher for the current build.
-- `/devexpress build lab|release` — full flow on the current profile.
-- `/devexpress publish lab|release` — skip-build on the current profile.
+  → Lab | Release, plus "Last build status", "Cancel AzDO build" and one of
+  "Abort build" (a run is being watched) or "Close build pane" (a pane is
+  open, nothing running).
+- No arguments, no flags and no subcommand words: every capability is a menu
+  pick. The old words `/devexpress status`, `/devexpress cancel`,
+  `/devexpress watch`, `/devexpress build lab|release` and
+  `/devexpress publish lab|release` are gone (CLI Flag Gate) — the same
+  actions are the menu items "Last build status", "Cancel AzDO build",
+  "Start AzDO watcher", Build and Publish, each followed by the Lab | Release
+  pick it needs.
 
 Menu picks run in the INVOKING window. The eXpand pick uses
 `resolveRepo` (cwd, then known roots only when cwd is the other repo).
@@ -38,7 +41,12 @@ Menu picks run in the INVOKING window. The eXpand pick uses
    version: Lab → DX base; Release → next after the last published version on
    the feeds (Xpand server + nuget.org, e.g. 26.1.401.0 after 26.1.400).
 3. **depPins** (expand only) — latest `Xpand.Extensions` from the matching feed.
-4. **Build** — `profile.buildCmd` in a right-side pane.
+4. **Build** — `profile.buildCmd` in a right-side pane, driven by a per-run
+   supervisor script (`pane.ts`) whose exit code lands in a transient marker.
+   The command returns on a STARTED build; `run.ts` watches the run out of
+   band (marker, pane death, a 10-minute silence-plus-CPU-idle stall, a
+   20-minute overrun) and reports. Nothing in the watch kills a build —
+   `/devexpress` → "Abort build" is the only deliberate stop.
 5. **Publish** — VMs C11–C14, commit, optional `git push`, `profile.queueCmd`,
    AzDO watcher (`publish.ts`).
 
@@ -50,8 +58,10 @@ Menu picks run in the INVOKING window. The eXpand pick uses
 | `profile.ts` | `profile.md` | RepoProfile: RX default + expand. `profileByPick`, `resolveRepo`. |
 | `pins.ts` | `pins.md` | Expand-only RX package pin rewrite. |
 | `publish.ts` | `publish.md` | VMs, commit, queue, watcher start. |
-| `menu.ts` | `menu.md` | Command surface: RX-XAF | eXpand then Lab | Release. |
-| `build.ts` | `build.md` | Flow engine (DX, local build, menu wiring). |
+| `menu.ts` | `menu.md` | Command surface and composition root: owns the command, drives the engine. |
+| `build.ts` | `build.md` | Flow engine (DX, local build start, menu wiring). |
+| `run.ts` | `run.md` | Background build run: marker, pane death, stall/overrun, abort. |
+| `report.ts` | `report.md` | The flow's messages and the warn/steer pair. |
 | `release.ts` | `release.md` | Release version bump (feed consultation). |
 | `watcher.ts` | `watcher.md` | Background AzDO chain watcher. |
 | `menu-tests.ts` | `menu-tests.md` | Skip-build contract. |
@@ -62,6 +72,6 @@ Menu picks run in the INVOKING window. The eXpand pick uses
 | `profile-tests.ts` | `profile-tests.md` | RepoProfile (RX vs expand). |
 | `azdo.ts` / `status.ts` | `azdo.md` | AzDO status/cancel. |
 | `delegate.ts` | `delegate.md` | Dormant. |
-| `pane.ts` | — | Build pane primitives. |
+| `pane.ts` | `pane.md` | Pane seams: open, send, capture, close, probe, CPU sample. |
 
 Run: `npx tsx C:/Work/Reactive.XAF/.pi/extensions/reactive-xaf-build/{menu,build,watcher,azdo,profile}-tests.ts`

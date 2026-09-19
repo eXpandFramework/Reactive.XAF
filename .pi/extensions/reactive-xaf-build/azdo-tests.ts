@@ -8,7 +8,7 @@ import { mkdtempSync, mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import activate from "./index.js";
-import { registerBuildCommand } from "./build.js";
+import { registerBuildCommand } from "./menu.js";
 
 let ok = 0;
 let fail = 0;
@@ -39,11 +39,13 @@ function mkPi(): any {
     _cmds: cmds,
   };
 }
-function mkCtx(repo: string): any {
+/** The menu's first pick decides the capability: status and cancel are
+ *  top-level items, so no project pick follows them. */
+function mkCtx(repo: string, pick = "Last build status"): any {
   return {
     cwd: repo,
     ui: {
-      select: async () => "Skip",
+      select: async () => pick,
       notify: () => {},
     },
   };
@@ -76,19 +78,19 @@ function registerCapture(repo: string, stdout: string): { pi: any; calls: string
     const repo = mkRepo();
     const logLines = ["Executing Compile", "CSC : error DX1003: Expired license key version", "##[error]PowerShell exited with code '1'"];
     const pi = register(repo, crlf(["LOGSTART", ...logLines, "LOGEND", "STATUS=35735;completed;failed;"]));
-    const r = await pi._cmds.get("devexpress").handler(["status"], mkCtx(repo));
+    const r = await pi._cmds.get("devexpress").handler([], mkCtx(repo));
     check("T1: status surfaces id + extracted reason from CRLF", r.includes("35735") && r.includes("DX1003"), r);
   }
   {
     const repo = mkRepo();
     const pi = register(repo, crlf(["CANCEL=35735;ok;3"]));
-    const r = await pi._cmds.get("devexpress").handler(["cancel"], mkCtx(repo));
+    const r = await pi._cmds.get("devexpress").handler([], mkCtx(repo, "Cancel AzDO build"));
     check("T2: cancel requested for all builds surfaced from CRLF", r.includes("Cancel requested for 3 AzDO builds"), r);
   }
   {
     const repo = mkRepo();
     const pi = register(repo, crlf(["CANCEL=0;none;none"]));
-    const r = await pi._cmds.get("devexpress").handler(["cancel"], mkCtx(repo));
+    const r = await pi._cmds.get("devexpress").handler([], mkCtx(repo, "Cancel AzDO build"));
     check("T3: no-builds cancel surfaced", r.includes("No AzDO builds found to cancel"), r);
   }
   {
@@ -100,13 +102,13 @@ function registerCapture(repo: string, stdout: string): { pi: any; calls: string
   {
     const repo = mkRepo();
     const { pi, calls } = registerCapture(repo, crlf(["STATUS=35735;completed;failed;"]));
-    await pi._cmds.get("devexpress").handler(["status"], mkCtx(repo));
+    await pi._cmds.get("devexpress").handler([], mkCtx(repo));
     check("T5: plain status keeps def 23", calls.some((c) => c.includes("definitions=23")), JSON.stringify(calls));
   }
   {
     const repo = mkRepo();
     const { pi, calls } = registerCapture(repo, crlf(["CANCEL=0;none;none"]));
-    await pi._cmds.get("devexpress").handler(["cancel"], mkCtx(repo));
+    await pi._cmds.get("devexpress").handler([], mkCtx(repo, "Cancel AzDO build"));
     check(
       "T6: cancel queries all builds project-wide",
       calls.some((c) => c.includes("statusFilter=inProgress,notStarted,postponed") && !c.includes("definitions=")),
@@ -116,7 +118,7 @@ function registerCapture(repo: string, stdout: string): { pi: any; calls: string
   {
     const repo = mkRepo();
     const { pi, calls } = registerCapture(repo, crlf(["STATUS=35797;completed;failed;"]));
-    await pi._cmds.get("devexpress").handler(["status"], mkCtx(repo));
+    await pi._cmds.get("devexpress").handler([], mkCtx(repo));
     check(
       "T7: status log block filters failed Task records",
       calls.some((c) => c.includes('$_.type -eq "Task" -and $_.result -eq "failed"')),
@@ -126,7 +128,7 @@ function registerCapture(repo: string, stdout: string): { pi: any; calls: string
   {
     const repo = mkRepo();
     const pi = register(repo, crlf(["LOGSTART", "##[error]Release 26.1.301.1 exists", "LOGEND", "STATUS=35802;completed;failed;26.1.301.1;"]));
-    const r = await pi._cmds.get("devexpress").handler(["status"], mkCtx(repo));
+    const r = await pi._cmds.get("devexpress").handler([], mkCtx(repo));
     check("T8: 5-field STATUS surfaces id + log reason", r.includes("35802") && r.includes("Release 26.1.301.1 exists"), r);
   }
   console.log(`\n${ok} passed, ${fail} failed`);

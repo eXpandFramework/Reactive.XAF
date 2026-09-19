@@ -1,11 +1,12 @@
 /**
- * reactive-xaf-build/delegate-tests — behavior contract for the window
- * delegation fallback (companion of delegate.ts): a spawned window that dies
- * during the boot grace period must NOT receive the flow —
- * defaultDelegateWindow returns null and the /devexpress menu flow falls back
- * to the invoking session, completing there. A surviving window is delegated
- * to. Mock-pi harness with injected delegate deps (run/windowExists/
- * killWindow/graceMs) — the real psmux CLI is never touched.
+ * reactive-xaf-build/delegate-tests — the delegation module's contract.
+ *
+ * delegateWindow is dormant: the /devexpress flow runs in the invoking
+ * session and never consults it. What stays pinned here is the helper's own
+ * behavior (a window that dies inside the boot grace window is killed and the
+ * helper answers null, and outside psmux nothing is spawned), plus the flow
+ * publishing locally. Mock-pi harness with injected delegate deps
+ * (run/windowExists/killWindow/graceMs) — the real psmux CLI is never touched.
  * Run: npx tsx C:/Work/Reactive.XAF/.pi/extensions/reactive-xaf-build/delegate-tests.ts
  */
 /* oxlint-disable no-console -- test harness prints PASS/FAIL to stdout */
@@ -13,7 +14,7 @@ import { mkdtempSync, mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import activate from "./index.js";
-import { registerBuildCommand } from "./build.js";
+import { registerBuildCommand } from "./menu.js";
 import { defaultDelegateWindow } from "./delegate.js";
 import type { DelegateDeps } from "./delegate.js";
 
@@ -32,6 +33,7 @@ function mkPi(): any {
   const cmds = new Map<string, any>();
   return {
     registerCommand: (n: string, d: any) => { cmds.set(n, d); },
+    sendUserMessage: () => {},
     _cmds: cmds,
   };
 }
@@ -71,11 +73,8 @@ function mkPaneSeams(): any {
   return {
     openBuildPane: async () => "pane1",
     runInPane: async () => {},
-    waitForPaneExit: async () => ({ code: 0, timedOut: false }),
     capturePane: async () => "",
     closePane: async () => {},
-    waitForAzDoBuild: async () => ({ id: 1, result: "succeeded", reason: "" }),
-    delegateWindow: async () => null,
   };
 }
 function mkRepo(): string {
@@ -101,10 +100,9 @@ const GREEN_PUBLISH = [
     activate(pi);
     check("S0: devexpress command registered via index.ts", typeof pi._cmds.get("devexpress")?.handler === "function");
   }
-  // Section: S1 — spawned window dies during grace → menu falls back to the invoking session
+  // Section: S1 — a window that dies inside the grace window is killed, helper answers null
   {
     const repo = mkRepo();
-    const runner = mkRunner(GREEN_PUBLISH);
     const killed: string[] = [];
     const deps: DelegateDeps = {
       run: async () => ({ code: 0, stdout: "7\n", stderr: "" }),
@@ -112,27 +110,19 @@ const GREEN_PUBLISH = [
       killWindow: async (idx: string) => { killed.push(idx); },
       graceMs: 100,
     };
-    const pi = mkPi();
-    registerBuildCommand(pi, { run: runner.run, fetchFeed: async () => "[]", repoRoot: repo, pollMs: 1, ...mkPaneSeams(), delegateWindow: (r: string, t: string) => defaultDelegateWindow(r, t, deps) });
-    const ctx = mkCtx(["Publish", "Lab", "Publish"], repo);
-    const result = await pi._cmds.get("devexpress").handler([], ctx);
-    check("S1: dead window killed, flow fell back and published here", killed.length === 1 && killed[0] === "7" && result.includes("published"), result + " | killed: " + JSON.stringify(killed));
-    check("S1: prx ran in the invoking session, no brx", runner.calls.includes("prx") && !runner.calls.some((c) => c.startsWith("brx")), runner.calls.join(" | "));
+    const result = await defaultDelegateWindow(repo, "task", deps);
+    check("S1: dead window inside the grace window killed, helper answers null", result === null && killed.length === 1 && killed[0] === "7", String(result) + " | killed: " + JSON.stringify(killed));
   }
-  // Section: S2 — surviving window → delegated, flow not run here
+  // Section: S2 — the flow ignores the dormant seam and publishes in this session
   {
     const repo = mkRepo();
-    const runner = mkRunner([]);
-    const deps: DelegateDeps = {
-      run: async () => ({ code: 0, stdout: "8\n", stderr: "" }),
-      windowExists: async () => true,
-      graceMs: 50,
-    };
+    const runner = mkRunner(GREEN_PUBLISH);
     const pi = mkPi();
-    registerBuildCommand(pi, { run: runner.run, fetchFeed: async () => "[]", repoRoot: repo, pollMs: 1, ...mkPaneSeams(), delegateWindow: (r: string, t: string) => defaultDelegateWindow(r, t, deps) });
-    const ctx = mkCtx(["Publish", "Lab"], repo);
+    registerBuildCommand(pi, { run: runner.run, fetchFeed: async () => "[]", repoRoot: repo, pollMs: 1, ...mkPaneSeams() });
+    const ctx = mkCtx(["Publish", "RX-XAF", "Lab", "Publish"], repo);
     const result = await pi._cmds.get("devexpress").handler([], ctx);
-    check("S2: surviving window delegated, nothing ran here", result.includes("delegated to window 8") && !runner.calls.includes("prx"), result + " | " + runner.calls.join(" | "));
+    check("S2: publish-only flow ran here, prx queued", result.includes("published") && runner.calls.includes("prx"), result + " | " + runner.calls.join(" | "));
+    check("S2: no build command ran", !runner.calls.some((c) => c.startsWith("brx")), runner.calls.join(" | "));
   }
   // Section: S3 — outside psmux → null without spawning
   {

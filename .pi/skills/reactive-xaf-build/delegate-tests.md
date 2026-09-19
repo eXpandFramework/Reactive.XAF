@@ -5,9 +5,10 @@ description: Use when the /devexpress delegation fallback misbehaves or its test
 
 # delegate-tests.ts — delegation fallback behavior contract
 
-Companion of `.pi/extensions/reactive-xaf-build/delegate-tests.ts`. Pins the
-OBSERVABLE contract of the liveness-verified delegation: the flow must never
-hand off to a dead window.
+Companion of `.pi/extensions/reactive-xaf-build/delegate-tests.ts`.
+`delegateWindow` is dormant (`delegate.ts`; the flow stopped calling it on
+2026-08-25), so the /devexpress flow runs in the invoking session and never
+consults a window. The helper's own liveness contract stays pinned.
 
 Run: `npx tsx C:/Work/Reactive.XAF/.pi/extensions/reactive-xaf-build/delegate-tests.ts`
 
@@ -15,19 +16,17 @@ Run: `npx tsx C:/Work/Reactive.XAF/.pi/extensions/reactive-xaf-build/delegate-te
 
 The REAL `defaultDelegateWindow` runs with injected `DelegateDeps`
 (`run`, `windowExists`, `killWindow`, `graceMs`) — the real psmux CLI is
-never touched. The menu path is driven through `registerBuildCommand` with
-`delegateWindow` wrapping the real function. `TMUX_PANE` is set/restored
-around the suite.
+never touched. The menu path is driven through `registerBuildCommand` (from
+`menu.ts`, the surface module that owns the command). `TMUX_PANE` is
+set/restored around the suite.
 
 ## Contracts
 
 - **S0** — the command registers through the real index boot (`activate(pi)`).
-- **S1** — spawned window dies during the grace (`windowExists` false):
-  the window is killed, `defaultDelegateWindow` returns null, and the menu
-  flow (Publish → Lab) falls back to the invoking session — prx runs there,
-  no brx, result "published".
-- **S2** — surviving window: "delegated to window N", nothing runs in the
-  invoking session (no prx).
+- **S1** — spawned window dies during the grace (`windowExists` false): the
+  window is killed and `defaultDelegateWindow` returns null.
+- **S2** — the flow ignores the dormant seam: menu Publish → RX-XAF → Lab
+  publishes in the invoking session (prx runs, no brx).
 - **S3** — outside psmux (`TMUX_PANE` unset): null, nothing spawned.
 
 ## Notes
