@@ -30,6 +30,10 @@ the first, and from here on they belong to the same moment.
 
 ## The git half (`gitphase.ts`)
 
+Module detail: [gitphase.md](gitphase.md). This module only decides WHERE the
+steps run: the commit step before the VM outcome is read, the pre-push check
+inside `queuePhase`.
+
 `dirtyStatus` — one `git status --short`, the changed lines or a named failure.
 A read that FAILED is never a clean tree: counting the stdout of a broken read
 reported "nothing to commit" and let the flow walk over a dirty tree.

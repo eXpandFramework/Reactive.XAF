@@ -68,7 +68,7 @@ Menu picks run in the INVOKING window. The eXpand pick uses
 | `profile.ts` | `profile.md` | RepoProfile: RX default + expand. `profileByPick`, `resolveRepo`. |
 | `pins.ts` | `pins.md` | Expand-only RX package pin rewrite. |
 | `publish.ts` | `publish.md` | The VM layer and the phase order: commit, push, queue, watcher start. |
-| `gitphase.ts` | `publish.md` | The git half: dirty read + summary, both commit prompts, the commit core. |
+| `gitphase.ts` | `gitphase.md` | The git half: dirty read + summary, both commit prompts, the commit core. |
 | `menu.ts` | `menu.md` | Command surface and composition root: owns the command, drives the engine. |
 | `build.ts` | `build.md` | Flow engine (DX, local build start, menu wiring). |
 | `run.ts` | `run.md` | Background build run: marker, pane death, stall/overrun, abort. |
