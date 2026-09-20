@@ -1,6 +1,7 @@
 ---
 name: reactive-xaf-build/publish
 description: Use when changing the publish path — the Hyper-V VM probe/classifier (C11-C14), the build-start pre-warm, git commit, optional git push (expand), profile.queueCmd, AzDO watcher start.
+drop-names: dirtyStatus, dirtySummary, areaOf, commitWith, pushDirtyPhase, Dirty working tree before pushing to <remote>
 ---
 
 # publish.ts — the VM layer, commit, queue, watcher
@@ -30,33 +31,10 @@ the first, and from here on they belong to the same moment.
 
 ## The git half (`gitphase.ts`)
 
-Module detail: [gitphase.md](gitphase.md). This module only decides WHERE the
-steps run: the commit step before the VM outcome is read, the pre-push check
-inside `queuePhase`.
-
-`dirtyStatus` — one `git status --short`, the changed lines or a named failure.
-A read that FAILED is never a clean tree: counting the stdout of a broken read
-reported "nothing to commit" and let the flow walk over a dirty tree.
-
-`dirtySummary` — the prompt's two lines: `N files: 1 modified, 1 new` then
-`areas: <dir> (n)`, capped at three areas plus a remainder. No paths: `areaOf`
-names a directory (one segment when the rest of the path is the file, two when
-there is a deeper directory to name, `(root)` for a top-level file), so the
-prompt stays readable and a file name never leaks into it.
-
-Two prompts over ONE core (`commitWith`, which never prompts):
-
-- `commitPhase` — the build's commit step. Clean → "nothing to commit" and the
-  flow continues. Dirty → `Commit with message: "<msg>"?` plus the summary.
-  Abort → "commit aborted", the publish stops.
-- `pushDirtyPhase` — the pre-push check, on the profiles that push (eXpand
-  Lab/Release; RX has no remote). The commit step normally leaves the tree
-  clean, so this fires when something wrote in the window between the two (the
-  IDE, another agent, a background build). Dirty → `Dirty working tree before
-  pushing to <remote>` plus the summary, with three answers: Commit before push
-  (commits under the same message rules, then pushes), Push as is (pushes the
-  tree untouched), Abort (no push, and NO queue — a pipeline queued on a commit
-  the user just declined is not a publish).
+The dirty read, the summary a prompt carries, the message rules and both commit
+prompts live in `gitphase.ts`, with the module detail in
+[gitphase.md](gitphase.md). What stays here is the ORDER: the commit step runs
+before the VM outcome is read, and the pre-push check runs inside `queuePhase`.
 
 ## The VM gate (`planVms` + `ensureVmsRunning`)
 
