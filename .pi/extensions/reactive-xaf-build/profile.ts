@@ -33,6 +33,9 @@ export interface RepoProfile {
   knownRoots: string[];
   depPins?: DepPins;
   detect(cwd: string): string | null;
+  /** Env the profile's own runs start with. Optional: a profile that needs
+   *  none declares none, and the run template adds nothing of its own. */
+  buildEnv?: Record<string, string>;
   buildCmd(choice: Choice): string;
   queueCmd(choice: Choice): string;
   queueLabel(choice: Choice): string;
@@ -100,6 +103,10 @@ export const rxProfile: RepoProfile = {
   nugetId: "xpand.extensions",
   knownRoots: ["C:/Work/Reactive.XAF", "D:/Reactive.XAF"],
   detect: (cwd) => detectAt(cwd, path.join("src", "Extensions")),
+  // The shared bin folder makes the build's own parallel workers collide on
+  // the same DLL; the copy retries and succeeds, and only that retry notice
+  // would fail the -WarnAsError build. A genuine failure still errors.
+  buildEnv: { MSBuildWarningsAsMessages: "MSB3026" },
   buildCmd: (choice) => choice === "Release" ? "brx -Release" : "brx",
   queueCmd: (choice) => choice === "Release" ? "prx -Release" : "prx",
   queueLabel: (choice) => choice === "Release"

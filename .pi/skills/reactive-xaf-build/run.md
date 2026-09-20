@@ -22,7 +22,8 @@ arrives as a message instead of a hang.
   marker can never report a later build.
 - `supervisorScript(cmd, marker)` — runs the build in a NESTED `pwsh`, so an
   `exit` (or a crash) inside the build cannot skip the marker write, then
-  writes `$LASTEXITCODE` (falling back to `$?`) into the marker.
+  writes `$LASTEXITCODE` (falling back to `$?`) into the marker. It also
+  exports `MSB3026` as a message for the run, see below.
 - `writeRunScript(paths, cmd)` — writes the script, creating the run dir,
   through `trackedWrite(file, data)`: every file write rides pi-dev's tracked
   seam from `globalThis`, and a missing seam is a loud error.
@@ -32,6 +33,34 @@ arrives as a message instead of a hang.
 - `pruneRunDirs(ttlMs = 24 h)` — best-effort TTL cleanup. Age-based on purpose:
   a "newest N" rule deletes a live build's dir, including another session's
   concurrent run whose marker this process never reads.
+
+## The build env, owned by the profile
+
+`supervisorScript(cmd, marker, env)` / `writeRunScript(paths, cmd, env)` write
+one `$env:NAME = 'value'` assignment per entry ahead of the build line, so the
+nested pwsh inherits it. The env is the CALLER's: `run.ts` owns no build policy,
+because the same template serves every profile that shares the pane. A
+malformed name throws at write time instead of producing a broken script. Both
+branches of a run get it: a pane run through the script, the no-pane fallback
+through `RunOpts.env` on the command runner (`pane.ts`), so the two are
+interchangeable.
+
+RX declares its own in `profile.ts` (`buildEnv`): `MSBuildWarningsAsMessages =
+'MSB3026'`. The shared `bin` folder is written by many projects at once, so the
+build's own parallel workers collide on the same DLL now and then; MSBuild's
+copy task retries, logs `MSB3026` (a notice), and the copy succeeds. Under
+`-WarnAsError` that notice alone failed a Release run on 2026-09-20, and each of
+its three attempts reproduced it. A copy that genuinely fails is untouched:
+exhausted retries log `Copy.Error`, an error, and still stop the build.
+
+Scope, on purpose: local runs only. The Azure pipeline reaches the same psake
+`Compile` task (`Build/BuildPipeline.yml` → `Build/BuildPipeline.ps1`, with
+`-WarnAsError`) and keeps failing on that notice by decision, not by oversight:
+moving the setting into the shared build entry would change the pipeline too. If
+the notice ever fails a pipeline run, that entry is where it belongs. Where the
+setting does apply it is an MSBuild property from the environment, so a
+project-level definition that does not compose it simply drops the downgrade and
+that project fails as before.
 
 ## Signals, in the order a tick reads them
 

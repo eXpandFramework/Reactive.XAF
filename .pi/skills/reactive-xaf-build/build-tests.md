@@ -70,6 +70,15 @@ Run: `npx tsx d:/Reactive.XAF/.pi/extensions/reactive-xaf-build/build-tests.ts`
   `git status` that failed refuses instead of reading as clean (T52); aborting
   the commit drops the VM outcome with it (T53).
 
+- T54-T56 — the run's build env: the value a run is handed comes from the
+  profile (`profile.buildEnv`), asserted by parsing the generated `run.ps1`
+  into pairs rather than matching its text (T54); a run handed no env carries
+  no assignment, and a malformed name throws at write time instead of
+  producing a broken script (T55); the no-pane fallback is handed the same env
+  through `RunOpts.env` on the command runner, so a pane run and a fallback run
+  start identically (T56). The template in `run.ts` adds no policy of its own,
+  so the eXpand profile cannot silently inherit RX's MSBuild setting.
+
 The watcher's own contract (toast per poll, terminal steer, give-up,
 replace) is pinned by `watcher-tests.ts`; the CRLF status/cancel parse
 contract by `azdo-tests.ts`.
@@ -113,3 +122,11 @@ eight rules, and the checks those lines named are rules 7 and 8 here.
   is intact;
 - rules 2, 3 and 5 — untouched: no `test()` wrapper pattern beside `check()`,
   no pi spawn, no process-boundary mock enters these cases.
+
+The T54-T56 addition (2026-09-20) follows the same rules: it sits under its
+own `// Section:` comment (rule 1, T54 inside the T3 section and T56 inside the
+T11 one), its labels are unique strings in this file (rule 6), no assertion sits
+inside an iteration (rule 7 — the script parse is an `envOf` helper, not a loop
+over cases), and the file's import graph is untouched (rule 8: `readFileSync`,
+`runPaths` and `writeRunScript` were already imported; `mkRunner` only gained a
+recording field).

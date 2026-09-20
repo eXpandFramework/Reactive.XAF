@@ -37,11 +37,14 @@ to `run.ts`.
    ride the started message, `attention` adds a `steerWatch` warning that spends
    no model turn. A flow that aborts earlier (DX prompt, feed consultation)
    leaves the VMs alone.
-5. **Build** (`startBuildPhase`) — `profile.buildCmd` in a right-side pane,
-   now via the run's supervisor script (`run.ts`): the pane is opened, the
+5. **Build** (`startBuildPhase`) — `profile.buildCmd` plus `profile.buildEnv`
+   (RX: `MSBuildWarningsAsMessages=MSB3026`, see `profile.md`) in a right-side
+   pane, via the run's supervisor script (`run.ts`): the pane is opened, the
    supervisor line is typed, and the phase returns on a STARTED build, where
    `startBuildRun` takes over. No pane → the same command runs in-process
-   through `watchInProcessRun`. Either way the command never awaits the build,
+   through `watchInProcessRun` with the SAME env, handed to the command runner
+   (`RunOpts.env`, see `pane.md`), so a fallback run cannot lose what the pane
+   run would have had. Either way the command never awaits the build,
    so the agent stays reachable.
 6. **Publish** (`publishPhase`) — runs from the watch when the marker reports
    exit 0: the VM gate (C11–C14 must answer Running, see `publish.md`) → commit

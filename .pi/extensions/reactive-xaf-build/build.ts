@@ -185,16 +185,17 @@ function runSeamsOf(seams: BuildSeams): BuildRunSeams {
 async function startBuildPhase(
   ctx: any, seams: BuildSeams, choice: string, repo: string, report: RunReporter,
 ): Promise<StartedBuild> {
-  const cmd = profileOf(seams).buildCmd(choice as Choice);
+  const profile = profileOf(seams);
+  const cmd = profile.buildCmd(choice as Choice);
   const paths = (seams.runPaths ?? runPaths)(newRunId());
-  writeRunScript(paths, cmd);
+  writeRunScript(paths, cmd, profile.buildEnv ?? {});
   pruneRunDirs();
   const started: StartedBuild = { runId: paths.runId, pane: null, marker: paths.marker, command: cmd };
   const pane = await (seams.openBuildPane ?? defaultOpenBuildPane)(repo);
   if (!pane) {
     await ctx.ui.notify("Build pane could not be opened — building in-process.", "warning");
     setBuildPane(null);
-    watchInProcessRun(seams.run(cmd, { cwd: repo, timeoutMs: 3_600_000 }), report);
+    watchInProcessRun(seams.run(cmd, { cwd: repo, timeoutMs: 3_600_000, env: profile.buildEnv ?? {} }), report);
     return started;
   }
   started.pane = pane;

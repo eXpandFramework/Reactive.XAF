@@ -13,7 +13,7 @@ machine the pane exposes: open it, send a command, capture the tail, close it,
 and probe what its process is doing. A green exit leaves the pane open for the
 user to close (`/devexpress` → "Close build pane"); a failed build keeps it,
 and `build.ts` falls back to an in-process run only when the pane cannot be
-opened at all.
+opened at all — that fallback is handed the same build env as a pane run.
 
 Everything about the RUN itself — its id, temp dir, supervisor script, exit
 marker, TTL cleanup and the background watch — lives in `run.ts`, not here.
@@ -58,15 +58,18 @@ the test suite.
 
 ## Process helpers
 
-- `runArgv(argv, timeoutMs, cwd?)` — spawns the argv array with
-  `windowsHide`, captures stdout (bounded 100 KB, keeps the tail) and
+- `runArgv(argv, timeoutMs, cwd?, env?)` — spawns the argv array with
+  `windowsHide` and `env` merged over the inherited environment (so the
+  parent's variables survive), captures stdout (bounded 100 KB, keeps the tail) and
   stderr (bounded 50 KB); on timeout it tree-kills via
   `taskkill /PID <pid> /T /F`; resolves `{ code, stdout, stderr }` on close.
 - `runProcess(cmd, opts)` — `pwsh -Command <cmd>` through `runArgv`,
   default 60 s timeout. `RunOpts.noProfile` swaps in
   `pwsh -NoProfile -NonInteractive -Command`: the VM probe sets it, because
   what the user profile loads must never decide whether a probe answers (a
-  profile stall is what killed the probe in the incident).
+  profile stall is what killed the probe in the incident). `RunOpts.env`
+  carries extra variables into the child: the build's no-pane fallback hands
+  the profile's `buildEnv` here, so it starts what a pane run starts.
 - `psmuxArgs(args)` — prepends `-L $PSMUX_SOCKET` when the env var is set
   (socket isolation for tests and parallel servers).
 - `sleep(ms)` — promise-based delay, used by the dormant delegation helper.

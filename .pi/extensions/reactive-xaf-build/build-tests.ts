@@ -6,7 +6,9 @@
  *  T14-T17 AzDO monitor + status; T18-T19 menu delegation; T20 fail-reason
  *  extraction (wrapper noise filtered, real error delivered); T31-T47 the VM
  *  contract (a failed probe stops the publish and never the commit, a build
- *  pre-warms the agents); T48-T53 the commit summary and the pre-push check.
+ *  pre-warms the agents); T48-T53 the commit summary and the pre-push check;
+ *  T54-T56 the run's build env (the profile owns it, the template adds none,
+ *  and the no-pane fallback is handed it too).
  * Run: npx tsx C:/Work/Reactive.XAF/.pi/extensions/reactive-xaf-build/build-tests.ts
  */
 /* oxlint-disable no-console -- test harness prints PASS/FAIL to stdout */
@@ -57,12 +59,14 @@ function mkCtx(selects: string[], cwd: string): any {
     _notifies: notifies,
   };
 }
-function mkRunner(script: Array<{ match: string; result: any }>): { run: (cmd: string) => Promise<any>; calls: string[] } {
+function mkRunner(script: Array<{ match: string; result: any }>): { run: (cmd: string, opts?: any) => Promise<any>; calls: string[]; runOpts: any[] } {
   const calls: string[] = [];
+  const runOpts: any[] = [];
   let i = 0;
   return {
-    run: async (cmd: string) => {
+    run: async (cmd: string, opts?: any) => {
       calls.push(cmd);
+      runOpts.push(opts);
       const entry = script[i];
       i++;
       if (entry && (cmd === entry.match || (entry.match.includes("*") && cmd.startsWith(entry.match.replace("*", ""))))) {
@@ -71,6 +75,7 @@ function mkRunner(script: Array<{ match: string; result: any }>): { run: (cmd: s
       return { code: 0, stdout: "", stderr: "" };
     },
     calls,
+    runOpts,
   };
 }
 function mkPaneSeams(overrides: Partial<{
@@ -128,6 +133,15 @@ function warnings(): string[] {
 function markerOf(sentLine: string): string {
   const script = /-File "([^"]+)"/.exec(sentLine)?.[1] ?? "";
   return join(dirname(script), "exit.code");
+}
+/** The env the run was handed, parsed out of its script into pairs. */
+function envOf(scriptPath: string): Record<string, string> {
+  const env: Record<string, string> = {};
+  for (const line of readFileSync(scriptPath, "utf-8").split("\n")) {
+    const m = /^\$env:([A-Za-z_][A-Za-z0-9_]*)\s*=\s*'(.*)'\s*$/.exec(line);
+    if (m) env[m[1]] = m[2].replace(/''/g, "'");
+  }
+  return env;
 }
 /** Finish a started run the way the supervisor would. */
 function finishRun(pane: any, code: number): void {
@@ -234,7 +248,9 @@ function mkMonitor(): { pi: any; repo: string; starts: number[]; pane: any } {
     check("T3: DX update prompt shown", ctx._prompts.some((p) => p.includes("update all DevExpress")), ctx._prompts.join(" | "));
     check("T3: all DX pins rewritten, non-DX untouched", after.includes('DevExpress.ExpressApp" Version="26.1.4"') && after.includes('DevExpress.Xpo" Version="26.1.4"') && after.includes('Xpand.Collections" Version="1.0.4"'), after);
     check("T3: build pane opened once", pane.opened.length === 1, JSON.stringify(pane.opened));
-    check("T3: the pane got the supervisor script, not a bare command", pane.sent.length === 1 && /-File ".*run\.ps1"$/.test(pane.sent[0]) && readFileSync(join(dirname(markerOf(pane.sent[0])), "run.ps1"), "utf-8").includes("brx"), JSON.stringify(pane.sent));
+    const scriptPath = join(dirname(markerOf(pane.sent[0])), "run.ps1");
+    check("T3: the pane got the supervisor script, not a bare command", pane.sent.length === 1 && /-File ".*run\.ps1"$/.test(pane.sent[0]) && readFileSync(scriptPath, "utf-8").includes("brx"), JSON.stringify(pane.sent));
+    check("T54: the run is handed the profile's build env", envOf(scriptPath).MSBuildWarningsAsMessages === "MSB3026", JSON.stringify(envOf(scriptPath)));
     check("T3: the command returned on a STARTED build, nothing published yet", result.includes("Build started in pane") && !runner.calls.includes("prx"), result + " | " + runner.calls.join(" | "));
     check("T3: build.ps1 version bumped with DX", readFileSync(join(repo, "build.ps1"), "utf-8").includes('-version "26.1.400.0"'), readFileSync(join(repo, "build.ps1"), "utf-8"));
     check("T3: started notice rides along without forcing a turn", steers.some((s) => s.content.includes("Build started in pane") && s.opts?.triggerTurn !== true) && ctx._notifies.some((n) => n.includes("Build started in pane")), JSON.stringify(steers));
@@ -245,6 +261,19 @@ function mkMonitor(): { pi: any; repo: string; starts: number[]; pane: any } {
     check("T3: commit message carries DX", runner.calls.some((c) => c.startsWith('git commit -m "Update DX to 26.1.4"')), runner.calls.join(" | "));
     check("T3: pane kept, close is conversational", pane.closed.length === 0 && !ctx._prompts.some((p) => p.includes("Close build pane")), JSON.stringify(pane.closed));
     check("T3: no failure warning on a green build", warnings().length === 0, JSON.stringify(steers));
+  }
+  // Section: T55 — the run template adds no policy of its own
+  {
+    const paths = runPaths("t55-no-env");
+    writeRunScript(paths, "brx", {});
+    check("T55: a run handed no env carries no assignment", Object.keys(envOf(paths.script)).length === 0, readFileSync(paths.script, "utf-8"));
+    let threw = "";
+    try {
+      writeRunScript(runPaths("t55-bad-env"), "brx", { "BAD NAME": "1" });
+    } catch (err) {
+      threw = err instanceof Error ? err.message : String(err);
+    }
+    check("T55: a malformed env name throws at write time", threw.includes("invalid env name"), threw);
   }
   // Section: T4 — DX already latest
   {
@@ -417,6 +446,8 @@ function mkMonitor(): { pi: any; repo: string; starts: number[]; pane: any } {
     const result = await pi._cmds.get("devexpress").handler([], ctx);
     check("T11: fallback note notified", ctx._notifies.some((n) => n.includes("building in-process")), ctx._notifies.join(" | "));
     check("T11: in-process brx ran", runner.calls.includes("brx"), runner.calls.join(" | "));
+    const brxOpts = runner.runOpts[runner.calls.indexOf("brx")] ?? {};
+    check("T56: the in-process run is handed the profile's build env", brxOpts.env?.MSBuildWarningsAsMessages === "MSB3026", JSON.stringify(runner.runOpts));
     check("T11: no pane sent, the start message says in-process", pane.sent.length === 0 && result.includes("Build started in-process"), JSON.stringify(pane.sent) + " " + result);
     await waitFor(() => ctx._notifies.some((n) => n.includes("published")));
     check("T11: the in-process run still reports its outcome", ctx._notifies.some((n) => n.includes("published")), ctx._notifies.join(" | "));

@@ -21,6 +21,13 @@ never tests `label === "eXpand"`.
 - `buildCmd` / `queueCmd` / `queueLabel` / `pushRemote` — RX: `brx`/`prx`,
   push null (`prx` already pushes). Expand: `bx lab`/`bx Release`, `px` /
   `px -Release`, push `lab` or `eXpand` then queue.
+- `buildEnv` — env the profile's own local runs start with; the run template
+  adds none, so a second profile cannot inherit it. RX:
+  `MSBuildWarningsAsMessages=MSB3026`, because the shared `bin` folder makes
+  parallel workers collide on the same DLL and only the copy-retry NOTICE
+  would fail the `-WarnAsError` build (a genuine failure still errors).
+  Expand: unset. Local runs only: the pipeline never executes that script,
+  and it reaches the same `Compile` task with `-WarnAsError` on purpose.
 - `chain` — RX 23 → 72 (assert nugets) → 89. Expand Lab 94 / Release 39
   → 38 (nugets) → 37. Def 32 is `_Xpand-Lab`, a 2023 leftover; `px` queues 94.
 - `versionFile` — RX `src/Common/AssemblyInfoVersion.cs`. Expand

@@ -24,6 +24,10 @@ export interface RunResult {
 export interface RunOpts {
   cwd?: string;
   timeoutMs?: number;
+  /** Extra variables for the spawned process, merged over the inherited
+   *  environment. The build hands the profile's `buildEnv` here, so a no-pane
+   *  run starts with what a pane run starts with. */
+  env?: Record<string, string>;
   /** Run pwsh without the user profile and without a prompt. The VM probe sets
    *  it: what the profile loads must never decide whether a probe answers (a
    *  profile stall is what killed the probe in the incident). */
@@ -59,8 +63,8 @@ export function sleep(ms: number): Promise<void> {
 }
 
 /** Spawn an argv array and capture stdout/stderr (bounded, timeout-killed). */
-export async function runArgv(argv: string[], timeoutMs: number, cwd?: string): Promise<RunResult> {
-  const child = spawn(argv[0], argv.slice(1), { cwd, windowsHide: true });
+export async function runArgv(argv: string[], timeoutMs: number, cwd?: string, env?: Record<string, string>): Promise<RunResult> {
+  const child = spawn(argv[0], argv.slice(1), { cwd, env: { ...process.env, ...env }, windowsHide: true });
   let stdout = "";
   let stderr = "";
   child.stdout.on("data", (d: Buffer) => {
@@ -84,7 +88,7 @@ export async function runProcess(cmd: string, opts: RunOpts = {}): Promise<RunRe
   const argv = opts.noProfile
     ? ["pwsh", "-NoProfile", "-NonInteractive", "-Command", cmd]
     : ["pwsh", "-Command", cmd];
-  return runArgv(argv, opts.timeoutMs ?? 60000, opts.cwd);
+  return runArgv(argv, opts.timeoutMs ?? 60000, opts.cwd, opts.env);
 }
 
 /** psmux CLI args with the socket-isolation seam (tests / parallel servers). */

@@ -4,6 +4,8 @@
  * Lifecycle: a per-run temp dir (`runPaths`) holding a supervisor script that
  * runs the build in a NESTED pwsh, so an `exit` inside the build cannot skip
  * the exit-code write, and drops that code into the run's transient marker.
+ * The env the script starts with is the caller's: this module owns no build
+ * policy, the profile does.
  *
  * Watch: /devexpress hands the pane the supervisor line and returns; this
  * module then watches the run out of band, reading its signals in this order:
@@ -70,12 +72,26 @@ export function runPaths(runId: string): RunPaths {
   return { runId, dir, script: path.join(dir, "run.ps1"), marker: path.join(dir, "exit.code") };
 }
 
+/** One `$env:NAME = 'value'` assignment per entry, so the nested pwsh inherits
+ *  what the caller asked for. A malformed name is a loud error: a silently
+ *  broken script would fail the build far from here. */
+function envLines(env: Record<string, string>): string[] {
+  return Object.entries(env).map(([name, value]) => {
+    if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(name)) throw new Error(`invalid env name for the run: ${name}`);
+    return `$env:${name} = '${value.replace(/'/g, "''")}'`;
+  });
+}
+
 /** The supervisor the pane runs. The build goes into a NESTED pwsh, so an
- *  `exit` (or a crash) inside the build cannot skip the marker write. */
-export function supervisorScript(buildCmd: string, marker: string): string {
+ *  `exit` (or a crash) inside the build cannot skip the marker write. The env
+ *  it starts with is the caller's (the profile's build data), never this
+ *  module's: a repo-specific MSBuild property here would leak into every
+ *  profile that shares the pane. */
+export function supervisorScript(buildCmd: string, marker: string, env: Record<string, string> = {}): string {
   const quotedMarker = marker.replace(/'/g, "''");
   const quotedCmd = buildCmd.replace(/'/g, "''");
   return [
+    ...envLines(env),
     `$marker = '${quotedMarker}'`,
     "$code = 1",
     "try {",
@@ -96,9 +112,9 @@ export function trackedWrite(file: string, data: string): void {
 }
 
 /** Write a run's supervisor script; returns the same paths for chaining. */
-export function writeRunScript(paths: RunPaths, buildCmd: string): RunPaths {
+export function writeRunScript(paths: RunPaths, buildCmd: string, env: Record<string, string> = {}): RunPaths {
   fs.mkdirSync(paths.dir, { recursive: true });
-  trackedWrite(paths.script, supervisorScript(buildCmd, paths.marker));
+  trackedWrite(paths.script, supervisorScript(buildCmd, paths.marker, env));
   return paths;
 }
 
