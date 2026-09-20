@@ -2,10 +2,11 @@
  * reactive-xaf-build/build-tests — behavior contract for the /devexpress workflow.
  * Mock-pi harness with injected seams (fake command runner, feed fetcher, pane
  * seams, fixture props) — the real nuget.org, pwsh, psmux, VMs and git are
- * never touched. T1-T13 build/commit/publish/failure/abort/pane flows;
- * T14-T17 AzDO monitor + status; T18-T19 menu delegation; T20 fail-reason
- * extraction (wrapper noise filtered, real error delivered); T31-T40 the VM
- * contract (a failed probe stops the publish, a build pre-warms the agents).
+ *  never touched. T1-T13 build/commit/publish/failure/abort/pane flows;
+ *  T14-T17 AzDO monitor + status; T18-T19 menu delegation; T20 fail-reason
+ *  extraction (wrapper noise filtered, real error delivered); T31-T47 the VM
+ *  contract (a failed probe stops the publish and never the commit, a build
+ *  pre-warms the agents); T48-T53 the commit summary and the pre-push check.
  * Run: npx tsx C:/Work/Reactive.XAF/.pi/extensions/reactive-xaf-build/build-tests.ts
  */
 /* oxlint-disable no-console -- test harness prints PASS/FAIL to stdout */
@@ -143,9 +144,11 @@ async function waitFor(cond: () => boolean, ms = 4000): Promise<boolean> {
 function mkFetch(versions: string[]): (url: string) => Promise<string> {
   return async (_url: string) => JSON.stringify({ versions });
 }
-function mkRepo(pins: Array<[string, string]>): string {
+/** The fixture repo. `marker` is the directory the picked profile's `detect`
+ *  looks for: the RX path by default, the eXpand path for the push cases. */
+function mkRepo(pins: Array<[string, string]>, marker = join("src", "Extensions")): string {
   const root = mkdtempSync(join(tmpdir(), "rxaf-build-"));
-  mkdirSync(join(root, "src", "Extensions"), { recursive: true });
+  mkdirSync(join(root, marker), { recursive: true });
   const lines = pins.map(([id, v]) => `    <PackageVersion Include="${id}" Version="${v}" />`);
   const props = "<Project>\n  <ItemGroup>\n" + lines.join("\n") + "\n  </ItemGroup>\n</Project>\n";
   writeFileSync(join(root, "Directory.Packages.props"), props);
@@ -159,6 +162,7 @@ function propsText(root: string): string {
  *  agents at all (2026-09-19 incident) — these fixtures are CRLF so the suite
  *  fails with it. VM_LF keeps the other shape a seam may hand back. */
 const VM_OFF = "C11=Off\r\nC12=Running\r\nC13=Running\r\nC14=Running\r\n";
+const VM_SAVED = "C11=Saved\r\nC12=Running\r\nC13=Running\r\nC14=Running\r\n";
 const VM_STARTING = "C11=Starting\r\nC12=Running\r\nC13=Running\r\nC14=Running\r\n";
 const VM_RUN = "C11=Running\r\nC12=Running\r\nC13=Running\r\nC14=Running\r\n";
 const VM_LF = "C11=Running\nC12=Running\nC13=Running\nC14=Running\n";
@@ -435,11 +439,14 @@ function mkMonitor(): { pi: any; repo: string; starts: number[]; pane: any } {
   // Section: T13 — a Starting VM is not Start-VM'd; the flow waits for it
   {
     const repo = mkRepo(DX_PINS);
+    // The order is the flow's: the probe is issued, the commit's own status read
+    // follows it before the probe's continuation starts the wait, and the poll
+    // lands last (the wait sleeps pollMs, the commit does not sleep at all).
     const runner = mkRunner([
       { match: VM_CHECK_PREFIX, result: { code: 0, stdout: VM_STARTING, stderr: "" } },
       { match: VM_CHECK_PREFIX, result: { code: 0, stdout: VM_STARTING, stderr: "" } },
-      { match: VM_CHECK_PREFIX, result: { code: 0, stdout: VM_RUN, stderr: "" } },
       { match: "git status --short", result: okResult("") },
+      { match: VM_CHECK_PREFIX, result: { code: 0, stdout: VM_RUN, stderr: "" } },
       { match: "prx", result: okResult() },
     ]);
     const pane = mkPaneSeams();
@@ -629,21 +636,26 @@ function mkMonitor(): { pi: any; repo: string; starts: number[]; pane: any } {
     await waitFor(() => warnings().some((w) => w.includes("no readable code")));
     check("T30: reported as a failure naming the raw marker", warnings().some((w) => w.includes("no readable code")), JSON.stringify(warnings()));
   }
-  // Section: T31 — an unreadable VM probe stops the publish before any commit
+  // Section: T31 — an unreadable VM probe stops the publish, never the commit
   {
     clearSteers();
     const repo = mkRepo(DX_PINS);
     const runner = mkRunner([
       { match: VM_CHECK_PREFIX, result: { code: 1, stdout: "", stderr: "Get-VM: Access is denied." } },
+      { match: "git status --short", result: { code: 0, stdout: " M src/x.cs\n", stderr: "" } },
       { match: VM_CHECK_PREFIX, result: { code: 1, stdout: "", stderr: "Get-VM: Access is denied." } },
+      { match: "git add -A", result: okResult() },
+      { match: "git commit -m *", result: okResult() },
     ]);
     const pi = mkPi();
     registerBuildCommand(pi, { run: runner.run, fetchFeed: mkFetch(["26.1.4"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1, ...mkPaneSeams() });
-    const ctx = mkCtx(["Publish", "RX-XAF", "Lab"], repo);
+    const ctx = mkCtx(["Publish", "RX-XAF", "Lab", "Commit"], repo);
     const result = await pi._cmds.get("devexpress").handler([], ctx);
     check("T31: the failed probe is retried once, then refused", runner.calls.filter((c) => c.startsWith("Get-VM")).length === 2, runner.calls.join(" | "));
-    check("T31: nothing committed or queued", !runner.calls.some((c) => c.startsWith("git") || c.includes("prx")), runner.calls.join(" | "));
+    check("T31: the commit ran without the gate", runner.calls.includes("git add -A") && runner.calls.some((c) => c.startsWith('git commit -m "Publish (1 files)"')), runner.calls.join(" | "));
+    check("T31: no queue from an unreadable VM layer", !runner.calls.some((c) => c.includes("prx")), runner.calls.join(" | "));
     check("T31: exit code and stderr reach the warning", warnings().some((w) => w.includes("Get-VM failed (exit 1)") && w.includes("Access is denied")), JSON.stringify(warnings()));
+    check("T31: the report commits first, then names the VM error", result.indexOf("committed: Publish") >= 0 && result.indexOf("committed: Publish") < result.indexOf("Get-VM failed (exit 1)"), result);
     check("T31: the summary says the publish stopped", result.includes("publish stopped"), result);
   }
   // Section: T32 — a probe that reported nothing is loud, never "already running"
@@ -658,7 +670,7 @@ function mkMonitor(): { pi: any; repo: string; starts: number[]; pane: any } {
     check("T32: every unseen agent named", msg.includes("did not report C11, C12, C13, C14"), msg);
     check("T32: the silent read is named as silent", msg.includes("no output on either stream"), msg);
     check("T32: no already-running claim", !msg.includes("already running"), msg);
-    check("T32: no commit, no queue", !runner.calls.some((c) => c.startsWith("git") || c.includes("prx")), runner.calls.join(" | "));
+    check("T32: no commit, no queue", !runner.calls.some((c) => c.startsWith("git add") || c.startsWith("git commit") || c.includes("prx")), runner.calls.join(" | "));
   }
   // Section: T33 — a partial probe names exactly the agent it missed
   {
@@ -689,10 +701,10 @@ function mkMonitor(): { pi: any; repo: string; starts: number[]; pane: any } {
     clearSteers();
     const repo = mkRepo(DX_PINS);
     const runner = mkRunner([
-      { match: VM_CHECK_PREFIX, result: okResult("C11=Saved\r\nC12=Running\r\nC13=Running\r\nC14=Running\r\n") },
+      { match: VM_CHECK_PREFIX, result: okResult(VM_SAVED) },
+      { match: "git status --short", result: okResult("") },
       { match: "Start-VM -Name C11", result: okResult() },
       { match: VM_CHECK_PREFIX, result: okResult(VM_RUN) },
-      { match: "git status --short", result: okResult("") },
       { match: "prx", result: okResult() },
     ]);
     const pi = mkPi();
@@ -798,7 +810,7 @@ function mkMonitor(): { pi: any; repo: string; starts: number[]; pane: any } {
     await pi._cmds.get("devexpress").handler([], mkCtx(["Publish", "RX-XAF", "Lab"], repo));
     const msg = warnings().join("\n");
     check("T40: the wait ends loudly", msg.includes("did not reach Running within 3 minutes"), msg || "(no warning)");
-    check("T40: still nothing committed or queued", !calls.some((c) => c.startsWith("git") || c.includes("prx")), calls.join(" | "));
+    check("T40: still nothing committed or queued", !calls.some((c) => c.startsWith("git add") || c.startsWith("git commit") || c.includes("prx")), calls.join(" | "));
   }
   // Section: T41 — a probe killed mid-list refuses instead of acting on part of a plan
   {
@@ -807,6 +819,7 @@ function mkMonitor(): { pi: any; repo: string; starts: number[]; pane: any } {
     const KILLED = "C11=Off\r\nC12=Running\r\n";
     const runner = mkRunner([
       { match: VM_CHECK_PREFIX, result: { code: 1, stdout: KILLED, stderr: "" } },
+      { match: "git status --short", result: okResult("") },
       { match: VM_CHECK_PREFIX, result: { code: 1, stdout: KILLED, stderr: "" } },
     ]);
     const pi = mkPi();
@@ -814,7 +827,7 @@ function mkMonitor(): { pi: any; repo: string; starts: number[]; pane: any } {
     await pi._cmds.get("devexpress").handler([], mkCtx(["Publish", "RX-XAF", "Lab"], repo));
     const msg = warnings().join("\n");
     check("T41: the kill is reported, not the truncated list", msg.includes("Get-VM failed (exit 1)"), msg || "(no warning)");
-    check("T41: no commit and no queue from a partial probe", !runner.calls.some((c) => c.startsWith("git") || c.includes("prx")), runner.calls.join(" | "));
+    check("T41: no commit and no queue from a partial probe", !runner.calls.some((c) => c.startsWith("git add") || c.startsWith("git commit") || c.includes("prx")), runner.calls.join(" | "));
   }
   // Section: T42 — a probe that answers the retry publishes, and asks for a profile-free pwsh
   {
@@ -861,7 +874,7 @@ function mkMonitor(): { pi: any; repo: string; starts: number[]; pane: any } {
     const msg = warnings().join("\n");
     check("T43: the silent read is probed twice before it refuses", calls.filter((c) => c.startsWith("Get-VM")).length === 2, calls.join(" | "));
     check("T43: the refusal names the agents and quotes the probe", msg.includes("did not report C11, C12, C13, C14") && msg.includes("The service cannot be started"), msg || "(no warning)");
-    check("T43: nothing committed or queued from a silent read", !calls.some((c) => c.startsWith("git") || c.includes("prx")), calls.join(" | "));
+    check("T43: nothing committed or queued from a silent read", !calls.some((c) => c.startsWith("git add") || c.startsWith("git commit") || c.includes("prx")), calls.join(" | "));
     check("T43: the summary says the publish stopped", result.includes("publish stopped"), result);
   }
   // Section: T44 — an empty read that answers the retry publishes
@@ -944,6 +957,125 @@ function mkMonitor(): { pi: any; repo: string; starts: number[]; pane: any } {
     registerBuildCommand(pi, { run: lfRead.run, fetchFeed: mkFetch(["26.1.4"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1, ...mkPaneSeams() });
     const result = await pi._cmds.get("devexpress").handler([], mkCtx(["Publish", "RX-XAF", "Lab", "Publish"], repo));
     check("T47: an LF read is still read as four agents and publishes", result.includes("published") && warnings().length === 0 && calls.filter((c) => c.startsWith("Get-VM")).length === 1, result + " | " + calls.join(" | "));
+  }
+  // Section: T48 — the agents boot while the commit prompt is open
+  {
+    clearSteers();
+    const repo = mkRepo(DX_PINS);
+    const runner = mkRunner([
+      { match: VM_CHECK_PREFIX, result: okResult(VM_SAVED) },
+      { match: "git status --short", result: { code: 0, stdout: " M src/x.cs\n", stderr: "" } },
+      { match: "Start-VM -Name C11", result: okResult() },
+      { match: "git add -A", result: okResult() },
+      { match: "git commit -m *", result: okResult() },
+      { match: VM_CHECK_PREFIX, result: okResult(VM_RUN) },
+      { match: "prx", result: okResult() },
+    ]);
+    const pi = mkPi();
+    registerBuildCommand(pi, { run: runner.run, fetchFeed: mkFetch(["26.1.4"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1, ...mkPaneSeams() });
+    const atPrompt: string[][] = [];
+    const ctx = mkCtx(["Publish", "RX-XAF", "Lab", "Commit", "Publish"], repo);
+    const select = ctx.ui.select;
+    ctx.ui.select = async (t: string, o: string[]) => {
+      if (t.includes("Commit with message")) atPrompt.push([...runner.calls]);
+      return select(t, o);
+    };
+    const result = await pi._cmds.get("devexpress").handler([], ctx);
+    const seen = atPrompt[0] ?? [];
+    check("T48: the probe and the start already ran at the prompt", seen.some((c) => c.startsWith("Start-VM")) && seen.some((c) => c.startsWith("Get-VM")), JSON.stringify(seen));
+    check("T48: the commit itself had not started", !seen.some((c) => c.startsWith("git add")), JSON.stringify(seen));
+    check("T48: the prompt carries counts and areas, never a path", ctx._prompts.some((p) => p.includes("1 file: 1 modified") && p.includes("areas: src") && !p.includes("src/x.cs")), ctx._prompts.join(" | "));
+    check("T48: committed after the answer, then published", runner.calls.includes("git add -A") && runner.calls.includes("prx") && result.includes("published"), result + " | " + runner.calls.join(" | "));
+  }
+  // Section: T49 — a dirty tree at the push is a prompt, not a silent push
+  {
+    clearSteers();
+    const repo = mkRepo(DX_PINS, join("Xpand", "Xpand.ExpressApp.Modules"));
+    const runner = mkRunner([
+      { match: VM_CHECK_PREFIX, result: okResult(VM_RUN) },
+      { match: "git status --short", result: okResult("") },
+      { match: "git status --short", result: { code: 0, stdout: " M Xpand/Xpand.Utils/Properties/XpandAssemblyInfo.cs\n", stderr: "" } },
+      { match: "git add -A", result: okResult() },
+      { match: "git commit -m *", result: okResult() },
+      { match: "git push lab HEAD:master", result: okResult() },
+      { match: "px", result: okResult() },
+    ]);
+    const pi = mkPi();
+    registerBuildCommand(pi, { run: runner.run, fetchFeed: mkFetch(["26.1.4"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1, ...mkPaneSeams() });
+    const ctx = mkCtx(["Publish", "eXpand", "Lab", "Publish", "Commit before push"], repo);
+    const result = await pi._cmds.get("devexpress").handler([], ctx);
+    const push = runner.calls.indexOf("git push lab HEAD:master");
+    const add = runner.calls.indexOf("git add -A");
+    check("T49: the dirty window is asked about, with a summary", ctx._prompts.some((p) => p.includes("Dirty working tree before pushing to lab") && p.includes("1 file: 1 modified") && p.includes("areas: Xpand/Xpand.Utils")), ctx._prompts.join(" | "));
+    check("T49: Commit before push commits first, then pushes", add >= 0 && push > add, runner.calls.join(" | "));
+    check("T49: the queue followed the push", runner.calls.includes("px") && result.includes("published"), result + " | " + runner.calls.join(" | "));
+  }
+  // Section: T50 — Push as is pushes the tree without committing it
+  {
+    clearSteers();
+    const repo = mkRepo(DX_PINS, join("Xpand", "Xpand.ExpressApp.Modules"));
+    const runner = mkRunner([
+      { match: VM_CHECK_PREFIX, result: okResult(VM_RUN) },
+      { match: "git status --short", result: okResult("") },
+      { match: "git status --short", result: { code: 0, stdout: " M build.ps1\n", stderr: "" } },
+      { match: "git push lab HEAD:master", result: okResult() },
+      { match: "px", result: okResult() },
+    ]);
+    const pi = mkPi();
+    registerBuildCommand(pi, { run: runner.run, fetchFeed: mkFetch(["26.1.4"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1, ...mkPaneSeams() });
+    const ctx = mkCtx(["Publish", "eXpand", "Lab", "Publish", "Push as is"], repo);
+    const result = await pi._cmds.get("devexpress").handler([], ctx);
+    check("T50: a top-level file reads as (root), never as a path", ctx._prompts.some((p) => p.includes("areas: (root) (1)") && !p.includes("build.ps1")), ctx._prompts.join(" | "));
+    check("T50: no commit from a Push as is answer", !runner.calls.some((c) => c.startsWith("git add") || c.startsWith("git commit")), runner.calls.join(" | "));
+    check("T50: pushed as it is and queued", runner.calls.includes("git push lab HEAD:master") && runner.calls.includes("px") && result.includes("published"), result + " | " + runner.calls.join(" | "));
+  }
+  // Section: T51 — Abort at the push stops before the push and the queue
+  {
+    clearSteers();
+    const repo = mkRepo(DX_PINS, join("Xpand", "Xpand.ExpressApp.Modules"));
+    const runner = mkRunner([
+      { match: VM_CHECK_PREFIX, result: okResult(VM_RUN) },
+      { match: "git status --short", result: okResult("") },
+      { match: "git status --short", result: { code: 0, stdout: " M src/x.cs\n", stderr: "" } },
+    ]);
+    const pi = mkPi();
+    registerBuildCommand(pi, { run: runner.run, fetchFeed: mkFetch(["26.1.4"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1, ...mkPaneSeams() });
+    const ctx = mkCtx(["Publish", "eXpand", "Lab", "Publish", "Abort"], repo);
+    const result = await pi._cmds.get("devexpress").handler([], ctx);
+    check("T51: no push and no queue after the abort", !runner.calls.some((c) => c.startsWith("git push") || c === "px"), runner.calls.join(" | "));
+    check("T51: the abort is named and the summary stopped", result.includes("push aborted") && result.includes("publish stopped"), result);
+    check("T51: a user abort is not a warning", warnings().length === 0, JSON.stringify(steers));
+  }
+  // Section: T52 — a status read that failed refuses instead of reading as clean
+  {
+    clearSteers();
+    const repo = mkRepo(DX_PINS);
+    const runner = mkRunner([
+      { match: VM_CHECK_PREFIX, result: okResult(VM_RUN) },
+      { match: "git status --short", result: { code: 1, stdout: "", stderr: "fatal: not a git repository" } },
+    ]);
+    const pi = mkPi();
+    registerBuildCommand(pi, { run: runner.run, fetchFeed: mkFetch(["26.1.4"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1, ...mkPaneSeams() });
+    const result = await pi._cmds.get("devexpress").handler([], mkCtx(["Publish", "RX-XAF", "Lab"], repo));
+    check("T52: the failed read is named, never read as clean", result.includes("git status failed (exit 1)") && result.includes("not a git repository"), result);
+    check("T52: nothing committed and nothing queued", !runner.calls.some((c) => c.startsWith("git add") || c.startsWith("git commit") || c.includes("prx")), runner.calls.join(" | "));
+    check("T52: the publish stopped", result.includes("publish stopped"), result);
+  }
+  // Section: T53 — aborting the commit drops the VM outcome with it
+  {
+    clearSteers();
+    const repo = mkRepo(DX_PINS);
+    const runner = mkRunner([
+      { match: VM_CHECK_PREFIX, result: okResult(VM_SAVED) },
+      { match: "git status --short", result: { code: 0, stdout: " M src/x.cs\n", stderr: "" } },
+      { match: "Start-VM -Name C11", result: okResult() },
+    ]);
+    const pi = mkPi();
+    registerBuildCommand(pi, { run: runner.run, fetchFeed: mkFetch(["26.1.4"]), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1, ...mkPaneSeams() });
+    const result = await pi._cmds.get("devexpress").handler([], mkCtx(["Publish", "RX-XAF", "Lab", "Abort"], repo));
+    check("T53: the abort stops before the commit and the queue", !runner.calls.some((c) => c.startsWith("git add") || c.includes("prx")) && result.includes("commit aborted"), result + " | " + runner.calls.join(" | "));
+    check("T53: the dropped VM outcome is not reported as waited for", !result.includes("starting Hyper-V agents"), result);
+    check("T53: the summary stopped without a warning", result.includes("publish stopped") && warnings().length === 0, result + " | " + JSON.stringify(steers));
   }
   console.log(`\n${ok} passed, ${fail} failed`);
   process.exit(fail > 0 ? 1 : 0);

@@ -1,20 +1,28 @@
 /**
- * reactive-xaf-build/publish — VMs, commit, optional git push, queue, watcher.
+ * reactive-xaf-build/publish — the VM layer and the phase order: commit,
+ * optional git push, queue, watcher.
  *
  * Called after a local build (or skip-build). Repo-specific queue/push
  * come from RepoProfile.
  *
  * The VM gate reads the agents through one classifier: a probe that failed, or
- * that did not name every agent, stops a publish instead of reading as "already
+ * that did not name every agent, stops a PUBLISH instead of reading as "already
  * running". Queueing a pipeline onto agents nothing started is the failure the
- * gate exists to prevent. `prewarmVms` boots what it can while the build runs.
+ * gate exists to prevent. `prewarmVms` boots what it can while the build runs,
+ * and the gate itself runs while the commit is decided: it can cost the queue,
+ * never the commit.
+ *
+ * The git half (the dirty read, the two commit prompts, the commit core) lives
+ * in gitphase.ts: the prompts and the shared core crossed the 400-line cap here.
  */
 
 import { sleep } from "./pane.js";
 import { startAzDoWatcher } from "./watcher.js";
 import { profileOf } from "./profile.js";
+import { commitMessage, commitPhase, pushDirtyPhase } from "./gitphase.js";
 import type { Choice } from "./profile.js";
 import type { BuildSeams } from "./build.js";
+import type { PushCheck } from "./gitphase.js";
 
 const VM_NAMES = ["C11", "C12", "C13", "C14"];
 const VM_CHECK_CMD = `Get-VM -Name C11,C12,C13,C14 | ForEach-Object { "$($_.Name)=$($_.State)" }`;
@@ -251,35 +259,6 @@ async function blindPrewarm(seams: BuildSeams, reason: string): Promise<PrewarmO
   };
 }
 
-async function commitPhase(ctx: any, seams: BuildSeams, repoRoot: string, dxChanged: boolean, latest: string, label = "Build fixes"): Promise<{ committed: boolean; failed: boolean; notes: string[] }> {
-  const notes: string[] = [];
-  const status = await seams.run("git status --short", { cwd: repoRoot, timeoutMs: 30000 });
-  const changed = status.stdout.split("\n").filter((l) => l.trim()).length;
-  if (changed === 0) {
-    notes.push("nothing to commit");
-    return { committed: true, failed: false, notes };
-  }
-  const msg = dxChanged ? `Update DX to ${latest}` : `${label} (${changed} files)`;
-  const pick = await ctx.ui.select(`Commit with message: "${msg}"?`, ["Commit", "Abort"]);
-  if (pick !== "Commit") {
-    notes.push("commit aborted");
-    return { committed: false, failed: false, notes };
-  }
-  const add = await seams.run("git add -A", { cwd: repoRoot, timeoutMs: 60000 });
-  if (add.code !== 0) {
-    notes.push(`git add failed: ${tail(add.stderr)}`);
-    return { committed: false, failed: true, notes };
-  }
-  const safeMsg = msg.replace(/"/g, "'");
-  const commit = await seams.run(`git commit -m "${safeMsg}"`, { cwd: repoRoot, timeoutMs: 60000 });
-  if (commit.code !== 0) {
-    notes.push(`git commit failed: ${tail(commit.stderr)}`);
-    return { committed: false, failed: true, notes };
-  }
-  notes.push(`committed: ${msg}`);
-  return { committed: true, failed: false, notes };
-}
-
 async function monitorPhase(pi: any, ctx: any, seams: BuildSeams, repo: string, choice: string): Promise<{ ok: boolean; failed: boolean; notes: string[] }> {
   const notes: string[] = [];
   await ctx.ui.notify("AzDO build queued — monitoring in background (toast on every check).", "info");
@@ -289,14 +268,19 @@ async function monitorPhase(pi: any, ctx: any, seams: BuildSeams, repo: string, 
   return { ok: true, failed: false, notes };
 }
 
-async function pushThenQueue(seams: BuildSeams, repoRoot: string, choice: Choice, notes: string[]): Promise<{ failed: boolean }> {
+async function pushThenQueue(
+  ctx: any, seams: BuildSeams, repoRoot: string, choice: Choice, dxChanged: boolean, latest: string,
+  label: string, notes: string[],
+): Promise<PushCheck> {
   const p = profileOf(seams);
   const remote = p.pushRemote(choice);
   if (remote) {
+    const pre = await pushDirtyPhase(ctx, seams, repoRoot, remote, (n) => commitMessage(label, dxChanged, latest, n), notes);
+    if (pre.failed || pre.aborted) return pre;
     const push = await seams.run(`git push ${remote} HEAD:master`, { cwd: repoRoot, timeoutMs: 120000 });
     if (push.code !== 0) {
       notes.push(`git push ${remote} failed: ${tail(push.stderr)}`);
-      return { failed: true };
+      return { failed: true, aborted: false };
     }
     notes.push(`pushed to ${remote}`);
   }
@@ -304,13 +288,16 @@ async function pushThenQueue(seams: BuildSeams, repoRoot: string, choice: Choice
   const res = await seams.run(queueCmd, { cwd: repoRoot, timeoutMs: 600000 });
   if (res.code !== 0) {
     notes.push(`${queueCmd} failed: ${tail(res.stderr)}`);
-    return { failed: true };
+    return { failed: true, aborted: false };
   }
   notes.push(`${queueCmd} done (exit ${res.code})`);
-  return { failed: false };
+  return { failed: false, aborted: false };
 }
 
-async function queuePhase(ctx: any, seams: BuildSeams, repoRoot: string, choice: string): Promise<{ failed: boolean; notes: string[] }> {
+async function queuePhase(
+  ctx: any, seams: BuildSeams, repoRoot: string, choice: string, dxChanged: boolean, latest: string,
+  label: string,
+): Promise<{ failed: boolean; aborted: boolean; notes: string[] }> {
   const notes: string[] = [];
   const p = profileOf(seams);
   const queueCmd = p.queueCmd(choice as Choice);
@@ -318,10 +305,10 @@ async function queuePhase(ctx: any, seams: BuildSeams, repoRoot: string, choice:
   const pick = await ctx.ui.select(`Publish: ${p.queueLabel(choice as Choice)}?`, ["Publish", "Abort"]);
   if (pick !== "Publish") {
     notes.push("publish aborted");
-    return { failed: false, notes };
+    return { failed: false, aborted: true, notes };
   }
-  const ran = await pushThenQueue(seams, repoRoot, choice as Choice, notes);
-  return { failed: ran.failed, notes };
+  const ran = await pushThenQueue(ctx, seams, repoRoot, choice as Choice, dxChanged, latest, label, notes);
+  return { failed: ran.failed, aborted: ran.aborted, notes };
 }
 
 export async function publishPhase(
@@ -329,16 +316,24 @@ export async function publishPhase(
   dxChanged: boolean, latest: string, skipBuild = false,
 ): Promise<{ ok: boolean; failed: boolean; notes: string[] }> {
   const notes: string[] = [];
-  await ctx.ui.notify("Checking Hyper-V agents C11-C14…", "info");
-  const vms = await ensureVmsRunning(seams);
-  notes.push(...vms.notes);
-  if (!vms.ok) return { ok: false, failed: true, notes };
-  await ctx.ui.notify("Committing build state…", "info");
-  const commit = await commitPhase(ctx, seams, repoRoot, dxChanged, latest, skipBuild ? "Publish" : "Build fixes");
+  const label = skipBuild ? "Publish" : "Build fixes";
+  // Both milestones in ONE notify: two of the same type back to back lose the
+  // first, and from here on the two run at the same time.
+  await ctx.ui.notify("Checking Hyper-V agents C11-C14…\nCommitting build state…", "info");
+  // The gate is STARTED, not awaited: the agents boot while the commit prompt is
+  // open. Its outcome is read after the commit, so a VM layer that cannot be read
+  // costs the queue, never the commit. The catch folds a throw into the same
+  // shape, so a dropped task (the commit aborted) never rejects unobserved.
+  const vms = ensureVmsRunning(seams).catch((err) => ({ ok: false, failed: true, notes: [reasonOf(err)] }));
+  const commit = await commitPhase(ctx, seams, repoRoot, dxChanged, latest, label);
   notes.push(...commit.notes);
   if (!commit.committed) return { ok: false, failed: commit.failed === true, notes };
-  const queue = await queuePhase(ctx, seams, repoRoot, choice);
+  const vm = await vms;
+  notes.push(...vm.notes);
+  if (!vm.ok) return { ok: false, failed: true, notes };
+  const queue = await queuePhase(ctx, seams, repoRoot, choice, dxChanged, latest, label);
   notes.push(...queue.notes);
+  if (queue.aborted) return { ok: false, failed: false, notes };
   if (queue.failed) return { ok: false, failed: true, notes };
   const monitor = await monitorPhase(pi, ctx, seams, repoRoot, choice);
   notes.push(...monitor.notes);

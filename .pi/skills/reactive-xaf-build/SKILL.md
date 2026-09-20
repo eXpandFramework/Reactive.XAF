@@ -47,17 +47,18 @@ Menu picks run in the INVOKING window. The eXpand pick uses
    band (marker, pane death, a 10-minute silence-plus-CPU-idle stall, a
    20-minute overrun) and reports. Nothing in the watch kills a build —
    `/devexpress` → "Abort build" is the only deliberate stop.
-5. **Publish** — `publishPhase` gates on the VM probe first: C11–C14 must
-   answer Running, `Off`/`Saved` are Start-VM'd, and anything unreadable,
-   missing or unstartable THROWS `VmProbeError` out of `planVms`, stopping the
-   publish before the commit with a warning steer. The probe runs profile-free
-   and is retried once (a nonzero exit, a thrown seam, or an exit-0 read that
-   named no agent); a refusal carries the probe's own output. The agents are
-   pre-warmed at build start
-   (`prewarmVms`): a readable probe starts what can start, an unreadable one
-   blind-starts C11-C14, and the build never fails over it (a `steerWatch`
-   warning, no model turn). Then commit, optional `git push`,
-   `profile.queueCmd`, AzDO watcher (`publish.ts`).
+5. **Publish** — `publishPhase` starts the VM probe and reads its outcome
+   AFTER the commit prompt: C11–C14 must answer Running, `Off`/`Saved` are
+   Start-VM'd, and anything unreadable, missing or unstartable THROWS
+   `VmProbeError` out of `planVms`, stopping the QUEUE with a warning steer —
+   a green build's commit stands either way. The probe runs profile-free and is
+   retried once (a nonzero exit, a thrown seam, or an exit-0 read that named no
+   agent); a refusal carries the probe's own output. The agents are pre-warmed
+   at build start (`prewarmVms`): a readable probe starts what can start, an
+   unreadable one blind-starts C11-C14, and the build never fails over it (a
+   `steerWatch` warning, no model turn). Then the commit step, the pre-push
+   dirty check on the profiles that push, `profile.queueCmd`, AzDO watcher
+   (`publish.ts`, `gitphase.ts`).
 
 ## Module map
 
@@ -66,7 +67,8 @@ Menu picks run in the INVOKING window. The eXpand pick uses
 | `index.ts` | — | Boot: registers the command (thin). |
 | `profile.ts` | `profile.md` | RepoProfile: RX default + expand. `profileByPick`, `resolveRepo`. |
 | `pins.ts` | `pins.md` | Expand-only RX package pin rewrite. |
-| `publish.ts` | `publish.md` | VMs, commit, queue, watcher start. |
+| `publish.ts` | `publish.md` | The VM layer and the phase order: commit, push, queue, watcher start. |
+| `gitphase.ts` | `publish.md` | The git half: dirty read + summary, both commit prompts, the commit core. |
 | `menu.ts` | `menu.md` | Command surface and composition root: owns the command, drives the engine. |
 | `build.ts` | `build.md` | Flow engine (DX, local build start, menu wiring). |
 | `run.ts` | `run.md` | Background build run: marker, pane death, stall/overrun, abort. |

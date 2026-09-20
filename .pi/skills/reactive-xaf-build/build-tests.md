@@ -41,7 +41,8 @@ Run: `npx tsx d:/Reactive.XAF/.pi/extensions/reactive-xaf-build/build-tests.ts`
   refused, the supervisor's real exit code survives an `exit`, and a green
   marker publishes.
 - T31-T47 — the VM probe contract: a probe that exits nonzero twice refuses
-  the publish before any commit and steers the exit code plus stderr (T31);
+  the QUEUE with the commit already standing, and steers the exit code plus
+  stderr (T31);
   a silent exit-0 read is probed twice, is named as silent instead of as an
   empty agent list, and still names all four agents (T32); a partial list names
   exactly the agent it missed (T33), and the killed-mid-list shape (nonzero
@@ -59,6 +60,15 @@ Run: `npx tsx d:/Reactive.XAF/.pi/extensions/reactive-xaf-build/build-tests.ts`
   `publish.md`; `VM_LF` keeps the bare-LF one): a CRLF read names every
   agent, probes once and publishes without a Start-VM (T45); a CRLF read that
   names C11 `Off` starts exactly C11 (T46); a bare-LF read still parses (T47).
+
+- T48-T53 — the commit summary and the pre-push check: the agents are already
+  booting when the commit prompt is answered, and the prompt carries counts and
+  areas, never a path (T48); a dirty tree at the push is asked about with that
+  summary, and "Commit before push" commits then pushes then queues (T49);
+  "Push as is" pushes the tree untouched (T50); "Abort" stops before the push
+  AND the queue and is named in the report without a warning (T51); a
+  `git status` that failed refuses instead of reading as clean (T52); aborting
+  the commit drops the VM outcome with it (T53).
 
 The watcher's own contract (toast per poll, terminal steer, give-up,
 replace) is pinned by `watcher-tests.ts`; the CRLF status/cancel parse
@@ -84,8 +94,8 @@ doc's CURRENT eight-rule list is the index below. The numbering this section
 carried earlier (a "rule 9", a "rule 10") is retired: the gate file holds
 eight rules, and the checks those lines named are rules 7 and 8 here.
 
-- rule 1 — every added block sits under a `// Section:` comment (T31-T44, and
-  the three CRLF sections);
+- rule 1 — every added block sits under a `// Section:` comment (T31-T44, the
+  three CRLF sections, and T48-T53);
 - rule 4 — every case drives the registered command handler through the
   mock-pi harness (`activate(pi)` / `registerBuildCommand`), no helper-only
   assertions; the CRLF cases are no exception — they run `/devexpress`
@@ -98,7 +108,8 @@ eight rules, and the checks those lines named are rules 7 and 8 here.
   fixture entries, no new assertions;
 - rule 7 — no assertion sits inside an iteration construct: the CRLF/LF
   choice is data (a fixture constant and a ternary), never a loop;
-- rule 8 — neither batch added an import, so the typebox-free import graph is
-  intact;
+- rule 8 — the T48-T53 batch added no import either (it extends `mkRepo` with
+  a marker argument and adds one VM fixture), so the typebox-free import graph
+  is intact;
 - rules 2, 3 and 5 — untouched: no `test()` wrapper pattern beside `check()`,
   no pi spawn, no process-boundary mock enters these cases.
