@@ -76,7 +76,7 @@ Menu picks run in the INVOKING window. The eXpand pick uses
 | `release.ts` | `release.md` | Release version bump (feed consultation). |
 | `watcher.ts` | `watcher.md` | Background AzDO chain watcher. |
 | `menu-tests.ts` | `menu-tests.md` | Skip-build contract, on pi's own runtime. |
-| `resolve.mjs` | `menu-tests.md` | Node hook: `.js`→`.ts` and the whitelisted `@pi/` floor, installed before any harness import. |
+| `resolve.mjs` | `resolve.md` | Node hook: `.js`→`.ts` and the whitelisted `@pi/` floor, installed before any harness import. |
 | `delegate-tests.ts` | `delegate-tests.md` | Dormant delegation helper plus the flow publishing locally. |
 | `build-tests.ts` | `build-tests.md` | Full flow. |
 | `release-tests.ts` | `release-tests.md` | build.ps1 version bump (Release feed consultation). |
