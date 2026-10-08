@@ -75,10 +75,11 @@ Menu picks run in the INVOKING window. The eXpand pick uses
 | `report.ts` | `report.md` | The flow's messages and the warn/steer pair. |
 | `release.ts` | `release.md` | Release version bump (feed consultation). |
 | `watcher.ts` | `watcher.md` | Background AzDO chain watcher. |
-| `menu-tests.ts` | `menu-tests.md` | Skip-build contract, on pi's own runtime. |
+| `real-host.ts` | — | Removed: each suite carries its own copy of the route. |
 | `resolve.mjs` | `resolve.md` | Node hook: `.js`→`.ts` and the whitelisted `@pi/` floor, installed before any harness import. |
+| `menu-tests.ts` | `menu-tests.md` | Skip-build contract, on pi's own runtime (per-suite route). |
+| `build-tests.ts` | `build-tests.md` | Full flow, on pi's own runtime through the wrapper. |
 | `delegate-tests.ts` | `delegate-tests.md` | Dormant delegation helper plus the flow publishing locally. |
-| `build-tests.ts` | `build-tests.md` | Full flow. |
 | `release-tests.ts` | `release-tests.md` | build.ps1 version bump (Release feed consultation). |
 | `watcher-tests.ts` | `watcher-tests.md` | Watcher W1–W18. |
 | `profile-tests.ts` | `profile-tests.md` | RepoProfile (RX vs expand). |
@@ -86,44 +87,27 @@ Menu picks run in the INVOKING window. The eXpand pick uses
 | `delegate.ts` | `delegate.md` | Dormant. |
 | `pane.ts` | `pane.md` | Pane seams: open, send, capture, close, probe, CPU sample. |
 
-Run: `npx tsx C:/Work/Reactive.XAF/.pi/extensions/reactive-xaf-build/{menu,build,watcher,azdo,profile,release,delegate}-tests.ts`
+Run: `npx tsx .pi/extensions/reactive-xaf-build/{menu,build,watcher,azdo,profile,release,delegate}-tests.ts`
 
 ## Test harness route (project tree)
 
-The suites drive the extension through pi's OWN loader and `ExtensionRunner`
-(pi-dev's `buildRealRunner`), never a hand-written fake pi. The harness lives
-in the home tree, unreachable by a relative import from this repo: copy
-`menu-tests.ts`; `menu-tests.md` has the shapes and the traps.
+Each suite carries the route itself, in the shape `menu-tests.ts` established
+(commit `93e1a4754`): `installRoute()` installs the resolver hook
+(`./resolve.mjs`), then `buildRealRunner({ cwd, ui, activate })` builds one host
+per case — so the command runs on pi's OWN `ExtensionRunner` with `activate`
+wired to the extension's own ports (`repoRoot`, `fetchFeed`, `pollMs`), and a
+case asserts on `handle.host` (`notices`, `errors`) or drives
+`handle.runCommand`.
 
-1. **Resolver first.** `./resolve.mjs` maps `.js`→`.ts` and resolves
-   `@pi/<name>/...` into the home extension tree, gated by the platform's
-   `shared-utilities.json`. Install it:
-   `await import(new URL("./resolve.mjs", import.meta.url).href)`.
-2. **Harness by dynamic import only.** A static import is linked before the
-   hook exists: hold `buildRealRunner` in a module-scope `let` and import every
-   `@pi/...` module from inside a function.
-3. **Import the seam-owning modules, never stub them.** The extension reads
-   `__steer` (llm-utils) and `__writeFileSync` (tracked-write) off globalThis;
-   a process-boundary stub is hard-blocked by the write gate.
-4. **`buildRealRunner({ activate, cwd, ui })`, one route only**: `activate`
-   wires the real modules, and the extension's own ports (runner, panes,
-   watcher, `repoRoot`, `fetchFeed`, `pollMs`) go INSIDE it — why not `entry:`,
-   which cannot inject ports. `cwd` is what the repo guard reads. **`ui.select`
-   answers the FIRST option**, so every case answers the prompts itself and
-   fails on a title it did not expect.
-5. **Assert on `handle.host`** (`notices`, `messages`, `prompts`, `errors`):
-   `runCommand` returns only a boolean, and a throwing handler is REPORTED, not
-   thrown — so every case asserts `errors` is empty. Dispose every handle;
-   clean fixture dirs in a `finally`.
-6. **Prove the boot**: `ensureBootProof("<ext>", entry)` in a straight-line
-   function body, asserted as `boot.ok` with
-   `JSON.stringify(boot).slice(0, 200)`. `entry` must be relative to
-   `<agentDir>/extensions` — the one base pi's `-e` and the proof's key both
-   join — and comes from the suite's own URL. Take the dir from pi-runner's
-   `resolveAgentDir()`; do NOT pass it to `ensureBootProof` (an explicit one
-   roots the ledger in the caller). Module scope is unreachable here (the
-   binding needs a dynamic import; top-level await is refused), so keep the call
-   clear of any branch, loop, `try` or short-circuit. In a `b:\Temp` island B0
-   is red (pi's spawn also loads `dependency-manager` from that base, which the
-   island's agent dir lacks) and green in the real tree — `menu-tests.md` has
-   the measurement. Budget it with `// test-timeout: 120000`.
+`./resolve.mjs` is installed first (the `.js`→`.ts` map and the `@pi/` name
+floor over `shared-utilities.json`), then the harness (`buildRealRunner`) is
+imported by name; the extension's `__steer` and `__writeFileSync` seams are the
+real modules' publications, never a stub. Nothing spawns, so a converted suite
+needs no boot proof and carries a module-scope `let` for nothing but
+`try`/`finally` cleanup. `entry:` stays the other harness route (a file rather
+than a factory) and `ui.select` answers the first option unless the case owns it
+— every case answers its own prompts and fails on one it did not map.
+`menu-tests.ts` is where the route comes from; its boot proof (`ensureBootProof`,
+asserted as `boot.ok`) is red in a `b:\Temp` island because pi's spawn there adds
+`dependency-manager` to its `-e` list from that base — `menu-tests.md` has the
+measurement.
