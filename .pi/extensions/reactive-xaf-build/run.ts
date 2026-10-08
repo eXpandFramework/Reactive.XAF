@@ -175,6 +175,13 @@ interface RunState {
   lastCpu: number | null;
   lastCpuAt: number;
   panePid: number | null;
+  /** The last real answer to "is the pane there?" — null until one arrives, so
+   *  a missing answer never reads as a dead pane. */
+  paneAlive: boolean | null;
+  /** A pane read in flight since this moment, or null when none is. */
+  paneReadAt: number | null;
+  /** A CPU sample in flight since this moment, or null when none is. */
+  cpuReadAt: number | null;
   lastProbeAt: number;
   lastCpuSampleAt: number;
   stalled: boolean;
@@ -225,7 +232,8 @@ export function startBuildRun(handle: BuildRunHandle, seams: BuildRunSeams, repo
   const now = Date.now();
   const state: RunState = {
     handle, timer: null, lastCapture: "", lastOutputAt: now, lastCpu: null, lastCpuAt: now,
-    panePid: null, lastProbeAt: 0, lastCpuSampleAt: 0, stalled: false, overran: false,
+    panePid: null, paneAlive: null, paneReadAt: null, cpuReadAt: null,
+    lastProbeAt: 0, lastCpuSampleAt: 0, stalled: false, overran: false,
     polling: false, stopped: false,
   };
   (globalThis as any)[RUN_KEY] = state;
@@ -256,53 +264,68 @@ export function readMarker(marker: string): number | null | undefined {
   return Number.isFinite(code) ? code : null;
 }
 
-async function captureTail(state: RunState, seams: BuildRunSeams): Promise<string> {
-  if (!seams.capture || !state.handle.pane) return "";
-  try { return await seams.capture(state.handle.pane); } catch { return ""; }
+/** How long a read may stay in flight before it is written off: three ticks'
+ *  worth, never under a quarter second. A written-off read has answered nothing,
+ *  and its late reply is ignored — the next tick asks again. */
+function readBudgetMs(cadence: RunCadence): number {
+  return Math.max(cadence.signalMs * 3, 250);
+}
+
+/** Ask the pane how it is WITHOUT waiting for the answer. The reply lands in
+ *  the run's state when it arrives, a read still in flight past its budget is
+ *  written off, and the next tick asks again. The tick itself never awaits a
+ *  seam: the exit marker, the signal the user is waiting for, must never queue
+ *  behind a pane that stopped answering. Nothing runs in parallel here — one
+ *  pane read is in flight at a time, and its answer is the only writer of
+ *  `paneAlive`, `panePid` and the capture clock. */
+function readPane(state: RunState, seams: BuildRunSeams, cadence: RunCadence): void {
+  const now = Date.now();
+  if (state.paneReadAt !== null && now - state.paneReadAt > readBudgetMs(cadence)) state.paneReadAt = null;
+  if (state.paneReadAt !== null) return;
+  if (!seams.probe || !state.handle.pane) return;
+  if (now - state.lastProbeAt < cadence.probeMs) return;
+  state.lastProbeAt = now;
+  state.paneReadAt = now;
+  void seams.probe(state.handle.pane)
+    .then(async (paneState) => {
+      state.paneReadAt = null;
+      state.paneAlive = paneState?.alive !== false;
+      state.panePid = paneState?.pid ?? state.panePid;
+      if (!state.paneAlive || !seams.capture) return;
+      const text = await seams.capture(state.handle.pane as string);
+      if (text.trim() !== state.lastCapture.trim()) {
+        state.lastCapture = text;
+        state.lastOutputAt = Date.now();
+      }
+    })
+    .catch(() => { state.paneReadAt = null; });
+}
+
+/** Sample the build host's CPU the same way: fired, never awaited. Output
+ *  silence plus a CPU clock that does not move is a hang; a quiet compile still
+ *  burns CPU, so it never reads as one. Without a sampler the stall rule falls
+ *  back to output silence alone. */
+function readCpu(state: RunState, seams: BuildRunSeams, cadence: RunCadence): void {
+  const now = Date.now();
+  if (!seams.sampleCpu || !state.panePid) return;
+  if (state.cpuReadAt !== null && now - state.cpuReadAt > readBudgetMs(cadence)) state.cpuReadAt = null;
+  if (state.cpuReadAt !== null) return;
+  if (now - state.lastCpuSampleAt < cadence.cpuMs) return;
+  state.lastCpuSampleAt = now;
+  state.cpuReadAt = now;
+  void seams.sampleCpu(state.panePid)
+    .then((cpu) => {
+      state.cpuReadAt = null;
+      if (cpu === null) return;
+      if (state.lastCpu !== null && cpu - state.lastCpu > 0.1) state.lastCpuAt = Date.now();
+      state.lastCpu = cpu;
+    })
+    .catch(() => { state.cpuReadAt = null; });
 }
 
 async function finish(state: RunState, report: RunReporter, event: RunEvent): Promise<void> {
   stopBuildRun();
   await report(event);
-}
-
-/** Probe the pane: true when it is gone and no marker has arrived. A live
- *  probe also refreshes the output clock from the captured pane text. */
-async function probeTick(state: RunState, seams: BuildRunSeams, cadence: RunCadence): Promise<boolean> {
-  const probe = seams.probe;
-  if (!probe || !state.handle.pane) return false;
-  const now = Date.now();
-  if (now - state.lastProbeAt < cadence.probeMs) return false;
-  state.lastProbeAt = now;
-  let paneState;
-  try { paneState = await probe(state.handle.pane); } catch { return false; }
-  state.panePid = paneState.pid ?? state.panePid;
-  if (!paneState.alive) return true;
-  if (!seams.capture) return false;
-  try {
-    const text = await seams.capture(state.handle.pane);
-    if (text.trim() !== state.lastCapture.trim()) {
-      state.lastCapture = text;
-      state.lastOutputAt = Date.now();
-    }
-  } catch { /* no pane output to read — the marker and the probe still speak */ }
-  return false;
-}
-
-/** Sample the build host's CPU. Output silence plus a CPU clock that does not
- *  move is a hang; a quiet compile still burns CPU, so it never reads as one.
- *  The sampler is optional: without it the stall rule falls back to output
- *  silence alone. */
-async function cpuTick(state: RunState, seams: BuildRunSeams, cadence: RunCadence): Promise<void> {
-  if (!seams.sampleCpu || !state.panePid) return;
-  const now = Date.now();
-  if (now - state.lastCpuSampleAt < cadence.cpuMs) return;
-  state.lastCpuSampleAt = now;
-  let cpu: number | null = null;
-  try { cpu = await seams.sampleCpu(state.panePid); } catch { cpu = null; }
-  if (cpu === null) return;
-  if (state.lastCpu !== null && cpu - state.lastCpu > 0.1) state.lastCpuAt = Date.now();
-  state.lastCpu = cpu;
 }
 
 /** The two report-only backstops, each fired at most once per run. */
@@ -325,16 +348,16 @@ async function pollRun(state: RunState, seams: BuildRunSeams, cadence: RunCadenc
   try {
     const code = readMarker(state.handle.marker);
     if (code !== undefined) {
-      const tail = await captureTail(state, seams);
       const note = code === null ? "the exit marker held no readable code" : undefined;
-      await finish(state, report, { kind: "done", code: code ?? -1, tail, note });
+      await finish(state, report, { kind: "done", code: code ?? -1, tail: state.lastCapture, note });
       return;
     }
-    if (await probeTick(state, seams, cadence)) {
-      await finish(state, report, { kind: "died", tail: await captureTail(state, seams) });
+    readPane(state, seams, cadence);
+    if (state.paneAlive === false) {
+      await finish(state, report, { kind: "died", tail: state.lastCapture });
       return;
     }
-    await cpuTick(state, seams, cadence);
+    readCpu(state, seams, cadence);
     backstopTick(state, cadence, report);
   } finally {
     state.polling = false;

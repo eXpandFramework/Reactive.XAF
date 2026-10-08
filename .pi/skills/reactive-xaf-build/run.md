@@ -74,6 +74,28 @@ that project fails as before.
 A stall or an overrun never kills the build. The only closer is the user's
 abort (`/devexpress` → "Abort build"), which closes the pane.
 
+## A seam that never answers
+
+The watch never waits for a seam. The exit marker is a local file read; the pane
+read (probe, then capture) and the CPU sample are FIRED, and their answers land
+in the run's state when they arrive — one read in flight at a time, never a
+race, never two of them in parallel. A read still in flight past
+`readBudgetMs(cadence)` (three ticks' worth, never under a quarter second) is
+written off and a later tick asks again, so a pane that stopped answering costs
+the pane-death and stall backstops their freshness and nothing else: the marker
+is still read on every tick.
+
+Before this, the tick awaited each seam and marked itself busy first, so ONE
+promise that never settled stopped every later tick at the guard — the marker sat
+unread, the outcome was never reported (no toast, no steer), and the next build
+was refused as "already running", which is return-only and therefore invisible.
+A missing answer never reads as a dead pane: death is declared only by a real
+negative answer. The report chain needs no bound of its own: `finish()` calls
+`stopBuildRun()` before it awaits the report, so a hung report leaves a STOPPED
+run rather than a wedged one. `build-tests.ts`'s T57 pins the whole thing: with
+the sampler, the pane capture and the pane probe all answering long past the
+budget, the build's outcome still lands.
+
 ## Cadence (`RUN_CADENCE`)
 
 | Key | Default | Job |

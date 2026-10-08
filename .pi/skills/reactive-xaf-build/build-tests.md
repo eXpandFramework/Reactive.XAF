@@ -121,6 +121,9 @@ the bare-LF shape a seam may hand back.
 - T54-T56 — the run's build env: `profile.buildEnv` owns it, the template in
   `run.ts` adds no policy of its own, and the no-pane fallback is handed the same
   env through `RunOpts.env` on the command runner.
+- T57 — a read that never answers cannot wedge the watch: with the CPU sampler,
+  the pane capture and the pane probe all answering long past the tick's budget,
+  the build's outcome still lands and the run stops (`run.md` has the design).
 
 The watcher's own contract (toast per poll, terminal steer, give-up, replace) is
 pinned by `watcher-tests.ts`; the CRLF status/cancel parse contract by

@@ -1531,6 +1531,46 @@ async function caseT53(): Promise<void> {
   noErrors(handle, "T53");
 }
 
+// Section: T57 — an unanswered seam cannot wedge the watch. The tick marks
+// itself busy before its first await and clears it in a `finally`: one seam
+// that never settles left the marker unread for good, the run active and every
+// later build refused. The three advisory seams get a bound; the marker read is
+// a local file read and never waits on them.
+async function caseT57(): Promise<void> {
+  stopBuildRun();
+  const repo = mkRepo(DX_PINS);
+  const pane = mkPaneSeams();
+  const runner = mkRunner(GREEN_PUBLISH);
+  // Seams that answer long after the tick's budget: for the tick that is no
+  // answer at all, and the answer is still a plain delay, not a promise built
+  // by hand.
+  const lateAlive = async (): Promise<{ alive: boolean; pid?: number }> => {
+    await sleep(5000);
+    return { alive: true, pid: 4242 };
+  };
+  const lateText = async (): Promise<string> => {
+    await sleep(5000);
+    return "";
+  };
+  const lateCpu = async (): Promise<number> => {
+    await sleep(5000);
+    return 1;
+  };
+  const seams = buildSeams(repo, runner, pane, ["26.1.4"]);
+  seams.sampleCpu = lateCpu;
+  seams.capturePane = lateText;
+  seams.probePane = lateAlive;
+  const sel = uiFor({ ...RX_LAB, [DX_PROMPT]: "Skip", [PUBLISH_PROMPT]: "Publish" });
+  const handle = await menuHandle(repo, seams, sel.ui);
+  await handle.runCommand("devexpress", "");
+  finishRun(pane, 0);
+  const done = await waitFor(() => noticesOf(handle).some((n) => n.includes("published")), 3000);
+  check("T57: an unanswered sampler, capture and probe cannot wedge the watch", done && !isBuildRunActive(), `active=${isBuildRunActive()} | ` + noticesOf(handle).join(" | "));
+  stopBuildRun();
+  answered(sel, "T57");
+  noErrors(handle, "T57");
+}
+
 /** The contract, in the order it runs: T9's repo is fresh per case, so a case
  *  that "continues" an earlier one builds its own clean tree. */
 const CASES: Array<[string, () => Promise<void>]> = [
@@ -1588,6 +1628,7 @@ const CASES: Array<[string, () => Promise<void>]> = [
   ["T51", caseT51],
   ["T52", caseT52],
   ["T53", caseT53],
+  ["T57", caseT57],
 ];
 
 /** One case's failure is reported and counted, never a crash that hides the
