@@ -6,14 +6,31 @@ description: Behavior contract for the AzDO chain watcher — toast per poll, ch
 # watcher-tests.ts — watcher behavior contract
 
 Companion of `.pi/extensions/reactive-xaf-build/watcher-tests.ts`. Drives the
-Publish menu item (the retired `/devexpress publish lab|release` args) with a
-mock pi, through per-suite pick lists (`PUBLISH_PICKS`,
-`PUBLISH_RELEASE_PICKS`, `PUBLISH_EXPAND_PICKS`); the flow starts the REAL
-watcher through an injected 20 ms interval seam. Fake run seam serves CRLF
-STATUS= fixtures per chain step. `mkSeams` copies the poll queue so a
-shared GREEN fixture is not emptied across tests.
+Publish menu item through pi's OWN runtime — the resolver-first route this file
+carries itself, in the shape `menu-tests.ts` established — with the extension's
+OWN ports injected: the command runner, the feed fetcher, `ghFetch` and a fast
+`startAzDoWatcher` seam (20 ms interval).
 
-Run: `npx tsx d:/Reactive.XAF/.pi/extensions/reactive-xaf-build/watcher-tests.ts`
+The hand-written pi this suite used to build (`mkPi` plus a `mkCtx` answering
+from per-case pick lists) is GONE: there is no stand-in for pi here, and the
+`PUBLISH_PICKS` / `PUBLISH_RELEASE_PICKS` / `PUBLISH_EXPAND_PICKS` queues went
+with it. The picks are now keyed by a SUBSTRING of each prompt's title
+(`PUBLISH_LAB`, `PUBLISH_RELEASE`, `PUBLISH_EXPAND`), a prompt the case did not
+map fails the case, and the retired `["publish", "lab"]` / `["publish",
+"release"]` word forms are inert — every case opens the menu the way the user
+does, which `build-tests.ts` pins. The run seam serves CRLF `STATUS=` fixtures
+per chain step, and `mkSeams` copies its poll queue so a shared `GREEN` fixture
+is not emptied across cases.
+
+watcher.ts delivers through `ctx.ui.notify` and
+`pi.sendUserMessage(msg, { deliverAs: "steer" })`, so a case asserts the toasts
+(`toastsOf` / `toastText`, over `host.notices` with the type) and the agent's
+messages (`steersOf`, over `host.messages` with `messageOptions` index-aligned).
+Nothing spawns: the real AzDO, GitHub, nuget.org and pwsh are never touched, and
+the cases that need a slower or faster chain inject their own `intervalMs` /
+`maxMs`.
+
+Run: `npx tsx .pi/extensions/reactive-xaf-build/watcher-tests.ts`
 
 ## Pinned behaviors
 
