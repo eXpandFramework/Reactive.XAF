@@ -75,10 +75,10 @@ Menu picks run in the INVOKING window. The eXpand pick uses
 | `report.ts` | `report.md` | The flow's messages and the warn/steer pair. |
 | `release.ts` | `release.md` | Release version bump (feed consultation). |
 | `watcher.ts` | `watcher.md` | Background AzDO chain watcher. |
-| `real-host.ts` | — | Removed: each suite carries its own copy of the route. |
+| `real-host.ts` | — | Never landed: the review reverted the shared wrapper, so each suite copies the route instead. |
 | `resolve.mjs` | `resolve.md` | Node hook: `.js`→`.ts` and the whitelisted `@pi/` floor, installed before any harness import. |
-| `menu-tests.ts` | `menu-tests.md` | Skip-build contract, on pi's own runtime (per-suite route). |
-| `build-tests.ts` | `build-tests.md` | Full flow, on pi's own runtime through the wrapper. |
+| `menu-tests.ts` | `menu-tests.md` | Skip-build contract; the route's origin shape, on the same per-suite copy. |
+| `build-tests.ts` | `build-tests.md` | Full flow, on its own copy of the route. |
 | `delegate-tests.ts` | `delegate-tests.md` | Dormant delegation helper plus the flow publishing locally. |
 | `release-tests.ts` | `release-tests.md` | build.ps1 version bump (Release feed consultation). |
 | `watcher-tests.ts` | `watcher-tests.md` | Watcher W1–W18. |
@@ -97,17 +97,18 @@ Each suite carries the route itself, in the shape `menu-tests.ts` established
 per case — so the command runs on pi's OWN `ExtensionRunner` with `activate`
 wired to the extension's own ports (`repoRoot`, `fetchFeed`, `pollMs`), and a
 case asserts on `handle.host` (`notices`, `errors`) or drives
-`handle.runCommand`.
+`handle.runCommand`. A suite keeps a module-scope `let` for the harness binding
+and disposes its hosts and temp dirs in a `finally`.
 
 `./resolve.mjs` is installed first (the `.js`→`.ts` map and the `@pi/` name
 floor over `shared-utilities.json`), then the harness (`buildRealRunner`) is
 imported by name; the extension's `__steer` and `__writeFileSync` seams are the
-real modules' publications, never a stub. Nothing spawns, so a converted suite
-needs no boot proof and carries a module-scope `let` for nothing but
-`try`/`finally` cleanup. `entry:` stays the other harness route (a file rather
-than a factory) and `ui.select` answers the first option unless the case owns it
-— every case answers its own prompts and fails on one it did not map.
-`menu-tests.ts` is where the route comes from; its boot proof (`ensureBootProof`,
-asserted as `boot.ok`) is red in a `b:\Temp` island because pi's spawn there adds
-`dependency-manager` to its `-e` list from that base — `menu-tests.md` has the
-measurement.
+real modules' publications, never a stub. The `ensureBootProof` proof that once
+lived in `menu-tests.ts` — asserted as `boot.ok` against the shared ledger, and
+red in a `b:\Temp` island because pi's spawn there pulled `dependency-manager`
+through its `-e` list — is gone with the last conversion, so no test file in
+this repo starts a pi and nothing spawns in any suite (`menu-tests.md` keeps the
+record of what that proof was and why it retired). `entry:` stays the other
+harness route (a file rather than a factory) and `ui.select` answers the first
+option unless the case owns it — every case answers its own prompts and fails on
+one it did not map.

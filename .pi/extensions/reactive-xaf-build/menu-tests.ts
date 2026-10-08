@@ -5,29 +5,32 @@
  * commit → prx → AzDO monitor) WITHOUT the DX feed check or the local brx
  * build, and a leftover argument never bypasses the menu.
  *
- * Runtime: pi's OWN loader and ExtensionRunner, through pi-dev's real-runner.
- * The extension is built from its real factory (`./index.ts`), which registers
- * the command through `./menu.ts`, and only the extension's own injectable
- * ports are wired in (command runner, pane machinery, AzDO watcher) — there is
- * no hand-written pi here. Assertions read the harness's host capture
- * (notices / errors); the harness answers ui.select with the FIRST option, so
- * every case answers the flow's prompts itself and fails on a prompt it never
- * expected.
+ * Runtime: pi's OWN loader and ExtensionRunner, through the resolver-first route
+ * this file carries itself — there is no hand-written pi here. The extension is
+ * built from its real factory (`./index.ts`), which registers the command
+ * through `./menu.ts`, and only the extension's own injectable ports are wired
+ * in (command runner, pane machinery, AzDO watcher). Assertions read the host
+ * capture (notices / errors); the harness answers ui.select with the FIRST
+ * option, so every case answers the flow's prompts itself and fails on a prompt
+ * it never mapped.
+ *
+ * This suite used to carry the shared ledger's boot proof (`ensureBootProof`,
+ * B0) — the one place a real pi was started. It is gone: nothing here spawns,
+ * and every case builds through pi's own loader in-process instead.
  *
  * The shared harness lives in the home tree, another drive this repo cannot
- * reach by a relative import: ./resolve.mjs installs the `@pi/` name floor
- * first and the harness modules are DYNAMIC imports after it (a static one is
- * linked before any hook exists). The real nuget.org, pwsh, psmux, VMs and git
- * are never touched.
+ * reach by a relative import: ./resolve.mjs installs the `@pi/` name floor first
+ * and the harness modules are DYNAMIC imports after it (a static one is linked
+ * before any hook exists). The real nuget.org, pwsh, psmux, VMs and git are
+ * never touched.
  *
  * Run: npx tsx .pi/extensions/reactive-xaf-build/menu-tests.ts
  */
-// test-timeout: 120000 — the shared ledger's real pi boot plus five runner builds
+// test-timeout: 120000 — five runner builds on pi's real runtime
 /* oxlint-disable no-console -- test harness prints PASS/FAIL to stdout */
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join, relative } from "node:path";
-import { fileURLToPath } from "node:url";
+import { join } from "node:path";
 import activate from "./index.js";
 import { registerBuildCommand } from "./menu.js";
 
@@ -51,27 +54,28 @@ function assert(desc: string, c: boolean, detail?: string): void {
   if (!c) throw new Error(desc + (detail ? ` — ${detail}` : ""));
 }
 
-/** The extension entry as the boot proof needs it: relative to
- *  `<agentDir>/extensions` — the one base pi's `-e` resolution and the proof's
- *  key both join against — with the agent dir taken from pi-runner's own
- *  resolver (the install, or the test island's PI_RUNNER_AGENT_DIR when one is
- *  set) so no absolute path is committed. The entry comes from this file's own
- *  location, which is what makes an island run prove the island's copy. The dir
- *  is NOT handed to ensureBootProof: an explicit one would root the ledger
- *  inside the runtime that asked, and the proof belongs in the install's
- *  pi-dev.db. */
-function bootEntry(resolveAgentDir: () => string): string {
-  return relative(join(resolveAgentDir(), "extensions"), fileURLToPath(new URL("./index.ts", import.meta.url)));
-}
-
-/** The harness's build function, filled in main() after the resolver install:
- *  its own types sit behind a bare `@pi/` specifier a plain-tsx process cannot
- *  resolve, and a static import would be linked before the hook exists. */
+/** The harness's build function, filled in by installRoute(): its types sit
+ *  behind a bare `@pi/` specifier a plain-tsx process cannot resolve, and a
+ *  static import would be linked BEFORE the resolver hook exists. */
 let buildRealRunner: (opts: {
   activate: (pi: any) => void;
   cwd?: string;
   ui?: Record<string, unknown>;
 }) => Promise<any>;
+
+/** The route, carried by this file rather than shared in a helper (the
+ *  per-suite copy the plan calls for): the resolver hook first, then the harness
+ *  and the seam-owning modules BY NAME — dynamic imports only, since a static
+ *  one is linked before the hook exists. The extension reads `__steer`
+ *  (llm-utils) and `__writeFileSync` (tracked-write) off globalThis, so the real
+ *  modules have to publish them — a stub would fabricate the observable a case
+ *  asserts. Nothing spawns: this suite reads no ledger boot proof. */
+async function installRoute(): Promise<void> {
+  await import(new URL("./resolve.mjs", import.meta.url).href);
+  buildRealRunner = (await import("@pi/pi-dev/real-runner.js")).buildRealRunner;
+  await import("@pi/pi-dev/llm-utils.js"); // publishes __steer
+  await import("@pi/pi-dev/tracked-write.js"); // publishes __writeFileSync
+}
 
 interface CommandSeams {
   run: (cmd: string) => Promise<any>;
@@ -180,7 +184,8 @@ interface CaseUi {
 /** The case's own ui.select override. A title the case did not map, or a
  *  mapped answer that is not one of the offered options, is RECORDED — the
  *  harness would otherwise answer it with the first option — and every case
- *  asserts the list is empty. */
+ *  asserts the list is empty. The LONGEST matching key wins, so a future title
+ *  that spells a menu key cannot be answered by it. */
 function uiFor(answers: Record<string, string>): CaseUi {
   const asks: string[] = [];
   const unexpected: string[] = [];
@@ -188,7 +193,8 @@ function uiFor(answers: Record<string, string>): CaseUi {
     ui: {
       select: async (title: string, options: string[]): Promise<string | undefined> => {
         asks.push(title);
-        const key = Object.keys(answers).find((k) => title.includes(k));
+        const matching = Object.keys(answers).filter((k) => title.includes(k));
+        const key = matching.sort((a, b) => b.length - a.length)[0];
         if (key === undefined) {
           unexpected.push(`unanswered prompt: ${title}`);
           return options?.[0];
@@ -353,40 +359,9 @@ async function caseS4(): Promise<void> {
   assertNoErrors(handle, "S4");
 }
 
-/** The route: the resolver hook first, then the harness and the seam-owning
- *  modules BY NAME — dynamic imports only, since a static one is linked before
- *  the hook exists. Hands back the boot proof, which shares the route. */
-async function installRoute(): Promise<(ext: string, entry: string) => any> {
-  await import(new URL("./resolve.mjs", import.meta.url).href);
-  buildRealRunner = (await import("@pi/pi-dev/real-runner.js")).buildRealRunner;
-  const { ensureBootProof } = await import("@pi/pi-dev/boot-proof.js");
-  await import("@pi/pi-dev/llm-utils.js"); // publishes __steer
-  await import("@pi/pi-dev/tracked-write.js"); // publishes __writeFileSync
-  return ensureBootProof;
-}
-
-/** The route's own evidence: the boot, which the in-process harness cannot
- *  cover, and the two seams the extension reads off globalThis. */
-async function routeEvidence(
-  ensureBootProof: (ext: string, entry: string) => any,
-): Promise<void> {
-  const { resolveAgentDir } = await import("@pi/pi-dev/pi-runner.js");
-  const entry = bootEntry(resolveAgentDir);
-  // Not at module scope on purpose, and it cannot be: the binding comes from a
-  // dynamic import that must follow the resolver install (a static `@pi/...`
-  // import is linked before any hook exists), and a module-level dynamic import
-  // is top-level await, which the write gate refuses. What the placement rule
-  // forbids is a proof something can SKIP: nothing above this call can.
-  // Section: boot — the shared ledger proves the extension's current sources boot
-  const boot = ensureBootProof("reactive-xaf-build", entry);
-  await test("B0: the extension's current sources boot (shared ledger)", () => {
-    assert(
-      "menu B0: the extension's sources boot under a real pi spawn (ledger)",
-      boot.ok,
-      JSON.stringify(boot).slice(0, 200),
-    );
-  });
-  // Section: the route itself — the process seams and the @pi name floor
+/** The route's own evidence: the two process seams and the @pi name floor. The
+ *  boot proof that used to sit here is gone — see the file header. */
+async function routeCases(): Promise<void> {
   await test("R1: the real modules publish the seams the extension reads", caseRouteSeams);
   await test("R2: the @pi floor refuses a name the platform does not share", caseResolverFloor);
 }
@@ -401,10 +376,9 @@ async function surfaceCases(): Promise<void> {
 }
 
 async function main(): Promise<void> {
-  // Section: the route — the resolver hook first, then the harness by name
-  const ensureBootProof = await installRoute();
+  await installRoute();
   console.log("reactive-xaf-build/menu-tests — pi's own runtime, no fake\n");
-  await routeEvidence(ensureBootProof);
+  await routeCases();
   await surfaceCases();
   console.log(`\n${passed + failed} total: ${passed} passed, ${failed} failed`);
   process.exitCode = failed > 0 ? 1 : 0;

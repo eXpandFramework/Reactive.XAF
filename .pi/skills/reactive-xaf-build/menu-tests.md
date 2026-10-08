@@ -1,6 +1,6 @@
 ---
 name: reactive-xaf-build/menu-tests
-description: Use when changing the /devexpress skip-build publish surface — Publish → RX-XAF | eXpand → Lab | Release, the inert leftover argument, and the "Publish (N files)" commit label — or when migrating another suite in this extension onto pi's real runtime.
+description: Use when changing the /devexpress skip-build publish surface — Publish → RX-XAF | eXpand → Lab | Release, the inert leftover argument, and the "Publish (N files)" commit label — or when converting another suite in this extension onto pi's real runtime.
 ---
 
 # menu-tests.ts — skip-build behavior contract
@@ -12,16 +12,19 @@ Run: `npx tsx .pi/extensions/reactive-xaf-build/menu-tests.ts`
 
 ## Harness (mock pi, injected seams)
 
-RETIRED in this migration, and replaced by the route below. The suite used to
-hand-build a pi object and fire the command through a couple of injected seams,
-which proved the fake and not the extension: nothing tied that object to pi's
-`ExtensionAPI`, and renaming a ctx field in pi could not have failed it. What it
-still injects is the extension's OWN ports, listed under "The route it drives".
+RETIRED, and replaced by the route below. The suite used to hand-build a pi
+object and fire the command through a couple of injected seams, which proved the
+fake and not the extension: nothing tied that object to pi's `ExtensionAPI`, and
+renaming a ctx field in pi could not have failed it. What it still injects is the
+extension's OWN ports, listed under "The route it drives".
 
 ## The route it drives
 
-pi's OWN loader and ExtensionRunner, through pi-dev's `buildRealRunner`:
-`activate` is the extension's real factory (`./index.ts` →
+pi's OWN loader and ExtensionRunner, through the resolver-first route this file
+carries itself (`installRoute()`): `./resolve.mjs` installs the `@pi/` name floor
+first, and the harness plus the seam-owning modules are DYNAMIC imports after it,
+since a static one is linked before the hook exists. `buildRealRunner({ activate
+})` builds the extension from its real factory (`./index.ts` →
 `registerBuildCommand` from `./menu.ts`), with the extension's own ports wired
 inside it — command runner, pane ports, AzDO watcher starter, `repoRoot`,
 `fetchFeed`, `pollMs`. Those are the extension's injectable seams, not a pi
@@ -41,15 +44,15 @@ Which module is which:
   it maps `.js` onto its `.ts` sibling and resolves `@pi/<name>/...` into the
   home pi tree, gated by the platform's `shared-utilities.json`. Every harness
   import is therefore DYNAMIC and comes after the install — `real-runner`,
-  `boot-proof`, `llm-utils` (publishes `__steer`), `tracked-write` (publishes
+  `llm-utils` (publishes `__steer`), `tracked-write` (publishes
   `__writeFileSync`). The extension reads those two globals at run time
   (`report.ts` steers, `run.ts`/`pins.ts` writes), so the seam is the real
   module's publication and never a stub.
 - `./menu.ts` — the surface under test (the composition root and the picks).
 - `./index.ts` — S0's subject: the real boot entry.
 
-The repo fixture is a temp dir with `src/Extensions` + a
-`Directory.Packages.props`, so the repo guard (`resolveRepo`) passes and no
+The repo fixture is a temp dir with `src/Extensions` +
+a `Directory.Packages.props`, so the repo guard (`resolveRepo`) passes and no
 command ever touches the real checkout. Assertions read the harness's host
 capture: `handle.host.notices` (the messages the flow showed the user) and
 `handle.host.errors`, which EVERY case asserts is empty — the runner reports a
@@ -57,8 +60,6 @@ throwing handler instead of throwing, so an error is otherwise a no-op.
 
 ## Contracts
 
-- **B0** — the extension's current sources boot, proven once per source key by
-  the shared boot ledger. The verdict JSON is the failure detail.
 - **R1** — the process seams the extension reads off globalThis are the real
   modules' publications.
 - **R2** — the `@pi` floor refuses a name the platform does not share: a
@@ -77,7 +78,8 @@ throwing handler instead of throwing, so an error is otherwise a no-op.
 
 ## What the harness cannot cover
 
-- the BOOT — B0's ledger call, a real spawned pi;
+- the BOOT — this suite no longer proves it (see below): every case builds
+  through pi's own loader in-process, with only the host stubbed;
 - pi's loader TS/alias path for a factory build: this suite imports the
   extension's modules into the test process, so it does not prove jiti loads
   them (the `entry:` route is what covers that, and it cannot inject ports);
@@ -86,50 +88,25 @@ throwing handler instead of throwing, so an error is otherwise a no-op.
 
 ## The boot proof
 
-`ensureBootProof("reactive-xaf-build", entry)` sits in `routeEvidence`'s
-straight-line body. It is NOT at module scope, and in a project tree it cannot
-be: the binding comes from a dynamic import that must follow the resolver
-install (a static `@pi/...` import is linked before any hook exists), and a
-module-level dynamic import is top-level await, which the same write gate
-refuses ("Top-level await: not supported by tsx/esbuild CJS output" — verified
-with a preflight against a probe file). What the placement rule actually
-forbids is a proof something can SKIP, and nothing above this call can: no
-branch, no loop, no `try`, no short-circuit.
-
-- The agent dir comes from pi-runner's own `resolveAgentDir()` — the install,
-  or the test island's `PI_RUNNER_AGENT_DIR` when one is set — so no absolute
-  path is committed. It is deliberately NOT handed to `ensureBootProof`: an
-  explicit one would root the ledger inside whatever runtime asked, and the
-  proof belongs in the install's `<agentDir>/extensions/pi-dev/pi-dev.db`, the
-  row every other converted suite shares.
-- `entry` is relative to `<agentDir>/extensions` — the one base pi's `-e`
-  resolution and the proof's key both join against — taken from this file's own
-  URL, which is what makes an island run prove the ISLAND's copy. Project paths
-  sit outside the agent dir, so they digest absolute: an island run and a
-  real-tree run file different keys and each pays one boot (one row per
-  extension is replaced, never duplicated).
-- `// test-timeout: 120000` covers that boot plus the five runner builds (the
-  runner's default budget is 30s; the island's per-file cap is 120s).
+Retired 2026-10-08 with the last suite conversion. What stood here was
+`ensureBootProof(ext, entry)` — the shared ledger's recorded proof that the
+extension's current sources boot under a real pi — with `bootEntry` and
+`resolveAgentDir` building the key and a `B0` case asserting `boot.ok`. It is
+GONE, and the `boot-proof.js` import with it: it was the one place in this repo
+where a test started a real pi. Every suite in this extension now builds through
+pi's own loader in-process, nothing spawns, and B0 has no subject left.
 
 ### The island limit (measured)
 
-B0 cannot pass inside the test gate's island, and the reason is in the
-platform's spawn rather than in this suite: `runPi` appends
-`dependency-manager/index.ts` to every spawn's `-e` list and resolves it
-against the same agent dir the entry uses. The island's root is `b:\Temp`; the
-install is on `C:`. Both available shapes fail, one requirement each:
-
-- passing the install as the agent dir puts the entry on another drive, where
-  `relative()` returns an absolute path that `join()` mangles, so the KEY fails
-  before any spawn: `ok:false, status:null`, which the gate read as a
-  load-shaped verdict (`LOAD-INCONCLUSIVE ... menu-tests.ts`);
-- letting the platform resolve builds the key and boots the island's copy, but
-  `<island>/agent/extensions/` carries only the gitignored home extensions, so
-  `dependency-manager` is a phantom path: pi exits 1 and B0 fails with
-  `status:1` — a counted failure, with the rest of the suite still executing
-  (`1 of 8 cases inside`).
-
-So this file is red in the island until the platform either accepts an absolute
-entry for a project tree or projects the always-loaded spawn deps into the
-island's agent dir. The real tree resolves the agent dir to the install and
-boots: measured 8,967 ms, recorded in the ledger with `status:0`.
+The limit recorded here retired with the proof. It was the platform's spawn, not
+this suite: `runPi` appends `dependency-manager/index.ts` to every spawn's `-e`
+list against the same agent dir the entry uses, and the island's root is
+`b:\Temp` while the install sits on `C:`. Passing the install as the agent dir
+put the entry on another drive, where `relative()` returned an absolute path
+that `join()` mangled, so the key failed before any spawn (`ok:false,
+status:null`); letting the platform resolve it booted the island's copy, whose
+`<island>/agent/extensions/` carries only the gitignored home extensions, so
+`dependency-manager` was a phantom path and pi exited 1 — B0 then failed with
+`status:1`, while the real tree resolved the agent dir to the install and booted
+(`status:0`, measured 8,967 ms). Without a spawn the suite is island-green as it
+stands and needs no exemption.
