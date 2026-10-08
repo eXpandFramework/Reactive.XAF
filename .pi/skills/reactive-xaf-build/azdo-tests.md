@@ -1,14 +1,23 @@
 ---
 name: reactive-xaf-build/azdo-tests
-description: Behavior contract for the AzDO status/cancel parse path — CRLF (pwsh-shaped) STATUS=/CANCEL= output must parse through the registered command.
+description: Behavior contract for the AzDO status/cancel parse path — CRLF (pwsh-shaped) STATUS=/CANCEL= output must parse through the registered command on pi's own runtime.
 ---
 
 # azdo-tests.ts — AzDO parse contract
 
-Companion of `.pi/extensions/reactive-xaf-build/azdo-tests.ts`. Pins the
-CRLF parse contract.
+Companion of `.pi/extensions/reactive-xaf-build/azdo-tests.ts`. Drives the two
+menu items ("Last build status", "Cancel AzDO build") through pi's OWN runtime —
+the resolver-first route this file carries itself, in the shape `menu-tests.ts`
+established — with the extension's OWN ports injected: the run seam answers each
+case's CRLF fixture, the feed fetcher is stubbed, and the picks are keyed by a
+substring of each prompt's title. The hand-written pi this suite used to build
+(`mkPi` plus a `mkCtx` answering from a pick list) is GONE.
 
-Run: `npx tsx d:/Reactive.XAF/.pi/extensions/reactive-xaf-build/azdo-tests.ts`
+`status.ts` reports through `ctx.ui.notify` and steers nothing, so a case asserts
+the toasts (`noticesOf`, over `handle.host.notices`) — pi discards a command
+handler's return value. The real AzDO API and pwsh are never touched.
+
+Run: `npx tsx .pi/extensions/reactive-xaf-build/azdo-tests.ts`
 
 ## Pinned behaviors
 
