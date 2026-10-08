@@ -53,12 +53,11 @@ let buildRealRunner: (opts: {
 
 /** The route, carried by this file rather than shared in a helper (the
  *  per-suite copy the plan calls for): the resolver hook first, then the harness
- *  and the seam-owning modules BY NAME. menu-tests.ts's installRoute is the same
- *  shape with one difference — it also imports boot-proof and hands that file's
- *  ledger proof back; this suite spawns nothing, so it does not. The extension
- *  reads `__steer` (llm-utils) and `__writeFileSync` (tracked-write) off
- *  globalThis, so the real modules have to publish them. Idempotent: the hook is
- *  a process-wide registration. */
+ *  and the seam-owning modules BY NAME — dynamic imports only, since a static
+ *  one is linked before the hook exists. The extension reads `__steer`
+ *  (llm-utils) and `__writeFileSync` (tracked-write) off globalThis, so the real
+ *  modules have to publish them; a stub would fabricate the observable a case
+ *  asserts. Idempotent: the hook is a process-wide registration. */
 async function installRoute(): Promise<void> {
   await import(new URL("./resolve.mjs", import.meta.url).href);
   buildRealRunner = (await import("@pi/pi-dev/real-runner.js")).buildRealRunner;
