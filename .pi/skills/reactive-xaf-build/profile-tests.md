@@ -25,8 +25,8 @@ The real nuget.org, pwsh, psmux and AzDO are never touched.
 Run: `npx tsx .pi/extensions/reactive-xaf-build/profile-tests.ts`
 
 - P0 — index still registers `/devexpress`.
-- P1 — RX detect rejects a foreign tree (zero commands; the refusal message is
-  return-only, so the behavior is what is pinned).
+- P1 — RX detect rejects a foreign tree (zero commands, and the refusal itself
+  is a warning toast now — pinned by `build-tests.ts` T2).
 - P2 — expandProfile: menu offers the Project pick, `bx lab` in the pane,
   `git push lab` then `px`, published.
 - P3 — expand status queries def 94; RX status still queries def 23.

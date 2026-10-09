@@ -81,8 +81,9 @@ consults a window.
 `createFlowRunners(pi, ctx, merged, cwd)` returns the two entries the command
 surface calls: `FlowRunner` (`runFlow(choice, skipBuild?, projectPick?)`) and
 `WatchStarter` (`startWatch(choice, projectPick?)`). Both resolve the profile
-and repo from the project pick (`seamsForPick`) and answer a loud "not inside
-the repo" message when the tree is missing.
+and repo from the project pick (`seamsForPick`); a missing tree answers "not
+inside the repo" through `refuse`, which toasts it as a warning and returns it —
+the return value alone used to leave the user staring at nothing.
 
 ## Skip-build variant
 

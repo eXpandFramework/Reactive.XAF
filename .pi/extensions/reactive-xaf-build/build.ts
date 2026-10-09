@@ -291,7 +291,7 @@ async function runBuildFlow(pi: any, ctx: any, seams: BuildSeams, choice: string
     }
     const running = activeBuildRun();
     if (running) {
-      return `${id} build is already running in pane ${running.pane ?? "the build host"} — stop it with /devexpress → "Abort build" first.`;
+      return refuse(ctx, `${id} build is already running in pane ${running.pane ?? "the build host"} — stop it with /devexpress → "Abort build" first.`);
     }
     const local = await runLocalBuild(ctx, seams, choice, repo, notes);
     await prewarmPhase(pi, seams, notes, id, choice);
@@ -323,6 +323,15 @@ function missingRepo(p: RepoProfile, cwd: string): string {
   return `${p.label} build: not inside the ${p.label} repo (cwd: ${cwd}) — no commands ran.`;
 }
 
+/** A pick that cannot run is a warning the user SEES. This refusal and the
+ *  running-build one below used to be return-only, so a wrong tree or a second
+ *  build produced nothing on screen at all: the message existed and nobody
+ *  could read it. */
+async function refuse(ctx: any, msg: string): Promise<string> {
+  await ctx.ui.notify(msg, "warning");
+  return msg;
+}
+
 /** Start the AzDO chain watcher for a build (menu item; picked like Build). */
 async function watchPhase(pi: any, ctx: any, seams: BuildSeams, repo: string, choice: string): Promise<string> {
   startAzDoWatcher(pi, ctx, seams, { followNugets: true, repoRoot: repo, choice: choice === "Release" ? "Release" : "Lab" });
@@ -336,12 +345,12 @@ export function createFlowRunners(
 ): { runFlow: FlowRunner; startWatch: WatchStarter } {
   const runFlow: FlowRunner = (choice: string, skipBuild = false, projectPick?: string) => {
     const { seams: s, repo } = seamsForPick(merged, projectPick, cwd);
-    if (!repo) return Promise.resolve(missingRepo(profileOf(s), cwd));
+    if (!repo) return refuse(ctx, missingRepo(profileOf(s), cwd));
     return runBuildFlow(pi, ctx, s, choice, repo, skipBuild);
   };
   const startWatch: WatchStarter = (choice: string, projectPick?: string) => {
     const { seams: s, repo } = seamsForPick(merged, projectPick, cwd);
-    if (!repo) return Promise.resolve(missingRepo(profileOf(s), cwd));
+    if (!repo) return refuse(ctx, missingRepo(profileOf(s), cwd));
     return watchPhase(pi, ctx, s, repo, choice);
   };
   return { runFlow, startWatch };

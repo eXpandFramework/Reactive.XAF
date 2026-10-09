@@ -88,7 +88,8 @@ is still read on every tick.
 Before this, the tick awaited each seam and marked itself busy first, so ONE
 promise that never settled stopped every later tick at the guard — the marker sat
 unread, the outcome was never reported (no toast, no steer), and the next build
-was refused as "already running", which is return-only and therefore invisible.
+was refused as "already running", which was return-only then and therefore
+invisible (it is a warning toast now, see `build.md`).
 A missing answer never reads as a dead pane: death is declared only by a real
 negative answer. The report chain needs no bound of its own: `finish()` calls
 `stopBuildRun()` before it awaits the report, so a hung report leaves a STOPPED

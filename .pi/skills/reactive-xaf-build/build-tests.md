@@ -56,16 +56,15 @@ flow's report is asserted where the user meets it: the summary is notified, so
 failure is the warning toast PLUS the steer that forces a turn; the started
 notice is a steer with no turn.
 
-Two refusals are return-only in the flow, so they carry no observable and are
-pinned by the behavior they protect, never by their text:
+Both refusals are DELIVERED now (2026-10-08): `build.ts` routes them through
+`refuse`, which toasts the message as a warning before returning it. They used to
+be return-only, so a wrong tree or a second build produced nothing on screen at
+all — the case pinned the behavior and could never pin the message.
 
-- the repo guard (`build.ts` `missingRepo`) — outside the repo zero commands run,
-  no pane opens and no run starts;
-- the second-build refusal (`runBuildFlow`) — no second pane opens and the first
-  run stays active.
-
-Deliver either message some day and the case should assert it; until then a dead
-string would be an assertion about nothing.
+- the repo guard (`build.ts` `missingRepo`) — T2 asserts the toast names the
+  tree, and that zero commands run, no pane opens and no run starts;
+- the second-build refusal (`runBuildFlow`) — T21 asserts the toast names the
+  running build, and that no second pane opens while the first run stays active.
 
 Every case also fails on a prompt it did not map, or on an answer that is not
 one of the offered options (`answered(sel, …)`) — that is what keeps a Build

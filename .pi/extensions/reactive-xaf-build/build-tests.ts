@@ -369,9 +369,9 @@ async function caseT1(): Promise<void> {
   noErrors(handle, "T1");
 }
 
-// Section: T2 — repo guard. The refusal itself is return-only (build.ts
-// missingRepo), so what is pinned here is the behavior it protects: outside the
-// repo nothing runs, nothing opens and no run starts.
+// Section: T2 — repo guard. The refusal is a warning toast now (`build.ts`
+// `missingRepo`, delivered through `refuse`), so the case pins BOTH halves: the
+// user is told, and outside the repo nothing runs, nothing opens and no run starts.
 async function caseT2(): Promise<void> {
   const runner = mkRunner([]);
   const pane = mkPaneSeams();
@@ -379,6 +379,7 @@ async function caseT2(): Promise<void> {
   const handle = await menuHandle(tmpdir(), { run: runner.run, fetchFeed: mkFetch(["26.1.3"]), ...pane }, sel.ui);
   await handle.runCommand("devexpress", "");
   check("loud error outside the repo, zero commands ran", runner.calls.length === 0 && pane.opened.length === 0 && !isBuildRunActive(), JSON.stringify({ calls: runner.calls, opened: pane.opened }));
+  check("T2: the refusal is a warning toast naming the tree", warningToasts(handle).some((n) => n.includes("not inside the Reactive.XAF repo")), warningToasts(handle).join(" | "));
   answered(sel, "T2");
   noErrors(handle, "T2");
 }
@@ -827,12 +828,13 @@ async function caseT21(): Promise<void> {
   await handle.runCommand("devexpress", "");
   check("T21: returned with the build still running", isBuildRunActive() && !runner.calls.includes("prx"), noticesOf(handle).join(" | "));
   check("T21: start notice rides along without a model turn", steersOf(handle).some((s) => s.content.includes("Build started in pane") && s.triggerTurn === false), JSON.stringify(steersOf(handle)));
-  // The refusal ("build is already running") is return-only; what a second
-  // build must not do is open a second pane or take the run over.
+  // The refusal ("build is already running") is a warning toast now; what a
+  // second build must not do is open a second pane or take the run over.
   const sel2 = uiFor({ ...RX_LAB, [DX_PROMPT]: "Skip" });
   const twice = await menuHandle(repo, buildSeams(repo, runner, pane, ["26.1.4"]), sel2.ui);
   await twice.runCommand("devexpress", "");
   check("T21: a second build is refused, no second pane", pane.opened.length === 1 && isBuildRunActive(), JSON.stringify(pane.opened));
+  check("T21: the refusal is a warning toast naming the running build", warningToasts(twice).some((n) => n.includes("already running")), warningToasts(twice).join(" | "));
   stopBuildRun();
   answered(sel, "T21");
   answered(sel2, "T21-second");
