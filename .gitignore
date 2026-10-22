@@ -650,3 +650,6 @@ GitUserEmail.json
 **/Xpand.XAF.ModelEditor.bat
 /src/Tests/Clipboard_data.txt
 /MyBlazorApp/
+
+# graphify's generated code graph: a build artifact, never source
+graphify-out/
