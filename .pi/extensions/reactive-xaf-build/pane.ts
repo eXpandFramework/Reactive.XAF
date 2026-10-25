@@ -2,11 +2,13 @@
  * reactive-xaf-build/pane — psmux pane machinery for the build step.
  *
  * The brx build runs in a NEW psmux pane split to the right of the invoking
- * window, and its output streams there live. This module owns the pane and the
- * machine it exposes: open a pane, send a command to it, capture its tail,
- * close it, and probe what the pane's process is doing (liveness, pid, CPU).
- * Everything about the RUN itself — its id, temp dir, supervisor script, exit
- * marker, TTL cleanup and the background watch — lives in `run.ts`.
+ * window, and its output streams there live — the invoking pane keeps the
+ * keyboard, because reading the build must never cost the user their cursor.
+ * This module owns the pane and the machine it exposes: open a pane, send a
+ * command to it, capture its tail, close it, and probe what the pane's process
+ * is doing (liveness, pid, CPU). Everything about the RUN itself — its id, temp
+ * dir, supervisor script, exit marker, TTL cleanup and the background watch —
+ * lives in `run.ts`.
  *
  * All seams are injectable (tests pass fakes via registerBuildCommand) — the
  * real psmux CLI is never touched by the test suite.
@@ -91,16 +93,26 @@ export async function runProcess(cmd: string, opts: RunOpts = {}): Promise<RunRe
   return runArgv(argv, opts.timeoutMs ?? 60000, opts.cwd, opts.env);
 }
 
-/** psmux CLI args with the socket-isolation seam (tests / parallel servers). */
-export function psmuxArgs(args: string[]): string[] {
+/** Apply the socket-isolation seam (tests / parallel servers) to a psmux argv.
+ *  `-L <socket>` goes directly AFTER the binary and never in front of it: the
+ *  caller spawns argv[0], so a leading `-L` is not an executable
+ *  (`spawn -L ENOENT`) and the seam only ever worked while the socket was
+ *  unset. Everything after the binary is untouched. */
+export function psmuxArgs(argv: string[]): string[] {
   const sock = process.env.PSMUX_SOCKET;
-  return sock ? ["-L", sock, ...args] : args;
+  if (!sock || argv.length === 0) return argv;
+  const [binary, ...rest] = argv;
+  return [binary, "-L", sock, ...rest];
 }
 
+/** Split a pane to the RIGHT of the caller and hand back its id. `-d` is the
+ *  whole point: a plain split makes the NEW pane active, so the user's next
+ *  keystroke would land in the build's output pane instead of their prompt. */
 export async function defaultOpenBuildPane(repo: string): Promise<string | null> {
   const self = process.env.TMUX_PANE;
   const target = self ? ["-t", self] : [];
-  const res = await runArgv(psmuxArgs(["psmux", "split-window", "-h", ...target, "-P", "-F", "#{pane_id}", "-c", repo.replace(/\\/g, "/")]), 15000);
+  const argv = ["psmux", "split-window", "-d", "-h", ...target, "-P", "-F", "#{pane_id}", "-c", repo.replace(/\\/g, "/")];
+  const res = await runArgv(psmuxArgs(argv), 15000);
   const id = res.stdout.trim().split("\n").pop() ?? "";
   return res.code === 0 && id ? id : null;
 }

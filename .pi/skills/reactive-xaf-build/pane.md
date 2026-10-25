@@ -1,6 +1,7 @@
 ---
 name: reactive-xaf-build/pane
 description: Use when working on the /devexpress build pane — pane identity, the pane seams (open, send, capture, close, probe, CPU sample), their psmux defaults, the process helpers, and why the blocking waiter is gone.
+drop-names: psmux split-window -h [-t self] -P -F "#{pane_id}" -c <repo>
 ---
 
 # pane.ts — build pane machinery
@@ -8,9 +9,11 @@ description: Use when working on the /devexpress build pane — pane identity, t
 Companion of `.pi/extensions/reactive-xaf-build/pane.ts`.
 
 The brx build runs in a NEW psmux pane split to the right of the invoking
-window, and its output streams there live. This module owns the pane and the
-machine the pane exposes: open it, send a command, capture the tail, close it,
-and probe what its process is doing. A green exit leaves the pane open for the
+window, and its output streams there live — the invoking pane keeps the
+keyboard, because reading the build must never cost the user their cursor.
+This module owns the pane and the machine the pane exposes: open it, send a
+command, capture the tail, close it, and probe what its process is doing. A
+green exit leaves the pane open for the
 user to close (`/devexpress` → "Close build pane"); a failed build keeps it,
 and `build.ts` falls back to an in-process run only when the pane cannot be
 opened at all — that fallback is handed the same build env as a pane run.
@@ -43,8 +46,12 @@ the test suite.
 
 ## Defaults
 
-- `defaultOpenBuildPane(repo)` — `psmux split-window -h [-t self] -P -F
-  "#{pane_id}" -c <repo>`; `-t self` is added when `TMUX_PANE` is set.
+- `defaultOpenBuildPane(repo)` — `psmux split-window -d -h [-t self] -P -F
+  "#{pane_id}" -c <repo>`; `-t self` is added when `TMUX_PANE` is set. `-d` is
+  the whole point: a plain split makes the NEW pane active, so the user's next
+  keystroke would land in the build's output pane instead of their prompt
+  (`pane-tests.ts` pins it on a real isolated server, with the plain form as the
+  control that proves the assertion can fail).
 - `defaultRunInPane(pane, cmd)` — `psmux send-keys -t <pane> <cmd> Enter`.
 - `defaultProbePane(pane)` — `psmux display-message -t <pane> -p
   "#{pane_dead} #{pane_pid}"`; a non-zero exit means the pane is gone, and a
@@ -70,8 +77,11 @@ the test suite.
   profile stall is what killed the probe in the incident). `RunOpts.env`
   carries extra variables into the child: the build's no-pane fallback hands
   the profile's `buildEnv` here, so it starts what a pane run starts.
-- `psmuxArgs(args)` — prepends `-L $PSMUX_SOCKET` when the env var is set
-  (socket isolation for tests and parallel servers).
+- `psmuxArgs(argv)` — inserts `-L $PSMUX_SOCKET` directly AFTER the binary when
+  the env var is set (socket isolation for tests and parallel servers), and
+  returns the argv untouched otherwise. The socket never leads: the caller
+  spawns `argv[0]`, so a leading `-L` is not an executable (`spawn -L ENOENT`) —
+  the shape that made the seam work only while the socket was unset.
 - `sleep(ms)` — promise-based delay, used by the dormant delegation helper.
 
 ## Gone
