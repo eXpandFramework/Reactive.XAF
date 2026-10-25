@@ -18,6 +18,7 @@ import {
   rxProfile, nugetAssertUrl, nugetOrgNuspecUrl, githubReleasesUrl, githubReleaseUrl, compareVersions,
 } from "./profile.js";
 import type { RepoProfile, Choice, ChainStep, GithubOnSuccess } from "./profile.js";
+import { emptyPoll, giveUp } from "./watcher-notice.js";
 
 function profileOf(seams: BuildSeams): RepoProfile {
   return seams.profile ?? rxProfile;
@@ -26,6 +27,10 @@ function profileOf(seams: BuildSeams): RepoProfile {
 export interface AzDoWatcherOptions {
   intervalMs?: number;
   maxMs?: number;
+  /** How long an all-empty chain keeps retrying before the watcher says there
+   *  is nothing to watch. Its own budget: the maxMs deadline belongs to a chain
+   *  that has a build in flight. */
+  emptyGraceMs?: number;
   followNugets?: boolean;
   choice?: "Lab" | "Release";
   ghToken?: string;
@@ -52,7 +57,7 @@ function chainFor(choice: Choice, seams: BuildSeams): ChainStep[] {
   return profileOf(seams).chain(choice);
 }
 
-interface WatcherState {
+export interface WatcherState {
   timer: ReturnType<typeof setInterval> | null;
   startedAt: number;
   step: number;
@@ -60,6 +65,10 @@ interface WatcherState {
   chainLength: number;
   minId: number;
   lastId: number | null;
+  /** When the first empty poll of this stretch happened, or null while the
+   *  chain has a build. Cleared the moment a build appears, so a later queue is
+   *  never judged by an old clock. */
+  emptySince: number | null;
   stopped: boolean;
   stop: () => void;
 }
@@ -80,11 +89,9 @@ export function isAzDoWatcherActive(): boolean {
   return !!state && !state.stopped;
 }
 
-async function giveUp(ctx: any, state: WatcherState, msg: string, pi?: any): Promise<void> {
-  await ctx.ui.notify(msg, "warning");
-  if (pi) pi.sendUserMessage(msg, { deliverAs: "steer" });
-  state.stop();
-}
+/* The give-up path, the empty-poll retry and the grace between them live in
+ * watcher-notice.ts (the 400-line cap): `giveUp` and `emptyPoll` are imported
+ * at the top of this module. */
 
 function terminalMessage(s: { id: number; result: string; reason: string }, definition: string): { msg: string; failed: boolean } {
   const failed = s.result === "failed";
@@ -297,11 +304,6 @@ async function checkDeadline(ctx: any, state: WatcherState, opts: AzDoWatcherOpt
   return true;
 }
 
-async function notifyEmptyPoll(ctx: any, state: WatcherState): Promise<void> {
-  const elapsed = Math.round((Date.now() - state.startedAt) / 60_000);
-  await ctx.ui.notify(`AzDO: no build found yet (${elapsed} min) — waiting…`, "info");
-}
-
 async function pollTick(state: WatcherState, pi: any, ctx: any, seams: BuildSeams, opts: AzDoWatcherOptions): Promise<void> {
   if (state.stopped) return;
   if (await checkDeadline(ctx, state, opts, pi)) return;
@@ -324,9 +326,10 @@ async function applyPoll(state: WatcherState, pi: any, ctx: any, seams: BuildSea
     return;
   }
   if (s.id === 0) {
-    await notifyEmptyPoll(ctx, state);
+    await emptyPoll(ctx, state, opts, pi);
     return;
   }
+  state.emptySince = null;
   if (["notStarted", "inProgress", "cancelling"].includes(s.status)) {
     const elapsed = Math.round((Date.now() - state.startedAt) / 60_000);
     state.lastId = s.id;
@@ -357,6 +360,7 @@ export function startAzDoWatcher(pi: any, ctx: any, seams: BuildSeams, opts: AzD
     chainLength: opts.followNugets ? chain.length : 1,
     minId: 0,
     lastId: null,
+    emptySince: null,
     stopped: false,
     stop: () => {
       if (state.stopped) return;

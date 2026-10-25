@@ -232,6 +232,11 @@ function mkSeams(statusQueue: string[]): { run: (cmd: string) => Promise<any>; c
 function fastWatcher(p: any, c: any, s: any, opts?: any): ReturnType<typeof startAzDoWatcher> {
   return startAzDoWatcher(p, c, s, { ...opts, intervalMs: 20, maxMs: 5000 });
 }
+/** The watcher with a test-sized empty-poll grace, so a real three-minute wait
+ *  never enters a run. */
+function graceWatcher(emptyGraceMs: number): (p: any, c: any, s: any, opts?: any) => ReturnType<typeof startAzDoWatcher> {
+  return (p: any, c: any, s: any, opts?: any) => startAzDoWatcher(p, c, s, { ...opts, intervalMs: 20, maxMs: 5000, emptyGraceMs });
+}
 function mkFetch(nugetVersions: string[]): (url: string) => Promise<string> {
   return async (url: string) => {
     if (url.includes("xpandnugetserver")) return JSON.stringify({ feed: oDataFeed(nugetVersions) });
@@ -582,6 +587,76 @@ async function caseW18(): Promise<void> {
   noErrors(w.handle, "W18");
 }
 
+// Section: W19 — empty polls have their own grace budget: inside it they retry,
+// past it the watcher says there is nothing to watch instead of reporting
+// "waiting…" until the two-hour deadline.
+async function caseW19(): Promise<void> {
+  const repo = mkRepo();
+  const seams = mkSeams(Array.from({ length: 40 }, () => empty()));
+  const w = await watcherHandle(repo, {
+    run: seams.run, fetchFeed: mkFetch(LAB), startAzDoWatcher: graceWatcher(60_000),
+  }, PUBLISH_LAB);
+  await w.handle.runCommand("devexpress", "");
+  await sleep(300);
+  const toasts = toastText(w.handle);
+  check(
+    "W19: empty polls inside the grace retry and never stop the watcher",
+    isAzDoWatcherActive() && toasts.some((n) => n.includes("no build found yet")) && !toasts.some((n) => n.includes("nothing to watch")),
+    JSON.stringify({ active: isAzDoWatcherActive(), toasts }),
+  );
+  check("W19: the retry does not steer", w.handle.host.messages.length === 0, JSON.stringify(w.handle.host.messages));
+  stopAzDoWatcher();
+  answered(w.sel, "W19");
+  noErrors(w.handle, "W19");
+}
+
+/** W20: past the grace the watcher admits it — a warning plus a steer naming the
+ *  real problem, and the watcher stops. */
+async function caseW20(): Promise<void> {
+  const repo = mkRepo();
+  const seams = mkSeams(Array.from({ length: 40 }, () => empty()));
+  const w = await watcherHandle(repo, {
+    run: seams.run, fetchFeed: mkFetch(LAB), startAzDoWatcher: graceWatcher(0),
+  }, PUBLISH_LAB);
+  await w.handle.runCommand("devexpress", "");
+  await sleep(200);
+  const warning = toastsOf(w.handle).filter((n: { type: string }) => n.type === "warning").map((n: { message: string }) => n.message);
+  const steers = w.handle.host.messages.map((m: any) => String(m?.content ?? m ?? ""));
+  check(
+    "W20: past the grace it stops with a warning naming the real problem",
+    !isAzDoWatcherActive() && warning.some((n: string) => n.includes("no build was queued")),
+    JSON.stringify({ active: isAzDoWatcherActive(), warning }),
+  );
+  check(
+    "W20: the agent is steered with the same truth",
+    steers.some((s: string) => s.includes("no build was queued") && s.includes("Build & Publish")),
+    JSON.stringify(steers),
+  );
+  answered(w.sel, "W20");
+  noErrors(w.handle, "W20");
+}
+
+/** W21: a build appearing inside the grace continues the chain — the clock is
+ *  cleared, nothing is given up. */
+async function caseW21(): Promise<void> {
+  const repo = mkRepo();
+  const seams = mkSeams([empty(), empty(), ...GREEN]);
+  const w = await watcherHandle(repo, {
+    run: seams.run, fetchFeed: mkFetch(LAB), ghFetch: mkGh(GH_DRAFT).gh, startAzDoWatcher: graceWatcher(60_000),
+  }, PUBLISH_LAB);
+  await w.handle.runCommand("devexpress", "");
+  await sleep(400);
+  const toasts = toastText(w.handle);
+  check(
+    "W21: a build inside the grace continues the chain",
+    toasts.some((n) => n.includes("chain complete")) && !toasts.some((n) => n.includes("nothing to watch")),
+    JSON.stringify(toasts),
+  );
+  check("W21: no give-up steer", w.handle.host.messages.length === 0, JSON.stringify(w.handle.host.messages));
+  answered(w.sel, "W21");
+  noErrors(w.handle, "W21");
+}
+
 /** The contract, in the order it runs. */
 const CASES: Array<[string, () => Promise<void>]> = [
   ["W1", caseW1],
@@ -602,6 +677,9 @@ const CASES: Array<[string, () => Promise<void>]> = [
   ["W16", caseW16],
   ["W17", caseW17],
   ["W18", caseW18],
+  ["W19", caseW19],
+  ["W20", caseW20],
+  ["W21", caseW21],
 ];
 
 /** One case's failure is reported and counted, never a crash that hides the
