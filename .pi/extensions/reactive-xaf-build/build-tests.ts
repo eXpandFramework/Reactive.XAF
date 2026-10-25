@@ -27,10 +27,11 @@
  * T31-T47 the VM contract (a failed probe stops the publish and never the
  * commit, a build pre-warms the agents); T48-T53 the commit summary and the
  * pre-push check; T54-T56 the run's build env (the profile owns it, the
- * template adds none, and the no-pane fallback is handed it too); BP1-BP6 the
+ * template adds none, and the no-pane fallback is handed it too); BP1-BP7 the
  * Build & Publish row (it builds only when the last green build no longer
  * covers the tree, then continues into the same publish — BP5 pins the
- * per-profile key, BP6 a store that cannot be read or written).
+ * per-profile key, BP6 a store that cannot be read or written, BP7 the
+ * per-configuration key).
  *
  * Run: npx tsx .pi/extensions/reactive-xaf-build/build-tests.ts
  */
@@ -39,6 +40,7 @@
 /** Local delay: the test harness owns its own clock. */
 const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
 import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, existsSync, rmSync } from "node:fs";
+import { DatabaseSync } from "node:sqlite";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import activate from "./index.js";
@@ -1674,6 +1676,14 @@ async function stampWritten(runner: { calls: string[] }): Promise<void> {
   await sleep(100);
 }
 
+/** One full green run: the pick, the marker that ends it, and the stamp it
+ *  records. Three cases start from exactly this. */
+async function greenRun(handle: any, pane: any, runner: { calls: string[] }): Promise<void> {
+  await handle.runCommand("devexpress", "");
+  finishRun(pane, 0);
+  await stampWritten(runner);
+}
+
 /** BP2: a green run first, then the same pick again over an untouched tree —
  *  the second run publishes WITHOUT a second build. */
 async function caseBP2(): Promise<void> {
@@ -1682,9 +1692,7 @@ async function caseBP2(): Promise<void> {
   const pane = mkPaneSeams();
   const sel = uiFor({ ...BP_PICKS, [PUBLISH_PROMPT]: "Publish" });
   const handle = await menuHandle(repo, buildSeams(repo, runner, pane, ["26.1.3"]), sel.ui);
-  await handle.runCommand("devexpress", "");
-  finishRun(pane, 0);
-  await stampWritten(runner);
+  await greenRun(handle, pane, runner);
   await handle.runCommand("devexpress", "");
   const twice = await waitFor(() => runner.calls.filter((c) => c === "prx").length === 2, 5000);
   checkBP2({ repo, runner, pane, sel, handle }, twice);
@@ -1717,9 +1725,7 @@ async function caseBP3(): Promise<void> {
   const sel = uiFor(answers);
   const handle = await menuHandle(repo, buildSeams(repo, runner, pane, ["26.1.3"]), sel.ui);
   // 1: a green run, so a stamp exists and a freshness read WOULD happen.
-  await handle.runCommand("devexpress", "");
-  finishRun(pane, 0);
-  await stampWritten(runner);
+  await greenRun(handle, pane, runner);
   // 2: the plain Build row puts a run in flight and leaves it there.
   answers.DevExpress = "Build";
   await handle.runCommand("devexpress", "");
@@ -1824,6 +1830,111 @@ async function caseBP6(): Promise<void> {
   );
   answered(sel, "BP6");
   noErrors(handle, "BP6");
+}
+
+/** BP7: the row is keyed by configuration too. Lab and Release compile different
+ *  code, so a Lab-green build proves nothing about a Release publish — and the
+ *  Lab row must survive the Release run that follows it. */
+async function caseBP7(): Promise<void> {
+  const repo = mkRepo(DX_PINS);
+  const runner = mkRunner([...BP_GREEN_SCRIPT, { match: VM_CHECK_PREFIX, result: okResult(VM_RUN) }, ...BP_SECOND_SCRIPT]);
+  const pane = mkPaneSeams();
+  const answers: Record<string, Answer> = { ...BP_PICKS, [PUBLISH_PROMPT]: "Publish" };
+  const sel = uiFor(answers);
+  const handle = await menuHandle(repo, buildSeams(repo, runner, pane, ["26.1.3"]), sel.ui);
+  // 1: Lab builds, publishes, records the Lab row.
+  await greenRun(handle, pane, runner);
+  // 2: Release has no row of its own, so it builds.
+  answers["RX-XAF"] = "Release";
+  await handle.runCommand("devexpress", "");
+  check(
+    "BP7: a Lab-green stamp does not make the Release pick fresh",
+    pane.opened.length === 2 && noticesOf(handle).some((n) => n.includes("no green build is recorded") && n.includes("Release")),
+    JSON.stringify({ opened: pane.opened, notices: noticesOf(handle) }),
+  );
+  stopBuildRun(); // the Release build is left in flight by design
+  // 3: the Lab row was never overwritten, so Lab is still fresh.
+  answers["RX-XAF"] = "Lab";
+  await handle.runCommand("devexpress", "");
+  await waitFor(() => runner.calls.filter((c) => c === "prx").length === 2, 5000);
+  check(
+    "BP7: the Lab row survives the Release run",
+    pane.opened.length === 2 && noticesOf(handle).some((n) => n.includes("build not needed")),
+    JSON.stringify({ opened: pane.opened, notices: noticesOf(handle) }),
+  );
+  answered(sel, "BP7");
+  noErrors(handle, "BP7");
+}
+
+/** The store as the shipped shape left it: one row keyed by profile alone, with
+ *  no `mode` column and no schema version. */
+function seedLegacyStamp(repo: string): void {
+  const db = new DatabaseSync(join(repo, "build-stamp.db"));
+  db.exec("CREATE TABLE build_stamp (profile TEXT PRIMARY KEY, head_sha TEXT NOT NULL, clean_src INTEGER NOT NULL, built_at INTEGER NOT NULL, version TEXT NOT NULL)");
+  db.prepare("INSERT INTO build_stamp (profile, head_sha, clean_src, built_at, version) VALUES (?, ?, ?, ?, ?)")
+    .run("Reactive.XAF", BP_HEAD, 1, Date.now(), "");
+  db.close();
+}
+
+/** BP8: a store written by the OLD shape must not strand the row. The stamp is a
+ *  cache: the read answers "predates this rule", the run builds, and the write
+ *  rebuilds the table so the next pick is fresh again. */
+async function caseBP8(): Promise<void> {
+  const repo = mkRepo(DX_PINS);
+  seedLegacyStamp(repo);
+  const runner = mkRunner([...BP_GREEN_SCRIPT, ...BP_SECOND_SCRIPT]);
+  const pane = mkPaneSeams();
+  const sel = uiFor({ ...BP_PICKS, [PUBLISH_PROMPT]: "Publish" });
+  const handle = await menuHandle(repo, buildSeams(repo, runner, pane, ["26.1.3"]), sel.ui);
+  await handle.runCommand("devexpress", "");
+  check(
+    "BP8: a legacy store makes the pick build and names its age",
+    pane.opened.length === 1 && noticesOf(handle).some((n) => n.includes("predates this rule")),
+    JSON.stringify({ opened: pane.opened, notices: noticesOf(handle) }),
+  );
+  finishRun(pane, 0);
+  await stampWritten(runner);
+  await handle.runCommand("devexpress", "");
+  const twice = await waitFor(() => runner.calls.filter((c) => c === "prx").length === 2, 5000);
+  check(
+    "BP8: that green run rebuilt the store, so the next pick is fresh",
+    twice && pane.opened.length === 1 && noticesOf(handle).some((n) => n.includes("build not needed")),
+    JSON.stringify({ twice, opened: pane.opened, notices: noticesOf(handle) }),
+  );
+  answered(sel, "BP8");
+  noErrors(handle, "BP8");
+}
+
+/** BP9: the store module itself cannot be loaded. That is a store failure like
+ *  any other — the row BUILDS, the publish still lands, and the reason is
+ *  reported once instead of aborting the decision. */
+async function caseBP9(): Promise<void> {
+  const repo = mkRepo(DX_PINS);
+  writeFileSync(join(repo, "build-stamp.db"), ""); // the path exists, so the store IS reached
+  const runner = mkRunner([...BP_GREEN_SCRIPT]);
+  const pane = mkPaneSeams();
+  const sel = uiFor({ ...BP_PICKS, [PUBLISH_PROMPT]: "Publish" });
+  const seams = {
+    ...buildSeams(repo, runner, pane, ["26.1.3"]),
+    stampLoad: async (): Promise<never> => { throw new Error("no sqlite module here"); },
+  };
+  const handle = await menuHandle(repo, seams, sel.ui);
+  await handle.runCommand("devexpress", "");
+  check(
+    "BP9: an unloadable store module still builds and says why",
+    pane.opened.length === 1 && noticesOf(handle).some((n) => n.includes("could not be read") && n.includes("no sqlite module here")),
+    JSON.stringify({ opened: pane.opened, notices: noticesOf(handle) }),
+  );
+  finishRun(pane, 0);
+  await waitFor(() => runner.calls.includes("prx"));
+  await waitFor(() => steersText(handle).some((s) => s.includes("build stamp not recorded")), 4000);
+  check(
+    "BP9: the publish still lands, and the failure is one warning steer",
+    noticesOf(handle).some((n) => n.includes("published")) && noWarning(handle),
+    JSON.stringify({ notices: noticesOf(handle), toasts: warningToasts(handle) }),
+  );
+  answered(sel, "BP9");
+  noErrors(handle, "BP9");
 }
 
 // Section: R — the run's SECOND completion signal. A green build printed
@@ -1958,6 +2069,9 @@ const CASES: Array<[string, () => Promise<void>]> = [
   ["BP4", caseBP4],
   ["BP5", caseBP5],
   ["BP6", caseBP6],
+  ["BP7", caseBP7],
+  ["BP8", caseBP8],
+  ["BP9", caseBP9],
   ["R1", caseR1],
   ["R2", caseR2],
   ["R3", caseR3],

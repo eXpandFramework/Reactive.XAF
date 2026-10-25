@@ -34,6 +34,7 @@ import { releaseVersionTarget } from "./release.js";
 import { depPinsPhase } from "./pins.js";
 import { prewarmVms, publishPhase } from "./publish.js";
 import { buildNeeded, recordGreen, stampDbPath } from "./stamp.js";
+import type { StampLoader } from "./stamp.js";
 
 export type { RunResult } from "./pane.js";
 export { profileOf };
@@ -61,6 +62,9 @@ export interface BuildSeams {
   /** The green-build stamp store (a SQLite path). Hermetic runs point it at
    *  their own temp dir; the default is this extension's own DB. */
   stampPath?: string;
+  /** How the stamp store is reached. A suite points it at a loader it controls
+   *  to prove the store's failure path; production leaves it unset. */
+  stampLoad?: StampLoader;
 }
 
 /** Which flow a pick runs: `build` always builds, `publish` never does, and
@@ -250,7 +254,7 @@ function buildRunReporter(
       // publish: its commit moves HEAD without changing content, so the stamp
       // is written against the HEAD the next flow will actually see. A store
       // that cannot be written is a warning steer, never a failed build.
-      const notRecorded = await recordGreen(seams, repo);
+      const notRecorded = await recordGreen(seams, repo, choice);
       if (notRecorded) steerWatch(pi, `${id} build: ${notRecorded}`);
       return;
     }
@@ -301,10 +305,11 @@ async function prewarmPhase(pi: any, seams: BuildSeams, notes: string[], id: str
 }
 
 /** "buildIfNeeded" answers here: true when the last green build still covers
- *  the tree, with the reason the user reads left in the notes either way. */
-async function buildNotNeeded(seams: BuildSeams, repo: string, mode: FlowMode, notes: string[]): Promise<boolean> {
+ *  the tree FOR THIS CONFIGURATION, with the reason the user reads left in the
+ *  notes either way. */
+async function buildNotNeeded(seams: BuildSeams, repo: string, mode: FlowMode, choice: string, notes: string[]): Promise<boolean> {
   if (mode !== "buildIfNeeded") return false;
-  const verdict = await buildNeeded(seams, repo);
+  const verdict = await buildNeeded(seams, repo, choice);
   notes.push(verdict.fresh ? `build not needed — ${verdict.reason}` : `building — ${verdict.reason}`);
   return verdict.fresh;
 }
@@ -322,7 +327,7 @@ async function runBuildFlow(pi: any, ctx: any, seams: BuildSeams, choice: string
       const where = running.pane ? `pane ${running.pane}` : "in-process";
       return refuse(ctx, `${id} build is already running (run ${running.runId}, ${where}) — stop it with /devexpress → "Abort build" first.`);
     }
-    if (await buildNotNeeded(seams, repo, mode, notes)) {
+    if (await buildNotNeeded(seams, repo, mode, choice, notes)) {
       return finishPublish(pi, ctx, seams, choice, repo, notes, false, "", id, true);
     }
     const local = await runLocalBuild(ctx, seams, choice, repo, notes);

@@ -2,24 +2,27 @@
  * reactive-xaf-build/stamp — the last green build, and the question a
  * "Build & Publish" pick asks before it spends another 10-20 minutes building.
  *
- * A stamp is a PROOF, not a log: one row PER PROFILE, replaced by every green
- * build of that profile, saying "this tree state was compiled and passed". The
- * key is `profile.label`, so an RX-XAF green build never makes an eXpand
- * publish look fresh. Rows live in SQLite — one DB in this extension's own
- * directory, so nothing grows as files.
+ * A stamp is a PROOF, not a log: one row PER PROFILE AND CONFIGURATION,
+ * replaced by every green build of that pair, saying "this tree state was
+ * compiled and passed". The key is `(profile.label, mode)`, so neither an
+ * RX-XAF build nor a Lab build vouches for an eXpand or a Release publish.
  *
  * `buildNeeded` applies the four conditions together and answers STALE for
  * anything it cannot read: a build is the safe side of every doubt.
- *   1. a row exists for THIS profile,
+ *   1. a row exists for THIS profile and configuration,
  *   2. its head_sha is HEAD now,
  *   3. it was recorded on a tree with no uncommitted source edits,
  *   4. no tracked file under src/ (or Directory.Packages.props) is modified now.
  *
  * The build's OWN version stamp (`profile.versionFile`) is excluded from both
  * dirty reads: every build rewrites it, so counting it would make the tree
- * "dirty" the moment a build finished and no tree would ever read fresh. Its
- * content is a function of the version being built, not a source edit — which
- * is why the `version` column records it, read from that same file.
+ * "dirty" the moment a build finished and no tree would ever read fresh.
+ *
+ * ONE error contract: every store failure — the shared sqlite module missing,
+ * the file unreadable, a shape from an older schema, a refused write — degrades
+ * to STALE with a reason (a read) or to a reported reason (a write). Nothing
+ * here throws into the flow, because a store must never be able to decide that
+ * a publish cannot happen.
  */
 
 import { existsSync, readFileSync } from "node:fs";
@@ -44,27 +47,32 @@ export interface BuildVerdict {
   reason: string;
 }
 
+/** The shared sqlite store, as this module consumes it. */
+export type SqliteModule = typeof import("@pi/sqlite/index.js");
+/** How the store is reached. A seam so a suite can prove the failure path. */
+export type StampLoader = () => Promise<SqliteModule>;
+
 const SCHEMA = `
 CREATE TABLE IF NOT EXISTS build_stamp (
-  profile   TEXT    PRIMARY KEY,
+  profile   TEXT    NOT NULL,
+  mode      TEXT    NOT NULL,
   head_sha  TEXT    NOT NULL,
   clean_src INTEGER NOT NULL,
   built_at  INTEGER NOT NULL,
-  version   TEXT    NOT NULL
+  version   TEXT    NOT NULL,
+  PRIMARY KEY (profile, mode)
 );
 `;
+/** Bumped whenever the shape above changes. A store carrying an older number is
+ *  DROPPED and rebuilt — see `openStore`. */
+const SCHEMA_VERSION = 1;
 const BUSY_TIMEOUT_MS = 5000;
 const GIT_TIMEOUT_MS = 30_000;
 /** The paths a green build is a proof ABOUT: the sources, and the pin file. */
 const SOURCE_PATHS = "src Directory.Packages.props";
+/** A read answer for a store written by an older shape. */
+const LEGACY = Symbol("legacy-stamp-store");
 
-/** The platform's shared sqlite store. It is a NAME (`@pi/sqlite`, the
- *  whitelist a project tree has instead of a relative path to the install) and
- *  it is imported on FIRST USE, not at load: every suite statically imports
- *  this extension's graph before the `@pi/` name floor is installed, and a
- *  static import fails at link time there. Absence still throws — loudly, on
- *  the first read or write, never a silent fallback to a file. */
-type SqliteModule = typeof import("@pi/sqlite/index.js");
 let sqlite: SqliteModule | null = null;
 
 async function store(): Promise<SqliteModule> {
@@ -72,17 +80,20 @@ async function store(): Promise<SqliteModule> {
   return sqlite;
 }
 
+function storeKey(dbPath: string): string {
+  return `reactive-xaf-build:${dbPath}`;
+}
+
 /** One operation on the store, with the handle RELEASED before returning: the
  *  stamp is touched twice per flow, and a connection held for the life of the
  *  process would keep the DB (and its WAL) open inside whatever tree the store
  *  points at — a temp repo cannot be removed under an open handle. */
-async function withStore(dbPath: string, fn: (mod: SqliteModule) => any): Promise<any> {
-  const key = `reactive-xaf-build:${dbPath}`;
-  const mod = await store();
+async function withStore(dbPath: string, seams: BuildSeams, fn: (mod: SqliteModule) => any): Promise<any> {
+  const mod = seams.stampLoad ? await seams.stampLoad() : await store();
   try {
     return fn(mod);
   } finally {
-    mod.closeDb(key);
+    mod.closeDb(storeKey(dbPath));
   }
 }
 
@@ -96,8 +107,7 @@ function dbPathOf(seams: BuildSeams): string {
   return seams.stampPath ?? stampDbPath();
 }
 
-/** The row's key: one profile, one proof. The RX and the eXpand trees carry
- *  their own label, so neither vouches for the other. */
+/** The row's key: one profile, one proof. */
 function profileKey(seams: BuildSeams): string {
   return profileOf(seams).label;
 }
@@ -106,10 +116,30 @@ function message(err: unknown): string {
   return err instanceof Error ? err.message : String(err);
 }
 
-/** What the profile's version file names, or "" when it cannot be read: a
- *  label for the reader, never part of the decision. The watcher parses the
- *  same file for its nuget assertion, which asks a different question (is the
- *  published version the expected one), so that parse stays where it is. */
+/** What the live store's shape says about itself. */
+function schemaVersion(db: any): number {
+  const row = db.prepare("PRAGMA user_version").get() as { user_version?: number } | undefined;
+  return Number(row?.user_version ?? 0);
+}
+
+/** Open the store for WRITING and bring its shape to this build's schema. The
+ *  stamp is a CACHE, not a record: a store written by an older shape is dropped
+ *  and rebuilt, and one rebuild is the correct price. Without this the old table
+ *  keeps its old columns, every write fails on a column it never had, and
+ *  "Build & Publish" rebuilds forever with only a warning to say why. */
+function openStore(mod: SqliteModule, dbPath: string): any {
+  const db = mod.openDb(storeKey(dbPath), { path: dbPath, schema: SCHEMA, busyTimeoutMs: BUSY_TIMEOUT_MS });
+  if (schemaVersion(db) >= SCHEMA_VERSION) return db;
+  db.exec("DROP TABLE IF EXISTS build_stamp");
+  db.exec(SCHEMA);
+  db.exec(`PRAGMA user_version = ${SCHEMA_VERSION}`);
+  return db;
+}
+
+/** What the profile's version file names, or "" when it cannot be read: a label
+ *  for the reader, never part of the decision. The watcher parses the same file
+ *  for its nuget assertion, which asks a different question (is the published
+ *  version the expected one), so that parse stays where it is. */
 function versionOf(repo: string, versionFile: string): string {
   try {
     const text = readFileSync(path.join(repo, versionFile), "utf-8");
@@ -194,20 +224,27 @@ interface StampRead {
   reason: string;
 }
 
-/** The stored proof for this profile, plus the reason when there is none: a
- *  store that cannot be read is REPORTED (the reason goes into the notice),
- *  never silently treated as a green build. */
-async function readStamp(dbPath: string, profile: string): Promise<StampRead> {
-  const absent: StampRead = { stamp: null, reason: `no green build is recorded for ${profile} yet` };
+/** The stored proof for one profile AND one configuration, plus the reason when
+ *  there is none: a store that cannot be read is REPORTED (the reason goes into
+ *  the notice), never silently treated as a green build. */
+async function readStamp(seams: BuildSeams, dbPath: string, profile: string, mode: string): Promise<StampRead> {
+  const absent: StampRead = { stamp: null, reason: `no green build is recorded for ${profile} ${mode} yet` };
   if (!existsSync(dbPath)) return absent;
   try {
-    const row = await withStore(dbPath, ({ readDb }) => readDb(
-      `reactive-xaf-build:${dbPath}`,
-      (db) => db
-        .prepare("SELECT head_sha, clean_src, built_at, version FROM build_stamp WHERE profile = ?")
-        .get(profile) as StampRow | undefined,
+    const found = await withStore(dbPath, seams, ({ readDb }) => readDb(
+      storeKey(dbPath),
+      (db) => {
+        if (schemaVersion(db) < SCHEMA_VERSION) return LEGACY;
+        return db
+          .prepare("SELECT head_sha, clean_src, built_at, version FROM build_stamp WHERE profile = ? AND mode = ?")
+          .get(profile, mode) as StampRow | undefined;
+      },
       { path: dbPath },
-    ) as StampRow | undefined);
+    ));
+    if (found === LEGACY) {
+      return { stamp: null, reason: "the build stamp store predates this rule — the next green build rebuilds it" };
+    }
+    const row = found as StampRow | undefined;
     if (!row) return absent;
     return {
       stamp: {
@@ -223,10 +260,12 @@ async function readStamp(dbPath: string, profile: string): Promise<StampRead> {
   }
 }
 
-/** Build, or go straight to publish? The four conditions, each answered with
- *  the sentence the user reads; anything unreadable is STALE, which builds. */
-export async function buildNeeded(seams: BuildSeams, repo: string): Promise<BuildVerdict> {
-  const stored = await readStamp(dbPathOf(seams), profileKey(seams));
+/** Build, or go straight to publish? The four conditions, for THIS profile and
+ *  THIS configuration — Lab and Release compile different code, so one proves
+ *  nothing about the other — each answered with the sentence the user reads;
+ *  anything unreadable is STALE, which builds. */
+export async function buildNeeded(seams: BuildSeams, repo: string, mode: string): Promise<BuildVerdict> {
+  const stored = await readStamp(seams, dbPathOf(seams), profileKey(seams), mode);
   if (!stored.stamp) return { fresh: false, reason: stored.reason };
   const head = await headNow(seams, repo);
   if (!("sha" in head)) return { fresh: false, reason: head.reason };
@@ -245,26 +284,25 @@ export async function buildNeeded(seams: BuildSeams, repo: string): Promise<Buil
 /** Record the green build — the proof the next "Build & Publish" consults.
  *  Returns null when it was written, the reason when it was not: a store that
  *  cannot be written never fails the build that just succeeded. */
-export async function recordGreen(seams: BuildSeams, repo: string): Promise<string | null> {
+export async function recordGreen(seams: BuildSeams, repo: string, mode: string): Promise<string | null> {
   const head = await headNow(seams, repo);
   if (!("sha" in head)) return `build stamp not recorded: ${head.reason}`;
   const sources = await sourcesChanged(seams, repo);
   if (!("changed" in sources)) return `build stamp not recorded: ${sources.reason}`;
   const dbPath = dbPathOf(seams);
-  const profile = profileKey(seams);
   const version = versionOf(repo, profileOf(seams).versionFile);
   try {
-    await withStore(dbPath, ({ openDb }) => {
-      openDb(`reactive-xaf-build:${dbPath}`, { path: dbPath, schema: SCHEMA, busyTimeoutMs: BUSY_TIMEOUT_MS })
+    await withStore(dbPath, seams, (mod) => {
+      openStore(mod, dbPath)
         .prepare(
-          "INSERT INTO build_stamp (profile, head_sha, clean_src, built_at, version) VALUES (?, ?, ?, ?, ?) " +
-            "ON CONFLICT(profile) DO UPDATE SET head_sha = excluded.head_sha, clean_src = excluded.clean_src, " +
+          "INSERT INTO build_stamp (profile, mode, head_sha, clean_src, built_at, version) VALUES (?, ?, ?, ?, ?, ?) " +
+            "ON CONFLICT(profile, mode) DO UPDATE SET head_sha = excluded.head_sha, clean_src = excluded.clean_src, " +
             "built_at = excluded.built_at, version = excluded.version",
         )
-        .run(profile, head.sha, sources.changed === 0 ? 1 : 0, Date.now(), version);
+        .run(profileKey(seams), mode, head.sha, sources.changed === 0 ? 1 : 0, Date.now(), version);
     });
     return null;
   } catch (err) {
-    return `build stamp not recorded: ${message(err)}`;
+    return `build stamp not recorded: ${message(err)} (store: ${dbPath})`;
   }
 }

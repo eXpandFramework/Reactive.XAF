@@ -1,7 +1,7 @@
 ---
 name: reactive-xaf-build/build
 description: Use when changing the /devexpress flow engine — DX check, optional depPins, the background build run (supervisor script in a pane, watched out of band), the publish continuation, the failure and stall reports, and the runners the command surface drives.
-drop-names: profile.name
+drop-names: profile.name build_stamp head_sha clean_src built_at openDb readDb
 ---
 
 # build.ts — the /devexpress flow engine
@@ -118,44 +118,19 @@ boolean became a mode (`FlowMode`), so a pick can never be mistaken for a flag.
 ## Build & Publish — the stamp (`stamp.ts`)
 
 The row exists so a publish does not rebuild a tree a green build already
-proved. The proof is a row in SQLite — `.pi/extensions/reactive-xaf-build/`
-`reactive-xaf-build.db`, table `build_stamp`, PRIMARY KEY `profile` (the
-profile's own label — one row per profile, so an RX-XAF green build never makes
-an eXpand publish look fresh), columns `head_sha`, `clean_src`, `built_at`,
-`version` (what the profile's `versionFile` named when the build passed — a
-label, never part of the decision). One DB per extension dir holding one row
-per profile; `openDb`/`readDb` are reached as `@pi/sqlite` (a project tree has
-no relative path to the install; the prefix is the platform's whitelist) and
-imported on FIRST USE, because every suite links this extension's graph before
-the `@pi/` name floor exists.
-`seams.stampPath` overrides the path — the test suites point it at their own
-temp dir. No JSON, no flag file, no second store.
+proved. The stamp — the store, its `(profile, mode)` key, its schema version and
+the four freshness conditions — is owned by `stamp.md`; this module only decides
+WHEN to ask. `buildIfNeeded` calls `buildNeeded(seams, repo, mode)` through
+`buildNotNeeded` and puts the verdict in the notes (`build not needed — …` or
+`building — …`), and a green run calls `recordGreen(seams, repo, mode)` in
+`buildRunReporter`'s green arm AFTER the publish returns, so the recorded HEAD is
+the one the next flow will actually see. `seams.stampPath` points the store at a
+temp dir in tests.
 
-`buildNeeded(seams, repo)` has ONE job — fresh or stale — and answers STALE for
-anything it cannot read, because a build is the safe side of every doubt:
-
-1. a row exists for THIS profile;
-2. its `head_sha` equals `git rev-parse HEAD` now;
-3. its `clean_src` is 1;
-4. `git status --porcelain -- src Directory.Packages.props` is empty now, minus
-   the build's own version stamp.
-
-The exclusion in 4 is not cosmetic: every build rewrites
-`profile.versionFile` (`src/Common/AssemblyInfoVersion.cs` for RX), so counting
-it would make the tree "dirty" the moment a build finished and NO tree would
-ever read fresh. Its content is a function of the version being built, not a
-source edit.
-
-`recordGreen(seams, repo)` writes the row, and the flow calls it in
-`buildRunReporter`'s green arm AFTER the publish returns: the publish's commit
-moves HEAD without changing content, so the stamp is recorded against the HEAD
-the next flow will actually see. Recording it before the publish instead would
-leave every stamp one commit behind and the row would rebuild every time. It
-returns the reason instead of throwing, and the flow steers it as a warning
-(`steerWatch`, no model turn) — a store that cannot be written never fails the
-build that just succeeded; a store that cannot be READ answers STALE with its
-reason in the started notice, so the row builds instead of dying on a store.
-A red build records nothing.
+A red build records nothing, and every store failure degrades instead of
+throwing: a read answers STALE with its reason in the started notice, a write
+returns its reason and the flow steers it once (`steerWatch`). The single
+contract and the whole store rule live in `stamp.md`.
 
 ## Outcome strings
 
