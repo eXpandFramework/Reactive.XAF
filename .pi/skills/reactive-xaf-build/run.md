@@ -7,6 +7,11 @@ description: Use when working on the build run — the per-run temp dir and supe
 
 Companion of `.pi/extensions/reactive-xaf-build/run.ts`.
 
+The per-run temp artifacts — the dir, `runPaths`, `supervisorScript` with its
+exit marker and `RXAF-RUN-DONE` sentinel, `trackedWrite` and the TTL prune —
+live in `run-script.ts` (`run-script.md`), split out at the 400-line cap and
+re-exported from here. This file owns the run's state and its watch.
+
 `/devexpress` hands the build to a pane and returns; this module owns the run
 from there. It is both the run's lifecycle and its watch. Nothing awaits a
 build inside the command handler, so the agent stays reachable and the result
@@ -20,9 +25,13 @@ arrives as a message instead of a hang.
 - `runPaths(runId)` — `%TEMP%/rxaf-build-<runId>/` holding `run.ps1` (the
   supervisor) and `exit.code` (the marker). A fresh dir per run, so a stale
   marker can never report a later build.
-- `supervisorScript(cmd, marker)` — runs the build in a NESTED `pwsh`, so an
-  `exit` (or a crash) inside the build cannot skip the marker write, then
-  writes `$LASTEXITCODE` (falling back to `$?`) into the marker. It also
+- `supervisorScript(cmd, marker, env)` — runs the build in a NESTED `pwsh`, so
+  an `exit` (or a crash) inside the build cannot skip the marker write, then
+  writes `$LASTEXITCODE` (falling back to `$?`) into the marker with
+  `[IO.File]::WriteAllText`, inside a `try/catch`. It then ECHOES
+  `marker=<path> code=<n> exists=<True|False> err=<first error|empty>` and
+  `RXAF-RUN-DONE code=<n>` into the pane: the marker's own state, visible in the
+  window it happened in, and the run's second completion signal. It also
   exports `MSB3026` as a message for the run, see below.
 - `writeRunScript(paths, cmd)` — writes the script, creating the run dir,
   through `trackedWrite(file, data)`: every file write rides pi-dev's tracked
@@ -65,11 +74,19 @@ that project fails as before.
 ## Signals, in the order a tick reads them
 
 1. **Exit marker** — the supervisor's code, consume-on-read. The primary signal.
-2. **Pane death** — the probe answers dead or gone and no marker arrived: the
+2. **Sentinel** — the pane's `RXAF-RUN-DONE code=<n>` line, read from the
+   capture and trusted only once the pane has held still for
+   `SENTINEL_IDLE_POLLS` (2) consecutive polls. This is the signal for a run
+   whose marker write died: on 2026-10-25 a build printed `psake succeeded`,
+   returned to a prompt and left no `exit.code` at all, and because the marker
+   was the only completion signal the chain went silent — no publish, no queue,
+   no notification, and no error in the pane. The marker still WINS when both
+   arrive: it is the supervisor's own write, and a pane line cannot override it.
+3. **Pane death** — the probe answers dead or gone and no marker arrived: the
    build host vanished, reported as a failure with the captured tail.
-3. **Stall** — no new pane output AND no CPU progress for `stallMs` while the
+4. **Stall** — no new pane output AND no CPU progress for `stallMs` while the
    process is alive: reported once.
-4. **Overrun** — running longer than `overrunMs`: reported once.
+5. **Overrun** — running longer than `overrunMs`: reported once.
 
 A stall or an overrun never kills the build. The only closer is the user's
 abort (`/devexpress` → "Abort build"), which closes the pane.

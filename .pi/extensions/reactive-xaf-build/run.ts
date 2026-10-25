@@ -5,7 +5,9 @@
  * runs the build in a NESTED pwsh, so an `exit` inside the build cannot skip
  * the exit-code write, and drops that code into the run's transient marker.
  * The env the script starts with is the caller's: this module owns no build
- * policy, the profile does.
+ * policy, the profile does. Those artifacts live in `run-script.ts` (the
+ * 400-line cap) and are re-exported below; this file owns the run's state and
+ * its watch.
  *
  * Watch: /devexpress hands the pane the supervisor line and returns; this
  * module then watches the run out of band, reading its signals in this order:
@@ -22,8 +24,6 @@
  */
 
 import * as fs from "node:fs";
-import * as os from "node:os";
-import * as path from "node:path";
 import type { CpuSampler, PaneCapturer, PaneCloser, PaneProber } from "./pane.js";
 
 export interface RunCadence {
@@ -50,97 +50,17 @@ export const RUN_CADENCE: RunCadence = {
   overrunMs: 1_200_000,
 };
 
-/** A run id unique across sessions: two pi windows building in the same
- *  millisecond must never share a run dir (one would overwrite the other's
- *  supervisor script and marker). */
-export function newRunId(): string {
-  return `${Date.now()}-${process.pid}`;
-}
+/** A run id, its temp dir, the supervisor script and the prune live in
+ *  run-script.ts (the 400-line cap): re-exported below so every consumer keeps
+ *  importing the run from this one module. */
+export {
+  newRunId, runPaths, supervisorScript, trackedWrite, writeRunScript, supervisorCommand, pruneRunDirs,
+} from "./run-script.js";
+export type { RunPaths } from "./run-script.js";
 
-/** The per-run temp artifacts: the supervisor script and its exit marker. */
-export interface RunPaths {
-  runId: string;
-  dir: string;
-  script: string;
-  marker: string;
-}
-
-/** One run's temp artifacts. A fresh dir per run, so a stale marker can
- *  never report a later build. */
-export function runPaths(runId: string): RunPaths {
-  const dir = path.join(os.tmpdir(), `rxaf-build-${runId}`);
-  return { runId, dir, script: path.join(dir, "run.ps1"), marker: path.join(dir, "exit.code") };
-}
-
-/** One `$env:NAME = 'value'` assignment per entry, so the nested pwsh inherits
- *  what the caller asked for. A malformed name is a loud error: a silently
- *  broken script would fail the build far from here. */
-function envLines(env: Record<string, string>): string[] {
-  return Object.entries(env).map(([name, value]) => {
-    if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(name)) throw new Error(`invalid env name for the run: ${name}`);
-    return `$env:${name} = '${value.replace(/'/g, "''")}'`;
-  });
-}
-
-/** The supervisor the pane runs. The build goes into a NESTED pwsh, so an
- *  `exit` (or a crash) inside the build cannot skip the marker write. The env
- *  it starts with is the caller's (the profile's build data), never this
- *  module's: a repo-specific MSBuild property here would leak into every
- *  profile that shares the pane. */
-export function supervisorScript(buildCmd: string, marker: string, env: Record<string, string> = {}): string {
-  const quotedMarker = marker.replace(/'/g, "''");
-  const quotedCmd = buildCmd.replace(/'/g, "''");
-  return [
-    ...envLines(env),
-    `$marker = '${quotedMarker}'`,
-    "$code = 1",
-    "try {",
-    `  & pwsh -NoLogo -Command '${quotedCmd}'`,
-    "  if ($null -ne $LASTEXITCODE) { $code = $LASTEXITCODE } elseif ($?) { $code = 0 } else { $code = 1 }",
-    "} catch { $code = 1 }",
-    "Set-Content -LiteralPath $marker -Value $code",
-    "",
-  ].join("\n");
-}
-
-/** Every file write rides pi-dev's tracked seam (a load-time global), the same
- *  one the flow uses for repo files; a missing seam is a loud error. */
-export function trackedWrite(file: string, data: string): void {
-  const seam = (globalThis as any).__writeFileSync;
-  if (typeof seam !== "function") throw new Error("__writeFileSync seam missing — pi-dev not loaded");
-  seam(file, data);
-}
-
-/** Write a run's supervisor script; returns the same paths for chaining. */
-export function writeRunScript(paths: RunPaths, buildCmd: string, env: Record<string, string> = {}): RunPaths {
-  fs.mkdirSync(paths.dir, { recursive: true });
-  trackedWrite(paths.script, supervisorScript(buildCmd, paths.marker, env));
-  return paths;
-}
-
-/** The short line typed into the pane. The logic lives in the script file,
- *  so a partially delivered keystroke cannot lose the exit code. */
-export function supervisorCommand(paths: RunPaths): string {
-  return `pwsh -NoLogo -File "${paths.script}"`;
-}
-
-function mtimeOf(dir: string): number {
-  try { return fs.statSync(dir).mtimeMs; } catch { return 0; }
-}
-
-/** Drop run dirs older than the TTL (best-effort). Age-based on purpose: a
- *  "newest N" rule would delete a live build's dir, including another
- *  session's concurrent run whose marker this process never reads. */
-export function pruneRunDirs(ttlMs = 86_400_000): void {
-  let names: string[];
-  try { names = fs.readdirSync(os.tmpdir()).filter((n) => n.startsWith("rxaf-build-")); } catch { return; }
-  const cutoff = Date.now() - ttlMs;
-  for (const name of names) {
-    const dir = path.join(os.tmpdir(), name);
-    if (mtimeOf(dir) >= cutoff) continue;
-    fs.rmSync(dir, { recursive: true, force: true });
-  }
-}
+/** The supervisor script itself: `run-script.ts`'s `supervisorScript`, which
+ *  runs the build in a nested pwsh and reports the code both as a marker file
+ *  and as a line echoed into the pane. */
 
 export type RunEvent =
   | { kind: "done"; code: number; tail: string; note?: string }
@@ -186,6 +106,13 @@ interface RunState {
   lastCpuSampleAt: number;
   stalled: boolean;
   overran: boolean;
+  /** The code the pane's sentinel line carried, once one has been seen. */
+  sentinel: number | null;
+  /** Consecutive polls whose capture equalled the previous one: the stillness
+   *  that makes a sentinel trustworthy. */
+  idlePolls: number;
+  /** What the previous poll saw, for that comparison. */
+  prevCapture: string;
   polling: boolean;
   stopped: boolean;
 }
@@ -234,6 +161,7 @@ function newRunState(handle: BuildRunHandle): RunState {
     handle, timer: null, lastCapture: "", lastOutputAt: now, lastCpu: null, lastCpuAt: now,
     panePid: null, paneAlive: null, paneReadAt: null, cpuReadAt: null,
     lastProbeAt: 0, lastCpuSampleAt: 0, stalled: false, overran: false,
+    sentinel: null, idlePolls: 0, prevCapture: "",
     polling: false, stopped: false,
   };
 }
@@ -366,6 +294,33 @@ function backstopTick(state: RunState, cadence: RunCadence, report: RunReporter)
   }
 }
 
+/** How many consecutive polls the pane must hold still after its sentinel
+ *  line before the code is trusted: the line lands while the build's own last
+ *  output is still draining, and stillness is what proves nothing is still
+ *  being written. */
+export const SENTINEL_IDLE_POLLS = 2;
+
+/** The LAST sentinel the pane printed, or null. A run that reused a pane would
+ *  print more than one, and the newest is the one that finished. */
+function sentinelCode(text: string): number | null {
+  const hits = [...text.matchAll(/RXAF-RUN-DONE code=(-?\d+)/g)];
+  const last = hits[hits.length - 1];
+  return last ? Number(last[1]) : null;
+}
+
+/** Track the pane's stillness and its sentinel, and answer the code once the
+ *  sentinel has been seen AND the pane stopped moving for SENTINEL_IDLE_POLLS
+ *  polls. This is the SECOND completion signal, for the runs whose exit marker
+ *  never lands. */
+function sentinelDone(state: RunState): number | null {
+  const seen = sentinelCode(state.lastCapture);
+  if (seen !== null) state.sentinel = seen;
+  state.idlePolls = state.lastCapture === state.prevCapture ? state.idlePolls + 1 : 0;
+  state.prevCapture = state.lastCapture;
+  if (state.sentinel === null || state.idlePolls < SENTINEL_IDLE_POLLS) return null;
+  return state.sentinel;
+}
+
 async function pollRun(state: RunState, seams: BuildRunSeams, cadence: RunCadence, report: RunReporter): Promise<void> {
   if (state.stopped || state.polling) return;
   state.polling = true;
@@ -377,6 +332,16 @@ async function pollRun(state: RunState, seams: BuildRunSeams, cadence: RunCadenc
       return;
     }
     readPane(state, seams, cadence);
+    const sentinel = sentinelDone(state);
+    if (sentinel !== null) {
+      await finish(state, report, {
+        kind: "done",
+        code: sentinel,
+        tail: state.lastCapture,
+        note: "no exit marker was read — the code came from the run's own sentinel line",
+      });
+      return;
+    }
     if (state.paneAlive === false) {
       await finish(state, report, { kind: "died", tail: state.lastCapture });
       return;

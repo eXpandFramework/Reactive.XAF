@@ -48,7 +48,8 @@ RX-XAF|eXpand`); `fence.ts` refuses that pipeline through every shell surface
 4. **Build** — `profile.buildCmd` in a right-side pane, driven by a per-run
    supervisor script (`run.ts`) whose exit code lands in a transient marker.
    The command returns on a STARTED build; `run.ts` watches the run out of
-   band (marker, pane death, a 10-minute silence-plus-CPU-idle stall, a
+   band (marker, the pane's `RXAF-RUN-DONE` sentinel when the marker never
+   lands, pane death, a 10-minute silence-plus-CPU-idle stall, a
    20-minute overrun) and reports. Nothing in the watch kills a build —
    `/devexpress` → "Abort build" is the only deliberate stop.
 5. **Publish** — `publishPhase` starts the VM probe and reads its outcome
@@ -77,7 +78,8 @@ RX-XAF|eXpand`); `fence.ts` refuses that pipeline through every shell surface
 | `gitphase.ts` | `gitphase.md` | The git half: dirty read + summary, both commit prompts, the commit core. |
 | `menu.ts` | `menu.md` | Command surface and composition root: owns the command, drives the engine. |
 | `build.ts` | `build.md` | Flow engine (DX, local build start, menu wiring). |
-| `stamp.ts` | `build.md` | The last green build: SQLite stamp + `buildNeeded`. |
+| `stamp.ts` | `stamp.md` | The last green build: SQLite stamp + `buildNeeded`. |
+| `run-script.ts` | `run-script.md` | A run's temp dir, supervisor script, marker, sentinel and prune. |
 | `run.ts` | `run.md` | Background build run: marker, pane death, stall/overrun, abort. |
 | `report.ts` | `report.md` | The flow's messages and the warn/steer pair. |
 | `release.ts` | `release.md` | Release version bump (feed consultation). |

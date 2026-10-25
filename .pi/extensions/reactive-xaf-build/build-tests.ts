@@ -1826,6 +1826,74 @@ async function caseBP6(): Promise<void> {
   noErrors(handle, "BP6");
 }
 
+// Section: R — the run's SECOND completion signal. A green build printed
+// "psake succeeded" and returned to a prompt with no exit.code, and the watch —
+// which learned completion from that file alone — went silent: no publish, no
+// queue, no notification. The supervisor now prints RXAF-RUN-DONE code=<n>, and
+// the watch takes that code once the pane holds still.
+const SENTINEL_LINE = "psake succeeded\nmarker=C:\\tmp\\run\\exit.code code=0 exists=False err=denied\nRXAF-RUN-DONE code=0\nC:\\repo>";
+
+/** R1: no marker on disk, the sentinel in the pane — done(0), published. */
+async function caseR1(): Promise<void> {
+  const repo = mkRepo(DX_PINS);
+  const runner = mkRunner([...BP_GREEN_SCRIPT]);
+  const pane = mkPaneSeams({ capture: SENTINEL_LINE });
+  const sel = uiFor({ ...RX_LAB, [PUBLISH_PROMPT]: "Publish" });
+  const handle = await menuHandle(repo, buildSeams(repo, runner, pane, ["26.1.3"]), sel.ui);
+  await handle.runCommand("devexpress", "");
+  await waitFor(() => runner.calls.includes("prx"), 4000);
+  check("R1: no exit marker was ever written", !existsSync(markerOf(pane.sent[0])), markerOf(pane.sent[0]));
+  check(
+    "R1: the sentinel's code finished the run and the publish landed",
+    runner.calls.includes("prx") && noticesOf(handle).some((n) => n.includes("published")),
+    JSON.stringify({ calls: runner.calls, notices: noticesOf(handle) }),
+  );
+  check("R1: a green run warns about nothing", noWarning(handle), JSON.stringify({ toasts: warningToasts(handle), steers: steersText(handle) }));
+  answered(sel, "R1");
+  noErrors(handle, "R1");
+}
+
+/** R2: a live pane with no sentinel and no marker is NOT done — the watch must
+ *  never report a completion it did not see. */
+async function caseR2(): Promise<void> {
+  const repo = mkRepo(DX_PINS);
+  const runner = mkRunner(BP_GREEN_SCRIPT.slice(0, 1));
+  const pane = mkPaneSeams({ capture: "brx\nCompiling Extensions.sln…\n" });
+  const sel = uiFor({ ...RX_LAB, [PUBLISH_PROMPT]: "Publish" });
+  const handle = await menuHandle(repo, buildSeams(repo, runner, pane, ["26.1.3"]), sel.ui);
+  await handle.runCommand("devexpress", "");
+  await sleep(200); // many polls at the test cadence
+  check(
+    "R2: no sentinel and a live pane never finishes the run",
+    isBuildRunActive() && !runner.calls.includes("prx") && !noticesOf(handle).some((n) => n.includes("published")),
+    JSON.stringify({ active: isBuildRunActive(), calls: runner.calls, notices: noticesOf(handle) }),
+  );
+  stopBuildRun();
+  answered(sel, "R2");
+  noErrors(handle, "R2");
+}
+
+/** R3: the marker still wins. A pane carrying a contradicting sentinel must not
+ *  report the failure the marker contradicts. The cadence is slowed so the
+ *  marker is in place before the sentinel could settle. */
+async function caseR3(): Promise<void> {
+  const repo = mkRepo(DX_PINS);
+  const runner = mkRunner([...BP_GREEN_SCRIPT]);
+  const pane = mkPaneSeams({ capture: "RXAF-RUN-DONE code=7\n", runCadence: { ...TEST_CADENCE, signalMs: 150 } });
+  const sel = uiFor({ ...RX_LAB, [PUBLISH_PROMPT]: "Publish" });
+  const handle = await menuHandle(repo, buildSeams(repo, runner, pane, ["26.1.3"]), sel.ui);
+  await handle.runCommand("devexpress", "");
+  finishRun(pane, 0); // the marker says green, the pane says 7
+  await waitFor(() => runner.calls.includes("prx"), 5000);
+  check(
+    "R3: the exit marker wins over a contradicting sentinel",
+    runner.calls.includes("prx") && noticesOf(handle).some((n) => n.includes("published")) && noWarning(handle),
+    JSON.stringify({ calls: runner.calls, notices: noticesOf(handle), toasts: warningToasts(handle) }),
+  );
+  answered(sel, "R3");
+  noErrors(handle, "R3");
+}
+
 /** The contract, in the order it runs: T9's repo is fresh per case, so a case
  *  that "continues" an earlier one builds its own clean tree. */
 const CASES: Array<[string, () => Promise<void>]> = [
@@ -1890,6 +1958,9 @@ const CASES: Array<[string, () => Promise<void>]> = [
   ["BP4", caseBP4],
   ["BP5", caseBP5],
   ["BP6", caseBP6],
+  ["R1", caseR1],
+  ["R2", caseR2],
+  ["R3", caseR3],
 ];
 
 /** One case's failure is reported and counted, never a crash that hides the
