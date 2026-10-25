@@ -14,18 +14,30 @@
  * ##[error]Exception, "PowerShell exited with code", retry lines) and
  * attaching the nearest "Executing <task>" line as context.
  *
+ * THE QUERY IS CLASSIFIED, NOT GUESSED. A refused or expired token used to be
+ * written as an error while the script CARRIED ON: `$b` stayed null,
+ * `STATUS=0;none;none;` was printed with exit 0, so a dead PAT read as an empty
+ * pipeline to every caller and the watch sat on nothing until its deadline
+ * (2026-10-25). The call now sits in a try/catch that prints
+ * `STATUS=ERR;<auth|transient>;<message>`: auth is the one failure no retry
+ * clears, everything else (a 429, a blip, a proxy) keeps the chain retrying.
+ * A script-wide `$ErrorActionPreference = 'Stop'` was rejected for exactly that
+ * reason — it made a transient blip indistinguishable from a dead token, and
+ * the difference was then guessed by matching error prose downstream.
+ *
  * The cancel script (cancelAzDoScript) PATCHes {"status":"cancelling"} on
  * EVERY running/queued build of the project — the documented cancel; DELETE
  * is rejected by the API on running builds
  * (CannotDeleteRunningBuildException), which silently broke prx's cancel
  * and left zombie builds holding the pool (2026-08-25, fixed in XpandPwsh
- * Remove-AzBuild).
+ * Remove-AzBuild). It reports `CANCEL=ERR;<auth|transient>;<message>` the same
+ * way.
  *
  * One pwsh spawn per query: the profile loads Invoke-AzureRestMethod
  * (XpandPwsh, on PSModulePath) and sets $env:AzProject / $env:AzOrganization.
  * Scripts print a single STATUS= / CANCEL= line and exit. STATUS is
- * `id;status;result;buildNumber;reason` (parseStatus also accepts the
- * older 4-field line with no buildNumber).
+ * `id;status;result;buildNumber;reason` (the parser also accepts the older
+ * 4-field line with no buildNumber).
  *
  * The publish chain runs on ONE pipeline — the Reactive.XAF definition
  * (def 23); Lab builds queue branch lab, Release (prx -Release) queues
@@ -47,10 +59,24 @@ export interface AzDoStatus {
   reason: string;
 }
 
+/** Why a call could not be read. `auth` is final (renew the token); anything
+ *  else is worth another poll. */
+export type AzDoFailure = "auth" | "transient";
+
+/** One poll, classified. `null` from parsePoll means the script printed no
+ *  STATUS= line at all — a crash, not a failure it could classify. */
+export type AzDoPoll =
+  | { kind: "empty" }
+  | { kind: "build"; build: AzDoStatus }
+  | { kind: "error"; failure: AzDoFailure; message: string };
+
 export interface AzDoCancel {
   id: number;
   ok: boolean;
   status: string;
+  /** Set when the cancel script reached AzDO and was refused. */
+  failure?: AzDoFailure;
+  message?: string;
 }
 
 export const LAB_DEF = "23";
@@ -67,6 +93,17 @@ const WRAPPER_NOISE = /ScriptHalted|Approve-LastExitCode|##\[error\]Exception|Po
 const REAL_ERROR = /CSC : error\b|\berror (?:CS|MSB|DX|NU)\d+\b|\berror :\b/;
 /** Generic build-level failure marker (tier 2 — used only when no tier-1 line). */
 const BUILD_FAILED = /Build FAILED/i;
+
+/** PS: the catch body that classifies a refused call. The message is flattened
+ *  first — a newline or a `;` inside it would break the field protocol the TS
+ *  side parses. `auth` is matched on the server's own wording. */
+function errBlock(kind: "STATUS" | "CANCEL"): string {
+  return [
+    `  $m = "$($_.Exception.Message)" -replace "\\r?\\n", " " -replace ";", ","`,
+    `  $k = if ($m -match '401|Unauthorized|Access Denied|expired') { 'auth' } else { 'transient' }`,
+    `  "${kind}=ERR;$k;$m"`,
+  ].join("\n");
+}
 
 /** PS: fetch the failed TASK record's log (the Job record's log is a summary
  *  without the real error) and print a bounded tail between LOGSTART/LOGEND
@@ -88,10 +125,16 @@ const LOG_BLOCK = `
 
 /** The one-shot status script: newest build of a definition, current state,
  *  reason on failure. definitions defaults to 23 (Reactive.XAF); minId
- *  filters out builds the chain already passed (id <= minId). */
+ *  filters out builds the chain already passed (id <= minId). A refused call
+ *  prints the classified ERR line instead of an empty pipeline. */
 export function azdoStatusScript(definitions = LAB_DEF, minId = 0): string {
   return `$cred = @{ Project = $env:AzProject; Organization = $env:AzOrganization }
-$b = (Invoke-AzureRestMethod 'build/builds?definitions=${definitions}&$top=5&queryOrder=queueTimeDescending' @cred) | Where-Object { $_.id -gt ${minId} } | Select-Object -First 1
+try {
+  $b = (Invoke-AzureRestMethod 'build/builds?definitions=${definitions}&$top=5&queryOrder=queueTimeDescending' @cred -ErrorAction Stop) | Where-Object { $_.id -gt ${minId} } | Select-Object -First 1
+} catch {
+${errBlock("STATUS")}
+  exit 0
+}
 if ($null -eq $b) { "STATUS=0;none;none;"; exit 0 }
 $reason = ""
 if ($b.result -eq "failed") {${LOG_BLOCK}
@@ -102,16 +145,21 @@ if ($b.result -eq "failed") {${LOG_BLOCK}
 /** The project-wide cancel script: PATCH-cancel EVERY running/queued build of
  *  the project (statusFilter=inProgress,notStarted,postponed, no definition
  *  filter), so "Cancel AzDO build" stops the whole chain at once. CANCEL=
- *  carries the first canceled id and the total count. */
+ *  carries the first canceled id and the total count. A refused call prints
+ *  the classified ERR line instead of reading as "nothing to cancel". */
 export function cancelAzDoScript(): string {
   return `$cred = @{ Project = $env:AzProject; Organization = $env:AzOrganization }
-$bs = Invoke-AzureRestMethod 'build/builds?statusFilter=inProgress,notStarted,postponed&$top=100' @cred
-$running = @($bs | Where-Object { $_.status -in @("inProgress","notStarted","postponed") })
-if ($running.Count -eq 0) { "CANCEL=0;none;none"; exit 0 }
-foreach ($b in $running) {
-  Invoke-AzureRestMethod ("build/builds/" + $b.id) -Method Patch -Body '{"status":"cancelling"}' @cred | Out-Null
-}
-"CANCEL=$($running[0].id);ok;$($running.Count)"`;
+try {
+  $bs = Invoke-AzureRestMethod 'build/builds?statusFilter=inProgress,notStarted,postponed&$top=100' @cred -ErrorAction Stop
+  $running = @($bs | Where-Object { $_.status -in @("inProgress","notStarted","postponed") })
+  if ($running.Count -eq 0) { "CANCEL=0;none;none"; exit 0 }
+  foreach ($b in $running) {
+    Invoke-AzureRestMethod ("build/builds/" + $b.id) -Method Patch -Body '{"status":"cancelling"}' @cred -ErrorAction Stop | Out-Null
+  }
+  "CANCEL=$($running[0].id);ok;$($running.Count)"
+} catch {
+${errBlock("CANCEL")}
+}`;
 }
 
 /** Default GitHub API fetch: Authorization from GH_TOKEN / GITHUB_TOKEN when
@@ -125,17 +173,29 @@ export async function defaultGhFetch(url: string, opts: { method?: string; body?
   return { ok: res.ok, status: res.status, text: await res.text() };
 }
 
-/** Parse the status script's last STATUS= line; null when none was printed.
- *  CRLF — split on /\r?\n/ so the trailing \r never reaches the regex (a bare
- *  \n split silently broke every real parse; 2026-08-25 fix, contract:
- *  azdo-tests.ts). Five-field (id;status;result;buildNumber;reason) first;
- *  four-field (no buildNumber) still parses so existing fixtures keep working. */
-export function parseStatus(stdout: string): AzDoStatus | null {
+/** The last `<kind>=` line of a script's output, or "" when none was printed. */
+function lastLine(stdout: string, kind: "STATUS" | "CANCEL"): string {
   let line = "";
   for (const l of stdout.split(/\r?\n/)) {
-    if (l.startsWith("STATUS=")) line = l;
+    if (l.startsWith(`${kind}=`)) line = l;
   }
-  if (!line) return null;
+  return line;
+}
+
+/** The classified failure a line carries, or null when it is a normal line. */
+function classifiedFailure(line: string, kind: "STATUS" | "CANCEL"): { failure: AzDoFailure; message: string } | null {
+  const m = line.match(new RegExp(`^${kind}=ERR;(auth|transient);(.*)$`));
+  if (!m) return null;
+  return { failure: m[1] as AzDoFailure, message: m[2].trim() };
+}
+
+/** The build a STATUS= line carries, or null when the line is malformed.
+ *  CRLF — the caller splits on /\r?\n/ so the trailing \r never reaches the
+ *  regex (a bare \n split silently broke every real parse; 2026-08-25 fix,
+ *  contract: azdo-tests.ts). Five-field
+ *  (id;status;result;buildNumber;reason) first; four-field (no buildNumber)
+ *  still parses so existing fixtures keep working. */
+function buildFromLine(line: string): AzDoStatus | null {
   const five = line.match(/^STATUS=([^;]*);([^;]*);([^;]*);([^;]*);(.*)$/);
   if (five) {
     return { id: Number(five[1]), status: five[2], result: five[3], buildNumber: five[4], reason: five[5].trim() };
@@ -145,13 +205,25 @@ export function parseStatus(stdout: string): AzDoStatus | null {
   return { id: Number(four[1]), status: four[2], result: four[3], buildNumber: "", reason: four[4].trim() };
 }
 
+/** One poll, classified: a build, an empty pipeline, or the reason the call
+ *  could not be read. null means the script printed NO STATUS= line — a crash
+ *  nothing can classify, and the caller reports the stderr it has. */
+export function parsePoll(stdout: string): AzDoPoll | null {
+  const line = lastLine(stdout, "STATUS");
+  if (!line) return null;
+  const failed = classifiedFailure(line, "STATUS");
+  if (failed) return { kind: "error", failure: failed.failure, message: failed.message };
+  const build = buildFromLine(line);
+  if (!build) return null;
+  return build.id === 0 ? { kind: "empty" } : { kind: "build", build };
+}
+
 /** Parse the cancel script's last CANCEL= line; null when none was printed. */
 export function parseCancel(stdout: string): AzDoCancel | null {
-  let line = "";
-  for (const l of stdout.split(/\r?\n/)) {
-    if (l.startsWith("CANCEL=")) line = l;
-  }
+  const line = lastLine(stdout, "CANCEL");
   if (!line) return null;
+  const failed = classifiedFailure(line, "CANCEL");
+  if (failed) return { id: 0, ok: false, status: "", failure: failed.failure, message: failed.message };
   const m = line.match(/^CANCEL=([^;]*);([^;]*);([^;]*)$/);
   if (!m) return null;
   return { id: Number(m[1]), ok: m[2] === "ok", status: m[3] };

@@ -1,6 +1,6 @@
 ---
 name: reactive-xaf-build/report
-description: Use when changing the /devexpress messages — the failure and summary strings, the bounded pane tail, the start notice, and the warn/steer pair that carries a report to the agent.
+description: Use when changing the /devexpress messages — the failure and summary strings, the bounded pane tail, the start notice, and the one delivery decision behind the warn/error/watch steers.
 ---
 
 # report.ts — the flow's messages and its steer half
@@ -26,17 +26,26 @@ unchanged: the same strings, the same delivery.
 
 ## Delivery
 
+ONE decision. `deliver(pi, msg, { severity?, triggerTurn? })` is what every
+steer goes through: `globalThis.__steer` with customType
+`reactive-xaf-build:build`, the severity, and the message as the blockReason
+when it is an error. Without the shared sender the message still goes out
+through `pi.sendUserMessage(msg, { deliverAs: "steer" })` and the severity rides
+the TEXT (`[error] …`) — pi's own `sendMessage` has no channel for a severity,
+so the fallback carries it in band rather than dropping it and letting an error
+read as chatter.
+
 - `warn(pi, ctx, msg)` — a warning toast plus a steer. Every failure, stall,
   overrun and dead pane goes out as this pair, never as a bare toast.
-- `steerWarning(pi, msg)` — `globalThis.__steer` with customType
-  `reactive-xaf-build:build`, severity warning and `triggerTurn: true`; without
-  the shared sender it falls back to
-  `pi.sendUserMessage(msg, { deliverAs: "steer" })`, which always starts a turn.
-- `steerStarted(pi, msg)` — the started notice on the same sender with no
-  severity and no turn (a started build needs no agent action). Absent the
-  shared sender it is dropped and only the toast shows it.
-- `steerWatch(pi, msg)` — a warning on the same sender with
-  `severity: "warning"` and NO `triggerTurn`: the build is already running, so
-  the user must see it but no agent action follows (the pre-warm's "VM layer
-  needs attention" lines). Falls back to `pi.sendUserMessage` like
-  `steerWarning`.
+- `steerWarning(pi, msg)` — `deliver` with severity warning and
+  `triggerTurn: true`.
+- `steerError(pi, msg)` — `deliver` with severity ERROR and the message as its
+  blockReason, so a failure the user must act on (a dead AzDO token, a queue
+  nothing confirms) renders red instead of reading like one more line of
+  chatter. The watcher's give-up goes out this way.
+- `steerWatch(pi, msg)` — `deliver` with severity warning and NO `triggerTurn`:
+  the build is already running, so the user must see it but no agent action
+  follows (the pre-warm's "VM layer needs attention" lines).
+- `steerStarted(pi, msg)` — the started notice with neither severity nor turn
+  (a started build needs no agent action). Absent the shared sender it is
+  dropped and only the toast shows it.

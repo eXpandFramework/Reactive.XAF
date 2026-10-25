@@ -219,6 +219,19 @@ function answered(sel: CaseUi, where: string): void {
   check(`${where}: every prompt the flow showed was answered by the case`, sel.unexpected.length === 0, sel.unexpected.join(" | "));
 }
 
+/** A fixture's command pattern: equal, a PREFIX when it ends in `*`, or a
+ *  SUBSTRING when it is wrapped in one. A suite keys on the query it cares
+ *  about (`*queryOrder=queueTimeDescending*`), never on a script's first line,
+ *  so a preamble change in `azdo.ts` cannot redden an unrelated case. */
+function matchesPattern(cmd: string, pattern: string): boolean {
+  if (cmd === pattern) return true;
+  if (!pattern.includes("*")) return false;
+  if (pattern.length > 2 && pattern.startsWith("*") && pattern.endsWith("*")) {
+    return cmd.includes(pattern.slice(1, -1));
+  }
+  return cmd.startsWith(pattern.replace("*", ""));
+}
+
 function mkRunner(script: Array<{ match: string; result: any }>): { run: (cmd: string, opts?: any) => Promise<any>; calls: string[]; runOpts: any[] } {
   const calls: string[] = [];
   const runOpts: any[] = [];
@@ -229,7 +242,7 @@ function mkRunner(script: Array<{ match: string; result: any }>): { run: (cmd: s
       runOpts.push(opts);
       const entry = script[i];
       i++;
-      if (entry && (cmd === entry.match || (entry.match.includes("*") && cmd.startsWith(entry.match.replace("*", ""))))) {
+      if (entry && matchesPattern(cmd, entry.match)) {
         return entry.result;
       }
       return { code: 0, stdout: "", stderr: "" };
@@ -784,7 +797,7 @@ async function caseT15(): Promise<void> {
 // Section: T16 — the status pick parses the STATUS line
 async function caseT16(): Promise<void> {
   const repo = mkRepo(DX_PINS);
-  const runner = mkRunner([{ match: "$cred = @{ Project*", result: { code: 0, stdout: "STATUS=35735;completed;failed;Artifact TestAssemblies was not found for build 35735", stderr: "" } }]);
+  const runner = mkRunner([{ match: "*queryOrder=queueTimeDescending*", result: { code: 0, stdout: "STATUS=35735;completed;failed;Artifact TestAssemblies was not found for build 35735", stderr: "" } }]);
   const sel = uiFor({ DevExpress: "Last build status" });
   const handle = await menuHandle(repo, { run: runner.run, fetchFeed: mkFetch(["26.1.3"]), repoRoot: repo, ...mkPaneSeams() }, sel.ui);
   await handle.runCommand("devexpress", "");
@@ -799,7 +812,7 @@ async function caseT18(): Promise<void> {
   stopBuildRun();
   const repo = mkRepo(DX_PINS);
   const runner = mkRunner([
-    { match: "$cred = @{ Project*", result: okResult("STATUS=35735;completed;succeeded;") },
+    { match: "*queryOrder=queueTimeDescending*", result: okResult("STATUS=35735;completed;succeeded;") },
     ...GREEN_PUBLISH,
   ]);
   const pane = mkPaneSeams();

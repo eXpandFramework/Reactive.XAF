@@ -51,10 +51,18 @@ Run: `npx tsx .pi/extensions/reactive-xaf-build/watcher-tests.ts`
 - W14 — expand lab polls def 94; `26.1.400.0` matches feed `26.1.400`.
 - W15 — failed poll with a LOGSTART block: steer carries
   `Release 26.1.301.1 exists`, not "no error lines".
-- W16 — finished HEAD build of a different version is not this run: wait
-  toast, then give-up steers.
+- W16 — a finished HEAD build of a different version is not this run: it gives
+  up AT ONCE, with no waiting line, an error steer naming expected vs found and
+  the re-queue.
 - W17 — nugets missing on the first assert, present on retry (index
   lag): confirmed toast, no warning, no steer.
 - W18 — the real AzDO build numbers (`<version>-<dxVersion>` head,
   `yyyyMMdd.N` downstream): the chain runs to completion, no wrong-version
   wait toast, no give-up steer.
+- W19 — empty polls inside the grace retry and never stop the watcher.
+- W20 — past the grace the watcher warns and steers with the truth: nothing was
+  queued, so there is nothing to watch.
+- W21 — a build appearing inside the grace clears the clock and continues the
+  chain, no give-up.
+- W22 — a refused token (401 on the first poll) is reported at once with the
+  token remedy, never as "no build found yet", and the steer is an ERROR.

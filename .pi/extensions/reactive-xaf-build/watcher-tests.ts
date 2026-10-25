@@ -521,20 +521,25 @@ async function caseW15(): Promise<void> {
   noErrors(w.handle, "W15");
 }
 
-// Section: W16 — a finished head build of another version is not this run
+// Section: W16 — a finished head build of another version ends the watch AT ONCE:
+// nothing was queued for this run's version, so waiting out a deadline would be
+// the silent two-hour give-up all over again.
 async function caseW16(): Promise<void> {
   const repo = mkRepo();
   const seams = mkSeams([doneNum(25698, "succeeded", "22.1.601.2")]);
-  const w = await watcherHandle(repo, {
-    run: seams.run, fetchFeed: mkFetch(LAB),
-    startAzDoWatcher: (p: any, c: any, s: any, opts?: any) => startAzDoWatcher(p, c, s, { ...opts, intervalMs: 10, maxMs: 80 }),
-  }, PUBLISH_LAB);
-  await w.handle.runCommand("devexpress", "");
-  await sleep(250);
-  const toasts = toastText(w.handle);
-  const steers = steersOf(w.handle);
-  check("W16: wrong-version toast, no chain advance", toasts.some((n) => n.includes("is not this run")) && !toasts.some((n) => n.includes("release consumers pipeline")), JSON.stringify(toasts));
-  check("W16: give-up steers + watcher stopped", steers.length === 1 && steers[0].content.includes("gave up") && !isAzDoWatcherActive(), JSON.stringify(steers));
+  const probe = mkSteerProbe();
+  const w = await watcherHandle(repo, { run: seams.run, fetchFeed: mkFetch(LAB), startAzDoWatcher: fastWatcher }, PUBLISH_LAB);
+  try {
+    await w.handle.runCommand("devexpress", "");
+    await sleep(300);
+  } finally {
+    probe.restore();
+  }
+  const warnings = toastsOf(w.handle).filter((n) => n.type === "warning").map((n) => n.message);
+  check("W16: the wrong version gives up at once, naming expected and found", warnings.some((n) => n.includes("22.1.601.2") && n.includes("expected 4.261.2.1")), JSON.stringify(warnings));
+  check("W16: no waiting line — the watch is over", !toastText(w.handle).some((n) => n.includes("waiting")), JSON.stringify(toastText(w.handle)));
+  check("W16: the re-queue instruction rides the give-up", warnings.some((n) => n.includes("Build & Publish")), JSON.stringify(warnings));
+  check("W16: the steer is an ERROR and the watcher stopped", probe.calls.length === 1 && probe.calls[0].severity === "error" && !isAzDoWatcherActive(), JSON.stringify(probe.calls));
   answered(w.sel, "W16");
   noErrors(w.handle, "W16");
 }
@@ -657,6 +662,83 @@ async function caseW21(): Promise<void> {
   noErrors(w.handle, "W21");
 }
 
+// Section: W22 — a refused token is an ERROR on the FIRST poll, never "no build
+// found yet": an expired PAT makes the status script fail, and that failure has
+// to reach the user as the token problem it is, with the remedy.
+function mkAuthRun(): { run: (cmd: string) => Promise<any>; calls: string[] } {
+  const calls: string[] = [];
+  return {
+    calls,
+    run: async (cmd: string) => {
+      calls.push(cmd);
+      if (cmd.includes("queryOrder=queueTimeDescending")) {
+        return { code: 0, stdout: crlf(["STATUS=ERR;auth;Response status code does not indicate success: 401 (Unauthorized)."]), stderr: "" };
+      }
+      return flowResult(cmd);
+    },
+  };
+}
+
+/** What the extension ASKED the shared sender for. pi's own `steer` keeps the
+ *  severity out of the message options (it renders it through the registered
+ *  severity renderer), so the honest record of "this one is an error" is the
+ *  arguments the extension passes. The real sender still delivers the message. */
+function mkSteerProbe(): { calls: Array<{ severity?: string; blockReason: string }>; restore: () => void } {
+  const send = (globalThis as any).__steer;
+  const calls: Array<{ severity?: string; blockReason: string }> = [];
+  (globalThis as any).__steer = (pi: any, customType: string, content: string, blockReason: string, deliverAs: string, options?: any) => {
+    calls.push({ severity: options?.severity, blockReason });
+    return send(pi, customType, content, blockReason, deliverAs, options);
+  };
+  return { calls, restore: () => { (globalThis as any).__steer = send; } };
+}
+
+async function caseW22(): Promise<void> {
+  const repo = mkRepo();
+  const seams = mkAuthRun();
+  const w = await watcherHandle(repo, { run: seams.run, fetchFeed: mkFetch(LAB), startAzDoWatcher: fastWatcher }, PUBLISH_LAB);
+  const probe = mkSteerProbe();
+  try {
+    await w.handle.runCommand("devexpress", "");
+    await sleep(300);
+  } finally {
+    probe.restore();
+  }
+  const warnings = toastsOf(w.handle).filter((n) => n.type === "warning").map((n) => n.message);
+  const steers = steersOf(w.handle);
+  check("W22: the refused token is reported on the first poll", warnings.some((n) => n.includes("401")) && warnings.some((n) => n.includes("token")), JSON.stringify(warnings));
+  check("W22: the refusal never reads as an empty pipeline", !toastText(w.handle).some((n) => n.includes("no build found yet")), JSON.stringify(toastText(w.handle)));
+  check("W22: the give-up reaches the agent as an ERROR", steers.length === 1 && steers[0].content.includes("token") && probe.calls.length === 1 && probe.calls[0].severity === "error" && probe.calls[0].blockReason.length > 0, JSON.stringify(steers) + " | " + JSON.stringify(probe.calls));
+  check("W22: watcher stopped", !isAzDoWatcherActive());
+  answered(w.sel, "W22");
+  noErrors(w.handle, "W22");
+}
+
+// Section: W23 — a TRANSIENT failure is retried, not fatal: only the auth kind
+// ends the watch, everything else (a 503, a blip) gets the grace budget.
+async function caseW23(): Promise<void> {
+  const repo = mkRepo();
+  const chain = [done(35760, "succeeded"), done(35780, "succeeded"), done(35790, "succeeded")];
+  let polls = 0;
+  const run = async (cmd: string) => {
+    if (cmd.includes("queryOrder=queueTimeDescending")) {
+      polls++;
+      if (polls === 1) return { code: 0, stdout: crlf(["STATUS=ERR;transient;Response status code does not indicate success: 503 (Service Unavailable)."]), stderr: "" };
+      return { code: 0, stdout: chain.shift() ?? done(35790, "succeeded"), stderr: "" };
+    }
+    return flowResult(cmd);
+  };
+  const w = await watcherHandle(repo, { run, fetchFeed: mkFetch(LAB), ghFetch: mkGh(GH_DRAFT).gh, startAzDoWatcher: fastWatcher }, PUBLISH_LAB);
+  await w.handle.runCommand("devexpress", "");
+  await sleep(400);
+  const toasts = toastText(w.handle);
+  check("W23: the transient failure is retried and named", toasts.some((n) => n.includes("poll failed") && n.includes("503")), JSON.stringify(toasts));
+  check("W23: the chain completes once the reads recover", toasts.some((n) => n.includes("chain complete")), JSON.stringify(toasts));
+  check("W23: no give-up steer for a transient blip", w.handle.host.messages.length === 0, JSON.stringify(w.handle.host.messages));
+  answered(w.sel, "W23");
+  noErrors(w.handle, "W23");
+}
+
 /** The contract, in the order it runs. */
 const CASES: Array<[string, () => Promise<void>]> = [
   ["W1", caseW1],
@@ -680,6 +762,8 @@ const CASES: Array<[string, () => Promise<void>]> = [
   ["W19", caseW19],
   ["W20", caseW20],
   ["W21", caseW21],
+  ["W22", caseW22],
+  ["W23", caseW23],
 ];
 
 /** One case's failure is reported and counted, never a crash that hides the

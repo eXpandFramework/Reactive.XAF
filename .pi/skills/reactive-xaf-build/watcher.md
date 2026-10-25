@@ -25,8 +25,10 @@ Companion of `.pi/extensions/reactive-xaf-build/watcher.ts`. Started by
   date numbers (`20260919.1`). The this-run guard therefore compares only
   the HEAD build number's leading version token, and applies to the head
   step alone — steps 1-2 are fenced by the id baseline (`id > minId`).
-   A head build of a different version is not this run — wait (toast), then
-   give-up **steers**. Empty polls have their own grace budget — next bullet.
+   A head build of a different version is not this run: the watcher gives up AT
+   ONCE on the first one, naming expected vs found and the re-queue. Waiting on
+   a deadline for a build nothing queued is exactly the silent two-hour give-up
+   of 2026-10-25 (W16). Empty polls have their own grace budget — next bullet.
   (2026-09-19: comparing the raw number hit `Number("1-26")` = NaN, so a
   fully GREEN chain was rejected as "not this run", and the watcher gave up
   29 min after def 89 had succeeded.)
@@ -51,6 +53,15 @@ Companion of `.pi/extensions/reactive-xaf-build/watcher.ts`. Started by
 
 ## What it says
 
-`giveUp` (warning toast plus steer, then stop), the empty-poll retry line and
-the grace between them live in `watcher-notice.ts` — see `watcher-notice.md`.
-Every give-up path in this module calls that one function.
+`giveUp` (warning toast plus an ERROR steer, then stop), the retry lines and the
+grace between them live in `watcher-notice.ts` — see `watcher-notice.md`. Every
+give-up path in this module calls that one function.
+
+`applyPoll` switches on `parsePoll`'s typed answer, never on prose:
+
+- `build` → the in-flight line, the chain advance, or the terminal message.
+- `empty` → `emptyPoll`, retried inside the grace.
+- `error` / `auth` → `refusedPoll`: give up at once, the remedy in the message.
+- `error` / `transient` → `transientPoll`: retry inside the same grace.
+- `null` (no `STATUS=` line at all — a crashed script) → give up with the
+  stderr; nothing can classify it.

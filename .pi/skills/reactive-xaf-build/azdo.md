@@ -29,6 +29,27 @@ failure the failed record's log prints between LOGSTART/LOGEND markers
 or `STATUS=0;none;none;`. `parseStatus` also accepts the older 4-field
 line (no buildNumber) so existing fixtures keep working.
 
+## The call is classified, not guessed (2026-10-25)
+
+The query sits in a `try/catch` in both scripts and a refusal prints
+`STATUS=ERR;<auth|transient>;<message>` (`CANCEL=ERR;…` for the cancel). Before
+this, a refused or expired token was written as an error while the script
+CARRIED ON: `$b` stayed null, `STATUS=0;none;none;` was printed with exit 0, so
+a dead PAT read as an empty pipeline to every caller — the watcher waited on
+nothing until its deadline and \"Last build status\" answered \"No AzDO builds
+found\".
+
+- **`auth`** — matched on the server's own wording (`401|Unauthorized|Access
+  Denied|expired`). No retry clears it, so the watcher gives up on the FIRST
+  poll and names the remedy (renew the PAT, re-queue).
+- **`transient`** — anything else (a 429, a blip, a proxy). The watch keeps
+  retrying on the empty-poll grace clock and only reports if it never clears.
+
+A script-wide `$ErrorActionPreference = 'Stop'` was rejected for exactly that
+reason: it made a transient blip indistinguishable from a dead token, and the
+difference then had to be guessed from error prose downstream. The classifier is
+in the script that sees the failure; the consumers switch on the kind.
+
 ## Cancel script (`cancelAzDoScript`)
 
 Project-wide PATCH `{"status":"cancelling"}`. Output: `CANCEL=<id>;ok;<status>` /

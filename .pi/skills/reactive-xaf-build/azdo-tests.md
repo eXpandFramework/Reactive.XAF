@@ -33,3 +33,7 @@ Run: `npx tsx .pi/extensions/reactive-xaf-build/azdo-tests.ts`
 - T7 — the status log block targets the failed Task record.
 - T8 — 5-field `STATUS=id;status;result;buildNumber;reason` still
   extracts the log reason (`Release 26.1.301.1 exists`).
+- T9 — a refused status call (`STATUS=ERR;auth;…401…`) names the token and the
+  renewal, and never reads as "No AzDO builds found".
+- T10 — a transient cancel failure (`CANCEL=ERR;transient;…503…`) is reported
+  as retryable, never as "nothing to cancel".

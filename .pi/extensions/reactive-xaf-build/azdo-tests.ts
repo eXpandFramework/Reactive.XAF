@@ -265,6 +265,30 @@ async function caseT8(): Promise<void> {
   noErrors(w.handle, "T8");
 }
 
+// Section: T9 — a refused call is CLASSIFIED, so the status pick names the token
+async function caseT9(): Promise<void> {
+  const repo = mkRepo();
+  const runner = mkRun(crlf(["STATUS=ERR;auth;Response status code does not indicate success: 401 (Unauthorized)."]));
+  const w = await azdoHandle(repo, runner, STATUS_PICKS);
+  await w.handle.runCommand("devexpress", "");
+  const report = noticesOf(w.handle).join("\n");
+  check("T9: a refused status call names the token and the renewal, never 'no builds'", report.includes("token is expired or refused") && report.includes("Personal access tokens") && !report.includes("No AzDO builds found"), report);
+  answered(w.sel, "T9");
+  noErrors(w.handle, "T9");
+}
+
+// Section: T10 — a transient cancel failure is reported as retryable
+async function caseT10(): Promise<void> {
+  const repo = mkRepo();
+  const runner = mkRun(crlf(["CANCEL=ERR;transient;Response status code does not indicate success: 503 (Service Unavailable)."]));
+  const w = await azdoHandle(repo, runner, CANCEL_PICKS);
+  await w.handle.runCommand("devexpress", "");
+  const report = noticesOf(w.handle).join("\n");
+  check("T10: a transient cancel failure reads as 'retry', never as nothing to cancel", report.includes("AzDO cancel failed") && report.includes("retry") && !report.includes("No AzDO builds found to cancel"), report);
+  answered(w.sel, "T10");
+  noErrors(w.handle, "T10");
+}
+
 /** The contract, in the order it runs. */
 const CASES: Array<[string, () => Promise<void>]> = [
   ["T1", caseT1],
@@ -275,6 +299,8 @@ const CASES: Array<[string, () => Promise<void>]> = [
   ["T6", caseT6],
   ["T7", caseT7],
   ["T8", caseT8],
+  ["T9", caseT9],
+  ["T10", caseT10],
 ];
 
 /** One case's failure is reported and counted, never a crash that hides the

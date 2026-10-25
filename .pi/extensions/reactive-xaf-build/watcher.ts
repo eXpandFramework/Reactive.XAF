@@ -11,14 +11,15 @@
 
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { azdoStatusScript, parseStatus, azdoBuildUrl, defaultGhFetch, extractFailReason, failLogFromStdout } from "./azdo.js";
+import { azdoStatusScript, parsePoll, azdoBuildUrl, defaultGhFetch, extractFailReason, failLogFromStdout } from "./azdo.js";
+import type { AzDoStatus } from "./azdo.js";
 import type { BuildSeams } from "./build.js";
 import { sleep } from "./pane.js";
 import {
   rxProfile, nugetAssertUrl, nugetOrgNuspecUrl, githubReleasesUrl, githubReleaseUrl, compareVersions,
 } from "./profile.js";
 import type { RepoProfile, Choice, ChainStep, GithubOnSuccess } from "./profile.js";
-import { emptyPoll, giveUp } from "./watcher-notice.js";
+import { emptyPoll, giveUp, refusedPoll, transientPoll, wrongRun } from "./watcher-notice.js";
 
 function profileOf(seams: BuildSeams): RepoProfile {
   return seams.profile ?? rxProfile;
@@ -292,9 +293,11 @@ function thisRun(s: { buildNumber: string }, expected: string | null): boolean {
   return compareVersions(buildVersion(s.buildNumber), expected) === 0;
 }
 
-async function notifyWrongVersion(ctx: any, state: WatcherState, s: { id: number; buildNumber: string }, expected: string): Promise<void> {
+/** The in-flight poll's line: informational, once per poll, no steer. */
+async function notifyRunning(ctx: any, state: WatcherState, s: AzDoStatus, step: ChainStep): Promise<void> {
   const elapsed = Math.round((Date.now() - state.startedAt) / 60_000);
-  await ctx.ui.notify(`AzDO ${s.id} ${s.buildNumber} is not this run (${expected}) — waiting (${elapsed} min)…`, "info");
+  state.lastId = s.id;
+  await ctx.ui.notify(`AzDO ${s.id}: ${s.status} (${elapsed} min) — ${azdoBuildUrl(step.definition)}`, "info");
 }
 
 async function checkDeadline(ctx: any, state: WatcherState, opts: AzDoWatcherOptions, pi: any): Promise<boolean> {
@@ -319,21 +322,25 @@ async function pollTick(state: WatcherState, pi: any, ctx: any, seams: BuildSeam
 }
 
 async function applyPoll(state: WatcherState, pi: any, ctx: any, seams: BuildSeams, opts: AzDoWatcherOptions, step: ChainStep, res: { stdout: string; stderr?: string }): Promise<void> {
-  const s = parseStatus(res.stdout);
-  if (!s) {
+  const poll = parsePoll(res.stdout);
+  if (!poll) {
     const err = (res.stderr || "no STATUS= line").trim().slice(-200);
     await giveUp(ctx, state, `AzDO watcher: ${err} — check /devexpress status.`, pi);
     return;
   }
-  if (s.id === 0) {
+  if (poll.kind === "error") {
+    if (poll.failure === "auth") await refusedPoll(ctx, state, pi, poll.message);
+    else await transientPoll(ctx, state, opts, pi, poll.message);
+    return;
+  }
+  if (poll.kind === "empty") {
     await emptyPoll(ctx, state, opts, pi);
     return;
   }
+  const s = poll.build;
   state.emptySince = null;
   if (["notStarted", "inProgress", "cancelling"].includes(s.status)) {
-    const elapsed = Math.round((Date.now() - state.startedAt) / 60_000);
-    state.lastId = s.id;
-    await ctx.ui.notify(`AzDO ${s.id}: ${s.status} (${elapsed} min) — ${azdoBuildUrl(step.definition)}`, "info");
+    await notifyRunning(ctx, state, s, step);
     return;
   }
   // Only the chain head is queued by this run, so only it can be a stale
@@ -341,7 +348,7 @@ async function applyPoll(state: WatcherState, pi: any, ctx: any, seams: BuildSea
   // minId baseline (the newest build with id > the previous step's id).
   const expected = publishedVersion(opts.repoRoot, profileOf(seams).versionFile);
   if (state.step === 0 && !thisRun(s, expected)) {
-    await notifyWrongVersion(ctx, state, s, expected!);
+    await wrongRun(ctx, state, pi, s, expected!);
     return;
   }
   state.lastId = s.id;

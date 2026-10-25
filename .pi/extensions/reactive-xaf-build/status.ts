@@ -9,31 +9,46 @@
  * Info only — no steering.
  */
 
-import { azdoStatusScript, parseStatus, extractFailReason, failLogFromStdout, azdoBuildUrl, cancelAzDoScript, parseCancel } from "./azdo.js";
+import { azdoStatusScript, parsePoll, extractFailReason, failLogFromStdout, azdoBuildUrl, cancelAzDoScript, parseCancel } from "./azdo.js";
+import type { AzDoFailure } from "./azdo.js";
 import type { BuildSeams } from "./build.js";
 import { profileOf } from "./profile.js";
+
+/** Why an AzDO call could not be read, in the user's words. `auth` is the one
+ *  only they can fix. */
+function failureMessage(failure: AzDoFailure, message: string): string {
+  if (failure === "auth") {
+    return `the AzDO token is expired or refused, so nothing can be read (${message}). Renew it (Azure DevOps → User settings → Personal access tokens), then queue the pipeline again with Publish.`;
+  }
+  return `the call failed (${message}) — the pipeline may be fine, retry.`;
+}
 
 /** Query the last build and notify the outcome; returns the message. */
 export async function statusPhase(ctx: any, seams: BuildSeams, definition?: string): Promise<string> {
   definition ??= profileOf(seams).statusDef("Lab");
   const url = azdoBuildUrl(definition);
   const res = await seams.run(azdoStatusScript(definition), { timeoutMs: 60000 });
-  const s = parseStatus(res.stdout);
+  const poll = parsePoll(res.stdout);
   let msg: string;
-  if (!s) {
+  if (!poll) {
     const err = res.stderr.trim().slice(-300);
     msg = err ? `AzDO status check failed: ${err}` : "AzDO status check failed: no STATUS= line";
-  } else if (s.id === 0) {
+  } else if (poll.kind === "error") {
+    msg = `AzDO status check failed: ${failureMessage(poll.failure, poll.message)}`;
+  } else if (poll.kind === "empty") {
     msg = "No AzDO builds found for this definition.";
-  } else if (["notStarted", "inProgress", "cancelling"].includes(s.status)) {
-    msg = `AzDO build ${s.id} is ${s.status} — ${url}`;
-  } else if (s.result === "failed") {
-    const reason = s.reason || extractFailReason(failLogFromStdout(res.stdout));
-    msg = `AzDO build ${s.id} FAILED — ${reason || "no error lines"} — ${url}`;
-  } else if (s.result === "canceled") {
-    msg = `AzDO build ${s.id} canceled — ${url}`;
   } else {
-    msg = `AzDO build ${s.id} ${s.result} — ${url}`;
+    const s = poll.build;
+    if (["notStarted", "inProgress", "cancelling"].includes(s.status)) {
+      msg = `AzDO build ${s.id} is ${s.status} — ${url}`;
+    } else if (s.result === "failed") {
+      const reason = s.reason || extractFailReason(failLogFromStdout(res.stdout));
+      msg = `AzDO build ${s.id} FAILED — ${reason || "no error lines"} — ${url}`;
+    } else if (s.result === "canceled") {
+      msg = `AzDO build ${s.id} canceled — ${url}`;
+    } else {
+      msg = `AzDO build ${s.id} ${s.result} — ${url}`;
+    }
   }
   await ctx.ui.notify(msg, "info");
   return msg;
@@ -48,6 +63,8 @@ export async function cancelPhase(ctx: any, seams: BuildSeams): Promise<string> 
   if (!c) {
     const err = res.stderr.trim().slice(-300);
     msg = err ? `AzDO cancel failed: ${err}` : "AzDO cancel failed: no CANCEL= line";
+  } else if (c.failure) {
+    msg = `AzDO cancel failed: ${failureMessage(c.failure, c.message ?? "")}`;
   } else if (c.id === 0) {
     msg = "No AzDO builds found to cancel.";
   } else if (c.ok) {
