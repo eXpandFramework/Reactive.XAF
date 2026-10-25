@@ -1,6 +1,7 @@
 ---
 name: reactive-xaf-build
 description: Use when working on or invoking the /devexpress extension in Reactive.XAF — the Lab/Release build-publish flow (DX check, brx in a pane, commit, queue, AzDO monitor, GitHub draft publish) and its skip-build publish-only variant, including the command menu, the flow engine, RepoProfile, and their tests.
+drop-names: 93e1a4754 ExtensionRunner repoRoot fetchFeed pollMs let shared-utilities.json ensureBootProof boot.ok b:\Temp dependency-manager -e
 ---
 
 # /devexpress (reactive-xaf-build)
@@ -103,24 +104,13 @@ Run: `npx tsx .pi/extensions/reactive-xaf-build/{menu,build,watcher,azdo,profile
 
 ## Test harness route (project tree)
 
-Each suite carries the route itself, in the shape `menu-tests.ts` established
-(commit `93e1a4754`): `installRoute()` installs the resolver hook
-(`./resolve.mjs`), then `buildRealRunner({ cwd, ui, activate })` builds one host
-per case — so the command runs on pi's OWN `ExtensionRunner` with `activate`
-wired to the extension's own ports (`repoRoot`, `fetchFeed`, `pollMs`), and a
-case asserts on `handle.host` (`notices`, `errors`) or drives
-`handle.runCommand`. A suite keeps a module-scope `let` for the harness binding
-and disposes its hosts and temp dirs in a `finally`.
-
-`./resolve.mjs` is installed first (the `.js`→`.ts` map and the `@pi/` name
-floor over `shared-utilities.json`), then the harness (`buildRealRunner`) is
-imported by name; the extension's `__steer` and `__writeFileSync` seams are the
-real modules' publications, never a stub. The `ensureBootProof` proof that once
-lived in `menu-tests.ts` — asserted as `boot.ok` against the shared ledger, and
-red in a `b:\Temp` island because pi's spawn there pulled `dependency-manager`
-through its `-e` list — is gone with the last conversion, so no test file in
-this repo starts a pi and nothing spawns in any suite (`menu-tests.md` keeps the
-record of what that proof was and why it retired). `entry:` stays the other
-harness route (a file rather than a factory) and `ui.select` answers the first
-option unless the case owns it — every case answers its own prompts and fails on
-one it did not map.
+`installRoute()` installs the resolver hook (`./resolve.mjs`), then
+`buildRealRunner({ cwd, ui, activate })` builds one pi host per case, with
+`activate` wired to the extension's own ports; a case asserts on `handle.host`
+(`notices`, `errors`) or drives `handle.runCommand`, and disposes its hosts and
+temp dirs in a `finally`. Harness imports are DYNAMIC, after the hook, and the
+`__steer` / `__writeFileSync` seams are the real modules' publications, never a
+stub. Nothing in this repo spawns: no suite starts a pi. `entry:` is the other
+route (a file, not a factory) and `ui.select` answers the first option unless the
+case owns it. The retired boot proof, and the island measurement that killed it:
+`menu-tests.md`; the hook itself: `resolve.md`.
