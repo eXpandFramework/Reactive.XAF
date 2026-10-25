@@ -131,6 +131,13 @@ the bare-LF shape a seam may hand back.
 - T62 — the `log` seam: the status, add, commit and queue steps each leave one
   line naming their exit code, which is what makes a publish readable after the
   fact instead of reconstructed from git history.
+- T63-T64 — the status read against a chatty shell profile. T63: a banner line
+  alone is not a dirty file, so nothing is committed and the publish still
+  reaches the queue — and the recorded `runOpts` show the status read running
+  profile-free while `prx` keeps the profile. T64: a banner beside one real
+  change counts one file (`1 file: 1 modified`, `Publish (1 files)`), the add and
+  the commit are profile-free too, and the ignored line is named in the report
+  the user reads, not only on the log seam.
 
 The watcher's own contract (toast per poll, terminal steer, give-up, replace) is
 pinned by `watcher-tests.ts`; the CRLF status/cancel parse contract by

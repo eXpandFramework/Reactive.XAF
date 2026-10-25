@@ -1540,6 +1540,59 @@ async function caseT62(): Promise<void> {
   noErrors(handle, "T62");
 }
 
+// Section: T63–T64 — a chatty shell profile must not look like a changed file.
+// `pwsh -Command` loads the profile, and this machine's prints `high` on stdout
+// before the command's own output. A status read that counted it saw a dirty
+// tree that did not exist, staged nothing, failed the commit and stopped the
+// publish that had nothing to commit (2026-10-25).
+async function caseT63(): Promise<void> {
+  const repo = mkRepo(DX_PINS);
+  const runner = mkRunner([
+    { match: VM_CHECK_PREFIX, result: okResult(VM_RUN) },
+    { match: "git status --short", result: { code: 0, stdout: "high\r\n", stderr: "" } },
+    { match: "prx", result: okResult() },
+  ]);
+  const sel = uiFor({ DevExpress: "Publish", Project: "RX-XAF", "RX-XAF": "Lab", [PUBLISH_PROMPT]: "Publish" });
+  const handle = await menuHandle(repo, gateSeams(repo, runner), sel.ui);
+  await handle.runCommand("devexpress", "");
+  const notes = noticesOf(handle).join("\n");
+  check("T63: a banner line is not a changed file", notes.includes("nothing to commit") && !runner.calls.includes("git add -A"), notes + " | " + runner.calls.join(" | "));
+  check("T63: the publish reaches the queue", runner.calls.includes("prx") && notes.includes("published"), notes + " | " + runner.calls.join(" | "));
+  const statusOpts = runner.runOpts[runner.calls.indexOf("git status --short")];
+  const prxOpts = runner.runOpts[runner.calls.indexOf("prx")];
+  check("T63: the status read is profile-free, the queue keeps the profile", statusOpts?.noProfile === true && !prxOpts?.noProfile, JSON.stringify({ statusOpts, prxOpts }));
+  answered(sel, "T63");
+  noErrors(handle, "T63");
+}
+
+async function caseT64(): Promise<void> {
+  const repo = mkRepo(DX_PINS);
+  const runner = mkRunner([
+    { match: VM_CHECK_PREFIX, result: okResult(VM_RUN) },
+    { match: "git status --short", result: { code: 0, stdout: "high\r\n M src/x.cs\r\n", stderr: "" } },
+    { match: "git add -A", result: okResult() },
+    { match: "git commit -m *", result: okResult() },
+    { match: "prx", result: okResult() },
+  ]);
+  const sel = uiFor({ DevExpress: "Publish", Project: "RX-XAF", "RX-XAF": "Lab", [COMMIT_PROMPT]: "Commit", [PUBLISH_PROMPT]: "Publish" });
+  const handle = await menuHandle(repo, gateSeams(repo, runner), sel.ui);
+  await handle.runCommand("devexpress", "");
+  checkT64({ repo, runner, pane: null, sel, handle });
+}
+
+/** T64's checks: the real change counted, the shell policy on both kinds of
+ *  step, and the ignored line in the report the user reads. */
+function checkT64(p: Parts): void {
+  check("T64: the banner is dropped and the real change still counts", p.sel.asks.some((t) => t.includes("1 file: 1 modified") && t.includes("areas: src")), p.sel.asks.join(" | "));
+  check("T64: the message counts one file, and the commit ran", p.runner.calls.some((c) => c.startsWith('git commit -m "Publish (1 files)"')), p.runner.calls.join(" | "));
+  const summary = noticesOf(p.handle).join("\n");
+  check("T64: the ignored line reaches the report, not just the log", summary.includes("not status entries") && summary.includes("high"), summary);
+  const optsOf = (prefix: string) => p.runner.runOpts[p.runner.calls.findIndex((c: string) => c.startsWith(prefix))];
+  check("T64: the add and the commit are profile-free too", optsOf("git add -A")?.noProfile === true && optsOf("git commit")?.noProfile === true, JSON.stringify(p.runner.runOpts));
+  answered(p.sel, "T64");
+  noErrors(p.handle, "T64");
+}
+
 // Section: T49 — a dirty tree at the push is a prompt, not a silent push
 async function caseT49(): Promise<void> {
   const repo = mkRepo(DX_PINS, join("Xpand", "Xpand.ExpressApp.Modules"));
@@ -2172,6 +2225,8 @@ const CASES: Array<[string, () => Promise<void>]> = [
   ["T60", caseT60],
   ["T61", caseT61],
   ["T62", caseT62],
+  ["T63", caseT63],
+  ["T64", caseT64],
   ["BP1", caseBP1],
   ["BP2", caseBP2],
   ["BP3", caseBP3],

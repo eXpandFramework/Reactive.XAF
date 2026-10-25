@@ -18,15 +18,14 @@ question. Both callers fold its outcome into notes: `git add failed (exit N):
 <failure text>`, `git commit failed (exit N): <failure text>`, `committed:
 <msg>`, or `nothing left to commit: the tree is already committed (git said: …)`.
 
-Every command goes through `runStep(seams, cwd, label, cmd, timeoutMs)` — the
-status read, the add, the commit, and `publish.ts`'s push and queue command. One
-boundary owns three things: the timeout, the failure text (`text.ts`'s
+Every command goes through one boundary — `runGitStep` or `runStep`, two doors
+over one `step` (below). It owns the timeout, the failure text (`text.ts`'s
 `failureText(stderr, stdout)`: stderr when it spoke, else stdout — git explains
 most of its failures there — else `no output on either stream`), and ONE log line
-through the injected `log` seam (`<label>: exit <n>` plus git's words on a
-failure). Reading stderr alone printed a bare `git commit failed:` with an empty
-reason (2026-10-25); the exit code is named in the caller's own sentence, so a
-timeout-killed process (exit -1) reads as itself.
+through the injected `log` seam, shaped `<label>: exit <n>` plus the step's own
+note and, on a failure, git's words. Reading stderr alone printed a bare `git
+commit failed:` with an empty reason (2026-10-25); the exit code is named in the
+caller's own sentence, so a timeout-killed process (exit -1) reads as itself.
 
 A non-zero commit over a tree that is clean NOW is not a failure: the commit is
 asked to leave nothing uncommitted, and that holds. In a checkout two windows
@@ -51,6 +50,34 @@ lines or a named failure: `git status failed (exit N): <failure text>`, or
 `git status did not run: <message>` when the seam itself threw. A read that
 FAILED is never a clean tree — counting the stdout of a broken read reported
 "nothing to commit" and let the flow walk over a dirty tree.
+
+### What counts as a changed file
+
+A porcelain `--short` entry is EXACTLY `XY <path>`: two status columns, a space,
+then the path (`STATUS_ENTRY_RE`). Anything else on stdout is NOT a file. That is
+not pedantry: the command runner is `pwsh -Command`, which loads the user
+profile, and a profile that prints one word puts it in front of every command's
+output. This machine's profile printed `high`, `dirtyStatus` counted it, and
+every publish believed the tree was dirty — it staged nothing, `git commit`
+exited 1 with `nothing to commit, working tree clean`, and the publish stopped
+over work that did not exist (2026-10-25).
+
+The lines the read does not understand are NOT dropped quietly:
+`dirtyStatus` returns them in `DirtyRead.dropped`, the step's one log line names
+their count, and `commitPhase`/`pushDirtyPhase` put `git status printed <N>
+line(s) that are not status entries: <lines> — not counted as changes` in the
+report the user reads. A read that discarded part of git's output must never be
+indistinguishable from a fully read one.
+
+### Two doors, because the shell policy is not one decision
+
+- `runGitStep` NEVER loads the pwsh profile. `git` is an application on PATH, so
+  the profile has nothing to contribute and its chatter cannot reach a parse.
+  The status read, the add and the commit take this door, and so must every git
+  call added later.
+- `runStep` loads it, because `prx`/`brx` ARE profile-defined aliases and the
+  push may need the environment the profile sets up. The queue command and the
+  push take this door; their output is never parsed for entries.
 
 `dirtySummary(lines)` is what a prompt carries instead of paths:
 
@@ -101,4 +128,9 @@ summary inside the prompt), T49/T50/T51 (the three pre-push answers), T52 (a
 failed status read refuses instead of reading as clean), T53 (a commit abort
 drops the VM outcome), T58/T59/T61 (a failed commit reports git's stdout, the
 exit code when both streams are empty, and stderr when both spoke), T60 (a
-commit another process already landed continues the publish).
+commit another process already landed continues the publish), T62 (every step
+leaves one line on the `log` seam), T63 (a profile banner alone is not a dirty
+file, the status read is profile-free while the queue keeps the profile, and the
+publish still reaches the queue), T64 (a banner beside one real change still
+counts one file, the add and the commit are profile-free, and the ignored line
+reaches the report).

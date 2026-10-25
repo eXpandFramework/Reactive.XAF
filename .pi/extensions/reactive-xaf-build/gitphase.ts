@@ -19,6 +19,9 @@ import { failureText, tail } from "./text.js";
 export interface DirtyRead {
   ok: boolean;
   lines: string[];
+  /** stdout lines that were NOT `XY <path>` entries and were therefore not
+   *  counted as changes. Never silent: the caller reports them. */
+  dropped: string[];
   reason: string;
 }
 
@@ -32,34 +35,87 @@ export interface StepResult {
   said: string;
 }
 
-/** Every command this module runs goes through here — the status read, the add,
- *  the commit — and `publish.ts` pushes and queues through it too: ONE timeout,
- *  ONE failure text (both streams, never stderr alone) and ONE log line through
- *  the injected `log` seam. A suite that injects no seam logs nowhere; the
- *  composition root supplies the real sink (`build.ts` `defaultSeams`). */
-export async function runStep(
-  seams: BuildSeams, cwd: string, label: string, cmd: string, timeoutMs = 60000,
+/** Every command this module runs goes through `step` here: ONE timeout, ONE
+ *  failure text (both streams, never stderr alone) and ONE log line through the
+ *  injected `log` seam. TWO doors, because the shell policy is not one
+ *  decision:
+ *
+ *  - `runGitStep` NEVER loads the pwsh profile. A profile that prints a word
+ *    puts it in front of every command's stdout — this machine's printed `high`
+ *    and it was counted as a changed file (2026-10-25). `git` is an application
+ *    on PATH, so the profile has nothing to contribute.
+ *  - `runStep` loads it, because `prx`/`brx` ARE profile-defined aliases and the
+ *    push may need the environment the profile sets up.
+ *
+ *  A new git call takes `runGitStep`, so a future read cannot be born
+ *  contaminated; a profile-defined shell command takes `runStep`. A suite that
+ *  injects no `log` seam logs nowhere; `build.ts` `defaultSeams` supplies it. */
+async function step(
+  seams: BuildSeams, cwd: string, label: string, cmd: string, timeoutMs: number,
+  noProfile: boolean, note?: (res: StepResult) => string | undefined,
 ): Promise<StepResult> {
-  const res = await seams.run(cmd, { cwd, timeoutMs });
+  const res = await seams.run(cmd, { cwd, timeoutMs, noProfile });
   const said = failureText(res.stderr, res.stdout);
-  seams.log?.(`${label}: exit ${res.code}${res.code === 0 ? "" : ` — ${tail(said, 300)}`}`);
-  return { ok: res.code === 0, code: res.code, stdout: res.stdout, said };
+  const result: StepResult = { ok: res.code === 0, code: res.code, stdout: res.stdout, said };
+  const extra = note?.(result);
+  const onFailure = result.ok ? "" : ` — ${tail(said, 300)}`;
+  seams.log?.(`${label}: exit ${result.code}${extra ? ` — ${extra}` : ""}${onFailure}`);
+  return result;
+}
+
+/** A git command: profile-free, always. */
+export function runGitStep(
+  seams: BuildSeams, cwd: string, label: string, cmd: string, timeoutMs = 60000,
+  note?: (res: StepResult) => string | undefined,
+): Promise<StepResult> {
+  return step(seams, cwd, label, cmd, timeoutMs, true, note);
+}
+
+/** A shell command the user's profile defines (`prx`, `brx`) or one that needs
+ *  the environment it sets up (the push). */
+export function runStep(
+  seams: BuildSeams, cwd: string, label: string, cmd: string, timeoutMs = 60000,
+  note?: (res: StepResult) => string | undefined,
+): Promise<StepResult> {
+  return step(seams, cwd, label, cmd, timeoutMs, false, note);
 }
 
 /** One `git status --short` read: the changed lines, or a named failure. A read
  *  that FAILED is never a clean tree — counting the stdout of a broken read
  *  reported "nothing to commit" and let the flow walk over a dirty tree. */
 export async function dirtyStatus(seams: BuildSeams, repoRoot: string): Promise<DirtyRead> {
-  let step: StepResult;
+  let read: StepResult;
   try {
-    step = await runStep(seams, repoRoot, "git status", "git status --short", 30000);
+    read = await runGitStep(seams, repoRoot, "git status", "git status --short", 30000, (res) => {
+      const noise = splitStatus(res.stdout).dropped;
+      return noise.length ? `ignored ${noise.length} line(s) that are not status entries — ${tail(noise.join(" | "), 200)}` : undefined;
+    });
   } catch (err) {
-    return { ok: false, lines: [], reason: `git status did not run: ${err instanceof Error ? err.message : String(err)}` };
+    return { ok: false, lines: [], dropped: [], reason: `git status did not run: ${err instanceof Error ? err.message : String(err)}` };
   }
-  if (!step.ok) {
-    return { ok: false, lines: [], reason: `git status failed (exit ${step.code}): ${step.said}` };
+  if (!read.ok) {
+    return { ok: false, lines: [], dropped: [], reason: `git status failed (exit ${read.code}): ${read.said}` };
   }
-  return { ok: true, lines: step.stdout.split("\n").filter((l) => l.trim()), reason: "" };
+  const { lines, dropped } = splitStatus(read.stdout);
+  return { ok: true, lines, dropped, reason: "" };
+}
+
+/** A porcelain `--short` entry is EXACTLY `XY <path>`: two status columns, a
+ *  space, then the path. Anything else on stdout is not a changed file — and a
+ *  shell profile that prints a word (this machine's prints `high`) would
+ *  otherwise be counted as one. A phantom entry stages nothing, fails the
+ *  commit over a clean tree and stops a publish that had nothing to commit
+ *  (2026-10-25). */
+const STATUS_ENTRY_RE = /^[ MADRCU?!]{1,2} .+$/;
+
+/** git's `--short` stdout split into what it means: the entries, and the lines
+ *  that are not entries at all. CRLF tolerated — pwsh writes it. */
+function splitStatus(stdout: string): { lines: string[]; dropped: string[] } {
+  const raw = stdout.split("\n").map((l) => l.replace(/\r$/, "")).filter((l) => l.trim());
+  return {
+    lines: raw.filter((l) => STATUS_ENTRY_RE.test(l)),
+    dropped: raw.filter((l) => !STATUS_ENTRY_RE.test(l)),
+  };
 }
 
 /** git's two status letters as one word. An unknown pair reports its own letters
@@ -138,13 +194,13 @@ const COMMIT_TIMEOUT_MS = 180000;
  *  its exit code — because the flow cannot attest WHICH commit landed. */
 export async function commitWith(seams: BuildSeams, repoRoot: string, msg: string): Promise<CommitOutcome> {
   const notes: string[] = [];
-  const add = await runStep(seams, repoRoot, "git add", "git add -A", 60000);
+  const add = await runGitStep(seams, repoRoot, "git add", "git add -A", 60000);
   if (!add.ok) {
     notes.push(`git add failed (exit ${add.code}): ${add.said}`);
     return { committed: false, failed: true, notes };
   }
   const safeMsg = msg.replace(/"/g, "'");
-  const commit = await runStep(seams, repoRoot, "git commit", `git commit -m "${safeMsg}"`, COMMIT_TIMEOUT_MS);
+  const commit = await runGitStep(seams, repoRoot, "git commit", `git commit -m "${safeMsg}"`, COMMIT_TIMEOUT_MS);
   if (!commit.ok) {
     const after = await dirtyStatus(seams, repoRoot);
     if (after.ok && after.lines.length === 0) {
@@ -156,6 +212,13 @@ export async function commitWith(seams: BuildSeams, repoRoot: string, msg: strin
   }
   notes.push(`committed: ${msg}`);
   return { committed: true, failed: false, notes };
+}
+
+/** What a status read says about the lines it did not understand. User-visible
+ *  in the publish report, never log-only: a read that discarded part of git's
+ *  output must not be indistinguishable from a fully read one. */
+function droppedNote(dropped: string[]): string {
+  return `git status printed ${dropped.length} line(s) that are not status entries: ${tail(dropped.join(" | "), 200)} — not counted as changes`;
 }
 
 /** The build's commit step: read the tree, ask, commit. A clean tree is not a
@@ -170,6 +233,7 @@ export async function commitPhase(
     notes.push(dirty.reason);
     return { committed: false, failed: true, notes };
   }
+  if (dirty.dropped.length > 0) notes.push(droppedNote(dirty.dropped));
   if (dirty.lines.length === 0) {
     notes.push("nothing to commit");
     return { committed: true, failed: false, notes };
@@ -206,6 +270,7 @@ export async function pushDirtyPhase(
     notes.push(dirty.reason);
     return { failed: true, aborted: false };
   }
+  if (dirty.dropped.length > 0) notes.push(droppedNote(dirty.dropped));
   if (dirty.lines.length === 0) return { failed: false, aborted: false };
   const pick = await ctx.ui.select(
     `Dirty working tree before pushing to ${remote}\n${dirtySummary(dirty.lines)}\nCommit before pushing?`,
