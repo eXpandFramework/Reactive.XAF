@@ -36,13 +36,10 @@ Menu picks run in the INVOKING window. The eXpand pick uses
 
 ## Agent surface — the door and the fence
 
-An agent cannot type a slash command, so the same engine has a tool:
+An agent cannot type a slash command, so the same engine has a UI-free tool,
 `devexpress_build` (`action start|status`, `choice Lab|Release`, `project
-RX-XAF|eXpand`) — start returns at once with the run id and the pane, status the
-pane tail, and no UI is required: a decision it cannot answer aborts the flow
-instead of silently answering it. `fence.ts` refuses the same pipeline through
-every shell surface — a `tool_call` block, as lean-ctx does. Detail:
-**tool.md**, **fence.md**.
+RX-XAF|eXpand`); `fence.ts` refuses that pipeline through every shell surface
+(the `tool_call` block). Detail: **tool.md**, **fence.md**.
 
 ## Flow (Lab | Release)
 
