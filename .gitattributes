@@ -1,1 +1,2 @@
 text eol=crlf
+graphify-out/graph.json merge=graphify
