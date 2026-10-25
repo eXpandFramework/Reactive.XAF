@@ -22,7 +22,7 @@
  */
 
 import type { AzDoWatcherOptions, WatcherState } from "./watcher.js";
-import { steerError } from "./report.js";
+import { steerError, steerWarning } from "./report.js";
 
 /** Three minutes of unreadable polls: long enough for a queued build to appear,
  *  short enough that a watcher started with nothing queued says so. */
@@ -91,6 +91,32 @@ export async function transientPoll(ctx: any, state: WatcherState, opts: AzDoWat
  *  fix, so the watch ends on the FIRST poll with the remedy the user needs. */
 export async function refusedPoll(ctx: any, state: WatcherState, pi: any, message: string): Promise<void> {
   await giveUp(ctx, state, `AzDO refused the request: ${message} — the token is expired or refused, so nothing about this run can be read. ${TOKEN_REMEDY}`, pi);
+}
+
+/** A build that is still running and whose active task has gone quiet: a
+ *  WARNING, never a give-up. AzDO reads `inProgress` for a hung job too, so this
+ *  line is the only early evidence of a hang; the pipeline's own job timeout
+ *  ends the build, and the watch has to still be there to report that verdict
+ *  (2026-10-25: the 120-minute deadline had already killed the watch 30 minutes
+ *  before `Tests Workflow` was canceled at its 90-minute timeout). */
+export async function stalledPoll(ctx: any, pi: any, s: { id: number; activeName: string; silentMs: number }): Promise<void> {
+  const task = s.activeName || "the running task";
+  const msg = `AzDO ${s.id} is still inProgress but ${task} has written nothing for ${minutes(s.silentMs)} min — it looks hung, and the pipeline's own job timeout will end it. Still watching: the verdict will be reported.`;
+  await ctx.ui.notify(msg, "warning");
+  if (pi) steerWarning(pi, msg);
+}
+
+/** The monitor cannot see: BLIND_POLLS in-flight polls carried no readable
+ *  progress, so nothing at all can be said about this build. Reported ONCE per
+ *  build, as a warning — never as "hung", which would be a claim the evidence
+ *  does not support. The watch stays alive: the pipeline's own timeout still
+ *  ends the build, and that verdict has to reach the agent. Without this line,
+ *  removing the default deadline would trade one silent two-hour wait for
+ *  another whenever the timeline or a log cannot be read (2026-10-25). */
+export async function blindPoll(ctx: any, pi: any, s: { id: number; polls: number }): Promise<void> {
+  const msg = `AzDO ${s.id}: the build's progress cannot be read (${s.polls} polls carried no timeline/log line) — the monitor is blind about this build. Still watching its status; a job that stops writing will only surface when the pipeline's own timeout ends it.`;
+  await ctx.ui.notify(msg, "warning");
+  if (pi) steerWarning(pi, msg);
 }
 
 /** A finished HEAD build of another version is not this run: nothing was queued

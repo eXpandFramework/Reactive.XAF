@@ -16,10 +16,11 @@ import type { AzDoStatus } from "./azdo.js";
 import type { BuildSeams } from "./build.js";
 import { sleep } from "./pane.js";
 import {
-  rxProfile, nugetAssertUrl, nugetOrgNuspecUrl, githubReleasesUrl, githubReleaseUrl, compareVersions,
+  rxProfile, nugetAssertUrl, nugetOrgNuspecUrl, compareVersions,
 } from "./profile.js";
-import type { RepoProfile, Choice, ChainStep, GithubOnSuccess } from "./profile.js";
-import { emptyPoll, giveUp, refusedPoll, transientPoll, wrongRun } from "./watcher-notice.js";
+import type { RepoProfile, Choice, ChainStep } from "./profile.js";
+import { publishRelease } from "./github-release.js";
+import { blindPoll, emptyPoll, giveUp, refusedPoll, stalledPoll, transientPoll, wrongRun } from "./watcher-notice.js";
 
 function profileOf(seams: BuildSeams): RepoProfile {
   return seams.profile ?? rxProfile;
@@ -27,7 +28,12 @@ function profileOf(seams: BuildSeams): RepoProfile {
 
 export interface AzDoWatcherOptions {
   intervalMs?: number;
+  /** A BACKSTOP only, and only when a caller asks for one: by default the watch
+   *  has no wall-clock deadline at all (checkDeadline). */
   maxMs?: number;
+  /** How long the in-flight task may write nothing before the watch says it
+   *  looks hung. Sits below the 90-minute job timeout the pipeline enforces. */
+  stallMs?: number;
   /** How long an all-empty chain keeps retrying before the watcher says there
    *  is nothing to watch. Its own budget: the maxMs deadline belongs to a chain
    *  that has a build in flight. */
@@ -51,6 +57,14 @@ export interface AzDoWatcherHandle {
 export type AzDoWatcherStarter = (pi: any, ctx: any, seams: BuildSeams, opts?: AzDoWatcherOptions) => AzDoWatcherHandle;
 
 const WATCHER_KEY = Symbol.for("reactive-xaf-build.azdo-watcher");
+/** 45 minutes: below the 90-minute job timeout the pipeline enforces, and well
+ *  above the longest healthy leg observed — `Tests ModelMapper` ran 75 minutes
+ *  on 2026-10-25 and was writing the whole time. */
+const DEFAULT_STALL_MS = 45 * 60_000;
+/** Three in-flight polls with no readable progress is a report, not a guess:
+ *  the monitor cannot see this build, and saying so is the difference between a
+ *  blind watch and the silent two-hour wait this feature exists to end. */
+const BLIND_POLLS = 3;
 const NUGET_VERSION_RE = /Version='([^']+)'/g;
 const VERSION_RE = /Version\s*=\s*"([^"]+)"/;
 
@@ -70,6 +84,13 @@ export interface WatcherState {
    *  chain has a build. Cleared the moment a build appears, so a later queue is
    *  never judged by an old clock. */
   emptySince: number | null;
+  /** The stall episode already reported (`<buildId>:<task>`), so one silence is
+   *  one message. Cleared when the task writes again or the chain advances. */
+  stallKey: string | null;
+  /** Consecutive in-flight polls that carried no readable progress, per build:
+   *  the monitor's own blindness, reported once at BLIND_POLLS. */
+  blindPolls: number;
+  blindBuildId: number | null;
   stopped: boolean;
   stop: () => void;
 }
@@ -152,83 +173,25 @@ async function assertNugets(ctx: any, seams: BuildSeams, repoRoot: string | unde
   return last!;
 }
 
-type GhFetch = (url: string, opts?: { method?: string; body?: string }) => Promise<{ ok: boolean; status: number; text: string }>;
-
-function ghToken(opts: AzDoWatcherOptions): string | undefined {
-  return opts.ghToken ?? process.env.GH_TOKEN ?? process.env.GITHUB_TOKEN;
-}
-
-function findRelease(releases: Array<{ id?: number; tag_name?: string; draft?: boolean }>, version: string): { draftId?: number; published?: boolean } {
-  for (const r of releases) {
-    if (r.tag_name !== version) continue;
-    if (r.draft === true && typeof r.id === "number") return { draftId: r.id };
-    if (r.draft === false) return { published: true };
-  }
-  return {};
-}
-
-async function publishDraft(gh: GhFetch, repo: string, id: number, prerelease: boolean): Promise<{ ok: boolean; detail?: string }> {
-  const patch = await gh(githubReleaseUrl(repo, id), {
-    method: "PATCH",
-    body: JSON.stringify({ draft: false, prerelease }),
-  });
-  if (patch.ok) return { ok: true };
-  return { ok: false, detail: `GitHub publish failed: HTTP ${patch.status}` };
-}
-
-type AttemptOutcome =
-  | { kind: "publishedDraft"; detail: string }
-  | { kind: "published"; detail: string }
-  | { kind: "http"; detail: string }
-  | { kind: "retry" };
-
-async function githubAttempt(gh: GhFetch, repo: string, version: string, prerelease: boolean, onSuccess: GithubOnSuccess): Promise<AttemptOutcome> {
-  const res = await gh(githubReleasesUrl(repo));
-  if (!res.ok) return { kind: "http", detail: `GitHub query failed: HTTP ${res.status}` };
-  const found = findRelease(JSON.parse(res.text), version);
-  if (found.draftId !== undefined) {
-    if (onSuccess === "assertPublished") return { kind: "retry" };
-    const pub = await publishDraft(gh, repo, found.draftId, prerelease);
-    if (pub.ok) {
-      const kind = prerelease ? "pre-release" : "release";
-      return { kind: "publishedDraft", detail: `GitHub ${kind} ${version} published from draft` };
-    }
-    return { kind: "http", detail: pub.detail ?? "GitHub publish failed" };
-  }
-  if (found.published) return { kind: "published", detail: `GitHub release ${version} already published` };
-  return { kind: "retry" };
-}
-
+/** The chain's last step. The release attempt itself (token, draft PATCH, retry
+ *  loop) lives in github-release.ts; this is the watcher's half — which repo,
+ *  which policy, and where the version comes from. */
 async function publishGitHubRelease(ctx: any, seams: BuildSeams, repoRoot: string | undefined, opts: AzDoWatcherOptions): Promise<{ ok: boolean; detail: string; version: string | null }> {
   const p = profileOf(seams);
   const choice: Choice = opts.choice === "Release" ? "Release" : "Lab";
   const version = publishedVersion(repoRoot, p.versionFile);
-  if (!version) {
-    return { ok: false, detail: `no version read from ${p.versionFile}`, version: null };
-  }
-  const token = ghToken(opts);
-  if (!token) {
-    return { ok: false, detail: `GH_TOKEN is not set — the draft release ${version} must be published manually on GitHub`, version };
-  }
-  const attempts = opts.ghRetries ?? 6;
-  const delayMs = opts.ghRetryMs ?? 30_000;
-  const gh = seams.ghFetch ?? defaultGhFetch;
-  const prerelease = choice !== "Release";
-  const repo = p.githubRepo(choice);
-  const onSuccess = p.githubOnSuccess(choice);
-  for (let i = 0; i < attempts; i++) {
-    try {
-      const out = await githubAttempt(gh, repo, version, prerelease, onSuccess);
-      if (out.kind === "publishedDraft" || out.kind === "published") return { ok: true, detail: out.detail, version };
-      if (out.kind === "http" && i === attempts - 1) return { ok: false, detail: out.detail, version };
-    } catch (err) {
-      if (i === attempts - 1) {
-        return { ok: false, detail: `GitHub publish failed: ${err instanceof Error ? err.message : String(err)}`, version };
-      }
-    }
-    if (i < attempts - 1) await sleep(delayMs);
-  }
-  return { ok: false, detail: `GitHub release ${version} NOT found after ${attempts} tries`, version };
+  if (!version) return { ok: false, detail: `no version read from ${p.versionFile}`, version: null };
+  const out = await publishRelease({
+    gh: seams.ghFetch ?? defaultGhFetch,
+    repo: p.githubRepo(choice),
+    onSuccess: p.githubOnSuccess(choice),
+    prerelease: choice !== "Release",
+    version,
+    token: opts.ghToken ?? process.env.GH_TOKEN ?? process.env.GITHUB_TOKEN,
+    attempts: opts.ghRetries ?? 6,
+    delayMs: opts.ghRetryMs ?? 30_000,
+  });
+  return { ok: out.kind === "published", detail: out.detail, version };
 }
 
 async function advanceStep(state: WatcherState, ctx: any, s: { id: number; result: string }, next: ChainStep): Promise<void> {
@@ -236,6 +199,9 @@ async function advanceStep(state: WatcherState, ctx: any, s: { id: number; resul
   state.minId = s.id;
   state.step++;
   state.startedAt = Date.now();
+  state.stallKey = null;
+  state.blindPolls = 0;
+  state.blindBuildId = null;
   await ctx.ui.notify(`${previous.label} ${s.id} succeeded — watching the ${next.label}…`, "info");
 }
 
@@ -293,17 +259,53 @@ function thisRun(s: { buildNumber: string }, expected: string | null): boolean {
   return compareVersions(buildVersion(s.buildNumber), expected) === 0;
 }
 
-/** The in-flight poll's line: informational, once per poll, no steer. */
+/** The in-flight poll's line: informational, once per poll, no steer. It names
+ *  the task the build is inside, because that is the thing a reader needs when
+ *  a run outlives its estimate. */
 async function notifyRunning(ctx: any, state: WatcherState, s: AzDoStatus, step: ChainStep): Promise<void> {
   const elapsed = Math.round((Date.now() - state.startedAt) / 60_000);
   state.lastId = s.id;
-  await ctx.ui.notify(`AzDO ${s.id}: ${s.status} (${elapsed} min) — ${azdoBuildUrl(step.definition)}`, "info");
+  const where = s.progress?.activeName ? ` — ${s.progress.activeName}` : "";
+  await ctx.ui.notify(`AzDO ${s.id}: ${s.status} (${elapsed} min)${where} — ${azdoBuildUrl(step.definition)}`, "info");
 }
 
+/** The in-flight half of a poll: is this build making progress? Two failures
+ *  look alike from AzDO's side and are told apart here — a task that stopped
+ *  writing (`stalledPoll`) and a monitor that cannot read the progress at all
+ *  (`blindPoll`). Neither stops the watch: AzDO's own job timeout ends a hung
+ *  build, and that terminal verdict is what the agent needs. */
+async function reportStall(ctx: any, state: WatcherState, pi: any, opts: AzDoWatcherOptions, s: AzDoStatus): Promise<void> {
+  const p = s.progress;
+  if (!p || p.lastOutputAt === null) {
+    state.stallKey = null;
+    state.blindPolls = state.blindBuildId === s.id ? state.blindPolls + 1 : 1;
+    state.blindBuildId = s.id;
+    if (state.blindPolls === BLIND_POLLS) await blindPoll(ctx, pi, { id: s.id, polls: state.blindPolls });
+    return;
+  }
+  state.blindPolls = 0;
+  state.blindBuildId = null;
+  const silentMs = Date.now() - p.lastOutputAt;
+  if (silentMs < (opts.stallMs ?? DEFAULT_STALL_MS)) {
+    state.stallKey = null;
+    return;
+  }
+  const key = `${s.id}:${p.activeName}`;
+  if (state.stallKey === key) return;
+  state.stallKey = key;
+  await stalledPoll(ctx, pi, { id: s.id, activeName: p.activeName, silentMs });
+}
+
+/** The wall clock is a BACKSTOP, and only when a caller asks for one. The
+ *  default is NO deadline: a chain whose head job may legally run 90 minutes
+ *  outlives any number this module invents, and on 2026-10-25 the 120-minute
+ *  default ended the watch 30 minutes before the pipeline's own verdict. What
+ *  says a build is alive is progress (reportStall), not elapsed time. */
 async function checkDeadline(ctx: any, state: WatcherState, opts: AzDoWatcherOptions, pi: any): Promise<boolean> {
-  const maxMs = opts.maxMs ?? 7_200_000;
+  const maxMs = opts.maxMs;
+  if (typeof maxMs !== "number") return false;
   if (Date.now() - state.startedAt <= maxMs) return false;
-  await giveUp(ctx, state, `AzDO watcher gave up after ${Math.round(maxMs / 60_000)} min — check /devexpress status.`, pi);
+  await giveUp(ctx, state, `AzDO watcher gave up after ${Math.max(1, Math.round(maxMs / 60_000))} min — check /devexpress status.`, pi);
   return true;
 }
 
@@ -341,6 +343,7 @@ async function applyPoll(state: WatcherState, pi: any, ctx: any, seams: BuildSea
   state.emptySince = null;
   if (["notStarted", "inProgress", "cancelling"].includes(s.status)) {
     await notifyRunning(ctx, state, s, step);
+    await reportStall(ctx, state, pi, opts, s);
     return;
   }
   // Only the chain head is queued by this run, so only it can be a stale
@@ -368,6 +371,9 @@ export function startAzDoWatcher(pi: any, ctx: any, seams: BuildSeams, opts: AzD
     minId: 0,
     lastId: null,
     emptySince: null,
+    stallKey: null,
+    blindPolls: 0,
+    blindBuildId: null,
     stopped: false,
     stop: () => {
       if (state.stopped) return;

@@ -28,7 +28,7 @@ watcher.ts delivers through `ctx.ui.notify` and
 messages (`steersOf`, over `host.messages` with `messageOptions` index-aligned).
 Nothing spawns: the real AzDO, GitHub, nuget.org and pwsh are never touched, and
 the cases that need a slower or faster chain inject their own `intervalMs` /
-`maxMs`.
+`stallMs` / `maxMs`.
 
 Run: `npx tsx .pi/extensions/reactive-xaf-build/watcher-tests.ts`
 
@@ -66,3 +66,16 @@ Run: `npx tsx .pi/extensions/reactive-xaf-build/watcher-tests.ts`
   chain, no give-up.
 - W22 — a refused token (401 on the first poll) is reported at once with the
   token remedy, never as "no build found yet", and the steer is an ERROR.
+- W23 — a transient read failure (503) is retried and named; the chain still
+  completes and no give-up steer is sent.
+- W24 — a silent in-flight task is named as hung ONCE (toast + steer) while the
+  build is still `inProgress`, and the watch survives to report the terminal
+  FAILED verdict.
+- W25 — a task that keeps writing is never called hung, however long the build
+  runs.
+- W26 — unreadable progress is reported ONCE as a blind monitor (never as a hung
+  task) and the watch stays alive.
+- W27 — the stall re-arms only after output resumes: two silences, two messages,
+  no repeat per poll inside one silence.
+- W28 — a silence UNDER `stallMs` is not reported at all, so the threshold is
+  pinned from below as well as above.

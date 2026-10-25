@@ -41,10 +41,28 @@ Companion of `.pi/extensions/reactive-xaf-build/watcher.ts`. Started by
   toast PLUS a steer saying the true thing — no AzDO build was queued for this
   chain, so there is nothing to watch; queue it with Publish or Build &
   Publish. The clock is cleared the moment a build appears, so a later queue is
-  never judged by an old one. The 120-minute `maxMs` deadline is untouched and
-  belongs to a chain that has a build in flight. Before this the watcher said
+  never judged by an old one. A chain WITH a build in flight has no wall-clock
+  deadline any more — see the last two bullets. Before this the watcher said
   "waiting…" once a minute for two hours and never told the agent (2026-10-25).
-- Final step: `profile.githubOnSuccess(choice)`. Missing GH_TOKEN steers.
+- **A build that stops writing is reported, not waited out.** While the build is
+  in flight the status script also prints `PROGRESS=` — the task the build is
+  inside and the timestamp of that task's LAST log line (`azdo.md`). When that
+  stamp is older than `stallMs` (default 45 minutes) the watcher WARNS once per
+  episode, naming the task and the silence, and KEEPS WATCHING
+  (`watcher-notice.md` `stalledPoll`). It never gives up there: AzDO's own job
+  timeout ends a hung build, and that terminal verdict is what the agent needs.
+  2026-10-25: `Tests Workflow` wrote nothing from 14:43 and was canceled at its
+  90-minute timeout at 16:04, so that silence was the only evidence of the hang.
+  Progress that cannot be read is not a stall — no `PROGRESS=` line leaves the
+  watch quiet.
+- **No wall-clock deadline by default.** `maxMs` is a backstop a caller asks
+  for; without it the watch runs until the chain ends. The old 120-minute
+  default ended the watch at 15:34 on 2026-10-25, 30 minutes before the build
+  actually failed — which is why nothing was listening when it did.
+- Final step: `profile.githubOnSuccess(choice)`. Missing GH_TOKEN steers. The
+  attempt itself — the token, the draft PATCH and the retry loop — lives in
+  `github-release.ts` (`github-release.md`); this module only decides which
+  repo, which policy and which version.
 
 ## State
 
@@ -59,7 +77,10 @@ give-up path in this module calls that one function.
 
 `applyPoll` switches on `parsePoll`'s typed answer, never on prose:
 
-- `build` → the in-flight line, the chain advance, or the terminal message.
+- `build` → the in-flight line, the chain advance, or the terminal message. The
+  in-flight line is also where PROGRESS is decided: a task silent past `stallMs`
+  is `stalledPoll`, and three polls in a row with no readable progress are
+  `blindPoll`. Neither stops the watch (`watcher-notice.md`).
 - `empty` → `emptyPoll`, retried inside the grace.
 - `error` / `auth` → `refusedPoll`: give up at once, the remedy in the message.
 - `error` / `transient` → `transientPoll`: retry inside the same grace.

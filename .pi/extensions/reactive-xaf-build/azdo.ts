@@ -57,6 +57,19 @@ export interface AzDoStatus {
   result: string;
   buildNumber: string;
   reason: string;
+  /** Set while the build is in flight: the task it is inside and when that task
+   *  last wrote a log line. Absent when the script could not tell. */
+  progress?: BuildProgress;
+}
+
+/** Where an in-flight build actually is. `lastOutputAt` is the ONLY stall
+ *  signal AzDO offers: its `status` field reads `inProgress` for a hung job
+ *  too. 2026-10-25 build 36111 — `Tests Workflow` wrote nothing for 80 minutes
+ *  while every status field said the build was fine. */
+export interface BuildProgress {
+  activeName: string;
+  activeSince: number | null;
+  lastOutputAt: number | null;
 }
 
 /** Why a call could not be read. `auth` is final (renew the token); anything
@@ -123,6 +136,31 @@ const LOG_BLOCK = `
     $reason = "log fetch failed: " + $_.Exception.Message
   }`;
 
+/** PS: while the build is in flight, name the task it is inside and the
+ *  timestamp of that task's LAST log line. A job that stays `inProgress` while
+ *  it writes nothing is the hang no status field shows. PROGRESS=0 means the
+ *  timeline could not be read: silence about a task is never evidence that it
+ *  is stalled. */
+const PROGRESS_BLOCK = `
+if ($b.status -in @("inProgress","cancelling")) {
+  try {
+    $t = Invoke-AzureRestMethod ("build/builds/" + $b.id + "/timeline") @cred -ErrorAction Stop
+    $a = $t.records | Where-Object { $_.type -eq "Task" -and $_.state -eq "inProgress" -and $_.log.id } | Sort-Object startTime | Select-Object -First 1
+    if ($a) {
+      $st = if ($a.startTime -is [datetime]) { $a.startTime.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ") } else { "$($a.startTime)" }
+      $p = $t.records | Where-Object { $_.id -eq $a.parentId } | Select-Object -First 1
+      $name = if ($p) { "$($p.name) / $($a.name)" } else { "$($a.name)" }
+      $last = ""
+      try {
+        $lg = Invoke-AzureRestMethod ("build/builds/" + $b.id + "/logs/" + $a.log.id) @cred -ErrorAction Stop
+        $last = (@($lg -split "\\r?\\n") | Where-Object { $_ } | Select-Object -Last 1)
+      } catch { }
+      $ts = if ($last) { ($last -split " ")[0] } else { "" }
+      "PROGRESS=1;" + ($name -replace ";", ",") + ";" + $st + ";" + $ts
+    } else { "PROGRESS=0;;;" }
+  } catch { "PROGRESS=0;;;" }
+}`;
+
 /** The one-shot status script: newest build of a definition, current state,
  *  reason on failure. definitions defaults to 23 (Reactive.XAF); minId
  *  filters out builds the chain already passed (id <= minId). A refused call
@@ -136,6 +174,7 @@ ${errBlock("STATUS")}
   exit 0
 }
 if ($null -eq $b) { "STATUS=0;none;none;"; exit 0 }
+${PROGRESS_BLOCK}
 $reason = ""
 if ($b.result -eq "failed") {${LOG_BLOCK}
 }
@@ -174,7 +213,7 @@ export async function defaultGhFetch(url: string, opts: { method?: string; body?
 }
 
 /** The last `<kind>=` line of a script's output, or "" when none was printed. */
-function lastLine(stdout: string, kind: "STATUS" | "CANCEL"): string {
+function lastLine(stdout: string, kind: "STATUS" | "CANCEL" | "PROGRESS"): string {
   let line = "";
   for (const l of stdout.split(/\r?\n/)) {
     if (l.startsWith(`${kind}=`)) line = l;
@@ -205,6 +244,20 @@ function buildFromLine(line: string): AzDoStatus | null {
   return { id: Number(four[1]), status: four[2], result: four[3], buildNumber: "", reason: four[4].trim() };
 }
 
+/** The in-flight progress a PROGRESS= line carries, or undefined when the script
+ *  said it could not tell (PROGRESS=0, or no line at all). A field that does not
+ *  parse to a time is null, never zero: an unknown time must never read as a
+ *  very old one. */
+function progressFromStdout(stdout: string): BuildProgress | undefined {
+  const m = lastLine(stdout, "PROGRESS").match(/^PROGRESS=1;([^;]*);([^;]*);([^;]*)$/);
+  if (!m) return undefined;
+  const at = (s: string): number | null => {
+    const t = Date.parse(s);
+    return Number.isFinite(t) ? t : null;
+  };
+  return { activeName: m[1].trim(), activeSince: at(m[2]), lastOutputAt: at(m[3]) };
+}
+
 /** One poll, classified: a build, an empty pipeline, or the reason the call
  *  could not be read. null means the script printed NO STATUS= line — a crash
  *  nothing can classify, and the caller reports the stderr it has. */
@@ -215,7 +268,9 @@ export function parsePoll(stdout: string): AzDoPoll | null {
   if (failed) return { kind: "error", failure: failed.failure, message: failed.message };
   const build = buildFromLine(line);
   if (!build) return null;
-  return build.id === 0 ? { kind: "empty" } : { kind: "build", build };
+  if (build.id === 0) return { kind: "empty" };
+  build.progress = progressFromStdout(stdout);
+  return { kind: "build", build };
 }
 
 /** Parse the cancel script's last CANCEL= line; null when none was printed. */

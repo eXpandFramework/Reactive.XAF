@@ -1,5 +1,5 @@
 /**
- * reactive-xaf-build/watcher-tests — the AzDO chain watcher's contract (W1-W18).
+ * reactive-xaf-build/watcher-tests — the AzDO chain watcher's contract (W1-W28).
  *
  * Runtime: pi's OWN loader and ExtensionRunner, through the resolver-first route
  * this file carries itself — there is no hand-written pi here. The route is the
@@ -193,6 +193,18 @@ function crlf(lines: string[]): string {
 function running(id: number): string {
   return crlf([`STATUS=${id};inProgress;;`]);
 }
+/** An in-flight poll carrying the PROGRESS line, with the task's last log line
+ *  `silentMinutes` ago — a real elapsed time, so the threshold is exercised from
+ *  BOTH sides instead of only from far above it. */
+function runningWithTask(id: number, task: string, silentMinutes: number): string {
+  const last = new Date(Date.now() - silentMinutes * 60_000).toISOString();
+  return crlf([`PROGRESS=1;${task};2026-10-25T14:39:50Z;${last}`, `STATUS=${id};inProgress;;`]);
+}
+/** Build 36111's own progress line, captured from the AzDO API (the exact
+ *  strings are recorded in `azdo.md`): the `Run Tests` task inside
+ *  `Tests Workflow`, last log line 16:04:20Z after 80 minutes of silence.
+ *  Replayed verbatim — the wire format must not be this file's invention. */
+const CAPTURED_STALL = "PROGRESS=1;Tests Workflow / Run Tests;2026-10-25T14:39:50Z;2026-10-25T16:04:20.1296030Z";
 function done(id: number, result: string): string {
   return crlf([`STATUS=${id};completed;${result};`]);
 }
@@ -236,6 +248,11 @@ function fastWatcher(p: any, c: any, s: any, opts?: any): ReturnType<typeof star
  *  never enters a run. */
 function graceWatcher(emptyGraceMs: number): (p: any, c: any, s: any, opts?: any) => ReturnType<typeof startAzDoWatcher> {
   return (p: any, c: any, s: any, opts?: any) => startAzDoWatcher(p, c, s, { ...opts, intervalMs: 20, maxMs: 5000, emptyGraceMs });
+}
+/** The watcher with a test-sized stall threshold and NO wall-clock deadline:
+ *  the deadline is a backstop a caller asks for, never a default. */
+function stallWatcher(stallMs: number): (p: any, c: any, s: any, opts?: any) => ReturnType<typeof startAzDoWatcher> {
+  return (p: any, c: any, s: any, opts?: any) => startAzDoWatcher(p, c, s, { ...opts, intervalMs: 20, stallMs });
 }
 function mkFetch(nugetVersions: string[]): (url: string) => Promise<string> {
   return async (url: string) => {
@@ -739,6 +756,113 @@ async function caseW23(): Promise<void> {
   noErrors(w.handle, "W23");
 }
 
+// Section: W24 — a task that has written nothing for a long time is named while
+// the build is STILL inProgress, and the watch survives it: the terminal verdict
+// is what the agent needs (2026-10-25, `Tests Workflow` went silent for 80
+// minutes and the 120-minute deadline killed the watch 30 minutes before the
+// build actually failed).
+async function caseW24(): Promise<void> {
+  const repo = mkRepo();
+  const stale = crlf([CAPTURED_STALL, "STATUS=36111;inProgress;;"]);
+  const seams = mkSeams([stale, stale, stale, done(36111, "failed")]);
+  const w = await watcherHandle(repo, { run: seams.run, fetchFeed: mkFetch(LAB), startAzDoWatcher: stallWatcher(50) }, PUBLISH_LAB);
+  await w.handle.runCommand("devexpress", "");
+  await sleep(300);
+  const warnings = toastsOf(w.handle).filter((n) => n.type === "warning").map((n) => n.message);
+  check("W24: the silent task is named as hung, once", warnings.filter((n) => n.includes("Run Tests") && n.includes("hung")).length === 1, JSON.stringify(toastsOf(w.handle)));
+  check("W24: the stall reaches the agent as a steer", steersOf(w.handle).some((s) => s.content.includes("Run Tests")), JSON.stringify(steersOf(w.handle)));
+  check("W24: the watch survives the stall and reports the verdict", warnings.some((n) => n.includes("FAILED")), JSON.stringify(warnings));
+  answered(w.sel, "W24");
+  noErrors(w.handle, "W24");
+}
+
+// Section: W25 — a task that keeps writing is never called hung, however long
+// the build runs: progress, not elapsed time, is what says a build is alive.
+async function caseW25(): Promise<void> {
+  const repo = mkRepo();
+  let polls = 0;
+  const everyPollWrites = async (cmd: string) => {
+    if (cmd.includes("$top=5")) {
+      polls++;
+      if (polls > 6) return { code: 0, stdout: done(36111, "failed"), stderr: "" };
+      return { code: 0, stdout: runningWithTask(36111, "Tests ModelMapper", 0), stderr: "" };
+    }
+    return flowResult(cmd);
+  };
+  const w = await watcherHandle(repo, { run: everyPollWrites, fetchFeed: mkFetch(LAB), startAzDoWatcher: stallWatcher(400) }, PUBLISH_LAB);
+  await w.handle.runCommand("devexpress", "");
+  await sleep(350);
+  const warnings = toastsOf(w.handle).filter((n) => n.type === "warning").map((n) => n.message);
+  check("W25: the polls saw the build in flight", toastText(w.handle).some((n) => n.includes("inProgress")), JSON.stringify(toastText(w.handle)));
+  check("W25: a task that keeps writing is never called hung", !warnings.some((n) => n.includes("hung")), JSON.stringify(warnings));
+  answered(w.sel, "W25");
+  noErrors(w.handle, "W25");
+}
+
+// Section: W26 — progress that cannot be read is NOT evidence of a stall, and
+// it is not silence either: a monitor that cannot see must say so, once — the
+// alternative is the blind two-hour wait the deadline's removal was meant to end.
+async function caseW26(): Promise<void> {
+  const repo = mkRepo();
+  const blindPolls = async (cmd: string) => {
+    if (cmd.includes("$top=5")) return { code: 0, stdout: running(36111), stderr: "" };
+    return flowResult(cmd);
+  };
+  const w = await watcherHandle(repo, { run: blindPolls, fetchFeed: mkFetch(LAB), startAzDoWatcher: stallWatcher(50) }, PUBLISH_LAB);
+  await w.handle.runCommand("devexpress", "");
+  await sleep(250);
+  const warnings = toastsOf(w.handle).filter((n) => n.type === "warning").map((n) => n.message);
+  check("W26: a blind monitor is named ONCE, not per poll", warnings.filter((n) => n.includes("cannot be read")).length === 1, JSON.stringify(warnings));
+  check("W26: blindness is never reported as a hung task", !warnings.some((n) => n.includes("hung")), JSON.stringify(warnings));
+  check("W26: the watch is still alive", isAzDoWatcherActive());
+  answered(w.sel, "W26");
+  noErrors(w.handle, "W26");
+}
+
+// Section: W27 — the stall is reported once per episode and re-arms only when
+// the task writes again, so a long silence is one message, not one per poll.
+async function caseW27(): Promise<void> {
+  const repo = mkRepo();
+  const stale = runningWithTask(36111, "Run Tests", 130);
+  let polls = 0;
+  /** A "fresh" stamp built before the runner exists is already older than a
+   *  test-sized stallMs, so the resume is stamped per poll, at call time. */
+  const intermittentOutput = async (cmd: string) => {
+    if (cmd.includes("$top=5")) {
+      polls++;
+      const quiet = polls <= 2 || polls >= 4;
+      return { code: 0, stdout: quiet ? stale : runningWithTask(36111, "Run Tests", 0), stderr: "" };
+    }
+    return flowResult(cmd);
+  };
+  const w = await watcherHandle(repo, { run: intermittentOutput, fetchFeed: mkFetch(LAB), startAzDoWatcher: stallWatcher(400) }, PUBLISH_LAB);
+  await w.handle.runCommand("devexpress", "");
+  await sleep(300);
+  const warnings = toastsOf(w.handle).filter((n) => n.type === "warning").map((n) => n.message);
+  check("W27: the stall re-arms only after output resumes", warnings.filter((n) => n.includes("hung")).length === 2, JSON.stringify(warnings));
+  answered(w.sel, "W27");
+  noErrors(w.handle, "W27");
+}
+
+// Section: W28 — a silence UNDER the threshold is not a stall. The threshold is
+// exercised from below, so a detector that warned on every in-flight poll (or
+// ignored stallMs altogether) cannot pass this case.
+async function caseW28(): Promise<void> {
+  const repo = mkRepo();
+  const tenMinutesQuiet = async (cmd: string) => {
+    if (cmd.includes("$top=5")) return { code: 0, stdout: runningWithTask(36111, "Tests ModelMapper", 10), stderr: "" };
+    return flowResult(cmd);
+  };
+  const w = await watcherHandle(repo, { run: tenMinutesQuiet, fetchFeed: mkFetch(LAB), startAzDoWatcher: stallWatcher(45 * 60_000) }, PUBLISH_LAB);
+  await w.handle.runCommand("devexpress", "");
+  await sleep(250);
+  const warnings = toastsOf(w.handle).filter((n) => n.type === "warning").map((n) => n.message);
+  check("W28: a silence under stallMs is not reported", warnings.length === 0, JSON.stringify(warnings));
+  check("W28: the polls did run", toastText(w.handle).some((n) => n.includes("inProgress")), JSON.stringify(toastText(w.handle)));
+  answered(w.sel, "W28");
+  noErrors(w.handle, "W28");
+}
+
 /** The contract, in the order it runs. */
 const CASES: Array<[string, () => Promise<void>]> = [
   ["W1", caseW1],
@@ -764,6 +888,11 @@ const CASES: Array<[string, () => Promise<void>]> = [
   ["W21", caseW21],
   ["W22", caseW22],
   ["W23", caseW23],
+  ["W24", caseW24],
+  ["W25", caseW25],
+  ["W26", caseW26],
+  ["W27", caseW27],
+  ["W28", caseW28],
 ];
 
 /** One case's failure is reported and counted, never a crash that hides the

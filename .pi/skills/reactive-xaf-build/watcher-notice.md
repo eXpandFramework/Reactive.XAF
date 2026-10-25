@@ -1,6 +1,6 @@
 ---
 name: reactive-xaf-build/watcher-notice
-description: Use when working on what the background AzDO watcher tells the user — giving up (warning toast plus steer), the empty-poll retry line, and the grace budget that decides between them.
+description: Use when working on what the background AzDO watcher tells the user — giving up (warning toast plus steer), the empty-poll retry line, the stall and blind-monitor warnings, and the clocks that decide between them.
 ---
 
 # watcher-notice.ts — what the watcher says
@@ -14,8 +14,9 @@ stay in `watcher.md`; this module is the voice.
 One warning the user sees (`ctx.ui.notify(..., "warning")`) and one the agent
 reads as an ERROR (`report.ts` `steerError`: severity `error`, the message as
 its blockReason), then `state.stop()`. Every give-up path goes through it —
-header failure, deadline, an unreadable probe, a failed pipeline, an empty
-chain past its grace, a refused token — so a watcher never dies silently. The
+header failure, a caller-passed deadline, an unreadable probe, a failed pipeline,
+an empty chain past its grace, a refused token — so a watcher never dies
+silently. The
 steer is the whole point: a toast alone leaves an agent that started the watcher
 waiting for a completion it will never get, and a plain warning steer put a
 condition the agent cannot repair (an expired PAT) in the same key as chatter —
@@ -35,13 +36,54 @@ An empty poll is `STATUS=0`: nothing is queued for this chain.
 
 The clock lives on the watcher's state as `emptySince` and is cleared by
 `watcher.ts` the moment a poll returns a build, so a later queue is never judged
-by an old one. The 120-minute `maxMs` deadline is a different budget and is
-untouched: it bounds a chain that HAS a build in flight.
+by an old one. A chain that HAS a build in flight is watched by PROGRESS
+(`stalledPoll`, `blindPoll`), not by elapsed time — see the three clocks above.
 
 Why the grace exists (2026-10-25): a watcher started with nothing queued said
 "waiting…" once a minute for two hours and never told the agent, because an
 empty poll was treated as a retry until the deadline. Retrying forever is not
 neutral — it is a silent failure with a friendly voice.
+
+## The three clocks
+
+| clock | default | what it means | who speaks |
+|---|---|---|---|
+| `emptyGraceMs` | 3 min | nothing is queued for this chain — retried inside the grace | `emptyPoll`, then `giveUp` |
+| `maxMs` | **none** | a caller-supplied backstop only; the watch has NO wall-clock deadline by default | `giveUp` |
+| `stallMs` | 45 min | the in-flight task stopped writing — one warning, the watch keeps going | `stalledPoll` |
+
+There is no 120-minute default any more: a chain whose head job may legally run
+90 minutes outlives any number this module invents, and the 2026-10-25 watch
+died 30 minutes before the build it was watching failed. What says a build is
+alive is progress — and when progress cannot be read at all, `blindPoll` says so
+instead of staying quiet.
+
+## `stalledPoll(ctx, pi, { id, activeName, silentMs })`
+
+A build that is still `inProgress` while the task inside it has written nothing
+for `stallMs` (default 45 minutes, decided in `watcher.ts`). It WARNS — a toast
+plus a warning steer, no error severity and NO stop — because the condition is
+not the agent's to repair and the build is not over: AzDO's own job timeout ends
+it, and that verdict must still reach the agent.
+
+Reported once per episode: the watcher keys it `<buildId>:<task>` and clears the
+key when the task writes again or the chain advances, so a long silence is one
+message rather than one per poll. 2026-10-25 is why it exists — `Tests Workflow`
+wrote nothing for 80 minutes, every status field still said `inProgress`, and the
+watch had already ended on the deadline it used to have, 30 minutes before the
+build failed.
+
+## `blindPoll(ctx, pi, { id, polls })`
+
+The monitor cannot see: `BLIND_POLLS` (3, `watcher.ts`) in-flight polls carried
+no readable `PROGRESS=` line — the timeline or the log could not be read, or the
+last line carried no leading timestamp. One warning per build, never a per-poll
+repeat, and never the word "hung": that would be a claim the evidence does not
+support. The watch stays alive, because the pipeline's own timeout still ends the
+build and that verdict has to reach the agent.
+
+Why: dropping the default deadline without this line would trade one silent
+two-hour wait for another whenever the monitor goes blind.
 
 ## `refusedPoll(ctx, state, pi, message)`
 
