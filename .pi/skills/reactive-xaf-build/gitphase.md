@@ -14,8 +14,30 @@ order, this module owns everything that reads or writes the work tree.
 `commitWith(seams, repoRoot, msg)` is the only code that stages and commits:
 `git add -A`, then `git commit -m "<msg>"` with `"` folded to `'`. It never
 prompts, so a "commit" answer in either prompt can never turn into a second
-question. Both callers fold its outcome into notes: `git add failed: <tail>`,
-`git commit failed: <tail>`, or `committed: <msg>`.
+question. Both callers fold its outcome into notes: `git add failed (exit N):
+<failure text>`, `git commit failed (exit N): <failure text>`, `committed:
+<msg>`, or `nothing left to commit: the tree is already committed (git said: …)`.
+
+Every command goes through `runStep(seams, cwd, label, cmd, timeoutMs)` — the
+status read, the add, the commit, and `publish.ts`'s push and queue command. One
+boundary owns three things: the timeout, the failure text (`text.ts`'s
+`failureText(stderr, stdout)`: stderr when it spoke, else stdout — git explains
+most of its failures there — else `no output on either stream`), and ONE log line
+through the injected `log` seam (`<label>: exit <n>` plus git's words on a
+failure). Reading stderr alone printed a bare `git commit failed:` with an empty
+reason (2026-10-25); the exit code is named in the caller's own sentence, so a
+timeout-killed process (exit -1) reads as itself.
+
+A non-zero commit over a tree that is clean NOW is not a failure: the commit is
+asked to leave nothing uncommitted, and that holds. In a checkout two windows
+share, the other window can commit the same files between the prompt and the
+commit. The note reports what the two reads prove — git's own words and its exit
+code — and claims nothing about WHICH commit landed. The commit's own budget is
+180s (not the 60s of the other calls): a repo-local `post-commit` hook may
+rebuild a code graph after the ref moved, and a kill there reported a landed
+commit as a failure. `log` is a seam on `BuildSeams`, wired once in
+`build.ts` `defaultSeams` through a FIRST-USE dynamic import of the shared
+`Log` — a static `@pi/` import cannot link under the suite's resolver hook.
 
 `commitMessage(label, dxChanged, latest, changed)` — the message rules both
 prompts share: `Update DX to <version>` when the DX/pin phase rewrote pins,
@@ -25,7 +47,7 @@ else `<label> (<N> files)`. The labels are `Build fixes` (build flow) and
 ## The dirty read
 
 `dirtyStatus` runs one `git status --short` and returns either the changed
-lines or a named failure: `git status failed (exit N): <stderr tail>`, or
+lines or a named failure: `git status failed (exit N): <failure text>`, or
 `git status did not run: <message>` when the seam itself threw. A read that
 FAILED is never a clean tree — counting the stdout of a broken read reported
 "nothing to commit" and let the flow walk over a dirty tree.
@@ -77,4 +99,6 @@ messages, and `Update DX` winning over the label), T10 (clean tree, no commit
 prompt), T31 (a commit that runs while the VM layer is unreadable), T48 (the
 summary inside the prompt), T49/T50/T51 (the three pre-push answers), T52 (a
 failed status read refuses instead of reading as clean), T53 (a commit abort
-drops the VM outcome).
+drops the VM outcome), T58/T59/T61 (a failed commit reports git's stdout, the
+exit code when both streams are empty, and stderr when both spoke), T60 (a
+commit another process already landed continues the publish).

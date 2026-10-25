@@ -79,7 +79,11 @@ probe answers.
 
 `BuildSeams.profile?: RepoProfile` (default `rxProfile`). `ghFetch` for the
 watcher's GitHub step. `stampPath` overrides the green-build stamp store
-(default: this extension's own `reactive-xaf-build.db`, see below). The run
+(default: this extension's own `reactive-xaf-build.db`, see below). `log` is
+the publish phases' one line per command: `defaultSeams` wires it to
+`report.ts` `lazyLog()` (a first-use dynamic import of the shared `Log`, because
+a static `@pi/` specifier cannot link under the suite's resolver hook), and a
+suite that injects none logs nowhere. The run
 watch adds `probePane`, `sampleCpu`, `runPaths`
 and `runCadence`. `delegateWindow` was removed 2026-08-25 and the flow never
 consults a window.

@@ -21,7 +21,17 @@ unchanged: the same strings, the same delivery.
 - `finishMessage(event, id, choice, latest, notes, tailText)` — the dead-pane
   message ("the build pane is gone and no exit code was written") or the
   nonzero-exit `failureResult`.
-- `tail(s, n = 1500)` — the bounded tail, marked `...` when truncated.
+- `tail(s, n = 1500)` — imported from `text.ts`, the leaf this module and the
+  command layers both use; the bounded tail, marked `...` when truncated. What a
+  failed command said (`failureText`) lives there too, because it belongs to the
+  commands rather than to the flow's messages: see `text.md`.
+- `lazyLog()` — the sink the publish phases write through: one line per command
+  (`gitphase.ts` `runStep`). It resolves the shared `Log` on FIRST USE with a
+  dynamic `import("@pi/pi-dev/llm-utils.js")`, because a static `@pi/` specifier
+  is linked before the suite's resolver hook exists and the extension would not
+  load under the harness. A resolution that never happens is named once on
+  stderr and the sink goes quiet — logging can never fail a publish. A suite
+  that injects no `log` seam logs nowhere.
 - `minutes(ms)` — minutes, never below 1.
 
 ## Delivery

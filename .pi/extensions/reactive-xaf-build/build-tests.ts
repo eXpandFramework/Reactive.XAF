@@ -1449,6 +1449,97 @@ function checkT48(p: Parts, atPrompt: string[][]): void {
   noErrors(p.handle, "T48");
 }
 
+// Section: T58–T61 — a commit that failed says WHY it failed, and one that
+// already happened does not stop the publish. Git puts its reason on stdout
+// ("nothing to commit, working tree clean" is not stderr), so reading stderr
+// alone printed a bare `git commit failed:` and cost a whole diagnosis, and a
+// commit another window had already landed stopped a publish for nothing
+// (2026-10-25 incident).
+async function commitFailureCase(commitResult: any): Promise<Parts> {
+  const repo = mkRepo(DX_PINS);
+  const runner = mkRunner([
+    { match: VM_CHECK_PREFIX, result: okResult(VM_RUN) },
+    { match: "git status --short", result: { code: 0, stdout: " M src/x.cs\n", stderr: "" } },
+    { match: "git add -A", result: okResult() },
+    { match: "git commit -m *", result: commitResult },
+    { match: "git status --short", result: { code: 0, stdout: " M src/x.cs\n", stderr: "" } },
+  ]);
+  const sel = uiFor({ DevExpress: "Publish", Project: "RX-XAF", "RX-XAF": "Lab", [COMMIT_PROMPT]: "Commit" });
+  const handle = await menuHandle(repo, gateSeams(repo, runner), sel.ui);
+  await handle.runCommand("devexpress", "");
+  return { repo, runner, pane: null, sel, handle };
+}
+
+async function caseT58(): Promise<void> {
+  const p = await commitFailureCase({ code: 1, stdout: "On branch lab\nnothing to commit, working tree clean\n", stderr: "" });
+  const said = steersText(p.handle).join(" | ");
+  check("T58: the failure carries git's own stdout reason", said.includes("git commit failed (exit 1)") && said.includes("nothing to commit, working tree clean"), said);
+  check("T58: a tree still dirty still stops the publish", !p.runner.calls.includes("prx"), p.runner.calls.join(" | "));
+  answered(p.sel, "T58");
+  noErrors(p.handle, "T58");
+}
+
+async function caseT59(): Promise<void> {
+  const p = await commitFailureCase({ code: 1, stdout: "", stderr: "" });
+  const said = steersText(p.handle).join(" | ");
+  check("T59: a silent failure names the exit code anyway", said.includes("git commit failed (exit 1)") && said.includes("no output on either stream"), said);
+  answered(p.sel, "T59");
+  noErrors(p.handle, "T59");
+}
+
+async function caseT61(): Promise<void> {
+  const p = await commitFailureCase({ code: 1, stdout: "a stdout line nobody asked for", stderr: "fatal: a hook refused the commit" });
+  const said = steersText(p.handle).join(" | ");
+  check("T61: stderr wins when both streams spoke", said.includes("fatal: a hook refused the commit") && !said.includes("a stdout line nobody asked for"), said);
+  answered(p.sel, "T61");
+  noErrors(p.handle, "T61");
+}
+
+// T60 — the commit already happened: the tree is clean after a non-zero
+// commit, so the flow reports it and carries on to the queue.
+async function caseT60(): Promise<void> {
+  const repo = mkRepo(DX_PINS);
+  const runner = mkRunner([
+    { match: VM_CHECK_PREFIX, result: okResult(VM_RUN) },
+    { match: "git status --short", result: { code: 0, stdout: " M src/x.cs\n", stderr: "" } },
+    { match: "git add -A", result: okResult() },
+    { match: "git commit -m *", result: { code: 1, stdout: "nothing to commit, working tree clean\n", stderr: "" } },
+    { match: "git status --short", result: okResult("") },
+    { match: "prx", result: okResult() },
+  ]);
+  const sel = uiFor({ DevExpress: "Publish", Project: "RX-XAF", "RX-XAF": "Lab", [COMMIT_PROMPT]: "Commit", [PUBLISH_PROMPT]: "Publish" });
+  const handle = await menuHandle(repo, gateSeams(repo, runner), sel.ui);
+  await handle.runCommand("devexpress", "");
+  const notes = noticesOf(handle).join("\n");
+  check("T60: the clean tree after the refusal is reported with git's own words", notes.includes("nothing left to commit") && notes.includes("working tree clean"), notes);
+  check("T60: the publish carries on to the queue", runner.calls.includes("prx") && notes.includes("published"), notes + " | " + runner.calls.join(" | "));
+  check("T60: no failure warning over work already in history", noWarning(handle), JSON.stringify({ toasts: warningToasts(handle), steers: steersText(handle) }));
+  answered(sel, "T60");
+  noErrors(handle, "T60");
+}
+
+// T62 — the seam every step logs through: one line per command, naming its exit
+// code, so a publish can be read back instead of reconstructed from git history.
+async function caseT62(): Promise<void> {
+  const repo = mkRepo(DX_PINS);
+  const lines: string[] = [];
+  const runner = mkRunner([
+    { match: VM_CHECK_PREFIX, result: okResult(VM_RUN) },
+    { match: "git status --short", result: { code: 0, stdout: " M src/x.cs\n", stderr: "" } },
+    { match: "git add -A", result: okResult() },
+    { match: "git commit -m *", result: okResult() },
+    { match: "prx", result: okResult() },
+  ]);
+  const sel = uiFor({ DevExpress: "Publish", Project: "RX-XAF", "RX-XAF": "Lab", [COMMIT_PROMPT]: "Commit", [PUBLISH_PROMPT]: "Publish" });
+  const handle = await menuHandle(repo, { ...gateSeams(repo, runner), log: (m: string) => lines.push(m) }, sel.ui);
+  await handle.runCommand("devexpress", "");
+  const trail = lines.join(" | ");
+  check("T62: status, add, commit and the queue each log one line", ["git status:", "git add:", "git commit:", "prx:"].every((p) => lines.some((l) => l.startsWith(p))), trail);
+  check("T62: a line names its exit code", lines.some((l) => l.startsWith("git commit: exit 0")) && lines.some((l) => l === "prx: exit 0"), trail);
+  answered(sel, "T62");
+  noErrors(handle, "T62");
+}
+
 // Section: T49 — a dirty tree at the push is a prompt, not a silent push
 async function caseT49(): Promise<void> {
   const repo = mkRepo(DX_PINS, join("Xpand", "Xpand.ExpressApp.Modules"));
@@ -2076,6 +2167,11 @@ const CASES: Array<[string, () => Promise<void>]> = [
   ["T52", caseT52],
   ["T53", caseT53],
   ["T57", caseT57],
+  ["T58", caseT58],
+  ["T59", caseT59],
+  ["T60", caseT60],
+  ["T61", caseT61],
+  ["T62", caseT62],
   ["BP1", caseBP1],
   ["BP2", caseBP2],
   ["BP3", caseBP3],

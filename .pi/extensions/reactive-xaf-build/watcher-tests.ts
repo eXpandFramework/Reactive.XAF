@@ -338,7 +338,12 @@ async function caseW3(): Promise<void> {
   await w.handle.runCommand("devexpress", "");
   await sleep(250);
   const steers = steersOf(w.handle);
-  check("W3: gave-up warning + steer + watcher stopped", toastsOf(w.handle).some((n) => n.type === "warning" && n.message.includes("gave up")) && steers.length === 1 && steers[0].content.includes("gave up") && !isAzDoWatcherActive(), JSON.stringify(toastsOf(w.handle)) + " | " + JSON.stringify(steers));
+  // ONE give-up steer, and only one. The blind-monitor steer is a SEPARATE
+  // contract (W26/W28: progress that cannot be read is reported once), so the
+  // total steer count is not this case's business — asserting it went red the
+  // moment the blind monitor landed, on a flow that still gave up exactly once.
+  const gaveUp = steers.filter((s) => s.content.includes("gave up"));
+  check("W3: gave-up warning + steer + watcher stopped", toastsOf(w.handle).some((n) => n.type === "warning" && n.message.includes("gave up")) && gaveUp.length === 1 && !isAzDoWatcherActive(), JSON.stringify(toastsOf(w.handle)) + " | " + JSON.stringify(steers));
   answered(w.sel, "W3");
   noErrors(w.handle, "W3");
 }

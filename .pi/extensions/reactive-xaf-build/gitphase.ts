@@ -14,13 +14,7 @@
  */
 
 import type { BuildSeams } from "./build.js";
-
-/** A bounded tail for this module's own failure text. report.ts owns the shared
- *  one, which belongs to the flow's messages rather than to a git call. */
-function tail(s: string, n = 1500): string {
-  const t = s.trim();
-  return t.length <= n ? t : "..." + t.slice(-n);
-}
+import { failureText, tail } from "./text.js";
 
 export interface DirtyRead {
   ok: boolean;
@@ -28,20 +22,44 @@ export interface DirtyRead {
   reason: string;
 }
 
+/** What one command left behind: whether it worked, its exit code, its stdout
+ *  (the caller sometimes needs the text, not just the verdict) and the one
+ *  sentence a failure must carry. */
+export interface StepResult {
+  ok: boolean;
+  code: number;
+  stdout: string;
+  said: string;
+}
+
+/** Every command this module runs goes through here — the status read, the add,
+ *  the commit — and `publish.ts` pushes and queues through it too: ONE timeout,
+ *  ONE failure text (both streams, never stderr alone) and ONE log line through
+ *  the injected `log` seam. A suite that injects no seam logs nowhere; the
+ *  composition root supplies the real sink (`build.ts` `defaultSeams`). */
+export async function runStep(
+  seams: BuildSeams, cwd: string, label: string, cmd: string, timeoutMs = 60000,
+): Promise<StepResult> {
+  const res = await seams.run(cmd, { cwd, timeoutMs });
+  const said = failureText(res.stderr, res.stdout);
+  seams.log?.(`${label}: exit ${res.code}${res.code === 0 ? "" : ` — ${tail(said, 300)}`}`);
+  return { ok: res.code === 0, code: res.code, stdout: res.stdout, said };
+}
+
 /** One `git status --short` read: the changed lines, or a named failure. A read
  *  that FAILED is never a clean tree — counting the stdout of a broken read
  *  reported "nothing to commit" and let the flow walk over a dirty tree. */
 export async function dirtyStatus(seams: BuildSeams, repoRoot: string): Promise<DirtyRead> {
-  let res: { code: number; stdout: string; stderr: string };
+  let step: StepResult;
   try {
-    res = await seams.run("git status --short", { cwd: repoRoot, timeoutMs: 30000 });
+    step = await runStep(seams, repoRoot, "git status", "git status --short", 30000);
   } catch (err) {
     return { ok: false, lines: [], reason: `git status did not run: ${err instanceof Error ? err.message : String(err)}` };
   }
-  if (res.code !== 0) {
-    return { ok: false, lines: [], reason: `git status failed (exit ${res.code}): ${tail(res.stderr)}` };
+  if (!step.ok) {
+    return { ok: false, lines: [], reason: `git status failed (exit ${step.code}): ${step.said}` };
   }
-  return { ok: true, lines: res.stdout.split("\n").filter((l) => l.trim()), reason: "" };
+  return { ok: true, lines: step.stdout.split("\n").filter((l) => l.trim()), reason: "" };
 }
 
 /** git's two status letters as one word. An unknown pair reports its own letters
@@ -105,19 +123,35 @@ export interface CommitOutcome {
   notes: string[];
 }
 
+/** The commit's own budget, wider than the other git calls: a repo-local
+ *  `post-commit` hook may rebuild a code graph after the ref has moved, and a
+ *  kill there reported a commit that had already landed as a failure. */
+const COMMIT_TIMEOUT_MS = 180000;
+
 /** Stage the tree and commit it, with no prompt of its own: both callers ask
- *  their question first, so a "commit" answer never becomes a second one. */
+ *  their question first, so a "commit" answer never becomes a second one.
+ *
+ *  A non-zero commit over a tree that is clean NOW is not a failure: the commit
+ *  is asked to leave nothing uncommitted, and that holds. Usually another window
+ *  in the same checkout committed the same files between the prompt and the
+ *  commit. The note carries only what the two reads prove — git's own words and
+ *  its exit code — because the flow cannot attest WHICH commit landed. */
 export async function commitWith(seams: BuildSeams, repoRoot: string, msg: string): Promise<CommitOutcome> {
   const notes: string[] = [];
-  const add = await seams.run("git add -A", { cwd: repoRoot, timeoutMs: 60000 });
-  if (add.code !== 0) {
-    notes.push(`git add failed: ${tail(add.stderr)}`);
+  const add = await runStep(seams, repoRoot, "git add", "git add -A", 60000);
+  if (!add.ok) {
+    notes.push(`git add failed (exit ${add.code}): ${add.said}`);
     return { committed: false, failed: true, notes };
   }
   const safeMsg = msg.replace(/"/g, "'");
-  const commit = await seams.run(`git commit -m "${safeMsg}"`, { cwd: repoRoot, timeoutMs: 60000 });
-  if (commit.code !== 0) {
-    notes.push(`git commit failed: ${tail(commit.stderr)}`);
+  const commit = await runStep(seams, repoRoot, "git commit", `git commit -m "${safeMsg}"`, COMMIT_TIMEOUT_MS);
+  if (!commit.ok) {
+    const after = await dirtyStatus(seams, repoRoot);
+    if (after.ok && after.lines.length === 0) {
+      notes.push(`nothing left to commit: the tree is clean after git refused the commit (git exit ${commit.code}: ${commit.said})`);
+      return { committed: true, failed: false, notes };
+    }
+    notes.push(`git commit failed (exit ${commit.code}): ${commit.said}`);
     return { committed: false, failed: true, notes };
   }
   notes.push(`committed: ${msg}`);

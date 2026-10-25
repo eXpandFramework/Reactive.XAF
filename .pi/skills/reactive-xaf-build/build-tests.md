@@ -123,6 +123,14 @@ the bare-LF shape a seam may hand back.
 - T57 — a read that never answers cannot wedge the watch: with the CPU sampler,
   the pane capture and the pane probe all answering long past the tick's budget,
   the build's outcome still lands and the run stops (`run.md` has the design).
+- T58-T61 — what a failed commit says, and one that already happened. T58: the
+  reason git put on STDOUT is reported (a dirty tree still stops the publish),
+  T59: neither stream spoke so the exit code is named, T61: stderr wins when both
+  spoke, T60: the tree is clean after a non-zero commit, so the flow reports it
+  with git's own words and carries on to the queue with no failure warning.
+- T62 — the `log` seam: the status, add, commit and queue steps each leave one
+  line naming their exit code, which is what makes a publish readable after the
+  fact instead of reconstructed from git history.
 
 The watcher's own contract (toast per poll, terminal steer, give-up, replace) is
 pinned by `watcher-tests.ts`; the CRLF status/cancel parse contract by

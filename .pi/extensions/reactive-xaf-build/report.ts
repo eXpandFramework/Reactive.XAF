@@ -14,16 +14,40 @@
  */
 
 import type { RunEvent } from "./run.js";
+import { tail } from "./text.js";
 
 /** Minutes, never below 1: a report does not say "0 min". */
 export function minutes(ms: number): number {
   return Math.max(1, Math.round(ms / 60_000));
 }
 
-/** The last `n` characters of a captured pane, marked when truncated. */
-export function tail(s: string, n = 1500): string {
-  const t = s.trim();
-  return t.length <= n ? t : "..." + t.slice(-n);
+/** The log sink the publish phases write through, resolved ON FIRST USE.
+ *  `@pi/pi-dev/llm-utils.js` cannot be imported statically from this tree: a
+ *  static import is linked before the suite's resolver hook exists, so the
+ *  extension would not even load under the harness (`resolve.mjs` says why).
+ *  Under pi the dynamic import resolves through the loader every extension uses.
+ *  A sink that never resolves is named ONCE on stderr and goes quiet afterwards:
+ *  logging must never be able to fail a publish. */
+export function lazyLog(): (msg: string) => void {
+  let sink: ((msg: string) => void) | null = null;
+  let broken = false;
+  return (msg) => {
+    if (sink) {
+      sink(msg);
+      return;
+    }
+    if (broken) return;
+    void import("@pi/pi-dev/llm-utils.js").then(
+      (mod: { Log: (name: string) => (m: string) => void }) => {
+        sink = mod.Log("reactive-xaf-build");
+        sink(msg);
+      },
+      (err: unknown) => {
+        broken = true;
+        process.stderr.write(`reactive-xaf-build: no log sink — ${err instanceof Error ? err.message : String(err)}\n`);
+      },
+    );
+  };
 }
 
 export function failureResult(id: string, choice: string, latest: string, notes: string[], build: { code: number; stdout: string }): string {

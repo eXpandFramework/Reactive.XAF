@@ -24,7 +24,7 @@ import {
   pruneRunDirs, trackedWrite,
 } from "./run.js";
 import type { BuildRunSeams, RunCadence, RunPaths, RunReporter } from "./run.js";
-import { finishMessage, steerStarted, steerWarning, steerWatch, summaryResult, warn, watchMessage } from "./report.js";
+import { finishMessage, lazyLog, steerStarted, steerWarning, steerWatch, summaryResult, warn, watchMessage } from "./report.js";
 import { startAzDoWatcher } from "./watcher.js";
 import type { AzDoWatcherStarter } from "./watcher.js";
 import { defaultGhFetch } from "./azdo.js";
@@ -65,6 +65,9 @@ export interface BuildSeams {
   /** How the stamp store is reached. A suite points it at a loader it controls
    *  to prove the store's failure path; production leaves it unset. */
   stampLoad?: StampLoader;
+  /** One log line per publish command (`gitphase.ts` `runStep`); a suite that
+   *  injects none logs nowhere. */
+  log?: (msg: string) => void;
 }
 
 /** Which flow a pick runs: `build` always builds, `publish` never does, and
@@ -97,6 +100,7 @@ export function defaultSeams(): BuildSeams {
     sampleCpu: defaultSampleCpu,
     startAzDoWatcher,
     stampPath: stampDbPath(),
+    log: lazyLog(),
   };
 }
 

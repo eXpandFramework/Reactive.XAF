@@ -19,7 +19,8 @@
 import { sleep } from "./pane.js";
 import { startAzDoWatcher } from "./watcher.js";
 import { profileOf } from "./profile.js";
-import { commitMessage, commitPhase, pushDirtyPhase } from "./gitphase.js";
+import { commitMessage, commitPhase, pushDirtyPhase, runStep } from "./gitphase.js";
+import { tail } from "./text.js";
 import type { Choice } from "./profile.js";
 import type { BuildSeams } from "./build.js";
 import type { PushCheck } from "./gitphase.js";
@@ -38,11 +39,6 @@ const VM_PROBE_ATTEMPTS = 2;
 const VM_WAIT_POLLS = 18;
 /** Hyper-V's answer for an agent that is already up — expected on a blind start. */
 const VM_STATE_ERROR_RE = /current state/i;
-
-function tail(s: string, n = 1500): string {
-  const t = s.trim();
-  return t.length <= n ? t : "..." + t.slice(-n);
-}
 
 /** pwsh writes CRLF on Windows and terminates the last line: the read is split
  *  on it. A bare "\n" split leaves the \r on every line, where the anchored
@@ -277,17 +273,17 @@ async function pushThenQueue(
   if (remote) {
     const pre = await pushDirtyPhase(ctx, seams, repoRoot, remote, (n) => commitMessage(label, dxChanged, latest, n), notes);
     if (pre.failed || pre.aborted) return pre;
-    const push = await seams.run(`git push ${remote} HEAD:master`, { cwd: repoRoot, timeoutMs: 120000 });
-    if (push.code !== 0) {
-      notes.push(`git push ${remote} failed: ${tail(push.stderr)}`);
+    const push = await runStep(seams, repoRoot, `git push ${remote}`, `git push ${remote} HEAD:master`, 120000);
+    if (!push.ok) {
+      notes.push(`git push ${remote} failed (exit ${push.code}): ${push.said}`);
       return { failed: true, aborted: false };
     }
     notes.push(`pushed to ${remote}`);
   }
   const queueCmd = p.queueCmd(choice);
-  const res = await seams.run(queueCmd, { cwd: repoRoot, timeoutMs: 600000 });
-  if (res.code !== 0) {
-    notes.push(`${queueCmd} failed: ${tail(res.stderr)}`);
+  const res = await runStep(seams, repoRoot, queueCmd, queueCmd, 600000);
+  if (!res.ok) {
+    notes.push(`${queueCmd} failed (exit ${res.code}): ${res.said}`);
     return { failed: true, aborted: false };
   }
   notes.push(`${queueCmd} done (exit ${res.code})`);

@@ -83,6 +83,7 @@ RX-XAF|eXpand`); `fence.ts` refuses that pipeline through every shell surface
 | `run-script.ts` | `run-script.md` | A run's temp dir, supervisor script, marker, sentinel and prune. |
 | `run.ts` | `run.md` | Background build run: marker, pane death, stall/overrun, abort. |
 | `report.ts` | `report.md` | The flow's messages and the warn/steer pair. |
+| `text.ts` | `text.md` | The shared pure helpers: `tail`, `failureText`. |
 | `release.ts` | `release.md` | Release version bump (feed consultation). |
 | `watcher.ts` | `watcher.md` | Background AzDO chain watcher. |
 | `github-release.ts` | `github-release.md` | The chain's last step: GitHub draft publish or assert, with retries. |

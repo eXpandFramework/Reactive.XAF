@@ -37,7 +37,10 @@ Run: `npx tsx .pi/extensions/reactive-xaf-build/watcher-tests.ts`
 - W1 — full chain green (Lab): toast per poll, nugets asserted, GitHub
   DRAFT published (`prerelease:true`), chain complete, no steer.
 - W2 — failed Reactive.XAF build: warning + steer, then stop.
-- W3 — give-up deadline: warning + **steer** + stop.
+- W3 — give-up deadline: warning + **steer** + stop. The case counts the
+  give-up steers (exactly one), not every steer: a flow whose progress cannot be
+  read also steers the blind-monitor line once (W26/W28), and that is a separate
+  contract.
 - W4 — a new publish replaces the previous watcher.
 - W5 — command registers through the real index boot.
 - W6 — missing nuget version: warning + steer, chain continues.

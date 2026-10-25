@@ -29,6 +29,19 @@ commit-abort path (which returns without awaiting it) leaves no unhandled
 rejection. Both milestones are ONE notify: same-type notifies back to back lose
 the first, and from here on they belong to the same moment.
 
+## What a failed push or queue says
+
+Both go through `gitphase.ts`'s `runStep` — the one command boundary (timeout,
+failure text over both streams, one log line) — and carry their own exit code:
+
+- `git push <remote> failed (exit N): <failure text>`
+- `<profile.queueCmd> failed (exit N): <failure text>`
+
+`failureText` reads stderr first, then stdout — git explains most of its
+failures on stdout, and the queue command writes its own progress there — and
+reads `no output on either stream` when neither spoke. Reading one stream is
+what printed a bare `failed:` with an empty reason (2026-10-25).
+
 ## The git half (`gitphase.ts`)
 
 The dirty read, the summary a prompt carries, the message rules and both commit
