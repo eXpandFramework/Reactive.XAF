@@ -45,9 +45,11 @@ function abortLabel(): string {
 async function abortFlow(ctx: any, seams: BuildSeams): Promise<string> {
   const handle = await abortBuildRun(seams.closePane ?? defaultClosePane);
   setBuildPane(null);
-  const msg = handle
-    ? `Aborted the build run${handle.pane ? ` in pane ${handle.pane}` : ""} — the pane is closed and no failure is reported.`
-    : "No build run is being watched.";
+  const msg = !handle
+    ? "No build run is being watched."
+    : handle.pane
+      ? `Aborted the build run in pane ${handle.pane} — the pane is closed and no failure is reported.`
+      : "Stopped watching the in-process build: it cannot be killed from here, so it runs on and its outcome is no longer reported.";
   await ctx.ui.notify(msg, "info");
   return msg;
 }

@@ -14,7 +14,8 @@ This module is pure ENGINE: it imports no surface module. The command and its
 registration live in `menu.ts`, which drives this engine through the runners
 built by `createFlowRunners`. The run's lifecycle (`newRunId`, `runPaths`,
 `writeRunScript`, `supervisorCommand`, `pruneRunDirs`, `trackedWrite`) belongs
-to `run.ts`.
+to `run.ts`. The surfaces are two — `menu.ts` for the user, `tool.ts` for an
+agent — and both drive this same engine; neither owns a run.
 
 ## Phases (`runBuildFlow`)
 
@@ -44,8 +45,13 @@ to `run.ts`.
    `startBuildRun` takes over. No pane → the same command runs in-process
    through `watchInProcessRun` with the SAME env, handed to the command runner
    (`RunOpts.env`, see `pane.md`), so a fallback run cannot lose what the pane
-   run would have had. Either way the command never awaits the build,
-   so the agent stays reachable.
+   run would have had. That fallback is a RUN like any other:
+   `startBuildPhase` hands `watchInProcessRun` the same handle the pane path
+   registers, so `activeBuildRun()` and `isBuildRunActive()` answer for it and
+   the running check refuses a second start. Before that they answered null for
+   it, the check passed, and two brx processes collided on `obj/`, `bin/`,
+   `Build/nuspec/*` and `src/Common/AssemblyInfoVersion.cs`. Either way the
+   command never awaits the build, so the agent stays reachable.
 6. **Publish** (`publishPhase`) — runs from the watch when the marker reports
    exit 0: the VM gate (C11–C14 must answer Running, see `publish.md`) → commit
    → optional `git push ${profile.pushRemote} HEAD:master` → `profile.queueCmd`
@@ -78,12 +84,15 @@ consults a window.
 
 ## The surface boundary
 
-`createFlowRunners(pi, ctx, merged, cwd)` returns the two entries the command
-surface calls: `FlowRunner` (`runFlow(choice, skipBuild?, projectPick?)`) and
-`WatchStarter` (`startWatch(choice, projectPick?)`). Both resolve the profile
+`createFlowRunners(pi, ctx, merged, cwd)` returns the two entries a surface
+calls — **menu.ts** and **tool.ts** both do: `FlowRunner`
+(`runFlow(choice, skipBuild?, projectPick?)`) and `WatchStarter`
+(`startWatch(choice, projectPick?)`). Both resolve the profile
 and repo from the project pick (`seamsForPick`); a missing tree answers "not
 inside the repo" through `refuse`, which toasts it as a warning and returns it —
-the return value alone used to leave the user staring at nothing.
+the return value alone used to leave the user staring at nothing. A second
+start answers with the RUNNING run: its id and whether it lives in a pane or
+in-process, so a caller can find it instead of guessing why nothing happened.
 
 ## Skip-build variant
 

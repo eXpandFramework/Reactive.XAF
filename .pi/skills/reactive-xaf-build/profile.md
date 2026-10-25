@@ -46,3 +46,13 @@ Helpers: `profileByPick`, `resolveRepo`, `nugetAssertUrl`,
 `getLatestPackage`, `nextReleaseVersion` (next release on the DX minor:
 max(dxBase.Build, last published build + 1), revision 0), `readPrefixedPins`,
 `rewritePrefixedPins`, `compareVersions`, `profileOf`.
+
+## `pipelineEntrypoints` — the one owner of the build vocabulary
+
+`export const pipelineEntrypoints = { scripts, solutions }`: the pipeline's four
+scripts (`go.ps1`, `BuildPipeline.ps1`, `BuildDevExpress.XAF.ps1`,
+`QuickBuild.ps1`) and the three solutions `BuildDevExpress.XAF.ps1` builds
+(`:81`, `:186`, `:194`). `fence.ts` reads it — the command words it refuses come
+from `buildCmd`/`queueCmd`, these two lists from here — so a new entrypoint is
+added in ONE place and the refusal cannot fall behind what the build runs. Names
+are lowercased, because the fence compares them against a lowercased basename.

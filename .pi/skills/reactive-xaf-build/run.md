@@ -97,6 +97,17 @@ run rather than a wedged one. `build-tests.ts`'s T57 pins the whole thing: with
 the sampler, the pane capture and the pane probe all answering long past the
 budget, the build's outcome still lands.
 
+## The fallback is a run
+
+`watchInProcessRun` wraps its promise in the same `newRunState` factory the pane
+path uses, so `activeBuildRun()` and `isBuildRunActive()` answer for a pane-less
+build too. Before that they answered null, `runBuildFlow`'s running check passed,
+and a second start launched a concurrent brx — the obj/ bin/ nuspec collision the
+guard exists to prevent. The state is released when the build settles, and the
+settle path reports only while it still owns the state, so an abort (which
+cannot kill an in-process build) stops the watch and reports nothing. `menu.ts`'s
+abort text says exactly that instead of claiming a closed pane.
+
 ## Cadence (`RUN_CADENCE`)
 
 | Key | Default | Job |
@@ -118,8 +129,11 @@ windows), so the thresholds stay a seam, not a constant.
   returns false and the flow refuses with "already running".
 - `activeBuildRun()` — the run in flight, feeding the menu's abort label.
 - `isBuildRunActive()`, `stopBuildRun()`, `abortBuildRun(close)`.
-- `watchInProcessRun(promise, report)` — the no-pane fallback: the promise is
-  the signal, and the report still never blocks the command.
+- `watchInProcessRun(promise, report, handle)` — the no-pane fallback: the
+  promise is the signal, the report still never blocks the command, and the run
+  is registered like any other. The handle is REQUIRED, not optional: it is how
+  `activeBuildRun()` answers for a pane-less build, and an optional parameter
+  let a caller create a run nothing could see (see "The fallback is a run").
 - `readMarker(marker)` — consume-on-read: `undefined` when the file is absent
   or still empty (a mid-write is never read as success), a number, or null
   when the content is not a number (terminal, reported as a failure).

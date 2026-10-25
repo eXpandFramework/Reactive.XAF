@@ -14,7 +14,8 @@ parameter is a pick or a prompt.
 
 This module is the composition root. It imports the engine (`build.ts`) and
 drives it through `createFlowRunners`; the engine imports no surface.
-`index.ts` just calls `registerBuildCommand(pi)` from here.
+`index.ts` calls `registerBuildCommand(pi)` from here, and registers the agent's
+tool (`tool.md`) and the shell fence (`fence.md`) beside it.
 
 ## Registration (`registerBuildCommand`)
 
@@ -33,7 +34,8 @@ menu. Tests call it with fakes; the boot path calls it bare.
 - Abort is the only deliberate kill: `abortFlow` calls
   `abortBuildRun(seams.closePane ?? defaultClosePane)`, clears the pane key
   and reports "no failure is reported" — a deliberate stop is not a build
-  failure, so nothing steers.
+  failure, so nothing steers. A run with no pane cannot be killed from here, so
+  the message says the build runs on and only its report stops.
 - "Last build status" runs `statusPhase` against `profile.statusDef` (RX def
   23 / expand def 94), and "Cancel AzDO build" runs `cancelPhase`
   project-wide.

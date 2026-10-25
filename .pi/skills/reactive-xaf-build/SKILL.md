@@ -34,6 +34,16 @@ a 2023 leftover. Release is def 39 → 38 → 37.
 Menu picks run in the INVOKING window. The eXpand pick uses
 `resolveRepo` (cwd, then known roots only when cwd is the other repo).
 
+## Agent surface — the door and the fence
+
+An agent cannot type a slash command, so the same engine has a tool:
+`devexpress_build` (`action start|status`, `choice Lab|Release`, `project
+RX-XAF|eXpand`) — start returns at once with the run id and the pane, status the
+pane tail, and no UI is required: a decision it cannot answer aborts the flow
+instead of silently answering it. `fence.ts` refuses the same pipeline through
+every shell surface — a `tool_call` block, as lean-ctx does. Detail:
+**tool.md**, **fence.md**.
+
 ## Flow (Lab | Release)
 
 1. **DX check** — nuget.org flat-container, max stable `DevExpress.ExpressApp`.
@@ -64,7 +74,9 @@ Menu picks run in the INVOKING window. The eXpand pick uses
 
 | Module | Doc | Purpose |
 |---|---|---|
-| `index.ts` | — | Boot: registers the command (thin). |
+| `index.ts` | — | Boot: registers the command, the tool and the fence (thin). |
+| `tool.ts` | `tool.md` | The agent's door: `devexpress_build` (start/status), UI-free. |
+| `fence.ts` | `fence.md` | The shell refusal in front of the pipeline. |
 | `profile.ts` | `profile.md` | RepoProfile: RX default + expand. `profileByPick`, `resolveRepo`. |
 | `pins.ts` | `pins.md` | Expand-only RX package pin rewrite. |
 | `publish.ts` | `publish.md` | The VM layer and the phase order: commit, push, queue, watcher start. |
@@ -78,6 +90,8 @@ Menu picks run in the INVOKING window. The eXpand pick uses
 | `real-host.ts` | — | Never landed: the review reverted the shared wrapper, so each suite copies the route instead. |
 | `resolve.mjs` | `resolve.md` | Node hook: `.js`→`.ts` and the whitelisted `@pi/` floor, installed before any harness import. |
 | `menu-tests.ts` | `menu-tests.md` | Skip-build contract; the route's origin shape, on the same per-suite copy. |
+| `tool-tests.ts` | `tool-tests.md` | The door: started answer, second-start refusal, status tail, headless start. |
+| `fence-tests.ts` | `fence-tests.md` | The refusal: what is blocked, and what must still pass. |
 | `build-tests.ts` | `build-tests.md` | Full flow, on its own copy of the route. |
 | `delegate-tests.ts` | `delegate-tests.md` | Dormant delegation helper plus the flow publishing locally. |
 | `release-tests.ts` | `release-tests.md` | build.ps1 version bump (Release feed consultation). |
@@ -87,7 +101,7 @@ Menu picks run in the INVOKING window. The eXpand pick uses
 | `delegate.ts` | `delegate.md` | Dormant. |
 | `pane.ts` | `pane.md` | Pane seams: open, send, capture, close, probe, CPU sample. |
 
-Run: `npx tsx .pi/extensions/reactive-xaf-build/{menu,build,watcher,azdo,profile,release,delegate}-tests.ts`
+Run: `npx tsx .pi/extensions/reactive-xaf-build/{menu,build,watcher,azdo,profile,release,delegate,tool,fence}-tests.ts`
 
 ## Test harness route (project tree)
 

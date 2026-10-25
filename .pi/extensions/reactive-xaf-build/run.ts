@@ -226,16 +226,22 @@ export async function abortBuildRun(close?: PaneCloser): Promise<BuildRunHandle 
   return handle;
 }
 
-export function startBuildRun(handle: BuildRunHandle, seams: BuildRunSeams, report: RunReporter): boolean {
-  if (isBuildRunActive()) return false;
-  const cadence = { ...RUN_CADENCE, ...seams.cadence };
+/** The state a start installs. The pane path adds a poll timer to it; the
+ *  in-process path has nothing to poll, only a promise to settle. */
+function newRunState(handle: BuildRunHandle): RunState {
   const now = Date.now();
-  const state: RunState = {
+  return {
     handle, timer: null, lastCapture: "", lastOutputAt: now, lastCpu: null, lastCpuAt: now,
     panePid: null, paneAlive: null, paneReadAt: null, cpuReadAt: null,
     lastProbeAt: 0, lastCpuSampleAt: 0, stalled: false, overran: false,
     polling: false, stopped: false,
   };
+}
+
+export function startBuildRun(handle: BuildRunHandle, seams: BuildRunSeams, report: RunReporter): boolean {
+  if (isBuildRunActive()) return false;
+  const cadence = { ...RUN_CADENCE, ...seams.cadence };
+  const state: RunState = newRunState(handle);
   (globalThis as any)[RUN_KEY] = state;
   const tick = () => void pollRun(state, seams, cadence, report);
   state.timer = setInterval(tick, cadence.signalMs);
@@ -244,11 +250,29 @@ export function startBuildRun(handle: BuildRunHandle, seams: BuildRunSeams, repo
 }
 
 /** A build with no pane (the fallback): the promise is the signal, and the
- *  outcome still arrives as a report instead of an await inside the command. */
-export function watchInProcessRun(build: Promise<{ code: number; stdout: string }>, report: RunReporter): void {
+ *  outcome still arrives as a report instead of an await inside the command.
+ *
+ *  It is a RUN like any other, and the handle is REQUIRED, not optional: it is
+ *  how `activeBuildRun()` and `isBuildRunActive()` answer for it, so a second
+ *  start is refused instead of colliding on obj/, bin/, Build/nuspec/* and
+ *  src/Common/AssemblyInfoVersion.cs. An optional parameter let a caller create
+ *  a run nothing could see, which is the collision this guard exists to stop.
+ *  The state is released when the build settles; an abort (which cannot kill an
+ *  in-process build) stops the watch and reports nothing. */
+export function watchInProcessRun(
+  build: Promise<{ code: number; stdout: string }>, report: RunReporter, handle: BuildRunHandle,
+): void {
+  const state = isBuildRunActive() ? null : newRunState(handle);
+  if (state) (globalThis as any)[RUN_KEY] = state;
+  const mine = () => state === null || (globalThis as any)[RUN_KEY] === state;
+  const settle = (event: RunEvent) => {
+    if (!mine()) return; // an abort already stopped the watch: report nothing
+    if (state) stopBuildRun();
+    return report(event);
+  };
   build
-    .then((res) => report({ kind: "done", code: res.code, tail: res.stdout }))
-    .catch((err) => report({ kind: "done", code: -1, tail: String(err) }));
+    .then((res) => settle({ kind: "done", code: res.code, tail: res.stdout }))
+    .catch((err) => settle({ kind: "done", code: -1, tail: String(err) }));
 }
 
 /** Consume-on-read the supervisor's exit marker. undefined = not written yet,

@@ -195,7 +195,10 @@ async function startBuildPhase(
   if (!pane) {
     await ctx.ui.notify("Build pane could not be opened — building in-process.", "warning");
     setBuildPane(null);
-    watchInProcessRun(seams.run(cmd, { cwd: repo, timeoutMs: 3_600_000, env: profile.buildEnv ?? {} }), report);
+    watchInProcessRun(
+      seams.run(cmd, { cwd: repo, timeoutMs: 3_600_000, env: profile.buildEnv ?? {} }), report,
+      { runId: started.runId, pane: null, marker: started.marker, startedAt: Date.now() },
+    );
     return started;
   }
   started.pane = pane;
@@ -291,7 +294,8 @@ async function runBuildFlow(pi: any, ctx: any, seams: BuildSeams, choice: string
     }
     const running = activeBuildRun();
     if (running) {
-      return refuse(ctx, `${id} build is already running in pane ${running.pane ?? "the build host"} — stop it with /devexpress → "Abort build" first.`);
+      const where = running.pane ? `pane ${running.pane}` : "in-process";
+      return refuse(ctx, `${id} build is already running (run ${running.runId}, ${where}) — stop it with /devexpress → "Abort build" first.`);
     }
     const local = await runLocalBuild(ctx, seams, choice, repo, notes);
     await prewarmPhase(pi, seams, notes, id, choice);

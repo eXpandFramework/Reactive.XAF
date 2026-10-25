@@ -96,6 +96,16 @@ function expandChain(choice: Choice): ChainStep[] {
   ];
 }
 
+/** The pipeline's own entrypoints and solutions, in ONE place: `fence.ts`
+ *  refuses them through a shell, and `BuildDevExpress.XAF.ps1` builds exactly
+ *  these three solutions (`:81`, `:186`, `:194`). A new script or solution is
+ *  added HERE, so the refusal cannot fall behind what the build runs. Names are
+ *  lowercased: the fence compares them against a lowercased basename. */
+export const pipelineEntrypoints: { scripts: readonly string[]; solutions: readonly string[] } = {
+  scripts: ["go.ps1", "buildpipeline.ps1", "builddevexpress.xaf.ps1", "quickbuild.ps1"],
+  solutions: ["extensions.sln", "modules.sln", "tests.sln"],
+};
+
 export const rxProfile: RepoProfile = {
   label: "Reactive.XAF",
   menuProjectPick: "RX-XAF",
