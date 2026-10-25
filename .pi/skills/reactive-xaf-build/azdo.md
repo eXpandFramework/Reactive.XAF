@@ -31,19 +31,45 @@ line (no buildNumber) so existing fixtures keep working.
 
 ## The progress line (`PROGRESS=`)
 
-While the build is in flight the script also prints
-`PROGRESS=<ok>;<task>;<taskStart>;<lastOutput>`. `ok=1` carries the task the
-build is inside — the oldest `inProgress` Task record that has a `log.id` — when
-it started, and the timestamp of that task's LAST log line (the first token of
-the last non-empty line). `ok=0`, or no line at all, means the timeline or the
-log could not be read.
+Three shapes, one per state the build can be in:
+
+- `PROGRESS=queue;<status>;<queueTime>` — `notStarted`/`postponed`: no agent has
+  picked the build up, so nothing can be produced and nothing is stalled.
+- `PROGRESS=1;<record>;<recordStart>;<lastOutput>;<source>` — in flight.
+- `PROGRESS=0;;;` — the timeline could not be read. The ONLY blindness shape.
+
+`<source>` is the LAST field and is OPTIONAL: absent means `task`. That is why
+the four-field line captured from build 36111 below still parses, and W24 in
+`watcher-tests.ts` replays it verbatim to keep it that way. The parser turns the
+line into the `BuildProgress` union (`queue` | `running` | `blind`), and
+`renderProgressLine` is the one place that turns a reading back INTO the wire
+line — the watcher's tests build their fixtures through it rather than re-typing
+the format (`watcher-tests.md`).
+
+`<record>` is the deepest record still in flight: an `inProgress` Task, else a
+Phase, else a Job (the parent's name is prefixed when there is one). A `log.id`
+is NOT required — build 36112's live `Build` task reported `log: null` for two
+hours, and requiring one made a silent build look unreadable.
+
+`<source>` says where `<lastOutput>` came from:
+
+- `task` — the record's own log. The last 30 lines are scanned for the last
+  AzDO stamp (`YYYY-MM-DDTHH:mm:ss[.fffffff]Z`), so a trailing continuation line
+  carrying no timestamp no longer hides the real one.
+- `logs` — the task opened no log of its own, so the reading is the newest
+  `lastChangedOn` across `build/builds/{id}/logs` (one extra REST call, made only
+  on this path). A frozen watermark is still output evidence: it is silence, not
+  blindness.
 
 Why: AzDO's `status` reads `inProgress` for a hung job too, so silence is the
 only early evidence of a hang (2026-10-25: `Tests Workflow` wrote nothing for 80
 minutes while every status field said the build was fine). `parsePoll` attaches
-it to the build as `progress`; `progressFromStdout` turns an unparseable stamp
-into `null`, never `0` — an unknown time must never read as a very old one. The
-watcher's `stallMs` decision is the only consumer (`watcher.md`).
+the reading to the build as `progress` (the `BuildProgress` union);
+`progressFromStdout` degrades an unparseable stamp to `blind`, never to a very
+old reading. A 4-field line from an older script parses as `source=task`. The
+`stallMs` and `queueMs` verdicts in `watcher-notice.ts` (`reportProgress`) are
+the only consumers (`watcher.md`), and only `PROGRESS=0` ever reaches
+`blindPoll`.
 
 ### Captured output (build 36111, 2026-10-25)
 
@@ -57,13 +83,32 @@ PROGRESS=1;Tests Workflow / Run Tests;2026-10-25T14:39:50Z;2026-10-25T16:04:20.1
 The `PROGRESS` line IS the hang: `Run Tests` inside `Tests Workflow`, started
 14:39:50Z, whose last log line (`##[section]Finishing: Run Tests`) was written at
 16:04:20Z — 84 minutes later, when the 90-minute job timeout canceled it. W24 in
-`watcher-tests.ts` replays these exact strings.
+`watcher-tests.ts` replays these exact strings (4 fields, no `source` — it parses
+as a task reading, which is why the older shape keeps working).
 
-The script prints `PROGRESS=0;;;` when the timeline cannot be read, and leaves
-the timestamp field empty when the last log line carries no leading timestamp: it
-never invents a time, because an unknown time must never read as a very old one.
-Both shapes make the progress unknown, and `watcher.ts` reports a monitor that
-cannot see (`blindPoll`) rather than guessing.
+### Observed record shape (build 36112, 2026-10-25) — the case that forced `logs`
+
+Measured from AzDO while the build sat in flight: task `Build` `inProgress`
+since 18:57:46Z with `log: null`, every pending task `log: null`, and all five
+log containers unchanged since 18:57:48Z. The old script found no candidate
+record and printed `PROGRESS=0;;;` — so the monitor called itself blind for two
+hours while the newest container's `lastChangedOn` was stating exactly how long
+the silence had been.
+
+### Line this block prints for it — RECONSTRUCTED, not captured
+
+Nothing was observed on the wire: the build was canceled before the new script
+ever ran against it. What follows is the output of `azdoStatusScript` under a
+replayed `Invoke-AzureRestMethod` returning those records, run by hand:
+
+```
+PROGRESS=1;Build / Build;2026-10-25T18:57:46Z;2026-10-25T18:57:48Z;logs
+```
+
+`PROGRESS=0;;;` is now the only unknown: it appears when the timeline call
+itself fails, and that is the one reading `watcher.ts` (`reportProgress`) hands to `blindPoll`. A
+time is never invented, and a log line without a stamp is skipped in favour of
+the last stamped line.
 
 ## The call is classified, not guessed (2026-10-25)
 

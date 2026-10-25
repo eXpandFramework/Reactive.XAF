@@ -20,7 +20,7 @@ import {
 } from "./profile.js";
 import type { RepoProfile, Choice, ChainStep } from "./profile.js";
 import { publishRelease } from "./github-release.js";
-import { blindPoll, emptyPoll, giveUp, refusedPoll, stalledPoll, transientPoll, wrongRun } from "./watcher-notice.js";
+import { emptyPoll, giveUp, refusedPoll, reportProgress, transientPoll, wrongRun } from "./watcher-notice.js";
 
 function profileOf(seams: BuildSeams): RepoProfile {
   return seams.profile ?? rxProfile;
@@ -34,6 +34,9 @@ export interface AzDoWatcherOptions {
   /** How long the in-flight task may write nothing before the watch says it
    *  looks hung. Sits below the 90-minute job timeout the pipeline enforces. */
   stallMs?: number;
+  /** How long a build may sit QUEUED with no agent before the watch says so.
+   *  A healthy queue turns into a running job in seconds (`watcher-notice.md`). */
+  queueMs?: number;
   /** How long an all-empty chain keeps retrying before the watcher says there
    *  is nothing to watch. Its own budget: the maxMs deadline belongs to a chain
    *  that has a build in flight. */
@@ -57,14 +60,9 @@ export interface AzDoWatcherHandle {
 export type AzDoWatcherStarter = (pi: any, ctx: any, seams: BuildSeams, opts?: AzDoWatcherOptions) => AzDoWatcherHandle;
 
 const WATCHER_KEY = Symbol.for("reactive-xaf-build.azdo-watcher");
-/** 45 minutes: below the 90-minute job timeout the pipeline enforces, and well
- *  above the longest healthy leg observed — `Tests ModelMapper` ran 75 minutes
- *  on 2026-10-25 and was writing the whole time. */
-const DEFAULT_STALL_MS = 45 * 60_000;
-/** Three in-flight polls with no readable progress is a report, not a guess:
- *  the monitor cannot see this build, and saying so is the difference between a
- *  blind watch and the silent two-hour wait this feature exists to end. */
-const BLIND_POLLS = 3;
+/** The in-flight thresholds (`stallMs`, `queueMs`, `BLIND_POLLS`) live with the
+ *  voices in `watcher-notice.ts`: they decide what is SAID, not how the chain
+ *  advances. */
 const NUGET_VERSION_RE = /Version='([^']+)'/g;
 const VERSION_RE = /Version\s*=\s*"([^"]+)"/;
 
@@ -265,36 +263,13 @@ function thisRun(s: { buildNumber: string }, expected: string | null): boolean {
 async function notifyRunning(ctx: any, state: WatcherState, s: AzDoStatus, step: ChainStep): Promise<void> {
   const elapsed = Math.round((Date.now() - state.startedAt) / 60_000);
   state.lastId = s.id;
-  const where = s.progress?.activeName ? ` — ${s.progress.activeName}` : "";
+  const where = s.progress?.kind === "running" ? ` — ${s.progress.activeName}` : "";
   await ctx.ui.notify(`AzDO ${s.id}: ${s.status} (${elapsed} min)${where} — ${azdoBuildUrl(step.definition)}`, "info");
 }
 
-/** The in-flight half of a poll: is this build making progress? Two failures
- *  look alike from AzDO's side and are told apart here — a task that stopped
- *  writing (`stalledPoll`) and a monitor that cannot read the progress at all
- *  (`blindPoll`). Neither stops the watch: AzDO's own job timeout ends a hung
- *  build, and that terminal verdict is what the agent needs. */
-async function reportStall(ctx: any, state: WatcherState, pi: any, opts: AzDoWatcherOptions, s: AzDoStatus): Promise<void> {
-  const p = s.progress;
-  if (!p || p.lastOutputAt === null) {
-    state.stallKey = null;
-    state.blindPolls = state.blindBuildId === s.id ? state.blindPolls + 1 : 1;
-    state.blindBuildId = s.id;
-    if (state.blindPolls === BLIND_POLLS) await blindPoll(ctx, pi, { id: s.id, polls: state.blindPolls });
-    return;
-  }
-  state.blindPolls = 0;
-  state.blindBuildId = null;
-  const silentMs = Date.now() - p.lastOutputAt;
-  if (silentMs < (opts.stallMs ?? DEFAULT_STALL_MS)) {
-    state.stallKey = null;
-    return;
-  }
-  const key = `${s.id}:${p.activeName}`;
-  if (state.stallKey === key) return;
-  state.stallKey = key;
-  await stalledPoll(ctx, pi, { id: s.id, activeName: p.activeName, silentMs });
-}
+/** The in-flight progress verdict is judged in `watcher-notice.ts`
+ *  (`reportProgress`): the voices and the once-per-silence key belong with the
+ *  voices, and `applyPoll` below only hands it the poll. */
 
 /** The wall clock is a BACKSTOP, and only when a caller asks for one. The
  *  default is NO deadline: a chain whose head job may legally run 90 minutes
@@ -343,7 +318,7 @@ async function applyPoll(state: WatcherState, pi: any, ctx: any, seams: BuildSea
   state.emptySince = null;
   if (["notStarted", "inProgress", "cancelling"].includes(s.status)) {
     await notifyRunning(ctx, state, s, step);
-    await reportStall(ctx, state, pi, opts, s);
+    await reportProgress(ctx, pi, state, opts, s);
     return;
   }
   // Only the chain head is queued by this run, so only it can be a stale

@@ -62,15 +62,25 @@ export interface AzDoStatus {
   progress?: BuildProgress;
 }
 
-/** Where an in-flight build actually is. `lastOutputAt` is the ONLY stall
- *  signal AzDO offers: its `status` field reads `inProgress` for a hung job
- *  too. 2026-10-25 build 36111 — `Tests Workflow` wrote nothing for 80 minutes
- *  while every status field said the build was fine. */
-export interface BuildProgress {
-  activeName: string;
-  activeSince: number | null;
-  lastOutputAt: number | null;
-}
+/** Where a running build's last output stamp came from: the live record's own
+ *  log (`task`), or the newest change across EVERY log container (`logs`) when
+ *  that record opened none of its own. */
+export type ProgressSource = "task" | "logs";
+
+/** What one poll can say about an in-flight build — a discriminated union, so a
+ *  consumer switches on a kind instead of on a nullable time: `blind` is a fact
+ *  the script stated, not an absent field.
+ *
+ *  `queue` is `notStarted`: no agent has picked the build up, so nothing can be
+ *  produced and nothing is stalled. `running` is the deepest record in flight
+ *  (Task, else Phase, else Job) and when it last produced output — 2026-10-25
+ *  build 36111's `Tests Workflow` wrote nothing for 80 minutes while every
+ *  status field said the build was fine, and build 36112's live `Build` task
+ *  carried `log: null` while every container sat unchanged for two hours. */
+export type BuildProgress =
+  | { kind: "queue"; queuedAt: number | null }
+  | { kind: "running"; activeName: string; activeSince: number | null; lastOutputAt: number; source: ProgressSource }
+  | { kind: "blind" };
 
 /** Why a call could not be read. `auth` is final (renew the token); anything
  *  else is worth another poll. */
@@ -136,28 +146,59 @@ const LOG_BLOCK = `
     $reason = "log fetch failed: " + $_.Exception.Message
   }`;
 
-/** PS: while the build is in flight, name the task it is inside and the
- *  timestamp of that task's LAST log line. A job that stays `inProgress` while
- *  it writes nothing is the hang no status field shows. PROGRESS=0 means the
- *  timeline could not be read: silence about a task is never evidence that it
- *  is stalled. */
-const PROGRESS_BLOCK = `
-if ($b.status -in @("inProgress","cancelling")) {
-  try {
-    $t = Invoke-AzureRestMethod ("build/builds/" + $b.id + "/timeline") @cred -ErrorAction Stop
-    $a = $t.records | Where-Object { $_.type -eq "Task" -and $_.state -eq "inProgress" -and $_.log.id } | Sort-Object startTime | Select-Object -First 1
+/** PS: the record the build is inside now — the deepest one still in flight,
+ *  with or without a log of its own. `log.id` is NOT required: build 36112's
+ *  live `Build` task reported `log: null` for two hours, and requiring one made
+ *  every such build unreadable instead of recognisably silent. */
+const ACTIVE_RECORD_BLOCK = `    $st = ""
+    $name = ""
+    $last = ""
+    $src = "task"
+    $a = $t.records | Where-Object { $_.type -eq "Task" -and $_.state -eq "inProgress" } | Sort-Object startTime | Select-Object -First 1
+    if (-not $a) { $a = $t.records | Where-Object { $_.type -eq "Phase" -and $_.state -eq "inProgress" } | Sort-Object startTime | Select-Object -First 1 }
+    if (-not $a) { $a = $t.records | Where-Object { $_.type -eq "Job" -and $_.state -eq "inProgress" } | Sort-Object startTime | Select-Object -First 1 }
     if ($a) {
       $st = if ($a.startTime -is [datetime]) { $a.startTime.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ") } else { "$($a.startTime)" }
       $p = $t.records | Where-Object { $_.id -eq $a.parentId } | Select-Object -First 1
       $name = if ($p) { "$($p.name) / $($a.name)" } else { "$($a.name)" }
-      $last = ""
+    }`;
+
+/** PS: when the build last produced ANY output. The active task's own log is the
+ *  precise answer, but a task that never opened a log still leaves the newest
+ *  change across every container — the watermark this build's hang was visible
+ *  in. A last line that carries no timestamp (a continuation, a rewritten
+ *  buffer) is skipped rather than read as "no output ever". */
+const LAST_OUTPUT_BLOCK = `    if ($a -and $a.log.id) {
       try {
         $lg = Invoke-AzureRestMethod ("build/builds/" + $b.id + "/logs/" + $a.log.id) @cred -ErrorAction Stop
-        $last = (@($lg -split "\\r?\\n") | Where-Object { $_ } | Select-Object -Last 1)
+        foreach ($l in (@($lg -split "\\r?\\n") | Where-Object { $_ } | Select-Object -Last 30)) {
+          if ($l -match '^(\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\d(?:\\.\\d+)?Z)') { $last = $matches[1] }
+        }
       } catch { }
-      $ts = if ($last) { ($last -split " ")[0] } else { "" }
-      "PROGRESS=1;" + ($name -replace ";", ",") + ";" + $st + ";" + $ts
-    } else { "PROGRESS=0;;;" }
+    }
+    if (-not $last) {
+      $src = "logs"
+      $ls = Invoke-AzureRestMethod ("build/builds/" + $b.id + "/logs") @cred -ErrorAction Stop
+      $w = ($ls | Where-Object { $_.lastChangedOn } | Sort-Object lastChangedOn | Select-Object -Last 1).lastChangedOn
+      if ($w -is [datetime]) { $last = $w.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ") } elseif ($w) { $last = "$($w)" }
+    }`;
+
+/** PS: while the build is in flight, name the record it is inside and when it
+ *  last produced output. A build that stays `inProgress` while nothing is
+ *  written is the hang no status field shows. `PROGRESS=queue` says the build
+ *  has not started (nothing to read, nothing stalled); `PROGRESS=0` means not
+ *  even the log watermark could be read, and silence about a build is never
+ *  evidence that it is stalled. */
+const PROGRESS_BLOCK = `
+if ($b.status -in @("notStarted","postponed")) {
+  $q = if ($b.queueTime -is [datetime]) { $b.queueTime.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ") } else { "$($b.queueTime)" }
+  "PROGRESS=queue;$($b.status);$q"
+} elseif ($b.status -in @("inProgress","cancelling")) {
+  try {
+    $t = Invoke-AzureRestMethod ("build/builds/" + $b.id + "/timeline") @cred -ErrorAction Stop
+${ACTIVE_RECORD_BLOCK}
+${LAST_OUTPUT_BLOCK}
+    if ($last) { "PROGRESS=1;" + ($name -replace ";", ",") + ";" + $st + ";" + $last + ";" + $src } else { "PROGRESS=0;;;" }
   } catch { "PROGRESS=0;;;" }
 }`;
 
@@ -244,18 +285,34 @@ function buildFromLine(line: string): AzDoStatus | null {
   return { id: Number(four[1]), status: four[2], result: four[3], buildNumber: "", reason: four[4].trim() };
 }
 
-/** The in-flight progress a PROGRESS= line carries, or undefined when the script
- *  said it could not tell (PROGRESS=0, or no line at all). A field that does not
- *  parse to a time is null, never zero: an unknown time must never read as a
- *  very old one. */
-function progressFromStdout(stdout: string): BuildProgress | undefined {
-  const m = lastLine(stdout, "PROGRESS").match(/^PROGRESS=1;([^;]*);([^;]*);([^;]*)$/);
-  if (!m) return undefined;
+/** The reading a PROGRESS= line carries. A time that does not parse degrades to
+ *  `blind`, never to a very old reading; a missing line is `blind` too. A queued
+ *  line carries no output time at all. A 4-field running line predates `source`
+ *  and is a `task` reading — the default the wire documents. */
+function progressFromStdout(stdout: string): BuildProgress {
+  const line = lastLine(stdout, "PROGRESS");
   const at = (s: string): number | null => {
     const t = Date.parse(s);
     return Number.isFinite(t) ? t : null;
   };
-  return { activeName: m[1].trim(), activeSince: at(m[2]), lastOutputAt: at(m[3]) };
+  const queued = line.match(/^PROGRESS=queue;[^;]*;(.*)$/);
+  if (queued) return { kind: "queue", queuedAt: at(queued[1]) };
+  const m = line.match(/^PROGRESS=1;([^;]*);([^;]*);([^;]*)(?:;([^;]*))?$/);
+  if (!m) return { kind: "blind" };
+  const lastOutputAt = at(m[3]);
+  if (lastOutputAt === null) return { kind: "blind" };
+  return { kind: "running", activeName: m[1].trim(), activeSince: at(m[2]), lastOutputAt, source: m[4] === "logs" ? "logs" : "task" };
+}
+
+/** The wire line a reading travels in. Exported so the watcher's tests build
+ *  their fixtures through the SAME grammar the parser reads — only a verbatim
+ *  capture is typed by hand — instead of re-inventing the format a third time
+ *  beside the script and the parser. */
+export function renderProgressLine(p: BuildProgress): string {
+  if (p.kind === "blind") return "PROGRESS=0;;;";
+  const iso = (t: number | null): string => (t === null ? "" : new Date(t).toISOString());
+  if (p.kind === "queue") return `PROGRESS=queue;notStarted;${iso(p.queuedAt)}`;
+  return `PROGRESS=1;${p.activeName};${iso(p.activeSince)};${iso(p.lastOutputAt)};${p.source}`;
 }
 
 /** One poll, classified: a build, an empty pipeline, or the reason the call

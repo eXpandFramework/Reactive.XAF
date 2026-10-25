@@ -21,12 +21,29 @@
  * message. A transient failure keeps retrying on the same grace clock.
  */
 
+import type { AzDoStatus, BuildProgress } from "./azdo.js";
 import type { AzDoWatcherOptions, WatcherState } from "./watcher.js";
 import { steerError, steerWarning } from "./report.js";
 
 /** Three minutes of unreadable polls: long enough for a queued build to appear,
  *  short enough that a watcher started with nothing queued says so. */
 const DEFAULT_EMPTY_GRACE_MS = 180_000;
+
+/** 45 minutes: below the 90-minute job timeout the pipeline enforces, and well
+ *  above the longest healthy leg observed — `Tests ModelMapper` ran 75 minutes
+ *  on 2026-10-25 and was writing the whole time. */
+const DEFAULT_STALL_MS = 45 * 60_000;
+
+/** Three in-flight polls with no readable progress is a report, not a guess. */
+const BLIND_POLLS = 3;
+
+/** A queue that sits this long never got an agent: 36111 went from queued to a
+ *  running job in 12 seconds, 36112 in 7, so a wait measured in minutes is a
+ *  starved pool rather than a slow pipeline. */
+const DEFAULT_QUEUE_MS = 10 * 60_000;
+
+/** The reading for a poll that carried no PROGRESS= line at all. */
+const BLIND: BuildProgress = { kind: "blind" };
 
 const TOKEN_REMEDY = "Renew it (Azure DevOps → User settings → Personal access tokens), then queue the pipeline again with Publish.";
 
@@ -106,17 +123,95 @@ export async function stalledPoll(ctx: any, pi: any, s: { id: number; activeName
   if (pi) steerWarning(pi, msg);
 }
 
+/** Silence with a KNOWN clock: the live task opened no log of its own, so the
+ *  newest change across every log container is the only watermark AzDO offers.
+ *  A frozen watermark is output evidence all the same — a build that has written
+ *  nothing to any stream for two hours is not unreadable, it is silent — so this
+ *  is a stall, reported once per episode, never a blindness line (2026-10-25,
+ *  build 36112: task `Build` carried `log: null` and every container had sat
+ *  unchanged since 18:57:48 while the watch said it could not see the build). */
+export async function frozenPoll(ctx: any, pi: any, s: { id: number; activeName: string; silentMs: number }): Promise<void> {
+  const where = s.activeName || "the running phase";
+  const msg = `AzDO ${s.id}: no log stream has changed for ${minutes(s.silentMs)} min — ${where} is in flight and writing nothing. Still watching: the pipeline's own timeout is what ends a silent job, and its verdict will be reported.`;
+  await ctx.ui.notify(msg, "warning");
+  if (pi) steerWarning(pi, msg);
+}
+
+/** A build that is queued and NOT picked up: no agent has it, so nothing exists
+ *  to read and no stall clock can arm — without its own clock this is the one
+ *  state the watch could never speak about. 36111 went from queued to a running
+ *  job in 12 seconds, 36112 in 7, so a wait measured in minutes is a starved
+ *  pool, not a slow pipeline. One warning per wait, keyed
+ *  `<buildId>:queue:<queuedAt>` — a re-queued build is a new wait. */
+export async function queuedPoll(ctx: any, pi: any, s: { id: number; queuedMs: number }): Promise<void> {
+  const msg = `AzDO ${s.id} has been queued for ${minutes(s.queuedMs)} min and no agent has picked it up — the build has not started, so nothing can be read about it. Check that C11-C14 are Running and that no other build holds the pool. Still watching.`;
+  await ctx.ui.notify(msg, "warning");
+  if (pi) steerWarning(pi, msg);
+}
+
 /** The monitor cannot see: BLIND_POLLS in-flight polls carried no readable
- *  progress, so nothing at all can be said about this build. Reported ONCE per
- *  build, as a warning — never as "hung", which would be a claim the evidence
- *  does not support. The watch stays alive: the pipeline's own timeout still
- *  ends the build, and that verdict has to reach the agent. Without this line,
- *  removing the default deadline would trade one silent two-hour wait for
- *  another whenever the timeline or a log cannot be read (2026-10-25). */
+ *  progress AT ALL (no timeline record to name, no log watermark to time), so
+ *  nothing can be said about this build. Reported ONCE per build, as a warning —
+ *  never as "hung", which would be a claim the evidence does not support. The
+ *  watch stays alive: the pipeline's own timeout still ends the build, and that
+ *  verdict has to reach the agent. This is the LAST resort: a build that is
+ *  merely queued or whose task opened no log is read by `frozenPoll` instead. */
 export async function blindPoll(ctx: any, pi: any, s: { id: number; polls: number }): Promise<void> {
   const msg = `AzDO ${s.id}: the build's progress cannot be read (${s.polls} polls carried no timeline/log line) — the monitor is blind about this build. Still watching its status; a job that stops writing will only surface when the pipeline's own timeout ends it.`;
   await ctx.ui.notify(msg, "warning");
   if (pi) steerWarning(pi, msg);
+}
+
+/** One in-flight poll's progress verdict: which voice speaks about it, and
+ *  whether that voice has already spoken about THIS silence. The episode is
+ *  keyed `<buildId>:<lastOutputAt>` — ONE key for both stall voices, so a
+ *  reading that flips between the task log and the container watermark, or that
+ *  moves to another record, is still the same silence and is announced once.
+ *  Output that resumes advances the stamp, which re-arms the episode. */
+export async function reportProgress(ctx: any, pi: any, state: WatcherState, opts: AzDoWatcherOptions, s: AzDoStatus): Promise<void> {
+  const p = s.progress ?? BLIND;
+  if (p.kind === "blind") return noteBlind(ctx, pi, state, s.id);
+  state.blindPolls = 0;
+  state.blindBuildId = null;
+  if (p.kind === "queue") return noteQueue(ctx, pi, state, opts, s.id, p.queuedAt);
+  await noteSilence(ctx, pi, state, opts, s, p);
+}
+
+/** A poll the script could not read: counted per build, spoken once. */
+async function noteBlind(ctx: any, pi: any, state: WatcherState, id: number): Promise<void> {
+  state.stallKey = null;
+  state.blindPolls = state.blindBuildId === id ? state.blindPolls + 1 : 1;
+  state.blindBuildId = id;
+  if (state.blindPolls === BLIND_POLLS) await blindPoll(ctx, pi, { id, polls: state.blindPolls });
+}
+
+/** A queued build: quiet until the wait itself is the story. */
+async function noteQueue(ctx: any, pi: any, state: WatcherState, opts: AzDoWatcherOptions, id: number, queuedAt: number | null): Promise<void> {
+  const queuedMs = queuedAt === null ? 0 : Date.now() - queuedAt;
+  if (queuedMs < (opts.queueMs ?? DEFAULT_QUEUE_MS)) {
+    state.stallKey = null;
+    return;
+  }
+  const key = `${id}:queue:${queuedAt}`;
+  if (state.stallKey === key) return;
+  state.stallKey = key;
+  await queuedPoll(ctx, pi, { id, queuedMs });
+}
+
+/** A running build: the task's own log names it, the container watermark is all
+ *  there is when the task opened no log, and only a poll the script could not
+ *  read is blindness. */
+async function noteSilence(ctx: any, pi: any, state: WatcherState, opts: AzDoWatcherOptions, s: AzDoStatus, p: Extract<BuildProgress, { kind: "running" }>): Promise<void> {
+  const silentMs = Date.now() - p.lastOutputAt;
+  if (silentMs < (opts.stallMs ?? DEFAULT_STALL_MS)) {
+    state.stallKey = null;
+    return;
+  }
+  const key = `${s.id}:${p.lastOutputAt}`;
+  if (state.stallKey === key) return;
+  state.stallKey = key;
+  if (p.source === "logs") await frozenPoll(ctx, pi, { id: s.id, activeName: p.activeName, silentMs });
+  else await stalledPoll(ctx, pi, { id: s.id, activeName: p.activeName, silentMs });
 }
 
 /** A finished HEAD build of another version is not this run: nothing was queued

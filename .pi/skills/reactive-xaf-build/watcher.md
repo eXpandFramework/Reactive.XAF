@@ -45,16 +45,22 @@ Companion of `.pi/extensions/reactive-xaf-build/watcher.ts`. Started by
   deadline any more — see the last two bullets. Before this the watcher said
   "waiting…" once a minute for two hours and never told the agent (2026-10-25).
 - **A build that stops writing is reported, not waited out.** While the build is
-  in flight the status script also prints `PROGRESS=` — the task the build is
-  inside and the timestamp of that task's LAST log line (`azdo.md`). When that
-  stamp is older than `stallMs` (default 45 minutes) the watcher WARNS once per
-  episode, naming the task and the silence, and KEEPS WATCHING
-  (`watcher-notice.md` `stalledPoll`). It never gives up there: AzDO's own job
+  in flight the status script also prints `PROGRESS=` — the record the build is
+  inside and when it last produced output (`azdo.md`). A stamp older than
+  `stallMs` (default 45 minutes) WARNS once per episode, naming the record and
+  the silence, and KEEPS WATCHING: `stalledPoll` when the live task's own log
+  supplied the stamp, `frozenPoll` when every log container's watermark is all
+  there is (`watcher-notice.md`). It never gives up there: AzDO's own job
   timeout ends a hung build, and that terminal verdict is what the agent needs.
   2026-10-25: `Tests Workflow` wrote nothing from 14:43 and was canceled at its
   90-minute timeout at 16:04, so that silence was the only evidence of the hang.
-  Progress that cannot be read is not a stall — no `PROGRESS=` line leaves the
-  watch quiet.
+  2026-10-25, build 36112: the live `Build` task opened no log at all, and the
+  frozen watermark — not a missing `PROGRESS=` line — is what named it.
+  Four readings are told apart by `reportProgress` in `watcher-notice.ts`: a
+  silent task (`stalledPoll`), frozen log streams (`frozenPoll`), a build that is
+  still queued — quiet under `queueMs`, `queuedPoll` past it — and a `PROGRESS=0`
+  timeline that cannot be read at all (`blindPoll`). This module only hands the
+  poll over; every voice and the once-per-silence key live there.
 - **No wall-clock deadline by default.** `maxMs` is a backstop a caller asks
   for; without it the watch runs until the chain ends. The old 120-minute
   default ended the watch at 15:34 on 2026-10-25, 30 minutes before the build
@@ -77,10 +83,10 @@ give-up path in this module calls that one function.
 
 `applyPoll` switches on `parsePoll`'s typed answer, never on prose:
 
-- `build` → the in-flight line, the chain advance, or the terminal message. The
-  in-flight line is also where PROGRESS is decided: a task silent past `stallMs`
-  is `stalledPoll`, and three polls in a row with no readable progress are
-  `blindPoll`. Neither stops the watch (`watcher-notice.md`).
+- `build` → the in-flight line, `reportProgress` for the progress verdict, the
+  chain advance, or the terminal message. The verdict itself — a silent task,
+  frozen streams, a starved queue, blindness — is decided in `watcher-notice.md`
+  (`reportProgress`), and none of those stops the watch.
 - `empty` → `emptyPoll`, retried inside the grace.
 - `error` / `auth` → `refusedPoll`: give up at once, the remedy in the message.
 - `error` / `transient` → `transientPoll`: retry inside the same grace.

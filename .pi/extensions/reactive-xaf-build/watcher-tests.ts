@@ -1,5 +1,5 @@
 /**
- * reactive-xaf-build/watcher-tests — the AzDO chain watcher's contract (W1-W28).
+ * reactive-xaf-build/watcher-tests — the AzDO chain watcher's contract (W1-W33).
  *
  * Runtime: pi's OWN loader and ExtensionRunner, through the resolver-first route
  * this file carries itself — there is no hand-written pi here. The route is the
@@ -29,6 +29,7 @@ import { join } from "node:path";
 import activate from "./index.js";
 import { registerBuildCommand } from "./menu.js";
 import { startAzDoWatcher, stopAzDoWatcher, isAzDoWatcherActive } from "./watcher.js";
+import { renderProgressLine } from "./azdo.js";
 import { expandProfile } from "./profile.js";
 
 let ok = 0;
@@ -193,18 +194,36 @@ function crlf(lines: string[]): string {
 function running(id: number): string {
   return crlf([`STATUS=${id};inProgress;;`]);
 }
-/** An in-flight poll carrying the PROGRESS line, with the task's last log line
+/** An in-flight poll carrying a TASK reading, with the task's last log line
  *  `silentMinutes` ago — a real elapsed time, so the threshold is exercised from
- *  BOTH sides instead of only from far above it. */
+ *  BOTH sides instead of only from far above it. The line is built by the
+ *  parser's own renderer, so a fixture cannot drift from the wire. */
 function runningWithTask(id: number, task: string, silentMinutes: number): string {
-  const last = new Date(Date.now() - silentMinutes * 60_000).toISOString();
-  return crlf([`PROGRESS=1;${task};2026-10-25T14:39:50Z;${last}`, `STATUS=${id};inProgress;;`]);
+  const lastOutputAt = Date.now() - silentMinutes * 60_000;
+  const line = renderProgressLine({ kind: "running", activeName: task, activeSince: Date.parse("2026-10-25T14:39:50Z"), lastOutputAt, source: "task" });
+  return crlf([line, `STATUS=${id};inProgress;;`]);
 }
 /** Build 36111's own progress line, captured from the AzDO API (the exact
  *  strings are recorded in `azdo.md`): the `Run Tests` task inside
  *  `Tests Workflow`, last log line 16:04:20Z after 80 minutes of silence.
- *  Replayed verbatim — the wire format must not be this file's invention. */
+ *  Replayed verbatim — the wire format must not be this file's invention — and
+ *  it carries NO `source` field, which is the older shape W24 pins. */
 const CAPTURED_STALL = "PROGRESS=1;Tests Workflow / Run Tests;2026-10-25T14:39:50Z;2026-10-25T16:04:20.1296030Z";
+/** An in-flight poll whose live task opened NO log of its own: the reading is
+ *  the newest change across every log container, `silentMinutes` ago. This is
+ *  build 36112's shape — its `Build` task had `log: null` while the newest
+ *  container had last changed 2h03m before the poll. */
+function runningWithWatermark(id: number, phase: string, silentMinutes: number): string {
+  const lastOutputAt = Date.now() - silentMinutes * 60_000;
+  const line = renderProgressLine({ kind: "running", activeName: phase, activeSince: Date.parse("2026-10-25T18:57:46Z"), lastOutputAt, source: "logs" });
+  return crlf([line, `STATUS=${id};inProgress;;`]);
+}
+/** A build waiting for an agent: nothing has been produced yet, so nothing can
+ *  be read about it and nothing is stalled. */
+function queuedReading(id: number, queuedMinutes: number): string {
+  const queuedAt = Date.now() - queuedMinutes * 60_000;
+  return crlf([renderProgressLine({ kind: "queue", queuedAt }), `STATUS=${id};notStarted;;`]);
+}
 function done(id: number, result: string): string {
   return crlf([`STATUS=${id};completed;${result};`]);
 }
@@ -742,7 +761,7 @@ async function caseW23(): Promise<void> {
   const repo = mkRepo();
   const chain = [done(35760, "succeeded"), done(35780, "succeeded"), done(35790, "succeeded")];
   let polls = 0;
-  const run = async (cmd: string) => {
+  const flakyRun = async (cmd: string) => {
     if (cmd.includes("queryOrder=queueTimeDescending")) {
       polls++;
       if (polls === 1) return { code: 0, stdout: crlf(["STATUS=ERR;transient;Response status code does not indicate success: 503 (Service Unavailable)."]), stderr: "" };
@@ -750,7 +769,7 @@ async function caseW23(): Promise<void> {
     }
     return flowResult(cmd);
   };
-  const w = await watcherHandle(repo, { run, fetchFeed: mkFetch(LAB), ghFetch: mkGh(GH_DRAFT).gh, startAzDoWatcher: fastWatcher }, PUBLISH_LAB);
+  const w = await watcherHandle(repo, { run: flakyRun, fetchFeed: mkFetch(LAB), ghFetch: mkGh(GH_DRAFT).gh, startAzDoWatcher: fastWatcher }, PUBLISH_LAB);
   await w.handle.runCommand("devexpress", "");
   await sleep(400);
   const toasts = toastText(w.handle);
@@ -776,6 +795,7 @@ async function caseW24(): Promise<void> {
   const warnings = toastsOf(w.handle).filter((n) => n.type === "warning").map((n) => n.message);
   check("W24: the silent task is named as hung, once", warnings.filter((n) => n.includes("Run Tests") && n.includes("hung")).length === 1, JSON.stringify(toastsOf(w.handle)));
   check("W24: the stall reaches the agent as a steer", steersOf(w.handle).some((s) => s.content.includes("Run Tests")), JSON.stringify(steersOf(w.handle)));
+  check("W24: the 4-field capture reads as a TASK silence, never as frozen streams", warnings.some((n) => n.includes("Run Tests") && n.includes("hung")) && !warnings.some((n) => n.includes("no log stream has changed")), JSON.stringify(warnings));
   check("W24: the watch survives the stall and reports the verdict", warnings.some((n) => n.includes("FAILED")), JSON.stringify(warnings));
   answered(w.sel, "W24");
   noErrors(w.handle, "W24");
@@ -868,6 +888,105 @@ async function caseW28(): Promise<void> {
   noErrors(w.handle, "W28");
 }
 
+// Section: W29 — a build whose live task opened no log of its own is named
+// SILENT, not blind: a log container's stamp is real output evidence, and one
+// frozen for two hours is the hang (2026-10-25, build 36112: `Build` started
+// 18:57:46 with `log: null`, every container unchanged since 18:57:48, and the
+// watch said it could not see the build at all).
+async function caseW29(): Promise<void> {
+  const repo = mkRepo();
+  const frozen = runningWithWatermark(36112, "Build / Build", 130);
+  let polls = 0;
+  const silentTask = async (cmd: string) => {
+    if (!cmd.includes("$top=5")) return flowResult(cmd);
+    polls++;
+    if (polls > 6) return { code: 0, stdout: done(36112, "failed"), stderr: "" };
+    return { code: 0, stdout: frozen, stderr: "" };
+  };
+  const w = await watcherHandle(repo, { run: silentTask, fetchFeed: mkFetch(LAB), startAzDoWatcher: stallWatcher(50) }, PUBLISH_LAB);
+  await w.handle.runCommand("devexpress", "");
+  await sleep(300);
+  const warnings = toastsOf(w.handle).filter((n) => n.type === "warning").map((n) => n.message);
+  check("W29: a frozen log watermark is named as silence, once", warnings.filter((n) => n.includes("no log stream has changed") && n.includes("Build")).length === 1, JSON.stringify(warnings));
+  check("W29: the monitor never calls this build blind", !warnings.some((n) => n.includes("cannot be read")), JSON.stringify(warnings));
+  check("W29: the silence reaches the agent as a steer", steersOf(w.handle).some((s) => s.content.includes("no log stream has changed")), JSON.stringify(steersOf(w.handle)));
+  answered(w.sel, "W29");
+  noErrors(w.handle, "W29");
+}
+
+// Section: W30 — a QUEUED build is not a blind monitor and not a stall: the
+// agent has not started it, so there is nothing to read yet. Counted as
+// blindness it would report a problem that does not exist.
+async function caseW30(): Promise<void> {
+  const repo = mkRepo();
+  const queued = async (cmd: string) => (cmd.includes("$top=5") ? { code: 0, stdout: queuedReading(36112, 5), stderr: "" } : flowResult(cmd));
+  const w = await watcherHandle(repo, { run: queued, fetchFeed: mkFetch(LAB), startAzDoWatcher: stallWatcher(50) }, PUBLISH_LAB);
+  await w.handle.runCommand("devexpress", "");
+  await sleep(300);
+  const warnings = toastsOf(w.handle).filter((n) => n.type === "warning").map((n) => n.message);
+  check("W30: a queue younger than queueMs says nothing at all", warnings.length === 0, JSON.stringify(warnings));
+  check("W30: a queued build is never reported as blind", !warnings.some((n) => n.includes("cannot be read")), JSON.stringify(warnings));
+  check("W30: a queued build is never reported as stalled", !warnings.some((n) => n.includes("no log stream has changed")), JSON.stringify(warnings));
+  check("W30: the watch is still alive", isAzDoWatcherActive());
+  answered(w.sel, "W30");
+  noErrors(w.handle, "W30");
+}
+
+// Section: W31 — a watermark that keeps moving is a build that keeps writing:
+// never silent, never blind.
+async function caseW31(): Promise<void> {
+  const repo = mkRepo();
+  let polls = 0;
+  const moving = async (cmd: string) => {
+    if (!cmd.includes("$top=5")) return flowResult(cmd);
+    polls++;
+    if (polls > 6) return { code: 0, stdout: done(36112, "failed"), stderr: "" };
+    return { code: 0, stdout: runningWithWatermark(36112, "Build / Build", 0), stderr: "" };
+  };
+  const w = await watcherHandle(repo, { run: moving, fetchFeed: mkFetch(LAB), startAzDoWatcher: stallWatcher(400) }, PUBLISH_LAB);
+  await w.handle.runCommand("devexpress", "");
+  await sleep(300);
+  const warnings = toastsOf(w.handle).filter((n) => n.type === "warning").map((n) => n.message);
+  check("W31: a moving watermark is never called silent", !warnings.some((n) => n.includes("no log stream has changed")), JSON.stringify(warnings));
+  check("W31: a moving watermark is never called blind", !warnings.some((n) => n.includes("cannot be read")), JSON.stringify(warnings));
+  answered(w.sel, "W31");
+  noErrors(w.handle, "W31");
+}
+
+// Section: W32 — a reading whose times do not parse is blindness, never a very
+// old one: an unknown clock must not become evidence of a stall.
+async function caseW32(): Promise<void> {
+  const repo = mkRepo();
+  const garbage = crlf(["PROGRESS=1;Build / Build;not-a-time;also-not-a-time;task", "STATUS=36112;inProgress;;"]);
+  const blindTimes = async (cmd: string) => (cmd.includes("$top=5") ? { code: 0, stdout: garbage, stderr: "" } : flowResult(cmd));
+  const w = await watcherHandle(repo, { run: blindTimes, fetchFeed: mkFetch(LAB), startAzDoWatcher: stallWatcher(50) }, PUBLISH_LAB);
+  await w.handle.runCommand("devexpress", "");
+  await sleep(250);
+  const warnings = toastsOf(w.handle).filter((n) => n.type === "warning").map((n) => n.message);
+  check("W32: unparseable times are reported as blindness, once", warnings.filter((n) => n.includes("cannot be read")).length === 1, JSON.stringify(warnings));
+  check("W32: an unparseable time is never read as a stall", !warnings.some((n) => n.includes("has changed")), JSON.stringify(warnings));
+  answered(w.sel, "W32");
+  noErrors(w.handle, "W32");
+}
+
+// Section: W33 — a queued build that never gets an agent is the one state with
+// nothing at all to read: without its own clock the watch would sit silent
+// forever on a starved pool.
+async function caseW33(): Promise<void> {
+  const repo = mkRepo();
+  const waiting = queuedReading(36112, 25);
+  const starving = async (cmd: string) => (cmd.includes("$top=5") ? { code: 0, stdout: waiting, stderr: "" } : flowResult(cmd));
+  const w = await watcherHandle(repo, { run: starving, fetchFeed: mkFetch(LAB), startAzDoWatcher: stallWatcher(50) }, PUBLISH_LAB);
+  await w.handle.runCommand("devexpress", "");
+  await sleep(300);
+  const warnings = toastsOf(w.handle).filter((n) => n.type === "warning").map((n) => n.message);
+  check("W33: an agent-starved queue is named once", warnings.filter((n) => n.includes("has been queued for") && n.includes("25 min")).length === 1, JSON.stringify(warnings));
+  check("W33: the queue wait reaches the agent as a steer", steersOf(w.handle).some((s) => s.content.includes("no agent has picked it up")), JSON.stringify(steersOf(w.handle)));
+  check("W33: a queued build is still never called blind", !warnings.some((n) => n.includes("cannot be read")), JSON.stringify(warnings));
+  answered(w.sel, "W33");
+  noErrors(w.handle, "W33");
+}
+
 /** The contract, in the order it runs. */
 const CASES: Array<[string, () => Promise<void>]> = [
   ["W1", caseW1],
@@ -898,13 +1017,18 @@ const CASES: Array<[string, () => Promise<void>]> = [
   ["W26", caseW26],
   ["W27", caseW27],
   ["W28", caseW28],
+  ["W29", caseW29],
+  ["W30", caseW30],
+  ["W31", caseW31],
+  ["W32", caseW32],
+  ["W33", caseW33],
 ];
 
 /** One case's failure is reported and counted, never a crash that hides the
  *  rest of the contract. */
-async function runCase(label: string, run: () => Promise<void>): Promise<void> {
+async function runCase(label: string, body: () => Promise<void>): Promise<void> {
   try {
-    await run();
+    await body();
   } catch (e) {
     fail++;
     console.log(`FAIL  ${label} crashed: ${(e as Error)?.stack ?? e}`);
@@ -913,7 +1037,7 @@ async function runCase(label: string, run: () => Promise<void>): Promise<void> {
 
 async function main(): Promise<void> {
   console.log("reactive-xaf-build/watcher-tests — pi's own runtime, no fake\n");
-  for (const [label, run] of CASES) await runCase(label, run);
+  for (const [label, body] of CASES) await runCase(label, body);
   stopAzDoWatcher();
   console.log(`\n${ok} passed, ${fail} failed`);
   process.exitCode = fail > 0 ? 1 : 0;

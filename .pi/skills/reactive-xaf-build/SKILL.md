@@ -95,7 +95,7 @@ RX-XAF|eXpand`); `fence.ts` refuses that pipeline through every shell surface
 | `build-tests.ts` | `build-tests.md` | Full flow, on its own copy of the route. |
 | `delegate-tests.ts` | `delegate-tests.md` | Dormant delegation helper plus the flow publishing locally. |
 | `release-tests.ts` | `release-tests.md` | build.ps1 version bump (Release feed consultation). |
-| `watcher-tests.ts` | `watcher-tests.md` | Watcher W1–W28. |
+| `watcher-tests.ts` | `watcher-tests.md` | Watcher W1–W33. |
 | `profile-tests.ts` | `profile-tests.md` | RepoProfile (RX vs expand). |
 | `azdo.ts` / `status.ts` | `azdo.md` | AzDO status/cancel. |
 | `delegate.ts` | `delegate.md` | Dormant. |

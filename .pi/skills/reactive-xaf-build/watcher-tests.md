@@ -82,3 +82,18 @@ Run: `npx tsx .pi/extensions/reactive-xaf-build/watcher-tests.ts`
   no repeat per poll inside one silence.
 - W28 — a silence UNDER `stallMs` is not reported at all, so the threshold is
   pinned from below as well as above.
+- W29 — a build whose live task opened no log of its own is named SILENT from the
+  newest log container's stamp (toast + steer, once), and never as a blind
+  monitor: a frozen watermark is evidence, not an unreadable poll.
+- W30 — a build that is still queued and younger than `queueMs` says nothing at
+  all: not blind, not stalled.
+- W31 — a watermark that keeps moving is never called silent and never blind.
+- W32 — a reading whose times do not parse is blindness ONCE, never a very old
+  reading that would surface as a stall.
+- W33 — a build queued past `queueMs` with no agent is named once, with the
+  queue wait, and is still never called blind.
+
+The PROGRESS fixtures are built through `renderProgressLine` (`azdo.ts`), the
+parser's own renderer, so a fixture cannot drift from the wire. Two lines are
+typed by hand on purpose: `CAPTURED_STALL` (build 36111's verbatim capture, four
+fields, no `source`) and W32's deliberately malformed line.
