@@ -653,3 +653,10 @@ GitUserEmail.json
 
 # graphify's generated code graph: a build artifact, never source
 graphify-out/
+
+# reactive-xaf-build's own state: the last-green-build stamp (SQLite). Runtime
+# data of the extension, never source — without this it lands in every publish's
+# dirty summary and gets committed.
+.pi/extensions/reactive-xaf-build/*.db
+.pi/extensions/reactive-xaf-build/*.db-wal
+.pi/extensions/reactive-xaf-build/*.db-shm

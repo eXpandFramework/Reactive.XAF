@@ -33,6 +33,7 @@ import type { RepoProfile, Choice } from "./profile.js";
 import { releaseVersionTarget } from "./release.js";
 import { depPinsPhase } from "./pins.js";
 import { prewarmVms, publishPhase } from "./publish.js";
+import { buildNeeded, recordGreen, stampDbPath } from "./stamp.js";
 
 export type { RunResult } from "./pane.js";
 export { profileOf };
@@ -57,10 +58,18 @@ export interface BuildSeams {
   runCadence?: Partial<RunCadence>;
   startAzDoWatcher?: AzDoWatcherStarter;
   profile?: RepoProfile;
+  /** The green-build stamp store (a SQLite path). Hermetic runs point it at
+   *  their own temp dir; the default is this extension's own DB. */
+  stampPath?: string;
 }
 
+/** Which flow a pick runs: `build` always builds, `publish` never does, and
+ *  `buildIfNeeded` builds only when the last green build no longer covers the
+ *  tree (stamp.ts). Every mode publishes on its own terms. */
+export type FlowMode = "build" | "publish" | "buildIfNeeded";
+
 /** What menu.ts calls to run a build or publish flow. */
-export type FlowRunner = (choice: string, skipBuild?: boolean, projectPick?: string) => Promise<string>;
+export type FlowRunner = (choice: string, mode?: FlowMode, projectPick?: string) => Promise<string>;
 /** What menu.ts calls for "Start AzDO watcher". */
 export type WatchStarter = (choice: string, projectPick?: string) => Promise<string>;
 
@@ -83,6 +92,7 @@ export function defaultSeams(): BuildSeams {
     probePane: defaultProbePane,
     sampleCpu: defaultSampleCpu,
     startAzDoWatcher,
+    stampPath: stampDbPath(),
   };
 }
 
@@ -236,6 +246,12 @@ function buildRunReporter(
         const detail = err instanceof Error ? err.message : String(err);
         await warn(pi, ctx, `${id} publish threw after a green build: ${detail}\n${notes.join("\n")}`);
       }
+      // The proof the "Build & Publish" row consults, recorded AFTER the
+      // publish: its commit moves HEAD without changing content, so the stamp
+      // is written against the HEAD the next flow will actually see. A store
+      // that cannot be written is a warning steer, never a failed build.
+      const notRecorded = await recordGreen(seams, repo);
+      if (notRecorded) steerWatch(pi, `${id} build: ${notRecorded}`);
       return;
     }
     if (event.kind === "done" || event.kind === "died") {
@@ -284,11 +300,20 @@ async function prewarmPhase(pi: any, seams: BuildSeams, notes: string[], id: str
   if (pre.attention) steerWatch(pi, `${id} build — ${choice}\n${pre.notes.join("\n")}`);
 }
 
-async function runBuildFlow(pi: any, ctx: any, seams: BuildSeams, choice: string, repo: string, skipBuild = false): Promise<string> {
+/** "buildIfNeeded" answers here: true when the last green build still covers
+ *  the tree, with the reason the user reads left in the notes either way. */
+async function buildNotNeeded(seams: BuildSeams, repo: string, mode: FlowMode, notes: string[]): Promise<boolean> {
+  if (mode !== "buildIfNeeded") return false;
+  const verdict = await buildNeeded(seams, repo);
+  notes.push(verdict.fresh ? `build not needed — ${verdict.reason}` : `building — ${verdict.reason}`);
+  return verdict.fresh;
+}
+
+async function runBuildFlow(pi: any, ctx: any, seams: BuildSeams, choice: string, repo: string, mode: FlowMode = "build"): Promise<string> {
   const id = profileOf(seams).label;
   try {
     const notes: string[] = [];
-    if (skipBuild) {
+    if (mode === "publish") {
       notes.push("build skipped — publish only");
       return finishPublish(pi, ctx, seams, choice, repo, notes, false, "", id, true);
     }
@@ -296,6 +321,9 @@ async function runBuildFlow(pi: any, ctx: any, seams: BuildSeams, choice: string
     if (running) {
       const where = running.pane ? `pane ${running.pane}` : "in-process";
       return refuse(ctx, `${id} build is already running (run ${running.runId}, ${where}) — stop it with /devexpress → "Abort build" first.`);
+    }
+    if (await buildNotNeeded(seams, repo, mode, notes)) {
+      return finishPublish(pi, ctx, seams, choice, repo, notes, false, "", id, true);
     }
     const local = await runLocalBuild(ctx, seams, choice, repo, notes);
     await prewarmPhase(pi, seams, notes, id, choice);
@@ -347,10 +375,10 @@ async function watchPhase(pi: any, ctx: any, seams: BuildSeams, repo: string, ch
 export function createFlowRunners(
   pi: any, ctx: any, merged: BuildSeams, cwd: string,
 ): { runFlow: FlowRunner; startWatch: WatchStarter } {
-  const runFlow: FlowRunner = (choice: string, skipBuild = false, projectPick?: string) => {
+  const runFlow: FlowRunner = (choice: string, mode: FlowMode = "build", projectPick?: string) => {
     const { seams: s, repo } = seamsForPick(merged, projectPick, cwd);
     if (!repo) return refuse(ctx, missingRepo(profileOf(s), cwd));
-    return runBuildFlow(pi, ctx, s, choice, repo, skipBuild);
+    return runBuildFlow(pi, ctx, s, choice, repo, mode);
   };
   const startWatch: WatchStarter = (choice: string, projectPick?: string) => {
     const { seams: s, repo } = seamsForPick(merged, projectPick, cwd);

@@ -104,7 +104,7 @@ async function startBuild(pi: any, ctx: any, seams: BuildSeams, params: any): Pr
   if (running) return alreadyRunning(running);
   const cwd = ctx?.cwd ?? seams.repoRoot ?? process.cwd();
   const runners = createFlowRunners(pi, uiFreeCtx(ctx), seams, cwd);
-  return startedAnswer(await runners.runFlow(choice, false, project));
+  return startedAnswer(await runners.runFlow(choice, "build", project));
 }
 
 async function buildStatus(seams: BuildSeams): Promise<string> {

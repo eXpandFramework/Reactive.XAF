@@ -27,7 +27,10 @@
  * T31-T47 the VM contract (a failed probe stops the publish and never the
  * commit, a build pre-warms the agents); T48-T53 the commit summary and the
  * pre-push check; T54-T56 the run's build env (the profile owns it, the
- * template adds none, and the no-pane fallback is handed it too).
+ * template adds none, and the no-pane fallback is handed it too); BP1-BP6 the
+ * Build & Publish row (it builds only when the last green build no longer
+ * covers the tree, then continues into the same publish — BP5 pins the
+ * per-profile key, BP6 a store that cannot be read or written).
  *
  * Run: npx tsx .pi/extensions/reactive-xaf-build/build-tests.ts
  */
@@ -35,7 +38,7 @@
 /* oxlint-disable no-console -- test harness prints PASS/FAIL to stdout */
 /** Local delay: the test harness owns its own clock. */
 const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
-import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync } from "node:fs";
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, existsSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import activate from "./index.js";
@@ -191,10 +194,13 @@ async function menuHandle(
   cwd: string, seams: Record<string, unknown>, ui: Record<string, unknown>,
 ): Promise<any> {
   await installRoute();
+  // The green-build stamp is this case's own artifact: it lands in the case's
+  // temp repo, never in the extension's real store.
+  const withStamp = { stampPath: join(cwd, "build-stamp.db"), ...seams };
   const handle = await buildRealRunner({
     cwd,
     ui,
-    activate: (pi: any) => registerBuildCommand(pi, seams),
+    activate: (pi: any) => registerBuildCommand(pi, withStamp),
   });
   handles.push(handle);
   return handle;
@@ -1573,6 +1579,253 @@ async function caseT57(): Promise<void> {
   noErrors(handle, "T57");
 }
 
+// Section: BP — the "Build & Publish" row. It builds only when the last green
+// build no longer covers the tree (stamp.ts) and then continues into the SAME
+// publish every green build runs; a current stamp goes straight there.
+const BP_HEAD = "aaaa1111bbbb2222";
+/** The row's own picks: after it the flow asks exactly what Build and Publish
+ *  ask, in the same order. */
+const BP_PICKS: Record<string, Answer> = { DevExpress: "Build & Publish", Project: "RX-XAF", "RX-XAF": "Lab" };
+/** One full green run from an EMPTY store, in call order: no stamp means no
+ *  freshness read at all (`buildNeeded` answers before git), then the pre-warm
+ *  probe, the publish (gate probe, clean commit read, prx) and the stamp the
+ *  run records last. */
+const BP_GREEN_SCRIPT = [
+  { match: VM_CHECK_PREFIX, result: okResult(VM_RUN) },
+  { match: VM_CHECK_PREFIX, result: okResult(VM_RUN) },
+  { match: "git status --short", result: okResult("") },
+  { match: "prx", result: okResult() },
+  { match: "git rev-parse HEAD", result: okResult(BP_HEAD) },
+  { match: "git status --porcelain*", result: okResult("") },
+];
+/** The calls a run with a CURRENT stamp makes: the freshness reads, then the
+ *  publish alone — no pane, no supervisor line. */
+const BP_SECOND_SCRIPT = [
+  { match: "git rev-parse HEAD", result: okResult(BP_HEAD) },
+  { match: "git status --porcelain*", result: okResult("") },
+  { match: VM_CHECK_PREFIX, result: okResult(VM_RUN) },
+  { match: "git status --short", result: okResult("") },
+  { match: "prx", result: okResult() },
+];
+
+/** BP1: with no stamp the row builds, and publishes only when the run says 0.
+ *  The menu assertions ride along: the row sits after Publish, reaches the same
+ *  two picks, and a leftover argument from the retired word forms is inert. */
+async function caseBP1(): Promise<void> {
+  const repo = mkRepo(DX_PINS);
+  const runner = mkRunner([...BP_GREEN_SCRIPT]);
+  const pane = mkPaneSeams();
+  const items: string[][] = [];
+  const sel = uiFor({ ...BP_PICKS, [PUBLISH_PROMPT]: "Publish" }, (title, options) => {
+    if (title === "DevExpress") items.push(options);
+  });
+  const handle = await menuHandle(repo, buildSeams(repo, runner, pane, ["26.1.3"]), sel.ui);
+  await handle.runCommand("devexpress", "build lab");
+  const parts: Parts = { repo, runner, pane, sel, handle };
+  checkBP1Start(parts, items);
+  finishRun(pane, 0);
+  await waitFor(() => runner.calls.includes("prx"));
+  checkBP1Publish(parts);
+}
+
+/** BP1's first half: the menu row, the picks it reaches, the build it starts. */
+function checkBP1Start(p: Parts, atPrompt: string[][]): void {
+  const rows = atPrompt[0] ?? [];
+  check(
+    "BP1: the Build & Publish row sits after Publish, before Last build status",
+    rows[1] === "Publish" && rows[2] === "Build & Publish" && rows[3] === "Last build status",
+    rows.join(" | "),
+  );
+  check(
+    "BP1: the row reaches the project and choice picks, a leftover argument changes nothing",
+    p.sel.asks.includes("DevExpress") && p.sel.asks.includes("Project") && p.sel.asks.includes("RX-XAF"),
+    p.sel.asks.join(" | "),
+  );
+  check(
+    "BP1: with no stamp the build starts and the notice says why",
+    p.pane.opened.length === 1 && noticesOf(p.handle).some((n) => n.includes("Build started in pane") && n.includes("no green build is recorded")),
+    JSON.stringify({ opened: p.pane.opened, notices: noticesOf(p.handle) }),
+  );
+  check(
+    "BP1: nothing is published before the run reports",
+    !p.runner.calls.includes("prx") && !noticesOf(p.handle).some((n) => n.includes("published")),
+    p.runner.calls.join(" | "),
+  );
+}
+
+/** BP1's second half: the green run published and recorded the stamp. */
+function checkBP1Publish(p: Parts): void {
+  check("BP1: the green run published", noticesOf(p.handle).some((n) => n.includes("published")), noticesOf(p.handle).join(" | "));
+  check(
+    "BP1: the green run recorded a stamp for this tree",
+    existsSync(join(p.repo, "build-stamp.db")) && p.runner.calls.filter((c) => c === "git rev-parse HEAD").length === 1,
+    JSON.stringify({ db: existsSync(join(p.repo, "build-stamp.db")), calls: p.runner.calls }),
+  );
+  check("BP1: no warning on a green run", noWarning(p.handle), JSON.stringify({ toasts: warningToasts(p.handle), steers: steersText(p.handle) }));
+  answered(p.sel, "BP1");
+  noErrors(p.handle, "BP1");
+}
+
+/** Wait for the green run's LAST act to land: the stamp write happens right
+ *  after its porcelain read, so that read is the signal — then one short beat
+ *  for the synchronous insert that follows it. */
+async function stampWritten(runner: { calls: string[] }): Promise<void> {
+  await waitFor(() => runner.calls.filter((c) => c.startsWith("git status --porcelain")).length === 1, 5000);
+  await sleep(100);
+}
+
+/** BP2: a green run first, then the same pick again over an untouched tree —
+ *  the second run publishes WITHOUT a second build. */
+async function caseBP2(): Promise<void> {
+  const repo = mkRepo(DX_PINS);
+  const runner = mkRunner([...BP_GREEN_SCRIPT, ...BP_SECOND_SCRIPT]);
+  const pane = mkPaneSeams();
+  const sel = uiFor({ ...BP_PICKS, [PUBLISH_PROMPT]: "Publish" });
+  const handle = await menuHandle(repo, buildSeams(repo, runner, pane, ["26.1.3"]), sel.ui);
+  await handle.runCommand("devexpress", "");
+  finishRun(pane, 0);
+  await stampWritten(runner);
+  await handle.runCommand("devexpress", "");
+  const twice = await waitFor(() => runner.calls.filter((c) => c === "prx").length === 2, 5000);
+  checkBP2({ repo, runner, pane, sel, handle }, twice);
+}
+
+/** BP2's assertions: one build, two publishes, and the skip says what it read. */
+function checkBP2(p: Parts, twice: boolean): void {
+  check(
+    "BP2: the second run opened no pane and wrote no supervisor line",
+    twice && p.pane.opened.length === 1 && p.pane.sent.length === 1,
+    JSON.stringify({ twice, opened: p.pane.opened, sent: p.pane.sent.length }),
+  );
+  check(
+    "BP2: the skip names the stamp it trusted",
+    noticesOf(p.handle).some((n) => n.includes("build not needed") && n.includes("the last green build covers")),
+    noticesOf(p.handle).join(" | "),
+  );
+  check("BP2: both runs published", p.runner.calls.filter((c) => c === "prx").length === 2, p.runner.calls.join(" | "));
+  answered(p.sel, "BP2");
+  noErrors(p.handle, "BP2");
+}
+
+/** BP3: the row is refused while a build is being watched — nothing starts, and
+ *  the freshness read is never reached even though a stamp exists to read. */
+async function caseBP3(): Promise<void> {
+  const repo = mkRepo(DX_PINS);
+  const runner = mkRunner([...BP_GREEN_SCRIPT, { match: VM_CHECK_PREFIX, result: okResult(VM_RUN) }]);
+  const pane = mkPaneSeams();
+  const answers: Record<string, Answer> = { ...BP_PICKS, [PUBLISH_PROMPT]: "Publish" };
+  const sel = uiFor(answers);
+  const handle = await menuHandle(repo, buildSeams(repo, runner, pane, ["26.1.3"]), sel.ui);
+  // 1: a green run, so a stamp exists and a freshness read WOULD happen.
+  await handle.runCommand("devexpress", "");
+  finishRun(pane, 0);
+  await stampWritten(runner);
+  // 2: the plain Build row puts a run in flight and leaves it there.
+  answers.DevExpress = "Build";
+  await handle.runCommand("devexpress", "");
+  // 3: Build & Publish must refuse without reading the stamp.
+  answers.DevExpress = "Build & Publish";
+  await handle.runCommand("devexpress", "");
+  check(
+    "BP3: the second attempt is refused with a warning and starts nothing",
+    pane.opened.length === 2 && pane.sent.length === 2
+      && warningToasts(handle).some((n) => n.includes("already running") && n.includes("Abort build")),
+    JSON.stringify({ opened: pane.opened, toasts: warningToasts(handle) }),
+  );
+  check(
+    "BP3: the refusal happens before any freshness read",
+    runner.calls.filter((c) => c === "git rev-parse HEAD").length === 1,
+    runner.calls.join(" | "),
+  );
+  stopBuildRun();
+  answered(sel, "BP3");
+  noErrors(handle, "BP3");
+}
+
+/** BP4: a red build never reaches the publish, warns once, and leaves no stamp
+ *  behind for the next run to trust. */
+async function caseBP4(): Promise<void> {
+  const repo = mkRepo(DX_PINS);
+  const runner = mkRunner(BP_GREEN_SCRIPT.slice(0, 1));
+  const pane = mkPaneSeams();
+  const sel = uiFor({ ...BP_PICKS, [PUBLISH_PROMPT]: "Publish" });
+  const handle = await menuHandle(repo, buildSeams(repo, runner, pane, ["26.1.3"]), sel.ui);
+  await handle.runCommand("devexpress", "");
+  finishRun(pane, 1);
+  await waitFor(() => warningToasts(handle).length > 0);
+  check(
+    "BP4: a red build never publishes and warns exactly once",
+    warningToasts(handle).length === 1 && !runner.calls.includes("prx") && !noticesOf(handle).some((n) => n.includes("published")),
+    JSON.stringify({ toasts: warningToasts(handle), calls: runner.calls }),
+  );
+  check("BP4: a red build leaves no stamp", !existsSync(join(repo, "build-stamp.db")), join(repo, "build-stamp.db"));
+  answered(sel, "BP4");
+  noErrors(handle, "BP4");
+}
+
+/** BP5: the stamp is keyed by PROFILE, so a green RX-XAF build — which proves
+ *  nothing about the eXpand tree — cannot make an eXpand publish look fresh. */
+async function caseBP5(): Promise<void> {
+  const repo = mkRepo(DX_PINS);
+  mkdirSync(join(repo, "Xpand", "Xpand.ExpressApp.Modules"), { recursive: true });
+  const runner = mkRunner([...BP_GREEN_SCRIPT, { match: VM_CHECK_PREFIX, result: okResult(VM_RUN) }]);
+  const pane = mkPaneSeams();
+  const answers: Record<string, Answer> = { ...BP_PICKS, "eXpand": "Lab", [PUBLISH_PROMPT]: "Publish" };
+  const sel = uiFor(answers);
+  const handle = await menuHandle(repo, buildSeams(repo, runner, pane, ["26.1.3"]), sel.ui);
+  // 1: RX-XAF builds, publishes, and records ITS row.
+  await handle.runCommand("devexpress", "");
+  finishRun(pane, 0);
+  await stampWritten(runner);
+  // 2: the same store, the other profile — no row for eXpand, so it builds.
+  answers.Project = "eXpand";
+  await handle.runCommand("devexpress", "");
+  check(
+    "BP5: the eXpand pick builds with no stamp of its own",
+    pane.opened.length === 2 && pane.sent.length === 2,
+    JSON.stringify({ opened: pane.opened, sent: pane.sent.length }),
+  );
+  check(
+    "BP5: the notice names the profile it has no green build for",
+    noticesOf(handle).some((n) => n.includes("no green build is recorded") && n.includes("eXpand")),
+    noticesOf(handle).join(" | "),
+  );
+  check("BP5: only the RX run published", runner.calls.filter((c) => c === "prx").length === 1, runner.calls.join(" | "));
+  stopBuildRun(); // the eXpand build is left in flight by design: stop the watch
+  answered(sel, "BP5");
+  noErrors(handle, "BP5");
+}
+
+/** BP6: a store that cannot be opened is STALE (build, never a dead flow), and
+ *  a stamp write that throws after a green publish never costs the publish. */
+async function caseBP6(): Promise<void> {
+  const repo = mkRepo(DX_PINS);
+  const runner = mkRunner([...BP_GREEN_SCRIPT]);
+  const pane = mkPaneSeams();
+  const sel = uiFor({ ...BP_PICKS, [PUBLISH_PROMPT]: "Publish" });
+  // A DIRECTORY where the store file should be: existsSync passes, every open
+  // throws — the read and the write both fail through the real sqlite path.
+  const seams = { ...buildSeams(repo, runner, pane, ["26.1.3"]), stampPath: repo };
+  const handle = await menuHandle(repo, seams, sel.ui);
+  await handle.runCommand("devexpress", "");
+  finishRun(pane, 0);
+  await waitFor(() => runner.calls.includes("prx"));
+  await waitFor(() => steersText(handle).some((s) => s.includes("build stamp not recorded")), 4000);
+  check(
+    "BP6: an unreadable store builds and says why",
+    pane.opened.length === 1 && noticesOf(handle).some((n) => n.includes("the build stamp could not be read")),
+    JSON.stringify({ opened: pane.opened, notices: noticesOf(handle) }),
+  );
+  check("BP6: the publish still landed", noticesOf(handle).some((n) => n.includes("published")), noticesOf(handle).join(" | "));
+  check(
+    "BP6: the failed write is reported as a warning steer, not a failure toast",
+    steersText(handle).some((s) => s.includes("build stamp not recorded")) && noWarning(handle),
+    JSON.stringify({ steers: steersText(handle), toasts: warningToasts(handle) }),
+  );
+  answered(sel, "BP6");
+  noErrors(handle, "BP6");
+}
+
 /** The contract, in the order it runs: T9's repo is fresh per case, so a case
  *  that "continues" an earlier one builds its own clean tree. */
 const CASES: Array<[string, () => Promise<void>]> = [
@@ -1631,6 +1884,12 @@ const CASES: Array<[string, () => Promise<void>]> = [
   ["T52", caseT52],
   ["T53", caseT53],
   ["T57", caseT57],
+  ["BP1", caseBP1],
+  ["BP2", caseBP2],
+  ["BP3", caseBP3],
+  ["BP4", caseBP4],
+  ["BP5", caseBP5],
+  ["BP6", caseBP6],
 ];
 
 /** One case's failure is reported and counted, never a crash that hides the

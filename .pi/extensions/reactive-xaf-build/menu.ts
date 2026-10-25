@@ -1,10 +1,10 @@
 /**
  * reactive-xaf-build/menu — the /devexpress command surface.
  *
- * Every capability is a menu pick: Build / Publish / Last build status /
- * Cancel AzDO build / Start AzDO watcher, then RX-XAF | eXpand, then Lab |
- * Release. No flags and no subcommand words: a parameter is always a pick or
- * a prompt, never an argument.
+ * Every capability is a menu pick: Build / Publish / Build & Publish / Last
+ * build status / Cancel AzDO build / Start AzDO watcher, then RX-XAF | eXpand,
+ * then Lab | Release. No flags and no subcommand words: a parameter is always a
+ * pick or a prompt, never an argument.
  *
  * This module is the composition root. It imports the engine (build.ts) and
  * drives it through the runners it builds; the engine imports no surface.
@@ -14,10 +14,20 @@ import { getBuildPane, setBuildPane, defaultClosePane } from "./pane.js";
 import { abortBuildRun, activeBuildRun } from "./run.js";
 import { statusPhase, cancelPhase } from "./status.js";
 import { createFlowRunners, defaultSeams } from "./build.js";
-import type { BuildSeams, FlowRunner, WatchStarter } from "./build.js";
+import type { BuildSeams, FlowMode, FlowRunner, WatchStarter } from "./build.js";
 import { rxProfile, expandProfile } from "./profile.js";
 
 const PROJECT_PICKS = [rxProfile.menuProjectPick, expandProfile.menuProjectPick];
+
+/** The rows that run a flow, and the mode each one means: Build always builds,
+ *  Publish never does, Build & Publish builds only when the last green build no
+ *  longer covers the tree. The label IS the decision, so the menu and the
+ *  engine cannot drift apart. */
+const FLOW_ROWS: Record<string, FlowMode> = {
+  Build: "build",
+  Publish: "publish",
+  "Build & Publish": "buildIfNeeded",
+};
 
 async function pickProject(ctx: any): Promise<string | null> {
   const pick = await ctx.ui.select("Project", PROJECT_PICKS);
@@ -68,7 +78,7 @@ export async function runDevexpressMenu(
 ): Promise<string> {
   const pane = getBuildPane();
   const abort = abortLabel();
-  const base = ["Build", "Publish", "Last build status", "Cancel AzDO build", "Start AzDO watcher"];
+  const base = ["Build", "Publish", "Build & Publish", "Last build status", "Cancel AzDO build", "Start AzDO watcher"];
   const items = abort ? [...base, abort] : pane ? [...base, "Close build pane"] : base;
   const top = await ctx.ui.select("DevExpress", items);
   if (abort && top === abort) return abortFlow(ctx, seams);
@@ -85,10 +95,11 @@ export async function runDevexpressMenu(
     if (typeof picked === "string") return picked;
     return startWatch(picked.choice, picked.project);
   }
-  if (top !== "Build" && top !== "Publish") return "DevExpress menu: aborted.";
+  const mode = FLOW_ROWS[String(top)] as FlowMode | undefined;
+  if (!mode) return "DevExpress menu: aborted.";
   const picked = await pickProjectAndChoice(ctx);
   if (typeof picked === "string") return picked;
-  return runFlow(picked.choice, top === "Publish", picked.project);
+  return runFlow(picked.choice, mode, picked.project);
 }
 
 /** Register the command: merge the seams, then hand the menu this
@@ -96,7 +107,7 @@ export async function runDevexpressMenu(
  *  dependency runs surface → engine and never the other way. */
 export function registerBuildCommand(pi: any, seams?: Partial<BuildSeams>): void {
   pi.registerCommand("devexpress", {
-    description: "DevExpress menu: Build | Publish | Last build status | Cancel AzDO build | Start AzDO watcher → RX-XAF | eXpand → Lab | Release",
+    description: "DevExpress menu: Build | Publish | Build & Publish | Last build status | Cancel AzDO build | Start AzDO watcher → RX-XAF | eXpand → Lab | Release",
     handler: async (_args: string | string[], ctx: any) => {
       const merged = { ...defaultSeams(), ...seams };
       const cwd = ctx?.cwd ?? merged.repoRoot ?? process.cwd();

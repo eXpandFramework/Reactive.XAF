@@ -78,7 +78,9 @@ toast with a steer.
 probe answers.
 
 `BuildSeams.profile?: RepoProfile` (default `rxProfile`). `ghFetch` for the
-watcher's GitHub step. The run watch adds `probePane`, `sampleCpu`, `runPaths`
+watcher's GitHub step. `stampPath` overrides the green-build stamp store
+(default: this extension's own `reactive-xaf-build.db`, see below). The run
+watch adds `probePane`, `sampleCpu`, `runPaths`
 and `runCadence`. `delegateWindow` was removed 2026-08-25 and the flow never
 consults a window.
 
@@ -86,7 +88,8 @@ consults a window.
 
 `createFlowRunners(pi, ctx, merged, cwd)` returns the two entries a surface
 calls — **menu.ts** and **tool.ts** both do: `FlowRunner`
-(`runFlow(choice, skipBuild?, projectPick?)`) and `WatchStarter`
+(`runFlow(choice, mode?, projectPick?)`, the mode from `menu.ts`'s `FLOW_ROWS`;
+`tool.ts` passes `"build"`) and `WatchStarter`
 (`startWatch(choice, projectPick?)`). Both resolve the profile
 and repo from the project pick (`seamsForPick`); a missing tree answers "not
 inside the repo" through `refuse`, which toasts it as a warning and returns it —
@@ -96,8 +99,63 @@ in-process, so a caller can find it instead of guessing why nothing happened.
 
 ## Skip-build variant
 
-`skipBuild = true`: phases 1–4 omitted. Publish + watcher run unchanged, in
-the command call itself (nothing to watch).
+The `"publish"` flow mode: phases 1–5 omitted, publish + watcher run unchanged
+in the command call itself (nothing to watch). The old `skipBuild = true`
+boolean became a mode (`FlowMode`), so a pick can never be mistaken for a flag.
+
+## Flow modes (`FlowMode`)
+
+- `"publish"` — the skip-build variant above.
+- `"build"` — the full flow. A green build continues into the publish on its
+  own (`buildRunReporter`).
+- `"buildIfNeeded"` — `buildNotNeeded` asks `buildNeeded` (below) and puts the
+  verdict in the notes: FRESH answers "build not needed — <reason>" and
+  publishes like `"publish"`; STALE answers "building — <reason>" and runs the
+  full flow, which publishes on green. The order inside `runBuildFlow` matters:
+  the running-build refusal comes BEFORE this decision, so a build-capable row
+  never starts a second run and never publishes behind a live one.
+
+## Build & Publish — the stamp (`stamp.ts`)
+
+The row exists so a publish does not rebuild a tree a green build already
+proved. The proof is a row in SQLite — `.pi/extensions/reactive-xaf-build/`
+`reactive-xaf-build.db`, table `build_stamp`, PRIMARY KEY `profile` (the
+profile's own label — one row per profile, so an RX-XAF green build never makes
+an eXpand publish look fresh), columns `head_sha`, `clean_src`, `built_at`,
+`version` (what the profile's `versionFile` named when the build passed — a
+label, never part of the decision). One DB per extension dir holding one row
+per profile; `openDb`/`readDb` are reached as `@pi/sqlite` (a project tree has
+no relative path to the install; the prefix is the platform's whitelist) and
+imported on FIRST USE, because every suite links this extension's graph before
+the `@pi/` name floor exists.
+`seams.stampPath` overrides the path — the test suites point it at their own
+temp dir. No JSON, no flag file, no second store.
+
+`buildNeeded(seams, repo)` has ONE job — fresh or stale — and answers STALE for
+anything it cannot read, because a build is the safe side of every doubt:
+
+1. a row exists for THIS profile;
+2. its `head_sha` equals `git rev-parse HEAD` now;
+3. its `clean_src` is 1;
+4. `git status --porcelain -- src Directory.Packages.props` is empty now, minus
+   the build's own version stamp.
+
+The exclusion in 4 is not cosmetic: every build rewrites
+`profile.versionFile` (`src/Common/AssemblyInfoVersion.cs` for RX), so counting
+it would make the tree "dirty" the moment a build finished and NO tree would
+ever read fresh. Its content is a function of the version being built, not a
+source edit.
+
+`recordGreen(seams, repo)` writes the row, and the flow calls it in
+`buildRunReporter`'s green arm AFTER the publish returns: the publish's commit
+moves HEAD without changing content, so the stamp is recorded against the HEAD
+the next flow will actually see. Recording it before the publish instead would
+leave every stamp one commit behind and the row would rebuild every time. It
+returns the reason instead of throwing, and the flow steers it as a warning
+(`steerWatch`, no model turn) — a store that cannot be written never fails the
+build that just succeeded; a store that cannot be READ answers STALE with its
+reason in the started notice, so the row builds instead of dying on a store.
+A red build records nothing.
 
 ## Outcome strings
 

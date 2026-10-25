@@ -41,6 +41,15 @@ own ports).
   Nothing watched: it says so, and says that another window's build is
   invisible here, because the pane and the run live in that process.
 
+## The flow it drives
+
+`start` calls `runners.runFlow(choice, "build", project)` — the FULL flow, never
+the `"buildIfNeeded"` decision the menu's Build & Publish row makes. A caller
+that asked for a build gets a build; the green-build stamp (`stamp.ts`) is the
+menu's convenience, not the door's. `FlowRunner` is
+`(choice, mode?, projectPick?)`, so the mode is named at every call site
+instead of a boolean whose meaning lived in the reader's head.
+
 ## No UI is required
 
 Worker and headless windows are exactly where a blind shell does the most

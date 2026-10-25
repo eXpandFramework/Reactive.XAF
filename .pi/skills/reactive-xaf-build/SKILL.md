@@ -19,17 +19,14 @@ a 2023 leftover. Release is def 39 → 38 → 37.
 
 ## Command surface
 
-- `/devexpress` — interactive menu: Build | Publish → **RX-XAF | eXpand**
-  → Lab | Release, plus "Last build status", "Cancel AzDO build" and one of
-  "Abort build" (a run is being watched) or "Close build pane" (a pane is
-  open, nothing running).
+- `/devexpress` — interactive menu: Build | Publish | Build & Publish →
+  **RX-XAF | eXpand** → Lab | Release, plus "Last build status", "Cancel AzDO
+  build" and one of "Abort build" (a run is being watched) or "Close build
+  pane" (a pane is open, nothing running). Build always builds, Publish never
+  does, Build & Publish only when the last green build no longer covers the
+  tree (`stamp.ts`).
 - No arguments, no flags and no subcommand words: every capability is a menu
-  pick. The old words `/devexpress status`, `/devexpress cancel`,
-  `/devexpress watch`, `/devexpress build lab|release` and
-  `/devexpress publish lab|release` are gone (CLI Flag Gate) — the same
-  actions are the menu items "Last build status", "Cancel AzDO build",
-  "Start AzDO watcher", Build and Publish, each followed by the Lab | Release
-  pick it needs.
+  pick (the retired arg words are listed in `menu.md`).
 
 Menu picks run in the INVOKING window. The eXpand pick uses
 `resolveRepo` (cwd, then known roots only when cwd is the other repo).
@@ -80,6 +77,7 @@ RX-XAF|eXpand`); `fence.ts` refuses that pipeline through every shell surface
 | `gitphase.ts` | `gitphase.md` | The git half: dirty read + summary, both commit prompts, the commit core. |
 | `menu.ts` | `menu.md` | Command surface and composition root: owns the command, drives the engine. |
 | `build.ts` | `build.md` | Flow engine (DX, local build start, menu wiring). |
+| `stamp.ts` | `build.md` | The last green build: SQLite stamp + `buildNeeded`. |
 | `run.ts` | `run.md` | Background build run: marker, pane death, stall/overrun, abort. |
 | `report.ts` | `report.md` | The flow's messages and the warn/steer pair. |
 | `release.ts` | `release.md` | Release version bump (feed consultation). |
