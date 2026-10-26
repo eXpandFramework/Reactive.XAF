@@ -30,7 +30,8 @@ import activate from "./index.js";
 import { registerBuildCommand } from "./menu.js";
 import { startAzDoWatcher, stopAzDoWatcher, isAzDoWatcherActive } from "./watcher.js";
 import { renderProgressLine } from "./azdo.js";
-import { renderTestScan } from "./test-scan.js";
+import { renderTestRefusal, renderTestScan } from "./test-scan.js";
+import { newTestWatch, testScan } from "./test-watch.js";
 import { expandProfile } from "./profile.js";
 
 let ok = 0;
@@ -235,6 +236,23 @@ function runningWithTask(id: number, task: string, silentMinutes: number): strin
  *  Replayed verbatim — the wire format must not be this file's invention — and
  *  it carries NO `source` field, which is the older shape W24 pins. */
 const CAPTURED_STALL = "PROGRESS=1;Tests Workflow / Run Tests;2026-10-25T14:39:50Z;2026-10-25T16:04:20.1296030Z";
+/** Build 36117's own test poll, captured from the live API on 2026-10-26 and
+ *  replayed VERBATIM — for the same reason `CAPTURED_STALL` is: the wire format
+ *  must not be this file's invention. Two runs' results, out of order exactly as
+ *  Azure published them, and the run-level watermark the scan printed. A fixture
+ *  built by `renderTestScan` alone cannot catch a pwsh-side format drift, and
+ *  that seam is exactly where the phantom name came from. */
+const CAPTURED_TESTFAIL = crlf([
+  "TESTLINE=1023516;2026-10-26T05:05:48Z;Synchronize_styles_when_document_modified",
+  "TESTLINE=1023520;2026-10-26T05:22:44Z;Can_Get_Correct_StackTrace_From_Nested_Method",
+  "TESTLINE=1023520;2026-10-26T05:22:44Z;Chained_Action_Helpers_Propagate_Correct_Stack_Trace",
+  "TESTSEEN=2026-10-26T06:13:54Z",
+]);
+/** Build 36120's live poll, which printed NOTHING at all while the build was
+ *  inProgress: the empty answer that had named a passing job's log warning as a
+ *  failed test. Captured before the `TESTRUNS` count line existed — W58 covers
+ *  that line and the counts it carries. */
+const CAPTURED_EMPTY = "";
 /** An in-flight poll whose live task opened NO log of its own: the reading is
  *  the newest change across every log container, `silentMinutes` ago. This is
  *  build 36112's shape — its `Build` task had `log: null` while the newest
@@ -1023,19 +1041,21 @@ async function caseW33(): Promise<void> {
   noErrors(w.handle, "W33");
 }
 
-// Section: W40 — a failing test is reported the moment it appears, not at the
-// build's verdict. The pipeline retries each VSTest task twice and the job is
-// `continueOnError`, so only the log shows it this early.
+// Section: W40 — a failing test is reported as soon as its VSTest task attempt
+// publishes a result, not at the build's verdict. The pipeline retries each task
+// twice and the job is `continueOnError`, so the timeline waits for the retries
+// while the results API already names the failure.
 async function caseW40(): Promise<void> {
   const repo = mkRepo();
-  const seams = mkSeams([running(35760)], [testFails(["Xpand.Tests.Alpha"])]);
+  const seams = mkSeams([running(35760)], [CAPTURED_TESTFAIL]);
   const w = await watcherHandle(repo, { run: seams.run, fetchFeed: mkFetch(LAB), startAzDoWatcher: fastWatcher }, KEEP_TESTS);
   await w.handle.runCommand("devexpress", "");
   await sleep(300);
-  const reports = toastsOf(w.handle).filter((n) => n.type === "warning" && n.message.includes("a test has failed"));
-  check("W40: a failed test is reported while the build still runs", reports.length === 1 && reports[0].message.includes("Xpand.Tests.Alpha"), JSON.stringify(toastsOf(w.handle)));
+  const reports = toastsOf(w.handle).filter((n) => n.type === "warning" && /(has|have) failed/.test(n.message));
+  check("W40: a failed test is reported while the build still runs", reports.length === 1 && reports[0].message.includes("Synchronize_styles_when_document_modified"), JSON.stringify(toastsOf(w.handle)));
+  check("W40: every captured name reaches the report", reports.length === 1 && reports[0].message.includes("Can_Get_Correct_StackTrace_From_Nested_Method") && reports[0].message.includes("Chained_Action_Helpers_Propagate_Correct_Stack_Trace"), JSON.stringify(reports));
   check("W40: the report carries the build URL", reports.length === 1 && reports[0].message.includes("definitionId=23"), JSON.stringify(reports));
-  check("W40: it reaches the agent as a steer", steersOf(w.handle).some((s) => s.content.includes("a test has failed") && s.deliverAs === "steer"), JSON.stringify(steersOf(w.handle)));
+  check("W40: it reaches the agent as a steer", steersOf(w.handle).some((s) => /(has|have) failed/.test(s.content) && s.deliverAs === "steer"), JSON.stringify(steersOf(w.handle)));
   check("W40: the watch is still running", isAzDoWatcherActive());
   stopAzDoWatcher();
   answered(w.sel, "W40");
@@ -1265,6 +1285,122 @@ async function caseW52(): Promise<void> {
   noErrors(w.handle, "W52");
 }
 
+// Section: W53 — the script the scan actually SENDS. It used to scrape build
+// logs, and on build 36120 it read a PASSING job's "Failed to determine the
+// https port for redirect." warning as a failed test. These read the emitted
+// pwsh text, so a field reorder or a wrong call fails HERE, not in production.
+function checkTestFailScript(scan: string): void {
+  check("W53: the scan asks for this build's test runs", scan.includes("Get-AzTestRuns -buildIds 35760"), scan.slice(0, 240));
+  check("W53: the scan asks for the failed results", scan.includes("test/Runs/") && scan.includes("Results?outcomes=Failed"), scan.slice(0, 240));
+  check("W53: the script prints run id, then the run stamp, then the name", scan.includes('"TESTLINE=$($run.id);$stamp;" + ($n -replace'), scan.slice(0, 400));
+  check("W53: the script prints what it looked at", scan.includes('"TESTRUNS=$($runs.Count);$broken"'), scan.slice(0, 400));
+  check("W53: the watermark is the RUN stamp, not a result time", scan.includes("if ($since -and $stamp -le $since) { continue }"), scan.slice(0, 400));
+  check("W53: only runs carrying a failure are opened", scan.includes("if ($failed -le 0) { continue }"), scan.slice(0, 400));
+  check("W53: no build log is fetched for tests", !scan.includes("/logs") && !scan.includes("build/builds/"), scan.slice(0, 240));
+}
+
+async function caseW53(): Promise<void> {
+  const repo = mkRepo();
+  const seams = mkSeams([running(35760)], [CAPTURED_TESTFAIL]);
+  const w = await watcherHandle(repo, { run: seams.run, fetchFeed: mkFetch(LAB), startAzDoWatcher: fastWatcher }, KEEP_TESTS);
+  await w.handle.runCommand("devexpress", "");
+  await sleep(300);
+  const scans = seams.calls.filter((c) => c.includes("# rxaf-testfail"));
+  check("W53: the test scan ran", scans.length >= 1, String(scans.length));
+  checkTestFailScript(scans[0] ?? "");
+  stopAzDoWatcher();
+  answered(w.sel, "W53");
+  noErrors(w.handle, "W53");
+}
+
+// Section: W54 — the pipeline retries a VSTest task twice, so the same test
+// fails again under a NEW run id. One name is one report, whoever published it.
+async function caseW54(): Promise<void> {
+  const repo = mkRepo();
+  const seams = mkSeams([running(35760)], [
+    renderTestScan(["Xpand.Tests.Alpha"], "2026-10-26T08:00:00Z", { run: "1023520" }),
+    renderTestScan(["Xpand.Tests.Alpha"], "2026-10-26T08:10:00Z", { run: "1023530" }),
+  ]);
+  const w = await watcherHandle(repo, { run: seams.run, fetchFeed: mkFetch(LAB), startAzDoWatcher: fastWatcher }, KEEP_TESTS);
+  await w.handle.runCommand("devexpress", "");
+  await sleep(300);
+  const reports = toastsOf(w.handle).filter((n) => n.message.includes("a test has failed"));
+  check("W54: a retried attempt failing the same test is one report", reports.length === 1, JSON.stringify(reports));
+  stopAzDoWatcher();
+  answered(w.sel, "W54");
+  noErrors(w.handle, "W54");
+}
+
+// Section: W55 — a scan that found no failed result says nothing at all: the
+// watermark is the only payload a green build has, and it is not a report.
+async function caseW55(): Promise<void> {
+  const repo = mkRepo();
+  const seams = mkSeams([running(35760)], [CAPTURED_EMPTY]);
+  const w = await watcherHandle(repo, { run: seams.run, fetchFeed: mkFetch(LAB), startAzDoWatcher: fastWatcher }, KEEP_TESTS);
+  await w.handle.runCommand("devexpress", "");
+  await sleep(300);
+  check("W55: a green scan reports nothing", !toastsOf(w.handle).some((n) => n.message.includes("a test has failed")), JSON.stringify(toastsOf(w.handle)));
+  check("W55: the watch keeps running", isAzDoWatcherActive());
+  stopAzDoWatcher();
+  answered(w.sel, "W55");
+  noErrors(w.handle, "W55");
+}
+
+// Section: W56 — a refused scan is ONE classified note, never silence and never
+// a failure: a dead token must not read as a green build, and a read that failed
+// must not read as a broken test.
+async function caseW56(): Promise<void> {
+  const repo = mkRepo();
+  const seams = mkSeams([running(35760)], [renderTestRefusal("auth", "401 Unauthorized")]);
+  const w = await watcherHandle(repo, { run: seams.run, fetchFeed: mkFetch(LAB), startAzDoWatcher: fastWatcher }, KEEP_TESTS);
+  await w.handle.runCommand("devexpress", "");
+  await sleep(300);
+  const notes = toastsOf(w.handle).filter((n) => n.message.includes("the test scan could not be read"));
+  check("W56: a refused scan is said once", notes.length === 1, JSON.stringify(notes));
+  check("W56: the note carries the reason", notes.length === 1 && notes[0].message.includes("401"), JSON.stringify(notes));
+  check("W56: a refused scan is not a failed test", !toastsOf(w.handle).some((n) => n.message.includes("a test has failed")), JSON.stringify(toastsOf(w.handle)));
+  stopAzDoWatcher();
+  answered(w.sel, "W56");
+  noErrors(w.handle, "W56");
+}
+
+// Section: W57 — a failed result carrying no name says nothing: an empty bullet
+// is a report the agent cannot act on.
+async function caseW57(): Promise<void> {
+  const repo = mkRepo();
+  const seams = mkSeams([running(35760)], [renderTestScan([""], "2026-10-26T08:00:00Z")]);
+  const w = await watcherHandle(repo, { run: seams.run, fetchFeed: mkFetch(LAB), startAzDoWatcher: fastWatcher }, KEEP_TESTS);
+  await w.handle.runCommand("devexpress", "");
+  await sleep(300);
+  check("W57: a nameless failed result is not reported", !toastsOf(w.handle).some((n) => n.message.includes("a test has failed")), JSON.stringify(toastsOf(w.handle)));
+  check("W57: it never reaches the agent as a steer", !steersOf(w.handle).some((s) => s.content.includes("a test has failed")), JSON.stringify(steersOf(w.handle)));
+  stopAzDoWatcher();
+  answered(w.sel, "W57");
+  noErrors(w.handle, "W57");
+}
+
+// Section: W58 — an empty answer is FALSIFIABLE. The scan records what it looked
+// at, so "no failed test" and "the scan reached nothing" stop being the same
+// statement: build 36120's silence was read as a verdict it never made.
+async function caseW58(): Promise<void> {
+  const io = {
+    buildId: 36120, definition: "23", role: "Test-Runner",
+    notify: async () => {}, steer: () => {}, select: async () => undefined,
+    ended: () => false, spawn: async () => null,
+  };
+  const looked = newTestWatch();
+  await testScan(looked, io, async () => ({ stdout: crlf(["TESTRUNS=25;0", "TESTSEEN=2026-10-26T06:13:54Z"]) }));
+  check("W58: the scan records the runs it looked at", looked.runs === 25, String(looked.runs));
+  check("W58: the scan records that none carried a failure", looked.failedRuns === 0, String(looked.failedRuns));
+  check("W58: a green scan still says nothing", looked.seen.size === 0, String(looked.seen.size));
+  const broken = newTestWatch();
+  await testScan(broken, io, async () => ({ stdout: renderTestScan(["Xpand.Tests.Alpha"], "2026-10-26T09:00:00Z", { runs: 24, failedRuns: 3 }) }));
+  check("W58: a broken scan records both counts", broken.runs === 24 && broken.failedRuns === 3, `${broken.runs}/${broken.failedRuns}`);
+  const blind = newTestWatch();
+  await testScan(blind, io, async () => ({ stdout: renderTestRefusal("auth", "401 Unauthorized") }));
+  check("W58: a refused scan records no count", blind.runs === null && blind.failedRuns === null, `${blind.runs}/${blind.failedRuns}`);
+}
+
 /** The contract, in the order it runs. */
 const CASES: Array<[string, () => Promise<void>]> = [
   ["W1", caseW1],
@@ -1312,6 +1448,12 @@ const CASES: Array<[string, () => Promise<void>]> = [
   ["W49", caseW49],
   ["W50", caseW50],
   ["W52", caseW52],
+  ["W53", caseW53],
+  ["W54", caseW54],
+  ["W55", caseW55],
+  ["W56", caseW56],
+  ["W57", caseW57],
+  ["W58", caseW58],
 ];
 
 /** One case's failure is reported and counted, never a crash that hides the

@@ -50,10 +50,16 @@ export interface TestWatch {
   /** The scan failure already reported, so a dead token is one line not a
    *  line per poll. */
   scanError: string | null;
+  /** What the last readable scan LOOKED AT: the build's test runs and how many
+   *  of them carried a failure. Null until a scan answered, so "no failed test"
+   *  can be told apart from "the scan reached nothing" — the empty answer that
+   *  named a middleware warning as a test (build 36120) has to be falsifiable. */
+  runs: number | null;
+  failedRuns: number | null;
 }
 
 export function newTestWatch(): TestWatch {
-  return { watermark: null, seen: new Set<string>(), asked: false, muted: false, pending: false, scanError: null };
+  return { watermark: null, seen: new Set<string>(), asked: false, muted: false, pending: false, scanError: null, runs: null, failedRuns: null };
 }
 
 /** Everything this module may do to the outside world, so a suite drives it
@@ -106,6 +112,8 @@ export async function testScan(watch: TestWatch, io: TestWatchIo, read: (since: 
   }
   const poll = parseTestLines(stdout);
   if (poll.watermark) watch.watermark = poll.watermark;
+  if (poll.runs !== undefined) watch.runs = poll.runs;
+  if (poll.failedRuns !== undefined) watch.failedRuns = poll.failedRuns;
   if (poll.kind === "error") {
     await noteScanError(io, watch, `${poll.failure}: ${poll.message ?? ""}`);
     return;

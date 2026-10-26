@@ -24,6 +24,15 @@ state and can open a window.
 A failure retried into a pass is NOT retracted — the poll saw what it saw, and
 the chain's own verdict still reports the truth.
 
+## Every poll says what it looked at
+
+`TestWatch.runs` and `TestWatch.failedRuns` record the counts the scan printed
+(`TESTRUNS=<runs>;<failedRuns>`), so an empty answer is falsifiable: "the build's
+runs carried no failure" is a different statement from "the scan reached
+nothing". Both stay `null` until a readable scan answers, and a refused scan
+leaves them `null` rather than a fabricated zero — build 36120's silence was
+once read as a verdict the scan never made.
+
 ## The prompt never holds the chain
 
 `reportTestFails` returns as soon as the steer is out and offers the delegation
@@ -64,10 +73,10 @@ on), `testRole` (default `DEFAULT_TEST_ROLE` = `Test-Runner`), `spawnWindow`.
 
 ## Contracts
 
-`watcher-tests.ts` W40–W52: reported once, new names only, one prompt, the role
+`watcher-tests.ts` W40–W58: reported once, new names only, one prompt, the role
 launch and brief, the launch following the PUBLISHED store (W50) and a role
 entry with no model resolving to nothing (W52), the command to run by hand, the
-chain surviving, the watermark, and muting. Roles are published through
-model-role's own `initModelRoles`, never hand-assigned. `delegate-tests.ts`
-S4/S5 pin the role lookup out of that store and the quote doubling the brief
-relies on.
+chain surviving, the watermark, muting, and the counts an empty poll leaves
+behind (W58). Roles are published through model-role's own `initModelRoles`,
+never hand-assigned. `delegate-tests.ts` S4/S5 pin the role lookup out of that
+store and the quote doubling the brief relies on.
