@@ -20,6 +20,17 @@ namespace Xpand.TestsLib{
     public class TestWinApplication : WinApplication, ITestApplication{
         private readonly bool _transmitMessage;
         private readonly int _createdOnThread = Environment.CurrentManagedThreadId;
+        private readonly int _liveSeq = RegisterLive();
+        private static int _liveCount;
+        private bool _disposed;
+
+        private static int RegisterLive() {
+            var live = System.Threading.Interlocked.Increment(ref _liveCount);
+            if (live > 1) {
+                Console.Error.WriteLine($"[TestWinApplication] created while {live - 1} previous instance(s) still live; process threads={Process.GetCurrentProcess().Threads.Count}");
+            }
+            return live;
+        }
 
         public TestWinApplication(Type sutModule, bool transmitMessage = true, bool handleExceptions=true) {
             // SettingUp += (_, args) => ((ExportedTypeCollection)args.SetupParameters.DomainComponents).Add(typeof(TraceEvent));
@@ -50,6 +61,10 @@ namespace Xpand.TestsLib{
         public Type SUTModule{ get; }
 
         protected override void Dispose(bool disposing){
+            if (disposing && !_disposed) {
+                _disposed = true;
+                System.Threading.Interlocked.Decrement(ref _liveCount);
+            }
             if (Environment.CurrentManagedThreadId != _createdOnThread) {
                 Console.Error.WriteLine($"[TestWinApplication] disposed on managed thread {Environment.CurrentManagedThreadId} but created on {_createdOnThread}");
             }
