@@ -272,7 +272,9 @@ namespace Xpand.TestsLib.Common{
             }))
             .Timeout(timeout??300.ToSeconds())
             .Catch<T,TimeoutException>(e => {
+                Console.Error.WriteLine($"[PROBE] 1 timeout fired tid={Environment.CurrentManagedThreadId}");
                 exit.Request();
+                Console.Error.WriteLine("[PROBE] 1b request returned, rethrowing");
                 return e.Throw<T>();
             });
         }
@@ -298,6 +300,7 @@ namespace Xpand.TestsLib.Common{
 
             public void Request() {
                 if (Interlocked.Exchange(ref _requested, 1) == 1) {
+                    Console.Error.WriteLine("[PROBE] 2 already requested, nothing posted");
                     return;
                 }
                 var context = _context;
@@ -305,7 +308,13 @@ namespace Xpand.TestsLib.Common{
                     Console.Error.WriteLine("[StartWinTest] exit requested before the run context was installed, so the application is left running");
                     return;
                 }
-                context.Post(_ => _application.Exit(), null);
+                Console.Error.WriteLine($"[PROBE] 2 posting exit tid={Environment.CurrentManagedThreadId} context={context.GetType().Name}");
+                context.Post(_ => {
+                    Console.Error.WriteLine($"[PROBE] 3 posted exit running tid={Environment.CurrentManagedThreadId}");
+                    _application.Exit();
+                    Console.Error.WriteLine($"[PROBE] 4 exit returned tid={Environment.CurrentManagedThreadId}");
+                }, null);
+                Console.Error.WriteLine("[PROBE] 2b post returned");
             }
         }
 
