@@ -27,6 +27,7 @@ namespace Xpand.TestsLib{
             SUTModule = sutModule;
             CustomHandleException += (_, e) => {
                 if (handleExceptions){
+                    Console.Error.WriteLine($"[TestWinApplication] UI-thread exception on managed thread {Environment.CurrentManagedThreadId}: {e.Exception}");
                     ExceptionDispatchInfo.Capture(e.Exception).Throw();
                 }
             };
