@@ -13,6 +13,9 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 import { azdoStatusScript, parsePoll, azdoBuildUrl, defaultGhFetch, extractFailReason, failLogFromStdout } from "./azdo.js";
 import type { AzDoStatus } from "./azdo.js";
+import { pollTestFails, newTestWatch, type TestWatch } from "./test-watch.js";
+import { defaultDelegateWindow } from "./delegate.js";
+import type { WindowSpawner } from "./delegate.js";
 import type { BuildSeams } from "./build.js";
 import { sleep } from "./pane.js";
 import {
@@ -42,6 +45,11 @@ export interface AzDoWatcherOptions {
    *  that has a build in flight. */
   emptyGraceMs?: number;
   followNugets?: boolean;
+  /** Scan the logs of a running build's tests and offer ONE delegation of the
+   *  failures to `testRole`; `spawnWindow` opens that window. */
+  watchTests?: boolean;
+  testRole?: string;
+  spawnWindow?: WindowSpawner;
   choice?: "Lab" | "Release";
   ghToken?: string;
   repoRoot?: string;
@@ -89,6 +97,9 @@ export interface WatcherState {
    *  the monitor's own blindness, reported once at BLIND_POLLS. */
   blindPolls: number;
   blindBuildId: number | null;
+  /** What this build's failing tests have already been told, and the one
+   *  delegation already offered (`test-watch.ts`). */
+  tests: TestWatch;
   stopped: boolean;
   stop: () => void;
 }
@@ -284,6 +295,16 @@ async function checkDeadline(ctx: any, state: WatcherState, opts: AzDoWatcherOpt
   return true;
 }
 
+/** The in-flight test poll. Detached from `applyPoll` so the chain's verdict
+ *  path stays one function with one job. The watcher hands over PORTS — a shell
+ *  runner and a window spawner — and `test-watch.ts` builds the whole scan. */
+async function pollTests(state: WatcherState, pi: any, ctx: any, seams: BuildSeams, opts: AzDoWatcherOptions, s: AzDoStatus, step: ChainStep): Promise<void> {
+  if (opts.watchTests === false || state.stopped) return;
+  const spawnWindow = opts.spawnWindow ?? ((repo, task, launch) => defaultDelegateWindow(repo, task, launch ? { launch } : {}));
+  const run = (cmd: string) => seams.run(cmd, { timeoutMs: 60_000 });
+  await pollTestFails({ watch: state.tests, buildId: s.id, definition: step.definition, testRole: opts.testRole, repoRoot: opts.repoRoot, ctx, pi, stopped: () => state.stopped, spawnWindow, run });
+}
+
 async function pollTick(state: WatcherState, pi: any, ctx: any, seams: BuildSeams, opts: AzDoWatcherOptions): Promise<void> {
   if (state.stopped) return;
   if (await checkDeadline(ctx, state, opts, pi)) return;
@@ -319,6 +340,7 @@ async function applyPoll(state: WatcherState, pi: any, ctx: any, seams: BuildSea
   if (["notStarted", "inProgress", "cancelling"].includes(s.status)) {
     await notifyRunning(ctx, state, s, step);
     await reportProgress(ctx, pi, state, opts, s);
+    await pollTests(state, pi, ctx, seams, opts, s, step);
     return;
   }
   // Only the chain head is queued by this run, so only it can be a stale
@@ -349,6 +371,7 @@ export function startAzDoWatcher(pi: any, ctx: any, seams: BuildSeams, opts: AzD
     stallKey: null,
     blindPolls: 0,
     blindBuildId: null,
+    tests: newTestWatch(),
     stopped: false,
     stop: () => {
       if (state.stopped) return;

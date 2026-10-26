@@ -18,8 +18,27 @@ close.
   pwsh -NoLogo -c "pi '<task>'"` — the new pi boots already working, no
   send-keys race.
 - Reads the new window index from the spawn's stdout.
-- **Task text constraint:** interpolated into pwsh single quotes — the task
-  strings must contain NO single quotes (menu.ts keeps them fixed).
+- **Task text constraint:** interpolated into pwsh single quotes, and a quote
+  inside it is DOUBLED (`quoteTask`), never dropped. The briefs are no longer
+  fixed strings — a failing test's brief carries AzDO test names — so an
+  unescaped quote would end the pwsh literal mid-task. S4 pins it.
+- **Role launch:** `deps.launch` (`RoleLaunch = { provider, model,
+  thinkingLevel? }`) boots the window as a model role —
+  `pi --provider <p> --model <m> [--thinking <l>] '<task>'` — the same launch
+  line psmux uses for a role window, built here because this spawner is the one
+  that boot-verifies its window. No launch → the plain `pi '<task>'` line
+  (S5).
+
+## Role resolution lives here too
+
+`roleLaunch(role, store?)` turns a role NAME into that `RoleLaunch`: it reads the
+model-role store off `globalThis.__pi_model_roles` at call time (a role assigned
+while a build runs is picked up by the next offer) and answers `null` when the
+entry is missing, has no `provider`, or has no `modelId` — an invented model
+would spawn a window on whatever the caller guessed. `DEFAULT_TEST_ROLE` is
+`Test-Runner`, the operator role the failing-test offer uses.
+
+The caller resolves the role; this module only knows how it rides the command.
 
 ## Liveness verification (grace period)
 
@@ -44,3 +63,12 @@ function with fakes so psmux is never touched by the test suite.
 - Dead window (vanishes during grace) → `null` → the menu flow falls back
   to the invoking session and completes there ("published").
 - Surviving window → the index is returned → "delegated to window N".
+- S4: the role's `--provider/--model/--thinking` ride the boot line, and a
+  quote in the brief is doubled.
+- S5: no launch → no flags; the plain `pi '<task>'` line is unchanged.
+
+## Who calls it
+
+`menu.ts` used to leave this dormant; `watcher.ts` `pollTests` now spawns the
+`Test-Runner` window from here when a failing test is accepted for delegation
+(`test-watch.md`).

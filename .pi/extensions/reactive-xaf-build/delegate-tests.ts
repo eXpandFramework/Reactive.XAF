@@ -9,11 +9,13 @@
  * DYNAMIC imports after it. This suite imports no boot proof, because nothing
  * here spawns.
  *
- * `delegateWindow` is dormant: the /devexpress flow runs in the invoking session
- * and never consults it. What stays pinned here is the helper's OWN liveness
- * contract — the real `defaultDelegateWindow` with injected `DelegateDeps`
+ * `delegateWindow` started dormant: the /devexpress flow runs in the invoking
+ * session and never consults it. The watcher now does — a failing test offers
+ * one delegation — so the role launch (`--provider/--model/--thinking`) and the
+ * brief-escaping that offer depends on are pinned here too. What stays the
+ * helper's OWN liveness contract is asserted with injected `DelegateDeps`
  * (`run`/`windowExists`/`killWindow`/`graceMs`), so the real psmux CLI is never
- * touched — and the flow publishing locally through pi's own dispatch.
+ * touched.
  *
  * Run: npx tsx .pi/extensions/reactive-xaf-build/delegate-tests.ts
  */
@@ -24,7 +26,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import activate from "./index.js";
 import { registerBuildCommand } from "./menu.js";
-import { defaultDelegateWindow } from "./delegate.js";
+import { defaultDelegateWindow, roleLaunch } from "./delegate.js";
 import type { DelegateDeps } from "./delegate.js";
 
 let ok = 0;
@@ -236,12 +238,76 @@ async function caseS3(): Promise<void> {
   check("S3: no TMUX_PANE → null, nothing spawned", result === null && !spawned, String(result));
 }
 
+/** The operator's role, published the way pi publishes it: model-role's OWN
+ *  `initModelRoles` reads a file and fills `globalThis.__pi_model_roles`. S4
+ *  then takes its launch from that store — handing the already-resolved flags to
+ *  the code would assert nothing about the role lookup itself. */
+async function publishTestRole(): Promise<void> {
+  const dir = mkdtempSync(join(tmpdir(), "rxaf-delegate-roles-"));
+  tempDirs.push(dir);
+  const file = join(dir, "roles.json");
+  writeFileSync(file, JSON.stringify({ "Test-Runner": { role: "Test-Runner", provider: "deepseek", modelId: "deepseek-flash", thinkingLevel: "max" } }));
+  const { initModelRoles } = await import("@pi/model-role/state.js");
+  initModelRoles(file);
+}
+
+// Section: S4 — the Test-Runner role resolves out of the published store, its
+// launch rides the boot line, and a quote in the brief survives it. The brief is
+// no longer a fixed string (it carries AzDO test names), so an unescaped quote
+// would end the pwsh literal mid-task.
+async function caseS4(): Promise<void> {
+  // S3 deletes TMUX_PANE on purpose (the outside-psmux refusal). Each case that
+  // needs the window path says so itself instead of trusting case order.
+  process.env.TMUX_PANE = "%1";
+  const repo = mkRepo();
+  await installRoute();
+  await publishTestRole();
+  const launch = roleLaunch("Test-Runner");
+  check("S4: the Test-Runner role resolves out of the published store", launch?.provider === "deepseek" && launch?.model === "deepseek-flash" && launch?.thinkingLevel === "max", JSON.stringify(launch));
+  if (!launch) return;
+  let argv: string[] = [];
+  const deps: DelegateDeps = {
+    run: async (a: string[]) => {
+      argv = a;
+      return { code: 0, stdout: "4\n", stderr: "" };
+    },
+    windowExists: async () => true,
+    graceMs: 100,
+    launch,
+  };
+  const result = await defaultDelegateWindow(repo, "run Bob's tests", deps);
+  const line = argv.join(" ");
+  check("S4: role launch rides the boot line", line.includes("pi --provider deepseek --model deepseek-flash --thinking max"), line);
+  check("S4: a quote in the brief is doubled, not dropped", line.includes("'run Bob''s tests'"), line);
+  check("S4: the window index is the answer", result === "4", String(result));
+}
+
+// Section: S5 — no launch, no flags: the plain `pi '<task>'` line is unchanged
+async function caseS5(): Promise<void> {
+  process.env.TMUX_PANE = "%1";
+  const repo = mkRepo();
+  let argv: string[] = [];
+  const deps: DelegateDeps = {
+    run: async (a: string[]) => {
+      argv = a;
+      return { code: 0, stdout: "5\n", stderr: "" };
+    },
+    windowExists: async () => true,
+    graceMs: 100,
+  };
+  await defaultDelegateWindow(repo, "plain task", deps);
+  const line = argv.join(" ");
+  check("S5: no role → no provider flags", !line.includes("--provider") && line.includes("pi 'plain task'"), line);
+}
+
 /** The contract, in the order it runs. */
 const CASES: Array<[string, () => Promise<void>]> = [
   ["S0", caseS0],
   ["S1", caseS1],
   ["S2", caseS2],
   ["S3", caseS3],
+  ["S4", caseS4],
+  ["S5", caseS5],
 ];
 
 /** One case's failure is reported and counted, never a crash that hides the

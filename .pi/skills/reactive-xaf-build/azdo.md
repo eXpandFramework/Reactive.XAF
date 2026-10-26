@@ -131,6 +131,22 @@ reason: it made a transient blip indistinguishable from a dead token, and the
 difference then had to be guessed from error prose downstream. The classifier is
 in the script that sees the failure; the consumers switch on the kind.
 
+Both halves live in `azdo-refusal.ts` — `errBlock(kind)` and
+`classifiedFailure(line, kind)` — because every AzDO query in this extension is
+the same call and must fail the same way. The `kind` union carries three
+members, `STATUS`, `CANCEL` and `TEST`, so `test-scan.ts` prints
+`TEST=ERR;<auth|transient>;<message>` without inventing a second grammar. The
+type is re-exported here, so an importer of this module keeps one name for it.
+Detail: `azdo-refusal.md`.
+
+## The test scan is NOT here
+
+The query that finds a failing test while the build still runs
+(`azdoTestFailScript`, `TESTLINE=`/`TESTSEEN=` lines) lives in `test-scan.ts`,
+which owns its script, its parser AND its renderer: this module sits at the
+400-line cap, and one protocol belongs in one place. What it borrows from here is
+the refusal grammar above. Detail: `test-scan.md`.
+
 ## Cancel script (`cancelAzDoScript`)
 
 Project-wide PATCH `{"status":"cancelling"}`. Output: `CANCEL=<id>;ok;<status>` /

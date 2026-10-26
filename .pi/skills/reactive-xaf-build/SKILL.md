@@ -86,6 +86,9 @@ RX-XAF|eXpand`); `fence.ts` refuses that pipeline through every shell surface
 | `text.ts` | `text.md` | The shared pure helpers: `tail`, `failureText`. |
 | `release.ts` | `release.md` | Release version bump (feed consultation). |
 | `watcher.ts` | `watcher.md` | Background AzDO chain watcher. |
+| `test-scan.ts` | `test-scan.md` | The AzDO test scan: script, grammar and wire renderer. |
+| `test-watch.ts` | `test-watch.md` | A failing test's voice and the one delegation it offers. |
+| `azdo-refusal.ts` | `azdo-refusal.md` | The refusal grammar every AzDO query shares. |
 | `github-release.ts` | `github-release.md` | The chain's last step: GitHub draft publish or assert, with retries. |
 | `real-host.ts` | — | Never landed: the review reverted the shared wrapper, so each suite copies the route instead. |
 | `resolve.mjs` | `resolve.md` | Node hook: `.js`→`.ts` and the whitelisted `@pi/` floor, installed before any harness import. |
@@ -95,10 +98,10 @@ RX-XAF|eXpand`); `fence.ts` refuses that pipeline through every shell surface
 | `build-tests.ts` | `build-tests.md` | Full flow, on its own copy of the route. |
 | `delegate-tests.ts` | `delegate-tests.md` | Dormant delegation helper plus the flow publishing locally. |
 | `release-tests.ts` | `release-tests.md` | build.ps1 version bump (Release feed consultation). |
-| `watcher-tests.ts` | `watcher-tests.md` | Watcher W1–W33. |
+| `watcher-tests.ts` | `watcher-tests.md` | Watcher W1–W52, including the failing-test report and its one offer. |
 | `profile-tests.ts` | `profile-tests.md` | RepoProfile (RX vs expand). |
 | `azdo.ts` / `status.ts` | `azdo.md` | AzDO status/cancel. |
-| `delegate.ts` | `delegate.md` | Dormant. |
+| `delegate.ts` | `delegate.md` | A psmux window running a task, boot-verified; boots as a model role on request. |
 | `pane.ts` | `pane.md` | Pane seams: open, send, capture, close, probe, CPU sample. |
 
 Run: `npx tsx .pi/extensions/reactive-xaf-build/{menu,build,watcher,azdo,profile,release,delegate,tool,fence}-tests.ts`

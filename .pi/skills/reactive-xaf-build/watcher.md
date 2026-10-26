@@ -65,6 +65,15 @@ Companion of `.pi/extensions/reactive-xaf-build/watcher.ts`. Started by
   for; without it the watch runs until the chain ends. The old 120-minute
   default ended the watch at 15:34 on 2026-10-25, 30 minutes before the build
   actually failed — which is why nothing was listening when it did.
+- **A failing test is reported while the build is still running.** Every
+  in-flight poll also runs the test scan (`test-scan.ts`) through `pollTests`,
+  and its verdict is spoken by `test-watch.ts`: the first failure is a warning
+  toast plus a steer naming the test and the build URL, later new names are more
+  lines, and ONE delegation to the `Test-Runner` model role is offered per
+  build. Options: `watchTests` (default on) and `testRole`. `pollTests` is a
+  separate function on purpose — `applyPoll` keeps one job (what the chain does
+  next), the test voice is its own. The scan never stops or fails the chain: a
+  refused scan is one note, and the terminal verdict still arrives.
 - Final step: `profile.githubOnSuccess(choice)`. Missing GH_TOKEN steers. The
   attempt itself — the token, the draft PATCH and the retry loop — lives in
   `github-release.ts` (`github-release.md`); this module only decides which
@@ -83,10 +92,11 @@ give-up path in this module calls that one function.
 
 `applyPoll` switches on `parsePoll`'s typed answer, never on prose:
 
-- `build` → the in-flight line, `reportProgress` for the progress verdict, the
-  chain advance, or the terminal message. The verdict itself — a silent task,
-  frozen streams, a starved queue, blindness — is decided in `watcher-notice.md`
-  (`reportProgress`), and none of those stops the watch.
+- `build` → the in-flight line, `reportProgress` for the progress verdict,
+  `pollTests` for the failing tests, the chain advance, or the terminal message.
+  The verdict itself — a silent task, frozen streams, a starved queue, blindness
+  — is decided in `watcher-notice.md` (`reportProgress`), and none of those stops
+  the watch.
 - `empty` → `emptyPoll`, retried inside the grace.
 - `error` / `auth` → `refusedPoll`: give up at once, the remedy in the message.
 - `error` / `transient` → `transientPoll`: retry inside the same grace.

@@ -30,6 +30,7 @@ import activate from "./index.js";
 import { registerBuildCommand } from "./menu.js";
 import { startAzDoWatcher, stopAzDoWatcher, isAzDoWatcherActive } from "./watcher.js";
 import { renderProgressLine } from "./azdo.js";
+import { renderTestScan } from "./test-scan.js";
 import { expandProfile } from "./profile.js";
 
 let ok = 0;
@@ -158,8 +159,9 @@ function noErrors(handle: any, where: string): void {
  *  and the case's own watcher cadence. */
 async function watcherHandle(
   repo: string, seams: Record<string, unknown>, picks: Record<string, Answer>,
+  observe?: (title: string, options: string[]) => void,
 ): Promise<{ handle: any; sel: CaseUi }> {
-  const sel = uiFor(picks);
+  const sel = uiFor(picks, observe);
   await installRoute();
   const handle = await buildRealRunner({
     cwd: repo,
@@ -191,6 +193,30 @@ function mkExpandRepo(): string {
 function crlf(lines: string[]): string {
   return lines.join("\r\n") + "\r\n";
 }
+/** A test scan in which the test records moved since the last poll. The wire is
+ *  built by the PRODUCER's own renderer (`renderTestScan`), for the same reason
+ *  `renderProgressLine` builds the PROGRESS fixtures: a fixture that re-typed
+ *  the format would stay green while the script's own line drifted. */
+function testFails(names: string[], at = "2026-10-26T08:00:00Z"): string {
+  return renderTestScan(names, at);
+}
+
+/** The operator's real role entry, as `.model-roles.json` carries it. */
+const TEST_ROLE_ENTRY = { role: "Test-Runner", modelId: "deepseek-flash", provider: "deepseek", thinkingLevel: "max" };
+
+/** Publish a roles store the way pi does: model-role's OWN `initModelRoles`
+ *  reads a file and publishes `globalThis.__pi_model_roles`. Hand-assigning that
+ *  slot would fabricate the lookup these cases exist to assert — a wrong field
+ *  name or a nested store shape would stay green. */
+async function publishRoles(roles: Record<string, unknown>): Promise<void> {
+  const dir = mkdtempSync(join(tmpdir(), "rxaf-roles-"));
+  tempDirs.push(dir);
+  const file = join(dir, "roles.json");
+  writeFileSync(file, JSON.stringify(roles));
+  const { initModelRoles } = await import("@pi/model-role/state.js");
+  initModelRoles(file);
+}
+
 function running(id: number): string {
   return crlf([`STATUS=${id};inProgress;;`]);
 }
@@ -248,12 +274,14 @@ function flowResult(cmd: string): any {
   if (cmd.startsWith("$cred")) return { code: 0, stdout: "QUEUED=4444", stderr: "" };
   return { code: 0, stdout: "", stderr: "" };
 }
-function mkSeams(statusQueue: string[]): { run: (cmd: string) => Promise<any>; calls: string[] } {
+function mkSeams(statusQueue: string[], testQueue: string[] = []): { run: (cmd: string) => Promise<any>; calls: string[] } {
   const queue = statusQueue.slice();
+  const tests = testQueue.slice();
   const calls: string[] = [];
   return {
     run: async (cmd: string) => {
       calls.push(cmd);
+      if (cmd.includes("# rxaf-testfail")) return { code: 0, stdout: tests.shift() ?? "", stderr: "" };
       if (cmd.includes("$top=5")) return { code: 0, stdout: queue.shift() ?? running(35760), stderr: "" };
       return flowResult(cmd);
     },
@@ -272,6 +300,11 @@ function graceWatcher(emptyGraceMs: number): (p: any, c: any, s: any, opts?: any
  *  the deadline is a backstop a caller asks for, never a default. */
 function stallWatcher(stallMs: number): (p: any, c: any, s: any, opts?: any) => ReturnType<typeof startAzDoWatcher> {
   return (p: any, c: any, s: any, opts?: any) => startAzDoWatcher(p, c, s, { ...opts, intervalMs: 20, stallMs });
+}
+/** The fast watcher plus a delegation spawner the case owns: the spawner is a
+ *  watcher option, because the offer is the watcher's, not the flow's. */
+function testWatcher(spawnWindow: (repo: string, task: string, launch?: any) => Promise<string | null>) {
+  return (p: any, c: any, s: any, opts?: any) => startAzDoWatcher(p, c, s, { ...opts, intervalMs: 20, maxMs: 5000, spawnWindow });
 }
 function mkFetch(nugetVersions: string[]): (url: string) => Promise<string> {
   return async (url: string) => {
@@ -304,6 +337,9 @@ const PUBLISH_PROMPT = "Publish: ";
 const PUBLISH_LAB: Record<string, Answer> = { DevExpress: "Publish", Project: "RX-XAF", "RX-XAF": "Lab", [PUBLISH_PROMPT]: "Publish" };
 const PUBLISH_RELEASE: Record<string, Answer> = { DevExpress: "Publish", Project: "RX-XAF", "RX-XAF": "Release", [PUBLISH_PROMPT]: "Publish" };
 const PUBLISH_EXPAND: Record<string, Answer> = { DevExpress: "Publish", Project: "eXpand", eXpand: "Lab", [PUBLISH_PROMPT]: "Publish" };
+/** The picks that keep the flow quiet while the failing tests are reported: the
+ *  shared prologue of W40-W43 and W47/W48. */
+const KEEP_TESTS: Record<string, Answer> = { ...PUBLISH_LAB, "Tests failing": "Keep watching" };
 
 // Section: W1 — the full Lab chain, green
 async function caseW1(): Promise<void> {
@@ -987,6 +1023,248 @@ async function caseW33(): Promise<void> {
   noErrors(w.handle, "W33");
 }
 
+// Section: W40 — a failing test is reported the moment it appears, not at the
+// build's verdict. The pipeline retries each VSTest task twice and the job is
+// `continueOnError`, so only the log shows it this early.
+async function caseW40(): Promise<void> {
+  const repo = mkRepo();
+  const seams = mkSeams([running(35760)], [testFails(["Xpand.Tests.Alpha"])]);
+  const w = await watcherHandle(repo, { run: seams.run, fetchFeed: mkFetch(LAB), startAzDoWatcher: fastWatcher }, KEEP_TESTS);
+  await w.handle.runCommand("devexpress", "");
+  await sleep(300);
+  const reports = toastsOf(w.handle).filter((n) => n.type === "warning" && n.message.includes("a test has failed"));
+  check("W40: a failed test is reported while the build still runs", reports.length === 1 && reports[0].message.includes("Xpand.Tests.Alpha"), JSON.stringify(toastsOf(w.handle)));
+  check("W40: the report carries the build URL", reports.length === 1 && reports[0].message.includes("definitionId=23"), JSON.stringify(reports));
+  check("W40: it reaches the agent as a steer", steersOf(w.handle).some((s) => s.content.includes("a test has failed") && s.deliverAs === "steer"), JSON.stringify(steersOf(w.handle)));
+  check("W40: the watch is still running", isAzDoWatcherActive());
+  stopAzDoWatcher();
+  answered(w.sel, "W40");
+  noErrors(w.handle, "W40");
+}
+
+// Section: W41 — the same failing test on every poll is ONE message
+async function caseW41(): Promise<void> {
+  const repo = mkRepo();
+  const seams = mkSeams([running(35760)], [testFails(["Xpand.Tests.Alpha"]), testFails(["Xpand.Tests.Alpha"]), testFails(["Xpand.Tests.Alpha"])]);
+  const w = await watcherHandle(repo, { run: seams.run, fetchFeed: mkFetch(LAB), startAzDoWatcher: fastWatcher }, KEEP_TESTS);
+  await w.handle.runCommand("devexpress", "");
+  await sleep(350);
+  const reports = toastsOf(w.handle).filter((n) => n.message.includes("a test has failed"));
+  check("W41: the same failing test is reported once", reports.length === 1, JSON.stringify(reports));
+  check("W41: the prompt was raised once", w.sel.asks.filter((t) => t.includes("Tests failing")).length === 1, JSON.stringify(w.sel.asks));
+  stopAzDoWatcher();
+  answered(w.sel, "W41");
+  noErrors(w.handle, "W41");
+}
+
+// Section: W42 — a NEW name later is one more steer, naming only the new one
+async function caseW42(): Promise<void> {
+  const repo = mkRepo();
+  const seams = mkSeams([running(35760)], [testFails(["Xpand.Tests.Alpha"]), testFails(["Xpand.Tests.Alpha", "Xpand.Tests.Omega"])]);
+  const w = await watcherHandle(repo, { run: seams.run, fetchFeed: mkFetch(LAB), startAzDoWatcher: fastWatcher }, KEEP_TESTS);
+  await w.handle.runCommand("devexpress", "");
+  await sleep(350);
+  const reports = toastsOf(w.handle).filter((n) => n.message.includes("a test has failed"));
+  const second = reports[1]?.message ?? "";
+  check("W42: a new failing test is its own report", reports.length === 2, JSON.stringify(reports));
+  check("W42: the second report names only the new test", second.includes("Xpand.Tests.Omega") && !second.includes("Xpand.Tests.Alpha"), second);
+  check("W42: a new name raises no second prompt", w.sel.asks.filter((t) => t.includes("Tests failing")).length === 1, JSON.stringify(w.sel.asks));
+  stopAzDoWatcher();
+  answered(w.sel, "W42");
+  noErrors(w.handle, "W42");
+}
+
+// Section: W43 — one prompt per build, and its option names the role
+async function caseW43(): Promise<void> {
+  const repo = mkRepo();
+  const prompts: Array<{ title: string; options: string[] }> = [];
+  const seams = mkSeams([running(35760)], [testFails(["Xpand.Tests.Alpha"]), testFails(["Xpand.Tests.Omega"]), testFails(["Xpand.Tests.Sigma"])]);
+  const w = await watcherHandle(
+    repo, { run: seams.run, fetchFeed: mkFetch(LAB), startAzDoWatcher: fastWatcher }, KEEP_TESTS,
+    (title: string, options: string[]) => prompts.push({ title, options }),
+  );
+  await w.handle.runCommand("devexpress", "");
+  await sleep(400);
+  const asks = prompts.filter((p) => p.title.includes("Tests failing"));
+  check("W43: exactly one delegation prompt per build", asks.length === 1, JSON.stringify(prompts.map((p) => p.title)));
+  check("W43: the prompt offers the Test-Runner role", asks.length === 1 && asks[0].options.some((o) => o.includes("Delegate to Test-Runner")), JSON.stringify(asks));
+  stopAzDoWatcher();
+  answered(w.sel, "W43");
+  noErrors(w.handle, "W43");
+}
+
+// Section: W44 — accepting it boots the window as the role, with the brief
+async function caseW44(): Promise<void> {
+  const repo = mkRepo();
+  await publishRoles({ "Test-Runner": TEST_ROLE_ENTRY });
+  const spawns: Array<{ task: string; launch: any }> = [];
+  const seams = mkSeams([running(35760)], [testFails(["Xpand.Tests.Alpha"])]);
+  const w = await watcherHandle(repo, {
+    run: seams.run, fetchFeed: mkFetch(LAB),
+    startAzDoWatcher: testWatcher(async (_repo: string, task: string, launch: any) => {
+      spawns.push({ task, launch });
+      return "42";
+    }),
+  }, { ...PUBLISH_LAB, "Tests failing": "Delegate to Test-Runner" });
+  await w.handle.runCommand("devexpress", "");
+  await sleep(400);
+  check("W44: accepting spawns one window", spawns.length === 1, JSON.stringify(spawns.length));
+  check("W44: the launch is the role's", spawns[0]?.launch?.provider === "deepseek" && spawns[0]?.launch?.model === "deepseek-flash" && spawns[0]?.launch?.thinkingLevel === "max", JSON.stringify(spawns[0]?.launch));
+  check("W44: the brief names the failing test", (spawns[0]?.task ?? "").includes("Xpand.Tests.Alpha"), spawns[0]?.task ?? "");
+  const brief = spawns[0]?.task ?? "";
+  check("W44: the brief carries the narrowed run", brief.includes("dotnet test src\\Tests\\Tests.sln") && brief.includes('--filter "FullyQualifiedName~Xpand.Tests.Alpha"'), brief);
+  check("W44: the window is reported", toastsOf(w.handle).some((n) => n.message.includes("window 42")), JSON.stringify(toastText(w.handle)));
+  stopAzDoWatcher();
+  answered(w.sel, "W44");
+  noErrors(w.handle, "W44");
+}
+
+// Section: W45 — a published store WITHOUT the role: no window, and the role is
+// NAMED. The store is empty, published the way pi publishes it.
+async function caseW45(): Promise<void> {
+  const repo = mkRepo();
+  await publishRoles({});
+  let spawned = 0;
+  const seams = mkSeams([running(35760)], [testFails(["Xpand.Tests.Alpha"])]);
+  const w = await watcherHandle(repo, {
+    run: seams.run, fetchFeed: mkFetch(LAB),
+    startAzDoWatcher: testWatcher(async () => {
+      spawned++;
+      return "43";
+    }),
+  }, { ...PUBLISH_LAB, "Tests failing": "Delegate to Test-Runner" });
+  await w.handle.runCommand("devexpress", "");
+  await sleep(400);
+  check("W45: a missing role spawns nothing", spawned === 0, String(spawned));
+  check("W45: the missing role is named", steersOf(w.handle).some((s) => s.content.includes("no Test-Runner role")), JSON.stringify(steersOf(w.handle)));
+  stopAzDoWatcher();
+  answered(w.sel, "W45");
+  noErrors(w.handle, "W45");
+}
+
+// Section: W46 — a spawn that yields no window: the command to run by hand
+async function caseW46(): Promise<void> {
+  const repo = mkRepo();
+  await publishRoles({ "Test-Runner": TEST_ROLE_ENTRY });
+  const seams = mkSeams([running(35760)], [testFails(["Xpand.Tests.Alpha"])]);
+  const w = await watcherHandle(repo, {
+    run: seams.run, fetchFeed: mkFetch(LAB),
+    startAzDoWatcher: testWatcher(async () => null),
+  }, { ...PUBLISH_LAB, "Tests failing": "Delegate to Test-Runner" });
+  await w.handle.runCommand("devexpress", "");
+  await sleep(400);
+  const steers = steersOf(w.handle).map((s) => s.content).join("\n");
+  check("W46: no window is reported as no window", toastsOf(w.handle).some((n) => n.message.includes("no delegate window could be opened")), JSON.stringify(toastText(w.handle)));
+  check("W46: the exact command is handed over", steers.includes("pi --provider deepseek --model deepseek-flash --thinking max"), steers);
+  check("W46: nothing claims a delegation happened", !steers.includes("delegated the failing tests"), steers);
+  stopAzDoWatcher();
+  answered(w.sel, "W46");
+  noErrors(w.handle, "W46");
+}
+
+// Section: W47 — the failure does not end the watch: the chain still runs to its
+// own verdict. The prologue is W1's whole green chain, with a failing test on
+// the first in-flight poll, because the publish flow follows all three legs.
+async function caseW47(): Promise<void> {
+  const repo = mkRepo();
+  await publishRoles({ "Test-Runner": TEST_ROLE_ENTRY });
+  const gh = mkGh(GH_DRAFT);
+  const seams = mkSeams([running(35760), ...GREEN], [testFails(["Xpand.Tests.Alpha"])]);
+  const w = await watcherHandle(repo, { run: seams.run, fetchFeed: mkFetch(LAB), ghFetch: gh.gh, startAzDoWatcher: fastWatcher }, KEEP_TESTS);
+  await w.handle.runCommand("devexpress", "");
+  await sleep(600);
+  check("W47: the failing test was reported", toastsOf(w.handle).some((n) => n.message.includes("a test has failed")), JSON.stringify(toastText(w.handle)));
+  check("W47: the chain's verdict still arrived", toastsOf(w.handle).some((n) => n.message.includes("chain complete")), JSON.stringify(toastText(w.handle)));
+  check("W47: the watcher ended on its own verdict", !isAzDoWatcherActive());
+  answered(w.sel, "W47");
+  noErrors(w.handle, "W47");
+}
+
+// Section: W48 — the scan is asked for what MOVED, and keeps what it was told
+async function caseW48(): Promise<void> {
+  const repo = mkRepo();
+  const seams = mkSeams([running(35760)], [testFails(["Xpand.Tests.Alpha"], "2026-10-26T08:00:00Z")]);
+  const w = await watcherHandle(repo, { run: seams.run, fetchFeed: mkFetch(LAB), startAzDoWatcher: fastWatcher }, KEEP_TESTS);
+  await w.handle.runCommand("devexpress", "");
+  await sleep(350);
+  const scans = seams.calls.filter((c) => c.includes("# rxaf-testfail"));
+  check("W48: the first scan starts with no watermark", scans.length >= 2 && scans[0].includes("$since = ''"), JSON.stringify(scans.slice(0, 2)));
+  check("W48: the next scan passes back what the script reported", scans.length >= 2 && scans[1].includes("$since = '2026-10-26T08:00:00Z'"), JSON.stringify(scans.slice(0, 2)));
+  stopAzDoWatcher();
+  answered(w.sel, "W48");
+  noErrors(w.handle, "W48");
+}
+
+// Section: W49 — "Don't ask again this run" silences the ASK, not the report
+async function caseW49(): Promise<void> {
+  const repo = mkRepo();
+  await publishRoles({ "Test-Runner": TEST_ROLE_ENTRY });
+  const prompts: string[] = [];
+  const seams = mkSeams([running(35760)], [testFails(["Xpand.Tests.Alpha"]), testFails(["Xpand.Tests.Omega"])]);
+  const w = await watcherHandle(
+    repo, { run: seams.run, fetchFeed: mkFetch(LAB), startAzDoWatcher: fastWatcher },
+    { ...PUBLISH_LAB, "Tests failing": "Don't ask again this run" },
+    (title: string) => prompts.push(title),
+  );
+  await w.handle.runCommand("devexpress", "");
+  await sleep(400);
+  check("W49: muted after the first answer", prompts.filter((t) => t.includes("Tests failing")).length === 1, JSON.stringify(prompts));
+  check("W49: the next failure is still reported", toastsOf(w.handle).some((n) => n.message.includes("Xpand.Tests.Omega")), JSON.stringify(toastText(w.handle)));
+  stopAzDoWatcher();
+  answered(w.sel, "W49");
+  noErrors(w.handle, "W49");
+}
+
+// Section: W50 — the launch FOLLOWS the published store. The store carries a
+// provider/model no case writes as a literal anywhere else, so a hardcoded
+// deepseek default cannot satisfy this: it is the role-name -> flags lookup the
+// operator's /model-role assignment relies on.
+async function caseW50(): Promise<void> {
+  const repo = mkRepo();
+  await publishRoles({ "Test-Runner": { role: "Test-Runner", provider: "openrouter", modelId: "moonshotai/kimi-k3", thinkingLevel: "high" } });
+  const spawns: Array<{ launch: any }> = [];
+  const seams = mkSeams([running(35760)], [testFails(["Xpand.Tests.Alpha"])]);
+  const w = await watcherHandle(repo, {
+    run: seams.run, fetchFeed: mkFetch(LAB),
+    startAzDoWatcher: testWatcher(async (_repo: string, _task: string, launch: any) => {
+      spawns.push({ launch });
+      return "50";
+    }),
+  }, { ...PUBLISH_LAB, "Tests failing": "Delegate to Test-Runner" });
+  await w.handle.runCommand("devexpress", "");
+  await sleep(400);
+  const launch = spawns[0]?.launch ?? {};
+  check("W50: the role's provider reaches the launch", launch.provider === "openrouter", JSON.stringify(launch));
+  check("W50: the role's model reaches the launch", launch.model === "moonshotai/kimi-k3", JSON.stringify(launch));
+  check("W50: the role's level reaches the launch", launch.thinkingLevel === "high", JSON.stringify(launch));
+  stopAzDoWatcher();
+  answered(w.sel, "W50");
+  noErrors(w.handle, "W50");
+}
+
+// Section: W52 — a published entry with no modelId is NOT a role: no launch is
+// invented, and the same refusal as a missing role is spoken.
+async function caseW52(): Promise<void> {
+  const repo = mkRepo();
+  await publishRoles({ "Test-Runner": { role: "Test-Runner", provider: "deepseek" } });
+  let spawned = 0;
+  const seams = mkSeams([running(35760)], [testFails(["Xpand.Tests.Alpha"])]);
+  const w = await watcherHandle(repo, {
+    run: seams.run, fetchFeed: mkFetch(LAB),
+    startAzDoWatcher: testWatcher(async () => {
+      spawned++;
+      return "52";
+    }),
+  }, { ...PUBLISH_LAB, "Tests failing": "Delegate to Test-Runner" });
+  await w.handle.runCommand("devexpress", "");
+  await sleep(400);
+  check("W52: an entry without a model resolves to no launch", spawned === 0, String(spawned));
+  check("W52: the role is named as unset", steersOf(w.handle).some((s) => s.content.includes("no Test-Runner role")), JSON.stringify(steersOf(w.handle)));
+  stopAzDoWatcher();
+  answered(w.sel, "W52");
+  noErrors(w.handle, "W52");
+}
+
 /** The contract, in the order it runs. */
 const CASES: Array<[string, () => Promise<void>]> = [
   ["W1", caseW1],
@@ -1022,6 +1300,18 @@ const CASES: Array<[string, () => Promise<void>]> = [
   ["W31", caseW31],
   ["W32", caseW32],
   ["W33", caseW33],
+  ["W40", caseW40],
+  ["W41", caseW41],
+  ["W42", caseW42],
+  ["W43", caseW43],
+  ["W44", caseW44],
+  ["W45", caseW45],
+  ["W46", caseW46],
+  ["W47", caseW47],
+  ["W48", caseW48],
+  ["W49", caseW49],
+  ["W50", caseW50],
+  ["W52", caseW52],
 ];
 
 /** One case's failure is reported and counted, never a crash that hides the

@@ -49,6 +49,13 @@
  * callers). The token is never logged.
  */
 
+import { classifiedFailure, errBlock } from "./azdo-refusal.js";
+import type { AzDoFailure } from "./azdo-refusal.js";
+
+/** The refusal grammar is shared with every other AzDO query; re-exported so
+ *  an importer of this module keeps one name for the type. */
+export type { AzDoFailure } from "./azdo-refusal.js";
+
 export type AzDoBuildResult = "succeeded" | "failed" | "canceled" | "other";
 
 export interface AzDoStatus {
@@ -82,9 +89,8 @@ export type BuildProgress =
   | { kind: "running"; activeName: string; activeSince: number | null; lastOutputAt: number; source: ProgressSource }
   | { kind: "blind" };
 
-/** Why a call could not be read. `auth` is final (renew the token); anything
- *  else is worth another poll. */
-export type AzDoFailure = "auth" | "transient";
+/** The classified failure a PROGRESS=/STATUS= pair can carry is read by
+ *  `classifiedFailure` in `azdo-refusal.ts`; this module only switches on it. */
 
 /** One poll, classified. `null` from parsePoll means the script printed no
  *  STATUS= line at all — a crash, not a failure it could classify. */
@@ -116,17 +122,6 @@ const WRAPPER_NOISE = /ScriptHalted|Approve-LastExitCode|##\[error\]Exception|Po
 const REAL_ERROR = /CSC : error\b|\berror (?:CS|MSB|DX|NU)\d+\b|\berror :\b/;
 /** Generic build-level failure marker (tier 2 — used only when no tier-1 line). */
 const BUILD_FAILED = /Build FAILED/i;
-
-/** PS: the catch body that classifies a refused call. The message is flattened
- *  first — a newline or a `;` inside it would break the field protocol the TS
- *  side parses. `auth` is matched on the server's own wording. */
-function errBlock(kind: "STATUS" | "CANCEL"): string {
-  return [
-    `  $m = "$($_.Exception.Message)" -replace "\\r?\\n", " " -replace ";", ","`,
-    `  $k = if ($m -match '401|Unauthorized|Access Denied|expired') { 'auth' } else { 'transient' }`,
-    `  "${kind}=ERR;$k;$m"`,
-  ].join("\n");
-}
 
 /** PS: fetch the failed TASK record's log (the Job record's log is a summary
  *  without the real error) and print a bounded tail between LOGSTART/LOGEND
@@ -260,13 +255,6 @@ function lastLine(stdout: string, kind: "STATUS" | "CANCEL" | "PROGRESS"): strin
     if (l.startsWith(`${kind}=`)) line = l;
   }
   return line;
-}
-
-/** The classified failure a line carries, or null when it is a normal line. */
-function classifiedFailure(line: string, kind: "STATUS" | "CANCEL"): { failure: AzDoFailure; message: string } | null {
-  const m = line.match(new RegExp(`^${kind}=ERR;(auth|transient);(.*)$`));
-  if (!m) return null;
-  return { failure: m[1] as AzDoFailure, message: m[2].trim() };
 }
 
 /** The build a STATUS= line carries, or null when the line is malformed.

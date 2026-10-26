@@ -7,8 +7,13 @@
  * flow (prompts, build pane, notifies, steers) continues in the new window
  * and survives the invoking session's close.
  *
- * The task text is interpolated into pwsh single quotes — it must not contain
- * single quotes (the callers use fixed task strings).
+ * The task text is interpolated into pwsh single quotes; a quote inside it is
+ * DOUBLED (`quoteTask`), never dropped — the brief carries AzDO test names now,
+ * and a task that silently lost a character would be a brief nobody can trust.
+ *
+ * `launch` boots the window as a model role (`--provider/--model/--thinking`):
+ * the same launch line psmux uses for a role window, built here because this
+ * spawner is the one that boot-verifies its window.
  *
  * The spawned window is only trusted after it survives a boot grace period:
  * a window that vanishes means its pwsh/pi exited (pi crashed at startup —
@@ -22,11 +27,52 @@ import type { RunResult } from "./pane.js";
 
 export type WindowDelegator = (repo: string, task: string) => Promise<string | null>;
 
+/** A model role's launch triple. The caller resolves it (a store lookup is not
+ *  this module's business); this module only knows how it rides the command. */
+export interface RoleLaunch {
+  provider: string;
+  model: string;
+  thinkingLevel?: string;
+}
+
+/** A spawner that can boot the window as a role. */
+export type WindowSpawner = (repo: string, task: string, launch?: RoleLaunch) => Promise<string | null>;
+
+/** The model-role a failing AzDO test is delegated to. The operator store
+ *  carries it as `deepseek` / `deepseek-flash` / `thinking max`. */
+export const DEFAULT_TEST_ROLE = "Test-Runner";
+
+/** The role's launch triple, or null when the store has no such role. The store
+ *  is the model-role extension's own slot, read at CALL time — a role assigned
+ *  while a build runs is picked up by the next offer. A role entry with no
+ *  provider or no modelId resolves to NOTHING: an invented model would spawn a
+ *  window on whatever the caller guessed. */
+export function roleLaunch(role: string, store = (globalThis as any).__pi_model_roles): RoleLaunch | null {
+  const entry = store?.[role];
+  if (!entry || !entry.provider || !entry.modelId) return null;
+  const thinkingLevel = entry.thinkingLevel ? String(entry.thinkingLevel) : undefined;
+  return { provider: String(entry.provider), model: String(entry.modelId), thinkingLevel };
+}
+
+/** The flags that boot a window as a role, empty when there is no role. */
+function launchFlags(launch?: RoleLaunch): string {
+  if (!launch) return "";
+  const level = launch.thinkingLevel ? ` --thinking ${launch.thinkingLevel}` : "";
+  return `--provider ${launch.provider} --model ${launch.model}${level} `;
+}
+
+/** A task inside pwsh single quotes: a quote is doubled, so the brief survives
+ *  the shell instead of ending it. */
+function quoteTask(task: string): string {
+  return task.replace(/'/g, "''");
+}
+
 export interface DelegateDeps {
   run?: (argv: string[]) => Promise<RunResult>;
   windowExists?: (idx: string) => Promise<boolean>;
   killWindow?: (idx: string) => Promise<void>;
   graceMs?: number;
+  launch?: RoleLaunch;
 }
 
 const GRACE_MS = 8000;
@@ -49,7 +95,7 @@ export async function defaultDelegateWindow(repo: string, task: string, deps: De
   const name = `rxaf-${Date.now().toString(36).slice(-6)}`;
   const spawnArgs = [
     "psmux", "new-window", "-c", repo.replace(/\\/g, "/"), "-n", name, "-P", "-F", "#{window_index}",
-    "--", "pwsh", "-NoLogo", "-c", `pi '${task}'`,
+    "--", "pwsh", "-NoLogo", "-c", `pi ${launchFlags(deps.launch)}'${quoteTask(task)}'`,
   ];
   const res = await run(spawnArgs);
   const idx = res.stdout.trim().split("\n").pop() ?? "";
