@@ -227,7 +227,7 @@ jobs:
         runSettingsFile: '$(SOURCE_DIRECTORY)\Build\Tests.runsettings'
         vstestLocationMethod: 'location'
         vstestLocation: '$(VsTestPath)'
-        otherConsoleOptions: '/Blame /Diag:$(Agent.TempDirectory)\vstest_diag.log'
+        otherConsoleOptions: '/Blame:"CollectHangDump;TestTimeout=10min;HangDumpType=Mini" /Diag:$(Agent.TempDirectory)\vstest_diag.log'
         diagnosticsEnabled: true
 - job: PostTestTasks
   dependsOn:
