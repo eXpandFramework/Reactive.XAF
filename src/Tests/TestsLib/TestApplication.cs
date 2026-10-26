@@ -24,6 +24,10 @@ namespace Xpand.TestsLib{
         private static int _liveCount;
         private bool _disposed;
 
+        static TestWinApplication() {
+            Control.CheckForIllegalCrossThreadCalls = true;
+        }
+
         private static int RegisterLive() {
             var live = System.Threading.Interlocked.Increment(ref _liveCount);
             if (live > 1) {
