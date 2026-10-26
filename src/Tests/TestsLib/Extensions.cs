@@ -51,10 +51,17 @@ namespace Xpand.TestsLib {
                 .Timeout(timeout,nameof(StartWinTest))
             ))).FirstAsync();
 
-        public static IObservable<T> StartWinTest<T>(this WinApplication application, IObservable<T> test, string user=null) 
+        public static readonly TimeSpan DefaultWinTestTimeout = TimeSpan.FromMinutes(5);
+
+        public static IObservable<T> StartWinTest<T>(this WinApplication application, IObservable<T> test, string user=null, TimeSpan? timeout=null) 
             => SynchronizationContext.Current.Observe()
                 .DoWhen(context => context is not WindowsFormsSynchronizationContext,_ => SynchronizationContext.SetSynchronizationContext(new WindowsFormsSynchronizationContext()))
-                .SelectMany(_ => application.Start(test, SynchronizationContext.Current,user)).FirstOrDefaultAsync();
+                .SelectMany(_ => {
+                    var context = SynchronizationContext.Current;
+                    return application.Start(test, context, user)
+                        .Timeout(timeout ?? DefaultWinTestTimeout, nameof(StartWinTest))
+                        .DoOnError(_ => application.Terminate(context));
+                }).FirstOrDefaultAsync();
 
         private static IObservable<T> Start<T>(this WinApplication application, IObservable<T> test, SynchronizationContext context, string user = null) 
             => application.Start( exit => TestTracing.WhenError().ThrowTestException()
