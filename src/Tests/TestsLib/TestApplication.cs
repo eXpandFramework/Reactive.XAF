@@ -20,9 +20,11 @@ namespace Xpand.TestsLib{
     public class TestWinApplication : WinApplication, ITestApplication{
         private readonly bool _transmitMessage;
         private readonly int _createdOnThread = Environment.CurrentManagedThreadId;
+        private readonly System.Threading.SynchronizationContext _createdContext = System.Threading.SynchronizationContext.Current;
         private readonly int _liveSeq = RegisterLive();
+        private static readonly TimeSpan OwnerTeardownTimeout = TimeSpan.FromSeconds(5);
         private static int _liveCount;
-        private bool _disposed;
+        private int _disposed;
 
         static TestWinApplication() {
             Control.CheckForIllegalCrossThreadCalls = true;
@@ -65,20 +67,67 @@ namespace Xpand.TestsLib{
         public Type SUTModule{ get; }
 
         protected override void Dispose(bool disposing){
-            if (disposing && !_disposed) {
-                _disposed = true;
+            if (!disposing) {
+                base.Dispose(false);
+                return;
+            }
+            RunOnOwnerThread("disposed", () => {
+                if (System.Threading.Interlocked.Exchange(ref _disposed, 1) == 1) {
+                    return;
+                }
                 System.Threading.Interlocked.Decrement(ref _liveCount);
-            }
-            if (Environment.CurrentManagedThreadId != _createdOnThread) {
-                Console.Error.WriteLine($"[TestWinApplication] disposed on managed thread {Environment.CurrentManagedThreadId} but created on {_createdOnThread}");
-            }
-            if (_transmitMessage){
-                // TraceClientConnected.ToTaskWithoutConfigureAwait().GetAwaiter().GetResult();
-                // TraceClientBroadcast.ToTaskWithoutConfigureAwait().GetAwaiter().GetResult();
-            }
+                if (_transmitMessage){
+                    // TraceClientConnected.ToTaskWithoutConfigureAwait().GetAwaiter().GetResult();
+                    // TraceClientBroadcast.ToTaskWithoutConfigureAwait().GetAwaiter().GetResult();
+                }
 
-            base.Dispose(disposing);
+                base.Dispose(true);
+            });
         }
+
+        /// <summary>
+        /// Runs the teardown on the thread that created this application. DevExpress'
+        /// dispose closes the main form, and WinForms refuses a control-handle touch
+        /// from any thread but the one that owns it, so a test resuming on a pool
+        /// thread after ConfigureAwait(false) closed LightStyleMainRibbonForm
+        /// off-thread. An owner that cannot be reached in time is logged, never
+        /// silently skipped and never waited on forever.
+        /// </summary>
+        private void RunOnOwnerThread(string what, Action teardown) {
+            if (Environment.CurrentManagedThreadId == _createdOnThread) {
+                teardown();
+                return;
+            }
+            if (_createdContext == null) {
+                LogThreadMismatch(what, "no captured context");
+                teardown();
+                return;
+            }
+            Exception error = null;
+            var ran = new System.Threading.ManualResetEventSlim(false);
+            _createdContext.Post(_ => {
+                try {
+                    teardown();
+                }
+                catch (Exception exception) {
+                    error = exception;
+                }
+                finally {
+                    ran.Set();
+                }
+            }, null);
+            if (!ran.Wait(OwnerTeardownTimeout)) {
+                LogThreadMismatch(what, $"owner did not run it within {OwnerTeardownTimeout.TotalSeconds}s");
+                teardown();
+                return;
+            }
+            if (error != null) {
+                ExceptionDispatchInfo.Capture(error).Throw();
+            }
+        }
+
+        private void LogThreadMismatch(string what, string reason)
+            => Console.Error.WriteLine($"[TestWinApplication] {what} on managed thread {Environment.CurrentManagedThreadId} but created on {_createdOnThread}; {reason}, ran in place");
 
         readonly Subject<Form> _modelEditorForm = new();
 
