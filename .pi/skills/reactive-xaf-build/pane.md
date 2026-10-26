@@ -71,20 +71,28 @@ the test suite.
   and stderr (bounded 50 KB), and waits on ONE `events.once(child, "close")`
   bounded by `AbortSignal.timeout(timeoutMs)`. Inside the budget it resolves
   `{ code, stdout, stderr }` on close. At the deadline the wait is cut,
-  `kill` (the `KillFn` seam) takes the child down, both pipes are destroyed, and
-  it resolves `{ code: -1, stdout, stderr, timedOut: true }` — `timedOut` is a
-  flag of its own because `-1` alone would read as an exit code that never
-  happened. A spawn failure still rejects, as it always did.
+  `kill` (the `KillFn` seam) takes the child down, the death is VERIFIED by
+  waiting up to `REAP_MS` (1 s) for the child's own `exit` event, then both pipes
+  are destroyed, and it resolves `{ code: -1, stdout, stderr, timedOut: true, reaped }` —
+  `timedOut` is a flag of its own because `-1` alone would read as an exit code
+  that never happened. `reaped` is the verification: `true` means the child
+  reported its own death, `false` means the kill did not land and the process may
+  still be running. The leak is named, never swallowed — the catch rethrows
+  anything that is not the reap's own deadline.
+  The reap is the half that was missing: the old shape killed
+  and assumed, and 300+ leftover `pwsh` on this box is what assuming leaves behind.
+  A kill that still does not land cannot delay the answer, because the deadline
+  owns it. A spawn failure still rejects, as it always did.
 - `runProcess(cmd, opts)` — `pwsh -Command <cmd>` through `runArgv`,
   default 60 s timeout. `RunOpts.noProfile` swaps in
   `pwsh -NoProfile -NonInteractive -Command`: the VM probe sets it, because
   what the user profile loads must never decide whether a probe answers (a
-  profile stall is what killed the probe in the incident). `RunOpts.shell`
-  picks the PowerShell: `"powershell"` (Windows PowerShell 5.1) is what the
-  Hyper-V layer sets, because under pwsh 7 the Hyper-V cmdlets reach the module
-  through the Windows-PowerShell compat session and `Get-VM` never returns
-  (three measured attempts, no output, no exit, while `powershell.exe` answered
-  in about a second). Everything else stays on pwsh. `RunOpts.kill` replaces the
+  profile stall is what killed the probe in the incident). `RunOpts.shell` is gone:
+  the Hyper-V layer was briefly moved to `powershell.exe` on the theory that pwsh 7
+  could not answer `Get-VM` at all, and the re-measurement put pwsh at 1.3-2.3 s
+  against 2.5 s for 5.1 — no margin worth a second environment, and the deadline is
+  what saves a probe.
+  `RunOpts.kill` replaces the
   tree kill (`taskkill /T /F`) — a test seam: `pane-tests.ts` P3 passes a no-op
   and still expects an answer at the deadline, which is the one thing a real kill
   cannot prove. `RunOpts.env`

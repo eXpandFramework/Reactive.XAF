@@ -17,15 +17,15 @@
  *
  * Runtime: pi's own runtime through `buildRealRunner` (the extension loads for
  * real, only the host stubbed), plus the shared psmux harness on an isolated
- * socket, plus real `pwsh` and `powershell.exe` children for the deadline and
- * shell cases. Nothing here spawns pi, so no boot proof is carried.
+ * socket, plus real `pwsh` children for the deadline and reap cases. Nothing here
+ * spawns pi, so no boot proof is carried.
  *
  * Run: npx tsx .pi/extensions/reactive-xaf-build/pane-tests.ts
  */
 // test-timeout: 120000 — the real runner boots, then a real psmux server, one split and one control
 /* oxlint-disable no-console -- test harness prints PASS/FAIL to stdout */
 import activate from "./index.js";
-import { defaultOpenBuildPane, defaultRunInPane, runArgv, runProcess } from "./pane.js";
+import { defaultOpenBuildPane, defaultRunInPane, runArgv, REAP_MS } from "./pane.js";
 
 let ok = 0;
 let fail = 0;
@@ -125,10 +125,18 @@ async function caseDetachedSplit(iso: Isolated): Promise<void> {
   await iso.run(`kill-pane -t ${pane}`);
 }
 
-/** How long the kill itself may take before the answer counts as late. The answer
- *  does not wait for it: this is headroom for `taskkill` and the pipe teardown,
- *  never a grace window the call sits through. */
-const KILL_BUDGET_MS = 3000;
+/** What an answer may take beyond its deadline, in the TEST's own numbers: the reap
+ *  bound plus `taskkill` and pipe teardown. Deliberately NOT derived from `REAP_MS` —
+ *  a bound built from the constant it guards goes green when that constant grows, and
+ *  a reap wait becoming the hang is exactly the regression this suite exists to catch. */
+const ANSWER_CEILING_MS = 2000;
+function answerBound(deadlineMs: number): number {
+  return deadlineMs + ANSWER_CEILING_MS;
+}
+
+/** The reap stays a verification, not a wait. Asserted below, because a bound nobody
+ *  measures is a bound that drifts. */
+const REAP_CEILING_MS = 1000;
 
 /** P2 — a command that outlives its budget comes back, marked, AT its deadline.
  *  `runArgv` used to resolve on the close event and nothing else, so a kill that
@@ -138,7 +146,7 @@ async function caseRunDeadline(): Promise<void> {
   const killed = await runArgv(["pwsh", "-NoProfile", "-NonInteractive", "-Command", "Start-Sleep -Seconds 30"], 1500);
   const elapsed = Date.now() - started;
   check("P2: a child past its deadline answers instead of hanging", killed.timedOut === true && killed.code === -1, JSON.stringify(killed));
-  check("P2: the deadline settles the call, not the child's death report", elapsed < 1500 + KILL_BUDGET_MS, `${elapsed}ms`);
+  check("P2: the deadline settles the call, not the child's death report", elapsed < answerBound(1500), `${elapsed}ms`);
   const quick = await runArgv(["pwsh", "-NoProfile", "-NonInteractive", "-Command", "Write-Output done"], 30000);
   check("P2: a child that finishes carries no timeout mark", quick.code === 0 && quick.stdout.trim() === "done" && quick.timedOut === undefined, JSON.stringify(quick));
 }
@@ -148,21 +156,24 @@ async function caseRunDeadline(): Promise<void> {
  *  shape this is the case that hangs. */
 async function caseMissedKill(): Promise<void> {
   const started = Date.now();
-  const res = await runArgv(["pwsh", "-NoProfile", "-NonInteractive", "-Command", "Start-Sleep -Seconds 5"], 1000, undefined, undefined, () => undefined);
+  const res = await runArgv(["pwsh", "-NoProfile", "-NonInteractive", "-Command", "Start-Sleep -Seconds 30"], 1000, undefined, undefined, () => undefined);
   const elapsed = Date.now() - started;
-  check("P3: a kill that never lands still answers, marked", res.timedOut === true && res.code === -1, JSON.stringify(res));
-  check("P3: and it answers at the deadline, not after it", elapsed < 1000 + KILL_BUDGET_MS, `${elapsed}ms`);
+  check("P3: a kill that never lands still answers, marked", res.timedOut === true && res.code === -1 && res.reaped === false, JSON.stringify(res));
+  check("P3: and it answers inside the deadline plus the reap bound", elapsed < answerBound(1000), `${elapsed}ms`);
 }
 
-/** P4 — the shell seam measured at the process boundary. The Hyper-V layer asks
- *  for `powershell` because pwsh 7 never returns from `Get-VM` on this machine, so
- *  what must be proven is the PowerShell that actually answers, not the option
- *  object a call site composed. */
-async function caseShellSeam(): Promise<void> {
-  const win = await runProcess("$PSVersionTable.PSVersion.Major", { shell: "powershell", noProfile: true, timeoutMs: 30000 });
-  check("P4: shell \"powershell\" really runs Windows PowerShell 5", win.code === 0 && win.stdout.trim() === "5", JSON.stringify(win));
-  const pwsh = await runProcess("$PSVersionTable.PSVersion.Major", { noProfile: true, timeoutMs: 30000 });
-  check("P4: the default stays on pwsh", pwsh.code === 0 && Number(pwsh.stdout.trim()) >= 7, JSON.stringify(pwsh));
+/** P4 — the REAP, measured at the process boundary rather than at the return
+ *  value: the child prints its own pid and then outlives its deadline, so the pid
+ *  can be looked up afterwards. The old flow killed and assumed, and this box
+ *  carried 300+ leftover `pwsh` as the evidence that assuming is not enough. */
+async function caseReap(): Promise<void> {
+  const res = await runArgv(["pwsh", "-NoProfile", "-NonInteractive", "-Command", "$PID; Start-Sleep -Seconds 30"], 2000);
+  const pid = Number(res.stdout.trim().split("\n")[0]);
+  check("P4: the child under test answered its deadline, marked", res.timedOut === true && res.reaped === true && Number.isInteger(pid) && pid > 0, JSON.stringify(res));
+  check("P4: the reap bound stays a verification, not a wait", REAP_MS <= REAP_CEILING_MS, `${REAP_MS}ms`);
+  if (!Number.isInteger(pid) || pid <= 0) return;
+  const alive = await runArgv(["pwsh", "-NoProfile", "-NonInteractive", "-Command", `(Get-Process -Id ${pid} -ErrorAction SilentlyContinue).Count`], 30000);
+  check("P4: the killed child is gone, not left running", alive.code === 0 && alive.stdout.trim() === "0", `pid ${pid} -> ${alive.stdout.trim()} (exit ${alive.code})`);
 }
 
 async function main(): Promise<void> {
@@ -171,7 +182,7 @@ async function main(): Promise<void> {
   await caseBoot();
   await caseRunDeadline();
   await caseMissedKill();
-  await caseShellSeam();
+  await caseReap();
   if (withIsolatedPsmuxServer === null) {
     fail++;
     console.log("FAIL  the shared psmux harness resolved to nothing — nothing was measured");

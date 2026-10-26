@@ -46,6 +46,12 @@ import { dirname, join } from "node:path";
 import activate from "./index.js";
 import { registerBuildCommand } from "./menu.js";
 import { runArgv } from "./pane.js";
+import { VM_PROBE_TIMEOUT_MS } from "./publish.js";
+
+/** The refusal's deadline clause, rendered from the probe's own budget: the cases
+ *  assert the wording the code produces, and neither can drift from the other while
+ *  the number lives in one place. */
+const PROBE_DEADLINE_TEXT = `did not answer within ${VM_PROBE_TIMEOUT_MS / 1000}s`;
 import { isBuildRunActive, runPaths, stopBuildRun, writeRunScript } from "./run.js";
 
 let ok = 0;
@@ -1603,9 +1609,12 @@ async function caseT65(): Promise<void> {
     { match: "git commit -m *", result: okResult() },
   ]);
   const sel = uiFor({ DevExpress: "Publish", Project: "RX-XAF", "RX-XAF": "Lab", [COMMIT_PROMPT]: "Commit" });
-  const handle = await menuHandle(repo, gateSeams(repo, runner), sel.ui);
+  const lines: string[] = [];
+  const handle = await menuHandle(repo, { ...gateSeams(repo, runner), log: (m: string) => lines.push(m) }, sel.ui);
   await handle.runCommand("devexpress", "");
   checkT65({ repo, runner, pane: null, sel, handle });
+  const probeRows = lines.filter((l) => l.startsWith("Get-VM attempt"));
+  check("T65: the attempt is logged with its outcome, one row", probeRows.length === 1 && probeRows[0].includes("attempt 1 of 2") && probeRows[0].includes("timed out"), probeRows.join(" | ") || "(no probe row)");
 }
 
 /** T65's checks: one attempt, the deadline named, the commit kept, no queue. */
@@ -1614,10 +1623,10 @@ function checkT65(p: Parts): void {
   check("T65: a probe killed at its deadline is not retried", probes === 1, p.runner.calls.join(" | "));
   const steers = steersText(p.handle).join("\n");
   const said = [steers, noticesOf(p.handle).join("\n")].join("\n");
-  check("T65: the deadline is named, never an exit code", said.includes("did not answer within 60s") && !said.includes("Get-VM failed (exit"), said);
-  check("T65: the refusal reaches the agent as a warning steer", steers.includes("did not answer within 60s"), steers);
+  check("T65: the deadline is named, never an exit code", said.includes(PROBE_DEADLINE_TEXT) && !said.includes("Get-VM failed (exit"), said);
+  check("T65: the refusal reaches the agent as a warning steer", steers.includes(PROBE_DEADLINE_TEXT), steers);
   const probeOpts = p.runner.runOpts[p.runner.calls.findIndex((c: string) => c.startsWith("Get-VM"))];
-  check("T65: the probe runs in the Windows PowerShell, profile-free", probeOpts?.shell === "powershell" && probeOpts?.noProfile === true, JSON.stringify(probeOpts));
+  check("T65: the probe stays profile-free", probeOpts?.noProfile === true, JSON.stringify(probeOpts));
   check("T65: the commit ran without the gate", p.runner.calls.includes("git add -A") && p.runner.calls.some((c: string) => c.startsWith('git commit -m "Publish (1 files)"')), p.runner.calls.join(" | "));
   check("T65: no queue from a silent VM layer", !p.runner.calls.some((c: string) => c.includes("prx")), p.runner.calls.join(" | "));
   check("T65: the summary says the publish stopped", noticesOf(p.handle).join("\n").includes("publish stopped"), noticesOf(p.handle).join("\n"));

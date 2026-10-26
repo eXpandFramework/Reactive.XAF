@@ -52,13 +52,18 @@ before the VM outcome is read, and the pre-push check runs inside `queuePhase`.
 ## The VM gate (`planVms` + `ensureVmsRunning`)
 
 One probe (`Get-VM -Name C11,C12,C13,C14 | ForEach-Object { "$($_.Name)=$($_.State)" }`),
-run through the seam with `shell: "powershell"` and `noProfile: true`. The shell
-is the reason the gate answers at all: under pwsh 7 the Hyper-V cmdlets reach the
-module through the Windows-PowerShell compat session and `Get-VM` never returns
-(three measured attempts, 20/25/75 s, no output and no exit, while
-`powershell.exe` answered in about a second). The profile stays skipped because a
-profile stall is what killed the probe in the incident, and because Windows
-PowerShell loading the profile is the `Tmux.ps1` BOM trap.
+run through the seam with `noProfile: true` on the default shell. The profile stays
+skipped because a profile stall is what killed the probe in the incident, and
+because loading it is the `Tmux.ps1` BOM trap. There is no shell option, and the
+reason is recorded rather than assumed: pwsh 7 was blamed for the stall, then
+re-measured at 1.3-2.3 s against 2.5 s for `powershell.exe`, so the shell was not
+the fault and the deadline is what saves the probe. Every attempt writes one log
+row (`Get-VM attempt 1 of 2: timed out in 60001ms | stdout: … | stderr: …`),
+because the probe used to log nothing and a stall had to be reconstructed from
+process counts. A timed-out probe whose kill was not verified says so twice: the
+log row reads `timed out, kill not verified`, and the refusal reads `and its process
+could not be killed … the leftover pwsh may still be running`. The old flow killed
+and assumed, and a refusal that claimed a kill it never got was part of that.
 The read is split on `/\r?\n/`: pwsh writes CRLF and terminates the last line,
 and a bare `"\n"` split leaves the `\r` on every line, where the anchored
 `(.*)$` never matches (JS `$` without `/m` is end-of-input). That defect read a
@@ -85,8 +90,8 @@ list would only report the same thing twice.
 - an agent missing from the output → `Get-VM did not report C11, ... — no state to act on`,
   with the probe's own words appended: its stderr tail, or (when no agent was read
   at all) its stdout tail, or `no output on either stream`
-- `Off` / `Saved` → Start-VM (the same shell and also profile-free: the
-  `Tmux.ps1` BOM trap again)
+- `Off` / `Saved` → Start-VM (profile-free like the probe: the `Tmux.ps1` BOM
+  trap again)
 - `Starting` / `Pausing` / `Resuming` / `Saving` / `Stopping` → wait for Running
 - `Running` → nothing to do
 - anything else (`Paused`, `Suspended`, unknown) → `<name> is <state> — neither

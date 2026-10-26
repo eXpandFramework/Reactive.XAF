@@ -26,6 +26,10 @@ export interface RunResult {
    *  reading `code` alone would report a timeout as an exit code that never
    *  happened. */
   timedOut?: boolean;
+  /** Only meaningful on a timed-out result: the kill was VERIFIED, meaning the
+   *  child reported its own exit. `false` says the process may still be alive,
+   *  which is the leak to name rather than swallow. */
+  reaped?: boolean;
 }
 
 export interface RunOpts {
@@ -39,12 +43,6 @@ export interface RunOpts {
    *  it: what the profile loads must never decide whether a probe answers (a
    *  profile stall is what killed the probe in the incident). */
   noProfile?: boolean;
-  /** Which PowerShell runs the command. The Hyper-V layer sets "powershell":
-   *  under pwsh 7 the Hyper-V cmdlets reach the module through the
-   *  Windows-PowerShell compat session and `Get-VM` there never returned (three
-   *  measured attempts: no output, no exit), while `powershell.exe` answered in
-   *  about a second. Everything else stays on pwsh. */
-  shell?: "pwsh" | "powershell";
   /** How a child past its deadline is taken down. Production leaves it unset
    *  (`taskkill /T /F`); a test swaps in a no-op to prove the call still answers
    *  at the deadline when the kill never lands. */
@@ -108,12 +106,37 @@ const treeKill: KillFn = (child) => {
   if (child.pid !== undefined) spawn("taskkill", ["/PID", String(child.pid), "/T", "/F"], { stdio: "ignore" });
 };
 
-/** Kill the child and close its pipes, so a death that never reports cannot keep
- *  the call open. */
-function killTree(child: ChildProcess, kill: KillFn): void {
+/** How long the reap waits for a killed child to report its own death. A VERIFICATION
+ *  budget, not a wait the answer depends on: `taskkill /T /F` reports back in tens of
+ *  milliseconds, so a second is generous. Exported because the tests pin that it STAYS
+ *  a second — a reap that grew back would be the hang this module exists to prevent. */
+export const REAP_MS = 1000;
+
+/** Take the child down and VERIFY it, then close its pipes. The earlier shape
+ *  killed and assumed, and this box carried 300+ leftover `pwsh` as the evidence
+ *  that assuming is not enough: a kill that misses leaves a process behind, and a
+ *  pipe held by it makes the next wait look like a hang. `exit` is the death
+ *  report — and when it does not arrive the call still answers, because the
+ *  deadline owns the answer, not the child. */
+async function killAndReap(child: ChildProcess, kill: KillFn): Promise<boolean> {
   kill(child);
+  let reaped = child.exitCode !== null || child.signalCode !== null;
+  if (!reaped) {
+    try {
+      await once(child, "exit", { signal: AbortSignal.timeout(REAP_MS) });
+      reaped = true;
+    } catch (err) {
+      // Deliberate, and narrow: the ONLY rejection expected here is the reap's own
+      // deadline, so anything else is rethrown instead of hidden. A kill that never
+      // lands still lets the answer through — it is RETURNED as `reaped: false`.
+      const name = (err as { name?: string } | null)?.name;
+      if (name !== "TimeoutError" && name !== "AbortError") throw err;
+      reaped = false;
+    }
+  }
   child.stdout?.destroy();
   child.stderr?.destroy();
+  return reaped;
 }
 
 /** The wait: ONE awaited close, bounded by a timeout signal (the same shape
@@ -131,19 +154,20 @@ async function settleChild(child: ChildProcess, out: { stdout: string; stderr: s
     return { code: (code as number | null) ?? -1, stdout: out.stdout, stderr: out.stderr };
   } catch {
     if (spawnError) throw spawnError;
-    killTree(child, kill);
-    return { code: -1, stdout: out.stdout, stderr: out.stderr, timedOut: true };
+    const reaped = await killAndReap(child, kill);
+    return { code: -1, stdout: out.stdout, stderr: out.stderr, timedOut: true, reaped };
   }
 }
 
-/** Run a command through PowerShell (the default command runner seam): pwsh
- *  unless the caller names the Windows PowerShell, which is the only shell the
- *  Hyper-V cmdlets answer in on this machine. */
+/** Run a command through pwsh (the default command runner seam). The shell is not
+ *  a caller's choice: the Hyper-V layer was once moved to `powershell.exe` on the
+ *  theory that pwsh 7 could not answer `Get-VM`, and a re-measurement on the same
+ *  box had pwsh at 1.3-2.3 s against 2.5 s for 5.1 — no margin, and one extra
+ *  environment to reason about. The deadline is what saves a probe, not the shell. */
 export async function runProcess(cmd: string, opts: RunOpts = {}): Promise<RunResult> {
-  const shell = opts.shell ?? "pwsh";
   const argv = opts.noProfile
-    ? [shell, "-NoProfile", "-NonInteractive", "-Command", cmd]
-    : [shell, "-Command", cmd];
+    ? ["pwsh", "-NoProfile", "-NonInteractive", "-Command", cmd]
+    : ["pwsh", "-Command", cmd];
   return runArgv(argv, opts.timeoutMs ?? 60000, opts.cwd, opts.env, opts.kill);
 }
 
