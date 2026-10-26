@@ -266,15 +266,17 @@ namespace Xpand.TestsLib.Common{
                     .SelectMany(frame => (frame.Template)
                         .ProcessEvent("Activated").Take(1).WaitUntilInactive(2.Seconds()).Take(1).ObserveOnContext()
                         .SelectMany(_ => testFactory(frame).BufferUntilCompleted().DoSafe(_ => {
-                            Console.Error.WriteLine("[PROBE] 6 exit requested");
+                            Console.Error.WriteLine($"[PROBE] 6 exit requested tid={Environment.CurrentManagedThreadId}");
                             application.Exit();
-                            Console.Error.WriteLine("[PROBE] 7 exit returned");
+                            Console.Error.WriteLine($"[PROBE] 7 exit returned tid={Environment.CurrentManagedThreadId}");
                         }).SelectMany()))
                     .Finally(() => SynchronizationContext.SetSynchronizationContext(originalSyncContext));
             }))
             .Timeout(timeout??300.ToSeconds())
             .Catch<T,TimeoutException>(e => {
+                Console.Error.WriteLine($"[PROBE] 9 catch exit requested tid={Environment.CurrentManagedThreadId}");
                 application.Exit();
+                Console.Error.WriteLine($"[PROBE] 10 catch exit returned tid={Environment.CurrentManagedThreadId}");
                 return e.Throw<T>();
             });
 

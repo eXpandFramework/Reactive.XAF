@@ -111,15 +111,15 @@ namespace Xpand.XAF.Modules.Reactive.Tests.FaultContextTests {
             DefaultReactiveModule(application);
 
             await application.StartWinTest(frame => {
-                Console.Error.WriteLine("[PROBE] 1 factory reached");
+                Console.Error.WriteLine($"[PROBE] 1 factory reached tid={Environment.CurrentManagedThreadId}");
                 var actions = frame.Actions(nameof(Can_Get_Correct_StackTrace_From_Nested_Method)).ToArray();
                 Console.Error.WriteLine($"[PROBE] 2 actions found={actions.Length}");
                 return FaultHub.Bus
-                    .Do(_ => Console.Error.WriteLine("[PROBE] 3 announcement received"))
+                    .Do(_ => Console.Error.WriteLine($"[PROBE] 3 announcement received tid={Environment.CurrentManagedThreadId}"))
                     .Take(1)
                     .MergeToUnit(actions.Do(a => a.DoTheExecute()).ToNowObservable().IgnoreElements()
-                        .Finally(() => Console.Error.WriteLine("[PROBE] 4 action side ended")))
-                    .Finally(() => Console.Error.WriteLine("[PROBE] 5 merged wait ended"));
+                        .Finally(() => Console.Error.WriteLine($"[PROBE] 4 action side ended tid={Environment.CurrentManagedThreadId}")))
+                    .Finally(() => Console.Error.WriteLine($"[PROBE] 5 merged wait ended tid={Environment.CurrentManagedThreadId}"));
             }, 60.Seconds());
 
             BusEvents.Count.ShouldBe(1);
