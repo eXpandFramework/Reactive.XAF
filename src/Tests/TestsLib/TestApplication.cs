@@ -19,6 +19,7 @@ using Xpand.XAF.Modules.Reactive.Logger.Hub;
 namespace Xpand.TestsLib{
     public class TestWinApplication : WinApplication, ITestApplication{
         private readonly bool _transmitMessage;
+        private readonly int _createdOnThread = Environment.CurrentManagedThreadId;
 
         public TestWinApplication(Type sutModule, bool transmitMessage = true, bool handleExceptions=true) {
             // SettingUp += (_, args) => ((ExportedTypeCollection)args.SetupParameters.DomainComponents).Add(typeof(TraceEvent));
@@ -49,6 +50,9 @@ namespace Xpand.TestsLib{
         public Type SUTModule{ get; }
 
         protected override void Dispose(bool disposing){
+            if (Environment.CurrentManagedThreadId != _createdOnThread) {
+                Console.Error.WriteLine($"[TestWinApplication] disposed on managed thread {Environment.CurrentManagedThreadId} but created on {_createdOnThread}");
+            }
             if (_transmitMessage){
                 // TraceClientConnected.ToTaskWithoutConfigureAwait().GetAwaiter().GetResult();
                 // TraceClientBroadcast.ToTaskWithoutConfigureAwait().GetAwaiter().GetResult();
