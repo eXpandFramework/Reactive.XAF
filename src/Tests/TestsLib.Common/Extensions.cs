@@ -265,25 +265,36 @@ namespace Xpand.TestsLib.Common{
                 return application.WhenFrame(Nesting.Root).Take(1)
                     .SelectMany(frame => (frame.Template)
                         .ProcessEvent("Activated").Take(1).WaitUntilInactive(2.Seconds()).Take(1).ObserveOnContext()
-                        .SelectMany(_ => testFactory(frame).BufferUntilCompleted().DoSafe(_ => {
-                            Console.Error.WriteLine($"[PROBE] 6 exit requested tid={Environment.CurrentManagedThreadId}");
-                            application.Exit();
-                            Console.Error.WriteLine($"[PROBE] 7 exit returned tid={Environment.CurrentManagedThreadId}");
-                        }).SelectMany()))
+                        .SelectMany(_ => testFactory(frame).BufferUntilCompleted().DoSafe(_ => RequestExit(application)).SelectMany()))
                     .Finally(() => SynchronizationContext.SetSynchronizationContext(originalSyncContext));
             }))
             .Timeout(timeout??300.ToSeconds())
             .Catch<T,TimeoutException>(e => {
-                Console.Error.WriteLine($"[PROBE] 9 catch exit requested tid={Environment.CurrentManagedThreadId}");
                 application.Exit();
-                Console.Error.WriteLine($"[PROBE] 10 catch exit returned tid={Environment.CurrentManagedThreadId}");
                 return e.Throw<T>();
             });
 
+        /// <summary>
+        /// Stops the application without blocking the caller. Exit() marshals to the
+        /// UI thread and waits for it, so calling it from inside the fault pipeline
+        /// deadlocks: the UI thread is waiting for that pipeline to finish, and the
+        /// pipeline is the thread Exit was called on. A local run sat for minutes in
+        /// Exit() on the delivery thread while the same call returned on a free
+        /// thread (2026-10-26). Running the exit on its own thread lets the pipeline
+        /// unwind, so the UI thread is released and Start() returns.
+        /// </summary>
+        private static void RequestExit(XafApplication application)
+            => System.Threading.Tasks.Task.Run(() => {
+                try {
+                    application.Exit();
+                }
+                catch (Exception exception) {
+                    Console.Error.WriteLine($"[StartWinTest] exit failed: {exception.Message}");
+                }
+            });
+
         public static IObservable<T> Start<T>(this XafApplication application,IObservable<T> test) {
-            return test.Merge(application.DeferAction(_ => application.CallMethod("Start"))
-                .Do(_ => Console.Error.WriteLine("[PROBE] 8 start returned"))
-                .To<T>().IgnoreElements());
+            return test.Merge(application.DeferAction(_ => application.CallMethod("Start")).To<T>().IgnoreElements());
         }
 
         [SuppressMessage("ReSharper", "SuspiciousTypeConversion.Global")]
