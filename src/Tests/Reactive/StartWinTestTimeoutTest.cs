@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.Numeric;
+using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.TestsLib.Common;
 
 namespace Xpand.XAF.Modules.Reactive.Tests {
