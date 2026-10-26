@@ -110,9 +110,17 @@ namespace Xpand.XAF.Modules.Reactive.Tests.FaultContextTests {
 
             DefaultReactiveModule(application);
 
-            await application.StartWinTest(frame => FaultHub.Bus.Take(1)
-                .MergeToUnit(frame.Actions(nameof(Can_Get_Correct_StackTrace_From_Nested_Method))
-                    .Do(a => a.DoTheExecute()).ToNowObservable().IgnoreElements()));
+            await application.StartWinTest(frame => {
+                Console.Error.WriteLine("[PROBE] 1 factory reached");
+                var actions = frame.Actions(nameof(Can_Get_Correct_StackTrace_From_Nested_Method)).ToArray();
+                Console.Error.WriteLine($"[PROBE] 2 actions found={actions.Length}");
+                return FaultHub.Bus
+                    .Do(_ => Console.Error.WriteLine("[PROBE] 3 announcement received"))
+                    .Take(1)
+                    .MergeToUnit(actions.Do(a => a.DoTheExecute()).ToNowObservable().IgnoreElements()
+                        .Finally(() => Console.Error.WriteLine("[PROBE] 4 action side ended")))
+                    .Finally(() => Console.Error.WriteLine("[PROBE] 5 merged wait ended"));
+            }, 60.Seconds());
 
             BusEvents.Count.ShouldBe(1);
             var fault = BusEvents.Single().ShouldBeOfType<FaultHubException>();
