@@ -257,35 +257,57 @@ namespace Xpand.TestsLib.Common{
             {"SpeechManagerModule", 61494},
         };
         
-        public static IObservable<T> StartWinTest<T>(this XafApplication application, Func<Frame,IObservable<T>> testFactory,TimeSpan? timeout=null) 
-            => application.Start(Observable.Defer(() => {
+        public static IObservable<T> StartWinTest<T>(this XafApplication application, Func<Frame,IObservable<T>> testFactory,TimeSpan? timeout=null) {
+            var exit = new RunExit(application);
+            return application.Start(Observable.Defer(() => {
                 var originalSyncContext = SynchronizationContext.Current;
                 var winformsSyncContextType = AppDomain.CurrentDomain.GetAssemblyType("System.Windows.Forms.WindowsFormsSynchronizationContext");
                 SynchronizationContext.SetSynchronizationContext((SynchronizationContext)winformsSyncContextType.CreateInstance());
-                var runContext = SynchronizationContext.Current;
+                exit.Attach(SynchronizationContext.Current);
                 return application.WhenFrame(Nesting.Root).Take(1)
                     .SelectMany(frame => (frame.Template)
                         .ProcessEvent("Activated").Take(1).WaitUntilInactive(2.Seconds()).Take(1).ObserveOnContext()
-                        .SelectMany(_ => testFactory(frame).BufferUntilCompleted().DoSafe(_ => RequestExit(runContext, application)).SelectMany()))
+                        .SelectMany(_ => testFactory(frame).BufferUntilCompleted().DoSafe(_ => exit.Request()).SelectMany()))
                     .Finally(() => SynchronizationContext.SetSynchronizationContext(originalSyncContext));
             }))
             .Timeout(timeout??300.ToSeconds())
             .Catch<T,TimeoutException>(e => {
-                application.Exit();
+                exit.Request();
                 return e.Throw<T>();
             });
+        }
 
         /// <summary>
-        /// Ends the run on the application's UI thread. Measured with a stack dump on
-        /// 2026-10-26: Exit() called inline from the fault-delivery thread wedges and
-        /// never returns, and called from a pool thread it returns having stopped
-        /// nothing, because the WinForms loop it must end belongs to another thread.
-        /// The exit is therefore posted to the context this method installed for the
-        /// run: the call returns at once, and the close happens on the UI thread in
-        /// its own message turn, which is the only place it ends the loop.
+        /// The one place a run ends its application, on the application's own UI thread.
+        /// Measured with a stack dump on 2026-10-26: Exit() called inline from the
+        /// fault-delivery thread wedges and never returns, and called from a pool thread
+        /// it returns having stopped nothing, because the WinForms loop it must end
+        /// belongs to another thread. The exit is therefore posted to the context the run
+        /// installed: the call returns at once, and the close happens on the UI thread in
+        /// its own message turn, which is the only place it ends the loop. One request per
+        /// run, because a run that timed out has usually already asked on its way out.
         /// </summary>
-        private static void RequestExit(SynchronizationContext context, XafApplication application)
-            => context.Post(_ => application.Exit(), null);
+        private sealed class RunExit {
+            private readonly XafApplication _application;
+            private SynchronizationContext _context;
+            private int _requested;
+
+            public RunExit(XafApplication application) => _application = application;
+
+            public void Attach(SynchronizationContext context) => _context = context;
+
+            public void Request() {
+                if (Interlocked.Exchange(ref _requested, 1) == 1) {
+                    return;
+                }
+                var context = _context;
+                if (context == null) {
+                    Console.Error.WriteLine("[StartWinTest] exit requested before the run context was installed, so the application is left running");
+                    return;
+                }
+                context.Post(_ => _application.Exit(), null);
+            }
+        }
 
         public static IObservable<T> Start<T>(this XafApplication application,IObservable<T> test) {
             return test.Merge(application.DeferAction(_ => application.CallMethod("Start")).To<T>().IgnoreElements());
