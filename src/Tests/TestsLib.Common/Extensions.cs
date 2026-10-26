@@ -262,10 +262,11 @@ namespace Xpand.TestsLib.Common{
                 var originalSyncContext = SynchronizationContext.Current;
                 var winformsSyncContextType = AppDomain.CurrentDomain.GetAssemblyType("System.Windows.Forms.WindowsFormsSynchronizationContext");
                 SynchronizationContext.SetSynchronizationContext((SynchronizationContext)winformsSyncContextType.CreateInstance());
+                var runContext = SynchronizationContext.Current;
                 return application.WhenFrame(Nesting.Root).Take(1)
                     .SelectMany(frame => (frame.Template)
                         .ProcessEvent("Activated").Take(1).WaitUntilInactive(2.Seconds()).Take(1).ObserveOnContext()
-                        .SelectMany(_ => testFactory(frame).BufferUntilCompleted().DoSafe(_ => RequestExit(application)).SelectMany()))
+                        .SelectMany(_ => testFactory(frame).BufferUntilCompleted().DoSafe(_ => RequestExit(runContext, application)).SelectMany()))
                     .Finally(() => SynchronizationContext.SetSynchronizationContext(originalSyncContext));
             }))
             .Timeout(timeout??300.ToSeconds())
@@ -275,23 +276,16 @@ namespace Xpand.TestsLib.Common{
             });
 
         /// <summary>
-        /// Stops the application without blocking the caller. Exit() marshals to the
-        /// UI thread and waits for it, so calling it from inside the fault pipeline
-        /// deadlocks: the UI thread is waiting for that pipeline to finish, and the
-        /// pipeline is the thread Exit was called on. A local run sat for minutes in
-        /// Exit() on the delivery thread while the same call returned on a free
-        /// thread (2026-10-26). Running the exit on its own thread lets the pipeline
-        /// unwind, so the UI thread is released and Start() returns.
+        /// Ends the run on the application's UI thread. Measured with a stack dump on
+        /// 2026-10-26: Exit() called inline from the fault-delivery thread wedges and
+        /// never returns, and called from a pool thread it returns having stopped
+        /// nothing, because the WinForms loop it must end belongs to another thread.
+        /// The exit is therefore posted to the context this method installed for the
+        /// run: the call returns at once, and the close happens on the UI thread in
+        /// its own message turn, which is the only place it ends the loop.
         /// </summary>
-        private static void RequestExit(XafApplication application)
-            => System.Threading.Tasks.Task.Run(() => {
-                try {
-                    application.Exit();
-                }
-                catch (Exception exception) {
-                    Console.Error.WriteLine($"[StartWinTest] exit failed: {exception.Message}");
-                }
-            });
+        private static void RequestExit(SynchronizationContext context, XafApplication application)
+            => context.Post(_ => application.Exit(), null);
 
         public static IObservable<T> Start<T>(this XafApplication application,IObservable<T> test) {
             return test.Merge(application.DeferAction(_ => application.CallMethod("Start")).To<T>().IgnoreElements());
