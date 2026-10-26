@@ -257,6 +257,20 @@ namespace Xpand.TestsLib.Common{
             {"SpeechManagerModule", 61494},
         };
         
+        private static readonly System.Collections.Concurrent.ConcurrentQueue<string> RunTrailLines = new();
+
+        public static void Trace(string line) {
+            RunTrailLines.Enqueue($"{DateTime.Now:HH:mm:ss.fff} {line} tid={Environment.CurrentManagedThreadId}");
+            try {
+                NUnit.Framework.TestContext.Progress.WriteLine($"[trail] {line}");
+            }
+            catch (Exception) {
+                // no NUnit context outside a test run
+            }
+        }
+
+        public static string RunTrail() => string.Join(" | ", RunTrailLines);
+
         public static IObservable<T> StartWinTest<T>(this XafApplication application, Func<Frame,IObservable<T>> testFactory,TimeSpan? timeout=null) {
             var exit = new RunExit(application);
             return application.Start(Observable.Defer(() => {
@@ -272,9 +286,9 @@ namespace Xpand.TestsLib.Common{
             }))
             .Timeout(timeout??300.ToSeconds())
             .Catch<T,TimeoutException>(e => {
-                NUnit.Framework.TestContext.Progress.WriteLine($"[PROBE] 1 timeout fired tid={Environment.CurrentManagedThreadId}");
+                Trace("timeout fired");
                 exit.Request();
-                NUnit.Framework.TestContext.Progress.WriteLine("[PROBE] 1b request returned, rethrowing");
+                Trace("timeout: request returned, rethrowing");
                 return e.Throw<T>();
             });
         }
@@ -300,21 +314,21 @@ namespace Xpand.TestsLib.Common{
 
             public void Request() {
                 if (Interlocked.Exchange(ref _requested, 1) == 1) {
-                    NUnit.Framework.TestContext.Progress.WriteLine("[PROBE] 2 already requested, nothing posted");
+                    Trace("exit already requested, nothing posted");
                     return;
                 }
                 var context = _context;
                 if (context == null) {
-                    NUnit.Framework.TestContext.Progress.WriteLine("[StartWinTest] exit requested before the run context was installed, so the application is left running");
+                    Trace("exit requested with no run context, application left running");
                     return;
                 }
-                NUnit.Framework.TestContext.Progress.WriteLine($"[PROBE] 2 posting exit tid={Environment.CurrentManagedThreadId} context={context.GetType().Name}");
+                Trace($"posting exit context={context.GetType().Name}");
                 context.Post(_ => {
-                    NUnit.Framework.TestContext.Progress.WriteLine($"[PROBE] 3 posted exit running tid={Environment.CurrentManagedThreadId}");
+                    Trace("posted exit running");
                     _application.Exit();
-                    NUnit.Framework.TestContext.Progress.WriteLine($"[PROBE] 4 exit returned tid={Environment.CurrentManagedThreadId}");
+                    Trace("exit returned");
                 }, null);
-                NUnit.Framework.TestContext.Progress.WriteLine("[PROBE] 2b post returned");
+                Trace("post returned");
             }
         }
 
