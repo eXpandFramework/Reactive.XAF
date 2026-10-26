@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Linq;
 using System.Reactive;
+using System.Runtime.ExceptionServices;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Windows.Forms;
@@ -26,7 +27,7 @@ namespace Xpand.TestsLib{
             SUTModule = sutModule;
             CustomHandleException += (_, e) => {
                 if (handleExceptions){
-                    throw e.Exception;
+                    ExceptionDispatchInfo.Capture(e.Exception).Throw();
                 }
             };
             // TraceClientConnected = this.ClientConnect();
