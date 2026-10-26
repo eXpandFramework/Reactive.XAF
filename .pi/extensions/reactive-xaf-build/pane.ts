@@ -14,13 +14,18 @@
  * real psmux CLI is never touched by the test suite.
  */
 
-import { spawn } from "node:child_process";
+import { spawn, type ChildProcess } from "node:child_process";
 import { once } from "node:events";
 
 export interface RunResult {
   code: number;
   stdout: string;
   stderr: string;
+  /** The deadline fired and the child never reported its death: `code` is -1 and
+   *  what arrived before the kill is all there is. A caller must say SO —
+   *  reading `code` alone would report a timeout as an exit code that never
+   *  happened. */
+  timedOut?: boolean;
 }
 
 export interface RunOpts {
@@ -34,6 +39,16 @@ export interface RunOpts {
    *  it: what the profile loads must never decide whether a probe answers (a
    *  profile stall is what killed the probe in the incident). */
   noProfile?: boolean;
+  /** Which PowerShell runs the command. The Hyper-V layer sets "powershell":
+   *  under pwsh 7 the Hyper-V cmdlets reach the module through the
+   *  Windows-PowerShell compat session and `Get-VM` there never returned (three
+   *  measured attempts: no output, no exit), while `powershell.exe` answered in
+   *  about a second. Everything else stays on pwsh. */
+  shell?: "pwsh" | "powershell";
+  /** How a child past its deadline is taken down. Production leaves it unset
+   *  (`taskkill /T /F`); a test swaps in a no-op to prove the call still answers
+   *  at the deadline when the kill never lands. */
+  kill?: KillFn;
 }
 
 export type PaneOpener = (repo: string) => Promise<string | null>;
@@ -64,33 +79,72 @@ export function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-/** Spawn an argv array and capture stdout/stderr (bounded, timeout-killed). */
-export async function runArgv(argv: string[], timeoutMs: number, cwd?: string, env?: Record<string, string>): Promise<RunResult> {
-  const child = spawn(argv[0], argv.slice(1), { cwd, env: { ...process.env, ...env }, windowsHide: true });
-  let stdout = "";
-  let stderr = "";
-  child.stdout.on("data", (d: Buffer) => {
-    stdout += d.toString();
-    if (stdout.length > 100000) stdout = stdout.slice(-100000);
-  });
-  child.stderr.on("data", (d: Buffer) => {
-    stderr += d.toString();
-    if (stderr.length > 50000) stderr = stderr.slice(-50000);
-  });
-  const timer = setTimeout(() => {
-    spawn("taskkill", ["/PID", String(child.pid), "/T", "/F"], { stdio: "ignore" });
-  }, timeoutMs);
-  const [code] = await once(child, "close");
-  clearTimeout(timer);
-  return { code: (code as number | null) ?? -1, stdout, stderr };
+/** Keep the LAST `cap` characters: a chatty command's tail is the part that says
+ *  what happened. */
+function bound(text: string, cap: number): string {
+  return text.length > cap ? text.slice(-cap) : text;
 }
 
-/** Run a command through pwsh (the default command runner seam). */
+/** Spawn an argv array and capture stdout/stderr (bounded, timeout-killed). */
+export async function runArgv(argv: string[], timeoutMs: number, cwd?: string, env?: Record<string, string>, kill: KillFn = treeKill): Promise<RunResult> {
+  const child = spawn(argv[0], argv.slice(1), { cwd, env: { ...process.env, ...env }, windowsHide: true });
+  const out = { stdout: "", stderr: "" };
+  child.stdout.on("data", (d: Buffer) => {
+    out.stdout = bound(out.stdout + d.toString(), 100000);
+  });
+  child.stderr.on("data", (d: Buffer) => {
+    out.stderr = bound(out.stderr + d.toString(), 50000);
+  });
+  return await settleChild(child, out, timeoutMs, kill);
+}
+
+/** How the deadline takes a child down. A seam, because the one thing worth
+ *  measuring is that the call settles when the kill does NOT land. */
+export type KillFn = (child: ChildProcess) => void;
+
+/** The production kill: the whole tree, because a child killed alone can leave a
+ *  shell holding the pipe open, and that is what a missed kill looks like. */
+const treeKill: KillFn = (child) => {
+  if (child.pid !== undefined) spawn("taskkill", ["/PID", String(child.pid), "/T", "/F"], { stdio: "ignore" });
+};
+
+/** Kill the child and close its pipes, so a death that never reports cannot keep
+ *  the call open. */
+function killTree(child: ChildProcess, kill: KillFn): void {
+  kill(child);
+  child.stdout?.destroy();
+  child.stderr?.destroy();
+}
+
+/** The wait: ONE awaited close, bounded by a timeout signal (the same shape
+ *  vanguard's scout spawner uses). A child that outlives its budget is killed
+ *  and answered `timedOut`, so a kill that misses cannot turn the call into a
+ *  hang, which is exactly what the publish did for minutes on screen. A spawn
+ *  failure still rejects, as it always did. */
+async function settleChild(child: ChildProcess, out: { stdout: string; stderr: string }, timeoutMs: number, kill: KillFn): Promise<RunResult> {
+  let spawnError: Error | undefined;
+  child.once("error", (err: Error) => {
+    spawnError = err;
+  });
+  try {
+    const [code] = await once(child, "close", { signal: AbortSignal.timeout(timeoutMs) });
+    return { code: (code as number | null) ?? -1, stdout: out.stdout, stderr: out.stderr };
+  } catch {
+    if (spawnError) throw spawnError;
+    killTree(child, kill);
+    return { code: -1, stdout: out.stdout, stderr: out.stderr, timedOut: true };
+  }
+}
+
+/** Run a command through PowerShell (the default command runner seam): pwsh
+ *  unless the caller names the Windows PowerShell, which is the only shell the
+ *  Hyper-V cmdlets answer in on this machine. */
 export async function runProcess(cmd: string, opts: RunOpts = {}): Promise<RunResult> {
+  const shell = opts.shell ?? "pwsh";
   const argv = opts.noProfile
-    ? ["pwsh", "-NoProfile", "-NonInteractive", "-Command", cmd]
-    : ["pwsh", "-Command", cmd];
-  return runArgv(argv, opts.timeoutMs ?? 60000, opts.cwd, opts.env);
+    ? [shell, "-NoProfile", "-NonInteractive", "-Command", cmd]
+    : [shell, "-Command", cmd];
+  return runArgv(argv, opts.timeoutMs ?? 60000, opts.cwd, opts.env, opts.kill);
 }
 
 /** Apply the socket-isolation seam (tests / parallel servers) to a psmux argv.

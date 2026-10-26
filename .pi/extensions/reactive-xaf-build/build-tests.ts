@@ -24,7 +24,7 @@
  *
  * T1-T13 build/commit/publish/failure/abort/pane flows; T14-T19 the AzDO
  * monitor and the status pick in the invoking window; T21-T30 the run watch;
- * T31-T47 the VM contract (a failed probe stops the publish and never the
+ * T31-T47, T65 the VM contract (a failed probe stops the publish and never the
  * commit, a build pre-warms the agents); T48-T53 the commit summary and the
  * pre-push check; T54-T56 the run's build env (the profile owns it, the
  * template adds none, and the no-pane fallback is handed it too); BP1-BP7 the
@@ -1593,6 +1593,38 @@ function checkT64(p: Parts): void {
   noErrors(p.handle, "T64");
 }
 
+// Section: T65 — a probe killed at its deadline is named as a timeout, once
+async function caseT65(): Promise<void> {
+  const repo = mkRepo(DX_PINS);
+  const runner = mkRunner([
+    { match: VM_CHECK_PREFIX, result: { code: -1, stdout: "", stderr: "", timedOut: true } },
+    { match: "git status --short", result: { code: 0, stdout: " M src/x.cs\n", stderr: "" } },
+    { match: "git add -A", result: okResult() },
+    { match: "git commit -m *", result: okResult() },
+  ]);
+  const sel = uiFor({ DevExpress: "Publish", Project: "RX-XAF", "RX-XAF": "Lab", [COMMIT_PROMPT]: "Commit" });
+  const handle = await menuHandle(repo, gateSeams(repo, runner), sel.ui);
+  await handle.runCommand("devexpress", "");
+  checkT65({ repo, runner, pane: null, sel, handle });
+}
+
+/** T65's checks: one attempt, the deadline named, the commit kept, no queue. */
+function checkT65(p: Parts): void {
+  const probes = p.runner.calls.filter((c: string) => c.startsWith("Get-VM")).length;
+  check("T65: a probe killed at its deadline is not retried", probes === 1, p.runner.calls.join(" | "));
+  const steers = steersText(p.handle).join("\n");
+  const said = [steers, noticesOf(p.handle).join("\n")].join("\n");
+  check("T65: the deadline is named, never an exit code", said.includes("did not answer within 60s") && !said.includes("Get-VM failed (exit"), said);
+  check("T65: the refusal reaches the agent as a warning steer", steers.includes("did not answer within 60s"), steers);
+  const probeOpts = p.runner.runOpts[p.runner.calls.findIndex((c: string) => c.startsWith("Get-VM"))];
+  check("T65: the probe runs in the Windows PowerShell, profile-free", probeOpts?.shell === "powershell" && probeOpts?.noProfile === true, JSON.stringify(probeOpts));
+  check("T65: the commit ran without the gate", p.runner.calls.includes("git add -A") && p.runner.calls.some((c: string) => c.startsWith('git commit -m "Publish (1 files)"')), p.runner.calls.join(" | "));
+  check("T65: no queue from a silent VM layer", !p.runner.calls.some((c: string) => c.includes("prx")), p.runner.calls.join(" | "));
+  check("T65: the summary says the publish stopped", noticesOf(p.handle).join("\n").includes("publish stopped"), noticesOf(p.handle).join("\n"));
+  answered(p.sel, "T65");
+  noErrors(p.handle, "T65");
+}
+
 // Section: T49 — a dirty tree at the push is a prompt, not a silent push
 async function caseT49(): Promise<void> {
   const repo = mkRepo(DX_PINS, join("Xpand", "Xpand.ExpressApp.Modules"));
@@ -2227,6 +2259,7 @@ const CASES: Array<[string, () => Promise<void>]> = [
   ["T62", caseT62],
   ["T63", caseT63],
   ["T64", caseT64],
+  ["T65", caseT65],
   ["BP1", caseBP1],
   ["BP2", caseBP2],
   ["BP3", caseBP3],

@@ -52,28 +52,41 @@ before the VM outcome is read, and the pre-push check runs inside `queuePhase`.
 ## The VM gate (`planVms` + `ensureVmsRunning`)
 
 One probe (`Get-VM -Name C11,C12,C13,C14 | ForEach-Object { "$($_.Name)=$($_.State)" }`),
-run through the seam with `noProfile: true` (pwsh without the user profile and
-without a prompt: a profile stall is what killed the probe in the incident).
+run through the seam with `shell: "powershell"` and `noProfile: true`. The shell
+is the reason the gate answers at all: under pwsh 7 the Hyper-V cmdlets reach the
+module through the Windows-PowerShell compat session and `Get-VM` never returns
+(three measured attempts, 20/25/75 s, no output and no exit, while
+`powershell.exe` answered in about a second). The profile stays skipped because a
+profile stall is what killed the probe in the incident, and because Windows
+PowerShell loading the profile is the `Tmux.ps1` BOM trap.
 The read is split on `/\r?\n/`: pwsh writes CRLF and terminates the last line,
 and a bare `"\n"` split leaves the `\r` on every line, where the anchored
 `(.*)$` never matches (JS `$` without `/m` is end-of-input). That defect read a
 healthy lab as "did not report C11, C12, C13, C14" (2026-09-19) — the same
 convention `azdo.ts`'s STATUS/CANCEL parse already carries. Two
-shapes are retried once: a TRANSPORT failure (the seam threw, or pwsh exited
-nonzero — the first pwsh of a session is the slow one) and an exit-0 read that
-named NO agent at all, which is an unreadable probe rather than an answer about
-the agents (Hyper-V exits nonzero for a name it cannot find). A readable answer
-that cannot be acted on is refused on the spot: retrying a state or a truncated
+shapes are retried once, and both are defined by the ABSENCE of the `timedOut`
+mark: a TRANSPORT failure (the seam threw, or the shell exited nonzero — the first
+pwsh of a session is the slow one) and an exit-0 read that named NO agent at all,
+which is an unreadable probe rather than an answer about the agents (Hyper-V exits
+nonzero for a name it cannot find). A probe KILLED at its deadline resolves with
+`code: -1` and `timedOut: true`, so the nonzero-exit rule above does not catch it:
+`probeVms` hands it straight to `planVms` and that refusal ends the loop, spending
+no second 60 s wait on the same silence. A readable answer
+that cannot be acted on is refused on the spot too: retrying a state or a truncated
 list would only report the same thing twice.
 
 `planVms` is the single place that decides what a probe means, and it THROWS
 `VmProbeError` instead of returning a refusal:
 
+- probe killed at its deadline → `Get-VM did not answer within 60s: the probe was
+  killed at its deadline, so the agent list is unreadable` (decided here, so the
+  gate and the pre-warm read one wording)
 - probe exit ≠ 0 → `Get-VM failed (exit N): <stderr tail>`
 - an agent missing from the output → `Get-VM did not report C11, ... — no state to act on`,
   with the probe's own words appended: its stderr tail, or (when no agent was read
   at all) its stdout tail, or `no output on either stream`
-- `Off` / `Saved` → Start-VM
+- `Off` / `Saved` → Start-VM (the same shell and also profile-free: the
+  `Tmux.ps1` BOM trap again)
 - `Starting` / `Pausing` / `Resuming` / `Saving` / `Stopping` → wait for Running
 - `Running` → nothing to do
 - anything else (`Paused`, `Suspended`, unknown) → `<name> is <state> — neither

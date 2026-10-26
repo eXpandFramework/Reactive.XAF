@@ -65,16 +65,29 @@ the test suite.
 
 ## Process helpers
 
-- `runArgv(argv, timeoutMs, cwd?, env?)` — spawns the argv array with
+- `runArgv(argv, timeoutMs, cwd?, env?, kill?)` — spawns the argv array with
   `windowsHide` and `env` merged over the inherited environment (so the
-  parent's variables survive), captures stdout (bounded 100 KB, keeps the tail) and
-  stderr (bounded 50 KB); on timeout it tree-kills via
-  `taskkill /PID <pid> /T /F`; resolves `{ code, stdout, stderr }` on close.
+  parent's variables survive), captures stdout (bounded 100 KB, keeps the tail)
+  and stderr (bounded 50 KB), and waits on ONE `events.once(child, "close")`
+  bounded by `AbortSignal.timeout(timeoutMs)`. Inside the budget it resolves
+  `{ code, stdout, stderr }` on close. At the deadline the wait is cut,
+  `kill` (the `KillFn` seam) takes the child down, both pipes are destroyed, and
+  it resolves `{ code: -1, stdout, stderr, timedOut: true }` — `timedOut` is a
+  flag of its own because `-1` alone would read as an exit code that never
+  happened. A spawn failure still rejects, as it always did.
 - `runProcess(cmd, opts)` — `pwsh -Command <cmd>` through `runArgv`,
   default 60 s timeout. `RunOpts.noProfile` swaps in
   `pwsh -NoProfile -NonInteractive -Command`: the VM probe sets it, because
   what the user profile loads must never decide whether a probe answers (a
-  profile stall is what killed the probe in the incident). `RunOpts.env`
+  profile stall is what killed the probe in the incident). `RunOpts.shell`
+  picks the PowerShell: `"powershell"` (Windows PowerShell 5.1) is what the
+  Hyper-V layer sets, because under pwsh 7 the Hyper-V cmdlets reach the module
+  through the Windows-PowerShell compat session and `Get-VM` never returns
+  (three measured attempts, no output, no exit, while `powershell.exe` answered
+  in about a second). Everything else stays on pwsh. `RunOpts.kill` replaces the
+  tree kill (`taskkill /T /F`) — a test seam: `pane-tests.ts` P3 passes a no-op
+  and still expects an answer at the deadline, which is the one thing a real kill
+  cannot prove. `RunOpts.env`
   carries extra variables into the child: the build's no-pane fallback hands
   the profile's `buildEnv` here, so it starts what a pane run starts.
 - `psmuxArgs(argv)` — inserts `-L $PSMUX_SOCKET` directly AFTER the binary when
@@ -83,6 +96,19 @@ the test suite.
   spawns `argv[0]`, so a leading `-L` is not an executable (`spawn -L ENOENT`) —
   the shape that made the seam work only while the socket was unset.
 - `sleep(ms)` — promise-based delay, used by the dormant delegation helper.
+
+## Why the wait is one awaited close
+
+The gate refuses an executor (`new Promise` with manual resolve/reject), a
+`Promise.race` fork-join, and every `node:timers/promises` import: none carries
+provenance, and that module's timers bypass the tracked-timer lifecycle. So
+`runArgv` waits with ONE `events.once(child, "close", { signal })` — the shape
+`vanguard/spawner.ts` already uses for its scout spawns — and the timeout signal
+(`AbortSignal.timeout`, unref'd) is the backstop. A `setTimeout` for the kill is
+legal; none is needed, because the abort itself is the deadline. The 5 s grace
+window an earlier draft carried is gone with it: a kill that misses cannot hang
+the call, and it cannot cost an extra five seconds either. P3 pins exactly that
+by handing `runArgv` a no-op kill and expecting the same answer.
 
 ## Gone
 

@@ -78,9 +78,18 @@ function reasonOf(err: unknown): string {
   return `Get-VM did not run: ${err instanceof Error ? err.message : String(err)}`;
 }
 
-/** pwsh exited nonzero: killed at the timeout, or the command failed. */
+/** The probe's command failed. A timeout no longer arrives here: `runArgv`
+ *  marks a killed child, and `probeVms` refuses on that mark before this. */
 function exitReason(probe: { code: number; stderr: string }): string {
   return `Get-VM failed (exit ${probe.code}): ${tail(probe.stderr) || "no stderr"}`;
+}
+
+/** A probe killed at its deadline never ran a command, read no agent and exited
+ *  with nothing: naming an exit code would send the reader looking for a failure
+ *  that never happened. `planVms` decides it with every other probe shape, so the
+ *  gate and the pre-warm read ONE wording. */
+function timeoutReason(): string {
+  return `Get-VM did not answer within ${VM_PROBE_TIMEOUT_MS / 1000}s: the probe was killed at its deadline, so the agent list is unreadable`;
 }
 
 /** The refusal's evidence: what the probe itself printed. Naming the agents is
@@ -98,7 +107,10 @@ function missingReason(missing: string[], probe: { stdout: string; stderr: strin
   return `${head} (${out ? `stdout: ${out}` : "no output on either stream"})`;
 }
 
-export function planVms(probe: { code: number; stdout: string; stderr: string }): VmPlan {
+export function planVms(probe: { code: number; stdout: string; stderr: string; timedOut?: boolean }): VmPlan {
+  if (probe.timedOut) {
+    throw new VmProbeError(timeoutReason());
+  }
   if (probe.code !== 0) {
     throw new VmProbeError(exitReason(probe));
   }
@@ -134,16 +146,23 @@ export function planVms(probe: { code: number; stdout: string; stderr: string })
  *  one took a publish down with no cause in the report. A readable answer that
  *  cannot be acted on is refused on the spot — retrying a state or a truncated
  *  list would only report the same thing twice. The invocation skips the user
- *  profile: a profile stall is what killed the probe that started this fix. */
+ *  profile AND runs in the Windows PowerShell: a profile stall is what killed the
+ *  probe that started this fix, and pwsh 7 cannot answer `Get-VM` on this machine
+ *  at all (it reaches the module through the Windows-PowerShell compat session and
+ *  the call never returns). A probe killed at its deadline carries no exit code to
+ *  retry, so it goes straight to `planVms` — the one place that decides what a
+ *  probe means — and that refusal ends the loop: a second 60s wait would report
+ *  the same silence. */
 async function probeVms(seams: BuildSeams): Promise<VmPlan> {
   let failure = "";
   for (let attempt = 0; attempt < VM_PROBE_ATTEMPTS; attempt++) {
-    let probe: { code: number; stdout: string; stderr: string } | null = null;
+    let probe: { code: number; stdout: string; stderr: string; timedOut?: boolean } | null = null;
     try {
-      probe = await seams.run(VM_CHECK_CMD, { timeoutMs: VM_PROBE_TIMEOUT_MS, noProfile: true });
+      probe = await seams.run(VM_CHECK_CMD, { timeoutMs: VM_PROBE_TIMEOUT_MS, noProfile: true, shell: "powershell" });
     } catch (err) {
       failure = `Get-VM did not run: ${err instanceof Error ? err.message : String(err)}`;
     }
+    if (probe !== null && probe.timedOut) return planVms(probe);
     if (probe !== null && probe.code === 0) {
       if (parseVmStates(probe.stdout).size > 0) return planVms(probe);
       failure = missingReason(VM_NAMES, probe);
@@ -154,10 +173,12 @@ async function probeVms(seams: BuildSeams): Promise<VmPlan> {
   throw new VmProbeError(failure || "Get-VM did not answer");
 }
 
-/** Start-VM for the named agents: null when it ran, the reason when it did not. */
+/** Start-VM for the named agents: null when it ran, the reason when it did not.
+ *  Same shell as the probe and profile-free too: the Windows PowerShell loading
+ *  the user profile is the Tmux.ps1 BOM trap, and a VM start must not enter it. */
 async function startVms(seams: BuildSeams, names: string[]): Promise<string | null> {
   try {
-    const res = await seams.run(`Start-VM -Name ${names.join(",")}`, { timeoutMs: 120_000 });
+    const res = await seams.run(`Start-VM -Name ${names.join(",")}`, { timeoutMs: 120_000, noProfile: true, shell: "powershell" });
     if (res.code === 0) return null;
     return `Start-VM failed: ${tail(res.stderr) || `exit ${res.code}`}`;
   } catch (err) {
