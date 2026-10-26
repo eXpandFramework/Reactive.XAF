@@ -265,7 +265,11 @@ namespace Xpand.TestsLib.Common{
                 return application.WhenFrame(Nesting.Root).Take(1)
                     .SelectMany(frame => (frame.Template)
                         .ProcessEvent("Activated").Take(1).WaitUntilInactive(2.Seconds()).Take(1).ObserveOnContext()
-                        .SelectMany(_ => testFactory(frame).BufferUntilCompleted().DoSafe(_ => application.Exit()).SelectMany()))
+                        .SelectMany(_ => testFactory(frame).BufferUntilCompleted().DoSafe(_ => {
+                            Console.Error.WriteLine("[PROBE] 6 exit requested");
+                            application.Exit();
+                            Console.Error.WriteLine("[PROBE] 7 exit returned");
+                        }).SelectMany()))
                     .Finally(() => SynchronizationContext.SetSynchronizationContext(originalSyncContext));
             }))
             .Timeout(timeout??300.ToSeconds())
@@ -275,7 +279,9 @@ namespace Xpand.TestsLib.Common{
             });
 
         public static IObservable<T> Start<T>(this XafApplication application,IObservable<T> test) {
-            return test.Merge(application.DeferAction(_ => application.CallMethod("Start")).To<T>().IgnoreElements());
+            return test.Merge(application.DeferAction(_ => application.CallMethod("Start"))
+                .Do(_ => Console.Error.WriteLine("[PROBE] 8 start returned"))
+                .To<T>().IgnoreElements());
         }
 
         [SuppressMessage("ReSharper", "SuspiciousTypeConversion.Global")]
