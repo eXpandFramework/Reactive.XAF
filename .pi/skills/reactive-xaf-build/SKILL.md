@@ -86,6 +86,7 @@ RX-XAF|eXpand`); `fence.ts` refuses that pipeline through every shell surface
 | `text.ts` | `text.md` | The shared pure helpers: `tail`, `failureText`. |
 | `release.ts` | `release.md` | Release version bump (feed consultation). |
 | `watcher.ts` | `watcher.md` | Background AzDO chain watcher. |
+| `nuget-assert.ts` | `nuget-assert.md` | The publish's nuget check: feed query, version normalization, the half-hour index window. |
 | `test-scan.ts` | `test-scan.md` | The AzDO test scan: script, grammar and wire renderer. |
 | `test-watch.ts` | `test-watch.md` | A failing test's voice and the one delegation it offers. |
 | `azdo-refusal.ts` | `azdo-refusal.md` | The refusal grammar every AzDO query shares. |
@@ -98,7 +99,7 @@ RX-XAF|eXpand`); `fence.ts` refuses that pipeline through every shell surface
 | `build-tests.ts` | `build-tests.md` | Full flow, on its own copy of the route. |
 | `delegate-tests.ts` | `delegate-tests.md` | Dormant delegation helper plus the flow publishing locally. |
 | `release-tests.ts` | `release-tests.md` | build.ps1 version bump (Release feed consultation). |
-| `watcher-tests.ts` | `watcher-tests.md` | Watcher W1–W52, including the failing-test report and its one offer. |
+| `watcher-tests.ts` | `watcher-tests.md` | Watcher behavior contract; the failing-test report and its one offer. |
 | `profile-tests.ts` | `profile-tests.md` | RepoProfile (RX vs expand). |
 | `azdo.ts` / `status.ts` | `azdo.md` | AzDO status/cancel. |
 | `delegate.ts` | `delegate.md` | A psmux window running a task, boot-verified; boots as a model role on request. |

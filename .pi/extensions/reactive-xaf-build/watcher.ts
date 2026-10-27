@@ -9,20 +9,18 @@
  * extractFailReason.
  */
 
-import * as fs from "node:fs";
-import * as path from "node:path";
 import { azdoStatusScript, parsePoll, azdoBuildUrl, defaultGhFetch, extractFailReason, failLogFromStdout } from "./azdo.js";
 import type { AzDoStatus } from "./azdo.js";
 import { pollTestFails, newTestWatch, type TestWatch } from "./test-watch.js";
 import { defaultDelegateWindow } from "./delegate.js";
 import type { WindowSpawner } from "./delegate.js";
 import type { BuildSeams } from "./build.js";
-import { sleep } from "./pane.js";
 import {
-  rxProfile, nugetAssertUrl, nugetOrgNuspecUrl, compareVersions,
+  rxProfile, compareVersions,
 } from "./profile.js";
 import type { RepoProfile, Choice, ChainStep } from "./profile.js";
 import { publishRelease } from "./github-release.js";
+import { assertNugets, publishedVersion } from "./nuget-assert.js";
 import { emptyPoll, giveUp, refusedPoll, reportProgress, transientPoll, wrongRun } from "./watcher-notice.js";
 
 function profileOf(seams: BuildSeams): RepoProfile {
@@ -70,9 +68,7 @@ export type AzDoWatcherStarter = (pi: any, ctx: any, seams: BuildSeams, opts?: A
 const WATCHER_KEY = Symbol.for("reactive-xaf-build.azdo-watcher");
 /** The in-flight thresholds (`stallMs`, `queueMs`, `BLIND_POLLS`) live with the
  *  voices in `watcher-notice.ts`: they decide what is SAID, not how the chain
- *  advances. */
-const NUGET_VERSION_RE = /Version='([^']+)'/g;
-const VERSION_RE = /Version\s*=\s*"([^"]+)"/;
+ *  advances. The nuget.org assert and its window live in `nuget-assert.ts`. */
 
 function chainFor(choice: Choice, seams: BuildSeams): ChainStep[] {
   return profileOf(seams).chain(choice);
@@ -101,6 +97,10 @@ export interface WatcherState {
    *  delegation already offered (`test-watch.ts`). */
   tests: TestWatch;
   stopped: boolean;
+  /** A tick is in flight. The interval keeps firing while a poll awaits — the
+   *  nuget assert can hold one for minutes — and a second tick on the same step
+   *  advances the chain twice, which is the undefined label `advanceStep` died on. */
+  busy: boolean;
   stop: () => void;
 }
 
@@ -129,57 +129,6 @@ function terminalMessage(s: { id: number; result: string; reason: string }, defi
   const label = failed ? "FAILED" : s.result;
   const reason = failed ? ` — ${s.reason || "no error lines"}` : "";
   return { msg: `AzDO build ${s.id} ${label}${reason} — ${azdoBuildUrl(definition)}`, failed };
-}
-
-function publishedVersion(repoRoot: string | undefined, versionFile: string): string | null {
-  if (!repoRoot) return null;
-  try {
-    const text = fs.readFileSync(path.join(repoRoot, versionFile), "utf-8");
-    return text.match(VERSION_RE)?.[1] ?? null;
-  } catch {
-    return null;
-  }
-}
-
-function normalizeNugetVersion(version: string): string {
-  const parts = version.split(".");
-  while (parts.length > 2 && parts[parts.length - 1] === "0") parts.pop();
-  return parts.join(".");
-}
-
-async function tryAssertNugets(seams: BuildSeams, p: RepoProfile, choice: "Lab" | "Release", version: string): Promise<{ ok: boolean; detail: string }> {
-  if (p.nugetFeed(choice) === "nuget.org") {
-    const normalized = normalizeNugetVersion(version);
-    try {
-      await seams.fetchFeed(nugetOrgNuspecUrl(p.nugetId, normalized));
-      return { ok: true, detail: `${p.nugetId} ${normalized} found on nuget.org` };
-    } catch {
-      return { ok: false, detail: `${p.nugetId} ${normalized} NOT found on nuget.org` };
-    }
-  }
-  try {
-    const text = await seams.fetchFeed(nugetAssertUrl(p.nugetId));
-    const versions = [...text.matchAll(NUGET_VERSION_RE)].map((m) => m[1]);
-    const found = versions.some((v) => compareVersions(v, version) === 0);
-    return { ok: found, detail: `${p.nugetId} ${version} ${found ? "found" : "NOT found"} on the eXpand nuget server` };
-  } catch (err) {
-    return { ok: false, detail: `feed query failed: ${err instanceof Error ? err.message : String(err)}` };
-  }
-}
-
-async function assertNugets(ctx: any, seams: BuildSeams, repoRoot: string | undefined, choice: "Lab" | "Release", retries: number, retryMs: number): Promise<{ ok: boolean; detail: string }> {
-  const p = profileOf(seams);
-  const version = publishedVersion(repoRoot, p.versionFile);
-  if (!version) {
-    return { ok: false, detail: `no version read from ${p.versionFile}` };
-  }
-  let last: { ok: boolean; detail: string } | null = null;
-  for (let i = 0; i < retries; i++) {
-    last = await tryAssertNugets(seams, p, choice, version);
-    if (last.ok) return last;
-    if (i < retries - 1) await sleep(retryMs);
-  }
-  return last!;
 }
 
 /** The chain's last step. The release attempt itself (token, draft PATCH, retry
@@ -222,7 +171,7 @@ async function handleSucceeded(state: WatcherState, pi: any, ctx: any, seams: Bu
   const step = state.chain[state.step];
   if (state.step < state.chainLength - 1) {
     if (step.assertNugets) {
-      const assert = await assertNugets(ctx, seams, opts.repoRoot, opts.choice ?? "Lab", opts.nugetRetries ?? 10, opts.nugetRetryMs ?? 30_000);
+      const assert = await assertNugets(seams, profileOf(seams), opts.repoRoot, opts.choice ?? "Lab", opts.nugetRetries, opts.nugetRetryMs);
       if (assert.ok) {
         await ctx.ui.notify(`Nugets published: ${assert.detail}`, "info");
       } else {
@@ -306,7 +255,18 @@ async function pollTests(state: WatcherState, pi: any, ctx: any, seams: BuildSea
 }
 
 async function pollTick(state: WatcherState, pi: any, ctx: any, seams: BuildSeams, opts: AzDoWatcherOptions): Promise<void> {
-  if (state.stopped) return;
+  if (state.stopped || state.busy) return;
+  state.busy = true;
+  try {
+    await oneTick(state, pi, ctx, seams, opts);
+  } finally {
+    state.busy = false;
+  }
+}
+
+/** One poll's work. Split out so `pollTick` owns the in-flight flag and nothing
+ *  else: the flag has to be cleared on every exit, verdicts included. */
+async function oneTick(state: WatcherState, pi: any, ctx: any, seams: BuildSeams, opts: AzDoWatcherOptions): Promise<void> {
   if (await checkDeadline(ctx, state, opts, pi)) return;
   const step = state.chain[state.step];
   let res;
@@ -373,6 +333,7 @@ export function startAzDoWatcher(pi: any, ctx: any, seams: BuildSeams, opts: AzD
     blindBuildId: null,
     tests: newTestWatch(),
     stopped: false,
+    busy: false,
     stop: () => {
       if (state.stopped) return;
       state.stopped = true;

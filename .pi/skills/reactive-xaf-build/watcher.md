@@ -1,6 +1,7 @@
 ---
 name: reactive-xaf-build/watcher
 description: Use when changing the background AzDO chain watcher — polls profile.chain, toasts on every check, retries empty polls, asserts nugets on the matching feed, then publishDraft or assertPublished on GitHub.
+drop-names: compareVersions 26.1.400.0 26.1.400 nugetRetries nugetRetryMs
 ---
 
 # watcher.ts — background AzDO chain watcher
@@ -14,12 +15,12 @@ Companion of `.pi/extensions/reactive-xaf-build/watcher.ts`. Started by
   stops the previous. Chain is `profile.chain(choice)` (RX 23 → 72 → 89;
   expand Lab 94 / Release 39 → 38 → 37). Def 32 is `_Xpand-Lab` (2023).
 - Version is read from `profile.versionFile`.
-- Nugets step ASSERTS `profile.nugetId` on `profile.nugetFeed(choice)`.
-  Lab uses `compareVersions` so `26.1.400.0` matches feed `26.1.400`.
-  The assert RETRIES `nugetRetries` (default 10) × `nugetRetryMs`
-  (default 30s) before warning — nuget.org's flatcontainer lags a push
-  by minutes (observed 2026-08-26: pushed 17:59Z, indexed 18:03Z, false
-  warning), so a single 404 is an index delay, not a missing publish.
+- Nugets step ASSERTS the published package on `profile.nugetFeed(choice)`. The
+  assertion itself — the budget, the two feeds, the version match and the whole
+  index-lag history — lives in `nuget-assert.ts` (`nuget-assert.md`). This module
+  only decides WHEN it runs (after the publish step succeeds) and speaks its
+  verdict: an informational toast, or a warning plus a steer when the assert says
+  the package is missing.
 - AzDO build numbers are NOT plain versions: the chain HEAD reports
   `<version>-<dxVersion>` (`4.261.3.1-26.1.3`), the downstream pipelines
   date numbers (`20260919.1`). The this-run guard therefore compares only
@@ -65,6 +66,13 @@ Companion of `.pi/extensions/reactive-xaf-build/watcher.ts`. Started by
   for; without it the watch runs until the chain ends. The old 120-minute
   default ended the watch at 15:34 on 2026-10-25, 30 minutes before the build
   actually failed — which is why nothing was listening when it did.
+- **One poll at a time.** The interval keeps firing while a poll awaits, and the
+  nuget assert above can hold one for minutes. A second tick on the same step
+  would advance the chain twice — `advanceStep` then reads `chain[step + 1]`
+  past the end and throws on its `label` (2026-10-26). `pollTick` owns a `busy`
+  flag and the poll's work is `oneTick`; a tick that arrives mid-tick is
+  SKIPPED, never queued, and the flag is cleared in a `finally` so a give-up
+  path cannot wedge the watch either.
 - **A failing test is reported while the build is still running.** Every
   in-flight poll also runs the test scan (`test-scan.ts`) through `pollTests`,
   and its verdict is spoken by `test-watch.ts`: the first failure is a warning

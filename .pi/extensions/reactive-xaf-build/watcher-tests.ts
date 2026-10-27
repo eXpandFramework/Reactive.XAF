@@ -1,5 +1,11 @@
 /**
- * reactive-xaf-build/watcher-tests — the AzDO chain watcher's contract (W1-W33).
+ * reactive-xaf-build/watcher-tests — the AzDO chain watcher's contract (W1-W60).
+ *
+ * W59/W60 are the nuget pressure cases: a package nuget.org indexes late is
+ * still confirmed inside the shipped window, and one that never lands spends the
+ * whole window before the warning. W59 also pins one poll at a time — a
+ * multi-minute assert overlaps interval ticks, so `pollTick` skips a tick that
+ * arrives mid-tick instead of advancing the chain twice (`watcher.md`).
  *
  * Runtime: pi's OWN loader and ExtensionRunner, through the resolver-first route
  * this file carries itself — there is no hand-written pi here. The route is the
@@ -330,6 +336,19 @@ function mkFetch(nugetVersions: string[]): (url: string) => Promise<string> {
     return JSON.stringify({ versions: ["26.1.3"] });
   };
 }
+/** A nuget.org feed that refuses the flat-container nuspec `lagPolls` times and
+ *  answers it afterwards — the indexing lag the assert has to outlast.
+ *  `Infinity` never answers: a package that truly did not land. */
+function mkLaggingFetch(lagPolls: number, lag: { calls: number }): (url: string) => Promise<string> {
+  return async (url: string) => {
+    if (url.includes("api.nuget.org")) {
+      lag.calls++;
+      if (lag.calls <= lagPolls) throw new Error("404 — flatcontainer not indexed yet");
+      return "<package><metadata><id>Xpand.Extensions</id></metadata></package>";
+    }
+    return JSON.stringify({ feed: oDataFeed(LAB) });
+  };
+}
 function mkGh(list: (attempt: number) => string): { gh: (url: string, opts?: any) => Promise<any>; patches: string[] } {
   let calls = 0;
   const patches: string[] = [];
@@ -643,15 +662,8 @@ async function caseW16(): Promise<void> {
 async function caseW17(): Promise<void> {
   const repo = mkRepo();
   const seams = mkSeams(GREEN);
-  let calls = 0;
-  const fetchLate = async (url: string) => {
-    if (url.includes("api.nuget.org")) {
-      calls++;
-      if (calls === 1) throw new Error("404 — flatcontainer not indexed yet");
-      return "<package><metadata><id>Xpand.Extensions</id></metadata></package>";
-    }
-    return JSON.stringify({ feed: oDataFeed(LAB) });
-  };
+  const lag = { calls: 0 };
+  const fetchLate = mkLaggingFetch(1, lag);
   const w = await watcherHandle(repo, {
     run: seams.run, fetchFeed: fetchLate, ghFetch: mkGh(GH_DRAFT).gh,
     startAzDoWatcher: (p: any, c: any, s: any, opts?: any) => startAzDoWatcher(p, c, s, { ...opts, intervalMs: 20, maxMs: 5000, nugetRetries: 3, nugetRetryMs: 10 }),
@@ -659,7 +671,7 @@ async function caseW17(): Promise<void> {
   await w.handle.runCommand("devexpress", "");
   await sleep(500);
   const toasts = toastText(w.handle);
-  check("W17: nugets confirmed on retry after index lag — no warning, no steer", calls >= 2 && toasts.some((n) => n.includes("Nugets published") && n.includes("nuget.org")) && !toasts.some((n) => n.includes("NOT confirmed")) && w.handle.host.messages.length === 0, JSON.stringify(toasts) + " | " + JSON.stringify(w.handle.host.messages));
+  check("W17: nugets confirmed on retry after index lag — no warning, no steer", lag.calls >= 2 && toasts.some((n) => n.includes("Nugets published") && n.includes("nuget.org")) && !toasts.some((n) => n.includes("NOT confirmed")) && w.handle.host.messages.length === 0, JSON.stringify(toasts) + " | " + JSON.stringify(w.handle.host.messages));
   answered(w.sel, "W17");
   noErrors(w.handle, "W17");
 }
@@ -1401,6 +1413,58 @@ async function caseW58(): Promise<void> {
   check("W58: a refused scan records no count", blind.runs === null && blind.failedRuns === null, `${blind.runs}/${blind.failedRuns}`);
 }
 
+// Section: W59 — nuget.org validates a pushed batch before it commits it to its
+// catalog, and that wait is minutes: the 2026-10-26 Release pushed 56 packages at
+// 18:49 and the last one surfaced at 19:07. The SHIPPED attempt count governs
+// this case — only the delay between tries is narrowed — so a budget back at ten
+// fails it while the assert as shipped still confirms.
+async function caseW59(): Promise<void> {
+  const repo = mkRepo();
+  const seams = mkSeams(GREEN);
+  const lag = { calls: 0 };
+  const gh = mkGh(GH_DRAFT);
+  const w = await watcherHandle(repo, {
+    run: seams.run, fetchFeed: mkLaggingFetch(12, lag), ghFetch: gh.gh,
+    startAzDoWatcher: (p: any, c: any, s: any, opts?: any) => startAzDoWatcher(p, c, s, { ...opts, intervalMs: 20, maxMs: 5000, nugetRetryMs: 5 }),
+  }, PUBLISH_RELEASE);
+  try {
+    await w.handle.runCommand("devexpress", "");
+    await sleep(1500);
+  } finally {
+    stopAzDoWatcher();
+  }
+  const toasts = toastText(w.handle);
+  check("W59: index lag past the old ten tries is still confirmed", lag.calls > 12 && toasts.some((n) => n.includes("Nugets published") && n.includes("nuget.org")), JSON.stringify(toasts));
+  check("W59: a confirmed assert neither warns nor steers", !toasts.some((n) => n.includes("NOT confirmed")) && w.handle.host.messages.length === 0, JSON.stringify(toasts) + " | " + JSON.stringify(w.handle.host.messages));
+  answered(w.sel, "W59");
+  noErrors(w.handle, "W59");
+}
+
+/** W60: the wider window must not become an infinite one — a package that never
+ *  reaches the index still ends the assert with a warning and a steer. */
+async function caseW60(): Promise<void> {
+  const repo = mkRepo();
+  const seams = mkSeams(GREEN);
+  const lag = { calls: 0 };
+  const gh = mkGh(GH_DRAFT);
+  const w = await watcherHandle(repo, {
+    run: seams.run, fetchFeed: mkLaggingFetch(Infinity, lag), ghFetch: gh.gh,
+    startAzDoWatcher: (p: any, c: any, s: any, opts?: any) => startAzDoWatcher(p, c, s, { ...opts, intervalMs: 20, maxMs: 5000, nugetRetryMs: 5 }),
+  }, PUBLISH_RELEASE);
+  try {
+    await w.handle.runCommand("devexpress", "");
+    await sleep(2500);
+  } finally {
+    stopAzDoWatcher();
+  }
+  const warnings = toastsOf(w.handle).filter((n) => n.type === "warning").map((n) => n.message);
+  const steers = steersOf(w.handle);
+  check("W60: every shipped attempt is spent before the give-up", lag.calls >= 30, String(lag.calls));
+  check("W60: a package that never lands still warns and steers", warnings.some((n) => n.includes("Nugets NOT confirmed") && n.includes("nuget.org")) && steers.some((s) => s.content.includes("Nugets NOT confirmed")), JSON.stringify({ warnings, steers }));
+  answered(w.sel, "W60");
+  noErrors(w.handle, "W60");
+}
+
 /** The contract, in the order it runs. */
 const CASES: Array<[string, () => Promise<void>]> = [
   ["W1", caseW1],
@@ -1454,6 +1518,8 @@ const CASES: Array<[string, () => Promise<void>]> = [
   ["W56", caseW56],
   ["W57", caseW57],
   ["W58", caseW58],
+  ["W59", caseW59],
+  ["W60", caseW60],
 ];
 
 /** One case's failure is reported and counted, never a crash that hides the

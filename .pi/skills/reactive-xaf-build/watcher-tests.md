@@ -97,3 +97,26 @@ The PROGRESS fixtures are built through `renderProgressLine` (`azdo.ts`), the
 parser's own renderer, so a fixture cannot drift from the wire. Two lines are
 typed by hand on purpose: `CAPTURED_STALL` (build 36111's verbatim capture, four
 fields, no `source`) and W32's deliberately malformed line.
+
+## Where W34–W58 live
+
+The suite outgrew this list while the failing-test series landed: W34–W52 are the
+report-once, watermark and one-delegation cases, W53–W58 the scan script's own
+contract (the run-stamp watermark, the counts it prints, a refused scan). Both
+series are named case by case where they run, in `watcher-tests.ts`, and the
+behavior they pin is documented in `test-watch.md` and `test-scan.md`. This file
+pins the watcher verdicts.
+
+## The nuget pressure cases
+
+- W59 — a package nuget.org indexes only after twelve failed polls is still
+  confirmed: `Nugets published` on the toast, no warning, no steer, and the chain
+  advances to the release consumers. It spends the SHIPPED attempt count and
+  narrows only the delay between tries, so a budget back at ten fails it. This is
+  2026-10-26: the 56-package Release pushed at 18:49 and its last package was
+  readable at 19:07, while the old 10 × 30s budget called it missing.
+- W60 — a package that never lands spends every one of the thirty attempts and
+  only then warns and steers, so the wider window cannot become an infinite one.
+- W59 also pins one poll at a time (`watcher.md`): a multi-minute assert overlaps
+  interval ticks, and without `pollTick`'s `busy` flag the second tick advanced
+  the chain past its end — `advanceStep` threw on `next.label`.
