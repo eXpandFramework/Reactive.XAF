@@ -7,15 +7,12 @@
  * in `watcher-notice.ts`, and `watcher.ts` decides what to do with it.
  */
 
-import * as fs from "node:fs";
-import * as path from "node:path";
 import { sleep } from "./pane.js";
-import { nugetAssertUrl, nugetOrgNuspecUrl, compareVersions } from "./profile.js";
+import { nugetAssertUrl, nugetOrgNuspecUrl, compareVersions, publishedVersion } from "./profile.js";
 import type { RepoProfile } from "./profile.js";
 import type { BuildSeams } from "./build.js";
 
 const NUGET_VERSION_RE = /Version='([^']+)'/g;
-const VERSION_RE = /Version\s*=\s*"([^"]+)"/;
 
 /** The nuget.org window, as attempts x the delay between them. nuget.org
  *  validates a pushed batch BEFORE committing it to its catalog, and that wait is
@@ -28,16 +25,10 @@ const VERSION_RE = /Version\s*=\s*"([^"]+)"/;
 const NUGET_ASSERT_ATTEMPTS = 30;
 const NUGET_ASSERT_EVERY_MS = 60_000;
 
-/** The version this checkout published, read from the profile's version file. */
-export function publishedVersion(repoRoot: string | undefined, versionFile: string): string | null {
-  if (!repoRoot) return null;
-  try {
-    const text = fs.readFileSync(path.join(repoRoot, versionFile), "utf-8");
-    return text.match(VERSION_RE)?.[1] ?? null;
-  } catch {
-    return null;
-  }
-}
+/** The version this checkout published — the ONE reader lives in profile.ts
+ *  (`publishedVersion`), re-exported here for the modules that already import
+ *  this half of the publish chain. */
+export { publishedVersion };
 
 function normalizeNugetVersion(version: string): string {
   const parts = version.split(".");

@@ -1,6 +1,6 @@
 ---
 name: reactive-xaf-build/menu
-description: Use when changing the /devexpress command surface — the composition root that owns the command and drives the engine, the menu picks (Build / Publish / Build & Publish / Last build status / Cancel AzDO build / Start AzDO watcher → RX-XAF | eXpand → Lab | Release), Abort build, Close build pane.
+description: Use when changing the /devexpress command surface — the composition root that owns the command and drives the engine, the menu picks (Build / Publish / Build & Publish / Publish GitHub release / Last build status / Cancel AzDO build / Start AzDO watcher → RX-XAF | eXpand → Lab | Release), Abort build, Close build pane.
 ---
 
 # menu.ts — the /devexpress command surface
@@ -26,8 +26,9 @@ menu. Tests call it with fakes; the boot path calls it bare.
 
 ## Menu (`runDevexpressMenu`)
 
-- Top: **DevExpress** → Build | Publish | Build & Publish | Last build status
-  | Cancel AzDO build | Start AzDO watcher, plus ONE of:
+- Top: **DevExpress** → Build | Publish | Build & Publish | Publish GitHub
+  release | Last build status | Cancel AzDO build | Start AzDO watcher, plus
+  ONE of:
   - **Abort build (`pane`, N min)** while a run is being watched
     (`abortLabel()` reads `activeBuildRun()`), or
   - **Close build pane** while a pane is open but nothing is running.
@@ -54,8 +55,16 @@ menu. Tests call it with fakes; the boot path calls it bare.
 
   A row that maps to no mode answers "DevExpress menu: aborted." and nothing
   runs.
-- `pickProjectAndChoice` is the shared two-pick helper for the three items
-  that need both. A non-pick answer returns "DevExpress menu: aborted." and
+- **Publish GitHub release** is NOT a flow row: it takes the same two picks and
+  runs `releasePhase` (`github-release.ts`) through `releaseFlow`, which
+  resolves the project through `seamsForPick` exactly as the flows do — the same
+  tree the build used, never `profileOf(seams)`, because a default RX profile
+  read RX's version file for an eXpand pick (`release-tests` R6). It publishes
+  the draft for the version already on disk, records the outcome for `Last build
+  status`, and never builds or queues. `registerBuildCommand` passes `pi` and the
+  cwd down, because the phase steers when the release cannot be published.
+- `pickProjectAndChoice` is the shared two-pick helper for every item that needs
+  both. A non-pick answer returns "DevExpress menu: aborted." and
   nothing runs.
 
 Every pick runs in the invoking window.

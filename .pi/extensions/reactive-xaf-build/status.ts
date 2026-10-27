@@ -7,12 +7,18 @@
  * EVERY running/queued build of the project (project-wide, no definition
  * filter). Definition comes from profile.statusDef (RX default Lab = 23).
  * Info only — no steering.
+ *
+ * "Last build" answers a second question too: what became of the GITHUB RELEASE
+ * for the version that was built (`stamp.ts` `lastRelease`). "Never attempted"
+ * and "attempted and failed" both used to look like nothing at all — which is
+ * how a draft came to be published by hand.
  */
 
 import { azdoStatusScript, parsePoll, extractFailReason, failLogFromStdout, azdoBuildUrl, cancelAzDoScript, parseCancel } from "./azdo.js";
 import type { AzDoFailure } from "./azdo.js";
 import type { BuildSeams } from "./build.js";
 import { profileOf } from "./profile.js";
+import { lastRelease } from "./release-store.js";
 
 /** Why an AzDO call could not be read, in the user's words. `auth` is the one
  *  only they can fix. */
@@ -21,6 +27,18 @@ function failureMessage(failure: AzDoFailure, message: string): string {
     return `the AzDO token is expired or refused, so nothing can be read (${message}). Renew it (Azure DevOps → User settings → Personal access tokens), then queue the pipeline again with Publish.`;
   }
   return `the call failed (${message}) — the pipeline may be fine, retry.`;
+}
+
+/** The release half of "last build": what happened to the GitHub release for the
+ *  version that was built, or the reason nothing is recorded. */
+async function releaseLine(seams: BuildSeams): Promise<string> {
+  const read = await lastRelease(seams);
+  if (!read.record) return read.reason;
+  const rec = read.record;
+  // A row whose version is empty is the release that could not even start: it
+  // must read as NOT ATTEMPTED, never as a blank version that looks pending.
+  if (!rec.version) return `GitHub release: not attempted — ${rec.detail}`;
+  return `GitHub release ${rec.version} ${rec.status} — ${rec.repo}: ${rec.detail}`;
 }
 
 /** Query the last build and notify the outcome; returns the message. */
@@ -50,8 +68,9 @@ export async function statusPhase(ctx: any, seams: BuildSeams, definition?: stri
       msg = `AzDO build ${s.id} ${s.result} — ${url}`;
     }
   }
-  await ctx.ui.notify(msg, "info");
-  return msg;
+  const text = `${msg}\n${await releaseLine(seams)}`;
+  await ctx.ui.notify(text, "info");
+  return text;
 }
 
 /** PATCH-cancel every running/queued build of the project and notify the

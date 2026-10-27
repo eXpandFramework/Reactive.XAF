@@ -28,10 +28,11 @@ import { finishMessage, lazyLog, steerStarted, steerWarning, steerWatch, summary
 import { startAzDoWatcher } from "./watcher.js";
 import type { AzDoWatcherStarter } from "./watcher.js";
 import { defaultGhFetch } from "./azdo.js";
-import { rxProfile, compareVersions, profileOf, profileByPick, resolveRepo } from "./profile.js";
+import { rxProfile, profileOf, profileByPick, resolveRepo } from "./profile.js";
 import type { RepoProfile, Choice } from "./profile.js";
 import { releaseVersionTarget } from "./release.js";
 import { depPinsPhase } from "./pins.js";
+import { getLatestDx, readDxPins, rewriteBuildVersion, rewriteDxVersion } from "./dxpins.js";
 import { prewarmVms, publishPhase } from "./publish.js";
 import { buildNeeded, recordGreen, stampDbPath } from "./stamp.js";
 import type { StampLoader } from "./stamp.js";
@@ -65,6 +66,12 @@ export interface BuildSeams {
   /** How the stamp store is reached. A suite points it at a loader it controls
    *  to prove the store's failure path; production leaves it unset. */
   stampLoad?: StampLoader;
+  /** The release watch's ports (`github-release.ts`): the token it publishes
+   *  with and how long it keeps looking. Unset means the environment's token
+   *  and the production cadence. */
+  ghToken?: string;
+  releaseIntervalMs?: number;
+  releaseDeadlineMs?: number;
   /** One log line per publish command (`gitphase.ts` `runStep`); a suite that
    *  injects none logs nowhere. */
   log?: (msg: string) => void;
@@ -79,9 +86,6 @@ export type FlowMode = "build" | "publish" | "buildIfNeeded";
 export type FlowRunner = (choice: string, mode?: FlowMode, projectPick?: string) => Promise<string>;
 /** What menu.ts calls for "Start AzDO watcher". */
 export type WatchStarter = (choice: string, projectPick?: string) => Promise<string>;
-
-const DX_FEED_URL = "https://api.nuget.org/v3-flatcontainer/devexpress.expressapp/index.json";
-const DX_PIN_RE = /Include="(DevExpress\.[^"]*)"\s+Version="([^"]*)"/g;
 
 export function defaultSeams(): BuildSeams {
   return {
@@ -108,32 +112,6 @@ export function repoRootOf(cwd: string, profile: RepoProfile = rxProfile): strin
   return resolveRepo(profile, cwd);
 }
 
-export async function getLatestDx(fetchFeed: FeedFetcher): Promise<string> {
-  const text = await fetchFeed(DX_FEED_URL);
-  const versions = (JSON.parse(text).versions as string[] | undefined) ?? [];
-  const stable = versions.filter((v) => /^\d+\.\d+\.\d+$/.test(v));
-  if (!stable.length) throw new Error("no stable DevExpress.ExpressApp versions on nuget.org");
-  stable.sort((a, b) => compareVersions(b, a));
-  return stable[0];
-}
-
-export function readDxPins(text: string): { count: number; unique: string | null } {
-  const versions = new Set<string>();
-  let m: RegExpExecArray | null;
-  DX_PIN_RE.lastIndex = 0;
-  while ((m = DX_PIN_RE.exec(text)) !== null) versions.add(m[2]);
-  return { count: versions.size, unique: versions.size === 1 ? [...versions][0] : null };
-}
-
-export function rewriteDxVersion(text: string, newVersion: string): string {
-  return text.replace(/(Include="DevExpress\.[^"]*"\s+Version=")[^"]*(")/g, `$1${newVersion}$2`);
-}
-
-/** Rewrite build.ps1's `-version "X.Y.Z.W"` when it mismatches the target. */
-function writeBuildVersion(text: string, version: string): string {
-  return text.replace(/-version "(\d+\.\d+\.\d+\.\d+)"/, `-version "${version}"`);
-}
-
 /** Rewrite build.ps1's -version when it mismatches the target version.
  *  Returns true when the file changed; a correct version is never touched. */
 async function bumpBuildPs1(repoRoot: string, dxVersion: string, notes: string[], seams: BuildSeams, choice: string): Promise<boolean> {
@@ -142,7 +120,7 @@ async function bumpBuildPs1(repoRoot: string, dxVersion: string, notes: string[]
   const bp = fs.readFileSync(buildPs1, "utf-8");
   const target = await releaseVersionTarget(seams, dxVersion, choice);
   if (!target) return false;
-  const bumped = writeBuildVersion(bp, target);
+  const bumped = rewriteBuildVersion(bp, target);
   if (bumped === bp) return false;
   trackedWrite(buildPs1, bumped);
   notes.push(`bumped build.ps1 -version to ${target}`);

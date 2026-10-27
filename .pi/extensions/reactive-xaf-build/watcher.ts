@@ -9,18 +9,19 @@
  * extractFailReason.
  */
 
-import { azdoStatusScript, parsePoll, azdoBuildUrl, defaultGhFetch, extractFailReason, failLogFromStdout } from "./azdo.js";
+import { azdoStatusScript, parsePoll, azdoBuildUrl, extractFailReason, failLogFromStdout } from "./azdo.js";
 import type { AzDoStatus } from "./azdo.js";
 import { pollTestFails, newTestWatch, type TestWatch } from "./test-watch.js";
 import { defaultDelegateWindow } from "./delegate.js";
 import type { WindowSpawner } from "./delegate.js";
 import type { BuildSeams } from "./build.js";
 import {
-  rxProfile, compareVersions,
+  rxProfile, compareVersions, publishedVersion,
 } from "./profile.js";
 import type { RepoProfile, Choice, ChainStep } from "./profile.js";
-import { publishRelease } from "./github-release.js";
-import { assertNugets, publishedVersion } from "./nuget-assert.js";
+import { publishRelease, releaseTarget, statusOf } from "./github-release.js";
+import { assertNugets } from "./nuget-assert.js";
+import { recordRelease } from "./release-store.js";
 import { emptyPoll, giveUp, refusedPoll, reportProgress, transientPoll, wrongRun } from "./watcher-notice.js";
 
 function profileOf(seams: BuildSeams): RepoProfile {
@@ -133,23 +134,25 @@ function terminalMessage(s: { id: number; result: string; reason: string }, defi
 
 /** The chain's last step. The release attempt itself (token, draft PATCH, retry
  *  loop) lives in github-release.ts; this is the watcher's half — which repo,
- *  which policy, and where the version comes from. */
+ *  which kind, where the version comes from — plus the row that keeps a release
+ *  which did NOT happen from being silence. */
 async function publishGitHubRelease(ctx: any, seams: BuildSeams, repoRoot: string | undefined, opts: AzDoWatcherOptions): Promise<{ ok: boolean; detail: string; version: string | null }> {
   const p = profileOf(seams);
   const choice: Choice = opts.choice === "Release" ? "Release" : "Lab";
   const version = publishedVersion(repoRoot, p.versionFile);
-  if (!version) return { ok: false, detail: `no version read from ${p.versionFile}`, version: null };
-  const out = await publishRelease({
-    gh: seams.ghFetch ?? defaultGhFetch,
-    repo: p.githubRepo(choice),
-    onSuccess: p.githubOnSuccess(choice),
-    prerelease: choice !== "Release",
-    version,
-    token: opts.ghToken ?? process.env.GH_TOKEN ?? process.env.GITHUB_TOKEN,
+  if (!version) {
+    const detail = `no version read from ${p.versionFile}`;
+    await recordRelease(seams, { version: "", mode: choice, repo: p.githubRepo(choice), status: "failed", detail });
+    return { ok: false, detail, version: null };
+  }
+  const target = releaseTarget(seams, choice, version, opts.ghToken, {
     attempts: opts.ghRetries ?? 6,
     delayMs: opts.ghRetryMs ?? 30_000,
   });
-  return { ok: out.kind === "published", detail: out.detail, version };
+  const out = await publishRelease(target);
+  await recordRelease(seams, { version, mode: choice, repo: target.repo, status: statusOf(out), detail: out.detail });
+  const ok = out.kind === "published" || out.kind === "already-published";
+  return { ok, detail: out.detail, version };
 }
 
 async function advanceStep(state: WatcherState, ctx: any, s: { id: number; result: string }, next: ChainStep): Promise<void> {

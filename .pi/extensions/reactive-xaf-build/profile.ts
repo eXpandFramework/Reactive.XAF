@@ -11,7 +11,6 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 
 export type Choice = "Lab" | "Release";
-export type GithubOnSuccess = "publishDraft" | "assertPublished";
 export type NugetFeed = "xpand-server" | "nuget.org";
 
 export interface ChainStep {
@@ -43,7 +42,6 @@ export interface RepoProfile {
   chain(choice: Choice): ChainStep[];
   statusDef(choice: Choice): string;
   githubRepo(choice: Choice): string;
-  githubOnSuccess(choice: Choice): GithubOnSuccess;
   nugetFeed(choice: Choice): NugetFeed;
 }
 
@@ -126,7 +124,6 @@ export const rxProfile: RepoProfile = {
   chain: rxChain,
   statusDef: () => "23",
   githubRepo: () => "eXpandFramework/Reactive.XAF",
-  githubOnSuccess: () => "publishDraft",
   nugetFeed: (choice) => choice === "Release" ? "nuget.org" : "xpand-server",
 };
 
@@ -152,7 +149,6 @@ export const expandProfile: RepoProfile = {
   githubRepo: (choice) => choice === "Release"
     ? "eXpandFramework/eXpand"
     : "eXpandFramework/eXpand.lab",
-  githubOnSuccess: (choice) => choice === "Release" ? "publishDraft" : "assertPublished",
   nugetFeed: (choice) => choice === "Release" ? "nuget.org" : "xpand-server",
 };
 
@@ -171,6 +167,27 @@ export function githubReleasesUrl(repo: string): string {
 
 export function githubReleaseUrl(repo: string, id: number): string {
   return `https://api.github.com/repos/${repo}/releases/${id}`;
+}
+
+/** The page a human opens to publish by hand — the URL a report carries when
+ *  the flow could not publish at all. */
+export function githubHtmlUrl(repo: string): string {
+  return `https://github.com/${repo}/releases`;
+}
+
+/** The version this tree publishes: what `versionFile` names, or null when it
+ *  cannot be read. ONE reader — the nuget assertion, the release attempt and
+ *  the menu all ask the same question of the same file. */
+const VERSION_RE = /Version\s*=\s*"([^"]+)"/;
+
+export function publishedVersion(repoRoot: string | undefined, versionFile: string): string | null {
+  if (!repoRoot) return null;
+  try {
+    const text = fs.readFileSync(path.join(repoRoot, versionFile), "utf-8");
+    return text.match(VERSION_RE)?.[1] ?? null;
+  } catch {
+    return null;
+  }
 }
 
 export function compareVersions(a: string, b: string): number {

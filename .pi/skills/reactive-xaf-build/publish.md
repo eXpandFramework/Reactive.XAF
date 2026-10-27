@@ -19,7 +19,11 @@ in `gitphase.ts` (below).
    already standing and its line already above the VM error in the report.
 4. `queuePhase` — confirm `profile.queueLabel`; the pre-push dirty check;
    `git push ${profile.pushRemote} HEAD:master`; then `profile.queueCmd`.
-5. `monitorPhase` — start the background AzDO watcher, return immediately.
+5. `monitorPhase` — start the background AzDO watcher, return immediately. The
+   release watch (`startReleaseWatch`, `github-release.ts`) starts beside it for
+   the same pick: the chain watcher reports the pipelines, the release watch
+   publishes the GitHub draft the pipeline leaves behind, so a publish no longer
+   ends with a release nobody touched.
 
 The gate is deliberately OFF the commit's critical path: it is started before
 the commit prompt is raised and read after it, so the agents boot while the

@@ -16,6 +16,7 @@
  * in gitphase.ts: the prompts and the shared core crossed the 400-line cap here.
  */
 
+import { startReleaseWatch } from "./github-release.js";
 import { sleep } from "./pane.js";
 import { startAzDoWatcher } from "./watcher.js";
 import { profileOf } from "./profile.js";
@@ -314,9 +315,11 @@ async function blindPrewarm(seams: BuildSeams, reason: string): Promise<PrewarmO
 async function monitorPhase(pi: any, ctx: any, seams: BuildSeams, repo: string, choice: string): Promise<{ ok: boolean; failed: boolean; notes: string[] }> {
   const notes: string[] = [];
   await ctx.ui.notify("AzDO build queued — monitoring in background (toast on every check).", "info");
+  const mode: Choice = choice === "Release" ? "Release" : "Lab";
   const starter = seams.startAzDoWatcher ?? startAzDoWatcher;
-  starter(pi, ctx, seams, { followNugets: true, repoRoot: repo, choice: choice === "Release" ? "Release" : "Lab" });
-  notes.push("AzDO monitoring in background — toasts on every check; follows the nuget + release publish chain and asserts the nugets");
+  starter(pi, ctx, seams, { followNugets: true, repoRoot: repo, choice: mode });
+  startReleaseWatch(pi, ctx, seams, { repo, choice: mode });
+  notes.push("AzDO monitoring in background — toasts on every check; follows the nuget + release publish chain, asserts the nugets, then publishes the GitHub release (the outcome is recorded)");
   return { ok: true, failed: false, notes };
 }
 

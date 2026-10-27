@@ -42,8 +42,10 @@ same, and retrying is what tells them apart.
 
 ## `publishedVersion(repoRoot, versionFile)`
 
-Reads the version this checkout published out of the profile's version file.
-Returns `null` instead of throwing when the repo root is unknown or the file
+The ONE version-file reader lives in `profile.ts` now, and this module
+RE-EXPORTS it (`export { publishedVersion };`) so its own callers did not move.
+It reads the version this checkout published out of the profile's version file,
+returns `null` instead of throwing when the repo root is unknown or the file
 cannot be read, and `assertNugets` reports that as `no version read from …`.
 `watcher.ts` uses the same reader for the GitHub release version and for the
-this-run guard on the chain HEAD.
+this-run guard on the chain HEAD, and so does `stamp.ts` — one regex, one place.

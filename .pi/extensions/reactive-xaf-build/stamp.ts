@@ -18,6 +18,12 @@
  * dirty reads: every build rewrites it, so counting it would make the tree
  * "dirty" the moment a build finished and no tree would ever read fresh.
  *
+ * The same store carries ONE more thing: the GitHub RELEASE the flow managed to
+ * publish (`release_state`), so "did the release happen?" is answered by "Last
+ * build status" instead of by opening GitHub. A draft nobody published and a
+ * release attempt nobody recorded look identical from the outside — that is
+ * exactly how 4.261.6.0 came to be published by hand.
+ *
  * ONE error contract: every store failure — the shared sqlite module missing,
  * the file unreadable, a shape from an older schema, a refused write — degrades
  * to STALE with a reason (a read) or to a reported reason (a write). Nothing
@@ -25,10 +31,10 @@
  * a publish cannot happen.
  */
 
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync } from "node:fs";
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
-import { profileOf } from "./profile.js";
+import { profileOf, publishedVersion } from "./profile.js";
 import type { BuildSeams } from "./build.js";
 
 /** One recorded green build. `version` is what the profile's version file
@@ -61,6 +67,16 @@ CREATE TABLE IF NOT EXISTS build_stamp (
   built_at  INTEGER NOT NULL,
   version   TEXT    NOT NULL,
   PRIMARY KEY (profile, mode)
+);
+CREATE TABLE IF NOT EXISTS release_state (
+  profile    TEXT    NOT NULL,
+  version    TEXT    NOT NULL,
+  mode       TEXT    NOT NULL,
+  repo       TEXT    NOT NULL,
+  status     TEXT    NOT NULL,
+  detail     TEXT    NOT NULL,
+  updated_at INTEGER NOT NULL,
+  PRIMARY KEY (profile, version)
 );
 `;
 /** Bumped whenever the shape above changes. A store carrying an older number is
@@ -136,17 +152,26 @@ function openStore(mod: SqliteModule, dbPath: string): any {
   return db;
 }
 
+/** The store path in force for these seams. */
+export function storePath(seams: BuildSeams): string {
+  return dbPathOf(seams);
+}
+
+/** Run `fn` against this extension's own store, opened (and schema-applied) for
+ *  writing, then released. The release rows live in the same DB; this is the one
+ *  door they use, so the sqlite plumbing stays here instead of being copied. The
+ *  answer is untyped on purpose: a caller knows the row shape it asked for, and
+ *  `any` here keeps one door serving both tables. */
+export async function withDb(seams: BuildSeams, fn: (db: any, key: string) => any): Promise<any> {
+  const dbPath = dbPathOf(seams);
+  return withStore(dbPath, seams, (mod) => fn(openStore(mod, dbPath), profileKey(seams)));
+}
+
 /** What the profile's version file names, or "" when it cannot be read: a label
- *  for the reader, never part of the decision. The watcher parses the same file
- *  for its nuget assertion, which asks a different question (is the published
- *  version the expected one), so that parse stays where it is. */
+ *  for the reader, never part of the decision. The ONE reader lives in
+ *  profile.ts — the release attempt and the menu ask the same question. */
 function versionOf(repo: string, versionFile: string): string {
-  try {
-    const text = readFileSync(path.join(repo, versionFile), "utf-8");
-    return /(\d+\.\d+\.\d+(?:\.\d+)?)/.exec(text)?.[1] ?? "";
-  } catch {
-    return "";
-  }
+  return publishedVersion(repo, versionFile) ?? "";
 }
 
 /** A git read's answer: the text it printed, the reason it could not be read.

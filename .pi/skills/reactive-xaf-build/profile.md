@@ -34,16 +34,20 @@ never tests `label === "eXpand"`.
   `Xpand/Xpand.Utils/Properties/XpandAssemblyInfo.cs` (build writes it;
   we never edit it).
 - `nugetId` — RX `xpand.extensions`. Expand `eXpandSystem`.
-- `githubRepo` / `githubOnSuccess` — RX both choices: publish draft
-  (`eXpandFramework/Reactive.XAF`). Expand Lab: assert published
-  (`eXpand.lab`). Expand Release: publish draft (`eXpand`).
+- `githubRepo` — where the release is published. RX both choices:
+  `eXpandFramework/Reactive.XAF`. Expand Lab: `eXpandFramework/eXpand.lab`.
+  Expand Release: `eXpandFramework/eXpand`. There is no per-profile POLICY left:
+  every profile publishes its draft (`github-release.ts`), so the only question
+  the profile answers is which repo.
 - `depPins` — expand only. After DX, rewrite `Xpand.Extensions*` /
   `Xpand.XAF.*` to the latest from the matching feed (lab server / nuget.org).
   Ask-first, same as DX pins. RX leaves this unset.
 
 Helpers: `profileByPick`, `resolveRepo`, `nugetAssertUrl`,
-`nugetOrgNuspecUrl`, `githubReleasesUrl`, `githubReleaseUrl`,
-`getLatestPackage`, `nextReleaseVersion` (next release on the DX minor:
+`nugetOrgNuspecUrl`, `githubReleasesUrl`, `githubReleaseUrl`, `githubHtmlUrl`
+(the manual-publish URL a warning names), `publishedVersion` (the ONE
+version-file reader — `stamp.ts`, the release attempt and `nuget-assert.ts` all
+call it), `getLatestPackage`, `nextReleaseVersion` (next release on the DX minor:
 max(dxBase.Build, last published build + 1), revision 0), `readPrefixedPins`,
 `rewritePrefixedPins`, `compareVersions`, `profileOf`.
 

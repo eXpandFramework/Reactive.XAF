@@ -1,6 +1,6 @@
 ---
 name: reactive-xaf-build/watcher
-description: Use when changing the background AzDO chain watcher — polls profile.chain, toasts on every check, retries empty polls, asserts nugets on the matching feed, then publishDraft or assertPublished on GitHub.
+description: Use when changing the background AzDO chain watcher — polls profile.chain, toasts on every check, retries empty polls, asserts nugets on the matching feed, then publishes the GitHub draft of the built version and records the outcome.
 drop-names: compareVersions 26.1.400.0 26.1.400 nugetRetries nugetRetryMs
 ---
 
@@ -82,10 +82,14 @@ Companion of `.pi/extensions/reactive-xaf-build/watcher.ts`. Started by
   separate function on purpose — `applyPoll` keeps one job (what the chain does
   next), the test voice is its own. The scan never stops or fails the chain: a
   refused scan is one note, and the terminal verdict still arrives.
-- Final step: `profile.githubOnSuccess(choice)`. Missing GH_TOKEN steers. The
-  attempt itself — the token, the draft PATCH and the retry loop — lives in
-  `github-release.ts` (`github-release.md`); this module only decides which
-  repo, which policy and which version.
+- Final step: `publishGitHubRelease` turns green only when the release is
+  actually published. It calls `publishRelease` for `profile.githubRepo(choice)`
+  — every profile publishes its draft now, so there is no per-choice policy left
+  — and writes the outcome through `release-store.ts`, which is what `Last build
+  status` reads later. Missing GH_TOKEN steers instead of skipping. The attempt
+  itself — the token, the draft PATCH and the retry loop — lives in
+  `github-release.ts` (`github-release.md`); this module only decides which repo
+  and which version.
 
 ## State
 

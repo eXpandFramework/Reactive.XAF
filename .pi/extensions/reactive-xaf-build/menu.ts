@@ -2,9 +2,9 @@
  * reactive-xaf-build/menu — the /devexpress command surface.
  *
  * Every capability is a menu pick: Build / Publish / Build & Publish / Last
- * build status / Cancel AzDO build / Start AzDO watcher, then RX-XAF | eXpand,
- * then Lab | Release. No flags and no subcommand words: a parameter is always a
- * pick or a prompt, never an argument.
+ * build status / Cancel AzDO build / Start AzDO watcher / Publish GitHub
+ * release, then RX-XAF | eXpand, then Lab | Release. No flags and no subcommand
+ * words: a parameter is always a pick or a prompt, never an argument.
  *
  * This module is the composition root. It imports the engine (build.ts) and
  * drives it through the runners it builds; the engine imports no surface.
@@ -13,9 +13,10 @@
 import { getBuildPane, setBuildPane, defaultClosePane } from "./pane.js";
 import { abortBuildRun, activeBuildRun } from "./run.js";
 import { statusPhase, cancelPhase } from "./status.js";
-import { createFlowRunners, defaultSeams } from "./build.js";
+import { releasePhase } from "./github-release.js";
+import { createFlowRunners, defaultSeams, seamsForPick } from "./build.js";
 import type { BuildSeams, FlowMode, FlowRunner, WatchStarter } from "./build.js";
-import { rxProfile, expandProfile } from "./profile.js";
+import { rxProfile, expandProfile, profileOf } from "./profile.js";
 
 const PROJECT_PICKS = [rxProfile.menuProjectPick, expandProfile.menuProjectPick];
 
@@ -73,12 +74,33 @@ async function pickProjectAndChoice(ctx: any): Promise<{ project: string; choice
   return { project, choice };
 }
 
+/** "Publish GitHub release": the same project/repo resolution the flows use
+ *  (`seamsForPick`), then the release door — for a draft nothing turned into a
+ *  release, and for the case where nobody can tell whether anything ran. */
+async function releaseFlow(ctx: any, seams: BuildSeams, repoRoot: string | undefined, pi?: any): Promise<string> {
+  const picked = await pickProjectAndChoice(ctx);
+  if (typeof picked === "string") return picked;
+  const cwd = repoRoot ?? seams.repoRoot ?? process.cwd();
+  const { seams: s, repo } = seamsForPick(seams, picked.project, cwd);
+  if (!repo) {
+    const label = profileOf(s).label;
+    const msg = `${label} release: not inside the ${label} repo (cwd: ${cwd}) — no release was attempted.`;
+    await ctx.ui.notify(msg, "warning");
+    return msg;
+  }
+  return releasePhase(ctx, s, repo, picked.choice === "Release" ? "Release" : "Lab", pi);
+}
+
 export async function runDevexpressMenu(
   ctx: any, seams: BuildSeams, runFlow: FlowRunner, startWatch: WatchStarter,
+  pi?: any, repoRoot?: string,
 ): Promise<string> {
   const pane = getBuildPane();
   const abort = abortLabel();
-  const base = ["Build", "Publish", "Build & Publish", "Last build status", "Cancel AzDO build", "Start AzDO watcher"];
+  const base = [
+    "Build", "Publish", "Build & Publish", "Last build status", "Cancel AzDO build", "Start AzDO watcher",
+    "Publish GitHub release",
+  ];
   const items = abort ? [...base, abort] : pane ? [...base, "Close build pane"] : base;
   const top = await ctx.ui.select("DevExpress", items);
   if (abort && top === abort) return abortFlow(ctx, seams);
@@ -95,6 +117,7 @@ export async function runDevexpressMenu(
     if (typeof picked === "string") return picked;
     return startWatch(picked.choice, picked.project);
   }
+  if (top === "Publish GitHub release") return releaseFlow(ctx, seams, repoRoot, pi);
   const mode = FLOW_ROWS[String(top)] as FlowMode | undefined;
   if (!mode) return "DevExpress menu: aborted.";
   const picked = await pickProjectAndChoice(ctx);
@@ -107,12 +130,12 @@ export async function runDevexpressMenu(
  *  dependency runs surface → engine and never the other way. */
 export function registerBuildCommand(pi: any, seams?: Partial<BuildSeams>): void {
   pi.registerCommand("devexpress", {
-    description: "DevExpress menu: Build | Publish | Build & Publish | Last build status | Cancel AzDO build | Start AzDO watcher → RX-XAF | eXpand → Lab | Release",
+    description: "DevExpress menu: Build | Publish | Build & Publish | Last build status | Cancel AzDO build | Start AzDO watcher | Publish GitHub release → RX-XAF | eXpand → Lab | Release",
     handler: async (_args: string | string[], ctx: any) => {
       const merged = { ...defaultSeams(), ...seams };
       const cwd = ctx?.cwd ?? merged.repoRoot ?? process.cwd();
       const runners = createFlowRunners(pi, ctx, merged, cwd);
-      return runDevexpressMenu(ctx, merged, runners.runFlow, runners.startWatch);
+      return runDevexpressMenu(ctx, merged, runners.runFlow, runners.startWatch, pi, cwd);
     },
   });
 }

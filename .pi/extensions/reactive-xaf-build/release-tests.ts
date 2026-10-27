@@ -23,7 +23,7 @@
 const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
 import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import activate from "./index.js";
 import { registerBuildCommand } from "./menu.js";
 import { stopBuildRun } from "./run.js";
@@ -281,6 +281,95 @@ function bumpSeams(repo: string, runner: { run: (cmd: string) => Promise<any> },
   return { run: runner.run, fetchFeed: mkExpandFeed(feeds), propsPath: join(repo, "Directory.Packages.props"), repoRoot: repo, pollMs: 1, ...pane };
 }
 
+// Section: R5-R11 — the GitHub RELEASE: published, recorded, never silent.
+//
+// The pipeline creates the release as a DRAFT on a master build
+// (`DevExpress.XAF-GitHub-Release.ps1:121`, `Xpand-GitHub-Release.ps1:150`), so
+// unless this flow publishes it the release stays invisible until a human
+// visits GitHub. Every case drives the real command and asserts what the user
+// meets: the toast, the PATCH GitHub received, and the row "Last build status"
+// reads afterwards.
+const RX_VERSION_FILE = join("src", "Common", "AssemblyInfoVersion.cs");
+const EXPAND_VERSION_FILE = join("Xpand", "Xpand.Utils", "Properties", "XpandAssemblyInfo.cs");
+const RX_RELEASES = "https://api.github.com/repos/eXpandFramework/Reactive.XAF/releases?per_page=50";
+const EXPAND_RELEASES = "https://api.github.com/repos/eXpandFramework/eXpand/releases?per_page=50";
+
+type GhAnswer = any[] | { status: number };
+interface GhFake {
+  gh: (url: string, opts?: { method?: string; body?: string }) => Promise<{ ok: boolean; status: number; text: string }>;
+  gets: string[];
+  patches: string[];
+}
+/** GitHub's release API, scripted: each GET answers the next list (the last one
+ *  repeats), and `{status}` answers an HTTP failure so the retry path is
+ *  reachable. A PATCH is recorded and never answered with a list. */
+function mkGh(answers: GhAnswer[]): GhFake {
+  const gets: string[] = [];
+  const patches: string[] = [];
+  let i = 0;
+  return {
+    gets,
+    patches,
+    gh: async (url: string, opts?: { method?: string; body?: string }) => {
+      if (opts?.method === "PATCH") {
+        patches.push(opts.body ?? "");
+        return { ok: true, status: 200, text: "{}" };
+      }
+      gets.push(url);
+      const answer = answers[Math.min(i, answers.length - 1)];
+      i++;
+      if (answer && !Array.isArray(answer)) return { ok: false, status: answer.status, text: "" };
+      return { ok: true, status: 200, text: JSON.stringify(answer ?? []) };
+    },
+  };
+}
+/** A draft as GitHub reports it: the shape the pipeline leaves behind. */
+function draftOf(tag: string, id = 424635336): any {
+  return { id, tag_name: tag, draft: true, prerelease: false };
+}
+function writeVersion(root: string, file: string, version: string): void {
+  mkdirSync(join(root, dirname(file)), { recursive: true });
+  writeFileSync(join(root, file), `internal static class AssemblyInfo {\n    public const string Version = "${version}";\n}\n`);
+}
+/** The tree an RX release case publishes: `Directory.Packages.props` and
+ *  `src/Extensions` are what resolveRepo detects. `version: null` leaves the
+ *  version file out, which is the unreadable case. */
+function mkRxRepo(version: string | null): string {
+  const root = mkdtempSync(join(tmpdir(), "rxaf-ghrel-"));
+  tempDirs.push(root);
+  mkdirSync(join(root, "src", "Extensions"), { recursive: true });
+  writeFileSync(join(root, "Directory.Packages.props"), "<Project>\n  <ItemGroup>\n    <PackageVersion Include=\"DevExpress.ExpressApp\" Version=\"26.1.4\" />\n  </ItemGroup>\n</Project>\n");
+  if (version !== null) writeVersion(root, RX_VERSION_FILE, version);
+  return root;
+}
+/** eXpand's tree, off the bump fixture: the release case only needs the
+ *  version file the profile names. */
+function mkExpandReleaseRepo(version: string | null): string {
+  const root = mkExpandRepo(EXPAND_PINS);
+  if (version !== null) writeVersion(root, EXPAND_VERSION_FILE, version);
+  return root;
+}
+/** The release item's picks: the top menu, the project, then Lab | Release. */
+function releasePicks(project: string, choice: string): Record<string, Answer> {
+  return { DevExpress: "Publish GitHub release", Project: project, [project]: choice };
+}
+/** The flow's ports for a release case: a runner that answers no commands, a
+ *  GitHub fake, and this case's own store. */
+function releaseOnlySeams(repo: string, gh: GhFake, extra: Record<string, unknown> = {}): Record<string, unknown> {
+  return {
+    run: async () => okResult(),
+    fetchFeed: async (url: string) => { throw new Error(`unexpected feed url: ${url}`); },
+    repoRoot: repo,
+    stampPath: join(repo, "release.db"),
+    ghFetch: gh.gh,
+    ghToken: "ghp_case",
+    releaseIntervalMs: 5,
+    releaseDeadlineMs: 3000,
+    pollMs: 1,
+    ...extra,
+  };
+}
+
 // Section: R0 — /devexpress registration through the real index boot
 async function caseR0(): Promise<void> {
   await installRoute();
@@ -385,6 +474,126 @@ async function caseR4(): Promise<void> {
   noErrors(w.handle, "R4");
 }
 
+// Section: R5 — RX-XAF Release: the draft becomes a release
+async function caseR5(): Promise<void> {
+  stopBuildRun();
+  const repo = mkRxRepo("4.261.6.0");
+  const gh = mkGh([[draftOf("4.261.6.0")]]);
+  const w = await releaseHandle(repo, releaseOnlySeams(repo, gh), releasePicks("RX-XAF", "Release"));
+  await w.handle.runCommand("devexpress", "");
+  const text = noticesOf(w.handle).join("\n");
+  check("R5: the draft is published, not left for a human", text.includes("4.261.6.0") && text.includes("published"), text);
+  check("R5: exactly one PATCH, draft=false prerelease=false", gh.patches.length === 1 && JSON.parse(gh.patches[0]).draft === false && JSON.parse(gh.patches[0]).prerelease === false, JSON.stringify(gh.patches));
+  check("R5: the release list came from the RX repo", gh.gets[0] === RX_RELEASES, JSON.stringify(gh.gets));
+  answered(w.sel, "R5");
+  noErrors(w.handle, "R5");
+}
+
+// Section: R6 — eXpand Release: the same publish, the other repo (parity)
+async function caseR6(): Promise<void> {
+  stopBuildRun();
+  const repo = mkExpandReleaseRepo("26.1.600.0");
+  const gh = mkGh([[draftOf("26.1.600.0")]]);
+  const w = await releaseHandle(repo, releaseOnlySeams(repo, gh), releasePicks("eXpand", "Release"));
+  await w.handle.runCommand("devexpress", "");
+  const text = noticesOf(w.handle).join("\n");
+  check("R6: eXpand's draft is published (it was asserted, never published)", text.includes("26.1.600.0") && text.includes("published"), text);
+  check("R6: the eXpand repo was queried and patched", gh.gets[0] === EXPAND_RELEASES && gh.patches.length === 1, JSON.stringify(gh.gets) + " " + JSON.stringify(gh.patches));
+  answered(w.sel, "R6");
+  noErrors(w.handle, "R6");
+}
+
+// Section: R7 — a release the pipeline already published: no PATCH
+async function caseR7(): Promise<void> {
+  stopBuildRun();
+  const repo = mkRxRepo("4.261.6.0");
+  const gh = mkGh([[{ id: 1, tag_name: "4.261.6.0", draft: false, prerelease: true }]]);
+  const w = await releaseHandle(repo, releaseOnlySeams(repo, gh), releasePicks("RX-XAF", "Lab"));
+  await w.handle.runCommand("devexpress", "");
+  const text = noticesOf(w.handle).join("\n");
+  check("R7: an already-published release is reported, not re-published", text.includes("already published") && gh.patches.length === 0, text + " " + JSON.stringify(gh.patches));
+  check("R7: the pre-release word is kept", text.includes("pre-release"), text);
+  answered(w.sel, "R7");
+  noErrors(w.handle, "R7");
+}
+
+// Section: R8 — a late draft (after a refused call) is waited for, not failed
+async function caseR8(): Promise<void> {
+  stopBuildRun();
+  const repo = mkRxRepo("4.261.6.0");
+  const gh = mkGh([{ status: 500 }, [], [draftOf("4.261.6.0")]]);
+  const w = await releaseHandle(repo, releaseOnlySeams(repo, gh), releasePicks("RX-XAF", "Release"));
+  await w.handle.runCommand("devexpress", "");
+  const published = await waitFor(() => gh.patches.length > 0, 4000);
+  const text = noticesOf(w.handle).join("\n");
+  check("R8: the draft that appeared late is still published", published && gh.patches.length === 1, text + " " + JSON.stringify(gh.patches));
+  check("R8: the first miss is not reported as a failure", !text.includes("gave up") && !text.includes("NOT confirmed"), text);
+  check("R8: it kept watching past the refused call", gh.gets.length >= 2, JSON.stringify(gh.gets));
+  answered(w.sel, "R8");
+  noErrors(w.handle, "R8");
+}
+
+// Section: R9 — no token: nothing sent, the URL to publish by hand
+async function caseR9(): Promise<void> {
+  stopBuildRun();
+  const repo = mkRxRepo("4.261.6.0");
+  const gh = mkGh([[draftOf("4.261.6.0")]]);
+  const w = await releaseHandle(repo, releaseOnlySeams(repo, gh, { ghToken: "" }), releasePicks("RX-XAF", "Release"));
+  await w.handle.runCommand("devexpress", "");
+  const text = noticesOf(w.handle).join("\n");
+  check("R9: no GitHub call without a token", gh.gets.length === 0 && gh.patches.length === 0, JSON.stringify(gh.gets) + " " + JSON.stringify(gh.patches));
+  check("R9: the toast names GH_TOKEN and the release URL", text.includes("GH_TOKEN") && text.includes("github.com/eXpandFramework/Reactive.XAF/releases"), text);
+  answered(w.sel, "R9");
+  noErrors(w.handle, "R9");
+}
+
+// Section: R10 — no version file: reported at every door, recorded, never pending
+async function caseR10(): Promise<void> {
+  stopBuildRun();
+  const repo = mkRxRepo(null);
+  const gh = mkGh([[draftOf("4.261.6.0")]]);
+  let step = 0;
+  const picks: Record<string, Answer> = {
+    DevExpress: () => (step++ === 0 ? "Publish GitHub release" : "Last build status"),
+    Project: "RX-XAF",
+    "RX-XAF": "Release",
+  };
+  const w = await releaseHandle(repo, releaseOnlySeams(repo, gh), picks);
+  await w.handle.runCommand("devexpress", "");
+  await w.handle.runCommand("devexpress", "");
+  const text = noticesOf(w.handle).join("\n");
+  check("R10: no version readable → the toast says so", text.includes("no version"), text);
+  check("R10: nothing was asked of GitHub", gh.gets.length === 0 && gh.patches.length === 0, JSON.stringify(gh.gets));
+  check(
+    "R10: the recorded row reads as NOT ATTEMPTED, never as a blank version",
+    text.includes("GitHub release: not attempted") && !text.includes("GitHub release  "),
+    text,
+  );
+  answered(w.sel, "R10");
+  noErrors(w.handle, "R10");
+}
+
+// Section: R11 — the outcome survives the run: Last build status reports it
+async function caseR11(): Promise<void> {
+  stopBuildRun();
+  const repo = mkRxRepo("4.261.6.0");
+  const gh = mkGh([[draftOf("4.261.6.0")]]);
+  let step = 0;
+  const picks: Record<string, Answer> = {
+    DevExpress: () => (step++ === 0 ? "Publish GitHub release" : "Last build status"),
+    Project: "RX-XAF",
+    "RX-XAF": "Release",
+  };
+  const w = await releaseHandle(repo, releaseOnlySeams(repo, gh), picks);
+  await w.handle.runCommand("devexpress", "");
+  await w.handle.runCommand("devexpress", "");
+  const text = noticesOf(w.handle).join("\n");
+  check("R11: Last build status carries the release outcome from the store", text.includes("GitHub release 4.261.6.0") && text.includes("published"), text);
+  check("R11: the AzDO line is still there beside it", text.includes("AzDO"), text);
+  answered(w.sel, "R11");
+  noErrors(w.handle, "R11");
+}
+
 /** The contract, in the order it runs. */
 const CASES: Array<[string, () => Promise<void>]> = [
   ["R0", caseR0],
@@ -392,6 +601,13 @@ const CASES: Array<[string, () => Promise<void>]> = [
   ["R2", caseR2],
   ["R3", caseR3],
   ["R4", caseR4],
+  ["R5", caseR5],
+  ["R6", caseR6],
+  ["R7", caseR7],
+  ["R8", caseR8],
+  ["R9", caseR9],
+  ["R10", caseR10],
+  ["R11", caseR11],
 ];
 
 /** One case's failure is reported and counted, never a crash that hides the

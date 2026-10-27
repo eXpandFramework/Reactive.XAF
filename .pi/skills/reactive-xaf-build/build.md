@@ -19,7 +19,10 @@ agent — and both drive this same engine; neither owns a run.
 
 ## Phases (`runBuildFlow`)
 
-1. **DX check** — `getLatestDx`: max stable `DevExpress.ExpressApp`.
+1. **DX check** — `getLatestDx`: max stable `DevExpress.ExpressApp`. The DX
+   pin/feed helpers (`getLatestDx`, `readDxPins`, `rewriteDxVersion`,
+   `rewriteBuildVersion`, `DX_FEED_URL`, `DX_PIN_RE`) live in `dxpins.ts`,
+   split out of this engine at the 400-line cap; the phases below call them.
 2. **Props compare** (`dxPhase`) — DevExpress.* pins: mixed → untouched;
    single shared version ≠ latest → Update | Skip | Abort. `build.ps1 -version`
    is aligned when the pins are at latest (or after an update): Lab → the
@@ -55,7 +58,8 @@ agent — and both drive this same engine; neither owns a run.
 6. **Publish** (`publishPhase`) — runs from the watch when the marker reports
    exit 0: the VM gate (C11–C14 must answer Running, see `publish.md`) → commit
    → optional `git push ${profile.pushRemote} HEAD:master` → `profile.queueCmd`
-   → `monitorPhase` (the AzDO watcher starts and the report returns).
+   → `monitorPhase` (the AzDO watcher and the release watch start, and the
+   report returns).
 
 ## The watch's half (`buildRunReporter`)
 
@@ -78,7 +82,10 @@ toast with a steer.
 probe answers.
 
 `BuildSeams.profile?: RepoProfile` (default `rxProfile`). `ghFetch` for the
-watcher's GitHub step. `stampPath` overrides the green-build stamp store
+watcher's GitHub step, plus `ghToken` / `releaseIntervalMs` /
+`releaseDeadlineMs` as the release watch's ports (`github-release.ts`):
+production leaves the three unset and takes the environment and the shipped
+defaults. `stampPath` overrides the green-build stamp store
 (default: this extension's own `reactive-xaf-build.db`, see below). `log` is
 the publish phases' one line per command: `defaultSeams` wires it to
 `report.ts` `lazyLog()` (a first-use dynamic import of the shared `Log`, because

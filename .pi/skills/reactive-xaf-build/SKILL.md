@@ -20,12 +20,12 @@ a 2023 leftover. Release is def 39 → 38 → 37.
 
 ## Command surface
 
-- `/devexpress` — interactive menu: Build | Publish | Build & Publish →
-  **RX-XAF | eXpand** → Lab | Release, plus "Last build status", "Cancel AzDO
-  build" and one of "Abort build" (a run is being watched) or "Close build
-  pane" (a pane is open, nothing running). Build always builds, Publish never
-  does, Build & Publish only when the last green build no longer covers the
-  tree (`stamp.ts`).
+- `/devexpress` — interactive menu: Build | Publish | Build & Publish |
+  Publish GitHub release → **RX-XAF | eXpand** → Lab | Release, plus "Last build
+  status", "Cancel AzDO build" and one of "Abort build" (a run is being
+  watched) or "Close build pane" (a pane is open, nothing running). Build always
+  builds, Publish never does, Build & Publish only when the last green build no
+  longer covers the tree (`stamp.ts`).
 - No arguments, no flags and no subcommand words: every capability is a menu
   pick (the retired arg words are listed in `menu.md`).
 
@@ -71,7 +71,9 @@ RX-XAF|eXpand`); `fence.ts` refuses that pipeline through every shell surface
 | `gitphase.ts` | `gitphase.md` | The git half: dirty read + summary, both commit prompts, the commit core. |
 | `menu.ts` | `menu.md` | Command surface and composition root: owns the command, drives the engine. |
 | `build.ts` | `build.md` | Flow engine (DX, local build start, menu wiring). |
-| `stamp.ts` | `stamp.md` | The last green build: SQLite stamp + `buildNeeded`. |
+| `dxpins.ts` | `dxpins.md` | DevExpress pin questions: latest stable, read/rewrite, build.ps1 `-version`. |
+| `stamp.ts` | `stamp.md` | The last green build: SQLite stamp + `buildNeeded`, and the `withDb` door. |
+| `release-store.ts` | `release-store.md` | Did the release happen: the `release_state` row flows write, status reads. |
 | `run-script.ts` | `run-script.md` | A run's temp dir, supervisor script, marker, sentinel and prune. |
 | `run.ts` | `run.md` | Background build run: marker, pane death, stall/overrun, abort. |
 | `report.ts` | `report.md` | The flow's messages and the warn/steer pair. |
@@ -82,7 +84,7 @@ RX-XAF|eXpand`); `fence.ts` refuses that pipeline through every shell surface
 | `test-scan.ts` | `test-scan.md` | The AzDO test scan: script, grammar and wire renderer. |
 | `test-watch.ts` | `test-watch.md` | A failing test's voice and the one delegation it offers. |
 | `azdo-refusal.ts` | `azdo-refusal.md` | The refusal grammar every AzDO query shares. |
-| `github-release.ts` | `github-release.md` | The chain's last step: GitHub draft publish or assert, with retries. |
+| `github-release.ts` | `github-release.md` | The chain's last step and the flow's end: publish the GitHub draft, record the outcome, keep a watch on it. |
 | `real-host.ts` | — | Never landed: the review reverted the shared wrapper, so each suite copies the route instead. |
 | `resolve.mjs` | `resolve.md` | Node hook: `.js`→`.ts` and the whitelisted `@pi/` floor, installed before any harness import. |
 | `menu-tests.ts` | `menu-tests.md` | Skip-build contract; the route's origin shape, on the same per-suite copy. |

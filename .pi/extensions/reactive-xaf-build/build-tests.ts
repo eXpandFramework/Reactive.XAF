@@ -324,6 +324,16 @@ async function waitFor(cond: () => boolean, ms = 4000): Promise<boolean> {
 function mkFetch(versions: string[]): (url: string) => Promise<string> {
   return async (_url: string) => JSON.stringify({ versions });
 }
+/** The version the fixture "built". The release step reads it from the picked
+ *  profile's version file, so the fixture repo carries one, exactly like the
+ *  real tree — a repo without it is not a repo the flow could ever publish. */
+const FIXTURE_VERSION = "26.1.400.0";
+/** Which version file a fixture repo gets: the picked profile's own. */
+function versionFileFor(marker: string): string {
+  return marker.includes("Xpand")
+    ? join("Xpand", "Xpand.Utils", "Properties", "XpandAssemblyInfo.cs")
+    : join("src", "Common", "AssemblyInfoVersion.cs");
+}
 /** The fixture repo. `marker` is the directory the picked profile's `detect`
  *  looks for: the RX path by default, the eXpand path for the push cases. */
 function mkRepo(pins: Array<[string, string]>, marker = join("src", "Extensions")): string {
@@ -333,6 +343,9 @@ function mkRepo(pins: Array<[string, string]>, marker = join("src", "Extensions"
   const lines = pins.map(([id, v]) => `    <PackageVersion Include="${id}" Version="${v}" />`);
   const props = "<Project>\n  <ItemGroup>\n" + lines.join("\n") + "\n  </ItemGroup>\n</Project>\n";
   writeFileSync(join(root, "Directory.Packages.props"), props);
+  const versionFile = join(root, versionFileFor(marker));
+  mkdirSync(dirname(versionFile), { recursive: true });
+  writeFileSync(versionFile, `public const string Version = "${FIXTURE_VERSION}";\n`);
   return root;
 }
 function propsText(root: string): string {
@@ -2203,6 +2216,41 @@ async function caseR3(): Promise<void> {
   noErrors(handle, "R3");
 }
 
+/** T66: a tree the profile cannot read a version out of must SAY so. The
+ *  release step the flow promised did not even start — the exact silence that
+ *  made a hand-publish necessary — so exactly one warning and one steer carry
+ *  the reason, on the automatic path, not only in a status query nobody runs. */
+async function caseT66(): Promise<void> {
+  const repo = mkRepo(DX_PINS);
+  rmSync(join(repo, versionFileFor(join("src", "Extensions"))), { force: true });
+  const runner = mkRunner([...BP_GREEN_SCRIPT]);
+  const pane = mkPaneSeams({ capture: SENTINEL_LINE });
+  const sel = uiFor({ ...RX_LAB, [PUBLISH_PROMPT]: "Publish" });
+  const handle = await menuHandle(repo, buildSeams(repo, runner, pane, ["26.1.3"]), sel.ui);
+  await handle.runCommand("devexpress", "");
+  await waitFor(() => runner.calls.includes("prx"), 4000);
+  await waitFor(() => warningToasts(handle).some((t) => t.includes("No GitHub release attempt")), 3000);
+  const toasts = warningToasts(handle).filter((t) => t.includes("No GitHub release attempt"));
+  const steers = steersText(handle).filter((s) => s.includes("No GitHub release attempt"));
+  check(
+    "T66: the build and publish still happened — a missing version is not a build failure",
+    runner.calls.includes("prx") && noticesOf(handle).some((n) => n.includes("published")),
+    JSON.stringify({ calls: runner.calls, notices: noticesOf(handle) }),
+  );
+  check(
+    "T66: the release that could not start is said ONCE, by warning and by steer",
+    toasts.length === 1 && steers.length === 1,
+    JSON.stringify({ toasts, steers }),
+  );
+  check(
+    "T66: the reason names the version file it could not read",
+    toasts[0]?.includes("AssemblyInfoVersion.cs") === true && toasts[0]?.includes(repo) === true,
+    String(toasts[0]),
+  );
+  answered(sel, "T66");
+  noErrors(handle, "T66");
+}
+
 /** The contract, in the order it runs: T9's repo is fresh per case, so a case
  *  that "continues" an earlier one builds its own clean tree. */
 const CASES: Array<[string, () => Promise<void>]> = [
@@ -2269,6 +2317,7 @@ const CASES: Array<[string, () => Promise<void>]> = [
   ["T63", caseT63],
   ["T64", caseT64],
   ["T65", caseT65],
+  ["T66", caseT66],
   ["BP1", caseBP1],
   ["BP2", caseBP2],
   ["BP3", caseBP3],

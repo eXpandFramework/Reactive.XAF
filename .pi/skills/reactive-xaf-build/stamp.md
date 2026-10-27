@@ -1,6 +1,6 @@
 ---
 name: reactive-xaf-build/stamp
-description: Use when working on the green-build proof behind the "Build & Publish" row — the SQLite build_stamp table keyed by (profile.label, mode), its schema version and rebuild rule, the four freshness conditions, when a green run records the row, and the one contract every store failure follows.
+description: Use when working on the green-build proof behind the "Build & Publish" row — the SQLite build_stamp table keyed by (profile.label, mode), its schema version and rebuild rule, the four freshness conditions, when a green run records the row, the release_state table the same store carries, and the one contract every store failure follows.
 ---
 
 # stamp.ts — the last green build
@@ -13,7 +13,10 @@ build? Detail of the row itself: `menu.md`; the flow modes that call it:
 ## The store
 
 One DB in this extension's own directory — `.pi/extensions/reactive-xaf-build/`
-`reactive-xaf-build.db` — never a JSON or flag file. One table:
+`reactive-xaf-build.db` — never a JSON or flag file. Two tables: `build_stamp`,
+below, and `release_state`, the GitHub release the flow managed to publish (its
+rows live in `release-store.ts` and reach this store through the `withDb` door).
+The stamp table:
 
 ```sql
 CREATE TABLE IF NOT EXISTS build_stamp (
@@ -58,6 +61,29 @@ CREATE TABLE IF NOT EXISTS build_stamp (
   columns it may not have. Bump the constant whenever the columns or the key
   change, or the old table survives and every write fails on a column it never
   had.
+
+## The door — `storePath(seams)` and `withDb(seams, fn)`
+
+The release rows are a SECOND table in the same store and do not open it
+themselves: `release-store.ts` calls `withDb(seams, (db, key) => …)`, which is
+this module's `withStore` + `openStore` (schema applied, handle released), with
+the profile key handed over. One place owns the sqlite plumbing, and a suite
+that injects `seams.stampLoad` proves the module-absent path for BOTH tables at
+once. `storePath(seams)` answers the path in force, so a caller can name the
+store in a failure line without repeating the resolution.
+
+```sql
+CREATE TABLE IF NOT EXISTS release_state (
+  profile    TEXT    NOT NULL,
+  version    TEXT    NOT NULL,
+  mode       TEXT    NOT NULL,
+  repo       TEXT    NOT NULL,
+  status     TEXT    NOT NULL,
+  detail     TEXT    NOT NULL,
+  updated_at INTEGER NOT NULL,
+  PRIMARY KEY (profile, version)
+);
+```
 
 ## `buildNeeded(seams, repo)` — fresh or stale
 
