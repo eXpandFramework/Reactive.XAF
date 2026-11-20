@@ -10,6 +10,10 @@ Project-specific knowledge distilled from the lab-build workflow session (2026-0
 4. **Timings.** The ~39-minute figure belongs to the AzDO pipeline, which runs the test suite. A local Lab build skips the tests and finishes in roughly 10-20 minutes. Never kill a build early, and any timeout must exceed a local build.
 5. **Commit then publish** — commit the build state (props update, `src/Common/AssemblyInfoVersion.cs`, nuspec bumps), then `prx` (stage + force-push `lab` → remote + queue the AzDO `Reactive.XAF` pipeline). Ensure the Hyper-V VMs **C11–C14 are running** before `prx`. The `/devexpress` publish step does this itself (VM check → commit → confirm → prx); `Build/nuspec/*` and `AssemblyInfoVersion.cs` change on **any** Lab build, from **any** window — treat them as the build's state, decide commit-vs-revert with the user, never claim or dispose of them unilaterally.
 
+## Answering GitHub issues
+
+Reply shape follows the `github-issue-answers` skill (`~/.pi/agent/skills/github-issue-answers/SKILL.md`): the authoritative doc link plus one thing to send back, nothing restated, no question the thread already answers. Posting goes through `github_issue_reply`, which asks for approval first and needs `GH_ISSUE_TOKEN` — the organization-owned token, because the general token cannot write to an organization's repository.
+
 ## The /devexpress extension
 
 `.pi/extensions/reactive-xaf-build/` (repo-local, auto-loads in this project's sessions):
